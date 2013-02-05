@@ -382,11 +382,9 @@ neon.query.queryUrl_ = function(path) {
  * Creates a filter that can be applied to a dataset
  * @namespace neon.query
  * @class Filter
- * @param {String} dataSourceName The data source containing the data being filtered
- * @param {String} datasetId The dataset to which the filter will be applied
  * @constructor
  */
-neon.query.Filter = function(dataSourceName, datasetId) {
+neon.query.Filter = function() {
 
     /*jshint expr: true */
     this.whereClause;
