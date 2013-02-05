@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>MongoDB query tester</title>
+
+    <script src="../../js/jquery/jquery-1.8.3.min.js"></script>
+    <script src="../../js/underscore/1.4.3/underscore.js"></script>
+    <script src="../../js/uuid/uuid.js"></script>
+
+    <script src="../../js/namespace.js"></script>
+    <script src="../../js/util/ajaxUtils.js"></script>
+    <script src="../../js/util/arrayUtils.js"></script>
+    <script src="../../js/query/query.js"></script>
+
+<script>
+    neon.query.SERVER_URL = 'https://localhost:8443/neon'
+
+    var dataSourceName = "xdata";
+    var datasetId = "xdata";
+    var x = neon.query;
+    function showResult(res) {
+        $('#results').text(JSON.stringify(res));
+    }
+
+    function clearResult() {
+        $('#results').text('')
+    }
+
+    function testFieldNames() {
+        clearResult();
+        x.getFieldNames(dataSourceName,datasetId, showResult);
+    }
+
+    function testQueryAll() {
+        clearResult();
+        var res = x.executeQuery(new x.Query().selectFrom(dataSourceName,datasetId),showResult);
+    }
+
+    function testQueryWhere() {
+        clearResult();
+        var res = x.executeQuery(new x.Query().selectFrom(dataSourceName,datasetId).where("Origin","=","SFO"),showResult);
+    }
+
+    function testGroupBy() {
+        clearResult();
+         var res = x.executeQuery(new x.Query().selectFrom(dataSourceName,datasetId).groupBy(["Origin"]),showResult);
+    }
+
+
+    function testCount() {
+        clearResult();
+        var res = x.executeQuery(new x.Query().selectFrom(dataSourceName,datasetId).groupBy(["Origin"]).aggregate(x.COUNT,'Origin','counted_origin'),showResult);
+    }
+
+    function testGroupByWhere() {
+        clearResult();
+        var res = x.executeQuery(new x.Query().selectFrom(dataSourceName,datasetId).where("Origin","=","SFO").groupBy("DayOfWeek"),showResult);
+    }
+
+    function testSetSelectionWhere() {
+        clearResult();
+        var res = x.setSelectionWhere(new x.Filter().selectFrom(dataSourceName,datasetId).where("Origin","=","SFO"),function(d) {
+            $('#results').text('selection complete');
+        });
+    }
+
+    function testGetSelectionWhere() {
+        clearResult();
+        x.getSelectionWhere(new x.Filter().selectFrom(dataSourceName,datasetId).where("Origin","=","SFO"),showResult);
+    }
+
+
+    function testSetSelectedIds() {
+        clearResult();
+        var ids = []
+        x.executeQuery(new x.Query().selectFrom(dataSourceName,datasetId).where("Origin","=","SFO") ,function(result) {
+            var dataset = result.data;
+            ids = dataset.map(function(rec){
+                return rec._id;
+            });
+            x.executeQuery(new x.Query().selectFrom(dataSourceName,datasetId).where("_id",'in',ids), function(result) {
+                x.setSelectedIds(ids, function(res) {
+                    $('#results').text('selection complete');
+                });
+            });
+        });
+    }
+
+    function testAddSelectedIds() {
+        clearResult();
+        var ids = []
+        x.executeQuery(new x.Query().selectFrom(dataSourceName,datasetId).where("Origin","=","SFO") ,function(res) {
+            ids = res.data.map(function(rec){
+                return rec._id;
+            });
+            x.executeQuery(new x.Query().selectFrom(dataSourceName,datasetId).where("_id",'in',ids), function(res) {
+                x.addSelectedIds(ids, function(d) {
+                    $('#results').text('selection complete');
+                });
+            });
+        });
+    }
+
+    function testRemoveSelectedIds() {
+        clearResult();
+        var ids = []
+        x.executeQuery(new x.Query().selectFrom(dataSourceName,datasetId).where("Origin","=","SFO") ,function(res) {
+            ids = res.data.map(function(rec){
+                return rec._id;
+            });
+            x.executeQuery(new x.Query().selectFrom(dataSourceName,datasetId).where("_id",'in',ids), function(res) {
+                x.removeSelectedIds(ids, function(d) {
+                    $('#results').text('selection complete');
+                });
+            });
+        });
+    }
+
+
+    function testClearSelection() {
+        clearResult();
+        var ids = []
+        x.executeQuery(new x.Query().selectFrom(dataSourceName,datasetId).where("Origin","=","SFO") ,function(res) {
+            var dataset = res.data;
+            ids = dataset.map(function(rec){
+                return rec._id;
+            });
+            x.executeQuery(new x.Query().selectFrom(dataSourceName,datasetId).where("_id",'in',ids), function(res) {
+                x.clearSelection( function(d) {
+                    $('#results').text('selection complete');
+                });
+            });
+        });
+    }
+
+    function testApplyFilter() {
+        clearResult();
+        var filter = new x.Filter(dataSourceName,datasetId).where("Origin","=","SFO");
+        x.addFilter(filter, function(id) {
+            $('#results').text('added filter ' + id);
+        });
+    }
+
+    function testBooleanQuery() {
+        var clause = x.and(x.or(x.where('Origin','=','SFO'), x.where('Origin','=','SAN')), x. where('Year','=',1987));
+        x.executeQuery(new x.Query().selectFrom(dataSourceName,datasetId).where(clause), showResult);
+
+    }
+
+    neon.util.AjaxUtils.setStartStopCallbacks(function() {
+       $('#status').text('working...');
+    }, function() {
+        $('#status').text('done');
+    });
+
+</script>
+</head>
+<body>
+    Status: <div id="status"></div>
+    <br><br>
+
+
+    <input type="button" onclick="testFieldNames()" value="test field names"><br>
+    <input type="button" onclick="testQueryAll()" value="test query all"><br>
+    <input type="button" onclick="testQueryWhere()" value="test query where"><br>
+    <input type="button" onclick="testGroupBy()" value="test group by"><br>
+    <input type="button" onclick="testGroupByWhere()" value="test group by where"><br>
+    <input type="button" onclick="testCount()" value="test count"><br>
+    <br><br>
+
+    <input type="button" onclick="testSetSelectionWhere()" value="test set selection where"><br>
+    <input type="button" onclick="testGetSelectionWhere()" value="test get selection where"><br>
+    <input type="button" onclick="testSetSelectedIds()" value="test set selected ids"><br>
+    <input type="button" onclick="testAddSelectedIds()" value="test add selection ids"><br>
+    <input type="button" onclick="testRemoveSelectedIds()" value="test remove selected ids"><br>
+    <input type="button" onclick="testClearSelection()" value="test clear selection"><br>
+
+    <br><br>
+    <input type="button" onclick="testApplyFilter()" value="apply SFO filter"><br>
+
+    <br><br>
+    <input type="button" onclick="testBooleanQuery()" value="test boolean query"><br>
+
+
+    <br><br><br>
+    Results:
+    <div id="results"></div>
+
+</body>
+</html>

@@ -1,0 +1,8 @@
+{
+    "name": "@libraryName@ Javascript API Documentation",
+    "version": "@libraryName@",
+    "options": {
+        "outdir":"@outDir@",
+        "paths":[ "src/main/javascript" ]
+    }
+}
