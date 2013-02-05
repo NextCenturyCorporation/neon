@@ -177,11 +177,7 @@ class MongoQueryExecutor implements QueryExecutor {
         return dbObject
     }
 
-<<<<<<< HEAD
-    private def computeGroupByQuery(collection, query, dbObj) {
-=======
     private def computeAggregationResults(collection, query, dbObj) {
->>>>>>> 63b788d... fixing missing parameter
         DBObject match = new BasicDBObject('$match', dbObj)
         def aggregates = MongoAggregator.buildAggregateClauses(query.aggregates, query.groupByClause)
         return collection.aggregate(match, aggregates as DBObject[]).results()
