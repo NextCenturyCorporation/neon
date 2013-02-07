@@ -53,7 +53,7 @@ neon.eventing.OWFIntentsLauncher.prototype.addMetadataForDataType = function (da
 neon.eventing.OWFIntentsLauncher.addIntentsSelector = function (launcher, intents, dataSourceNameLookup, datasetIdLookup, parentSelector) {
 
     var selector = neon.eventing.OWFIntentsLauncher.createIntentsSelector_(intents);
-    var launchButton = neon.eventing.OWFIntentsLauncher.createLaunchButton_(launcher,selector,dataSourceNameLookup,datasetIdLookup);
+    var launchButton = neon.eventing.OWFIntentsLauncher.createLaunchButton_(launcher,selector,intents,dataSourceNameLookup,datasetIdLookup);
     neon.eventing.OWFIntentsLauncher.addSelectListener_(selector, launchButton);
 
     var parent = $(parentSelector);
@@ -100,7 +100,7 @@ neon.eventing.OWFIntentsLauncher.prototype.launchIntents_ = function (intents, d
 };
 
 
-neon.eventing.OWFIntentsLauncher.createLaunchButton_ = function(launcher, selector, dataSourceNameLookup, datasetIdLookup) {
+neon.eventing.OWFIntentsLauncher.createLaunchButton_ = function(launcher, selector, intents, dataSourceNameLookup, datasetIdLookup) {
     var launchButton = $('<input/>').attr('type', 'button').attr('id', 'launch').attr('disabled', '').val('Display Data').click(function () {
         var dataSourceName = dataSourceNameLookup.apply(null);
         var datasetId = datasetIdLookup.apply(null);
