@@ -40,9 +40,6 @@
     <table id="datatable"></table>
 </div>
 
-<br><br>
-<div id="initializing">Initializing...</div>
-
 <script src="js/table.js"></script>
 <script src="js/tablewidget.js"></script>
 </body>

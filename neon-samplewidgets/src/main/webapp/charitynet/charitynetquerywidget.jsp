@@ -1,4 +1,3 @@
-<%@ page import="java.util.Enumeration" %>
 <!DOCTYPE html>
 <html>
 <head>
@@ -37,15 +36,26 @@
 </head>
 <body>
 
-<div>Charities</div>
-<select name="charities" disabled></select>
-<br><br><br>
+<div id="charities-container">
 
-<div>Display as:</div>
-<select name="intents" disabled></select><br>
-<input type="button" id="launch" value="Display Data" onclick="displayData()" disabled/>
+    <div>Charities</div>
+        <select name="charities"></select>
+    </div>
+    <br>
+</div>
+
 
 <script src="js/charitynetquerywidget.js"></script>
+<script src="js/intents.js"></script>
+<script>
+    neon.eventing.OWFIntentsLauncher.addIntentsSelector(intentsLauncher,
+            charityNetIntents.send,
+            function() { return dataSourceName; },
+            function() { return dataSetId; },
+            '#charities-container');
+</script>
+
+
 
 
 </body>

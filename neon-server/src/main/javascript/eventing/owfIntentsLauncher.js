@@ -43,21 +43,82 @@ neon.eventing.OWFIntentsLauncher.prototype.addMetadataForDataType = function (da
     _.extend(this.metadata_[dataType], metadata);
 };
 
-neon.eventing.OWFIntentsLauncher.prototype.launchIntent = function(intent, dataSourceName, datasetId) {
+/**
+ * @param launcher
+ * @param intents
+ * @param dataSourceNameLookup
+ * @param datasetIdLookup
+ * @param parentSelector
+ */
+neon.eventing.OWFIntentsLauncher.addIntentsSelector = function (launcher, intents, dataSourceNameLookup, datasetIdLookup, parentSelector) {
+
+    var selector = neon.eventing.OWFIntentsLauncher.createIntentsSelector_(intents);
+    var launchButton = neon.eventing.OWFIntentsLauncher.createLaunchButton_(launcher,selector,dataSourceNameLookup,datasetIdLookup);
+    neon.eventing.OWFIntentsLauncher.addSelectListener_(selector, launchButton);
+
+    var parent = $(parentSelector);
+    parent.append('<div/>').append(selector);
+    parent.append('<div/>').append(launchButton);
+};
+
+neon.eventing.OWFIntentsLauncher.createIntentsSelector_ = function(intents) {
+    var selector = $('<select/>').attr('name', 'intents').attr('id', 'intents').attr('multiple', '');
+    intents.forEach(function (intent, index) {
+        selector.append($("<option />").val(index).text(intent.action));
+    });
+    return selector;
+};
+
+neon.eventing.OWFIntentsLauncher.addSelectListener_ = function(selector, button) {
+    selector.change(function (evt) {
+        if ( selector.val() ) {
+            button.removeAttr('disabled');
+        }
+        else {
+            button.attr('disabled','');
+        }
+    });
+};
+
+neon.eventing.OWFIntentsLauncher.prototype.launchIntents_ = function (intents, dataSourceName, datasetId) {
+    var me = this;
+    if (intents.length > 0) {
+        var intent = intents.shift();
+        var intentData = this.createIntentData_(intent, dataSourceName, datasetId);
+        var action = intent.action;
+        OWF.Intents.startActivity(
+            {
+                action: action,
+                dataType: intentData.dataType
+            },
+            intentData.data,
+            function (dest) {
+                me.launchIntents_(intents, dataSourceName, datasetId);
+            }
+        );
+    }
+};
+
+
+neon.eventing.OWFIntentsLauncher.createLaunchButton_ = function(launcher, selector, dataSourceNameLookup, datasetIdLookup) {
+    var launchButton = $('<input/>').attr('type', 'button').attr('id', 'launch').attr('disabled', '').val('Display Data').click(function () {
+        var dataSourceName = dataSourceNameLookup.apply(null);
+        var datasetId = datasetIdLookup.apply(null);
+        var selectedIntents = selector.val().map(function (intentIndex) {
+            return intents[parseInt(intentIndex, 10)];
+        });
+        launcher.launchIntents_(selectedIntents, dataSourceName, datasetId);
+    });
+    return launchButton;
+};
+
+neon.eventing.OWFIntentsLauncher.prototype.createIntentData_ = function (intent, dataSourceName, datasetId) {
     var data = {};
     data.dataSourceName = dataSourceName;
     data.datasetId = datasetId;
-
-    var action = intent.action;
     var dataType = intent.dataTypes[0];
-    if ( this.metadata_.hasOwnProperty(dataType)) {
-        _.extend(data,this.metadata_[dataType]);
+    if (this.metadata_.hasOwnProperty(dataType)) {
+        _.extend(data, this.metadata_[dataType]);
     }
-    OWF.Intents.startActivity(
-        {
-            action: action,
-            dataType: dataType
-        },
-        data
-    );
+    return {"data": data, "dataType": dataType};
 };

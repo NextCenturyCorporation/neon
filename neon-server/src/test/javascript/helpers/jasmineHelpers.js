@@ -46,11 +46,11 @@ jasmine.Matchers.prototype.toBeEqualArray = function (expectedArray) {
 
     var matchError = false;
     this.actual.forEach(function (element, index, actual) {
-        if (expectedArray[index] !== actual[index]) {
+        if ( !jasmine.getEnv().equals_(actual[index],expectedArray[index])) {
             if (err) {
                 err += '\r\n';
             }
-            err += 'Element ' + index + ' does not match, expected ' + expectedArray[index] + ', but was ' + actual[index];
+            err += 'Element ' + index + ' does not match, expected ' + JSON.stringify(expectedArray[index]) + ', but was ' + JSON.stringify(actual[index]);
             matchError = true;
         }
     });

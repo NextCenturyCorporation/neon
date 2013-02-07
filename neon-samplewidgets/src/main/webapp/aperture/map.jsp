@@ -41,7 +41,6 @@
 <body>
 
 <div id="map-display"></div>
-<div id="initializing">Initializing...</div>
 
 <script src="js/mapwidget.js"></script>
 </body>

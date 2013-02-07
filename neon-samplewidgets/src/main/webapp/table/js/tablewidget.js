@@ -49,8 +49,6 @@ $(document).ready(function () {
         );
 
         table.show();
-        $('#initializing').remove();
-
 
         function updateData() {
             if (connected) {

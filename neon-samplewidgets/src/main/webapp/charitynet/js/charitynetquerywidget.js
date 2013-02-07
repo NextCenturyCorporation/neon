@@ -31,9 +31,7 @@ $(document).ready(function () {
         var currentCharityFilterId;
         var owfEventPublisher;
 
-
         addIntentsMetadata();
-        populateIntents();
         initOWFEventPublisher();
         populateCharitiesList();
 
@@ -43,9 +41,6 @@ $(document).ready(function () {
                 executeQuery(query, function (result) {
                     addCharitiesToDropdown(result.data);
                     addCharitiesChangeListener();
-                    $('select[name="charities"]').removeAttr('disabled');
-                    $('#launch').removeAttr('disabled');
-                    $('select[name="intents"]').removeAttr('disabled');
                 });
             }
         }
@@ -86,15 +81,6 @@ $(document).ready(function () {
             return new neon.query.Filter().selectFrom(dataSourceName, dataSetId).where('charity_name', '=', selectedCharity);
         }
 
-
-        function populateIntents() {
-            charityNetIntents.send.forEach(function (intent, index) {
-                var intents = $('select[name="intents"]');
-                intents.append($("<option />").val(index).text(intent.action));
-            });
-        }
-
-
         function addIntentsMetadata() {
             addMapMetadata();
         }
@@ -108,9 +94,3 @@ $(document).ready(function () {
         }
     });
 });
-
-function displayData() {
-    var intentIndex = parseInt($('select[name="intents"]').val());
-    var intent = charityNetIntents.send[intentIndex];
-    intentsLauncher.launchIntent(intent, dataSourceName, dataSetId);
-}

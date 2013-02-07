@@ -25,8 +25,6 @@ $(document).ready(function () {
         initOwfEventPublisher();
         initMap();
 
-        $('#initializing').remove();
-
         // This is invoked when the query widget tells the map widget to display the data
         OWF.Intents.receive(
             {
