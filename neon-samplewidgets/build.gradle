@@ -1,9 +1,5 @@
 archivesBaseName = 'neonsamplewidgets'
 
-dependencies {
-    providedCompile 'javax.servlet.jsp:jsp-api:2.2.1-b03'
-}
-
 javascript.source {
     dev {
         js {
