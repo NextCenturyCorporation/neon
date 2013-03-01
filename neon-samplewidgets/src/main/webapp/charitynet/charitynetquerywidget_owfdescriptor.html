@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <script src="js/intents.js"></script>
+    <script>
+        widgetData = {
+            "universalName":"neon.examples.charitynet.query",
+            "displayName":"Charity Net Query Widget",
+            "description": "Queries the charity net data source",
+            "widgetVersion":"1.0.0",
+            "widgetUrl":"https://localhost:9443/neonsamplewidgets/charitynet/charitynetquerywidget.jsp",
+            "imageUrlSmall":"https://localhost:9443/neonsamplewidgets/charitynet/images/dollarsign.png",
+            "imageUrlLarge":"https://localhost:9443/neonsamplewidgets/charitynet/images/dollarsign.png",
+            "width":800,
+            "height":600,
+            "visible":true,
+            "singleton":false,
+            "background":false,
+            "widgetTypes":[
+                "standard"
+            ],
+            "defaultTags":[
+                "charitynet"
+            ],
+            "intents":charityNetIntents
+        };
+        var jsonData = JSON.stringify({
+            status:200,
+            data:widgetData
+        });
+        window.name = jsonData;
+
+    </script>
+
+</head>
+<body>
+
+</body>
+</html>

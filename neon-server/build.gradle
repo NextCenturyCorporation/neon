@@ -1,0 +1,384 @@
+import org.gradle.plugins.javascript.envjs.browser.*
+import com.ncc.neon.JsTestDriverConfigParser
+import com.ncc.neon.JettyCORSFilterAdder
+import org.apache.tools.ant.filters.ReplaceTokens
+
+apply plugin: 'envjs'
+apply plugin: 'groovy'
+apply plugin: 'codenarc'
+apply plugin: 'jdepend'
+
+archivesBaseName = 'neon'
+sourceCompatibility = 1.7
+
+// task groupings we add
+def TEST_GROUP = JavaBasePlugin.VERIFICATION_GROUP
+
+// properties defined in here are available in tasks and helper methods as
+// properties of the project
+project.ext {
+    jsSrcDir ="src/main/javascript"
+    jsTestDir = "src/test/javascript"
+    jsdocDir = "${project.docsDir}/jsdocs"
+    javadocDir = "${project.docsDir}/javadocs"
+    testResultsDir = "${buildDir}/test-results"
+    libraryName = "$archivesBaseName-${project.version}"
+    javadocTitle = "$libraryName API Documentation"
+}
+
+
+javascript.source {
+    dev {
+        js {
+            srcDir jsSrcDir
+            include "**/*.js"
+        }
+    }
+}
+
+repositories {
+    add javaScript.gradlePublicJavaScriptRepository
+}
+
+sourceSets {
+    // the integrationSupport source set has files that are used to help with
+    // integration testing (such as stub implementations, bean configurations, etc)
+    integrationSupport {
+        groovy {
+            srcDir 'src/test/integration-support'
+        }
+        compileClasspath += sourceSets.main.compileClasspath + sourceSets.main.output
+        runtimeClasspath += sourceSets.main.runtimeClasspath + sourceSets.main.output
+    }
+}
+
+configurations {
+    integrationSupportCompile { extendsFrom testCompile }
+    integrationSupportRuntime { extendsFrom integrationSupportCompile, testRuntime }
+}
+
+dependencies {
+    groovy 'org.codehaus.groovy:groovy-all:2.0.5'
+
+    compile 'com.sun.jersey:jersey-servlet:1.15'
+    compile 'com.sun.jersey:jersey-core:1.15'
+    compile 'com.sun.jersey:jersey-client:1.15'
+    compile 'com.sun.jersey:jersey-server:1.15'
+    compile 'com.sun.jersey:jersey-json:1.15'
+    compile 'com.sun.jersey.contribs:jersey-spring:1.15'
+    compile 'org.mongodb:mongo-java-driver:2.10.1'
+    compile 'org.springframework:spring-webmvc:3.2.0.RELEASE'
+    compile 'joda-time:joda-time:2.1'
+    compile 'org.slf4j:slf4j-api:1.7.2'
+    compile 'ch.qos.logback:logback-core:1.0.9'
+    compile 'ch.qos.logback:logback-classic:1.0.9'
+
+    providedCompile 'javax.servlet:javax.servlet-api:3.0.1'
+
+    runtime 'cglib:cglib:2.2.2'
+
+    integrationSupportCompile 'org.eclipse.jetty:jetty-servlets:8.1.8.v20121106'
+
+    testCompile 'junit:junit:4.11'
+    testCompile 'commons-collections:commons-collections:3.2.1'
+
+}
+
+// configure codenarc for each of the source sets
+sourceSets.each { sourceSet ->
+    def name = sourceSet.name
+    // this set should only have one element for each source set
+    def codenarcTasks = project.getTasksByName("codenarc${name.capitalize()}",false)
+    codenarcTasks.each { task ->
+        task.reports.xml.enabled = true
+        task.reports.html.enabled = true
+    }
+}
+
+jdepend {
+    sourceSets = [sourceSets.main]
+}
+
+jdependMain.doLast {
+    File file = new File(jdepend.reportsDir, "main.xml");
+    def cycleCount = new XmlSlurper().parse(file).Cycles.Package.size()
+    if ( cycleCount > 0 ) {
+        throw new GradleException("Package cycles exist. See JDepend report at ${file}")
+    }
+}
+
+war {
+    dependsOn 'jshint'
+    dependsOn 'combineJs'
+    dependsOn 'check'
+    if ( isNoBrowserTest() ) {
+        dependsOn 'jsJasmineUnitTest'
+    }
+    else {
+        dependsOn 'jsTestDriverUnitTest'
+        dependsOn 'jsTestDriverIntegrationTest'
+    }
+    // copy the compiled library and the individual files so we can use either one.
+    // TODO: once we have the javascript build a little more solidified, we may not need the individual files, just the combined
+    from("${buildDir}/${libraryName}.js") {
+        into 'js'
+    }
+    from(jsSrcDir) {
+        include '**/*.js'
+        into 'js'
+    }
+    // strip out the version from the war
+    version ""
+}
+
+
+def isNoBrowserTest() {
+    "true" == System.properties['noBrowser']
+}
+
+combineJs {
+    source = javascript.source.dev.js.files
+    dest = file("${buildDir}/${libraryName}.js")
+}
+
+minifyJs {
+    source = combineJs
+    dest = file("${buildDir}/${libraryName}-min.js")
+    closure {
+        warningLevel = 'QUIET'
+    }
+}
+
+jshint {
+    source = javascript.source.dev.js.files
+}
+
+
+def ensureTestResultsDirExists() {
+    new File(testResultsDir).mkdirs()
+}
+
+task jsJasmineUnitTest(type: BrowserEvaluate) {
+    dependsOn 'createJasmineUnitSpecRunnerHtml'
+    group = TEST_GROUP
+    description = 'Runs the Jasmine unit test suite'
+    doRunJasmine(jsJasmineUnitTest,'unit')
+}
+
+/**
+ * Configures the specified task to run the jasmine tests
+ * @param task The task that runs the tests
+ * @param type The type of tests being run. This is a string describing
+ * the test type (e.g. unit) and is used in the result file
+ * and to determine which JsTestDriver config file to create the spec file
+ * from
+ */
+def doRunJasmine(task,type) {
+    def filename = "SpecRunner-${type}.html"
+    task.content 'src'
+    task.resource "test/javascript/${filename}"
+    // the results is put in a temporary directory since it is a "live' file that doesn't have references to the
+    // test and source files. it is strictly used for parsing for output, but not for trying to load once it is generated
+    task.result "${task.temporaryDir}/${filename}"
+    task.doFirst {
+        ensureTestResultsDirExists()
+    }
+    task.doLast {
+        def resultFile = file(task.result)
+        if (resultFile.text.contains('<div class="suite failed">')) {
+            throw new GradleException("There are failing jasmine tests. See $testResultsDir for details or re-run the spec file at ${task.content}/${task.resource}")
+        }
+    }
+}
+
+task createJasmineUnitSpecRunnerHtml << {
+    description = 'Creates the jasmine spec runner html file based on the jstestdriver config for unit tests'
+    group = TEST_GROUP
+    doCreateJasmineSpecRunnerHtml('jstd-unit.conf','unit')
+}
+
+/**
+ * Creates a jasmine test html file based on the js test driver configuration.
+ * This task copies it to the same directory as the spec runner template.
+ * @param jsTestDriverConf The JSTestDriver spec to create the jasmine tests from
+ * @param type A descriptor of the test type (e.g. unit, integration). This is used
+ * as part of the spec runner file
+ */
+def doCreateJasmineSpecRunnerHtml(jsTestDriverConf,type) {
+    def templateFile = 'SpecRunner.template.html'
+    def scriptIncludes = new StringBuilder()
+    def parser = new JsTestDriverConfigParser()
+    parser.parseJsTestDriverConfig(projectDir, jsTestDir, jsTestDriverConf, ['lib/jasmine-jstd/JasmineAdapter.js'] as Set)
+
+    parser.matchingFiles.each { scriptIncludes.append('  <script src="').append(it).append('"></script>').append(System.properties['line.separator']) }
+    def specRunnerOut = templateFile.replace('.template', "-$type")
+    new File(jsTestDir, specRunnerOut).delete()
+    copy {
+        from(jsTestDir) {
+            filter(ReplaceTokens, tokens: [
+                    includes: scriptIncludes.toString(),
+                    outputDir: testResultsDir.toString()
+            ])
+            include(templateFile)
+        }
+        into jsTestDir
+        rename { String filename ->
+            // only one file, so just return the new name
+            specRunnerOut
+        }
+    }
+}
+
+task jsTestDriverUnitTest(type: JavaExec) {
+    description = 'Runs the javascript unit tests using JSTestDriver. The JsTestDriver server must be started with browsers captured.'
+    group = TEST_GROUP
+
+    doRunJsTestDriver('jstd-unit.conf',jsTestDriverUnitTest);
+}
+
+task jsTestDriverIntegrationTest(type: JavaExec) {
+    description = 'Runs the javascript integration tests using JSTestDriver. The JsTestDriver server must be started with browsers captured.'
+    group = TEST_GROUP
+    System.setProperty('spring.profiles.active','integration-test')
+    dependsOn 'deployJsIntegrationTest'
+
+    doRunJsTestDriver('jstd-integration.conf',jsTestDriverIntegrationTest);
+}
+
+task deployJsIntegrationTest(type: org.gradle.api.plugins.jetty.JettyRun) {
+    group = TEST_GROUP
+    description = 'Deploys the integration tests to an embedded jetty server'
+    daemon = true
+    def webXmlFile =new File(sourceSets.integrationSupport.output.classesDir,'web-jetty.xml')
+    doFirst {
+        JettyCORSFilterAdder.rewriteWebXml(new File(projectDir, 'src/main/webapp/WEB-INF/web.xml').absolutePath, webXmlFile.path)
+    }
+    webXml = webXmlFile
+    classpath += sourceSets.integrationSupport.output
+}
+
+/**
+ * A helper method to run configure a JavaExec task to run JsTestDriver on
+ * the specified test driver config file.
+ * @param jstdConfig The JsTestDriver configuration file
+ * @param javaExecTask The task to configure
+ */
+def doRunJsTestDriver(jstdConfig, javaExecTask) {
+    javaExecTask.doFirst {
+        ensureTestResultsDirExists()
+    }
+    javaExecTask.main = '-jar'
+    javaExecTask.args = [
+            new File(projectDir, "../scripts/jstd/JsTestDriver-1.3.5.jar").absolutePath,
+            '--reset',
+            '--tests', 'all',
+            '--config', "${jsTestDir}/${jstdConfig}",
+            '--verbose',
+            '--testOutput', testResultsDir,
+            '--raiseOnFailure', true
+    ]
+
+}
+
+task jsDocs(type: Exec) {
+    description = 'Creates the javascript API documentation. This requires yuidocjs to be installed'
+    group = JavaBasePlugin.DOCUMENTATION_GROUP
+
+    // replace the tokens in the yuidoc descriptor file
+    doFirst {
+        new File(jsdocDir).mkdirs()
+        copy {
+            includeEmptyDirs = false
+            from('yuidoc') {
+                include('**/*.json')
+                // replace the tokens in the yuidoc file and put it in a temp dir so the yuidoc task can access it.
+                // this file is not part of the final docs output
+                filter(ReplaceTokens, tokens: [
+                        projectDir: projectDir.absolutePath,
+                        libraryName: libraryName.toString(),
+                        outDir: jsdocDir.toString()
+                ]
+                )
+            }
+            into temporaryDir
+        }
+    }
+    commandLine "yuidoc", "-c", "$temporaryDir/yuidoc.json"
+
+    // copy the images after the yuidoc tasks runs because the yuidoc task will delete the output directory
+    // these files are needed for the final docs output since they will be referenced in the html output
+    doLast {
+        copy {
+            from('yuidoc') {
+                include('images/*')
+            }
+            into jsdocDir
+        }
+    }
+}
+
+task copyJsDocs(type: Copy) {
+    description = 'Copies the javascript documentation to a directory to be zipped'
+    dependsOn 'jsDocs'
+    doCopyDocsIntoZipDir('javascript-api-docs',copyJsDocs,jsdocDir)
+}
+
+groovydoc {
+    destinationDir = file(javadocDir)
+    docTitle = javadocTitle
+    windowTitle = javadocTitle
+}
+
+task copyJavadocs(type: Copy) {
+    description = 'Copies the javadocs to a directory to be zipped'
+    dependsOn 'groovydoc'
+    doCopyDocsIntoZipDir('javadocs',copyJavadocs,javadocDir)
+}
+
+/**
+ * Configures a copy task to copy documentation into another directory for zipping
+ * @param classifier A string appended to the doc zip file name (e.g. javadoc)
+ * @param copyTask The task being configured for copying
+ * @param docDir The directory containing the documentation to be zipped
+ */
+def doCopyDocsIntoZipDir(classifier, copyTask, docDir) {
+    copyTask.ext.zipBaseName = "$libraryName-$classifier"
+
+    // the zipDir is another directory with the same name as the zip file
+    // used as the top level directory in the zip
+    copyTask.ext.zipDir = "${copyTask.temporaryDir}/$copyTask.zipBaseName"
+
+    copyTask.doFirst {
+        new File(zipDir).mkdirs()
+    }
+
+    copyTask.from new File(docDir).path
+    copyTask.into copyTask.zipDir
+
+}
+
+
+task zipJsDocs(type: Zip) {
+    description = 'Creates a zip file containing the javascript API documentation'
+    group = JavaBasePlugin.DOCUMENTATION_GROUP
+    dependsOn 'copyJsDocs'
+    doZipDocs(copyJsDocs, zipJsDocs)
+}
+
+task zipJavadocs(type: Zip) {
+    description = 'Creates a zip file containing the javadocs'
+    group = JavaBasePlugin.DOCUMENTATION_GROUP
+    dependsOn 'copyJavadocs'
+    doZipDocs(copyJavadocs, zipJavadocs)
+}
+
+/**
+ * Configures the zip task to create a zip the documentation generated by the docs task
+ * @param copyDocsTask
+ * @param zipTask
+ */
+def doZipDocs(copyDocsTask, zipTask) {
+    zipTask.from new File(copyDocsTask.zipDir).parent
+    zipTask.destinationDir buildDir
+    zipTask.archiveName "${copyDocsTask.zipBaseName}.zip"
+}
