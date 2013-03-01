@@ -1,0 +1,25 @@
+# generated files
+neon-server/src/test/javascript/SpecRunner-*.html
+
+# gradle files
+build
+.gradle
+buildSrc/build
+buildSrc/.gradle
+gradle.properties # machine specific config
+
+# intellij files
+.idea
+*.iml
+*.ipr
+*.iws
+out/
+classes/
+
+# eclipse files
+.project
+.settings
+.classpath
+target/
+
+*.*~
