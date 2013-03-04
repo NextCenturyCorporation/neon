@@ -32,12 +32,12 @@ class MongoConfigParserTest {
         def hostsString = "localhost:8440,localhost,127.0.0.1:8100"
         def serverAddresses = MongoConfigParser.createServerAddresses(hostsString)
         assert serverAddresses.size() == 3
-        assertServerAddress(serverAddresses[0],"localhost",8440)
-        assertServerAddress(serverAddresses[1],"localhost")
-        assertServerAddress(serverAddresses[2],"127.0.0.1",8100)
+        assertServerAddressMatchesHostAndPort(serverAddresses[0],"localhost",8440)
+        assertServerAddressMatchesHostAndPort(serverAddresses[1],"localhost")
+        assertServerAddressMatchesHostAndPort(serverAddresses[2],"127.0.0.1",8100)
     }
 
-    private static def assertServerAddress(address,host,port=null) {
+    private static def assertServerAddressMatchesHostAndPort(address,host,port=null) {
         assert address.host == host
         if ( port ) {
             assert address.port == port

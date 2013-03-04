@@ -29,13 +29,22 @@
 neon.namespace('neon.eventing');
 
 
+/**
+ * @constructor
+ */
 neon.eventing.OWFIntentsLauncher = function () {
 
     this.metadata_ = {};
 
 };
 
-
+/**
+ * Adds any metadata associated with a particular data type. That metadata as part of the message to the
+ * widget handling the intent.
+ * @method addMetadataForDataType
+ * @param {String} dataType
+ * @param {Object} metadata Some json metadata
+ */
 neon.eventing.OWFIntentsLauncher.prototype.addMetadataForDataType = function (dataType, metadata) {
     if (!this.metadata_.hasOwnProperty(dataType)) {
         this.metadata_[dataType] = {};
@@ -44,12 +53,14 @@ neon.eventing.OWFIntentsLauncher.prototype.addMetadataForDataType = function (da
 };
 
 /**
- * @param launcher
- * @param intents
- * @param dataSourceNameLookup
- * @param datasetIdLookup
- * @param parentSelector
+ * Adds a visual component to select the intents to launch
  * @method addIntentsSelector
+ * @param {neon.eventing.OWFIntentsLauncher} launcher The launcher that launches the intents
+ * @param {Array} intents An array of the intent descriptions that can be launched
+ * @param {Function} dataSourceNameLookup A function that returns the name of the data source to pass with the intent
+ * @param {Function} datasetIdLookup A function that returns the name of the data set id to pass with the intent
+ * @param {String} parentSelector The CSS selector to find the parent component to which this new component should be added
+ *
  */
 neon.eventing.OWFIntentsLauncher.addIntentsSelector = function (launcher, intents, dataSourceNameLookup, datasetIdLookup, parentSelector) {
 

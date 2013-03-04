@@ -32,7 +32,7 @@ class AppContextUtils {
         // utility class, no public constructor needed
     }
 
-    static createPropertyPlaceholderConfig(location) {
+    static def createPropertyPlaceholderConfig(location) {
        // def config = new PropertyPlaceholderConfigurer()
         def config = new PropertySourcesPlaceholderConfigurer()
         config.order = Ordered.HIGHEST_PRECEDENCE
