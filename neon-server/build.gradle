@@ -73,6 +73,7 @@ dependencies {
     compile 'ch.qos.logback:logback-core:1.0.9'
     compile 'ch.qos.logback:logback-classic:1.0.9'
 
+
     providedCompile 'javax.servlet:javax.servlet-api:3.0.1'
 
     runtime 'cglib:cglib:2.2.2'
@@ -81,6 +82,7 @@ dependencies {
 
     testCompile 'junit:junit:4.11'
     testCompile 'commons-collections:commons-collections:3.2.1'
+    testCompile 'org.json:json:20090211'
 
 }
 

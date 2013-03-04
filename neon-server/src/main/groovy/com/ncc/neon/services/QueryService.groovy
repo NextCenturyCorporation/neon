@@ -45,8 +45,10 @@ public class QueryService {
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     @Path("query")
-    public String executeQuery(Query query, @DefaultValue("false") @QueryParam("includefiltered") boolean includeFiltered) {
-        return wrapInDataJson(queryExecutor.execute(query, includeFiltered))
+    public String executeQuery(Query query,
+                               @DefaultValue("false") @QueryParam("includefiltered") boolean includeFiltered,
+                               @QueryParam("transform") String transformClassName) {
+        return wrapInDataJson(queryExecutor.execute(query, includeFiltered), transformClassName)
     }
 
     @POST
@@ -137,11 +139,20 @@ public class QueryService {
         return '{"fieldNames":' + queryExecutor.getFieldNames(dataSourceName, datasetId) + '}'
     }
 
-    private def wrapInDataJson(queryResult) {
+    private def wrapInDataJson(queryResult, transformClassName = null) {
         def json = queryResult.toJson()
+        if ( transformClassName ) {
+            json = applyTransform(transformClassName, json)
+        }
         def output = '{"data":' + json + '}'
         return output
     }
+
+    private static def applyTransform(transformClassName, json) {
+        def transform = ClassLoader.systemClassLoader.loadClass(transformClassName).newInstance()
+        return transform.apply(json)
+    }
+
 }
 
 

@@ -47,10 +47,12 @@ neon.query.Query = function() {
 
     this.filter = new neon.query.Filter();
 
-    // includeFiltered_ is used privately on the javascript side but is not mapped to a field on the server
-    this.includeFiltered_ = false;
-
     /*jshint expr: true */
+
+    // the underscore variables are used privately on the javascript side but not mapped to a field on the server
+    this.includeFiltered_ = false;
+    this.transform_;
+
     this.groupByClauses = [];
     this.distinctClause;
     this.aggregates = [];
@@ -233,6 +235,16 @@ neon.query.Query.prototype.includeFiltered = function(includeFiltered) {
 };
 
 /**
+ * Specifies a name of a transform to apply to the json before returning it from the query
+ * @param transformName
+ * @return {neon.query.Query} This query object
+ */
+neon.query.Query.prototype.transform = function(transformName) {
+    this.transform_ = transformName;
+    return this;
+};
+
+/**
  * Creates a simple *where* clause for the query
  * @method where
  * @param {String} fieldName The field name to group on
@@ -288,7 +300,11 @@ neon.query.getFieldNames = function(dataSourceName, datasetId, successCallback) 
  * @param {Function} successCallback The callback to fire when the query successfully completes
  */
 neon.query.executeQuery = function(query, successCallback) {
-    neon.util.AjaxUtils.doPostJSON(query, neon.query.queryUrl_('/services/queryservice/query?includefiltered=' + query.includeFiltered_), neon.query.wrapCallback_(successCallback,neon.query.wrapperArgsForQuery_(query)));
+    var queryParams = 'includefiltered=' + query.includeFiltered_;
+    if ( query.transform_ ) {
+        queryParams += '&transform=' + query.transform_;
+    }
+    neon.util.AjaxUtils.doPostJSON(query, neon.query.queryUrl_('/services/queryservice/query?' + queryParams), neon.query.wrapCallback_(successCallback,neon.query.wrapperArgsForQuery_(query)));
 };
 
 

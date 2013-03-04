@@ -1,12 +1,4 @@
-package com.ncc.neon.query
-
-import com.ncc.neon.query.clauses.AggregateClause
-import com.ncc.neon.query.clauses.DistinctClause
-import com.ncc.neon.query.clauses.GroupByClause
-import com.ncc.neon.query.clauses.SortClause
-import com.ncc.neon.query.filter.Filter
-import groovy.transform.ToString
-import org.codehaus.jackson.annotate.JsonIgnoreProperties
+package com.ncc.neon.query.transform
 
 /*
  * ************************************************************************
@@ -30,27 +22,13 @@ import org.codehaus.jackson.annotate.JsonIgnoreProperties
  * OF NEXT CENTURY CORPORATION EXCEPT BY PRIOR WRITTEN PERMISSION AND WHEN
  * RECIPIENT IS UNDER OBLIGATION TO MAINTAIN SECRECY.
  */
+interface JsonTransform {
 
-/**
- * A query stores a filter for selecting data and optional aggregation methods for grouping the data.
- * The query is translated to a datastore specific operation which returns the appropriate data.
- */
-@ToString
-@JsonIgnoreProperties(value = ['includeFiltered_', 'transform_'])
-class Query {
-
-    Filter filter
-    List<AggregateClause> aggregates = []
-    List<GroupByClause> groupByClauses = []
-    DistinctClause distinctClause
-    List<SortClause> sortClauses
-
-    def getDataSourceName() {
-        filter.dataSourceName
-    }
-
-    def getDatasetId() {
-        filter.datasetId
-    }
+    /**
+     * Transforms the json input array and returns the output json representation
+     * @param inputJsonArray
+     * @return
+     */
+    String apply(inputJsonArray);
 
 }

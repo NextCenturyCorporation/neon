@@ -1,12 +1,7 @@
-package com.ncc.neon.query
+package com.ncc.neon.services
 
-import com.ncc.neon.query.clauses.AggregateClause
-import com.ncc.neon.query.clauses.DistinctClause
-import com.ncc.neon.query.clauses.GroupByClause
-import com.ncc.neon.query.clauses.SortClause
-import com.ncc.neon.query.filter.Filter
-import groovy.transform.ToString
-import org.codehaus.jackson.annotate.JsonIgnoreProperties
+import com.ncc.neon.query.transform.JsonTransform
+import org.json.JSONArray
 
 /*
  * ************************************************************************
@@ -32,25 +27,21 @@ import org.codehaus.jackson.annotate.JsonIgnoreProperties
  */
 
 /**
- * A query stores a filter for selecting data and optional aggregation methods for grouping the data.
- * The query is translated to a datastore specific operation which returns the appropriate data.
+ * A transform used for testing that can replaces the string "val" in json results with "tval"
  */
-@ToString
-@JsonIgnoreProperties(value = ['includeFiltered_', 'transform_'])
-class Query {
+class ValueStringReplaceTransform implements JsonTransform {
 
-    Filter filter
-    List<AggregateClause> aggregates = []
-    List<GroupByClause> groupByClauses = []
-    DistinctClause distinctClause
-    List<SortClause> sortClauses
-
-    def getDataSourceName() {
-        filter.dataSourceName
-    }
-
-    def getDatasetId() {
-        filter.datasetId
+    @Override
+    String apply(inputJsonArray) {
+        def jsonArray = new JSONArray(inputJsonArray)
+        jsonArray.length().times { index ->
+            def object = jsonArray.getJSONObject(index)
+            object.keys().each { key ->
+                def val = object.getString(key).replaceAll("val", "tval")
+                object.put(key, val)
+            }
+        }
+        return jsonArray
     }
 
 }
