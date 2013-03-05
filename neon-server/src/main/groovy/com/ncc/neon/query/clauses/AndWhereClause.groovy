@@ -30,4 +30,7 @@ class AndWhereClause extends BooleanWhereClause {
     // this doesn't do anything specific but is a separate class to indicate to the
     // query builder what operation to perform
 
+
+    private static final long serialVersionUID = 4339985470022678121L
+
 }

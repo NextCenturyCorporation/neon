@@ -34,6 +34,10 @@
     </ruleset-ref>
     <ruleset-ref path='rulesets/logging.xml'/>
     <ruleset-ref path='rulesets/naming.xml'>
+        <rule-config name='FieldName'>
+            <!-- TODO: NEON-80 - This bug of falsely failing on serialVersionUID was fixed in codenarc 0.18. When codenarc is updated, this rule configuration can be removed and use the default -->
+            <property name='staticFinalRegex' value='([A-Z][A-Z0-9_]*)|(serialVersionUID)'/>
+        </rule-config>
         <rule-config name='MethodName'>
             <property name='regex' value='[a-z].*'/>
         </rule-config>

@@ -30,7 +30,9 @@ import groovy.transform.ToString
  * A filter specifies which data to select from a datastore
  */
 @ToString
-class Filter {
+class Filter implements Serializable {
+
+    private static final long serialVersionUID = 7238913369114626126L
 
     def dataSourceName
     def datasetId

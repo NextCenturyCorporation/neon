@@ -3,6 +3,7 @@ package com.ncc.neon.query.mongo
 import com.mongodb.BasicDBObject
 import com.mongodb.DBObject
 import com.mongodb.Mongo
+import com.mongodb.MongoClient
 import com.ncc.neon.query.AbstractQueryExecutor
 import com.ncc.neon.query.QueryResult
 import com.ncc.neon.query.clauses.SortOrder
@@ -42,9 +43,8 @@ class MongoQueryExecutor extends AbstractQueryExecutor {
     private static final DESCENDING_STRING_COMPARATOR = { a, b -> b <=> a }
     private static final Logger LOGGER = LoggerFactory.getLogger(MongoQueryExecutor)
 
-
     @Autowired
-    private Mongo mongo
+    private MongoClient mongo
 
     @Override
     protected QueryResult doExecuteQuery(mongoQuery) {

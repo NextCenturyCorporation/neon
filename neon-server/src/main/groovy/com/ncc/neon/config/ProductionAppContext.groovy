@@ -3,11 +3,14 @@ package com.ncc.neon.config
 import com.mongodb.MongoClient
 import com.ncc.neon.query.QueryExecutor
 import com.ncc.neon.query.mongo.MongoQueryExecutor
+import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.context.annotation.*
+import org.springframework.context.annotation.Bean
+import org.springframework.context.annotation.Configuration
+import org.springframework.context.annotation.Profile
+import org.springframework.context.annotation.PropertySource
 import org.springframework.core.env.Environment
 import org.springframework.core.env.PropertiesPropertySource
-import org.springframework.web.context.WebApplicationContext
 
 import javax.annotation.PostConstruct
 
@@ -42,6 +45,8 @@ import javax.annotation.PostConstruct
 @Profile("production")
 class ProductionAppContext {
 
+    private static final def LOGGER = LoggerFactory.getLogger(ProductionAppContext)
+
     @Autowired
     private Environment environment
 
@@ -58,16 +63,15 @@ class ProductionAppContext {
     }
 
     @Bean
-    @Scope(value = WebApplicationContext.SCOPE_SESSION, proxyMode = ScopedProxyMode.TARGET_CLASS)
     QueryExecutor queryExecutor() {
         return new MongoQueryExecutor()
     }
 
     @Bean
-    @Scope("singleton")
     MongoClient mongo() {
         def hostsString = environment.getProperty("mongo.hosts")
         def serverAddresses = MongoConfigParser.createServerAddresses(hostsString)
+        LOGGER.debug("connecting to mongo at {}",serverAddresses)
         return new MongoClient(serverAddresses)
     }
 

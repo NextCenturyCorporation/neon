@@ -25,7 +25,9 @@ import groovy.transform.ToString
  * RECIPIENT IS UNDER OBLIGATION TO MAINTAIN SECRECY.
  */
 @ToString
-class BooleanWhereClause implements WhereClause {
+class BooleanWhereClause implements WhereClause, Serializable {
+
+    private static final long serialVersionUID = -1686544619324087210L
 
     List<WhereClause> whereClauses;
 

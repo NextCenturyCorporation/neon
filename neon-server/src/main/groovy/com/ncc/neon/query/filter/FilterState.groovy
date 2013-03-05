@@ -1,6 +1,7 @@
 package com.ncc.neon.query.filter
 
 import org.springframework.context.annotation.Scope
+import org.springframework.context.annotation.ScopedProxyMode
 import org.springframework.stereotype.Component
 import org.springframework.web.context.WebApplicationContext
 
@@ -31,13 +32,13 @@ import org.springframework.web.context.WebApplicationContext
  * Stores any filters applied to the datasets
  */
 @Component
-@Scope(WebApplicationContext.SCOPE_SESSION)
-class FilterState {
+@Scope(value = WebApplicationContext.SCOPE_SESSION, proxyMode = ScopedProxyMode.TARGET_CLASS)
+class FilterState implements Serializable {
+
+    private static final long serialVersionUID = 120605443225830865L
 
     private final def filtersById = [:]
     private final def filtersByDataSource = [:]
-
-
 
     /**
      * Clears any existing filters
@@ -54,11 +55,11 @@ class FilterState {
     def addFilter(def filter) {
         def id = UUID.randomUUID()
         def dataSource = dataSourceFromFilter(filter)
-        filtersById.put(id,filter)
-        if ( !filtersByDataSource.containsKey(dataSource) ) {
+        filtersById.put(id, filter)
+        if (!filtersByDataSource.containsKey(dataSource)) {
             filtersByDataSource.put(dataSource, [] as Set)
         }
-        filtersByDataSource[dataSource] << (id)
+        filtersByDataSource[dataSource] << id
         return id
     }
 
@@ -72,12 +73,11 @@ class FilterState {
         def dataSource = dataSourceFromFilter(filter)
         def datasetFilters = filtersByDataSource[dataSource]
         datasetFilters.remove(id)
-        if ( datasetFilters.isEmpty() ) {
+        if (datasetFilters.isEmpty()) {
             filtersByDataSource.remove(dataSource)
         }
 
     }
-
 
     /**
      * Gets any filters that are applied to the specified dataset
@@ -88,7 +88,7 @@ class FilterState {
     def getFiltersForDataset(def dataSourceName, def datasetId) {
         def filters = []
         DataSource dataSource = new DataSource(dataSourceName: dataSourceName, datasetId: datasetId)
-        if ( filtersByDataSource.containsKey(dataSource)) {
+        if (filtersByDataSource.containsKey(dataSource)) {
             def ids = filtersByDataSource.get(dataSource)
             ids.each {
                 filters << filtersById[it]
@@ -100,7 +100,6 @@ class FilterState {
     private static def dataSourceFromFilter(filter) {
         return new DataSource(dataSourceName: filter.dataSourceName, datasetId: filter.datasetId)
     }
-
 
 
 }

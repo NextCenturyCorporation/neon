@@ -1,6 +1,7 @@
 package com.ncc.neon.selection
 
 import org.springframework.context.annotation.Scope
+import org.springframework.context.annotation.ScopedProxyMode
 import org.springframework.stereotype.Component
 import org.springframework.web.context.WebApplicationContext
 
@@ -27,8 +28,10 @@ import org.springframework.web.context.WebApplicationContext
  * RECIPIENT IS UNDER OBLIGATION TO MAINTAIN SECRECY.
  */
 @Component
-@Scope(WebApplicationContext.SCOPE_SESSION)
-class SelectionManager {
+@Scope(value = WebApplicationContext.SCOPE_SESSION, proxyMode = ScopedProxyMode.TARGET_CLASS)
+class SelectionManager implements Serializable {
+
+    private static final long serialVersionUID = 8224297040031252632L
 
     def selectedIds = [] as Set
 
