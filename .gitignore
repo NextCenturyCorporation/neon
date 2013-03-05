@@ -6,7 +6,6 @@ build
 .gradle
 buildSrc/build
 buildSrc/.gradle
-gradle.properties # machine specific config
 
 # intellij files
 .idea
