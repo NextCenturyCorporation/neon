@@ -25,37 +25,64 @@
  * This is a basic smoke test to make sure the javascript objects are properly mapped
  * to the server side groovy objects when passed via the web services
  */
-describe('query integration', function() {
-    var q = neon.query;
+describe('query integration', function () {
     var dataSourceName = 'test-dataSource';
     var datasetId = 'test-dataset';
 
-    it('should get fields', function() {
+    it('should get fields', function () {
         var callback = jasmine.createSpy('fields');
-        q.getFieldNames(dataSourceName,datasetId,callback);
-        waitsFor(function() { return callback.wasInvoked(); });
-        runs(function() { expect(callback).toHaveBeenCalled(); });
+        neon.query.getFieldNames(dataSourceName, datasetId, callback);
+        waitsFor(function () {
+            return callback.wasInvoked();
+        });
+        runs(function () {
+            expect(callback).toHaveBeenCalled();
+        });
     });
 
-    it('should execute a query', function() {
+    it('should execute a query', function () {
         var callback = jasmine.createSpy('query');
         // verify that the different clauses are properly mapped to the server side. if there
         // is an error in the mapping, the callback will not be invoked
-        var query = new q.Query()
+        var query = new neon.query.Query()
             .selectFrom(dataSourceName, datasetId)
-            .where('test_field','=','test_value')
-            .groupBy('DayOfWeek', new q.GroupByFunctionClause(q.MONTH, 'test_date', 'month'))
-            .aggregate(q.COUNT,'some_field','count');
-        q.executeQuery(query, callback);
-        waitsFor(function() { return callback.wasInvoked(); });
-        runs(function() { expect(callback).toHaveBeenCalled(); });
+            .where('test_field', '=', 'test_value')
+            .groupBy('DayOfWeek', new neon.query.GroupByFunctionClause(neon.query.MONTH, 'test_date', 'month'))
+            .aggregate(neon.query.COUNT, 'some_field', 'count');
+        neon.query.executeQuery(query, callback);
+        waitsFor(function () {
+            return callback.wasInvoked();
+        });
+        runs(function () {
+            expect(callback).toHaveBeenCalled();
+        });
     });
 
-    it('should add a filter', function() {
+    it('should execute invoke the error callback on failure', function () {
+        var successCallback = jasmine.createSpy('successCallback');
+        var errorCallback = jasmine.createSpy('successCallback');
+        // by passing in a non query object, this should cause a mapping error and trigger the error callback (though we
+        // still need a few of the valid query parameters for the executeQuery method to properly work)
+        neon.query.executeQuery({ filter: {dataSourceName: dataSourceName, datasetId: datasetId}, aField: "aValue"}, successCallback, errorCallback);
+        waitsFor(function () {
+            return errorCallback.wasInvoked();
+        });
+        runs(function () {
+            expect(errorCallback).toHaveBeenCalled();
+            expect(successCallback).not.toHaveBeenCalled();
+        });
+    });
+
+
+    it('should add a filter', function () {
         var callback = jasmine.createSpy('filter');
-        var filter = new q.Filter().selectFrom(dataSourceName, datasetId).where('someAttr','=','someValue');
-        q.addFilter(filter, callback);
-        waitsFor(function() { return callback.wasInvoked(); });
-        runs(function() { expect(callback).toHaveBeenCalled(); });
+        var filter = new neon.query.Filter().selectFrom(dataSourceName, datasetId).where('someAttr', '=', 'someValue');
+        neon.query.addFilter(filter, callback);
+        waitsFor(function () {
+            return callback.wasInvoked();
+        });
+        runs(function () {
+            expect(callback).toHaveBeenCalled();
+        });
     });
 });

@@ -36,3 +36,4 @@ neon.namespace('neon.util.ArrayUtils');
 neon.util.ArrayUtils.argumentsToArray = function(args) {
     return Array.prototype.slice.call(args);
 };
+

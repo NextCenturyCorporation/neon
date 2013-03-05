@@ -38,7 +38,7 @@ neon.namespace('neon.query');
  * @class OWFEventPublisher
  * @constructor
  */
-neon.query.OWFEventPublisher = function(messageHandler) {
+neon.query.OWFEventPublisher = function (messageHandler) {
 
     this.messageHandler_ = messageHandler ? messageHandler : new neon.eventing.MessageHandler();
 };
@@ -48,9 +48,10 @@ neon.query.OWFEventPublisher = function(messageHandler) {
  * @method addFilter
  * @param {neon.query.Filter || neon.query.FilterProvider} filter The filter (or filter provider) to add. A filter provider can be useful
  * for dynamically creating more complex filters on the server based on subquery results
+ * @param {Function} errorCallback (optional) The optional callback when an error occurs. This is a 3 parameter function that contains the xhr, a short error status and the full error message.
  */
-neon.query.OWFEventPublisher.prototype.addFilter = function (filter) {
-    neon.query.addFilter(filter, this.createChannelCallback_(neon.eventing.Channels.FILTERS_CHANGED));
+neon.query.OWFEventPublisher.prototype.addFilter = function (filter, errorCallback) {
+    neon.query.addFilter(filter, this.createChannelCallback_(neon.eventing.Channels.FILTERS_CHANGED), errorCallback);
 };
 
 
@@ -58,9 +59,10 @@ neon.query.OWFEventPublisher.prototype.addFilter = function (filter) {
  * Removes a filter and sends a message to the {{#crossLink "neon.eventing.Channels/FILTERS_CHANGED:property"}}{{/crossLink}} channel
  * @method removeFilter
  * @param {String} filterId The id of the filter to remove
+ * @param {Function} errorCallback (optional) The optional callback when an error occurs. This is a 3 parameter function that contains the xhr, a short error status and the full error message.
  */
-neon.query.OWFEventPublisher.prototype.removeFilter = function (filterId) {
-    neon.query.removeFilter(filterId, this.createChannelCallback_(neon.eventing.Channels.FILTERS_CHANGED));
+neon.query.OWFEventPublisher.prototype.removeFilter = function (filterId, errorCallback) {
+    neon.query.removeFilter(filterId, this.createChannelCallback_(neon.eventing.Channels.FILTERS_CHANGED), errorCallback);
 };
 
 
@@ -70,18 +72,20 @@ neon.query.OWFEventPublisher.prototype.removeFilter = function (filterId) {
  * @param {String} filterId The id of the filter to replace
  * @param {neon.query.Filter || neon.query.FilterProvider} filter The filter (or filter provider) to add. A filter provider can be useful
  * for dynamically creating more complex filters on the server based on subquery results
+ * @param {Function} errorCallback (optional) The optional callback when an error occurs. This is a 3 parameter function that contains the xhr, a short error status and the full error message.
  */
-neon.query.OWFEventPublisher.prototype.replaceFilter = function (filterId, filter) {
-    neon.query.replaceFilter(filterId, filter, this.createChannelCallback_(neon.eventing.Channels.FILTERS_CHANGED));
+neon.query.OWFEventPublisher.prototype.replaceFilter = function (filterId, filter, errorCallback) {
+    neon.query.replaceFilter(filterId, filter, this.createChannelCallback_(neon.eventing.Channels.FILTERS_CHANGED), errorCallback);
 };
 
 
 /**
  * Clears all filter and sends a message to the {{#crossLink "neon.eventing.Channels/FILTERS_CHANGED:property"}}{{/crossLink}} channel
  * @method clearFilters
+ * @param {Function} errorCallback (optional) The optional callback when an error occurs. This is a 3 parameter function that contains the xhr, a short error status and the full error message.
  */
-neon.query.OWFEventPublisher.prototype.clearFilters = function () {
-    neon.query.clearFilters(this.createChannelCallback_(neon.eventing.Channels.FILTERS_CHANGED));
+neon.query.OWFEventPublisher.prototype.clearFilters = function (errorCallback) {
+    neon.query.clearFilters(this.createChannelCallback_(neon.eventing.Channels.FILTERS_CHANGED), errorCallback);
 };
 
 
@@ -89,18 +93,20 @@ neon.query.OWFEventPublisher.prototype.clearFilters = function () {
  * Sets the selection to those items that match the filter and sends a message to the {{#crossLink "neon.eventing.Channels/SELECTION_CHANGED:property"}}{{/crossLink}} channel
  * @method selectSelectionWhere
  * @param {neon.query.Filter} filter Items matching this query will become the selected items
+ * @param {Function} errorCallback (optional) The optional callback when an error occurs. This is a 3 parameter function that contains the xhr, a short error status and the full error message.
  */
-neon.query.OWFEventPublisher.prototype.setSelectionWhere = function (filter) {
-    neon.query.setSelectionWhere(filter, this.createChannelCallback_(neon.eventing.Channels.SELECTION_CHANGED));
+neon.query.OWFEventPublisher.prototype.setSelectionWhere = function (filter, errorCallback) {
+    neon.query.setSelectionWhere(filter, this.createChannelCallback_(neon.eventing.Channels.SELECTION_CHANGED), errorCallback);
 };
 
 /**
  * Sets the items with the specified id to the current selection and sends a message to the {{#crossLink "neon.eventing.Channels/SELECTION_CHANGED:property"}}{{/crossLink}} channel
  * @method setSelectedIds
  * @param {Array} ids The ids of the set as the current selection
+ * @param {Function} errorCallback (optional) The optional callback when an error occurs. This is a 3 parameter function that contains the xhr, a short error status and the full error message.
  */
-neon.query.OWFEventPublisher.prototype.setSelectedIds = function (ids) {
-    neon.query.setSelectedIds(ids, this.createChannelCallback_(neon.eventing.Channels.SELECTION_CHANGED));
+neon.query.OWFEventPublisher.prototype.setSelectedIds = function (ids, errorCallback) {
+    neon.query.setSelectedIds(ids, this.createChannelCallback_(neon.eventing.Channels.SELECTION_CHANGED), errorCallback);
 };
 
 
@@ -108,9 +114,10 @@ neon.query.OWFEventPublisher.prototype.setSelectedIds = function (ids) {
  * Adds the items with the specified id to the current selection and sends a message to the {{#crossLink "neon.eventing.Channels/SELECTION_CHANGED:property"}}{{/crossLink}} channel
  * @method addSelectedIds
  * @param {Array} ids The ids of the items to add to the current selection
+ * @param {Function} errorCallback (optional) The optional callback when an error occurs. This is a 3 parameter function that contains the xhr, a short error status and the full error message.
  */
-neon.query.OWFEventPublisher.prototype.addSelectedIds = function (ids) {
-    neon.query.addSelectedIds(ids, this.createChannelCallback_(neon.eventing.Channels.SELECTION_CHANGED));
+neon.query.OWFEventPublisher.prototype.addSelectedIds = function (ids, errorCallback) {
+    neon.query.addSelectedIds(ids, this.createChannelCallback_(neon.eventing.Channels.SELECTION_CHANGED), errorCallback);
 };
 
 
@@ -118,22 +125,24 @@ neon.query.OWFEventPublisher.prototype.addSelectedIds = function (ids) {
  * Removes the items with the specified id from the current selection and sends a message to the {{#crossLink "neon.eventing.Channels/SELECTION_CHANGED:property"}}{{/crossLink}} channel
  * @method removeSelectedIds
  * @param {Array} ids The ids of the items to remove from the current selection
+ * @param {Function} errorCallback (optional) The optional callback when an error occurs. This is a 3 parameter function that contains the xhr, a short error status and the full error message.
  */
-neon.query.OWFEventPublisher.prototype.removeSelectedIds = function (ids) {
-    neon.query.removeSelectedIds(ids, this.createChannelCallback_(neon.eventing.Channels.SELECTION_CHANGED));
+neon.query.OWFEventPublisher.prototype.removeSelectedIds = function (ids, errorCallback) {
+    neon.query.removeSelectedIds(ids, this.createChannelCallback_(neon.eventing.Channels.SELECTION_CHANGED), errorCallback);
 };
 
 /**
  * Clears the current selection and sends a message to the {{#crossLink "neon.eventing.Channels/SELECTION_CHANGED:property"}}{{/crossLink}} channel
  * @method clearSelection
+ * @param {Function} errorCallback (optional) The optional callback when an error occurs. This is a 3 parameter function that contains the xhr, a short error status and the full error message.
  */
-neon.query.OWFEventPublisher.prototype.clearSelection = function () {
-    neon.query.clearSelection(this.createChannelCallback_(neon.eventing.Channels.SELECTION_CHANGED));
+neon.query.OWFEventPublisher.prototype.clearSelection = function (errorCallback) {
+    neon.query.clearSelection(this.createChannelCallback_(neon.eventing.Channels.SELECTION_CHANGED), errorCallback);
 };
 
-neon.query.OWFEventPublisher.prototype.createChannelCallback_ = function(channelName) {
+neon.query.OWFEventPublisher.prototype.createChannelCallback_ = function (channelName) {
     var me = this;
-    return function(results) {
+    return function (results) {
         me.messageHandler_.publishMessage(channelName, results || {});
     };
 };

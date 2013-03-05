@@ -34,15 +34,15 @@ neon.query.SERVER_URL = 'http://localhost:8080/neon';
  * Represents a query to be constructed against some data source. This class is built so query
  * clauses can be chained together to create an entire query, as shown below
  * @example
-     var where = neon.query.where;
-     var and = neon.query.and;
-     var query = new neon.query.Query(where(and(where('someProperty','=',5), where('someOtherProperty','<',10))));
-     neon.query.executeQuery(query);
+ var where = neon.query.where;
+ var and = neon.query.and;
+ var query = new neon.query.Query(where(and(where('someProperty','=',5), where('someOtherProperty','<',10))));
+ neon.query.executeQuery(query);
  * @namespace neon.query
  * @class Query
  * @constructor
  */
-neon.query.Query = function() {
+neon.query.Query = function () {
 
 
     this.filter = new neon.query.Filter();
@@ -101,7 +101,7 @@ neon.query.MONTH = 'month';
  * @property YEAR
  * @type {string}
  */
-neon.query.YEAR  = 'year';
+neon.query.YEAR = 'year';
 
 
 // these ids are used for providing json args to the callback functions
@@ -115,7 +115,7 @@ neon.query.DATASOURCE_NAME_IDENTIFIER = 'dataSourceName';
  * @param {String} datasetId The dataset to select from
  * @return {neon.query.Query} This query object
  */
-neon.query.Query.prototype.selectFrom = function(dataSourceName, datasetId) {
+neon.query.Query.prototype.selectFrom = function (dataSourceName, datasetId) {
     this.filter.selectFrom.apply(this.filter, arguments);
     return this;
 };
@@ -136,9 +136,9 @@ neon.query.Query.prototype.selectFrom = function(dataSourceName, datasetId) {
  *    <li>An In clause</li>
  * </ol>
  * @example
-     where('someProperty','=',5)
+ where('someProperty','=',5)
 
-     where(neon.Query.and(where('someProperty','=',5), where('someOtherProperty','<',10)))
+ where(neon.Query.and(where('someProperty','=',5), where('someOtherProperty','<',10)))
  * @return {neon.query.Query} This query object
  */
 neon.query.Query.prototype.where = function () {
@@ -153,7 +153,7 @@ neon.query.Query.prototype.where = function () {
  * Each parameter can be a single field name or a {{#crossLink "neon.query.GroupByFunctionClause"}}{{/crossLink}}
  * @return {neon.query.Query} This query object
  */
-neon.query.Query.prototype.groupBy = function(fields) {
+neon.query.Query.prototype.groupBy = function (fields) {
     // even though internally each groupBy clause is a separate object (since single field and functions
     // are processed differently), the user will think about a single groupBy operation which may include
     // multiple fields, so this method does not append to the existing groupBy fields, but replaces them
@@ -161,7 +161,7 @@ neon.query.Query.prototype.groupBy = function(fields) {
     var me = this;
 
     var list = neon.util.ArrayUtils.argumentsToArray(arguments);
-    list.forEach(function(field) {
+    list.forEach(function (field) {
         // if the user provided a string, convert that to the groupBy representation of a single field, otherwise,
         // they provided a groupBy function so just use that
         var clause = typeof field === 'string' ? new neon.query.GroupBySingleFieldClause(field) : field;
@@ -180,8 +180,8 @@ neon.query.Query.prototype.groupBy = function(fields) {
  * @method aggregate
  * @return {neon.query.Query} This query object
  */
-neon.query.Query.prototype.aggregate = function(aggregationOperation, aggregationField, name) {
-    this.aggregates.push(new neon.query.FieldFunction(aggregationOperation,aggregationField,name));
+neon.query.Query.prototype.aggregate = function (aggregationOperation, aggregationField, name) {
+    this.aggregates.push(new neon.query.FieldFunction(aggregationOperation, aggregationField, name));
     return this;
 };
 
@@ -191,7 +191,7 @@ neon.query.Query.prototype.aggregate = function(aggregationOperation, aggregatio
  * @param {String} fieldName The name of the field to return distinct values for
  * @return {neon.query.Query} This query object
  */
-neon.query.Query.prototype.distinct = function(fieldName) {
+neon.query.Query.prototype.distinct = function (fieldName) {
     this.distinctClause = new neon.query.DistinctClause(fieldName);
     return this;
 };
@@ -205,18 +205,18 @@ neon.query.Query.prototype.distinct = function(fieldName) {
  * @param {String} sortOrder The sort order (see the constants in this class)
  * @return {neon.query.Query} This query object
  * @example
-     new neon.query.Query(...).sortBy("field1",neon.query.ASC,"field2",neon.query.DESC);
+ new neon.query.Query(...).sortBy("field1",neon.query.ASC,"field2",neon.query.DESC);
  */
-neon.query.Query.prototype.sortBy = function(fieldName, sortOrder) {
+neon.query.Query.prototype.sortBy = function (fieldName, sortOrder) {
     // even though internally each sortBy clause is a separate object, the user will think about a single sortBy
     // operation which may include multiple fields, so this method does not append to the existing
     // sortBy fields, but replaces them
     this.sortClauses.length = 0;
     var list = neon.util.ArrayUtils.argumentsToArray(arguments);
-    for ( var i = 0; i < list.length; i+=2) {
+    for (var i = 0; i < list.length; i += 2) {
         var field = list[i];
-        var order = list[i+1];
-        this.sortClauses.push(new neon.query.SortClause(field,order));
+        var order = list[i + 1];
+        this.sortClauses.push(new neon.query.SortClause(field, order));
     }
     return this;
 };
@@ -229,7 +229,7 @@ neon.query.Query.prototype.sortBy = function(fieldName, sortOrder) {
  * the data matched by the current filters (defaults to false)
  * @return {neon.query.Query} This query object
  */
-neon.query.Query.prototype.includeFiltered = function(includeFiltered) {
+neon.query.Query.prototype.includeFiltered = function (includeFiltered) {
     this.includeFiltered_ = includeFiltered;
     return this;
 };
@@ -239,7 +239,7 @@ neon.query.Query.prototype.includeFiltered = function(includeFiltered) {
  * @param transformName
  * @return {neon.query.Query} This query object
  */
-neon.query.Query.prototype.transform = function(transformName) {
+neon.query.Query.prototype.transform = function (transformName) {
     this.transform_ = transformName;
     return this;
 };
@@ -251,11 +251,11 @@ neon.query.Query.prototype.transform = function(transformName) {
  * @param {String} op The operation to perform
  * @param {Object}  value The value to compare the field values against
  * @example
-     where('x','=',10)
+ where('x','=',10)
  * @return {Object}
  */
-neon.query.where = function(fieldName,op,value) {
-    return new this.WhereClause(fieldName,op,value);
+neon.query.where = function (fieldName, op, value) {
+    return new this.WhereClause(fieldName, op, value);
 };
 
 /**
@@ -263,10 +263,10 @@ neon.query.where = function(fieldName,op,value) {
  * @method and
  * @param  {Object} clauses A variable number of *where* clauses to apply
  * @example
-     and(where('x','=',10),where('y','=',1))
+ and(where('x','=',10),where('y','=',1))
  * @return {Object}
  */
-neon.query.and = function(clauses) {
+neon.query.and = function (clauses) {
     return new this.BooleanClause('and', neon.util.ArrayUtils.argumentsToArray(arguments));
 };
 
@@ -275,10 +275,10 @@ neon.query.and = function(clauses) {
  * @method or
  * @param {Object} clauses A variable number of *where* clauses to apply
  * @example
-     or(where('x','=',10),where('y','=',1))
+ or(where('x','=',10),where('y','=',1))
  * @return {Object}
  */
-neon.query.or = function(clauses) {
+neon.query.or = function (clauses) {
     return new this.BooleanClause('or', neon.util.ArrayUtils.argumentsToArray(arguments));
 };
 
@@ -287,10 +287,17 @@ neon.query.or = function(clauses) {
  * @method getFieldNames
  * @param {String} dataSourceName The name of the data source that holds this data
  * @param {String} datasetId The id of the dataset whose fields are being returned
- * @param {String} successCallback The callback to call when the field names are successfully retrieved
+ * @param {Function} successCallback The callback to call when the field names are successfully retrieved
+ * @param {Function} errorCallback (optional) The optional callback when an error occurs. This is a 3 parameter function that contains the xhr, a short error status and the full error message.
  */
-neon.query.getFieldNames = function(dataSourceName, datasetId, successCallback) {
-    neon.util.AjaxUtils.doGet(neon.query.queryUrl_('/services/queryservice/fieldnames?datasourcename='+ dataSourceName + '&datasetid=' + datasetId), neon.query.wrapCallback_(successCallback,neon.query.wrapperArgsForDataset_(dataSourceName,datasetId)));
+neon.query.getFieldNames = function (dataSourceName, datasetId, successCallback, errorCallback) {
+    neon.util.AjaxUtils.doGet(
+        neon.query.queryUrl_('/services/queryservice/fieldnames?datasourcename=' + dataSourceName + '&datasetid=' + datasetId),
+        {
+            success: neon.query.wrapCallback_(successCallback, neon.query.wrapperArgsForDataset_(dataSourceName, datasetId)),
+            error: errorCallback
+        }
+    );
 };
 
 /**
@@ -298,13 +305,21 @@ neon.query.getFieldNames = function(dataSourceName, datasetId, successCallback) 
  * @method executeQuery
  * @param {neon.query.Query} query the query to execute
  * @param {Function} successCallback The callback to fire when the query successfully completes
+ * @param {Function} errorCallback (optional) The optional callback when an error occurs. This is a 3 parameter function that contains the xhr, a short error status and the full error message.
  */
-neon.query.executeQuery = function(query, successCallback) {
+neon.query.executeQuery = function (query, successCallback, errorCallback) {
     var queryParams = 'includefiltered=' + query.includeFiltered_;
-    if ( query.transform_ ) {
+    if (query.transform_) {
         queryParams += '&transform=' + query.transform_;
     }
-    neon.util.AjaxUtils.doPostJSON(query, neon.query.queryUrl_('/services/queryservice/query?' + queryParams), neon.query.wrapCallback_(successCallback,neon.query.wrapperArgsForQuery_(query)));
+    neon.util.AjaxUtils.doPostJSON(
+        query,
+        neon.query.queryUrl_('/services/queryservice/query?' + queryParams),
+        {
+            success: neon.query.wrapCallback_(successCallback, neon.query.wrapperArgsForQuery_(query)),
+            error: errorCallback
+        }
+    );
 };
 
 
@@ -314,10 +329,18 @@ neon.query.executeQuery = function(query, successCallback) {
  * @param {neon.query.Filter || neon.query.FilterProvider} filter The filter (or filter provider) to add. A filter provider can be useful
  * for dynamically creating more complex filters on the server based on subquery results
  * @param {Function} successCallback The callback to fire when the filter is added
+ * @param {Function} errorCallback (optional) The optional callback when an error occurs. This is a 3 parameter function that contains the xhr, a short error status and the full error message.
  */
-neon.query.addFilter = function(filter, successCallback) {
+neon.query.addFilter = function (filter, successCallback, errorCallback) {
     var filterProvider = this.wrapFilterInProvider_(filter);
-    neon.util.AjaxUtils.doPostJSON(filterProvider, neon.query.queryUrl_('/services/queryservice/addfilter'), neon.query.wrapCallback_(successCallback, neon.query.wrapperArgsForFilter_(filterProvider.filter)));
+    neon.util.AjaxUtils.doPostJSON(
+        filterProvider,
+        neon.query.queryUrl_('/services/queryservice/addfilter'),
+        {
+            success: neon.query.wrapCallback_(successCallback, neon.query.wrapperArgsForFilter_(filterProvider.filter)),
+            error: errorCallback
+        }
+    );
 };
 
 /**
@@ -325,9 +348,17 @@ neon.query.addFilter = function(filter, successCallback) {
  * @method removeFilter
  * @param {String} filterId The id of the filter to remove
  * @param {Function} successCallback The callback to fire when the filter is removed
+ * @param {Function} errorCallback (optional) The optional callback when an error occurs. This is a 3 parameter function that contains the xhr, a short error status and the full error message.
  */
-neon.query.removeFilter = function(filterId, successCallback) {
-    neon.util.AjaxUtils.doPost(null, 'text/plain', 'json', neon.query.queryUrl_('/services/queryservice/removefilter/' + filterId), successCallback);
+neon.query.removeFilter = function (filterId, successCallback, errorCallback) {
+    var opts = {
+        contentType: 'text/plain',
+        responseType: 'json',
+        success: successCallback,
+        error: errorCallback
+    };
+
+    neon.util.AjaxUtils.doPost(neon.query.queryUrl_('/services/queryservice/removefilter/' + filterId), opts);
 };
 
 /**
@@ -337,13 +368,21 @@ neon.query.removeFilter = function(filterId, successCallback) {
  * @param {neon.query.Filter || neon.query.FilterProvider} filter The filter (or filter provider) to add. A filter provider can be useful
  * for dynamically creating more complex filters on the server based on subquery results
  * @param {Function} successCallback The callback to fire when the replacement is complete
+ * @param {Function} errorCallback (optional) The optional callback when an error occurs. This is a 3 parameter function that contains the xhr, a short error status and the full error message.
  */
-neon.query.replaceFilter = function(filterId, filter, successCallback) {
+neon.query.replaceFilter = function (filterId, filter, successCallback, errorCallback) {
     var filterProvider = this.wrapFilterInProvider_(filter);
-    neon.util.AjaxUtils.doPostJSON(filterProvider, neon.query.queryUrl_('/services/queryservice/replacefilter/' + filterId), neon.query.wrapCallback_(successCallback, neon.query.wrapperArgsForFilter_(filterProvider.filter)));
+    neon.util.AjaxUtils.doPostJSON(
+        filterProvider,
+        neon.query.queryUrl_('/services/queryservice/replacefilter/' + filterId),
+        {
+            success: neon.query.wrapCallback_(successCallback, neon.query.wrapperArgsForFilter_(filterProvider.filter)),
+            error: errorCallback
+        }
+    );
 };
 
-neon.query.wrapFilterInProvider_ = function(filter) {
+neon.query.wrapFilterInProvider_ = function (filter) {
     return filter instanceof neon.query.FilterProvider ? filter : new neon.query.SimpleFilterProvider(filter);
 };
 
@@ -351,9 +390,16 @@ neon.query.wrapFilterInProvider_ = function(filter) {
  * Removes all filters from the data
  * @method clearFilters
  * @param {Function} successCallback The callback to fire when the filters are cleared
+ * @param {Function} errorCallback (optional) The optional callback when an error occurs. This is a 3 parameter function that contains the xhr, a short error status and the full error message.
  */
-neon.query.clearFilters = function(successCallback) {
-    neon.util.AjaxUtils.doPostJSON(null, neon.query.queryUrl_('/services/queryservice/clearfilters'), successCallback);
+neon.query.clearFilters = function (successCallback, errorCallback) {
+    neon.util.AjaxUtils.doPost(
+        neon.query.queryUrl_('/services/queryservice/clearfilters'),
+        {
+            success: successCallback,
+            error: errorCallback
+        }
+    );
 };
 
 /**
@@ -361,9 +407,17 @@ neon.query.clearFilters = function(successCallback) {
  * @method setSelectionWhere
  * @param {neon.query.Filter} filter The filter to match the items
  * @param {Function} successCallback The callback to execute when selection is completed
+ * @param {Function} errorCallback (optional) The optional callback when an error occurs. This is a 3 parameter function that contains the xhr, a short error status and the full error message.
  */
-neon.query.setSelectionWhere = function(filter, successCallback) {
-neon.util.AjaxUtils.doPostJSON(filter, neon.query.queryUrl_('/services/queryservice/setselectionwhere'), neon.query.wrapCallback_(successCallback,neon.query.wrapperArgsForFilter_(filter)));
+neon.query.setSelectionWhere = function (filter, successCallback, errorCallback) {
+    neon.util.AjaxUtils.doPostJSON(
+        filter,
+        neon.query.queryUrl_('/services/queryservice/setselectionwhere'),
+        {
+            success: neon.query.wrapCallback_(successCallback, neon.query.wrapperArgsForFilter_(filter)),
+            error: errorCallback
+        }
+    );
 };
 
 /**
@@ -371,9 +425,17 @@ neon.util.AjaxUtils.doPostJSON(filter, neon.query.queryUrl_('/services/queryserv
  * @method getSelectionWhere
  * @param {neon.query.Filter} filter The filter to match items
  * @param {Function} successCallback The callback to execute when the selected items have been retrieved
+ * @param {Function} errorCallback (optional) The optional callback when an error occurs. This is a 3 parameter function that contains the xhr, a short error status and the full error message.
  */
-neon.query.getSelectionWhere = function(filter, successCallback) {
-    neon.util.AjaxUtils.doPostJSON(filter, neon.query.queryUrl_('/services/queryservice/getselectionwhere'), neon.query.wrapCallback_(successCallback,neon.query.wrapperArgsForFilter_(filter)));
+neon.query.getSelectionWhere = function (filter, successCallback, errorCallback) {
+    neon.util.AjaxUtils.doPostJSON(
+        filter,
+        neon.query.queryUrl_('/services/queryservice/getselectionwhere'),
+        {
+            success: neon.query.wrapCallback_(successCallback, neon.query.wrapperArgsForFilter_(filter)),
+            error: errorCallback
+        }
+    );
 };
 
 
@@ -382,9 +444,18 @@ neon.query.getSelectionWhere = function(filter, successCallback) {
  * @method setSelectedIds
  * @param {Array} ids An array of ids of items to select
  * @param {Function} successCallback The callback to execute when selection is completed
+ * @param {Function} errorCallback (optional) The optional callback when an error occurs. This is a 3 parameter function that contains the xhr, a short error status and the full error message.
  */
-neon.query.setSelectedIds = function(ids, successCallback) {
-    neon.util.AjaxUtils.doPostJSON(ids, neon.query.queryUrl_('/services/queryservice/setselectedids'), successCallback);
+neon.query.setSelectedIds = function (ids, successCallback, errorCallback) {
+    neon.util.AjaxUtils.doPostJSON(
+        ids,
+        neon.query.queryUrl_('/services/queryservice/setselectedids'),
+        {
+            success: successCallback,
+            error: errorCallback
+        }
+
+    );
 };
 
 /**
@@ -392,9 +463,17 @@ neon.query.setSelectedIds = function(ids, successCallback) {
  * @method addSelectedIds
  * @param {Array} ids An array of ids of items to add to the selection
  * @param {Function} successCallback The callback to execute when selection is completed
+ * @param {Function} errorCallback (optional) The optional callback when an error occurs. This is a 3 parameter function that contains the xhr, a short error status and the full error message.
  */
-neon.query.addSelectedIds = function(ids, successCallback) {
-    neon.util.AjaxUtils.doPostJSON(ids, neon.query.queryUrl_('/services/queryservice/addselectedids'), successCallback);
+neon.query.addSelectedIds = function (ids, successCallback, errorCallback) {
+    neon.util.AjaxUtils.doPostJSON(
+        ids,
+        neon.query.queryUrl_('/services/queryservice/addselectedids'),
+        {
+            success: successCallback,
+            error: errorCallback
+        }
+    );
 };
 
 /**
@@ -402,30 +481,45 @@ neon.query.addSelectedIds = function(ids, successCallback) {
  * @method addSelectedIds
  * @param {Array} ids An array of ids of items to add to the selection
  * @param {Function} successCallback The callback to execute when selection is completed
+ * @param {Function} errorCallback (optional) The optional callback when an error occurs. This is a 3 parameter function that contains the xhr, a short error status and the full error message.
  */
-neon.query.removeSelectedIds = function(ids, successCallback) {
-    neon.util.AjaxUtils.doPostJSON(ids, neon.query.queryUrl_('/services/queryservice/removeselectedids'), successCallback);
+neon.query.removeSelectedIds = function (ids, successCallback, errorCallback) {
+    neon.util.AjaxUtils.doPostJSON(
+        ids,
+        neon.query.queryUrl_('/services/queryservice/removeselectedids'),
+        {
+            success: successCallback,
+            error: errorCallback
+        }
+    );
 };
 
 /**
  * Clears the current selection
  * @method clearSelection
  * @param {Function} successCallback The callback to execute when the selection is cleared
+ * @param {Function} errorCallback (optional) The optional callback when an error occurs. This is a 3 parameter function that contains the xhr, a short error status and the full error message.
  */
-neon.query.clearSelection = function(successCallback) {
-    neon.util.AjaxUtils.doPostJSON(null, neon.query.queryUrl_('/services/queryservice/clearselection'), successCallback);
+neon.query.clearSelection = function (successCallback, errorCallback) {
+    neon.util.AjaxUtils.doPost(
+        neon.query.queryUrl_('/services/queryservice/clearselection'),
+        {
+            success: successCallback,
+            error: errorCallback
+        }
+    );
 };
 
 
-neon.query.wrapperArgsForQuery_= function(query) {
-    return neon.query.wrapperArgsForDataset_(query.filter.dataSourceName,query.filter.datasetId);
+neon.query.wrapperArgsForQuery_ = function (query) {
+    return neon.query.wrapperArgsForDataset_(query.filter.dataSourceName, query.filter.datasetId);
 };
 
-neon.query.wrapperArgsForFilter_= function(filter) {
-    return neon.query.wrapperArgsForDataset_(filter.dataSourceName,filter.datasetId);
+neon.query.wrapperArgsForFilter_ = function (filter) {
+    return neon.query.wrapperArgsForDataset_(filter.dataSourceName, filter.datasetId);
 };
 
-neon.query.wrapperArgsForDataset_= function(dataSourceName,datasetId) {
+neon.query.wrapperArgsForDataset_ = function (dataSourceName, datasetId) {
     var args = {};
     args[this.DATASOURCE_NAME_IDENTIFIER] = dataSourceName;
     args[this.DATASET_ID_IDENTIFIER] = datasetId;
@@ -440,22 +534,22 @@ neon.query.wrapperArgsForDataset_= function(dataSourceName,datasetId) {
  * @method wrapCallback_
  * @private
  */
-neon.query.wrapCallback_ = function(callback, additionalArgs) {
+neon.query.wrapCallback_ = function (callback, additionalArgs) {
 
-    return function() {
+    return function () {
         var newArgs = {};
-        _.extend(newArgs,additionalArgs);
+        _.extend(newArgs, additionalArgs);
         // element 0 is the json array of args to the original callback (if any)
         var args = neon.util.ArrayUtils.argumentsToArray(arguments)[0];
-        if ( args ) {
-            _.extend(newArgs,args);
+        if (args) {
+            _.extend(newArgs, args);
         }
-        callback.call(null,newArgs);
+        callback.call(null, newArgs);
     };
 
 };
 
-neon.query.queryUrl_ = function(path) {
+neon.query.queryUrl_ = function (path) {
     return neon.query.SERVER_URL + path;
 };
 
@@ -465,7 +559,7 @@ neon.query.queryUrl_ = function(path) {
  * @class Filter
  * @constructor
  */
-neon.query.Filter = function() {
+neon.query.Filter = function () {
 
     /*jshint expr: true */
     this.whereClause;
@@ -478,7 +572,7 @@ neon.query.Filter = function() {
  * @param {String} datasetId The dataset to select from
  * @return {neon.query.Filter} This filter object
  */
-neon.query.Filter.prototype.selectFrom = function(dataSourceName, datasetId) {
+neon.query.Filter.prototype.selectFrom = function (dataSourceName, datasetId) {
     this.dataSourceName = dataSourceName;
     this.datasetId = datasetId;
     return this;
@@ -491,8 +585,8 @@ neon.query.Filter.prototype.selectFrom = function(dataSourceName, datasetId) {
  * @method where
  * @return {neon.query.Filter} This filter object
  */
-neon.query.Filter.prototype.where = function() {
-    if ( arguments.length === 3 ) {
+neon.query.Filter.prototype.where = function () {
+    if (arguments.length === 3) {
         this.whereClause = new neon.query.WhereClause(arguments[0], arguments[1], arguments[2]);
     }
     else {
@@ -511,7 +605,7 @@ neon.query.Filter.prototype.where = function() {
  * @constructor
  * @param {neon.query.Filter} filter
  */
-neon.query.FilterProvider = function(filter) {
+neon.query.FilterProvider = function (filter) {
     this.filter = filter;
 };
 
@@ -531,7 +625,7 @@ neon.query.FilterProvider = function(filter) {
  * @param {String} operator The operator to use to compare the field to the results of the subfilter
  * @constructor
  */
-neon.query.SubfilterFieldProvider = function(subfilter, fieldName, operator) {
+neon.query.SubfilterFieldProvider = function (subfilter, fieldName, operator) {
     this.type = 'subfilter';
     this.operator = operator;
     this.fieldName = fieldName;
@@ -553,7 +647,7 @@ neon.query.SubfilterFieldProvider.prototype = new neon.query.FilterProvider();
  * @constructor
  * @private
  */
-neon.query.FieldFunction = function(operation, field, name) {
+neon.query.FieldFunction = function (operation, field, name) {
     this.operation = operation;
     this.field = field;
     this.name = name;
@@ -569,7 +663,7 @@ neon.query.FieldFunction = function(operation, field, name) {
  * @class GroupByFunctionClause
  * @constructor
  */
-neon.query.GroupByFunctionClause = function(operation, field, name) {
+neon.query.GroupByFunctionClause = function (operation, field, name) {
     this.type = 'function';
     neon.query.FieldFunction.call(this, operation, field, name);
 };
@@ -579,17 +673,17 @@ neon.query.GroupByFunctionClause.prototype = new neon.query.FieldFunction();
 
 // These are not meant to be instantiated directly but rather by helper methods
 
-neon.query.GroupBySingleFieldClause = function(field) {
+neon.query.GroupBySingleFieldClause = function (field) {
     this.type = 'single';
     this.field = field;
 };
 
-neon.query.BooleanClause = function(type, whereClauses) {
+neon.query.BooleanClause = function (type, whereClauses) {
     this.type = type;
     this.whereClauses = whereClauses;
 };
 
-neon.query.WhereClause = function(lhs, operator, rhs) {
+neon.query.WhereClause = function (lhs, operator, rhs) {
     this.type = 'where';
     this.lhs = lhs;
     this.operator = operator;
@@ -597,11 +691,11 @@ neon.query.WhereClause = function(lhs, operator, rhs) {
 
 };
 
-neon.query.DistinctClause = function(fieldName) {
+neon.query.DistinctClause = function (fieldName) {
     this.fieldName = fieldName;
 };
 
-neon.query.SortClause = function(fieldName,sortOrder) {
+neon.query.SortClause = function (fieldName, sortOrder) {
     this.fieldName = fieldName;
     this.sortOrder = sortOrder;
 };
@@ -614,7 +708,7 @@ neon.query.SortClause = function(fieldName,sortOrder) {
  * @constructor
  * @private
  */
-neon.query.SimpleFilterProvider = function(filter) {
+neon.query.SimpleFilterProvider = function (filter) {
     this.type = 'simple';
     neon.query.FilterProvider.call(this, filter);
 };

@@ -36,16 +36,13 @@ neon.util.AjaxUtils.ajaxStopCallback_;
 /*jshint expr: false */
 
 /**
- * Asynchronously posts the data to the specified URL
+ * Asynchronously makes a post request to the specified URL
  * @method doPost
- * @param {Object} data The data to post
  * @param {String} url The URL to post the data to
- * @param {String} contentType The type of data being sent (mime-type)
- * @param {String} responseType The type of data expected back
- * @param {Function} successCallback The function to call when the post successfully completes
+ * @param {Object} opts See {{#crossLink "neon.util.AjaxUtils/doAjaxRequest"}}{{/crossLink}}
  */
-neon.util.AjaxUtils.doPost = function (data, url, contentType, responseType, successCallback) {
-    this.doAjaxRequest_('POST', data, url, contentType, responseType, successCallback);
+neon.util.AjaxUtils.doPost = function (url, opts) {
+    this.doAjaxRequest('POST', url, opts);
 };
 
 /**
@@ -54,21 +51,23 @@ neon.util.AjaxUtils.doPost = function (data, url, contentType, responseType, suc
  * @method doPostJSON
  * @param {Object} object The object to post
  * @param {String} url The URL to post to
- * @param {Function} successCallback The function to call when the post successfully completes
+ * @param {Object} opts See {{#crossLink "neon.util.AjaxUtils/doAjaxRequest"}}{{/crossLink}}
  */
-neon.util.AjaxUtils.doPostJSON = function (object, url, successCallback) {
+neon.util.AjaxUtils.doPostJSON = function (object, url, opts) {
     var data = JSON.stringify(object);
-    this.doPost(data, url, 'application/json', 'json', successCallback);
+    var fullOpts = _.extend({}, opts, {data: data, contentType: 'application/json', responseType: 'json'});
+    this.doPost(url, fullOpts);
 };
 
 /**
  * Makes an ajax GET request
  * @method doGet
  * @param {String} url The url to get
- * @param {Function} successCallback The function to call when the GET request completes
+ * @param {Object} opts See {{#crossLink "neon.util.AjaxUtils/doAjaxRequest"}}{{/crossLink}}
+
  */
-neon.util.AjaxUtils.doGet = function (url, successCallback) {
-    this.doAjaxRequest_('GET', null, url, null, null, successCallback);
+neon.util.AjaxUtils.doGet = function (url, opts) {
+    this.doAjaxRequest('GET', url, opts);
 };
 
 /**
@@ -83,29 +82,40 @@ neon.util.AjaxUtils.setStartStopCallbacks = function (requestStart, requestEnd) 
     neon.util.AjaxUtils.ajaxStopCallback_ = requestEnd;
 };
 
-neon.util.AjaxUtils.doAjaxRequest_ = function (type, data, url, contentType, responseType, successCallback) {
+
+/**
+ * Executes the request using an ajax call
+ * @method doAjaxRequest
+ * @param {String} type The type of request, e.g. <code>GET</code> or <code>POST</code>
+ * @param {String} url The url of the request
+ * @param {Object} opts An associative array of options to configure the call
+ * <ul>
+ *  <li>data: Any data to include with the request (typically for POST requests)</li>
+ *  <li>contentType: The mime type of data being sent, such as <code>application/json</code></li>
+ *  <li>responseType: The type of data expected as a return value, such as <code>json</code> or <code>text</code></li>
+ *  <li>success: The callback function to execute on success. It will be passed the return value of the call</li>
+ *  <li>error: The callback function to execute on error. It will have 3 parameters - the xhr, a short error status message and the error message</li>
+ */
+neon.util.AjaxUtils.doAjaxRequest = function (type, url, opts) {
     var params = {};
     params.type = type;
     params.url = url;
-    if (data) {
-        params.data = data;
-    }
-    if (contentType) {
-        params.contentType = contentType;
-    }
-    if (responseType) {
-        params.dataType = responseType;
-    }
-    if (successCallback) {
-        params.success = successCallback;
-    }
-    params.error = function (xhr, status, error) {
-        console.log("error:");
-        console.log(JSON.stringify(xhr));
-        console.log(status);
-        console.log(error);
-    };
 
+    // don't just do a blind copy of params here. we want to restrict what can be used to avoid any jquery specific options.
+    params.data = opts.data;
+    params.contentType = opts.contentType;
+    params.dataType = opts.responseType;
+    params.success = opts.success;
+    params.error = opts.error;
+    // set a default error behavior is none is specified
+    if (!params.error) {
+        params.error = function (xhr, status, error) {
+            console.log("error:");
+            console.log(JSON.stringify(xhr));
+            console.log(status);
+            console.log(error);
+        };
+    }
     $.ajax(params);
 };
 
