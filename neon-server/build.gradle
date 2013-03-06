@@ -283,7 +283,7 @@ def doRunJsTestDriver(jstdConfig, javaExecTask) {
 }
 
 task jsDocs(type: Exec) {
-    description = 'Creates the javascript API documentation. This requires yuidocjs to be installed'
+    description = 'Creates the javascript API documentation. This requires yuidocjs (minimum version 0.3.38) to be installed'
     group = JavaBasePlugin.DOCUMENTATION_GROUP
 
     // replace the tokens in the yuidoc descriptor file
