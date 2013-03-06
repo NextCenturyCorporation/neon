@@ -150,7 +150,7 @@ public class QueryService {
     }
 
     private static def applyTransform(transformClassName, json) {
-        def transform = Class.forName(transformClassName).newInstance()
+        def transform = QueryService.classLoader.loadClass(transformClassName).newInstance()
         return transform.apply(json)
     }
 
