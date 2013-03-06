@@ -30,6 +30,7 @@ neon.namespace('neon.eventing');
 
 
 /**
+ * @class OWFIntentsLauncher
  * @constructor
  */
 neon.eventing.OWFIntentsLauncher = function () {
