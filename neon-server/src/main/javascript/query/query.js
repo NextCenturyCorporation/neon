@@ -539,7 +539,8 @@ neon.query.wrapCallback_ = function (callback, additionalArgs) {
     return function () {
         var newArgs = {};
         _.extend(newArgs, additionalArgs);
-        // element 0 is the json array of args to the original callback (if any)
+        // element 0 is the json array of args to the original callback (if any). if there are no arguments,
+        // this will just return undefined
         var args = neon.util.ArrayUtils.argumentsToArray(arguments)[0];
         if (args) {
             _.extend(newArgs, args);
