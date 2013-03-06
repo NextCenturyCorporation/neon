@@ -26,7 +26,7 @@
     <script src="<%=neonServerUrl%>/js/query/query.js"></script>
     <script src="<%=neonServerUrl%>/js/eventing/channels.js"></script>
     <script src="<%=neonServerUrl%>/js/eventing/messageHandler.js"></script>
-    <script src="<%=neonServerUrl%>/js/query/owfEventPublisher.js"></script>
+    <script src="<%=neonServerUrl%>/js/eventing/owfEventPublisher.js"></script>
 
     <script>
         OWF.relayFile = 'js/eventing/rpc_relay.uncompressed.html';

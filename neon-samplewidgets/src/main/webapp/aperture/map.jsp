@@ -23,7 +23,7 @@
     <script src="<%=neonServerUrl%>/js/query/query.js"></script>
     <script src="<%=neonServerUrl%>/js/eventing/channels.js"></script>
     <script src="<%=neonServerUrl%>/js/eventing/messageHandler.js"></script>
-    <script src="<%=neonServerUrl%>/js/query/owfEventPublisher.js"></script>
+    <script src="<%=neonServerUrl%>/js/eventing/owfEventPublisher.js"></script>
 
     <script src="js/aperture/1.0/lib/proj4js.js"></script>
     <script src="js/aperture/1.0/lib/OpenLayers-textures.js"></script>

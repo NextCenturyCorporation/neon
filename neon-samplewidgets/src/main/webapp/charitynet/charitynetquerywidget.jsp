@@ -23,7 +23,7 @@
     <script src="<%=neonServerUrl%>/js/query/query.js"></script>
     <script src="<%=neonServerUrl%>/js/eventing/channels.js"></script>
     <script src="<%=neonServerUrl%>/js/eventing/messageHandler.js"></script>
-    <script src="<%=neonServerUrl%>/js/query/owfEventPublisher.js"></script>
+    <script src="<%=neonServerUrl%>/js/eventing/owfEventPublisher.js"></script>
     <script src="<%=neonServerUrl%>/js/eventing/owfIntentsLauncher.js"></script>
 
     <script src="js/intents.js"></script>

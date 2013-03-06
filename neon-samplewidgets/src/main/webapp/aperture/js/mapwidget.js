@@ -50,7 +50,7 @@ $(document).ready(function () {
                 filtersChanged: loadData,
                 selectionChanged: redraw
             });
-            owfEventPublisher = new neon.query.OWFEventPublisher(messageHandler);
+            owfEventPublisher = new neon.eventing.OWFEventPublisher(messageHandler);
         }
 
         function initMap() {

@@ -93,7 +93,7 @@ $(document).ready(function () {
                     }
                 }
             });
-            owfEventPublisher = new neon.query.OWFEventPublisher(messageHandler);
+            owfEventPublisher = new neon.eventing.OWFEventPublisher(messageHandler);
         }
 
         function createCharityFilter() {
