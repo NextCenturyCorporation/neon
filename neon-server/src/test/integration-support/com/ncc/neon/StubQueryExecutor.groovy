@@ -74,8 +74,8 @@ class StubQueryExecutor implements QueryExecutor {
     }
 
     @Override
-    String getSelectionWhere(Filter filter) {
-        return ""
+    QueryResult getSelectionWhere(Filter filter) {
+        return new StubQueryResult()
     }
 
 }

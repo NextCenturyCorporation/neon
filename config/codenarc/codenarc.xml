@@ -3,7 +3,9 @@
          xsi:schemaLocation="http://codenarc.org/ruleset/1.0 http://codenarc.org/ruleset-schema.xsd"
          xsi:noNamespaceSchemaLocation="http://codenarc.org/ruleset-schema.xsd">
 
-    <ruleset-ref path='rulesets/basic.xml'/>
+    <ruleset-ref path='rulesets/basic.xml'>
+        <exclude name='ClassForName'/>
+    </ruleset-ref>
     <ruleset-ref path='rulesets/braces.xml'/>
     <ruleset-ref path='rulesets/concurrency.xml'/>
     <ruleset-ref path='rulesets/convention.xml'>
@@ -22,7 +24,7 @@
         <exclude name='DuplicateStringLiteral'/>
     </ruleset-ref>
     <ruleset-ref path='rulesets/exceptions.xml'>
-        <exclude name='ThrowError' />
+        <exclude name='ThrowError'/>
     </ruleset-ref>
     <ruleset-ref path='rulesets/groovyism.xml'/>
     <ruleset-ref path='rulesets/imports.xml'>

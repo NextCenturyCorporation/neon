@@ -3,6 +3,10 @@ package com.ncc.neon.services
 import com.ncc.neon.query.Query
 import com.ncc.neon.query.QueryExecutor
 import com.ncc.neon.query.QueryResult
+import com.ncc.neon.query.filter.Filter
+import com.ncc.neon.query.filter.providers.FilterProvider
+import com.ncc.neon.util.AssertUtils
+import groovy.mock.interceptor.MockFor
 import org.json.JSONObject
 import org.junit.Before
 import org.junit.Test
@@ -55,6 +59,111 @@ class QueryServiceTest {
         assertKeyValue(array,0,"key1","tval1")
         assertKeyValue(array,1,"keyNotTransformed","somethingElse")
         assertKeyValue(array,2,"key3","tval3")
+    }
+
+    @Test
+    void "add filter"() {
+        // arbitrary string (but constant for each test run)
+        def filterId = UUID.fromString("1af29529-86bb-4f2c-9928-7f4484b9cc49")
+        def filter = [] as Filter
+        def filterProvider = [ provideFilter : {filter}] as FilterProvider
+        def queryExecutor = [ addFilter : { f -> assert f.is(filter); filterId }] as QueryExecutor
+        queryService.queryExecutor = queryExecutor
+
+        def filterEvent = queryService.addFilter(filterProvider)
+        AssertUtils.assertEqualCollections([filterId.toString()],filterEvent.addedIds)
+        assert filterEvent.removedIds.isEmpty()
+    }
+
+    @Test
+    void "remove filter"() {
+        // arbitrary string (but constant for each test run)
+        def filterId = UUID.fromString("1af29529-86bb-4f2c-9928-7f4484b9cc49")
+        def queryExecutorMock = new MockFor(QueryExecutor)
+        queryExecutorMock.demand.removeFilter { id -> assert id == filterId }
+        def queryExecutor = queryExecutorMock.proxyInstance()
+        queryService.queryExecutor = queryExecutor
+
+        def event = queryService.removeFilter(filterId.toString())
+        queryExecutorMock.verify(queryExecutor)
+
+        assert event.addedIds.isEmpty()
+        AssertUtils.assertEqualCollections([filterId.toString()],event.removedIds)
+    }
+
+    @Test
+    void "replace filter"() {
+        // arbitrary strings (but constant for each test run)
+        def addId = UUID.fromString("1af29529-86bb-4f2c-9928-7f4484b9cc48")
+        def removeId = UUID.fromString("1af29529-86bb-4f2c-9928-7f4484b9cc49")
+        def filter = [] as Filter
+        def filterProvider = [ provideFilter : {filter}] as FilterProvider
+
+        def queryExecutorMock = new MockFor(QueryExecutor)
+        queryExecutorMock.demand.removeFilter { id -> assert id == removeId }
+        queryExecutorMock.demand.addFilter { f -> assert f.is(filter); addId }
+
+        def queryExecutor = queryExecutorMock.proxyInstance()
+        queryService.queryExecutor = queryExecutor
+
+        def event = queryService.replaceFilter(removeId.toString(),filterProvider)
+        queryExecutorMock.verify(queryExecutor)
+        AssertUtils.assertEqualCollections([addId.toString()],event.addedIds)
+        AssertUtils.assertEqualCollections([removeId.toString()],event.removedIds)
+    }
+
+
+    @Test
+    void "get selection WHERE"() {
+        def inputJson = /[ { "key1" : "val1" }, { "key2": "val2" }]/
+
+        def filter = [] as Filter
+        def queryExecutorMock = createQueryExecutorMockForGetSelection(filter, inputJson)
+        def queryExecutor = queryExecutorMock.proxyInstance()
+        queryService.queryExecutor = queryExecutor
+
+        def result = queryService.getSelectionWhere(filter, null)
+        queryExecutorMock.verify(queryExecutor)
+
+        // in this case the input and output is the same because there is no transform
+        def array = new JSONObject(result).getJSONArray("data")
+        assert array.length() == 2
+        assertKeyValue(array,0,"key1","val1")
+        assertKeyValue(array,1,"key2","val2")
+
+    }
+
+    @Test
+    void "get selection WHERE with transform"() {
+        def inputJson = /[ { "key1" : "val1" }, { "keyNotTransformed": "somethingElse" }, { "key3": "val3" }]/
+
+        def filter = [] as Filter
+        def transform = ValueStringReplaceTransform.name
+        def queryExecutorMock = createQueryExecutorMockForGetSelection(filter, inputJson)
+        def queryExecutor = queryExecutorMock.proxyInstance()
+        queryService.queryExecutor = queryExecutor
+
+        def result = queryService.getSelectionWhere(filter,transform)
+        queryExecutorMock.verify(queryExecutor)
+
+        def array = new JSONObject(result).getJSONArray("data")
+        assert array.length() == 3
+        assertKeyValue(array,0,"key1","tval1")
+        assertKeyValue(array,1,"keyNotTransformed","somethingElse")
+        assertKeyValue(array,2,"key3","tval3")
+    }
+
+    /**
+     * Creates a mock query executor that simulates a getSelectionWhere and returns this json
+     * @param filter
+     * @param inputJson
+     * @return
+     */
+    private def createQueryExecutorMockForGetSelection(filter, inputJson) {
+        def queryExecutorMock = new MockFor(QueryExecutor)
+        def result = [ toJson: {inputJson}] as QueryResult
+        queryExecutorMock.demand.getSelectionWhere { f -> assert f.is(filter); result }
+        return queryExecutorMock
     }
 
     private def executeQuery(inputJson, transform = null) {

@@ -48,10 +48,7 @@ neon.query.Query = function () {
     this.filter = new neon.query.Filter();
 
     /*jshint expr: true */
-
-    // the underscore variables are used privately on the javascript side but not mapped to a field on the server
     this.includeFiltered_ = false;
-    this.transform_;
 
     this.groupByClauses = [];
     this.distinctClause;
@@ -240,7 +237,7 @@ neon.query.Query.prototype.includeFiltered = function (includeFiltered) {
  * @return {neon.query.Query} This query object
  */
 neon.query.Query.prototype.transform = function (transformName) {
-    this.transform_ = transformName;
+    this.filter.transform(transformName);
     return this;
 };
 
@@ -309,8 +306,9 @@ neon.query.getFieldNames = function (dataSourceName, datasetId, successCallback,
  */
 neon.query.executeQuery = function (query, successCallback, errorCallback) {
     var queryParams = 'includefiltered=' + query.includeFiltered_;
-    if (query.transform_) {
-        queryParams += '&transform=' + query.transform_;
+    var filter = query.filter;
+    if (filter && filter.transform_) {
+        queryParams += '&transform=' + filter.transform_;
     }
     neon.util.AjaxUtils.doPostJSON(
         query,
@@ -428,9 +426,13 @@ neon.query.setSelectionWhere = function (filter, successCallback, errorCallback)
  * @param {Function} errorCallback (optional) The optional callback when an error occurs. This is a 3 parameter function that contains the xhr, a short error status and the full error message.
  */
 neon.query.getSelectionWhere = function (filter, successCallback, errorCallback) {
+    var queryParams = '';
+    if (filter.transform_) {
+        queryParams += '?transform=' + filter.transform_;
+    }
     neon.util.AjaxUtils.doPostJSON(
         filter,
-        neon.query.queryUrl_('/services/queryservice/getselectionwhere'),
+        neon.query.queryUrl_('/services/queryservice/getselectionwhere' + queryParams),
         {
             success: neon.query.wrapCallback_(successCallback, neon.query.wrapperArgsForFilter_(filter)),
             error: errorCallback
@@ -540,7 +542,7 @@ neon.query.wrapCallback_ = function (callback, additionalArgs) {
         var newArgs = {};
         _.extend(newArgs, additionalArgs);
         // element 0 is the json array of args to the original callback (if any). if there are no arguments,
-        // this will just return undefined
+        // this will just return undef
         var args = neon.util.ArrayUtils.argumentsToArray(arguments)[0];
         if (args) {
             _.extend(newArgs, args);
@@ -564,6 +566,9 @@ neon.query.Filter = function () {
 
     /*jshint expr: true */
     this.whereClause;
+
+    /** a transform to apply to data matched by this filter */
+    this.transform_;
 };
 
 /**
@@ -596,6 +601,17 @@ neon.query.Filter.prototype.where = function () {
     }
     return this;
 };
+
+/**
+ * Specifies a name of a transform to apply to the json before returning it from the query
+ * @param transformName
+ * @return {neon.query.Filter} This filter object
+ */
+neon.query.Filter.prototype.transform = function (transformName) {
+    this.transform_ = transformName;
+    return this;
+};
+
 
 /**
  * This is the parent class of objects used to create filters to be applied to the data. A filter provider

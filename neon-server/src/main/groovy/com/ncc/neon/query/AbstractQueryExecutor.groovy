@@ -91,7 +91,7 @@ abstract class AbstractQueryExecutor implements QueryExecutor {
     }
 
     @Override
-    def getSelectionWhere(Filter filter) {
+    QueryResult getSelectionWhere(Filter filter) {
         return executeQuery(QueryUtils.queryFromFilter(filter), this.&createWhereClauseForSelectedItems)
     }
 

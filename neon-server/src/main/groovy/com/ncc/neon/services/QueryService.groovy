@@ -56,7 +56,7 @@ public class QueryService {
     @Produces(MediaType.APPLICATION_JSON)
     @Path("addfilter")
     public FilterEvent addFilter(FilterProvider filterProvider) {
-        if ( filterProvider instanceof QueryBased ) {
+        if (filterProvider instanceof QueryBased) {
             filterProvider.queryExecutor = queryExecutor
         }
         def filter = filterProvider.provideFilter()
@@ -108,8 +108,9 @@ public class QueryService {
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     @Path("getselectionwhere")
-    public String getSelectionWhere(Filter filter) {
-        return wrapInDataJson(queryExecutor.getSelectionWhere(filter))
+    public String getSelectionWhere(Filter filter,
+                                    @QueryParam("transform") String transformClassName) {
+        return wrapInDataJson(queryExecutor.getSelectionWhere(filter), transformClassName)
     }
 
     @POST
@@ -141,7 +142,7 @@ public class QueryService {
 
     private def wrapInDataJson(queryResult, transformClassName = null) {
         def json = queryResult.toJson()
-        if ( transformClassName ) {
+        if (transformClassName) {
             json = applyTransform(transformClassName, json)
         }
         def output = '{"data":' + json + '}'
@@ -149,7 +150,7 @@ public class QueryService {
     }
 
     private static def applyTransform(transformClassName, json) {
-        def transform = ClassLoader.systemClassLoader.loadClass(transformClassName).newInstance()
+        def transform = Class.forName(transformClassName).newInstance()
         return transform.apply(json)
     }
 

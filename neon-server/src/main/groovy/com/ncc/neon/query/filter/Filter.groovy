@@ -2,6 +2,7 @@ package com.ncc.neon.query.filter
 
 import com.ncc.neon.query.clauses.WhereClause
 import groovy.transform.ToString
+import org.codehaus.jackson.annotate.JsonIgnoreProperties
 
 /*
  * ************************************************************************
@@ -30,6 +31,7 @@ import groovy.transform.ToString
  * A filter specifies which data to select from a datastore
  */
 @ToString
+@JsonIgnoreProperties(value = ['transform_'])
 class Filter implements Serializable {
 
     private static final long serialVersionUID = 7238913369114626126L

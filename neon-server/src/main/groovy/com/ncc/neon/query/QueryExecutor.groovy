@@ -100,6 +100,6 @@ public interface QueryExecutor {
      * @param filter
      * @return
      */
-    def getSelectionWhere(Filter filter);
+    QueryResult getSelectionWhere(Filter filter);
 
 }
