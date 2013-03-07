@@ -70,6 +70,18 @@ class FilterStateTest {
         verifyFilters(dataSourceName1, datasetId1, [])
     }
 
+    @Test
+    void "clear filters"() {
+        def dataSourceName = "dataSource1"
+        def datasetId = "dataset1"
+        def filter1 = new Filter(dataSourceName:  dataSourceName, datasetId: datasetId)
+        def filter2 = new Filter(dataSourceName:  dataSourceName, datasetId: datasetId)
+        filterState.addFilter(filter1);
+        filterState.addFilter(filter2);
+        filterState.clearFilters()
+        verifyFilters(dataSourceName, datasetId, [])
+    }
+
     private def verifyFilters(dataSourceName,datasetId,expected) {
         def actual =  filterState.getFiltersForDataset(dataSourceName,datasetId)
         AssertUtils.assertEqualCollections(expected,actual)

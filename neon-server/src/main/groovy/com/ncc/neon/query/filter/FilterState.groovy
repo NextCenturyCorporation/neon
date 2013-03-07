@@ -45,6 +45,7 @@ class FilterState implements Serializable {
      */
     def clearFilters() {
         filtersById.clear()
+        filtersByDataSource.clear()
     }
 
     /**
