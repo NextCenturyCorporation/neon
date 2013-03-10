@@ -13,6 +13,8 @@ sourceCompatibility = 1.7
 
 // task groupings we add
 def TEST_GROUP = JavaBasePlugin.VERIFICATION_GROUP
+def springVersion = "3.2.1.RELEASE"
+
 
 // properties defined in here are available in tasks and helper methods as
 // properties of the project
@@ -67,7 +69,7 @@ dependencies {
     compile 'com.sun.jersey:jersey-json:1.15'
     compile 'com.sun.jersey.contribs:jersey-spring:1.15'
     compile 'org.mongodb:mongo-java-driver:2.10.1'
-    compile 'org.springframework:spring-webmvc:3.2.0.RELEASE'
+    compile "org.springframework:spring-web:$springVersion"
     compile 'joda-time:joda-time:2.1'
     compile 'org.slf4j:slf4j-api:1.7.2'
     compile 'ch.qos.logback:logback-core:1.0.9'
@@ -83,6 +85,7 @@ dependencies {
     testCompile 'junit:junit:4.11'
     testCompile 'commons-collections:commons-collections:3.2.1'
     testCompile 'org.json:json:20090211'
+    testCompile "org.springframework:spring-test:$springVersion"
 
 }
 

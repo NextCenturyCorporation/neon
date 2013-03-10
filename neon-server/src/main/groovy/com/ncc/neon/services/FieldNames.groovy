@@ -1,7 +1,4 @@
-package com.ncc.neon.query.mongo
-
-import com.mongodb.util.ObjectSerializer
-import com.ncc.neon.util.DateUtils
+package com.ncc.neon.services
 
 /*
  * ************************************************************************
@@ -25,18 +22,12 @@ import com.ncc.neon.util.DateUtils
  * OF NEXT CENTURY CORPORATION EXCEPT BY PRIOR WRITTEN PERMISSION AND WHEN
  * RECIPIENT IS UNDER OBLIGATION TO MAINTAIN SECRECY.
  */
-class SimpleDateSerializer implements ObjectSerializer {
 
-    @Override
-    void serialize(Object obj, StringBuilder buf) {
-        def isoDateString = DateUtils.toISO8601String(obj)
-        buf.append("\"").append(isoDateString).append("\"")
-    }
+/**
+ * A wrapper around a list of fields. This is used as the return type for the field names in the query service.
+ */
+class FieldNames {
 
-    @Override
-    String serialize(Object obj) {
-        def builder = new StringBuilder()
-        serialize(obj, builder)
-        return builder.toString()
-    }
+    Collection<String> fieldNames
+
 }

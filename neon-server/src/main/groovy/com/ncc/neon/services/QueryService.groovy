@@ -36,7 +36,7 @@ import javax.ws.rs.core.MediaType
 
 @Component
 @Path("/queryservice")
-public class QueryService {
+class QueryService {
 
     @Autowired
     QueryExecutor queryExecutor
@@ -45,7 +45,7 @@ public class QueryService {
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     @Path("query")
-    public String executeQuery(Query query,
+    String executeQuery(Query query,
                                @DefaultValue("false") @QueryParam("includefiltered") boolean includeFiltered,
                                @QueryParam("transform") String transformClassName) {
         return wrapInDataJson(queryExecutor.execute(query, includeFiltered), transformClassName)
@@ -55,7 +55,7 @@ public class QueryService {
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     @Path("addfilter")
-    public FilterEvent addFilter(FilterProvider filterProvider) {
+    FilterEvent addFilter(FilterProvider filterProvider) {
         if (filterProvider instanceof QueryBased) {
             filterProvider.queryExecutor = queryExecutor
         }
@@ -68,7 +68,7 @@ public class QueryService {
     @Consumes(MediaType.TEXT_PLAIN)
     @Produces(MediaType.APPLICATION_JSON)
     @Path("removefilter/{id}")
-    public FilterEvent removeFilter(@PathParam("id") String filterId) {
+    FilterEvent removeFilter(@PathParam("id") String filterId) {
         UUID uuid = UUID.fromString(filterId)
         queryExecutor.removeFilter(uuid)
         return new FilterEvent(removedIds: [filterId])
@@ -78,7 +78,7 @@ public class QueryService {
     @Path("replacefilter/{id}")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-    public FilterEvent replaceFilter(@PathParam("id") String replaceId, FilterProvider replaceWith) {
+    FilterEvent replaceFilter(@PathParam("id") String replaceId, FilterProvider replaceWith) {
         queryExecutor.removeFilter(UUID.fromString(replaceId))
         def addEvent = addFilter(replaceWith)
         return new FilterEvent(addedIds: addEvent.addedIds, removedIds: [replaceId])
@@ -86,21 +86,21 @@ public class QueryService {
 
     @POST
     @Path("clearfilters")
-    public void clearFilters() {
+    void clearFilters() {
         queryExecutor.clearFilters()
     }
 
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
     @Path("setselectionwhere")
-    public void setSelectionWhere(Filter filter) {
+    void setSelectionWhere(Filter filter) {
         queryExecutor.setSelectionWhere(filter)
     }
 
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
     @Path("setselectedids")
-    public void setSelectedIds(Collection<Object> ids) {
+    void setSelectedIds(Collection<Object> ids) {
         queryExecutor.setSelectedIds(ids)
     }
 
@@ -108,7 +108,7 @@ public class QueryService {
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     @Path("getselectionwhere")
-    public String getSelectionWhere(Filter filter,
+    String getSelectionWhere(Filter filter,
                                     @QueryParam("transform") String transformClassName) {
         return wrapInDataJson(queryExecutor.getSelectionWhere(filter), transformClassName)
     }
@@ -116,28 +116,29 @@ public class QueryService {
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
     @Path("addselectedids")
-    public void addSelectedIds(Collection<Object> ids) {
+    void addSelectedIds(Collection<Object> ids) {
         queryExecutor.addSelectedIds(ids)
     }
 
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
     @Path("removeselectedids")
-    public void removeSelectedIds(Collection<Object> ids) {
+    void removeSelectedIds(Collection<Object> ids) {
         queryExecutor.removeSelectedIds(ids)
     }
 
     @POST
     @Path("clearselection")
-    public void clearSelection() {
+    void clearSelection() {
         queryExecutor.clearSelection()
     }
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     @Path("fieldnames")
-    public String getFieldNames(@QueryParam("datasourcename") String dataSourceName, @QueryParam("datasetid") String datasetId) {
-        return '{"fieldNames":' + queryExecutor.getFieldNames(dataSourceName, datasetId) + '}'
+    FieldNames getFieldNames(@QueryParam("datasourcename") String dataSourceName, @QueryParam("datasetid") String datasetId) {
+        def fieldNames = queryExecutor.getFieldNames(dataSourceName,datasetId)
+        return new FieldNames(fieldNames:fieldNames)
     }
 
     private def wrapInDataJson(queryResult, transformClassName = null) {

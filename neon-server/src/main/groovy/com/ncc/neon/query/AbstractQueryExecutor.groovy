@@ -103,7 +103,7 @@ abstract class AbstractQueryExecutor implements QueryExecutor {
      * @param includeFiltered If true, global filters are not applied to the query. This is optional and defaults to false.
      * @return
      */
-    QueryResult executeQuery(query, additionalWhereClauseGenerator = null, includeFiltered = false) {
+    private QueryResult executeQuery(query, additionalWhereClauseGenerator = null, includeFiltered = false) {
         // construct the query in a way that is specific to this query executor
         def builderResult = buildQuery(query, additionalWhereClauseGenerator, includeFiltered)
         return doExecuteQuery(builderResult)

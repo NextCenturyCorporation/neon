@@ -114,11 +114,11 @@ class MongoQueryExecutor extends AbstractQueryExecutor {
     }
 
     @Override
-    public String getFieldNames(String dataSourceName, String datasetId) {
+    public Collection<String> getFieldNames(String dataSourceName, String datasetId) {
         def db = mongo.getDB(dataSourceName)
         def collection = db.getCollection(datasetId)
         def result = collection.findOne()
-        return MongoUtils.serialize(result.keySet())
+        return result.keySet()
     }
 
     @Override

@@ -1,7 +1,8 @@
-package com.ncc.neon.query.mongo
+package com.ncc.neon.util
 
-import com.mongodb.util.ObjectSerializer
-import com.ncc.neon.util.DateUtils
+import org.junit.Test
+
+import java.text.SimpleDateFormat
 
 /*
  * ************************************************************************
@@ -25,18 +26,24 @@ import com.ncc.neon.util.DateUtils
  * OF NEXT CENTURY CORPORATION EXCEPT BY PRIOR WRITTEN PERMISSION AND WHEN
  * RECIPIENT IS UNDER OBLIGATION TO MAINTAIN SECRECY.
  */
-class SimpleDateSerializer implements ObjectSerializer {
+class DateUtilsTest {
 
-    @Override
-    void serialize(Object obj, StringBuilder buf) {
-        def isoDateString = DateUtils.toISO8601String(obj)
-        buf.append("\"").append(isoDateString).append("\"")
+    /** an arbitrary date to use for this test */
+    private static final def DATE = new SimpleDateFormat('MMM dd, yyyy hh:mmaa Z', Locale.US).parse('Apr 15, 2012 03:30PM -0100')
+
+    /** the ISO-8601 representation of {@link #DATE} */
+    private static final def ISO8601_DATE_STRING = "2012-04-15T16:30:00Z"
+
+    @Test
+    void "create date from ISO8601 string"() {
+        def date = DateUtils.fromISO8601String(ISO8601_DATE_STRING)
+        assert date == DATE
     }
 
-    @Override
-    String serialize(Object obj) {
-        def builder = new StringBuilder()
-        serialize(obj, builder)
-        return builder.toString()
+    @Test
+    void "convert ISO8601 string to date"() {
+        def iso860String = DateUtils.toISO8601String(DATE)
+        assert iso860String == ISO8601_DATE_STRING
     }
+
 }

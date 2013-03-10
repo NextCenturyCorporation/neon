@@ -1,7 +1,8 @@
-package com.ncc.neon.query.mongo
+package com.ncc.neon.util
 
-import com.mongodb.util.ObjectSerializer
-import com.ncc.neon.util.DateUtils
+import org.joda.time.DateTime
+import org.joda.time.DateTimeZone
+import org.joda.time.format.ISODateTimeFormat
 
 /*
  * ************************************************************************
@@ -25,18 +26,24 @@ import com.ncc.neon.util.DateUtils
  * OF NEXT CENTURY CORPORATION EXCEPT BY PRIOR WRITTEN PERMISSION AND WHEN
  * RECIPIENT IS UNDER OBLIGATION TO MAINTAIN SECRECY.
  */
-class SimpleDateSerializer implements ObjectSerializer {
+class DateUtils {
 
-    @Override
-    void serialize(Object obj, StringBuilder buf) {
-        def isoDateString = DateUtils.toISO8601String(obj)
-        buf.append("\"").append(isoDateString).append("\"")
+    private static final def DATE_FORMAT = ISODateTimeFormat.dateTimeNoMillis()
+
+    /**
+     * Converts a date from a string ISO-8601 format to a date object
+     * @param iso8601DateString
+     */
+    static def fromISO8601String(iso8601DateString) {
+        return DATE_FORMAT.parseDateTime(iso8601DateString).toDate()
     }
 
-    @Override
-    String serialize(Object obj) {
-        def builder = new StringBuilder()
-        serialize(obj, builder)
-        return builder.toString()
+    /**
+     * Converts a date to an ISO-8601 formatted string
+     * @param date
+     */
+    static def toISO8601String(def date) {
+        return DATE_FORMAT.print(new DateTime(date).withZone(DateTimeZone.UTC))
     }
+
 }

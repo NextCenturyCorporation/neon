@@ -36,8 +36,8 @@ class StubQueryExecutor implements QueryExecutor {
     }
 
     @Override
-    String getFieldNames(String dataSourceName, String datasetId) {
-        return "{}"
+    Collection<String> getFieldNames(String dataSourceName, String datasetId) {
+        return []
     }
 
     @Override
