@@ -45,9 +45,6 @@ repositories {
 sourceSets {
     // contains the server integration tests
     integrationTest {
-        groovy {
-            srcDir 'src/integrationTest'
-        }
         compileClasspath += sourceSets.main.compileClasspath + sourceSets.main.output + sourceSets.test.compileClasspath + sourceSets.test.output
         runtimeClasspath += sourceSets.main.runtimeClasspath + sourceSets.main.output + sourceSets.test.runtimeClasspath + sourceSets.test.output
     }
@@ -271,36 +268,17 @@ task jsTestDriverIntegrationTest(type: JavaExec) {
 }
 
 task deployJsIntegrationTest(type: org.gradle.api.plugins.jetty.JettyRun) {
+    dependsOn 'compileIntegrationTestGroovy'
     group = TEST_GROUP
     description = 'Deploys the integration tests to an embedded jetty server'
     daemon = true
     def webXmlFile = new File(sourceSets.integrationTest.output.classesDir, 'web-jetty.xml')
+    jettyConfig = new File(sourceSets.integrationTest.output.resourcesDir, 'jetty-clientmapping-integrationtest.xml')
     doFirst {
         JettyCORSFilterAdder.rewriteWebXml(new File(projectDir, 'src/main/webapp/WEB-INF/web.xml').absolutePath, webXmlFile.path)
-        setSpringProfile(webXmlFile,"clientmapping-integrationtest")
     }
     webXml = webXmlFile
     classpath += sourceSets.integrationTest.output
-}
-
-/**
- * Modifies the web xml file to activate the specified spring profile
- * @param webXmlFile The web xml file to modify
- * @param profileName The name of the spring profile to set as active
- * @return
- */
-def setSpringProfile(webXmlFile, profileName) {
-    // use double quotes instead of the more readble triple quotes because we do string interpolation
-    def profileXml ="<init-param><param-name>spring.profiles.active</param-name><param-value>${profileName}</param-value></init-param>"
-    def profile = new XmlSlurper(false, false).parseText(profileXml)
-
-    def root = new XmlSlurper(false, false).parse(webXmlFile)
-    def servlet = root.servlet
-    servlet.appendNode(profile)
-    def newXml = groovy.xml.XmlUtil.serialize(root)
-
-    webXmlFile.delete();
-    webXmlFile << newXml;
 }
 
 /**

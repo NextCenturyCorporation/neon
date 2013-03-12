@@ -1,0 +1,8 @@
+<?xml version="1.0"?>
+<!DOCTYPE Configure PUBLIC "-//Mort Bay Consulting//DTD Configure//EN" "http://jetty.mortbay.org/configure.dtd">
+<Configure id="Server" class="org.mortbay.jetty.Server">
+    <Call class="java.lang.System" name="setProperty">
+        <Arg>spring.profiles.active</Arg>
+        <Arg>clientmapping-integrationtest</Arg>
+    </Call>
+</Configure>
