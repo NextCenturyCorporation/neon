@@ -1,6 +1,6 @@
-package com.ncc.neon
+package com.ncc.neon.clientmapping
 
-import com.ncc.neon.query.QueryResult
+import javax.servlet.*
 
 /*
  * ************************************************************************
@@ -24,20 +24,27 @@ import com.ncc.neon.query.QueryResult
  * OF NEXT CENTURY CORPORATION EXCEPT BY PRIOR WRITTEN PERMISSION AND WHEN
  * RECIPIENT IS UNDER OBLIGATION TO MAINTAIN SECRECY.
  */
-class StubQueryResult implements QueryResult {
+
+/**
+ * This servlet filter accepts all cross-domain ajax requests. It allows the
+ * jstestdriver server to communicate with the server used for running integration tests
+ */
+class AcceptAllRequestsServletFilter implements Filter {
 
     @Override
-    def getFieldValue(field) {
-        return ""
+    void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException, ServletException {
+        response.addHeader('Access-Control-Allow-Origin','*');
+        response.addHeader('Access-Control-Allow-Methods','POST,GET,OPTIONS');
+        response.addHeader('Access-Control-Allow-Headers', 'Origin,Content-Type,Accept');
+
+        chain.doFilter(request,response)
     }
 
     @Override
-    String toJson() {
-        return "{}"
+    void init(FilterConfig filterConfig) throws ServletException {
     }
 
     @Override
-    Iterator iterator() {
-        return [ hasNext : {false} ] as Iterator
+    void destroy() {
     }
 }

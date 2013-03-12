@@ -1,4 +1,6 @@
-package com.ncc.neon
+package com.ncc.neon.clientmapping
+
+import com.ncc.neon.query.QueryResult
 
 /*
  * ************************************************************************
@@ -22,42 +24,20 @@ package com.ncc.neon
  * OF NEXT CENTURY CORPORATION EXCEPT BY PRIOR WRITTEN PERMISSION AND WHEN
  * RECIPIENT IS UNDER OBLIGATION TO MAINTAIN SECRECY.
  */
+class StubQueryResult implements QueryResult {
 
-/**
- * Appends a filter to an existing web.xml that allows cross domain requests on jetty
- */
-class JettyCORSFilterAdder {
-
-
-    private static final def FILTER_XML = '''
- <filter>
-   <filter-name>accept-all</filter-name>
-   <filter-class>com.ncc.neon.clientmapping.AcceptAllRequestsServletFilter</filter-class>
- </filter>
- '''
-    private static final def FILTER_MAPPING_XML = '''
-<filter-mapping>
-    <filter-name>accept-all</filter-name>
-    <url-pattern>/*</url-pattern>
-</filter-mapping>
-'''
-
-
-
-    static def rewriteWebXml(inputFile, outputFile) {
-        def filter = new XmlSlurper(false, false).parseText(FILTER_XML)
-        def filterMapping = new XmlSlurper(false, false).parseText(FILTER_MAPPING_XML)
-        def root = new XmlSlurper(false, false).parse(new File(inputFile))
-        root.appendNode(filter)
-        root.appendNode(filterMapping)
-
-        def newXml = groovy.xml.XmlUtil.serialize(root)
-
-        def out = new File(outputFile);
-        out.delete();
-        out << newXml;
+    @Override
+    def getFieldValue(field) {
+        return ""
     }
 
+    @Override
+    String toJson() {
+        return "{}"
+    }
+
+    @Override
+    Iterator iterator() {
+        return [ hasNext : {false} ] as Iterator
+    }
 }
-
-

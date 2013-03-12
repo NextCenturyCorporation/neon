@@ -15,12 +15,12 @@ sourceCompatibility = 1.7
 def TEST_GROUP = JavaBasePlugin.VERIFICATION_GROUP
 def springVersion = "3.2.1.RELEASE"
 
-
 // properties defined in here are available in tasks and helper methods as
 // properties of the project
 project.ext {
-    jsSrcDir ="src/main/javascript"
-    jsTestDir = "src/test/javascript"
+    jsSrcDir = "src/main/javascript"
+    jsUnitTestDir = "src/test/javascript"
+    jsIntegrationTestDir = "src/integrationTest/javascript"
     jsdocDir = "${project.docsDir}/jsdocs"
     javadocDir = "${project.docsDir}/javadocs"
     testResultsDir = "${buildDir}/test-results"
@@ -43,20 +43,20 @@ repositories {
 }
 
 sourceSets {
-    // the integrationSupport source set has files that are used to help with
-    // integration testing (such as stub implementations, bean configurations, etc)
-    integrationSupport {
+    // contains the server integration tests
+    integrationTest {
         groovy {
-            srcDir 'src/test/integration-support'
+            srcDir 'src/integrationTest'
         }
-        compileClasspath += sourceSets.main.compileClasspath + sourceSets.main.output
-        runtimeClasspath += sourceSets.main.runtimeClasspath + sourceSets.main.output
+        compileClasspath += sourceSets.main.compileClasspath + sourceSets.main.output + sourceSets.test.compileClasspath + sourceSets.test.output
+        runtimeClasspath += sourceSets.main.runtimeClasspath + sourceSets.main.output + sourceSets.test.runtimeClasspath + sourceSets.test.output
     }
 }
 
 configurations {
-    integrationSupportCompile { extendsFrom testCompile }
-    integrationSupportRuntime { extendsFrom integrationSupportCompile, testRuntime }
+    integrationTestCompile { extendsFrom testCompile }
+    integrationTestRuntime { extendsFrom integrationTestCompile, testRuntime }
+
 }
 
 dependencies {
@@ -80,7 +80,7 @@ dependencies {
 
     runtime 'cglib:cglib:2.2.2'
 
-    integrationSupportCompile 'org.eclipse.jetty:jetty-servlets:8.1.8.v20121106'
+    integrationTestCompile 'org.eclipse.jetty:jetty-servlets:8.1.8.v20121106'
 
     testCompile 'junit:junit:4.11'
     testCompile 'commons-collections:commons-collections:3.2.1'
@@ -93,7 +93,7 @@ dependencies {
 sourceSets.each { sourceSet ->
     def name = sourceSet.name
     // this set should only have one element for each source set
-    def codenarcTasks = project.getTasksByName("codenarc${name.capitalize()}",false)
+    def codenarcTasks = project.getTasksByName("codenarc${name.capitalize()}", false)
     codenarcTasks.each { task ->
         task.reports.xml.enabled = true
         task.reports.html.enabled = true
@@ -107,7 +107,7 @@ jdepend {
 jdependMain.doLast {
     File file = new File(jdepend.reportsDir, "main.xml");
     def cycleCount = new XmlSlurper().parse(file).Cycles.Package.size()
-    if ( cycleCount > 0 ) {
+    if (cycleCount > 0) {
         throw new GradleException("Package cycles exist. See JDepend report at ${file}")
     }
 }
@@ -116,13 +116,19 @@ war {
     dependsOn 'jshint'
     dependsOn 'combineJs'
     dependsOn 'check'
-    if ( isNoBrowserTest() ) {
-        dependsOn 'jsJasmineUnitTest'
-    }
-    else {
+    // when integration tests are being run, use the same jstestdriver environment to run the unit tests and fall
+    // back to the raw jasmine tests only when needed
+    if (isRunJavascriptIntegrationTests()) {
         dependsOn 'jsTestDriverUnitTest'
         dependsOn 'jsTestDriverIntegrationTest'
+    } else {
+        dependsOn 'jsJasmineUnitTest'
     }
+
+    if (isRunIntegrationTests()) {
+        dependsOn 'integrationTests'
+    }
+
     // copy the compiled library and the individual files so we can use either one.
     // TODO: once we have the javascript build a little more solidified, we may not need the individual files, just the combined
     from("${buildDir}/${libraryName}.js") {
@@ -137,8 +143,26 @@ war {
 }
 
 
-def isNoBrowserTest() {
-    "true" == System.properties['noBrowser']
+def isRunJavascriptIntegrationTests() {
+    return hasProperty('jsIntegrationTest') || hasProperty('allTests')
+}
+
+def isRunIntegrationTests() {
+    return hasProperty('integrationTest') || hasProperty('allTests')
+}
+
+task integrationTests(type: Test) {
+    testClassesDir = sourceSets.integrationTest.output.classesDir
+    classpath = sourceSets.integrationTest.runtimeClasspath
+
+    def props = [:]
+    def mongoHostProperty = 'integrationTest.mongo.host'
+    if (project.hasProperty(mongoHostProperty)) {
+        props[mongoHostProperty] = project.properties[mongoHostProperty]
+    }
+    props['spring.profiles.active'] = 'mongo-integrationtest'
+    systemProperties props
+
 }
 
 combineJs {
@@ -167,7 +191,7 @@ task jsJasmineUnitTest(type: BrowserEvaluate) {
     dependsOn 'createJasmineUnitSpecRunnerHtml'
     group = TEST_GROUP
     description = 'Runs the Jasmine unit test suite'
-    doRunJasmine(jsJasmineUnitTest,'unit')
+    doRunJasmine(jsJasmineUnitTest, 'unit')
 }
 
 /**
@@ -178,7 +202,7 @@ task jsJasmineUnitTest(type: BrowserEvaluate) {
  * and to determine which JsTestDriver config file to create the spec file
  * from
  */
-def doRunJasmine(task,type) {
+def doRunJasmine(task, type) {
     def filename = "SpecRunner-${type}.html"
     task.content 'src'
     task.resource "test/javascript/${filename}"
@@ -199,34 +223,31 @@ def doRunJasmine(task,type) {
 task createJasmineUnitSpecRunnerHtml << {
     description = 'Creates the jasmine spec runner html file based on the jstestdriver config for unit tests'
     group = TEST_GROUP
-    doCreateJasmineSpecRunnerHtml('jstd-unit.conf','unit')
+    doCreateJasmineSpecRunnerHtml()
 }
 
 /**
  * Creates a jasmine test html file based on the js test driver configuration.
  * This task copies it to the same directory as the spec runner template.
- * @param jsTestDriverConf The JSTestDriver spec to create the jasmine tests from
- * @param type A descriptor of the test type (e.g. unit, integration). This is used
- * as part of the spec runner file
  */
-def doCreateJasmineSpecRunnerHtml(jsTestDriverConf,type) {
+def doCreateJasmineSpecRunnerHtml() {
     def templateFile = 'SpecRunner.template.html'
     def scriptIncludes = new StringBuilder()
     def parser = new JsTestDriverConfigParser()
-    parser.parseJsTestDriverConfig(projectDir, jsTestDir, jsTestDriverConf, ['lib/jasmine-jstd/JasmineAdapter.js'] as Set)
+    parser.parseJsTestDriverConfig(projectDir, jsUnitTestDir, "jsTestDriver.conf", ['../../js-test-support/lib/jasmine-jstd/JasmineAdapter.js'] as Set)
 
     parser.matchingFiles.each { scriptIncludes.append('  <script src="').append(it).append('"></script>').append(System.properties['line.separator']) }
-    def specRunnerOut = templateFile.replace('.template', "-$type")
-    new File(jsTestDir, specRunnerOut).delete()
+    def specRunnerOut = templateFile.replace('.template', "-unit")
+    new File(jsUnitTestDir, specRunnerOut).delete()
     copy {
-        from(jsTestDir) {
+        from(jsUnitTestDir) {
             filter(ReplaceTokens, tokens: [
                     includes: scriptIncludes.toString(),
                     outputDir: testResultsDir.toString()
             ])
             include(templateFile)
         }
-        into jsTestDir
+        into jsUnitTestDir
         rename { String filename ->
             // only one file, so just return the new name
             specRunnerOut
@@ -238,37 +259,57 @@ task jsTestDriverUnitTest(type: JavaExec) {
     description = 'Runs the javascript unit tests using JSTestDriver. The JsTestDriver server must be started with browsers captured.'
     group = TEST_GROUP
 
-    doRunJsTestDriver('jstd-unit.conf',jsTestDriverUnitTest);
+    doRunJsTestDriver(jsUnitTestDir, jsTestDriverUnitTest);
 }
 
 task jsTestDriverIntegrationTest(type: JavaExec) {
     description = 'Runs the javascript integration tests using JSTestDriver. The JsTestDriver server must be started with browsers captured.'
     group = TEST_GROUP
-    System.setProperty('spring.profiles.active','integration-test')
     dependsOn 'deployJsIntegrationTest'
 
-    doRunJsTestDriver('jstd-integration.conf',jsTestDriverIntegrationTest);
+    doRunJsTestDriver(jsIntegrationTestDir, jsTestDriverIntegrationTest);
 }
 
 task deployJsIntegrationTest(type: org.gradle.api.plugins.jetty.JettyRun) {
     group = TEST_GROUP
     description = 'Deploys the integration tests to an embedded jetty server'
     daemon = true
-    def webXmlFile =new File(sourceSets.integrationSupport.output.classesDir,'web-jetty.xml')
+    def webXmlFile = new File(sourceSets.integrationTest.output.classesDir, 'web-jetty.xml')
     doFirst {
         JettyCORSFilterAdder.rewriteWebXml(new File(projectDir, 'src/main/webapp/WEB-INF/web.xml').absolutePath, webXmlFile.path)
+        setSpringProfile(webXmlFile,"clientmapping-integrationtest")
     }
     webXml = webXmlFile
-    classpath += sourceSets.integrationSupport.output
+    classpath += sourceSets.integrationTest.output
+}
+
+/**
+ * Modifies the web xml file to activate the specified spring profile
+ * @param webXmlFile The web xml file to modify
+ * @param profileName The name of the spring profile to set as active
+ * @return
+ */
+def setSpringProfile(webXmlFile, profileName) {
+    // use double quotes instead of the more readble triple quotes because we do string interpolation
+    def profileXml ="<init-param><param-name>spring.profiles.active</param-name><param-value>${profileName}</param-value></init-param>"
+    def profile = new XmlSlurper(false, false).parseText(profileXml)
+
+    def root = new XmlSlurper(false, false).parse(webXmlFile)
+    def servlet = root.servlet
+    servlet.appendNode(profile)
+    def newXml = groovy.xml.XmlUtil.serialize(root)
+
+    webXmlFile.delete();
+    webXmlFile << newXml;
 }
 
 /**
  * A helper method to run configure a JavaExec task to run JsTestDriver on
  * the specified test driver config file.
- * @param jstdConfig The JsTestDriver configuration file
+ * @param jsTestDir The directory containing the jstd config file
  * @param javaExecTask The task to configure
  */
-def doRunJsTestDriver(jstdConfig, javaExecTask) {
+def doRunJsTestDriver(jsTestDir, javaExecTask) {
     javaExecTask.doFirst {
         ensureTestResultsDirExists()
     }
@@ -277,7 +318,7 @@ def doRunJsTestDriver(jstdConfig, javaExecTask) {
             new File(projectDir, "../scripts/jstd/JsTestDriver-1.3.5.jar").absolutePath,
             '--reset',
             '--tests', 'all',
-            '--config', "${jsTestDir}/${jstdConfig}",
+            '--config', "${jsTestDir}/jsTestDriver.conf",
             '--verbose',
             '--testOutput', testResultsDir,
             '--raiseOnFailure', true
@@ -325,7 +366,7 @@ task jsDocs(type: Exec) {
 task copyJsDocs(type: Copy) {
     description = 'Copies the javascript documentation to a directory to be zipped'
     dependsOn 'jsDocs'
-    doCopyDocsIntoZipDir('javascript-api-docs',copyJsDocs,jsdocDir)
+    doCopyDocsIntoZipDir('javascript-api-docs', copyJsDocs, jsdocDir)
 }
 
 groovydoc {
@@ -337,7 +378,7 @@ groovydoc {
 task copyJavadocs(type: Copy) {
     description = 'Copies the javadocs to a directory to be zipped'
     dependsOn 'groovydoc'
-    doCopyDocsIntoZipDir('javadocs',copyJavadocs,javadocDir)
+    doCopyDocsIntoZipDir('javadocs', copyJavadocs, javadocDir)
 }
 
 /**

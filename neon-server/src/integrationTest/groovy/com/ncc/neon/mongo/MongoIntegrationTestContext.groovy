@@ -1,9 +1,12 @@
-package com.ncc.neon
+package com.ncc.neon.mongo
 
-import com.ncc.neon.query.QueryResult
-import com.ncc.neon.query.filter.Filter
-import com.ncc.neon.query.Query
-import com.ncc.neon.query.QueryExecutor
+import com.mongodb.MongoClient
+import com.ncc.neon.config.MongoConfigParser
+import com.ncc.neon.query.mongo.MongoQueryExecutor
+import org.springframework.context.annotation.Bean
+import org.springframework.context.annotation.ComponentScan
+import org.springframework.context.annotation.Configuration
+import org.springframework.context.annotation.Profile
 
 /*
  * ************************************************************************
@@ -27,55 +30,32 @@ import com.ncc.neon.query.QueryExecutor
  * OF NEXT CENTURY CORPORATION EXCEPT BY PRIOR WRITTEN PERMISSION AND WHEN
  * RECIPIENT IS UNDER OBLIGATION TO MAINTAIN SECRECY.
  */
-class StubQueryExecutor implements QueryExecutor {
 
+/**
+ * Spring bean configuration to use for the mongo configuration test
+ */
+@Configuration
+@ComponentScan(basePackages = ['com.ncc.neon'])
+@Profile('mongo-integrationtest')
+class MongoIntegrationTestContext {
 
-    @Override
-    QueryResult execute(Query query, boolean includeFiltered) {
-        return new StubQueryResult()
+    static final MongoClient MONGO;
+
+    static {
+        def hostsString = System.getProperty("integrationTest.mongo.host", "localhost")
+        def serverAddresses = MongoConfigParser.createServerAddresses(hostsString)
+        MONGO = new MongoClient(serverAddresses)
     }
 
-    @Override
-    Collection<String> getFieldNames(String dataSourceName, String datasetId) {
-        return []
+    @Bean
+    MongoQueryExecutor mongoQueryExecutor() {
+        return new MongoQueryExecutor()
     }
 
-    @Override
-    UUID addFilter(Filter filter) {
-        return UUID.randomUUID()
-    }
-
-    @Override
-    void removeFilter(UUID id) {
-    }
-
-    @Override
-    void clearFilters() {
-    }
-
-    @Override
-    void setSelectionWhere(Filter filter) {
-    }
-
-    @Override
-    void setSelectedIds(Collection<Object> ids) {
-    }
-
-    @Override
-    void addSelectedIds(Collection<Object> ids) {
-    }
-
-    @Override
-    void removeSelectedIds(Collection<Object> ids) {
-    }
-
-    @Override
-    void clearSelection() {
-    }
-
-    @Override
-    QueryResult getSelectionWhere(Filter filter) {
-        return new StubQueryResult()
+    @Bean
+    @SuppressWarnings('ConfusingMethodName') // method name is used for autowiring
+    MongoClient mongo() {
+        return MONGO
     }
 
 }

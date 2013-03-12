@@ -64,7 +64,7 @@ class JsTestDriverConfigParser {
         files.addAll(yaml.load)
         files.addAll(yaml.test)
         files.each { libPath ->
-            def file = new File(libPath)
+            def file = new File(libPath.replaceAll("\"",""))
             def name = file.name
             if (name.indexOf('*') >= 0) {
                 addMatchingFiles(projectDir, file, jsTestDriverConfigFileRoot)

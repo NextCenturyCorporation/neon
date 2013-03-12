@@ -25,7 +25,7 @@
  * This is a basic smoke test to make sure the javascript objects are properly mapped
  * to the server side groovy objects when passed via the web services
  */
-describe('query integration', function () {
+describe('query mapping', function () {
     var dataSourceName = 'test-dataSource';
     var datasetId = 'test-dataset';
 

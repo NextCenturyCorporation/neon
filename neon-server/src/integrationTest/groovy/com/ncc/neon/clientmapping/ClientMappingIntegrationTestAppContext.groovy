@@ -1,4 +1,4 @@
-package com.ncc.neon
+package com.ncc.neon.clientmapping
 
 import com.ncc.neon.query.QueryExecutor
 import org.springframework.context.annotation.Bean
@@ -29,11 +29,14 @@ import org.springframework.context.annotation.Profile
  */
 
 /**
- * Spring bean configuration to use for integration tests
+ * Spring bean configuration for testing the mapping between the javascript client code and the server
+ * objects. It returns stubbed out versions of the query executor. This is just used to do a test that the
+ * client javascript mappings to the server do not fail (it is not testing any correctness, just that the mapping
+ * process itself succeeds).
  */
 @Configuration
-@Profile("integration-test")
-class IntegrationTestAppContext {
+@Profile("clientmapping-integrationtest")
+class ClientMappingIntegrationTestAppContext {
 
     @Bean
     QueryExecutor queryExecutor() {
