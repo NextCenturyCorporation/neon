@@ -53,7 +53,7 @@ class FilterState implements Serializable {
      * @param filter
      * @return The id of the newly added filter
      */
-    def addFilter(def filter) {
+    def addFilter(filter) {
         def id = UUID.randomUUID()
         def dataSource = dataSourceFromFilter(filter)
         filtersById.put(id, filter)
@@ -69,7 +69,7 @@ class FilterState implements Serializable {
      * @param id The id of the filter generated when adding it
      * @return
      */
-    def removeFilter(def id) {
+    def removeFilter(id) {
         def filter = filtersById.remove(id)
         def dataSource = dataSourceFromFilter(filter)
         def datasetFilters = filtersByDataSource[dataSource]
@@ -86,7 +86,7 @@ class FilterState implements Serializable {
      * @param datasetId The id of the dataset whose filters are being returned
      * @return
      */
-    def getFiltersForDataset(def dataSourceName, def datasetId) {
+    def getFiltersForDataset(dataSourceName, datasetId) {
         def filters = []
         DataSource dataSource = new DataSource(dataSourceName: dataSourceName, datasetId: datasetId)
         if (filtersByDataSource.containsKey(dataSource)) {
