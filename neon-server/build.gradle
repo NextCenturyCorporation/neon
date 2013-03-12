@@ -14,6 +14,7 @@ sourceCompatibility = 1.7
 // task groupings we add
 def TEST_GROUP = JavaBasePlugin.VERIFICATION_GROUP
 def springVersion = "3.2.1.RELEASE"
+def logbackVersion = "1.0.9"
 
 // properties defined in here are available in tasks and helper methods as
 // properties of the project
@@ -54,6 +55,12 @@ configurations {
     integrationTestCompile { extendsFrom testCompile }
     integrationTestRuntime { extendsFrom integrationTestCompile, testRuntime }
 
+    all {
+        resolutionStrategy {
+            // there are conflicting versions of logback between what we specified and some internal gradle dependencies, so force it
+            force "ch.qos.logback:logback-core:$logbackVersion", "ch.qos.logback:logback-classic:$logbackVersion"
+        }
+    }
 }
 
 dependencies {
@@ -69,8 +76,8 @@ dependencies {
     compile "org.springframework:spring-web:$springVersion"
     compile 'joda-time:joda-time:2.1'
     compile 'org.slf4j:slf4j-api:1.7.2'
-    compile 'ch.qos.logback:logback-core:1.0.9'
-    compile 'ch.qos.logback:logback-classic:1.0.9'
+    compile 'ch.qos.logback:logback-core'
+    compile 'ch.qos.logback:logback-classic'
 
 
     providedCompile 'javax.servlet:javax.servlet-api:3.0.1'
