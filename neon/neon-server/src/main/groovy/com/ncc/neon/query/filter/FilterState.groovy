@@ -35,17 +35,17 @@ import org.springframework.web.context.WebApplicationContext
 @Scope(value = WebApplicationContext.SCOPE_SESSION, proxyMode = ScopedProxyMode.TARGET_CLASS)
 class FilterState implements Serializable {
 
-    private static final long serialVersionUID = 120605443225830865L
+    private static final long serialVersionUID = 5897358582328819569L
 
-    private final def filtersById = [:]
-    private final def filtersByDataSource = [:]
+    private final def idsToFilters = [:]
+    private final def dataSourcesToFilters = [:]
 
     /**
      * Clears any existing filters
      */
     def clearFilters() {
-        filtersById.clear()
-        filtersByDataSource.clear()
+        idsToFilters.clear()
+        dataSourcesToFilters.clear()
     }
 
     /**
@@ -56,11 +56,11 @@ class FilterState implements Serializable {
     def addFilter(filter) {
         def id = UUID.randomUUID()
         def dataSource = dataSourceFromFilter(filter)
-        filtersById.put(id, filter)
-        if (!filtersByDataSource.containsKey(dataSource)) {
-            filtersByDataSource.put(dataSource, [] as Set)
+        idsToFilters.put(id, filter)
+        if (!dataSourcesToFilters.containsKey(dataSource)) {
+            dataSourcesToFilters.put(dataSource, [] as Set)
         }
-        filtersByDataSource[dataSource] << id
+        dataSourcesToFilters[dataSource] << id
         return id
     }
 
@@ -70,12 +70,12 @@ class FilterState implements Serializable {
      * @return
      */
     def removeFilter(id) {
-        def filter = filtersById.remove(id)
+        def filter = idsToFilters.remove(id)
         def dataSource = dataSourceFromFilter(filter)
-        def datasetFilters = filtersByDataSource[dataSource]
+        def datasetFilters = dataSourcesToFilters[dataSource]
         datasetFilters.remove(id)
         if (datasetFilters.isEmpty()) {
-            filtersByDataSource.remove(dataSource)
+            dataSourcesToFilters.remove(dataSource)
         }
 
     }
@@ -89,10 +89,10 @@ class FilterState implements Serializable {
     def getFiltersForDataset(dataSourceName, datasetId) {
         def filters = []
         DataSource dataSource = new DataSource(dataSourceName: dataSourceName, datasetId: datasetId)
-        if (filtersByDataSource.containsKey(dataSource)) {
-            def ids = filtersByDataSource.get(dataSource)
+        if (dataSourcesToFilters.containsKey(dataSource)) {
+            def ids = dataSourcesToFilters.get(dataSource)
             ids.each {
-                filters << filtersById[it]
+                filters << idsToFilters[it]
             }
         }
         return filters
