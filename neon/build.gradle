@@ -34,7 +34,8 @@ subprojects {
 
     version = '1.0-SNAPSHOT'
 
-    def jettyPort =  project.hasProperty('jettyPort') ? jettyPort.toInteger() : 8080
+    // run a
+    def jettyPort = 10002
     httpPort = jettyPort
     stopPort = httpPort + 2
     stopKey = 'stop'

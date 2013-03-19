@@ -25,6 +25,8 @@
  * This is an end to end acceptance test to verify that queries can be executed against a mongo instance.
  * These tests parallel those in the MongoQueryExecutorIntegrationTest.
  */
+neon.query.SERVER_URL = 'http://localhost:10002/neon';
+
 describe('query mapping', function () {
     var dataSourceName = 'acceptanceTest';
     var datasetId = 'records';
