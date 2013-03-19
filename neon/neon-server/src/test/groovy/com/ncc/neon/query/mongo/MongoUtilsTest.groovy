@@ -30,20 +30,20 @@ class MongoUtilsTest {
 
     // valid IDs for the tests
     private static final ID1 = "01234567890123456789ABCD"
-    private static final OID1 = [$oid: ID1]
-
     private static final ID2 = "01234567890123456789ABCE"
-    private static final OID2 = [$oid: ID2]
 
     @Test
     void "convert single oid to ObjectId"() {
-        def objId = MongoUtils.toObjectId(OID1)
+        def objId = MongoUtils.toObjectId(ID1)
+        assert objId instanceof ObjectId
         compareIds(ID1, objId)
     }
 
     @Test
     void "convert collection of oids to ObjectIds"() {
-        def objIds = MongoUtils.oidsToObjectIds([OID1, OID2])
+        def objIds = MongoUtils.oidsToObjectIds([ID1, ID2])
+        assert objIds[0] instanceof ObjectId
+        assert objIds[1] instanceof ObjectId
         compareIds(ID1, objIds[0])
         compareIds(ID2, objIds[1])
     }
@@ -63,29 +63,6 @@ class MongoUtilsTest {
         def converted = MongoUtils.oidsToObjectIds(objIds)
         assert objIds[0].is(converted[0])
         assert objIds[1].is(converted[1])
-    }
-
-    @Test
-    void "convert list to maps"() {
-        def values = ["a", "b", "c"]
-        def key = "aKey"
-
-        def maps = MongoUtils.listToMaps(values,key)
-        assert maps.size() == 3
-        assertSingleMap(maps[0],key,"a")
-        assertSingleMap(maps[1],key,"b")
-        assertSingleMap(maps[2],key,"c")
-    }
-
-    /**
-     * Asserts that the specified map contains the one key value pair
-     * @param map
-     * @param key
-     * @param value
-     */
-    private static def assertSingleMap(map,key,value) {
-        assert map.size() == 1
-        assert map[key] == value
     }
 
     private static def compareIds(id1, id2) {

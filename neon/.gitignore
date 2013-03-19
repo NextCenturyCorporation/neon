@@ -1,5 +1,8 @@
 # generated files
-neon-server/src/test/javascript/SpecRunner-*.html
+neon-server/src/test/javascript/SpecRunner-unit.html
+neon-server/src/acceptanceTest/javascript/SpecRunner-acceptance.html
+neon-server/src/test-data/mongo-json/
+
 
 # gradle files
 build

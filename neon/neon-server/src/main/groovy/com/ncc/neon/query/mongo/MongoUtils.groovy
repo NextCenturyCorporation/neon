@@ -40,7 +40,7 @@ class MongoUtils {
      * @return
      */
     static def toObjectId(oid) {
-        return oid instanceof ObjectId ? oid : new ObjectId(oid['$oid'])
+        return oid instanceof ObjectId ? oid : new ObjectId(oid)
     }
 
     /**
@@ -76,9 +76,10 @@ class MongoUtils {
      * @return
      */
     static def serialize(object) {
-        // override the default serializer which nests the date object
+        // override the default serializers that use mongo nested bson syntax with field names that have $
         def serializer = JSONSerializers.strict
         serializer.addObjectSerializer(Date, new SimpleDateSerializer())
+        serializer.addObjectSerializer(ObjectId, new SimpleObjectIdSerializer())
         return serializer.serialize(object)
     }
 

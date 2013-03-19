@@ -1,0 +1,38 @@
+[
+    {
+        "_id": {
+            "state": "DC",
+            "city": "Washington"
+        },
+        "state": "DC",
+        "city": "Washington",
+        "salary_sum": 348000
+    },
+    {
+        "_id": {
+            "state": "MD",
+            "city": "Germantown"
+        },
+        "state": "MD",
+        "city": "Germantown",
+        "salary_sum": 105000
+    },
+    {
+        "_id": {
+            "state": "VA",
+            "city": "Arlington"
+        },
+        "state": "VA",
+        "city": "Arlington",
+        "salary_sum": 278000
+    },
+    {
+        "_id": {
+            "state": "VA",
+            "city": "Alexandria"
+        },
+        "state": "VA",
+        "city": "Alexandria",
+        "salary_sum": 55000
+    }
+]

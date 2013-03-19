@@ -1,9 +1,10 @@
-import org.gradle.plugins.javascript.envjs.browser.*
-import com.ncc.neon.JsTestDriverConfigParser
-import com.ncc.neon.JettyCORSFilterAdder
+import com.mongodb.MongoClient
+import com.mongodb.util.JSON
+import com.ncc.neon.JasmineIncludesGenerator
+import com.ncc.neon.MongoJSONGenerator
+import com.sun.org.apache.xalan.internal.xsltc.compiler.Copy
 import org.apache.tools.ant.filters.ReplaceTokens
 
-apply plugin: 'envjs'
 apply plugin: 'groovy'
 apply plugin: 'codenarc'
 apply plugin: 'jdepend'
@@ -16,17 +17,33 @@ def TEST_GROUP = JavaBasePlugin.VERIFICATION_GROUP
 def springVersion = "3.2.1.RELEASE"
 def logbackVersion = "1.0.9"
 
+buildscript {
+    repositories {
+        mavenCentral()
+    }
+    dependencies {
+        classpath 'org.mongodb:mongo-java-driver:2.10.1'
+    }
+}
+
 // properties defined in here are available in tasks and helper methods as
 // properties of the project
 project.ext {
     jsSrcDir = "src/main/javascript"
     jsUnitTestDir = "src/test/javascript"
-    jsIntegrationTestDir = "src/integrationTest/javascript"
+    jsAcceptanceTestDir = "src/acceptanceTest/javascript"
+    testDataDir = "${projectDir}/src/test-data"
     jsdocDir = "${project.docsDir}/jsdocs"
     javadocDir = "${project.docsDir}/javadocs"
-    testResultsDir = "${buildDir}/test-results"
     libraryName = "$archivesBaseName-${project.version}"
     javadocTitle = "$libraryName API Documentation"
+    phantomJsRunner = "${projectDir}/src/js-test-support/lib/phantomjs-jasmine/run_jasmine_test.coffee"
+
+    // a mongo instance for inserting/deleting test data (will be lazy initialized)
+    mongoInstance = null
+
+    // TODO: This may result in namespace.js being included twice but it needs to be included first (may be fixed with issue XDATA-12)
+    jsIncludesPatterns = ['../../main/webapp/js/*.js', '../../main/javascript/namespace.js', '../../main/javascript/*.js', '../../js-test-support/helpers/*.js'] as Set
 }
 
 
@@ -39,28 +56,25 @@ javascript.source {
     }
 }
 
-repositories {
-    add javaScript.gradlePublicJavaScriptRepository
-}
-
 sourceSets {
     // contains the server integration tests
     integrationTest {
         compileClasspath += sourceSets.main.compileClasspath + sourceSets.main.output + sourceSets.test.compileClasspath + sourceSets.test.output
         runtimeClasspath += sourceSets.main.runtimeClasspath + sourceSets.main.output + sourceSets.test.runtimeClasspath + sourceSets.test.output
+
+        resources {
+            srcDir 'src/integrationTest/resources'
+            srcDir 'src/test-data'
+        }
     }
+
+    // no configuration needed for the acceptance test source set - it only has resources
+    acceptanceTest
 }
 
 configurations {
     integrationTestCompile { extendsFrom testCompile }
     integrationTestRuntime { extendsFrom integrationTestCompile, testRuntime }
-
-    all {
-        resolutionStrategy {
-            // there are conflicting versions of logback between what we specified and some internal gradle dependencies, so force it
-            force "ch.qos.logback:logback-core:$logbackVersion", "ch.qos.logback:logback-classic:$logbackVersion"
-        }
-    }
 }
 
 dependencies {
@@ -76,15 +90,12 @@ dependencies {
     compile "org.springframework:spring-web:$springVersion"
     compile 'joda-time:joda-time:2.1'
     compile 'org.slf4j:slf4j-api:1.7.2'
-    compile 'ch.qos.logback:logback-core'
-    compile 'ch.qos.logback:logback-classic'
-
+    compile "ch.qos.logback:logback-core:$logbackVersion"
+    compile "ch.qos.logback:logback-classic:$logbackVersion"
 
     providedCompile 'javax.servlet:javax.servlet-api:3.0.1'
 
     runtime 'cglib:cglib:2.2.2'
-
-    integrationTestCompile 'org.eclipse.jetty:jetty-servlets:8.1.8.v20121106'
 
     testCompile 'junit:junit:4.11'
     testCompile 'commons-collections:commons-collections:3.2.1'
@@ -120,15 +131,9 @@ war {
     dependsOn 'jshint'
     dependsOn 'combineJs'
     dependsOn 'check'
-    // when integration tests are being run, use the same jstestdriver environment to run the unit tests and fall
-    // back to the raw jasmine tests only when needed
-    if (isRunJavascriptIntegrationTests()) {
-        dependsOn 'jsTestDriverUnitTest'
-        dependsOn 'jsTestDriverIntegrationTest'
-    } else {
-        dependsOn 'jsJasmineUnitTest'
+    if (isRunJavascriptTests()) {
+        dependsOn 'jsPhantomUnitTest'
     }
-
     if (isRunIntegrationTests()) {
         dependsOn 'integrationTests'
     }
@@ -147,26 +152,139 @@ war {
 }
 
 
-def isRunJavascriptIntegrationTests() {
-    return hasProperty('jsIntegrationTest') || hasProperty('allTests')
+def isRunJavascriptTests() {
+    return hasProperty('jsUnitTest')
 }
 
 def isRunIntegrationTests() {
-    return hasProperty('integrationTest') || hasProperty('allTests')
+    return hasProperty('integrationTest')
 }
 
 task integrationTests(type: Test) {
+    dependsOn 'integrationTestClasses'
+    dependsOn 'generateMongoJson'
+
     testClassesDir = sourceSets.integrationTest.output.classesDir
     classpath = sourceSets.integrationTest.runtimeClasspath
 
     def props = [:]
-    def mongoHostProperty = 'integrationTest.mongo.host'
-    if (project.hasProperty(mongoHostProperty)) {
-        props[mongoHostProperty] = project.properties[mongoHostProperty]
+    def mongoHostProperty = getMongoHosts()
+    if (mongoHostProperty) {
+        props[mongoHostProperty] = mongoHostProperty
     }
     props['spring.profiles.active'] = 'mongo-integrationtest'
     systemProperties props
 
+}
+
+
+task acceptanceTestWar(type: org.gradle.api.plugins.jetty.JettyRunWar) {
+    dependsOn 'acceptanceTestClasses'
+    daemon = true
+    jettyConfig = new File(sourceSets.acceptanceTest.output.resourcesDir, 'jetty-config.xml')
+}
+
+processAcceptanceTestResources {
+    from(sourceSets.acceptanceTest.resources.srcDirs) {
+        filter(ReplaceTokens, tokens: [
+                "mongo.hosts": getMongoHosts()
+        ])
+    }
+}
+
+def getMongoHosts() {
+    return project.hasProperty("mongo.hosts") ? getProperty("mongo.hosts") : "localhost"
+}
+
+task jsPhantomUnitTest(type: Exec) {
+    dependsOn 'createJasmineUnitSpecRunnerHtml'
+    group = TEST_GROUP
+    description = 'Runs the Jasmine unit test suite using phantomjs (requires phantomjs to be installed and on path)'
+    commandLine "phantomjs", phantomJsRunner, "${projectDir}/${jsUnitTestDir}/SpecRunner-unit.html"
+}
+
+
+task jsPhantomAcceptanceTest(type: Exec) {
+    dependsOn 'createJasmineAcceptanceSpecRunnerHtml'
+    dependsOn 'acceptanceTestWar'
+    dependsOn 'generateMongoJson'
+    group = TEST_GROUP
+    description = 'Runs the Jasmine acceptance test suite using phantomjs (requires phantomjs to be installed and on path)'
+    // disable websecurity so we can make the ajax calls to the neon server
+    doFirst {
+        // just in case any data got left around in the event that a cleanup failed, delete the data before inserting it
+        deleteAcceptanceTestData()
+        insertAcceptanceTestData()
+    }
+    commandLine "phantomjs", "--web-security=no", phantomJsRunner, "${projectDir}/${jsAcceptanceTestDir}/SpecRunner-acceptance.html"
+}
+
+gradle.taskGraph.afterTask { task ->
+    if ( task == jsPhantomAcceptanceTest ) {
+        deleteAcceptanceTestData()
+    }
+}
+
+task generateMongoJson {
+    MongoJSONGenerator.generateMongoJson(testDataDir, "${testDataDir}/mongo-json")
+}
+
+
+def insertAcceptanceTestData() {
+    def db = getMongo().getDB("acceptanceTest")
+    def collection = db.getCollection("records")
+    def dbList = JSON.parse(new File(testDataDir, '/mongo-json/data.json').text)
+    collection.insert(dbList)
+}
+
+def deleteAcceptanceTestData() {
+    def db = getMongo().getDB("acceptanceTest")
+    db.dropDatabase()
+}
+
+def getMongo() {
+    if (!mongoInstance) {
+        mongoInstance = new MongoClient(getMongoHosts())
+    }
+    return mongoInstance
+}
+
+task createJasmineUnitSpecRunnerHtml << {
+    description = 'Creates the jasmine spec runner html file for javascript unit tests'
+    group = TEST_GROUP
+    doCreateJasmineSpec(jsUnitTestDir, 'unit')
+}
+
+task createJasmineAcceptanceSpecRunnerHtml << {
+    description = 'Creates the jasmine spec runner html file for javascript acceptance tests'
+    group = TEST_GROUP
+    doCreateJasmineSpec(jsAcceptanceTestDir, 'acceptance')
+}
+
+
+def doCreateJasmineSpec(testDir, templateSuffix) {
+    def templateFile = 'SpecRunner.template.html'
+
+    def scriptIncludes = new StringBuilder()
+
+    def includesGenerator = new JasmineIncludesGenerator()
+    includesGenerator.generateIncludes(projectDir, testDir, jsIncludesPatterns)
+    includesGenerator.matchingFiles.each { scriptIncludes.append('  <script src="').append(it).append('"></script>').append(System.properties['line.separator']) }
+    def specRunnerOut = templateFile.replace('.template', "-${templateSuffix}")
+    new File(testDir, specRunnerOut).delete()
+    copy {
+        from('src/js-test-support') {
+            filter(ReplaceTokens, tokens: [
+                    includes: scriptIncludes.toString()
+            ])
+            include(templateFile)
+        }
+        into testDir
+        rename { String filename ->
+            // only one file, so just return the new name
+            specRunnerOut
+        }
+    }
 }
 
 combineJs {
@@ -186,130 +304,6 @@ jshint {
     source = javascript.source.dev.js.files
 }
 
-
-def ensureTestResultsDirExists() {
-    new File(testResultsDir).mkdirs()
-}
-
-task jsJasmineUnitTest(type: BrowserEvaluate) {
-    dependsOn 'createJasmineUnitSpecRunnerHtml'
-    group = TEST_GROUP
-    description = 'Runs the Jasmine unit test suite'
-    doRunJasmine(jsJasmineUnitTest, 'unit')
-}
-
-/**
- * Configures the specified task to run the jasmine tests
- * @param task The task that runs the tests
- * @param type The type of tests being run. This is a string describing
- * the test type (e.g. unit) and is used in the result file
- * and to determine which JsTestDriver config file to create the spec file
- * from
- */
-def doRunJasmine(task, type) {
-    def filename = "SpecRunner-${type}.html"
-    task.content 'src'
-    task.resource "test/javascript/${filename}"
-    // the results is put in a temporary directory since it is a "live' file that doesn't have references to the
-    // test and source files. it is strictly used for parsing for output, but not for trying to load once it is generated
-    task.result "${task.temporaryDir}/${filename}"
-    task.doFirst {
-        ensureTestResultsDirExists()
-    }
-    task.doLast {
-        def resultFile = file(task.result)
-        if (resultFile.text.contains('<div class="suite failed">')) {
-            throw new GradleException("There are failing jasmine tests. See $testResultsDir for details or re-run the spec file at ${task.content}/${task.resource}")
-        }
-    }
-}
-
-task createJasmineUnitSpecRunnerHtml << {
-    description = 'Creates the jasmine spec runner html file based on the jstestdriver config for unit tests'
-    group = TEST_GROUP
-    doCreateJasmineSpecRunnerHtml()
-}
-
-/**
- * Creates a jasmine test html file based on the js test driver configuration.
- * This task copies it to the same directory as the spec runner template.
- */
-def doCreateJasmineSpecRunnerHtml() {
-    def templateFile = 'SpecRunner.template.html'
-    def scriptIncludes = new StringBuilder()
-    def parser = new JsTestDriverConfigParser()
-    parser.parseJsTestDriverConfig(projectDir, jsUnitTestDir, "jsTestDriver.conf", ['../../js-test-support/lib/jasmine-jstd/JasmineAdapter.js'] as Set)
-
-    parser.matchingFiles.each { scriptIncludes.append('  <script src="').append(it).append('"></script>').append(System.properties['line.separator']) }
-    def specRunnerOut = templateFile.replace('.template', "-unit")
-    new File(jsUnitTestDir, specRunnerOut).delete()
-    copy {
-        from(jsUnitTestDir) {
-            filter(ReplaceTokens, tokens: [
-                    includes: scriptIncludes.toString(),
-                    outputDir: testResultsDir.toString()
-            ])
-            include(templateFile)
-        }
-        into jsUnitTestDir
-        rename { String filename ->
-            // only one file, so just return the new name
-            specRunnerOut
-        }
-    }
-}
-
-task jsTestDriverUnitTest(type: JavaExec) {
-    description = 'Runs the javascript unit tests using JSTestDriver. The JsTestDriver server must be started with browsers captured.'
-    group = TEST_GROUP
-
-    doRunJsTestDriver(jsUnitTestDir, jsTestDriverUnitTest);
-}
-
-task jsTestDriverIntegrationTest(type: JavaExec) {
-    description = 'Runs the javascript integration tests using JSTestDriver. The JsTestDriver server must be started with browsers captured.'
-    group = TEST_GROUP
-    dependsOn 'deployJsIntegrationTest'
-
-    doRunJsTestDriver(jsIntegrationTestDir, jsTestDriverIntegrationTest);
-}
-
-task deployJsIntegrationTest(type: org.gradle.api.plugins.jetty.JettyRun) {
-    dependsOn 'compileIntegrationTestGroovy'
-    group = TEST_GROUP
-    description = 'Deploys the integration tests to an embedded jetty server'
-    daemon = true
-    def webXmlFile = new File(sourceSets.integrationTest.output.classesDir, 'web-jetty.xml')
-    jettyConfig = new File(sourceSets.integrationTest.output.resourcesDir, 'jetty-clientmapping-integrationtest.xml')
-    doFirst {
-        JettyCORSFilterAdder.rewriteWebXml(new File(projectDir, 'src/main/webapp/WEB-INF/web.xml').absolutePath, webXmlFile.path)
-    }
-    webXml = webXmlFile
-    classpath += sourceSets.integrationTest.output
-}
-
-/**
- * A helper method to run configure a JavaExec task to run JsTestDriver on
- * the specified test driver config file.
- * @param jsTestDir The directory containing the jstd config file
- * @param javaExecTask The task to configure
- */
-def doRunJsTestDriver(jsTestDir, javaExecTask) {
-    javaExecTask.doFirst {
-        ensureTestResultsDirExists()
-    }
-    javaExecTask.main = '-jar'
-    javaExecTask.args = [
-            new File(projectDir, "../scripts/jstd/JsTestDriver-1.3.5.jar").absolutePath,
-            '--reset',
-            '--tests', 'all',
-            '--config', "${jsTestDir}/jsTestDriver.conf",
-            '--verbose',
-            '--testOutput', testResultsDir,
-            '--raiseOnFailure', true
-    ]
-
-}
 
 task jsDocs(type: Exec) {
     description = 'Creates the javascript API documentation. This requires yuidocjs (minimum version 0.3.38) to be installed'
@@ -348,7 +342,7 @@ task jsDocs(type: Exec) {
     }
 }
 
-task copyJsDocs(type: Copy) {
+task copyJsDocs(type: org.gradle.api.tasks.Copy) {
     description = 'Copies the javascript documentation to a directory to be zipped'
     dependsOn 'jsDocs'
     doCopyDocsIntoZipDir('javascript-api-docs', copyJsDocs, jsdocDir)
@@ -360,7 +354,7 @@ groovydoc {
     windowTitle = javadocTitle
 }
 
-task copyJavadocs(type: Copy) {
+task copyJavadocs(type: org.gradle.api.tasks.Copy) {
     description = 'Copies the javadocs to a directory to be zipped'
     dependsOn 'groovydoc'
     doCopyDocsIntoZipDir('javadocs', copyJavadocs, javadocDir)

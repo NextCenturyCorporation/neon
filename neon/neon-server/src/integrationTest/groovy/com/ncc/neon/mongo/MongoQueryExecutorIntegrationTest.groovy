@@ -1,13 +1,12 @@
 package com.ncc.neon.mongo
 
-import com.mongodb.BasicDBList
-import com.mongodb.BasicDBObject
+import com.mongodb.util.JSON
 import com.ncc.neon.query.Query
 import com.ncc.neon.query.clauses.*
 import com.ncc.neon.query.filter.Filter
 import com.ncc.neon.query.mongo.MongoQueryExecutor
 import com.ncc.neon.util.AssertUtils
-import org.bson.types.ObjectId
+import org.bson.BSONObject
 import org.junit.AfterClass
 import org.junit.BeforeClass
 import org.junit.Test
@@ -16,8 +15,6 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.test.context.ContextConfiguration
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner
 import org.springframework.test.context.web.WebAppConfiguration
-
-import static com.ncc.neon.util.DateUtils.fromISO8601String
 
 /*
  * ************************************************************************
@@ -42,29 +39,22 @@ import static com.ncc.neon.util.DateUtils.fromISO8601String
  * RECIPIENT IS UNDER OBLIGATION TO MAINTAIN SECRECY.
  */
 
+/**
+ * Integration test that verifies the neon server properly translates mongo queries.
+ * These tests parallel the acceptance tests in the javascript client query acceptance tests
+ */
 @RunWith(SpringJUnit4ClassRunner)
 @ContextConfiguration(classes = MongoIntegrationTestContext)
 @WebAppConfiguration
 @SuppressWarnings('DuplicateMapLiteral') // some of the tests use the same maps, but it makes the tests more readable
 class MongoQueryExecutorIntegrationTest {
 
-    private static final String DATASOURCE_NAME = 'integrationtest'
+    private static final String DATASOURCE_NAME = 'integrationTest'
 
-    // use a unique dataset id for each test to avoid overwriting anything that might be in the database (the database
-    // is supposed to be deleted after each test, but in case it is not, this will uniquely identify the test)
-    private static final String DATASET_ID = 'records' + System.currentTimeMillis()
+    private static final String DATASET_ID = 'records'
 
     /** all of the data in the test file */
-    private static final ALL_DATA = [
-            [_id: '5137b623a9f279d831b6fb86', firstname: 'Bill', lastname: 'Jones', city: 'Arlington', state: 'VA', salary: 100000, hiredate: fromISO8601String('2012-09-15T00:00:00Z')],
-            [_id: '5137b623a9f279d831b6fb87', firstname: 'Tom', lastname: 'Smith', city: 'Washington', state: 'DC', salary: 85000, hiredate: fromISO8601String('2011-10-17T00:00:00Z')],
-            [_id: '5137b623a9f279d831b6fb88', firstname: 'Maggie', lastname: 'Thomas', city: 'Washington', state: 'DC', salary: 175000, hiredate: fromISO8601String('2011-10-15T00:00:00Z')],
-            [_id: '5137b623a9f279d831b6fb89', firstname: 'Andrew', lastname: 'Wilks', city: 'Alexandria', state: 'VA', salary: 55000, hiredate: fromISO8601String('2013-01-10T00:00:00Z')],
-            [_id: '5137b623a9f279d831b6fb8a', firstname: 'Michelle', lastname: 'Jackson', city: 'Arlington', state: 'VA', salary: 118000, hiredate: fromISO8601String('2010-06-15T00:00:00Z')],
-            [_id: '5137b623a9f279d831b6fb8b', firstname: 'Rodney', lastname: 'Anderson', city: 'Washington', state: 'DC', salary: 88000, hiredate: fromISO8601String('2012-10-30T00:00:00Z')],
-            [_id: '5137b623a9f279d831b6fb8c', firstname: 'Anthony', lastname: 'Bowles', city: 'Germantown', state: 'MD', salary: 105000, hiredate: fromISO8601String('2012-02-15T00:00:00Z')],
-            [_id: '5137b623a9f279d831b6fb8d', firstname: 'Fred', lastname: 'Porter', city: 'Arlington', state: 'VA', salary: 60000, hiredate: fromISO8601String('2012-02-21T00:00:00Z')]
-    ]
+    private static final ALL_DATA = readJson('data.json')
 
     /** a filter that just includes all of the data (no WHERE clause) */
     private static final ALL_DATA_FILTER = new Filter(dataSourceName: DATASOURCE_NAME, datasetId: DATASET_ID)
@@ -86,15 +76,43 @@ class MongoQueryExecutorIntegrationTest {
         deleteData()
     }
 
+    @SuppressWarnings('CoupledTestCase') // this method incorrectly throws this codenarc error
+    private static def readJson(def fileName) {
+        def data = []
+        def dbList = parseJSON("/mongo-json/${fileName}")
+        dbList.each {
+            data << bsonToMap(it)
+        }
+        return data
+    }
+
+    /**
+     * Converts the bson object read from a mongo database to a map with standard java types (specifically it
+     * expands out the nested BSON object types)
+     * @param bson
+     * @return
+     */
+    private static def bsonToMap(bson) {
+        // extract out the bson specific encoding so it is easier to perform test comparisons
+        return bson.collectEntries { key, value ->
+            if (value instanceof BSONObject) {
+                return [(key): bsonToMap(value)]
+            }
+            return [(key): value]
+        }
+    }
+
+
     private static void insertData() {
         def db = MongoIntegrationTestContext.MONGO.getDB(DATASOURCE_NAME)
         def collection = db.getCollection(DATASET_ID)
-        def dbList = new BasicDBList()
-        ALL_DATA.each {
-            def row = it.collectEntries { key, value -> [(key): (key == '_id' ? ObjectId.massageToObjectId(value) : value)] }
-            dbList << new BasicDBObject(row)
-        }
+        def dbList = parseJSON("/mongo-json/data.json")
         collection.insert(dbList)
+    }
+
+    @SuppressWarnings('CoupledTestCase') // this method incorrectly throws this codenarc error
+    private static def parseJSON(resourcePath) {
+        return JSON.parse(MongoQueryExecutorIntegrationTest.getResourceAsStream(resourcePath).text)
     }
 
     private static void deleteData() {
@@ -133,12 +151,7 @@ class MongoQueryExecutorIntegrationTest {
         def sortByStateClause = new SortClause(fieldName: 'state', sortOrder: SortOrder.ASCENDING)
         def sortByCityClause = new SortClause(fieldName: 'city', sortOrder: SortOrder.DESCENDING)
         def salaryAggregateClause = new AggregateClause(name: 'salary_sum', operation: 'sum', field: 'salary')
-        def expected = [
-                [_id: [state: 'DC', city: 'Washington'], state: 'DC', city: 'Washington', salary_sum: 348000],
-                [_id: [state: 'MD', city: 'Germantown'], state: 'MD', city: 'Germantown', salary_sum: 105000],
-                [_id: [state: 'VA', city: 'Arlington'], state: 'VA', city: 'Arlington', salary_sum: 278000],
-                [_id: [state: 'VA', city: 'Alexandria'], state: 'VA', city: 'Alexandria', salary_sum: 55000]
-        ]
+        def expected = readJson('groupByStateAsc_cityDesc_aggregateSalary.json')
         def result = mongoQueryExecutor.execute(new Query(filter: ALL_DATA_FILTER,
                 groupByClauses: [groupByStateClause, groupByCityClause],
                 aggregates: [salaryAggregateClause],
@@ -149,11 +162,7 @@ class MongoQueryExecutorIntegrationTest {
     @Test
     void "distinct"() {
         def distinctStateClause = new DistinctClause(fieldName: 'state')
-        def expected = [
-                [state: 'DC'],
-                [state: 'MD'],
-                [state: 'VA']
-        ]
+        def expected = ["DC", "MD", "VA"]
         def result = mongoQueryExecutor.execute(new Query(filter: ALL_DATA_FILTER,
                 distinctClause: distinctStateClause), false).mongoIterable
 
@@ -173,7 +182,7 @@ class MongoQueryExecutorIntegrationTest {
     @Test
     void "set selection by id"() {
         def expected = rows(1, 2)
-        def ids = expected.collect { new ObjectId(it._id) }
+        def ids = expected.collect { it._id }
         mongoQueryExecutor.setSelectedIds(ids)
         def result = mongoQueryExecutor.getSelectionWhere(ALL_DATA_FILTER)
         assertQueryResult(expected, result)
@@ -182,7 +191,7 @@ class MongoQueryExecutorIntegrationTest {
     @Test
     void "add remove selection ids"() {
         def expected = rows(1, 2, 5)
-        def ids = expected.collect { new ObjectId(it._id) }
+        def ids = expected.collect { it._id }
         mongoQueryExecutor.addSelectedIds(ids)
 
         def result = mongoQueryExecutor.getSelectionWhere(ALL_DATA_FILTER)
@@ -202,7 +211,7 @@ class MongoQueryExecutorIntegrationTest {
 
     @Test
     void "clear selection"() {
-        def ids = rows(1, 2).collect { new ObjectId(it._id) }
+        def ids = rows(1, 2).collect { it._id }
 
         // adding ids already been tested, so we can be confident the ids are added properly
         mongoQueryExecutor.addSelectedIds(ids)
@@ -273,14 +282,8 @@ class MongoQueryExecutorIntegrationTest {
                 groupByClauses: [groupByMonthClause], aggregates: [salaryAggregateClause], sortClauses: [sortByMonth])
 
         def result = mongoQueryExecutor.execute(query, false)
+        def expected = readJson('groupByDerivedField.json')
 
-        def expected = [
-                [_id: [hire_month: 1], hire_month: 1, salary_sum: 55000],
-                [_id: [hire_month: 2], hire_month: 2, salary_sum: 165000],
-                [_id: [hire_month: 6], hire_month: 6, salary_sum: 118000],
-                [_id: [hire_month: 9], hire_month: 9, salary_sum: 100000],
-                [_id: [hire_month: 10], hire_month: 10, salary_sum: 348000]
-        ]
         assertQueryResult(expected, result)
     }
 
@@ -355,8 +358,7 @@ class MongoQueryExecutorIntegrationTest {
         int actualCount = 0
         // we know mongo returns BSON objects, so convert them to a map for easier testing
         actual.eachWithIndex { row, index ->
-            // compare objectIds by string since equality is based on the time they were created
-            def actualRow = row.mongoRow.toMap().collectEntries { key, value -> [(key): (value instanceof ObjectId ? value.toString() : value)] }
+            def actualRow = row.mongoRow.toMap()
             def expectedRow = expected[index]
             assert expectedRow == actualRow: "Row ${index}"
             actualCount++

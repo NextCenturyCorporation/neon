@@ -199,7 +199,7 @@ neon.query.Query.prototype.distinct = function (fieldName) {
  * 2 parameters multiple times
  * @method sortBy
  * @param {String} fieldName The name of the field to sort on
- * @param {String} sortOrder The sort order (see the constants in this class)
+ * @param {int} sortOrder The sort order (see the constants in this class)
  * @return {neon.query.Query} This query object
  * @example
  new neon.query.Query(...).sortBy("field1",neon.query.ASC,"field2",neon.query.DESC);
@@ -331,7 +331,7 @@ neon.query.executeQuery = function (query, successCallback, errorCallback) {
  * @param {Function} [errorCallback] The optional callback when an error occurs. This is a 3 parameter function that contains the xhr, a short error status and the full error message.
  */
 neon.query.addFilter = function (filter, successCallback, errorCallback) {
-    var filterProvider = this.wrapFilterInProvider_(filter);
+    var filterProvider = neon.query.wrapFilterInProvider_(filter);
     neon.util.AjaxUtils.doPostJSON(
         filterProvider,
         neon.query.queryUrl_('/services/queryservice/addfilter'),
@@ -370,7 +370,7 @@ neon.query.removeFilter = function (filterId, successCallback, errorCallback) {
  * @param {Function} [errorCallback] The optional callback when an error occurs. This is a 3 parameter function that contains the xhr, a short error status and the full error message.
  */
 neon.query.replaceFilter = function (filterId, filter, successCallback, errorCallback) {
-    var filterProvider = this.wrapFilterInProvider_(filter);
+    var filterProvider = neon.query.wrapFilterInProvider_(filter);
     neon.util.AjaxUtils.doPostJSON(
         filterProvider,
         neon.query.queryUrl_('/services/queryservice/replacefilter/' + filterId),

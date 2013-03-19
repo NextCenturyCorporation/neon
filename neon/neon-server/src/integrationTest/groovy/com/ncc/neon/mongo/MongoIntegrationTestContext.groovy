@@ -42,7 +42,7 @@ class MongoIntegrationTestContext {
     static final MongoClient MONGO;
 
     static {
-        def hostsString = System.getProperty("integrationTest.mongo.host", "localhost")
+        def hostsString = System.getProperty("mongo.hosts", "localhost")
         def serverAddresses = MongoConfigParser.createServerAddresses(hostsString)
         MONGO = new MongoClient(serverAddresses)
     }

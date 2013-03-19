@@ -74,6 +74,16 @@ jasmine.Matchers.prototype.toBeInstanceOf = function(expectedType) {
     return actual instanceof expectedType;
 };
 
+jasmine.Matchers.prototype.toBeArrayWithSameElements = function(expectedArray)  {
+
+    var actual = this.actual;
+    this.message = function() {
+        return 'expected: ' + expectedArray + ', actual: ' + actual;
+    };
+
+    return expectedArray.length == actual.length && _.difference(expectedArray, actual).length == 0;
+};
+
 jasmine.Spy.prototype.wasInvoked = function() {
     return this.callCount > 0;
 };

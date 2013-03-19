@@ -4,7 +4,7 @@ repositories {
     mavenCentral()
 }
 dependencies {
-    compile 'org.yaml:snakeyaml:1.11'
     groovy localGroovy()
+    compile 'org.json:json:20090211'
 }
 

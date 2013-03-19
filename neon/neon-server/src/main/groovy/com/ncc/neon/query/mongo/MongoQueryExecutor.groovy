@@ -94,7 +94,7 @@ class MongoQueryExecutor extends AbstractQueryExecutor {
             }
         }
 
-        return MongoUtils.listToMaps(distinct,distinctFieldName)
+        return distinct
     }
 
     private def executeGroupByQuery(collection, mongoQuery) {
