@@ -170,7 +170,7 @@ task integrationTests(type: Test) {
     def props = [:]
     def mongoHostProperty = getMongoHosts()
     if (mongoHostProperty) {
-        props[mongoHostProperty] = mongoHostProperty
+        props["mongo.hosts"] = mongoHostProperty
     }
     props['spring.profiles.active'] = 'mongo-integrationtest'
     systemProperties props
