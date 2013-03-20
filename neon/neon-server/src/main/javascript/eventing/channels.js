@@ -22,7 +22,8 @@
  */
 
 /**
- * This class has a list of the available channels
+ * This class has a list of the available channels that are used for messaging between
+ * OWF widgets
  * @namespace neon.eventing
  * @class Channels
  */
