@@ -2,7 +2,6 @@ import com.mongodb.MongoClient
 import com.mongodb.util.JSON
 import com.ncc.neon.JasmineIncludesGenerator
 import com.ncc.neon.MongoJSONGenerator
-import com.sun.org.apache.xalan.internal.xsltc.compiler.Copy
 import org.apache.tools.ant.filters.ReplaceTokens
 
 apply plugin: 'groovy'
@@ -199,7 +198,7 @@ task jsPhantomUnitTest(type: Exec) {
     dependsOn 'createJasmineUnitSpecRunnerHtml'
     group = TEST_GROUP
     description = 'Runs the Jasmine unit test suite using phantomjs (requires phantomjs to be installed and on path)'
-    commandLine "phantomjs", phantomJsRunner, "${projectDir}/${jsUnitTestDir}/SpecRunner-unit.html"
+    commandLine "phantomjs", phantomJsRunner, "${projectDir}/${jsUnitTestDir}/spec_runner_unit.html"
 }
 
 
@@ -215,7 +214,7 @@ task jsPhantomAcceptanceTest(type: Exec) {
         deleteAcceptanceTestData()
         insertAcceptanceTestData()
     }
-    commandLine "phantomjs", "--web-security=no", phantomJsRunner, "${projectDir}/${jsAcceptanceTestDir}/SpecRunner-acceptance.html"
+    commandLine "phantomjs", "--web-security=no", phantomJsRunner, "${projectDir}/${jsAcceptanceTestDir}/spec_runner_acceptance.html"
 }
 
 gradle.taskGraph.afterTask { task ->
@@ -262,14 +261,14 @@ task createJasmineAcceptanceSpecRunnerHtml << {
 
 
 def doCreateJasmineSpec(testDir, templateSuffix) {
-    def templateFile = 'SpecRunner.template.html'
+    def templateFile = 'spec_runner.template.html'
 
     def scriptIncludes = new StringBuilder()
 
     def includesGenerator = new JasmineIncludesGenerator()
     includesGenerator.generateIncludes(projectDir, testDir, jsIncludesPatterns)
     includesGenerator.matchingFiles.each { scriptIncludes.append('  <script src="').append(it).append('"></script>').append(System.properties['line.separator']) }
-    def specRunnerOut = templateFile.replace('.template', "-${templateSuffix}")
+    def specRunnerOut = templateFile.replace('.template', "_${templateSuffix}")
     new File(testDir, specRunnerOut).delete()
     copy {
         from('src/js-test-support') {
