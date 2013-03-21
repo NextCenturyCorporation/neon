@@ -1,4 +1,4 @@
-package com.ncc.neon.query.mongo
+package com.ncc.neon.query.clauses
 
 /*
  * ************************************************************************
@@ -22,17 +22,10 @@ package com.ncc.neon.query.mongo
  * OF NEXT CENTURY CORPORATION EXCEPT BY PRIOR WRITTEN PERMISSION AND WHEN
  * RECIPIENT IS UNDER OBLIGATION TO MAINTAIN SECRECY.
  */
-
 /**
- * A container for the information needed to execute a query against a mongo store
+ * A query clause to limit the number of results returned by the query
  */
-class MongoQuery {
+class LimitClause {
 
-    def dbObject
-    def selectClause
-    def distinctClause
-    def groupByClauses = []
-    def aggregateClauses = []
-    def sortClauses = []
-    def limitClause
+    def limit
 }

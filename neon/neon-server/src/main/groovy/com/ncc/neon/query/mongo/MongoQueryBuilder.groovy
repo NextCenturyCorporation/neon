@@ -36,6 +36,7 @@ class MongoQueryBuilder implements QueryBuilder {
     private def groupByClauses = []
     private def aggregateClauses = []
     private def sortClauses = []
+    private def limitClause
 
     MongoQueryBuilder() {
         dbObject = new BasicDBObject()
@@ -87,6 +88,11 @@ class MongoQueryBuilder implements QueryBuilder {
     }
 
     @Override
+    def apply(LimitClause clause) {
+        limitClause = clause
+    }
+
+    @Override
     def build() {
         return new MongoQuery(
                 dbObject: dbObject,
@@ -94,7 +100,8 @@ class MongoQueryBuilder implements QueryBuilder {
                 distinctClause: distinctClause,
                 groupByClauses: groupByClauses,
                 aggregateClauses: aggregateClauses,
-                sortClauses: sortClauses
+                sortClauses: sortClauses,
+                limitClause :limitClause
         )
     }
 }

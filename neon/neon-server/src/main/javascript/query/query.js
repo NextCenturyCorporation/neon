@@ -54,6 +54,7 @@ neon.query.Query = function () {
     this.distinctClause;
     this.aggregates = [];
     this.sortClauses = [];
+    this.limitClause;
 
 };
 
@@ -183,13 +184,24 @@ neon.query.Query.prototype.aggregate = function (aggregationOperation, aggregati
 };
 
 /**
- * Creates a new DISTINCT clause that returns only the distinct values of the specified field
+ * Specifies a DISTINCT clause that returns only the distinct values of the specified field
  * @method distinct
  * @param {String} fieldName The name of the field to return distinct values for
  * @return {neon.query.Query} This query object
  */
 neon.query.Query.prototype.distinct = function (fieldName) {
     this.distinctClause = new neon.query.DistinctClause(fieldName);
+    return this;
+};
+
+/**
+ * Specifies a limit on the maximum number of results that should be returned from the query
+ * @method limit
+ * @param {int} limit The maximum number of results to return from the query
+ * @return {neon.query.Query} This query object
+ */
+neon.query.Query.prototype.limit = function(limit) {
+    this.limitClause = new neon.query.LimitClause(limit);
     return this;
 };
 
@@ -715,6 +727,10 @@ neon.query.DistinctClause = function (fieldName) {
 neon.query.SortClause = function (fieldName, sortOrder) {
     this.fieldName = fieldName;
     this.sortOrder = sortOrder;
+};
+
+neon.query.LimitClause = function(limit) {
+    this.limit = limit;
 };
 
 /**

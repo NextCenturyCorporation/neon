@@ -257,7 +257,7 @@ describe('query mapping', function () {
     });
 
     it('should call an error callback if an error occurs', function () {
-        var query = baseQuery().groupBy('unknown').aggregate('unknown','unknown','unknown');
+        var query = baseQuery().groupBy('unknown').aggregate('unknown', 'unknown', 'unknown');
         var successCallback = jasmine.createSpy('success');
         var errorCallback = jasmine.createSpy('error');
         neon.query.executeQuery(query, successCallback, errorCallback);
@@ -267,6 +267,14 @@ describe('query mapping', function () {
         runs(function () {
             expect(successCallback).not.toHaveBeenCalled();
             expect(errorCallback).toHaveBeenCalled();
+        });
+    });
+
+    it('query with limit', function () {
+        var query = baseQuery().limit(2);
+        executeAndWait(neon.query.executeQuery, query);
+        runs(function () {
+            expect(currentResult.data.length).toEqual(2);
         });
     });
 

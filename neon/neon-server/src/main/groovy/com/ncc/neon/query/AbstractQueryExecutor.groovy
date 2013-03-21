@@ -111,7 +111,6 @@ abstract class AbstractQueryExecutor implements QueryExecutor {
 
     private def buildQuery(query, additionalWhereClauseGenerator, includeFiltered) {
         def builder = createQueryBuilder()
-
         applySelectClause(builder, query)
         applyWhereClause(builder, query, additionalWhereClauseGenerator, includeFiltered)
 
@@ -124,6 +123,9 @@ abstract class AbstractQueryExecutor implements QueryExecutor {
         }
         if ( query.sortClauses ) {
             applyClauses(builder, query.sortClauses)
+        }
+        if ( query.limitClause ) {
+            builder.apply(query.limitClause)
         }
         return builder.build()
     }

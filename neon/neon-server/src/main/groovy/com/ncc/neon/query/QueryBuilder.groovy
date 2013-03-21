@@ -39,6 +39,7 @@ public interface QueryBuilder {
     def apply(GroupByFieldClause clause)
     def apply(AggregateClause clause)
     def apply(SortClause clause)
+    def apply(LimitClause clause)
 
     /**
      * Builds the query object used by the {@link QueryExecutor}. The format of this object

@@ -68,6 +68,9 @@ class MongoQueryExecutor extends AbstractQueryExecutor {
         if (mongoQuery.sortClauses) {
             results = results.sort(createSortDBObject(mongoQuery.sortClauses))
         }
+        if (mongoQuery.limitClause) {
+            results = results.limit(mongoQuery.limitClause.limit)
+        }
         return results
     }
 

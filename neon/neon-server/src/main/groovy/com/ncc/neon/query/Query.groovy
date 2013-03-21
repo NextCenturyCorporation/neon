@@ -3,6 +3,7 @@ package com.ncc.neon.query
 import com.ncc.neon.query.clauses.AggregateClause
 import com.ncc.neon.query.clauses.DistinctClause
 import com.ncc.neon.query.clauses.GroupByClause
+import com.ncc.neon.query.clauses.LimitClause
 import com.ncc.neon.query.clauses.SortClause
 import com.ncc.neon.query.filter.Filter
 import groovy.transform.ToString
@@ -44,6 +45,7 @@ class Query {
     List<GroupByClause> groupByClauses = []
     DistinctClause distinctClause
     List<SortClause> sortClauses
+    LimitClause limitClause
 
     def getDataSourceName() {
         filter.dataSourceName

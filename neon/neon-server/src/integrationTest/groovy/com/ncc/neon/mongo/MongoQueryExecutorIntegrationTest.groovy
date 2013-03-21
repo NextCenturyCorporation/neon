@@ -352,6 +352,19 @@ class MongoQueryExecutorIntegrationTest {
         assertQueryResult(expected, result)
     }
 
+    @Test
+    void "query with limit"() {
+        def result = mongoQueryExecutor.execute(new Query(filter: ALL_DATA_FILTER, limitClause: new LimitClause(limit: 2)), false)
+
+        // should be limited to 2 results
+        def iterator = result.iterator()
+        assert iterator.hasNext()
+        iterator.next()
+        assert iterator.hasNext()
+        iterator.next()
+
+        assert !iterator.hasNext()
+    }
 
 
     private static def assertQueryResult(expected, actual) {
