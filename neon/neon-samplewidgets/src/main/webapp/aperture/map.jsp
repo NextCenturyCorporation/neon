@@ -31,7 +31,6 @@
     <script src="js/aperture/1.0/aperture.js"></script>
     <script src="js/mapconfig.js"></script>
 
-
     <script>
         OWF.relayFile = 'js/eventing/rpc_relay.uncompressed.html';
         neon.query.SERVER_URL = '<%=neonServerUrl%>';
