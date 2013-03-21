@@ -12,7 +12,6 @@ apply plugin: 'jdepend'
 archivesBaseName = 'neon'
 sourceCompatibility = 1.7
 
-// task groupings we add
 def TEST_GROUP = JavaBasePlugin.VERIFICATION_GROUP
 def springVersion = "3.2.1.RELEASE"
 def logbackVersion = "1.0.9"
