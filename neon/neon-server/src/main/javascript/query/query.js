@@ -152,7 +152,6 @@ neon.query.Query.prototype.selectFrom = function (dataSourceName, datasetId) {
  *      </ul>
  *    </li>
  *    <li>A boolean operator (and/or)</li>
- *    <li>An In clause</li>
  * </ol>
  * @example
  where('someProperty','=',5)
@@ -706,7 +705,7 @@ neon.query.FilterProvider = function (filter) {
  * A filter provider that dynamically creates a filter on the server based on the
  * results matched by the subfilter. The newly generated filter will be structured as
  * follows:<br>
- *     <fieldName> <operator> <subfilter-results>
+ *     &lt;fieldName&gt; &lt;operator&gt; &lt;subfilter-results&gt;
  *
  * For example, this can be used to generate a filter that matches any rows whose field X appears
  * in the results of the subfilter
