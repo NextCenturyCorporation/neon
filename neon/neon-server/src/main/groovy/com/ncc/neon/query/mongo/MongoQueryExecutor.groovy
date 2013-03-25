@@ -2,7 +2,6 @@ package com.ncc.neon.query.mongo
 
 import com.mongodb.BasicDBObject
 import com.mongodb.DBObject
-import com.mongodb.Mongo
 import com.mongodb.MongoClient
 import com.ncc.neon.query.AbstractQueryExecutor
 import com.ncc.neon.query.QueryResult

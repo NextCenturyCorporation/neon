@@ -28,6 +28,7 @@ import org.codehaus.jackson.annotate.JsonTypeInfo
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.PROPERTY, property = "type")
 @JsonSubTypes([
     @JsonSubTypes.Type(value = SingularWhereClause, name = 'where'),
+    @JsonSubTypes.Type(value = WithinDistanceClause, name =  'withinDistance'),
     @JsonSubTypes.Type(value =  AndWhereClause, name =  'and'),
     @JsonSubTypes.Type(value =  OrWhereClause, name =  'or')
 ])

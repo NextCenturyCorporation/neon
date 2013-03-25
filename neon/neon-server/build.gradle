@@ -1,3 +1,4 @@
+import com.mongodb.BasicDBObject
 import com.mongodb.MongoClient
 import com.mongodb.util.JSON
 import com.ncc.neon.JasmineIncludesGenerator
@@ -90,6 +91,7 @@ dependencies {
     compile 'org.slf4j:slf4j-api:1.7.2'
     compile "ch.qos.logback:logback-core:$logbackVersion"
     compile "ch.qos.logback:logback-classic:$logbackVersion"
+    compile "com.google.guava:guava:14.0.1"
 
     providedCompile 'javax.servlet:javax.servlet-api:3.0.1'
 
@@ -233,6 +235,7 @@ def insertAcceptanceTestData() {
     def collection = db.getCollection("records")
     def dbList = JSON.parse(new File(testDataDir, '/mongo-json/data.json').text)
     collection.insert(dbList)
+    collection.ensureIndex(new BasicDBObject("location","2dsphere"))
 }
 
 def deleteAcceptanceTestData() {

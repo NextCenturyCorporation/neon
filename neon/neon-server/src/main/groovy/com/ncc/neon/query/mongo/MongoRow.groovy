@@ -24,7 +24,6 @@ import com.ncc.neon.query.Row
  * OF NEXT CENTURY CORPORATION EXCEPT BY PRIOR WRITTEN PERMISSION AND WHEN
  * RECIPIENT IS UNDER OBLIGATION TO MAINTAIN SECRECY.
  */
-
 class MongoRow implements Row {
 
     private def mongoRow

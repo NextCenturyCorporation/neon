@@ -53,6 +53,11 @@ class MongoQueryBuilder implements QueryBuilder {
     }
 
     @Override
+    def apply(WithinDistanceClause clause) {
+        dbObject = MongoWhereClauseBuilder.build(clause)
+    }
+
+    @Override
     def apply(AndWhereClause clause) {
         dbObject = MongoWhereClauseBuilder.build(clause)
     }

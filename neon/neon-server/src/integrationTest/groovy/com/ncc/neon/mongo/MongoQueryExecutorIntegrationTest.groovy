@@ -1,11 +1,13 @@
 package com.ncc.neon.mongo
 
+import com.mongodb.BasicDBObject
 import com.mongodb.util.JSON
 import com.ncc.neon.query.Query
 import com.ncc.neon.query.clauses.*
 import com.ncc.neon.query.filter.Filter
 import com.ncc.neon.query.mongo.MongoQueryExecutor
 import com.ncc.neon.util.AssertUtils
+import com.ncc.neon.util.LatLon
 import org.bson.BSONObject
 import org.junit.AfterClass
 import org.junit.BeforeClass
@@ -95,7 +97,7 @@ class MongoQueryExecutorIntegrationTest {
     private static def bsonToMap(bson) {
         // extract out the bson specific encoding so it is easier to perform test comparisons
         return bson.collectEntries { key, value ->
-            if (value instanceof BSONObject) {
+            if (value instanceof BSONObject && value instanceof Map) {
                 return [(key): bsonToMap(value)]
             }
             return [(key): value]
@@ -108,6 +110,7 @@ class MongoQueryExecutorIntegrationTest {
         def collection = db.getCollection(DATASET_ID)
         def dbList = parseJSON("/mongo-json/data.json")
         collection.insert(dbList)
+        collection.ensureIndex(new BasicDBObject("location","2dsphere"))
     }
 
     @SuppressWarnings('CoupledTestCase') // this method incorrectly throws this codenarc error
@@ -123,7 +126,7 @@ class MongoQueryExecutorIntegrationTest {
     @Test
     void "field names"() {
         def fieldNames = mongoQueryExecutor.getFieldNames(DATASOURCE_NAME, DATASET_ID)
-        def expected = ['_id', 'firstname', 'lastname', 'city', 'state', 'salary', 'hiredate']
+        def expected = ['_id', 'firstname', 'lastname', 'city', 'state', 'salary', 'hiredate','location']
         AssertUtils.assertEqualCollections(expected, fieldNames)
     }
 
@@ -366,6 +369,38 @@ class MongoQueryExecutorIntegrationTest {
         assert !iterator.hasNext()
     }
 
+    @Test
+    void "query near location"() {
+        def withinDistance = new WithinDistanceClause(
+                locationField: "location",
+                center: new LatLon(latDegrees: 11.95d, lonDegrees: 19.5d),
+                distance: 35d,
+                distanceUnit: DistanceUnit.MILE
+        )
+        def expected = rows(2,0)
+        def query = new Query(filter: new Filter(dataSourceName: DATASOURCE_NAME, datasetId: DATASET_ID, whereClause: withinDistance))
+
+        def result = mongoQueryExecutor.execute(query, false)
+        assertQueryResult(expected,result)
+    }
+
+    @Test
+    void "query near location and filter on attributes"() {
+        def withinDistance = new WithinDistanceClause(
+                locationField: "location",
+                center: new LatLon(latDegrees: 11.95d, lonDegrees: 19.5d),
+                distance: 35d,
+                distanceUnit: DistanceUnit.MILE
+        )
+        def expected = rows(2)
+        def dcStateClause = new SingularWhereClause(lhs: 'state', operator: '=', rhs: 'DC')
+        def whereClause = new AndWhereClause(whereClauses: [withinDistance,dcStateClause])
+        def query = new Query(filter: new Filter(dataSourceName: DATASOURCE_NAME, datasetId: DATASET_ID, whereClause: whereClause))
+
+        def result = mongoQueryExecutor.execute(query, false)
+        assertQueryResult(expected,result)
+
+    }
 
     private static def assertQueryResult(expected, actual) {
         int actualCount = 0

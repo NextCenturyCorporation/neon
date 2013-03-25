@@ -1,6 +1,7 @@
-package com.ncc.neon.query
+package com.ncc.neon.query.clauses
 
-import com.ncc.neon.query.clauses.*
+import com.ncc.neon.query.jackson.DistanceUnitDeserializer
+import org.codehaus.jackson.map.annotate.JsonDeserialize
 
 /*
  * ************************************************************************
@@ -26,27 +27,22 @@ import com.ncc.neon.query.clauses.*
  */
 
 /**
- * Constructs queries to be executed against a data store
+ * A representation of a distance
  */
-public interface QueryBuilder {
+// TODO: A codenarc bug incorrectly throws the UnnecessaryPackageReference error on enums. We should upgrade codenarc to fix this.
+@SuppressWarnings('UnnecessaryPackageReference')
+@JsonDeserialize(using = DistanceUnitDeserializer)
+public enum DistanceUnit {
 
-    def apply(SelectClause clause)
-    def apply(SingularWhereClause clause)
-    def apply(WithinDistanceClause clause)
-    def apply(AndWhereClause clause)
-    def apply(OrWhereClause clause)
-    def apply(DistinctClause clause)
-    def apply(GroupByFunctionClause clause)
-    def apply(GroupByFieldClause clause)
-    def apply(AggregateClause clause)
-    def apply(SortClause clause)
-    def apply(LimitClause clause)
 
-    /**
-     * Builds the query object used by the {@link QueryExecutor}. The format of this object
-     * is based on the format the query executor uses.
-     * @return
-     */
-    def build()
+    METER(1), KM(1000), MILE(1609.34)
+
+
+    /** the distance unit in meters */
+    def meters
+
+    DistanceUnit(meters) {
+        this.meters = meters
+    }
 
 }

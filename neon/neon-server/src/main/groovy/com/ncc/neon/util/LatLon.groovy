@@ -1,6 +1,8 @@
-package com.ncc.neon.query
+package com.ncc.neon.util
 
-import com.ncc.neon.query.clauses.*
+import groovy.transform.ToString
+
+import static com.google.common.base.Preconditions.checkArgument
 
 /*
  * ************************************************************************
@@ -24,29 +26,26 @@ import com.ncc.neon.query.clauses.*
  * OF NEXT CENTURY CORPORATION EXCEPT BY PRIOR WRITTEN PERMISSION AND WHEN
  * RECIPIENT IS UNDER OBLIGATION TO MAINTAIN SECRECY.
  */
-
 /**
- * Constructs queries to be executed against a data store
+ * A latitude and longitude pair
  */
-public interface QueryBuilder {
+@ToString
+class LatLon {
 
-    def apply(SelectClause clause)
-    def apply(SingularWhereClause clause)
-    def apply(WithinDistanceClause clause)
-    def apply(AndWhereClause clause)
-    def apply(OrWhereClause clause)
-    def apply(DistinctClause clause)
-    def apply(GroupByFunctionClause clause)
-    def apply(GroupByFieldClause clause)
-    def apply(AggregateClause clause)
-    def apply(SortClause clause)
-    def apply(LimitClause clause)
+    def latDegrees
+    def lonDegrees
 
-    /**
-     * Builds the query object used by the {@link QueryExecutor}. The format of this object
-     * is based on the format the query executor uses.
-     * @return
-     */
-    def build()
+    // the validation is done on the setters so values set from json are validated
+
+    void setLatDegrees(latDegrees) {
+        checkArgument((-90d..90d).containsWithinBounds(latDegrees), "Latitude %s must be in range [-90,90]", latDegrees)
+        this.latDegrees = latDegrees
+    }
+
+
+    void setLonDegrees(lonDegrees) {
+        checkArgument((-180..180d).containsWithinBounds(lonDegrees), "Longitude %s must be in range [-180,180]", lonDegrees)
+        this.lonDegrees = lonDegrees
+    }
 
 }

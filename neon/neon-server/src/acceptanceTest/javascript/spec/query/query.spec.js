@@ -49,7 +49,7 @@ describe('query mapping', function () {
 
     it('get field names', function () {
         executeAndWait(neon.query.getFieldNames, dataSourceName, datasetId);
-        var expected = ['_id', 'firstname', 'lastname', 'city', 'state', 'salary', 'hiredate'];
+        var expected = ['_id', 'firstname', 'lastname', 'city', 'state', 'salary', 'hiredate', 'location'];
         runs(function () {
             expect(currentResult.fieldNames).toBeArrayWithSameElements(expected);
         });
@@ -278,6 +278,23 @@ describe('query mapping', function () {
         });
     });
 
+    it('query near location', function () {
+        var center = new neon.util.LatLon(11.95, 19.5);
+        var query = baseQuery().withinDistance('location', center, 35, neon.query.MILE);
+        var expectedData = rows(2, 0);
+        assertQueryResults(query, expectedData);
+    });
+
+    it('query near location and filter on attributes', function () {
+        var center = new neon.util.LatLon(11.95, 19.5);
+        var withinDistanceClause = neon.query.withinDistance('location', center, 35, neon.query.MILE);
+        var dcStateClause = neon.query.where('state', '=', 'DC');
+        var whereClause = neon.query.and(withinDistanceClause, dcStateClause);
+        var query = baseQuery().where(whereClause);
+
+        var expectedData = rows(2);
+        assertQueryResults(query, expectedData);
+    });
 
     /**
      * Executes the specified query and verifies that the results match the expected data

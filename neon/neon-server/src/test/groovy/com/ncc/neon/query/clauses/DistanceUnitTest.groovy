@@ -1,6 +1,6 @@
-package com.ncc.neon.query
+package com.ncc.neon.query.clauses
 
-import com.ncc.neon.query.clauses.*
+import org.junit.Test
 
 /*
  * ************************************************************************
@@ -25,28 +25,15 @@ import com.ncc.neon.query.clauses.*
  * RECIPIENT IS UNDER OBLIGATION TO MAINTAIN SECRECY.
  */
 
-/**
- * Constructs queries to be executed against a data store
- */
-public interface QueryBuilder {
+class DistanceUnitTest {
 
-    def apply(SelectClause clause)
-    def apply(SingularWhereClause clause)
-    def apply(WithinDistanceClause clause)
-    def apply(AndWhereClause clause)
-    def apply(OrWhereClause clause)
-    def apply(DistinctClause clause)
-    def apply(GroupByFunctionClause clause)
-    def apply(GroupByFieldClause clause)
-    def apply(AggregateClause clause)
-    def apply(SortClause clause)
-    def apply(LimitClause clause)
+    // these tests just make sure the distance units have not been incorrectly setup
 
-    /**
-     * Builds the query object used by the {@link QueryExecutor}. The format of this object
-     * is based on the format the query executor uses.
-     * @return
-     */
-    def build()
+    @Test
+    void testConversions() {
+        assert DistanceUnit.METER.meters == 1
+        assert DistanceUnit.KM.meters == 1000
+        assert DistanceUnit.MILE.meters == 1609.34
+    }
 
 }

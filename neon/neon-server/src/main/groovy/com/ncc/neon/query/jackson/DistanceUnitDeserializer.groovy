@@ -1,6 +1,10 @@
-package com.ncc.neon.query
+package com.ncc.neon.query.jackson
 
-import com.ncc.neon.query.clauses.*
+import com.ncc.neon.query.clauses.DistanceUnit
+import org.codehaus.jackson.JsonParser
+import org.codehaus.jackson.map.DeserializationContext
+import org.codehaus.jackson.map.JsonDeserializer
+import org.codehaus.jackson.map.annotate.JsonDeserialize
 
 /*
  * ************************************************************************
@@ -24,29 +28,11 @@ import com.ncc.neon.query.clauses.*
  * OF NEXT CENTURY CORPORATION EXCEPT BY PRIOR WRITTEN PERMISSION AND WHEN
  * RECIPIENT IS UNDER OBLIGATION TO MAINTAIN SECRECY.
  */
+class DistanceUnitDeserializer extends JsonDeserializer<DistanceUnit> {
 
-/**
- * Constructs queries to be executed against a data store
- */
-public interface QueryBuilder {
-
-    def apply(SelectClause clause)
-    def apply(SingularWhereClause clause)
-    def apply(WithinDistanceClause clause)
-    def apply(AndWhereClause clause)
-    def apply(OrWhereClause clause)
-    def apply(DistinctClause clause)
-    def apply(GroupByFunctionClause clause)
-    def apply(GroupByFieldClause clause)
-    def apply(AggregateClause clause)
-    def apply(SortClause clause)
-    def apply(LimitClause clause)
-
-    /**
-     * Builds the query object used by the {@link QueryExecutor}. The format of this object
-     * is based on the format the query executor uses.
-     * @return
-     */
-    def build()
-
+    @Override
+    DistanceUnit deserialize(JsonParser jp, DeserializationContext ctxt) {
+        def unit = jp.text
+        return DistanceUnit.valueOf(unit.toUpperCase(Locale.US))
+    }
 }

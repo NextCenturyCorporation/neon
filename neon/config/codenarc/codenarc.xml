@@ -51,6 +51,7 @@
         <rule-config name='MethodSize'>
             <property name='maxLines' value='20'/>
         </rule-config>
+        <exclude name='MethodCount'/>
     </ruleset-ref>
     <ruleset-ref path='rulesets/unnecessary.xml'>
         <exclude name='UnnecessaryCollectCall'/>

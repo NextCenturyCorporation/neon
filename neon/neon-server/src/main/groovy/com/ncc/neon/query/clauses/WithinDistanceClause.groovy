@@ -1,6 +1,7 @@
-package com.ncc.neon.query
+package com.ncc.neon.query.clauses
 
-import com.ncc.neon.query.clauses.*
+import com.ncc.neon.util.LatLon
+import groovy.transform.ToString
 
 /*
  * ************************************************************************
@@ -26,27 +27,14 @@ import com.ncc.neon.query.clauses.*
  */
 
 /**
- * Constructs queries to be executed against a data store
+ * A query clause to use when checking if a record is within a certain geographic distance of a point
  */
-public interface QueryBuilder {
+@ToString
+class WithinDistanceClause implements WhereClause {
 
-    def apply(SelectClause clause)
-    def apply(SingularWhereClause clause)
-    def apply(WithinDistanceClause clause)
-    def apply(AndWhereClause clause)
-    def apply(OrWhereClause clause)
-    def apply(DistinctClause clause)
-    def apply(GroupByFunctionClause clause)
-    def apply(GroupByFieldClause clause)
-    def apply(AggregateClause clause)
-    def apply(SortClause clause)
-    def apply(LimitClause clause)
-
-    /**
-     * Builds the query object used by the {@link QueryExecutor}. The format of this object
-     * is based on the format the query executor uses.
-     * @return
-     */
-    def build()
+    String locationField
+    LatLon center
+    double distance
+    DistanceUnit distanceUnit
 
 }

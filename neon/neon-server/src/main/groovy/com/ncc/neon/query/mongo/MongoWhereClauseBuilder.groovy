@@ -1,9 +1,11 @@
 package com.ncc.neon.query.mongo
 
 import com.mongodb.BasicDBObject
+import com.ncc.neon.query.InvalidQueryException
 import com.ncc.neon.query.clauses.AndWhereClause
 import com.ncc.neon.query.clauses.OrWhereClause
 import com.ncc.neon.query.clauses.SingularWhereClause
+import com.ncc.neon.query.clauses.WithinDistanceClause
 import org.bson.types.ObjectId
 
 /*
@@ -59,6 +61,15 @@ class MongoWhereClauseBuilder {
         return new BasicDBObject(clause.lhs, rhs)
     }
 
+    static def build(WithinDistanceClause clause) {
+        def geometry = new BasicDBObject("type", "Point")
+        geometry.put("coordinates", [clause.center.lonDegrees, clause.center.latDegrees])
+
+        def near = new BasicDBObject('$near', geometry)
+        near.put('$maxDistance', clause.distance * clause.distanceUnit.meters)
+
+        return new BasicDBObject(clause.locationField, near)
+    }
 
     static def build(AndWhereClause clause) {
         return buildBooleanClause(clause, 'and')
@@ -69,12 +80,30 @@ class MongoWhereClauseBuilder {
     }
 
     private static def buildBooleanClause(booleanClause, opName) {
+        // TODO: Mongo has a bug such that it can't use geospatial clauses in AND or OR operators - https://jira.mongodb.org/browse/SERVER-4572. AND can be partially used by putting the geospatial clause outside the rest of them (as long as the location field is not used inside the AND query as well)
+        def geospatialClauses = []
         def clauses = []
+
         booleanClause.whereClauses.each {
             def clause = build(it)
-            clauses << clause
+            if (!(it instanceof WithinDistanceClause)) {
+                clauses << clause
+            } else {
+                geospatialClauses << clause
+            }
         }
-        return new BasicDBObject('$' + opName, clauses)
+        def dbObject = new BasicDBObject('$' + opName, clauses)
+        appendGeospatialClausesToBooleanClause(booleanClause, dbObject, geospatialClauses)
+        return dbObject
+    }
+
+    private static def appendGeospatialClausesToBooleanClause(booleanClause, dbObject, geospatialClauses) {
+        geospatialClauses.each {
+            if (booleanClause instanceof OrWhereClause) {
+                throw new InvalidQueryException('MongoDB does not support geospatial queries in OR operators. See https://jira.mongodb.org/browse/SERVER-4572 for details')
+            }
+            dbObject.putAll(it)
+        }
     }
 
     private static def createObjIds(def rhs) {

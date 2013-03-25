@@ -1,7 +1,3 @@
-package com.ncc.neon.query
-
-import com.ncc.neon.query.clauses.*
-
 /*
  * ************************************************************************
  * Copyright (c), 2013 Next Century Corporation. All Rights Reserved.
@@ -24,29 +20,32 @@ import com.ncc.neon.query.clauses.*
  * OF NEXT CENTURY CORPORATION EXCEPT BY PRIOR WRITTEN PERMISSION AND WHEN
  * RECIPIENT IS UNDER OBLIGATION TO MAINTAIN SECRECY.
  */
+/**
+ * A structure that holds a latitude and longitude
+ * @namespace neon.util
+ * @class LatLon
+ */
+neon.namespace('neon.util');
 
 /**
- * Constructs queries to be executed against a data store
+ * Creates a new latitude/longitude pair with the specified values in degrees
+ * @param latDegrees
+ * @param lonDegrees
+ * @constructor
  */
-public interface QueryBuilder {
+neon.util.LatLon = function (latDegrees, lonDegrees) {
+    neon.util.LatLon.validateArgs_(latDegrees, lonDegrees);
+    this.latDegrees = latDegrees;
+    this.lonDegrees = lonDegrees;
 
-    def apply(SelectClause clause)
-    def apply(SingularWhereClause clause)
-    def apply(WithinDistanceClause clause)
-    def apply(AndWhereClause clause)
-    def apply(OrWhereClause clause)
-    def apply(DistinctClause clause)
-    def apply(GroupByFunctionClause clause)
-    def apply(GroupByFieldClause clause)
-    def apply(AggregateClause clause)
-    def apply(SortClause clause)
-    def apply(LimitClause clause)
+};
 
-    /**
-     * Builds the query object used by the {@link QueryExecutor}. The format of this object
-     * is based on the format the query executor uses.
-     * @return
-     */
-    def build()
+neon.util.LatLon.validateArgs_ = function (latDegrees, lonDegrees) {
+    if (latDegrees > 90 || latDegrees < -90) {
+        throw new Error('Invalid latitude ' + latDegrees + '. Must be in range [-90,90]');
+    }
 
-}
+    if (lonDegrees > 180 || lonDegrees < -180) {
+        throw new Error('Invalid longitude ' + lonDegrees + '. Must be in range [-180,180]');
+    }
+};

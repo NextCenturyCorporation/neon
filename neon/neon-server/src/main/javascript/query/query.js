@@ -101,6 +101,27 @@ neon.query.MONTH = 'month';
  */
 neon.query.YEAR = 'year';
 
+/**
+ * The distance unit for geospatial queries in meters
+ * @property METER
+ * @type {string}
+ */
+neon.query.METER = 'meter';
+
+/**
+ * The distance unit for geospatial queries in kilometers
+ * @property KM
+ * @type {string}
+ */
+neon.query.KM = 'km';
+
+/**
+ * The distance unit for geospatial queries in miles
+ * @property MILE
+ * @type {string}
+ */
+neon.query.MILE = 'mile';
+
 
 // these ids are used for providing json args to the callback functions
 neon.query.DATASET_ID_IDENTIFIER = 'datasetId';
@@ -200,7 +221,7 @@ neon.query.Query.prototype.distinct = function (fieldName) {
  * @param {int} limit The maximum number of results to return from the query
  * @return {neon.query.Query} This query object
  */
-neon.query.Query.prototype.limit = function(limit) {
+neon.query.Query.prototype.limit = function (limit) {
     this.limitClause = new neon.query.LimitClause(limit);
     return this;
 };
@@ -255,6 +276,22 @@ neon.query.Query.prototype.transform = function (transformName) {
 };
 
 /**
+ * Adds a query clause to specify that query results must be within the specified distance from
+ * the center point. This is used instead of a *where* query clause (or in conjuction with where
+ * clauses in boolean operators).
+ * @method withinDistance
+ * @param {String} locationField The name of the field containing the location value
+ * @param {neon.util.LatLon} center The point from which the distance is measured
+ * @param {double} distance The maximum distance from the center point a result must be within to be returned in the query
+ * @param {String} distanceUnit The unit of measure for the distance. See the constants in this class.
+ * @return {neon.query.Query} This query object
+ */
+neon.query.Query.prototype.withinDistance = function (locationField, center, distance, distanceUnit) {
+    this.filter.withinDistance(locationField, center, distance, distanceUnit);
+    return this;
+};
+
+/**
  * Creates a simple *where* clause for the query
  * @method where
  * @param {String} fieldName The field name to group on
@@ -265,7 +302,7 @@ neon.query.Query.prototype.transform = function (transformName) {
  * @return {Object}
  */
 neon.query.where = function (fieldName, op, value) {
-    return new this.WhereClause(fieldName, op, value);
+    return new neon.query.WhereClause(fieldName, op, value);
 };
 
 /**
@@ -277,7 +314,7 @@ neon.query.where = function (fieldName, op, value) {
  * @return {Object}
  */
 neon.query.and = function (clauses) {
-    return new this.BooleanClause('and', neon.util.ArrayUtils.argumentsToArray(arguments));
+    return new neon.query.BooleanClause('and', neon.util.ArrayUtils.argumentsToArray(arguments));
 };
 
 /**
@@ -289,7 +326,21 @@ neon.query.and = function (clauses) {
  * @return {Object}
  */
 neon.query.or = function (clauses) {
-    return new this.BooleanClause('or', neon.util.ArrayUtils.argumentsToArray(arguments));
+    return new neon.query.BooleanClause('or', neon.util.ArrayUtils.argumentsToArray(arguments));
+};
+
+/**
+ * Creates a query clause to specify that query results must be within the specified distance from
+ * the center point.
+ * @method withinDistance
+ * @param {String} locationField The name of the field containing the location value
+ * @param {neon.util.LatLon} center The point from which the distance is measured
+ * @param {double} distance The maximum distance from the center point a result must be within to be returned in the query
+ * @param {String} distanceUnit The unit of measure for the distance. See the constants in this class.
+ * @return {neon.query.WithinDistanceClause}
+ */
+neon.query.withinDistance = function (locationField, center, distance, distanceUnit) {
+    return new neon.query.WithinDistanceClause(locationField, center, distance, distanceUnit);
 };
 
 /**
@@ -604,13 +655,26 @@ neon.query.Filter.prototype.selectFrom = function (dataSourceName, datasetId) {
  */
 neon.query.Filter.prototype.where = function () {
     if (arguments.length === 3) {
-        this.whereClause = new neon.query.WhereClause(arguments[0], arguments[1], arguments[2]);
+        this.whereClause = neon.query.where(arguments[0], arguments[1], arguments[2]);
     }
     else {
-        // must be a boolean clause
+        // must be a boolean/geospatial clause
         this.whereClause = arguments[0];
     }
     return this;
+};
+
+/**
+ * Adds a *withinDistance* clause to the filter.
+ * @param {String} locationField The name of the field containing the location value
+ * @param {neon.util.LatLon} center The point from which the distance is measured
+ * @param {double} distance The maximum distance from the center point a result must be within to be returned in the query
+ * @param {String} distanceUnit The unit of measure for the distance. See the constants in this class.
+ * @method withinDistance
+ * @return {neon.query.Filter} This filter object
+ */
+neon.query.Filter.prototype.withinDistance = function (locationField, center, distance, distanceUnit) {
+    return this.where(neon.query.withinDistance(locationField, center, distance, distanceUnit));
 };
 
 /**
@@ -729,8 +793,16 @@ neon.query.SortClause = function (fieldName, sortOrder) {
     this.sortOrder = sortOrder;
 };
 
-neon.query.LimitClause = function(limit) {
+neon.query.LimitClause = function (limit) {
     this.limit = limit;
+};
+
+neon.query.WithinDistanceClause = function (locationField, center, distance, distanceUnit) {
+    this.type = 'withinDistance';
+    this.locationField = locationField;
+    this.center = center;
+    this.distance = distance;
+    this.distanceUnit = distanceUnit;
 };
 
 /**
