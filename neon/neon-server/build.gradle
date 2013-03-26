@@ -58,9 +58,6 @@ javascript.source {
 sourceSets {
     // contains the server integration tests
     integrationTest {
-        compileClasspath += sourceSets.main.compileClasspath + sourceSets.main.output + sourceSets.test.compileClasspath + sourceSets.test.output
-        runtimeClasspath += sourceSets.main.runtimeClasspath + sourceSets.main.output + sourceSets.test.runtimeClasspath + sourceSets.test.output
-
         resources {
             srcDir 'src/integrationTest/resources'
             srcDir 'src/test-data'
@@ -102,6 +99,10 @@ dependencies {
     testCompile 'org.json:json:20090211'
     testCompile "org.springframework:spring-test:$springVersion"
 
+    integrationTestCompile files(sourceSets.main.output.classesDir)
+    integrationTestCompile files(sourceSets.test.output.classesDir)
+
+
 }
 
 // configure codenarc for each of the source sets
@@ -128,9 +129,7 @@ jdependMain.doLast {
 }
 
 war {
-    dependsOn 'jshint'
-    dependsOn 'combineJs'
-    dependsOn 'check'
+    dependsOn 'jshint', 'combineJs', 'check'
     if (isRunJavascriptTests()) {
         dependsOn 'jsPhantomUnitTest'
     }
@@ -161,8 +160,7 @@ def isRunIntegrationTests() {
 }
 
 task integrationTests(type: Test) {
-    dependsOn 'integrationTestClasses'
-    dependsOn 'generateMongoJson'
+    dependsOn 'integrationTestClasses', 'generateMongoJson'
 
     testClassesDir = sourceSets.integrationTest.output.classesDir
     classpath = sourceSets.integrationTest.runtimeClasspath
@@ -205,9 +203,7 @@ task jsPhantomUnitTest(type: Exec) {
 
 
 task jsPhantomAcceptanceTest(type: Exec) {
-    dependsOn 'createJasmineAcceptanceSpecRunnerHtml'
-    dependsOn 'acceptanceTestWar'
-    dependsOn 'generateMongoJson'
+    dependsOn 'createJasmineAcceptanceSpecRunnerHtml', 'acceptanceTestWar', 'generateMongoJson'
     group = TEST_GROUP
     description = 'Runs the Jasmine acceptance test suite using phantomjs (requires phantomjs to be installed and on path)'
     // disable websecurity so we can make the ajax calls to the neon server

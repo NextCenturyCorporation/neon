@@ -48,7 +48,6 @@ import org.springframework.test.context.web.WebAppConfiguration
 @RunWith(SpringJUnit4ClassRunner)
 @ContextConfiguration(classes = MongoIntegrationTestContext)
 @WebAppConfiguration
-@SuppressWarnings('DuplicateMapLiteral') // some of the tests use the same maps, but it makes the tests more readable
 class MongoQueryExecutorIntegrationTest {
 
     private static final String DATASOURCE_NAME = 'integrationTest'

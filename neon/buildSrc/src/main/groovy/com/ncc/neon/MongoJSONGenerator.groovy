@@ -31,6 +31,9 @@ import org.json.JSONObject
  */
 class MongoJSONGenerator {
 
+    /** the number of spaces to use for indentation in the output json */
+    private static final def INDENT_FACTOR = 4
+
     /**
      * Reads all json files (non-recursively) from the input directory, converts them to a form suitable for upload
      * to mongo and writes them to the output directory. The output directory will be created if needed.
@@ -75,7 +78,7 @@ class MongoJSONGenerator {
         outDir.mkdirs()
         def outfile = new File(outDir, fileName)
         outfile.withWriter { w ->
-            w << jsonArray.toString(4)
+            w << jsonArray.toString(INDENT_FACTOR)
         }
     }
 
