@@ -90,35 +90,35 @@ neon.query.DESCENDING = -1;
 /**
  * The function name to get the month part of a date field
  * @property MONTH
- * @type {string}
+ * @type {String}
  */
 neon.query.MONTH = 'month';
 
 /**
  * The function name to get the year part of a date field
  * @property YEAR
- * @type {string}
+ * @type {String}
  */
 neon.query.YEAR = 'year';
 
 /**
  * The distance unit for geospatial queries in meters
  * @property METER
- * @type {string}
+ * @type {String}
  */
 neon.query.METER = 'meter';
 
 /**
  * The distance unit for geospatial queries in kilometers
  * @property KM
- * @type {string}
+ * @type {String}
  */
 neon.query.KM = 'km';
 
 /**
  * The distance unit for geospatial queries in miles
  * @property MILE
- * @type {string}
+ * @type {String}
  */
 neon.query.MILE = 'mile';
 
