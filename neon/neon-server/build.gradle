@@ -130,6 +130,10 @@ jdependMain.doLast {
 
 war {
     dependsOn 'jshint', 'combineJs', 'check'
+
+    // add flags for the javascript and mongo integration tests since they require external software to be
+    // installed (nodejs/phantomjs, mongo). turning these off by default makes it easy for people to build the war
+    // even if they don't have them installed
     if (isRunJavascriptTests()) {
         dependsOn 'jsPhantomUnitTest'
     }
