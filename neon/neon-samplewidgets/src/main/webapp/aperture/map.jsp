@@ -12,18 +12,7 @@
     <link rel="stylesheet" type="text/css" href="<%=neonServerUrl%>/css/neon.css">
 
     <script src="<%=owfServerUrl%>/js/owf-widget.js"></script>
-    <script src="<%=neonServerUrl%>/js/jquery/jquery-1.8.3.min.js"></script>
-    <script src="<%=neonServerUrl%>/js/underscore/1.4.3/underscore.js"></script>
-    <script src="<%=neonServerUrl%>/js/uuid/uuid.js"></script>
-
-    <script src="<%=neonServerUrl%>/js/namespace.js"></script>
-
-    <script src="<%=neonServerUrl%>/js/util/ajaxUtils.js"></script>
-    <script src="<%=neonServerUrl%>/js/util/arrayUtils.js"></script>
-    <script src="<%=neonServerUrl%>/js/query/query.js"></script>
-    <script src="<%=neonServerUrl%>/js/eventing/channels.js"></script>
-    <script src="<%=neonServerUrl%>/js/eventing/messageHandler.js"></script>
-    <script src="<%=neonServerUrl%>/js/eventing/owfEventPublisher.js"></script>
+    <script src="<%=neonServerUrl%>/js/neon.js"></script>
 
     <script src="js/aperture/1.0/lib/proj4js.js"></script>
     <script src="js/aperture/1.0/lib/OpenLayers-textures.js"></script>

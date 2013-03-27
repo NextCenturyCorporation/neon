@@ -25,7 +25,6 @@
  * @namespace neon.util
  * @class LatLon
  */
-neon.namespace('neon.util');
 
 /**
  * Creates a new latitude/longitude pair with the specified values in degrees
@@ -35,7 +34,19 @@ neon.namespace('neon.util');
  */
 neon.util.LatLon = function (latDegrees, lonDegrees) {
     neon.util.LatLon.validateArgs_(latDegrees, lonDegrees);
+
+    /**
+     * The latitude in degrees
+     * @property latDegrees
+     * @type {double}
+     */
     this.latDegrees = latDegrees;
+
+    /**
+     * The longitude in degrees
+     * @property lonDegrees
+     * @type {double}
+     */
     this.lonDegrees = lonDegrees;
 
 };

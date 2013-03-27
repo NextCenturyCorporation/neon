@@ -20,13 +20,14 @@
  * OF NEXT CENTURY CORPORATION EXCEPT BY PRIOR WRITTEN PERMISSION AND WHEN
  * RECIPIENT IS UNDER OBLIGATION TO MAINTAIN SECRECY.
  */
+
+neon.util.AjaxUtils = {};
+
 /**
  * Utility methods for working with ajax calls
  * @namespace neon.util
  * @class AjaxUtils
  */
-neon.namespace('neon.util.AjaxUtils');
-
 neon.util.AjaxUtils.overlayId_ = 'neon-overlay';
 
 /*jshint expr: true */

@@ -20,27 +20,8 @@
  * OF NEXT CENTURY CORPORATION EXCEPT BY PRIOR WRITTEN PERMISSION AND WHEN
  * RECIPIENT IS UNDER OBLIGATION TO MAINTAIN SECRECY.
  */
-
-/**
- * Utility class to provide easier ability to namespace classes
- *  @module neon
- *  @class neon
- */
-var neon = neon || {};
-
-
-/**
- * Creates the objects required for namespace based on the **.** separated string. If these objects
- * already exist, they will not be overwritten
- * @method namespace
- * @param namespace A namespace string, e.g. **com.mycompany**
- */
-neon.namespace = function (namespace) {
-
-    var parts = namespace.split('.');
-    var ns = window;
-    parts.forEach(function (part) {
-        ns[part] = ns[part] || {};
-        ns = ns[part];
-    });
-};
+(function() {
+    window.neon = window.neon || {};
+    neon.eventing = neon.eventing || {};
+    neon.query = neon.query || {};
+    neon.util = neon.util || {};

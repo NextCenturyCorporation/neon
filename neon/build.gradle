@@ -34,9 +34,8 @@ subprojects {
 
     version = '1.0-SNAPSHOT'
 
-    // run a
-    def jettyPort = 10002
-    httpPort = jettyPort
+    // run on a port that is likely to not be in use
+    httpPort = 10002
     stopPort = httpPort + 2
     stopKey = 'stop'
 

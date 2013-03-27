@@ -20,30 +20,28 @@
  * OF NEXT CENTURY CORPORATION EXCEPT BY PRIOR WRITTEN PERMISSION AND WHEN
  * RECIPIENT IS UNDER OBLIGATION TO MAINTAIN SECRECY.
  */
-neon.namespace('neon.owf.mock');
-neon.namespace('OWF.Eventing');
 
-neon.owf.mock.channelRegistry = {};
+neon.mock.channelRegistry = {};
 
-neon.owf.mock.Channel = function() {
+neon.mock.Channel = function() {
     this.callbacks_ = [];
 }
 
 OWF.Eventing.subscribe = function(channelName, callback) {
-    if ( !(channelName in neon.owf.mock.channelRegistry) ) {
-        neon.owf.mock.channelRegistry[channelName] = new neon.owf.mock.Channel();
+    if ( !(channelName in neon.mock.channelRegistry) ) {
+        neon.mock.channelRegistry[channelName] = new neon.mock.Channel();
     }
-    neon.owf.mock.channelRegistry[channelName].callbacks_.push(callback)
+    neon.mock.channelRegistry[channelName].callbacks_.push(callback)
 };
 
 OWF.Eventing.publish = function(channelName, message) {
-    var channel = neon.owf.mock.channelRegistry[channelName];
+    var channel = neon.mock.channelRegistry[channelName];
     channel.callbacks_.forEach(function(callback) {
         callback.call(null, 'owfEventingMockSender', message);
     });
 
 };
 
-neon.owf.mock.clearChannels = function() {
-    neon.owf.mock.channelRegistry = {};
+neon.mock.clearChannels = function() {
+    neon.mock.channelRegistry = {};
 };

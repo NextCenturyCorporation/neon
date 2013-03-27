@@ -27,7 +27,8 @@
  * @namespace neon.eventing
  * @class Channels
  */
-neon.namespace('neon.eventing.Channels');
+
+neon.eventing.Channels = {};
 
 /**
  * @property SELECTION_CHANGED

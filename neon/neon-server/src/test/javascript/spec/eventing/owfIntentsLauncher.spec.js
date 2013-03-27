@@ -22,8 +22,6 @@
  */
 describe('intents launcher', function () {
 
-    // ensure this exists since we'll be mocking it out
-    neon.namespace("OWF.Intents");
     var origStartActivity = OWF.Intents.startActivity;
 
     var launcher;

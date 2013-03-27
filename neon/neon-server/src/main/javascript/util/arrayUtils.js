@@ -25,7 +25,8 @@
  * @namespace neon.util
  * @class ArrayUtils
  */
-neon.namespace('neon.util.ArrayUtils');
+
+neon.util.ArrayUtils = {};
 
 /**
  * Converts the javascript *arguments* to an array.

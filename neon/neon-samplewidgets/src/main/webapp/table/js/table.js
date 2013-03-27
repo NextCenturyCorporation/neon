@@ -21,7 +21,8 @@
  * RECIPIENT IS UNDER OBLIGATION TO MAINTAIN SECRECY.
  */
 
-neon.namespace('neon.table');
+// neon scope is defined in neon.js
+neon.table = {};
 
 neon.table.Table = function () {
     this.table_;

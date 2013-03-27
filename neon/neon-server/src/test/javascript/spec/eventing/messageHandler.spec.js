@@ -24,7 +24,7 @@ describe('message handler', function () {
 
 
     beforeEach(function() {
-        neon.owf.mock.clearChannels();
+        neon.mock.clearChannels();
     });
 
     function testPublishedMessageReceived_(channelName, callbackName, params, context) {

@@ -24,11 +24,9 @@ package com.ncc.neon
  */
 
 /**
- * Generates the list of script includes for a jasmine spec file
+ * Generates the list of spec file includes for a jasmine spec runner
  */
 class JasmineIncludesGenerator {
-
-    // TODO: This class may only need to generate spec file includes after XDATA-12 (js dependency management) is done.
 
     /** a tag in a javascript file that indicates it is the minified version */
     private static final String MINIFIED_INDICATOR = '-min'
@@ -41,15 +39,13 @@ class JasmineIncludesGenerator {
      * @param projectDir The gradle project directory
      * @param testRoot The root directory for the javascript tests. Note the source file patterns should
      * be relative to here
-     * @param sourceFilePatterns The file patterns to match for source files to load (relative to the test root)
      */
     void generateIncludes(projectDir,
-                          testRoot,
-                          sourceFilePatterns) {
+                          testRoot) {
 
         matchingFiles.clear()
         def files = [];
-        files.addAll(sourceFilePatterns)
+        files.addAll('../../js-test-support/helpers/*.js')
         files.addAll('spec/*.spec.js')
         files.each { libPath ->
             def file = new File(libPath.replaceAll("\"", ""))
@@ -60,7 +56,6 @@ class JasmineIncludesGenerator {
                 matchingFiles.add(libPath)
             }
         }
-        removeMinifiedDuplicates()
     }
 
     private def addMatchingFiles(projectDir, file, testRoot) {
@@ -76,20 +71,5 @@ class JasmineIncludesGenerator {
             }
         }
     }
-
-    private def removeMinifiedDuplicates() {
-        matchingFiles.removeAll { filename ->
-            // if the file is a minified version and has a corresponding non minified version, remove it
-            def index = filename.lastIndexOf(MINIFIED_INDICATOR)
-            if (index >= 0) {
-                // some of the libraries strip off the min, and some replace it with "debug"
-                def nonMinifiedVersion = filename.substring(0, index) + filename.substring(index + MINIFIED_INDICATOR.length())
-                def debugVersion = filename.substring(0, index) + "-debug" + filename.substring(index + MINIFIED_INDICATOR.length())
-                return [nonMinifiedVersion, debugVersion].any { matchingFiles.contains(it) }
-            }
-            return false
-        }
-    }
-
 
 }

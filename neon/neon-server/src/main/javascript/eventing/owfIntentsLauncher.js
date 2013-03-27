@@ -26,8 +26,6 @@
  * @namespace neon.eventing
  * @class OWFIntentsLauncher
  */
-neon.namespace('neon.eventing');
-
 
 /**
  * @class OWFIntentsLauncher

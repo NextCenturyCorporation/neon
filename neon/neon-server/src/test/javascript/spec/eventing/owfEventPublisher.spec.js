@@ -20,7 +20,6 @@
  * OF NEXT CENTURY CORPORATION EXCEPT BY PRIOR WRITTEN PERMISSION AND WHEN
  * RECIPIENT IS UNDER OBLIGATION TO MAINTAIN SECRECY.
  */
-neon.namespace('OWF.Eventing');
 
 describe('publishing events to OWF channels', function(){
 
@@ -61,7 +60,7 @@ describe('publishing events to OWF channels', function(){
         // not all of the real methods actually return any results , but for this test it doesn't matter
         var mockResults = {mock:"results"};
         var delegateSpy = spyOn(neon.query,delegateMethodName).andCallThrough();
-        neon.ajax.mock.AjaxMockUtils.mockNextAjaxCall(mockResults);
+        neon.mock.AjaxMockUtils.mockNextAjaxCall(mockResults);
         queryExecutorMethod.apply(owfEventPublisher,args);
         var expectedArgs = {};
         if ( additionalArgs ) {

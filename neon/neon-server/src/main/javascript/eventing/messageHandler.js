@@ -20,7 +20,6 @@
  * OF NEXT CENTURY CORPORATION EXCEPT BY PRIOR WRITTEN PERMISSION AND WHEN
  * RECIPIENT IS UNDER OBLIGATION TO MAINTAIN SECRECY.
  */
-neon.namespace('neon.eventing');
 
 /**
  * This class is used for sending and receiving messages on OWF channels
@@ -34,8 +33,22 @@ neon.namespace('neon.eventing');
  */
 neon.eventing.MessageHandler = function (callbackOpts) {
 
-    this.id =  uuid.v4();
     var me = this;
+    var registerChannels = function() {
+        _.each([
+            {channel: neon.eventing.Channels.SELECTION_CHANGED, callback: me.selectionChanged},
+            {channel: neon.eventing.Channels.FILTERS_CHANGED, callback: me.filtersChanged}
+        ],
+            function (channelConfig) {
+                OWF.Eventing.subscribe(channelConfig.channel,
+                    function (sender, message) {
+                        channelConfig.callback.call(me.context, message);
+                    }
+                );
+            });
+    };
+
+    this.id =  uuid.v4();
 
     /**
      * The callback function that is invoked when a the selection of items changes
@@ -61,22 +74,9 @@ neon.eventing.MessageHandler = function (callbackOpts) {
     this.context = null;
 
     _.extend(this, callbackOpts);
-    registerChannels_();
 
+    registerChannels();
 
-    function registerChannels_() {
-        _.each([
-            {channel: neon.eventing.Channels.SELECTION_CHANGED, callback: me.selectionChanged},
-            {channel: neon.eventing.Channels.FILTERS_CHANGED, callback: me.filtersChanged}
-        ],
-            function (channelConfig) {
-                OWF.Eventing.subscribe(channelConfig.channel,
-                    function (sender, message) {
-                       channelConfig.callback.call(me.context, message);
-                    }
-                );
-            });
-    }
 };
 
 

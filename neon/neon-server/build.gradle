@@ -41,8 +41,6 @@ project.ext {
     // a mongo instance for inserting/deleting test data (will be lazy initialized)
     mongoInstance = null
 
-    // TODO: This may result in namespace.js being included twice but it needs to be included first (may be fixed with issue XDATA-12)
-    jsIncludesPatterns = ['../../main/webapp/js/*.js', '../../main/javascript/namespace.js', '../../main/javascript/*.js', '../../js-test-support/helpers/*.js'] as Set
 }
 
 
@@ -51,8 +49,17 @@ javascript.source {
         js {
             srcDir jsSrcDir
             include "**/*.js"
+            exclude 'intro.js'
+            exclude 'outro.js'
         }
     }
+    lib {
+        js {
+            srcDir 'src/main/js-lib'
+            include "**/*.js"
+        }
+    }
+
 }
 
 sourceSets {
@@ -141,15 +148,10 @@ war {
         dependsOn 'integrationTests'
     }
 
-    // copy the compiled library and the individual files so we can use either one.
-    // TODO: once we have the javascript build a little more solidified, we may not need the individual files, just the combined
-    from("${buildDir}/${libraryName}.js") {
+    from("${buildDir}/${archivesBaseName}.js") {
         into 'js'
     }
-    from(jsSrcDir) {
-        include '**/*.js'
-        into 'js'
-    }
+
     // strip out the version from the war
     version ""
 }
@@ -220,7 +222,7 @@ task jsPhantomAcceptanceTest(type: Exec) {
 }
 
 gradle.taskGraph.afterTask { task ->
-    if ( task == jsPhantomAcceptanceTest ) {
+    if (task == jsPhantomAcceptanceTest) {
         deleteAcceptanceTestData()
     }
 }
@@ -235,7 +237,7 @@ def insertAcceptanceTestData() {
     def collection = db.getCollection("records")
     def dbList = JSON.parse(new File(testDataDir, '/mongo-json/data.json').text)
     collection.insert(dbList)
-    collection.ensureIndex(new BasicDBObject("location","2dsphere"))
+    collection.ensureIndex(new BasicDBObject("location", "2dsphere"))
 }
 
 def deleteAcceptanceTestData() {
@@ -253,30 +255,31 @@ def getMongo() {
 task createJasmineUnitSpecRunnerHtml << {
     description = 'Creates the jasmine spec runner html file for javascript unit tests'
     group = TEST_GROUP
-    doCreateJasmineSpec(jsUnitTestDir, 'unit')
+    doCreateJasmineSpec(jsUnitTestDir, 'unit', '../../../build')
 }
 
 task createJasmineAcceptanceSpecRunnerHtml << {
     description = 'Creates the jasmine spec runner html file for javascript acceptance tests'
     group = TEST_GROUP
-    doCreateJasmineSpec(jsAcceptanceTestDir, 'acceptance')
+    doCreateJasmineSpec(jsAcceptanceTestDir, 'acceptance', "http://localhost:${httpPort}/neon/js")
 }
 
 
-def doCreateJasmineSpec(testDir, templateSuffix) {
+def doCreateJasmineSpec(testDir, templateSuffix, neonJsPath) {
     def templateFile = 'spec_runner.template.html'
 
     def scriptIncludes = new StringBuilder()
 
     def includesGenerator = new JasmineIncludesGenerator()
-    includesGenerator.generateIncludes(projectDir, testDir, jsIncludesPatterns)
+    includesGenerator.generateIncludes(projectDir, testDir)
     includesGenerator.matchingFiles.each { scriptIncludes.append('  <script src="').append(it).append('"></script>').append(System.properties['line.separator']) }
     def specRunnerOut = templateFile.replace('.template', "_${templateSuffix}")
     new File(testDir, specRunnerOut).delete()
     copy {
         from('src/js-test-support') {
             filter(ReplaceTokens, tokens: [
-                    includes: scriptIncludes.toString()
+                    includes: scriptIncludes.toString(),
+                    "neonjs.path" : neonJsPath.toString()
             ])
             include(templateFile)
         }
@@ -289,13 +292,13 @@ def doCreateJasmineSpec(testDir, templateSuffix) {
 }
 
 combineJs {
-    source = javascript.source.dev.js.files
-    dest = file("${buildDir}/${libraryName}.js")
+    source = javascript.source.lib.js.files + file("${jsSrcDir}/intro.js") + javascript.source.dev.js.files + file("${jsSrcDir}/outro.js")
+    dest = file("${buildDir}/${archivesBaseName}.js")
 }
 
 minifyJs {
     source = combineJs
-    dest = file("${buildDir}/${libraryName}-min.js")
+    dest = file("${buildDir}/${archivesBaseName}-min.js")
     closure {
         warningLevel = 'QUIET'
     }

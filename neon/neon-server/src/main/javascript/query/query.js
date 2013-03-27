@@ -20,8 +20,6 @@
  * OF NEXT CENTURY CORPORATION EXCEPT BY PRIOR WRITTEN PERMISSION AND WHEN
  * RECIPIENT IS UNDER OBLIGATION TO MAINTAIN SECRECY.
  */
-neon.namespace('neon.query');
-
 
 /**
  * The url of the query server. Defaults to localhost:8080/neon.
@@ -709,7 +707,6 @@ neon.query.FilterProvider = function (filter) {
  *
  * For example, this can be used to generate a filter that matches any rows whose field X appears
  * in the results of the subfilter
- *
  * @namespace neon.query
  * @class SubfilterFieldProvider
  * @param {neon.query.Filter} subfilter The subfilter whose results will be used as the basis for the newly generated filter
@@ -806,11 +803,10 @@ neon.query.WithinDistanceClause = function (locationField, center, distance, dis
 
 /**
  * A filter provider that wraps a simple filter
+ * @private
  * @namespace neon.query
- * @class SimpleFilterProvider
  * @param {neon.query.Filter} filter The filter being wrapped
  * @constructor
- * @private
  */
 neon.query.SimpleFilterProvider = function (filter) {
     this.type = 'simple';

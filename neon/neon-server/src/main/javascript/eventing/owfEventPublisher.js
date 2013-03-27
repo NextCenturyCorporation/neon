@@ -27,8 +27,6 @@
  * @class OWFEventPublisher
  */
 
-neon.namespace('neon.eventing');
-
 /**
  * Creates a new publisher that publishes messages to the appropriate OWF channel
  * using the specified message handler
