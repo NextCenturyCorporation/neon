@@ -1,5 +1,7 @@
 package com.ncc.neon.query.transform
 
+import org.json.JSONArray
+
 /*
  * ************************************************************************
  * Copyright (c), 2013 Next Century Corporation. All Rights Reserved.
@@ -24,15 +26,40 @@ package com.ncc.neon.query.transform
  */
 
 /**
- * An interface for applying a transform to a query result before returning it to the client.
+ * A transform used for testing that can replaces the string values in json results
  */
-interface JsonTransform {
+class ValueStringReplaceTransform implements JsonTransform {
+
+    private final String replaceThis
+    private final int replaceWith
+
+    ValueStringReplaceTransform(String replaceThis, Integer replaceWith) {
+        this.replaceThis = replaceThis
+        this.replaceWith = replaceWith
+    }
 
     /**
-     * Transforms the json input array and returns the output json representation
-     * @param inputJsonArray
-     * @return
+     * A no arg constructor for testing transforms with no arguments. It replaces occurrences of "abc"
+     * with 10
      */
-    String apply(inputJsonArray);
+    ValueStringReplaceTransform() {
+        this("abc", 10)
+    }
+
+    @Override
+    String apply(inputJsonArray) {
+        def jsonArray = new JSONArray(inputJsonArray)
+        jsonArray.length().times { index ->
+            def object = jsonArray.getJSONObject(index)
+            object.keys().each { key ->
+                def val = object.getString(key)
+                if ( val == replaceThis ) {
+                    val = replaceWith
+                }
+                object.put(key, val)
+            }
+        }
+        return jsonArray.toString()
+    }
 
 }

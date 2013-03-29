@@ -296,6 +296,24 @@ describe('query mapping', function () {
         assertQueryResults(query, expectedData);
     });
 
+    it('transforms query results with a RESTful service', function () {
+        // the port comes from build.gradle
+        var host = 'http://localhost:10008';
+        var path = '/neon/transformtest?replacethis=VA&replacewith=Virginia';
+        var transformClassName = 'com.ncc.neon.query.transform.RestServiceTransform';
+        var transformParams = [host, path];
+
+        var query = baseQuery().where('state', '=', 'VA').transform(transformClassName, transformParams);
+        executeAndWait(neon.query.executeQuery,query);
+        runs(function() {
+            expect(currentResult.data.length).toBe(4);
+            // the state should be converted from VA to Virginia
+            currentResult.data.forEach(function(row) {
+                expect(row.state).toEqual('Virginia');
+            });
+        });
+    });
+
     /**
      * Executes the specified query and verifies that the results match the expected data
      * @param query

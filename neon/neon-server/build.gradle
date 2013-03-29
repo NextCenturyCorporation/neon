@@ -19,6 +19,9 @@ def logbackVersion = "1.0.9"
 buildscript {
     repositories {
         mavenCentral()
+        maven {
+            url 'http://repository.codehaus.org/'
+        }
     }
     dependencies {
         classpath 'org.mongodb:mongo-java-driver:2.10.1'
@@ -71,13 +74,16 @@ sourceSets {
         }
     }
 
-    // no configuration needed for the acceptance test source set - it only has resources
     acceptanceTest
 }
 
 configurations {
     integrationTestCompile { extendsFrom testCompile }
     integrationTestRuntime { extendsFrom integrationTestCompile, testRuntime }
+
+    acceptanceTestCompile { extendsFrom testCompile }
+    acceptanceTestRuntime { extendsFrom testCompile, testRuntime }
+
 }
 
 dependencies {
@@ -96,6 +102,12 @@ dependencies {
     compile "ch.qos.logback:logback-core:$logbackVersion"
     compile "ch.qos.logback:logback-classic:$logbackVersion"
     compile "com.google.guava:guava:14.0.1"
+    compile ('org.codehaus.groovy.modules.http-builder:http-builder:0.6') {
+        // we already include groovy-all - this prevents bringing groovy in twice
+        exclude module: 'groovy'
+    }
+    compile 'commons-lang:commons-lang:2.6'
+    compile 'org.json:json:20090211'
 
     providedCompile 'javax.servlet:javax.servlet-api:3.0.1'
 
@@ -103,11 +115,11 @@ dependencies {
 
     testCompile 'junit:junit:4.11'
     testCompile 'commons-collections:commons-collections:3.2.1'
-    testCompile 'org.json:json:20090211'
     testCompile "org.springframework:spring-test:$springVersion"
 
     integrationTestCompile files(sourceSets.main.output.classesDir)
     integrationTestCompile files(sourceSets.test.output.classesDir)
+
 
 
 }
@@ -181,10 +193,22 @@ task integrationTests(type: Test) {
 
 }
 
+task transformTestWebService(type: org.gradle.api.plugins.jetty.JettyRun) {
+    dependsOn 'acceptanceTestClasses'
+    daemon = true
+    httpPort = 10008
+    stopPort = httpPort + 2
+    stopKey = 'stop'
+    classpath = sourceSets.acceptanceTest.runtimeClasspath
+    webXml = new File(sourceSets.acceptanceTest.output.resourcesDir, 'transform-service-web.xml')
+}
 
 task acceptanceTestWar(type: org.gradle.api.plugins.jetty.JettyRunWar) {
     dependsOn 'acceptanceTestClasses'
     daemon = true
+    httpPort = 10002
+    stopPort = httpPort + 2
+    stopKey = 'stop'
     jettyConfig = new File(sourceSets.acceptanceTest.output.resourcesDir, 'jetty-config.xml')
 }
 
@@ -209,7 +233,7 @@ task jsPhantomUnitTest(type: Exec) {
 
 
 task jsPhantomAcceptanceTest(type: Exec) {
-    dependsOn 'createJasmineAcceptanceSpecRunnerHtml', 'acceptanceTestWar', 'generateMongoJson'
+    dependsOn 'createJasmineAcceptanceSpecRunnerHtml', 'acceptanceTestWar', 'generateMongoJson', 'transformTestWebService'
     group = TEST_GROUP
     description = 'Runs the Jasmine acceptance test suite using phantomjs (requires phantomjs to be installed and on path)'
     // disable websecurity so we can make the ajax calls to the neon server
@@ -220,6 +244,7 @@ task jsPhantomAcceptanceTest(type: Exec) {
     }
     commandLine "phantomjs", "--web-security=no", phantomJsRunner, "${projectDir}/${jsAcceptanceTestDir}/spec_runner_acceptance.html"
 }
+
 
 gradle.taskGraph.afterTask { task ->
     if (task == jsPhantomAcceptanceTest) {
@@ -261,7 +286,7 @@ task createJasmineUnitSpecRunnerHtml << {
 task createJasmineAcceptanceSpecRunnerHtml << {
     description = 'Creates the jasmine spec runner html file for javascript acceptance tests'
     group = TEST_GROUP
-    doCreateJasmineSpec(jsAcceptanceTestDir, 'acceptance', "http://localhost:${httpPort}/neon/js")
+    doCreateJasmineSpec(jsAcceptanceTestDir, 'acceptance', "http://localhost:${acceptanceTestWar.httpPort}/neon/js")
 }
 
 
@@ -279,7 +304,7 @@ def doCreateJasmineSpec(testDir, templateSuffix, neonJsPath) {
         from('src/js-test-support') {
             filter(ReplaceTokens, tokens: [
                     includes: scriptIncludes.toString(),
-                    "neonjs.path" : neonJsPath.toString()
+                    "neonjs.path": neonJsPath.toString()
             ])
             include(templateFile)
         }

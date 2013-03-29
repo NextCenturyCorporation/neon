@@ -265,10 +265,11 @@ neon.query.Query.prototype.includeFiltered = function (includeFiltered) {
  * Specifies a name of a transform to apply to the json before returning it from the query
  * @method transform
  * @param {String} transformName
+ * @param {Array} [transformParams] If the transform takes any parameters, pass them in here
  * @return {neon.query.Query} This query object
  */
-neon.query.Query.prototype.transform = function (transformName) {
-    this.filter.transform(transformName);
+neon.query.Query.prototype.transform = function (transformName, transformParams) {
+    this.filter.transform(transformName, transformParams);
     return this;
 };
 
@@ -366,11 +367,7 @@ neon.query.getFieldNames = function (dataSourceName, datasetId, successCallback,
  * @param {Function} [errorCallback] The optional callback when an error occurs. This is a 3 parameter function that contains the xhr, a short error status and the full error message.
  */
 neon.query.executeQuery = function (query, successCallback, errorCallback) {
-    var queryParams = 'includefiltered=' + query.includeFiltered_;
-    var filter = query.filter;
-    if (filter && filter.transform_) {
-        queryParams += '&transform=' + filter.transform_;
-    }
+    var queryParams = neon.query.buildQueryParamsString_(query);
     neon.util.AjaxUtils.doPostJSON(
         query,
         neon.query.queryUrl_('/services/queryservice/query?' + queryParams),
@@ -379,6 +376,21 @@ neon.query.executeQuery = function (query, successCallback, errorCallback) {
             error: errorCallback
         }
     );
+};
+
+
+neon.query.buildQueryParamsString_ = function (query) {
+    var queryParams = 'includefiltered=' + query.includeFiltered_;
+    var filter = query.filter;
+    if (filter && filter.transform_) {
+        queryParams += '&transform=' + filter.transform_.transformName;
+        if (filter.transform_.transformParams) {
+            filter.transform_.transformParams.forEach(function (param) {
+                queryParams += '&param=' + encodeURIComponent(param);
+            });
+        }
+    }
+    return queryParams;
 };
 
 
@@ -678,10 +690,11 @@ neon.query.Filter.prototype.withinDistance = function (locationField, center, di
  * Specifies a name of a transform to apply to the json before returning it from the query
  * @method transform
  * @param {String} transformName
+ * @param {Array} [transformParams]
  * @return {neon.query.Filter} This filter object
  */
-neon.query.Filter.prototype.transform = function (transformName) {
-    this.transform_ = transformName;
+neon.query.Filter.prototype.transform = function (transformName, transformParams) {
+    this.transform_ = new neon.query.Transform(transformName, transformParams);
     return this;
 };
 
@@ -801,6 +814,11 @@ neon.query.WithinDistanceClause = function (locationField, center, distance, dis
     this.distanceUnit = distanceUnit;
 };
 
+neon.query.Transform = function (transformName, transformParams) {
+    this.transformName = transformName;
+    this.transformParams = transformParams;
+};
+
 /**
  * A filter provider that wraps a simple filter
  * @private
@@ -814,3 +832,4 @@ neon.query.SimpleFilterProvider = function (filter) {
 };
 // TODO: NEON-73 (Javascript inheritance library)
 neon.query.SimpleFilterProvider.prototype = new neon.query.FilterProvider();
+

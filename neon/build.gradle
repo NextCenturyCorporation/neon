@@ -34,11 +34,6 @@ subprojects {
 
     version = '1.0-SNAPSHOT'
 
-    // run on a port that is likely to not be in use
-    httpPort = 10002
-    stopPort = httpPort + 2
-    stopKey = 'stop'
-
 
     jshint {
         dest = file("${buildDir}/jshint.out")

@@ -1,7 +1,13 @@
-package com.ncc.neon.services
+package com.ncc.neon
 
-import com.ncc.neon.query.transform.JsonTransform
 import org.json.JSONArray
+
+import javax.ws.rs.Consumes
+import javax.ws.rs.POST
+import javax.ws.rs.Path
+import javax.ws.rs.Produces
+import javax.ws.rs.QueryParam
+import javax.ws.rs.core.MediaType
 
 /*
  * ************************************************************************
@@ -27,21 +33,17 @@ import org.json.JSONArray
  */
 
 /**
- * A transform used for testing that can replaces the string "val" in json results with "tval"
+ * A web service used during testing to transform json
  */
-class ValueStringReplaceTransform implements JsonTransform {
+@Path('/transformtest')
+class TransformService {
 
-    @Override
-    String apply(inputJsonArray) {
+    @POST
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    String transform(String inputJsonArray, @QueryParam("replacethis") String replaceThis, @QueryParam("replacewith") String replaceWith) {
         def jsonArray = new JSONArray(inputJsonArray)
-        jsonArray.length().times { index ->
-            def object = jsonArray.getJSONObject(index)
-            object.keys().each { key ->
-                def val = object.getString(key).replaceAll("val", "tval")
-                object.put(key, val)
-            }
-        }
-        return jsonArray
+        def output = jsonArray.toString().replaceAll(replaceThis,replaceWith);
+        return output
     }
-
 }

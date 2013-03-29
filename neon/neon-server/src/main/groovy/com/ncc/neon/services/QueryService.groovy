@@ -28,6 +28,7 @@ import com.ncc.neon.query.filter.Filter
 import com.ncc.neon.query.filter.FilterEvent
 import com.ncc.neon.query.filter.providers.FilterProvider
 import com.ncc.neon.query.filter.providers.QueryBased
+import org.apache.commons.lang.math.NumberUtils
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
 
@@ -46,9 +47,11 @@ class QueryService {
     @Produces(MediaType.APPLICATION_JSON)
     @Path("query")
     String executeQuery(Query query,
-                               @DefaultValue("false") @QueryParam("includefiltered") boolean includeFiltered,
-                               @QueryParam("transform") String transformClassName) {
-        return wrapInDataJson(queryExecutor.execute(query, includeFiltered), transformClassName)
+                        @DefaultValue("false") @QueryParam("includefiltered") boolean includeFiltered,
+                        @QueryParam("transform") String transformClassName,
+                        @QueryParam("param") List<String> transformParams
+    ) {
+        return wrapInDataJson(queryExecutor.execute(query, includeFiltered), transformClassName, transformParams)
     }
 
     @POST
@@ -109,8 +112,9 @@ class QueryService {
     @Produces(MediaType.APPLICATION_JSON)
     @Path("getselectionwhere")
     String getSelectionWhere(Filter filter,
-                                    @QueryParam("transform") String transformClassName) {
-        return wrapInDataJson(queryExecutor.getSelectionWhere(filter), transformClassName)
+                             @QueryParam("transform") String transformClassName,
+                             @QueryParam("param") List<String> transformParams) {
+        return wrapInDataJson(queryExecutor.getSelectionWhere(filter), transformClassName, transformParams)
     }
 
     @POST
@@ -137,22 +141,30 @@ class QueryService {
     @Produces(MediaType.APPLICATION_JSON)
     @Path("fieldnames")
     FieldNames getFieldNames(@QueryParam("datasourcename") String dataSourceName, @QueryParam("datasetid") String datasetId) {
-        def fieldNames = queryExecutor.getFieldNames(dataSourceName,datasetId)
-        return new FieldNames(fieldNames:fieldNames)
+        def fieldNames = queryExecutor.getFieldNames(dataSourceName, datasetId)
+        return new FieldNames(fieldNames: fieldNames)
     }
 
-    private def wrapInDataJson(queryResult, transformClassName = null) {
+    private def wrapInDataJson(queryResult, transformClassName = null, transformParams = []) {
         def json = queryResult.toJson()
         if (transformClassName) {
-            json = applyTransform(transformClassName, json)
+            json = applyTransform(transformClassName, transformParams, json)
         }
         def output = '{"data":' + json + '}'
         return output
     }
 
-    private static def applyTransform(transformClassName, json) {
-        def transform = QueryService.classLoader.loadClass(transformClassName).newInstance()
+    private static def applyTransform(transformClassName, transformParams, json) {
+        def transform = instantiateTransform(transformClassName, transformParams)
         return transform.apply(json)
+    }
+
+    private static instantiateTransform(transformClassName, transformParams) {
+        def typedParams = transformParams.collect { NumberUtils.isNumber(it) ? NumberUtils.createNumber(it) : it }
+        def transformParamTypes = typedParams.collect { it.class }
+        def transformClass = QueryService.classLoader.loadClass(transformClassName)
+        def constructor = transformClass.getConstructor(transformParamTypes as Class[])
+        return constructor.newInstance(typedParams as Object[])
     }
 
 }
