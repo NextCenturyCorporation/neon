@@ -29,7 +29,7 @@ import org.codehaus.jackson.map.annotate.JsonDeserialize
 /**
  * A representation of a distance
  */
-// TODO: A codenarc bug incorrectly throws the UnnecessaryPackageReference error on enums. We should upgrade codenarc to fix this.
+// TODO: NEON-80 A codenarc bug incorrectly throws the UnnecessaryPackageReference error on enums. We should upgrade codenarc to fix this.
 @SuppressWarnings('UnnecessaryPackageReference')
 @JsonDeserialize(using = DistanceUnitDeserializer)
 public enum DistanceUnit {
