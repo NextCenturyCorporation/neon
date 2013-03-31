@@ -93,11 +93,40 @@ neon.query.DESCENDING = -1;
 neon.query.MONTH = 'month';
 
 /**
+ * The function name to get the day part of a date field
+ * @property DAY
+ * @type {String}
+ */
+neon.query.DAY = 'dayOfMonth';
+
+/**
  * The function name to get the year part of a date field
  * @property YEAR
  * @type {String}
  */
 neon.query.YEAR = 'year';
+
+/**
+ * The function name to get the hour part of a date field
+ * @property HOUR
+ * @type {String}
+ */
+neon.query.HOUR = 'hour';
+
+/**
+ * The function name to get the minute part of a date field
+ * @property MINUTE
+ * @type {String}
+ */
+neon.query.MINUTE = 'minute';
+
+/**
+ * The function name to get the second part of a date field
+ * @property SECOND
+ * @type {String}
+ */
+neon.query.SECOND = 'second';
+
 
 /**
  * The distance unit for geospatial queries in meters
