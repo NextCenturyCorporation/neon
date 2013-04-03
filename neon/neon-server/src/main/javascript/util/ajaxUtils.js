@@ -30,20 +30,15 @@ neon.util.AjaxUtils = {};
  */
 neon.util.AjaxUtils.overlayId_ = 'neon-overlay';
 
-/*jshint expr: true */
-// these are set in the anonymous function at the end of this file
-neon.util.AjaxUtils.ajaxStartCallback_;
-neon.util.AjaxUtils.ajaxStopCallback_;
-/*jshint expr: false */
-
 /**
  * Asynchronously makes a post request to the specified URL
  * @method doPost
  * @param {String} url The URL to post the data to
  * @param {Object} opts See {{#crossLink "neon.util.AjaxUtils/doAjaxRequest"}}{{/crossLink}}
+ * @return {neon.util.AjaxRequest} The xhr request object
  */
 neon.util.AjaxUtils.doPost = function (url, opts) {
-    this.doAjaxRequest('POST', url, opts);
+    return this.doAjaxRequest('POST', url, opts);
 };
 
 /**
@@ -53,11 +48,12 @@ neon.util.AjaxUtils.doPost = function (url, opts) {
  * @param {Object} object The object to post
  * @param {String} url The URL to post to
  * @param {Object} opts See {{#crossLink "neon.util.AjaxUtils/doAjaxRequest"}}{{/crossLink}}
+ * @return {neon.util.AjaxRequest} The xhr request object
  */
 neon.util.AjaxUtils.doPostJSON = function (object, url, opts) {
     var data = JSON.stringify(object);
     var fullOpts = _.extend({}, opts, {data: data, contentType: 'application/json', responseType: 'json'});
-    this.doPost(url, fullOpts);
+    return this.doPost(url, fullOpts);
 };
 
 /**
@@ -65,10 +61,10 @@ neon.util.AjaxUtils.doPostJSON = function (object, url, opts) {
  * @method doGet
  * @param {String} url The url to get
  * @param {Object} opts See {{#crossLink "neon.util.AjaxUtils/doAjaxRequest"}}{{/crossLink}}
-
+ * @return {neon.util.AjaxRequest} The xhr request object
  */
 neon.util.AjaxUtils.doGet = function (url, opts) {
-    this.doAjaxRequest('GET', url, opts);
+    return this.doAjaxRequest('GET', url, opts);
 };
 
 /**
@@ -79,8 +75,18 @@ neon.util.AjaxUtils.doGet = function (url, opts) {
  * @param {Function} requestEnd
  */
 neon.util.AjaxUtils.setStartStopCallbacks = function (requestStart, requestEnd) {
-    neon.util.AjaxUtils.ajaxStartCallback_ = requestStart;
-    neon.util.AjaxUtils.ajaxStopCallback_ = requestEnd;
+    $(document).ajaxStart(requestStart);
+    $(document).ajaxStop(requestEnd);
+};
+
+/**
+ * Uses a default spinner when ajax queries are made
+ * @method useDefaultStartStopCallbacks
+ */
+neon.util.AjaxUtils.useDefaultStartStopCallbacks = function () {
+    neon.util.AjaxUtils.setStartStopCallbacks(
+        neon.util.AjaxUtils.showDefaultSpinner_,
+        neon.util.AjaxUtils.hideDefaultSpinner_);
 };
 
 
@@ -117,15 +123,17 @@ neon.util.AjaxUtils.doAjaxRequest = function (type, url, opts) {
             console.log(error);
         };
     }
-    $.ajax(params);
+    var xhr = $.ajax(params);
+    return new neon.util.AjaxRequest(xhr);
 };
 
 
 /**
- * The default method for showing an ajax spinner when none is provided
- * @method showDefaultSpinner
+ * A method that can be used when ajax calls start (if you do not have your own method to use).
+ * See {{#crossLink "neon.util.AjaxUtils/setStartStopCallbacks"}}{{/crossLink}}
+ * @method showDefaultSpinner_
  */
-neon.util.AjaxUtils.showDefaultSpinner = function () {
+neon.util.AjaxUtils.showDefaultSpinner_ = function () {
     $('body').append($('<div>').attr('id', neon.util.AjaxUtils.overlayId_).addClass('overlay-container'));
     $('#' + neon.util.AjaxUtils.overlayId_)
         .append($('<div>').addClass('overlay'));
@@ -133,23 +141,29 @@ neon.util.AjaxUtils.showDefaultSpinner = function () {
 };
 
 /**
- * Removes the default ajax spinner when an ajax request completes
- * @method hideDefaultSpinner
+ * A method that can be used when ajax calls are complete (if you do not have your own method to use).
+ * See {{#crossLink "neon.util.AjaxUtils/setStartStopCallbacks"}}{{/crossLink}}
+ * @method hideDefaultSpinner_
  */
-neon.util.AjaxUtils.hideDefaultSpinner = function () {
+neon.util.AjaxUtils.hideDefaultSpinner_ = function () {
     $('#' + neon.util.AjaxUtils.overlayId_).remove();
 };
 
-(function () {
-    neon.util.AjaxUtils.setStartStopCallbacks(
-        neon.util.AjaxUtils.showDefaultSpinner,
-        neon.util.AjaxUtils.hideDefaultSpinner);
+/**
+ * Stores an ajax request that is in progress (returned by any of the ajax method calls in this class)
+ * @class AjaxRequest
+ * @param {Object} xhr The jquery xhr being wrapped
+ * @constructor
+ */
+neon.util.AjaxRequest = function (xhr) {
 
-    // wrap the callbacks so the user can changed the underlying function that is invoked
-    $(document).ajaxStart(function () {
-        neon.util.AjaxUtils.ajaxStartCallback_();
-    });
-    $(document).ajaxStop(function () {
-        neon.util.AjaxUtils.ajaxStopCallback_();
-    });
-})();
+    // this really just wraps a jquery xhr
+    this.xhr = xhr;
+};
+
+/**
+ * Cancels the request if it is in progress
+ */
+neon.util.AjaxRequest.prototype.cancel = function () {
+    this.xhr.abort();
+};

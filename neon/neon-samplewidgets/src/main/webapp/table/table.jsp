@@ -21,6 +21,7 @@
     <script>
         OWF.relayFile = 'js/eventing/rpc_relay.uncompressed.html';
         neon.query.SERVER_URL = '<%=neonServerUrl%>';
+        neon.util.AjaxUtils.useDefaultStartStopCallbacks();
     </script>
 
 </head>

@@ -377,9 +377,10 @@ neon.query.withinDistance = function (locationField, center, distance, distanceU
  * @param {String} datasetId The id of the dataset whose fields are being returned
  * @param {Function} successCallback The callback to call when the field names are successfully retrieved
  * @param {Function} [errorCallback] The optional callback when an error occurs. This is a 3 parameter function that contains the xhr, a short error status and the full error message.
+ * @return {neon.util.AjaxRequest} The xhr request object
  */
 neon.query.getFieldNames = function (dataSourceName, datasetId, successCallback, errorCallback) {
-    neon.util.AjaxUtils.doGet(
+    return neon.util.AjaxUtils.doGet(
         neon.query.queryUrl_('/services/queryservice/fieldnames?datasourcename=' + dataSourceName + '&datasetid=' + datasetId),
         {
             success: neon.query.wrapCallback_(successCallback, neon.query.wrapperArgsForDataset_(dataSourceName, datasetId)),
@@ -394,10 +395,11 @@ neon.query.getFieldNames = function (dataSourceName, datasetId, successCallback,
  * @param {neon.query.Query} query the query to execute
  * @param {Function} successCallback The callback to fire when the query successfully completes
  * @param {Function} [errorCallback] The optional callback when an error occurs. This is a 3 parameter function that contains the xhr, a short error status and the full error message.
+ * @return {neon.util.AjaxRequest} The xhr request object
  */
 neon.query.executeQuery = function (query, successCallback, errorCallback) {
     var queryParams = neon.query.buildQueryParamsString_(query);
-    neon.util.AjaxUtils.doPostJSON(
+    return neon.util.AjaxUtils.doPostJSON(
         query,
         neon.query.queryUrl_('/services/queryservice/query?' + queryParams),
         {
@@ -430,10 +432,11 @@ neon.query.buildQueryParamsString_ = function (query) {
  * for dynamically creating more complex filters on the server based on subquery results
  * @param {Function} successCallback The callback to fire when the filter is added
  * @param {Function} [errorCallback] The optional callback when an error occurs. This is a 3 parameter function that contains the xhr, a short error status and the full error message.
+ * @return {neon.util.AjaxRequest} The xhr request object
  */
 neon.query.addFilter = function (filter, successCallback, errorCallback) {
     var filterProvider = neon.query.wrapFilterInProvider_(filter);
-    neon.util.AjaxUtils.doPostJSON(
+    return neon.util.AjaxUtils.doPostJSON(
         filterProvider,
         neon.query.queryUrl_('/services/queryservice/addfilter'),
         {
@@ -449,6 +452,7 @@ neon.query.addFilter = function (filter, successCallback, errorCallback) {
  * @param {String} filterId The id of the filter to remove
  * @param {Function} successCallback The callback to fire when the filter is removed
  * @param {Function} [errorCallback] The optional callback when an error occurs. This is a 3 parameter function that contains the xhr, a short error status and the full error message.
+ * @return {neon.util.AjaxRequest} The xhr request object
  */
 neon.query.removeFilter = function (filterId, successCallback, errorCallback) {
     var opts = {
@@ -458,7 +462,7 @@ neon.query.removeFilter = function (filterId, successCallback, errorCallback) {
         error: errorCallback
     };
 
-    neon.util.AjaxUtils.doPost(neon.query.queryUrl_('/services/queryservice/removefilter/' + filterId), opts);
+    return neon.util.AjaxUtils.doPost(neon.query.queryUrl_('/services/queryservice/removefilter/' + filterId), opts);
 };
 
 /**
@@ -469,10 +473,11 @@ neon.query.removeFilter = function (filterId, successCallback, errorCallback) {
  * for dynamically creating more complex filters on the server based on subquery results
  * @param {Function} successCallback The callback to fire when the replacement is complete
  * @param {Function} [errorCallback] The optional callback when an error occurs. This is a 3 parameter function that contains the xhr, a short error status and the full error message.
+ * @return {neon.util.AjaxRequest} The xhr request object
  */
 neon.query.replaceFilter = function (filterId, filter, successCallback, errorCallback) {
     var filterProvider = neon.query.wrapFilterInProvider_(filter);
-    neon.util.AjaxUtils.doPostJSON(
+    return neon.util.AjaxUtils.doPostJSON(
         filterProvider,
         neon.query.queryUrl_('/services/queryservice/replacefilter/' + filterId),
         {
@@ -491,9 +496,10 @@ neon.query.wrapFilterInProvider_ = function (filter) {
  * @method clearFilters
  * @param {Function} successCallback The callback to fire when the filters are cleared
  * @param {Function} [errorCallback] The optional callback when an error occurs. This is a 3 parameter function that contains the xhr, a short error status and the full error message.
+ * @return {neon.util.AjaxRequest} The xhr request object
  */
 neon.query.clearFilters = function (successCallback, errorCallback) {
-    neon.util.AjaxUtils.doPost(
+    return neon.util.AjaxUtils.doPost(
         neon.query.queryUrl_('/services/queryservice/clearfilters'),
         {
             success: successCallback,
@@ -508,9 +514,10 @@ neon.query.clearFilters = function (successCallback, errorCallback) {
  * @param {neon.query.Filter} filter The filter to match the items
  * @param {Function} successCallback The callback to execute when selection is completed
  * @param {Function} [errorCallback] The optional callback when an error occurs. This is a 3 parameter function that contains the xhr, a short error status and the full error message.
+ * @return {neon.util.AjaxRequest} The xhr request object
  */
 neon.query.setSelectionWhere = function (filter, successCallback, errorCallback) {
-    neon.util.AjaxUtils.doPostJSON(
+    return neon.util.AjaxUtils.doPostJSON(
         filter,
         neon.query.queryUrl_('/services/queryservice/setselectionwhere'),
         {
@@ -526,13 +533,14 @@ neon.query.setSelectionWhere = function (filter, successCallback, errorCallback)
  * @param {neon.query.Filter} filter The filter to match items
  * @param {Function} successCallback The callback to execute when the selected items have been retrieved
  * @param {Function} [errorCallback] The optional callback when an error occurs. This is a 3 parameter function that contains the xhr, a short error status and the full error message.
+ * @return {neon.util.AjaxRequest} The xhr request object
  */
 neon.query.getSelectionWhere = function (filter, successCallback, errorCallback) {
     var queryParams = '';
     if (filter.transform_) {
         queryParams += '?transform=' + filter.transform_;
     }
-    neon.util.AjaxUtils.doPostJSON(
+    return neon.util.AjaxUtils.doPostJSON(
         filter,
         neon.query.queryUrl_('/services/queryservice/getselectionwhere' + queryParams),
         {
@@ -549,9 +557,10 @@ neon.query.getSelectionWhere = function (filter, successCallback, errorCallback)
  * @param {Array} ids An array of ids of items to select
  * @param {Function} successCallback The callback to execute when selection is completed
  * @param {Function} [errorCallback] The optional callback when an error occurs. This is a 3 parameter function that contains the xhr, a short error status and the full error message.
+ * @return {neon.util.AjaxRequest} The xhr request object
  */
 neon.query.setSelectedIds = function (ids, successCallback, errorCallback) {
-    neon.util.AjaxUtils.doPostJSON(
+    return neon.util.AjaxUtils.doPostJSON(
         ids,
         neon.query.queryUrl_('/services/queryservice/setselectedids'),
         {
@@ -568,9 +577,10 @@ neon.query.setSelectedIds = function (ids, successCallback, errorCallback) {
  * @param {Array} ids An array of ids of items to add to the selection
  * @param {Function} successCallback The callback to execute when selection is completed
  * @param {Function} [errorCallback] The optional callback when an error occurs. This is a 3 parameter function that contains the xhr, a short error status and the full error message.
+ * @return {neon.util.AjaxRequest} The xhr request object
  */
 neon.query.addSelectedIds = function (ids, successCallback, errorCallback) {
-    neon.util.AjaxUtils.doPostJSON(
+    return neon.util.AjaxUtils.doPostJSON(
         ids,
         neon.query.queryUrl_('/services/queryservice/addselectedids'),
         {
@@ -586,9 +596,10 @@ neon.query.addSelectedIds = function (ids, successCallback, errorCallback) {
  * @param {Array} ids An array of ids of items to add to the selection
  * @param {Function} successCallback The callback to execute when selection is completed
  * @param {Function} [errorCallback] The optional callback when an error occurs. This is a 3 parameter function that contains the xhr, a short error status and the full error message.
+ * @return {neon.util.AjaxRequest} The xhr request object
  */
 neon.query.removeSelectedIds = function (ids, successCallback, errorCallback) {
-    neon.util.AjaxUtils.doPostJSON(
+    return neon.util.AjaxUtils.doPostJSON(
         ids,
         neon.query.queryUrl_('/services/queryservice/removeselectedids'),
         {
@@ -603,9 +614,10 @@ neon.query.removeSelectedIds = function (ids, successCallback, errorCallback) {
  * @method clearSelection
  * @param {Function} successCallback The callback to execute when the selection is cleared
  * @param {Function} [errorCallback] The optional callback when an error occurs. This is a 3 parameter function that contains the xhr, a short error status and the full error message.
+ * @return {neon.util.AjaxRequest} The xhr request object
  */
 neon.query.clearSelection = function (successCallback, errorCallback) {
-    neon.util.AjaxUtils.doPost(
+    return neon.util.AjaxUtils.doPost(
         neon.query.queryUrl_('/services/queryservice/clearselection'),
         {
             success: successCallback,
