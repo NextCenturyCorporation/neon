@@ -45,7 +45,6 @@ class JasmineIncludesGenerator {
 
         matchingFiles.clear()
         def files = [];
-        files.addAll('../../js-test-support/helpers/*.js')
         files.addAll('spec/*.spec.js')
         files.each { libPath ->
             def file = new File(libPath.replaceAll("\"", ""))
