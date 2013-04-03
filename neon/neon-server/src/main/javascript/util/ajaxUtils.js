@@ -80,7 +80,7 @@ neon.util.AjaxUtils.setStartStopCallbacks = function (requestStart, requestEnd) 
 };
 
 /**
- * Uses a default spinner when ajax queries are made
+ * Uses a default spinner when ajax queries are made. If this method is used, the neon.css file needs to be included.
  * @method useDefaultStartStopCallbacks
  */
 neon.util.AjaxUtils.useDefaultStartStopCallbacks = function () {
