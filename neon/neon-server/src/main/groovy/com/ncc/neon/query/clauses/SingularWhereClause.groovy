@@ -1,6 +1,8 @@
 package com.ncc.neon.query.clauses
 
+import com.ncc.neon.query.jackson.QueryValueDeserializer
 import groovy.transform.ToString
+import org.codehaus.jackson.map.annotate.JsonDeserialize
 
 /*
  * ************************************************************************
@@ -25,12 +27,14 @@ import groovy.transform.ToString
  * RECIPIENT IS UNDER OBLIGATION TO MAINTAIN SECRECY.
  */
 @ToString
-class SingularWhereClause implements WhereClause, Serializable{
+class SingularWhereClause implements WhereClause, Serializable {
 
     private static final long serialVersionUID = 5063293720269360039L
 
     def lhs
     def operator
+
+    @JsonDeserialize(using = QueryValueDeserializer)
     def rhs
 
 }

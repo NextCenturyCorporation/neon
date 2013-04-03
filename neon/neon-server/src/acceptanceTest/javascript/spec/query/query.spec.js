@@ -304,14 +304,22 @@ describe('query mapping', function () {
         var transformParams = [host, path];
 
         var query = baseQuery().where('state', '=', 'VA').transform(transformClassName, transformParams);
-        executeAndWait(neon.query.executeQuery,query);
-        runs(function() {
+        executeAndWait(neon.query.executeQuery, query);
+        runs(function () {
             expect(currentResult.data.length).toBe(4);
             // the state should be converted from VA to Virginia
-            currentResult.data.forEach(function(row) {
+            currentResult.data.forEach(function (row) {
                 expect(row.state).toEqual('Virginia');
             });
         });
+    });
+
+    it('query with date clause as value', function () {
+        with (neon.query) {
+            var whereDateBetweenClause = and(where('hiredate', '>=', '2011-10-15T00:00:00Z'), where('hiredate', '<=', '2011-10-17T00:00:00Z'));
+            var query = baseQuery().where(whereDateBetweenClause);
+            assertQueryResults(query, rows(1, 2));
+        }
     });
 
     /**

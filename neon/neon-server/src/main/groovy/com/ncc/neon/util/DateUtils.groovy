@@ -28,14 +28,15 @@ import org.joda.time.format.ISODateTimeFormat
  */
 class DateUtils {
 
-    private static final def DATE_FORMAT = ISODateTimeFormat.dateTimeNoMillis()
+    private static final def DATE_PARSER = ISODateTimeFormat.dateTimeParser()
+    private static final def DATE_FORMATTER = ISODateTimeFormat.dateTimeNoMillis()
 
     /**
      * Converts a date from a string ISO-8601 format to a date object
      * @param iso8601DateString
      */
     static def fromISO8601String(iso8601DateString) {
-        return DATE_FORMAT.parseDateTime(iso8601DateString).toDate()
+        return DATE_PARSER.parseDateTime(iso8601DateString).toDate()
     }
 
     /**
@@ -43,7 +44,7 @@ class DateUtils {
      * @param date
      */
     static def toISO8601String(def date) {
-        return DATE_FORMAT.print(new DateTime(date).withZone(DateTimeZone.UTC))
+        return DATE_FORMATTER.print(new DateTime(date).withZone(DateTimeZone.UTC))
     }
 
 }

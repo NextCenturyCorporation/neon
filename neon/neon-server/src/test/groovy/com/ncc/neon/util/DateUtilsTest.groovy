@@ -1,8 +1,8 @@
 package com.ncc.neon.util
 
+import org.joda.time.DateTime
+import org.joda.time.DateTimeZone
 import org.junit.Test
-
-import java.text.SimpleDateFormat
 
 /*
  * ************************************************************************
@@ -29,21 +29,37 @@ import java.text.SimpleDateFormat
 class DateUtilsTest {
 
     /** an arbitrary date to use for this test */
-    private static final def DATE = new SimpleDateFormat('MMM dd, yyyy hh:mmaa Z', Locale.US).parse('Apr 15, 2012 03:30PM -0100')
+    private static final def DATE_NO_MILLIS = new DateTime(2012,4,15,16,30,0,DateTimeZone.UTC).toDate()
+    private static final def DATE_WITH_MILLIS = new DateTime(2012,4,15,16,30,0,123,DateTimeZone.UTC).toDate()
 
-    /** the ISO-8601 representation of {@link #DATE} */
-    private static final def ISO8601_DATE_STRING = "2012-04-15T16:30:00Z"
+
+    /** the ISO-8601 representation of {@link #DATE_NO_MILLIS} */
+    private static final def ISO8601_DATE_STRING_NO_MILLIS = "2012-04-15T16:30:00Z"
+    private static final def ISO8601_DATE_STRING_WITH_MILLIS = "2012-04-15T16:30:00.123Z"
 
     @Test
-    void "create date from ISO8601 string"() {
-        def date = DateUtils.fromISO8601String(ISO8601_DATE_STRING)
-        assert date == DATE
+    void "create date from ISO8601 string no millis"() {
+        def date = DateUtils.fromISO8601String(ISO8601_DATE_STRING_NO_MILLIS)
+        assert date == DATE_NO_MILLIS
     }
 
     @Test
-    void "convert ISO8601 string to date"() {
-        def iso860String = DateUtils.toISO8601String(DATE)
-        assert iso860String == ISO8601_DATE_STRING
+    void "convert ISO8601 no millis string to date"() {
+        def iso860String = DateUtils.toISO8601String(DATE_NO_MILLIS)
+        assert iso860String == ISO8601_DATE_STRING_NO_MILLIS
+    }
+
+    @Test
+    void "create date from ISO8601 string with millis"() {
+        def date = DateUtils.fromISO8601String(ISO8601_DATE_STRING_WITH_MILLIS)
+        assert date == DATE_WITH_MILLIS
+    }
+
+    @Test
+    void "convert ISO8601 with millis string to date"() {
+        def iso860String = DateUtils.toISO8601String(DATE_WITH_MILLIS)
+        // the formatter still truncates the millis
+        assert iso860String == ISO8601_DATE_STRING_NO_MILLIS
     }
 
 }
