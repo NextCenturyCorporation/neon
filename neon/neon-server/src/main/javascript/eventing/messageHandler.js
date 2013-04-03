@@ -28,7 +28,7 @@
  * @class MessageHandler
  * @param callbackOpts An associative array mapping of function callbacks
  * @example
-     { selectionChanged: selectionChangedCallback, filtersChanged: filtersChangedCallback }
+ *     { selectionChanged: selectionChangedCallback, filtersChanged: filtersChangedCallback }
  * @constructor
  */
 neon.eventing.MessageHandler = function (callbackOpts) {

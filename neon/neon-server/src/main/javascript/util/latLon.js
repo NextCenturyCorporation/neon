@@ -20,17 +20,15 @@
  * OF NEXT CENTURY CORPORATION EXCEPT BY PRIOR WRITTEN PERMISSION AND WHEN
  * RECIPIENT IS UNDER OBLIGATION TO MAINTAIN SECRECY.
  */
-/**
- * A structure that holds a latitude and longitude
- * @namespace neon.util
- * @class LatLon
- */
 
 /**
  * Creates a new latitude/longitude pair with the specified values in degrees
- * @param latDegrees
- * @param lonDegrees
+ * @namespace neon.util
+ * @class LatLon
  * @constructor
+ * @param {double} latDegrees
+ * @param {double} lonDegrees
+
  */
 neon.util.LatLon = function (latDegrees, lonDegrees) {
     neon.util.LatLon.validateArgs_(latDegrees, lonDegrees);

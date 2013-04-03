@@ -32,10 +32,10 @@ neon.query.SERVER_URL = 'http://localhost:8080/neon';
  * Represents a query to be constructed against some data source. This class is built so query
  * clauses can be chained together to create an entire query, as shown below
  * @example
- var where = neon.query.where;
- var and = neon.query.and;
- var query = new neon.query.Query(where(and(where('someProperty','=',5), where('someOtherProperty','<',10))));
- neon.query.executeQuery(query);
+ *     var where = neon.query.where;
+ *     var and = neon.query.and;
+ *     var query = new neon.query.Query(where(and(where('someProperty','=',5), where('someOtherProperty','<',10))));
+ *     neon.query.executeQuery(query);
  * @namespace neon.query
  * @class Query
  * @constructor
@@ -181,9 +181,9 @@ neon.query.Query.prototype.selectFrom = function (dataSourceName, datasetId) {
  *    <li>A boolean operator (and/or)</li>
  * </ol>
  * @example
- where('someProperty','=',5)
-
- where(neon.Query.and(where('someProperty','=',5), where('someOtherProperty','<',10)))
+ *     where('someProperty','=',5)
+ *
+ *     where(neon.Query.and(where('someProperty','=',5), where('someOtherProperty','<',10)))
  * @return {neon.query.Query} This query object
  */
 neon.query.Query.prototype.where = function () {
@@ -261,7 +261,7 @@ neon.query.Query.prototype.limit = function (limit) {
  * @param {int} sortOrder The sort order (see the constants in this class)
  * @return {neon.query.Query} This query object
  * @example
- new neon.query.Query(...).sortBy("field1",neon.query.ASC,"field2",neon.query.DESC);
+ *     new neon.query.Query(...).sortBy("field1",neon.query.ASC,"field2",neon.query.DESC);
  */
 neon.query.Query.prototype.sortBy = function (fieldName, sortOrder) {
     // even though internally each sortBy clause is a separate object, the user will think about a single sortBy
@@ -325,7 +325,7 @@ neon.query.Query.prototype.withinDistance = function (locationField, center, dis
  * @param {String} op The operation to perform
  * @param {Object}  value The value to compare the field values against
  * @example
- where('x','=',10)
+ *     where('x','=',10)
  * @return {Object}
  */
 neon.query.where = function (fieldName, op, value) {
@@ -337,7 +337,7 @@ neon.query.where = function (fieldName, op, value) {
  * @method and
  * @param  {Object} clauses A variable number of *where* clauses to apply
  * @example
- and(where('x','=',10),where('y','=',1))
+ *     and(where('x','=',10),where('y','=',1))
  * @return {Object}
  */
 neon.query.and = function (clauses) {
@@ -349,7 +349,7 @@ neon.query.and = function (clauses) {
  * @method or
  * @param {Object} clauses A variable number of *where* clauses to apply
  * @example
- or(where('x','=',10),where('y','=',1))
+ *     or(where('x','=',10),where('y','=',1))
  * @return {Object}
  */
 neon.query.or = function (clauses) {
@@ -864,6 +864,7 @@ neon.query.Transform = function (transformName, transformParams) {
  * A filter provider that wraps a simple filter
  * @private
  * @namespace neon.query
+ * @class SimpleFilterProvider
  * @param {neon.query.Filter} filter The filter being wrapped
  * @constructor
  */

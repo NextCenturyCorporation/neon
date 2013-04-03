@@ -102,6 +102,8 @@ neon.util.AjaxUtils.useDefaultStartStopCallbacks = function () {
  *  <li>responseType: The type of data expected as a return value, such as <code>json</code> or <code>text</code></li>
  *  <li>success: The callback function to execute on success. It will be passed the return value of the call</li>
  *  <li>error: The callback function to execute on error. It will have 3 parameters - the xhr, a short error status message and the error message</li>
+ * </ul>
+ * @return {neon.util.AjaxRequest} The xhr request object
  */
 neon.util.AjaxUtils.doAjaxRequest = function (type, url, opts) {
     var params = {};
@@ -127,12 +129,6 @@ neon.util.AjaxUtils.doAjaxRequest = function (type, url, opts) {
     return new neon.util.AjaxRequest(xhr);
 };
 
-
-/**
- * A method that can be used when ajax calls start (if you do not have your own method to use).
- * See {{#crossLink "neon.util.AjaxUtils/setStartStopCallbacks"}}{{/crossLink}}
- * @method showDefaultSpinner_
- */
 neon.util.AjaxUtils.showDefaultSpinner_ = function () {
     $('body').append($('<div>').attr('id', neon.util.AjaxUtils.overlayId_).addClass('overlay-container'));
     $('#' + neon.util.AjaxUtils.overlayId_)
@@ -140,11 +136,6 @@ neon.util.AjaxUtils.showDefaultSpinner_ = function () {
     $('#' + neon.util.AjaxUtils.overlayId_).append($('<div>').addClass('spinner'));
 };
 
-/**
- * A method that can be used when ajax calls are complete (if you do not have your own method to use).
- * See {{#crossLink "neon.util.AjaxUtils/setStartStopCallbacks"}}{{/crossLink}}
- * @method hideDefaultSpinner_
- */
 neon.util.AjaxUtils.hideDefaultSpinner_ = function () {
     $('#' + neon.util.AjaxUtils.overlayId_).remove();
 };
@@ -163,6 +154,7 @@ neon.util.AjaxRequest = function (xhr) {
 
 /**
  * Cancels the request if it is in progress
+ * @method cancel
  */
 neon.util.AjaxRequest.prototype.cancel = function () {
     this.xhr.abort();
