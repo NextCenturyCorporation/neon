@@ -12,7 +12,7 @@
 
     <context-param>
         <param-name>neon.url</param-name>
-        <param-value>https://localhost:8443/neon</param-value>
+        <param-value>https://localhost:9443/neon</param-value>
     </context-param>
 
 </web-app>
