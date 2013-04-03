@@ -200,7 +200,7 @@ task transformTestWebService(type: org.gradle.api.plugins.jetty.JettyRun) {
     stopPort = httpPort + 2
     stopKey = 'stop'
     classpath = sourceSets.acceptanceTest.runtimeClasspath
-    webXml = new File(sourceSets.acceptanceTest.output.resourcesDir, 'transform-service-web.xml')
+    webXml = new File(sourceSets.acceptanceTest.output.resourcesDir, 'test-services-web.xml')
 }
 
 task acceptanceTestWar(type: org.gradle.api.plugins.jetty.JettyRunWar) {
