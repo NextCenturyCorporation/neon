@@ -31,5 +31,5 @@ appender("CONSOLE", ConsoleAppender) {
 }
 
 logger("com.ncc.neon", WARN)
-logger("com.ncc.neon.query", DEBUG)
+logger("com.ncc.neon.query", WARN)  // set to debug to turn on query logging
 root(WARN, ["CONSOLE"])
