@@ -28,6 +28,12 @@
 neon.query.SERVER_URL = 'http://localhost:10002/neon';
 
 describe('query mapping', function () {
+    // aliases for easier test writing
+    var where = neon.query.where;
+    var or = neon.query.or;
+    var and = neon.query.and;
+
+
     var dataSourceName = 'acceptanceTest';
     var datasetId = 'records';
     var allData;
@@ -61,23 +67,19 @@ describe('query mapping', function () {
     });
 
     it('query WHERE', function () {
-        with (neon.query) {
-            var whereStateClause = or(where('state', '=', 'VA'), where('state', '=', 'DC'));
-            var salaryAndStateClause = and(where('salary', '>=', 100000), whereStateClause);
-            var query = baseQuery().where(salaryAndStateClause);
-            assertQueryResults(query, rows(0, 2, 4));
-        }
+        var whereStateClause = or(where('state', '=', 'VA'), where('state', '=', 'DC'));
+        var salaryAndStateClause = and(where('salary', '>=', 100000), whereStateClause);
+        var query = baseQuery().where(salaryAndStateClause);
+        assertQueryResults(query, rows(0, 2, 4));
     });
 
     it('group by and sort', function () {
-        with (neon.query) {
-            var query = baseQuery()
-                .groupBy('state', 'city')
-                .sortBy('state', ASCENDING, 'city', DESCENDING)
-                .aggregate(SUM, 'salary', 'salary_sum');
-            var expectedData = getJSONFixture('groupByStateAsc_cityDesc_aggregateSalary.json');
-            assertQueryResults(query, expectedData);
-        }
+        var query = baseQuery()
+            .groupBy('state', 'city')
+            .sortBy('state', neon.query.ASCENDING, 'city', neon.query.DESCENDING)
+            .aggregate(neon.query.SUM, 'salary', 'salary_sum');
+        var expectedData = getJSONFixture('groupByStateAsc_cityDesc_aggregateSalary.json');
+        assertQueryResults(query, expectedData);
     });
 
     it('distinct fields', function () {
@@ -146,7 +148,7 @@ describe('query mapping', function () {
         // adding ids already been tested, so we can be confident the ids are added properly
         executeAndWait(neon.query.addSelectedIds, ids);
         runs(function () {
-            executeAndWait(neon.query.clearSelection)
+            executeAndWait(neon.query.clearSelection);
             runs(function () {
                 executeAndWait(neon.query.getSelectionWhere, baseFilter());
                 runs(function () {
@@ -262,7 +264,7 @@ describe('query mapping', function () {
         var errorCallback = jasmine.createSpy('error');
         neon.query.executeQuery(query, successCallback, errorCallback);
         waitsFor(function () {
-            return errorCallback.wasInvoked()
+            return errorCallback.wasInvoked();
         });
         runs(function () {
             expect(successCallback).not.toHaveBeenCalled();
@@ -315,11 +317,9 @@ describe('query mapping', function () {
     });
 
     it('query with date clause as value', function () {
-        with (neon.query) {
-            var whereDateBetweenClause = and(where('hiredate', '>=', '2011-10-15T00:00:00Z'), where('hiredate', '<=', '2011-10-17T00:00:00Z'));
-            var query = baseQuery().where(whereDateBetweenClause);
-            assertQueryResults(query, rows(1, 2));
-        }
+        var whereDateBetweenClause = and(where('hiredate', '>=', '2011-10-15T00:00:00Z'), where('hiredate', '<=', '2011-10-17T00:00:00Z'));
+        var query = baseQuery().where(whereDateBetweenClause);
+        assertQueryResults(query, rows(1, 2));
     });
 
     /**

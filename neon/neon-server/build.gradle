@@ -56,6 +56,13 @@ javascript.source {
             exclude 'outro.js'
         }
     }
+    test {
+        js {
+            srcDir jsUnitTestDir
+            srcDir jsAcceptanceTestDir
+            include "**/*.js"
+        }
+    }
     lib {
         js {
             srcDir 'src/main/js-lib'
@@ -330,7 +337,7 @@ minifyJs {
 }
 
 jshint {
-    source = javascript.source.dev.js.files
+    source = javascript.source.dev.js.files + javascript.source.test.js.files
 }
 
 

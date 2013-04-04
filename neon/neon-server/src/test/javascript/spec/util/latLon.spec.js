@@ -41,7 +41,7 @@ describe('latitude/longitude pair', function () {
     function assertLatLon(actual, expectedLatDegrees, expectedLonDegrees) {
         expect(actual.latDegrees).toEqual(expectedLatDegrees);
         expect(actual.lonDegrees).toEqual(expectedLonDegrees);
-    };
+    }
 
     /**
      * Wraps the latitude/longitude creation in anonymous function, which is needed for exception testing
@@ -52,5 +52,5 @@ describe('latitude/longitude pair', function () {
         return function() {
             return new neon.util.LatLon(latDegrees,lonDegrees);
         };
-    };
+    }
 });

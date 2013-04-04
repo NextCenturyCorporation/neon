@@ -40,7 +40,7 @@ describe('intents launcher', function () {
         var metadata2 = {key3: 'val3'};
         launcher.addMetadataForDataType(dataType1, metadata1);
         launcher.addMetadataForDataType(dataType1, metadata2);
-        expect(launcher.metadata_[dataType1]).toEqual({key1: 'val1', key2: 'val2', key3: 'val3'})
+        expect(launcher.metadata_[dataType1]).toEqual({key1: 'val1', key2: 'val2', key3: 'val3'});
 
     });
 
