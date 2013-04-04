@@ -30,7 +30,7 @@ import org.codehaus.jackson.annotate.JsonIgnoreProperties
 /**
  * A filter specifies which data to select from a datastore
  */
-@ToString
+@ToString(includeNames = true)
 @JsonIgnoreProperties(value = ['transform_'])
 class Filter implements Serializable {
 

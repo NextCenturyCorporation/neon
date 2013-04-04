@@ -30,7 +30,7 @@ import groovy.transform.ToString
  * A wrapper around a dataSourceName/datasetId combination
  */
 @EqualsAndHashCode
-@ToString
+@ToString(includeNames = true)
 class DataSource implements Serializable {
 
     private static final long serialVersionUID = 7653634335470364210L

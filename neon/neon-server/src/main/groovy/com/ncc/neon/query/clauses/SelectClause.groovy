@@ -25,7 +25,7 @@ import groovy.transform.ToString
  * RECIPIENT IS UNDER OBLIGATION TO MAINTAIN SECRECY.
  */
 
-@ToString
+@ToString(includeNames = true)
 class SelectClause {
 
     def dataSourceName

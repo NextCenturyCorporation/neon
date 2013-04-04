@@ -31,4 +31,5 @@ appender("CONSOLE", ConsoleAppender) {
 }
 
 logger("com.ncc.neon", WARN)
+logger("com.ncc.neon.query", DEBUG)
 root(WARN, ["CONSOLE"])

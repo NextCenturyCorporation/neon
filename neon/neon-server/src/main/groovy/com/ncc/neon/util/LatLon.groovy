@@ -29,7 +29,7 @@ import static com.google.common.base.Preconditions.checkArgument
 /**
  * A latitude and longitude pair
  */
-@ToString
+@ToString(includeNames = true)
 class LatLon {
 
     def latDegrees

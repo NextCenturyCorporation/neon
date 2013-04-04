@@ -36,7 +36,7 @@ import org.codehaus.jackson.annotate.JsonIgnoreProperties
  * A query stores a filter for selecting data and optional aggregation methods for grouping the data.
  * The query is translated to a datastore specific operation which returns the appropriate data.
  */
-@ToString
+@ToString(includeNames = true)
 @JsonIgnoreProperties(value = ['includeFiltered_'])
 class Query {
 

@@ -24,7 +24,7 @@ import groovy.transform.ToString
  * OF NEXT CENTURY CORPORATION EXCEPT BY PRIOR WRITTEN PERMISSION AND WHEN
  * RECIPIENT IS UNDER OBLIGATION TO MAINTAIN SECRECY.
  */
-@ToString
+@ToString(includeNames = true)
 class BooleanWhereClause implements WhereClause, Serializable {
 
     private static final long serialVersionUID = -1686544619324087210L

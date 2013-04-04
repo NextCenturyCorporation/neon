@@ -6,6 +6,7 @@ import com.ncc.neon.query.clauses.SingularWhereClause
 import com.ncc.neon.query.filter.Filter
 import com.ncc.neon.query.filter.FilterState
 import com.ncc.neon.selection.SelectionManager
+import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 
 /*
@@ -35,6 +36,8 @@ import org.springframework.beans.factory.annotation.Autowired
  * Executes queries against a data store
  */
 abstract class AbstractQueryExecutor implements QueryExecutor {
+
+    private static final def LOGGER = LoggerFactory.getLogger(AbstractQueryExecutor)
 
     @Autowired
     private SelectionManager selectionManager
@@ -106,6 +109,7 @@ abstract class AbstractQueryExecutor implements QueryExecutor {
     private QueryResult executeQuery(query, additionalWhereClauseGenerator = null, includeFiltered = false) {
         // construct the query in a way that is specific to this query executor
         def builderResult = buildQuery(query, additionalWhereClauseGenerator, includeFiltered)
+        LOGGER.debug("Executing query {}",query)
         return doExecuteQuery(builderResult)
     }
 
