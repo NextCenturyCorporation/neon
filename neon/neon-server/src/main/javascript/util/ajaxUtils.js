@@ -23,12 +23,19 @@
 
 neon.util.AjaxUtils = {};
 
+
 /**
  * Utility methods for working with ajax calls
  * @namespace neon.util
  * @class AjaxUtils
  */
+
 neon.util.AjaxUtils.overlayId_ = 'neon-overlay';
+neon.util.AjaxUtils.logger_ = neon.util.LoggerUtils.getGlobalLogger();
+
+// this logger is used specifically for error logging and should not be confused with the global logger which logs
+// all ajax requests
+neon.util.AjaxUtils.errorLogger_ = log4javascript.getLogger('neon.util.AjaxUtils.error');
 
 /**
  * Asynchronously makes a post request to the specified URL
@@ -119,15 +126,18 @@ neon.util.AjaxUtils.doAjaxRequest = function (type, url, opts) {
     // set a default error behavior is none is specified
     if (!params.error) {
         params.error = function (xhr, status, error) {
-            console.log("error:");
-            console.log(JSON.stringify(xhr));
-            console.log(status);
-            console.log(error);
+            neon.util.AjaxUtils.errorLogger_.error(xhr, status, error);
         };
     }
+    neon.util.AjaxUtils.logRequest_(params);
     var xhr = $.ajax(params);
     return new neon.util.AjaxRequest(xhr);
 };
+
+neon.util.AjaxUtils.logRequest_ = function (params) {
+    neon.util.AjaxUtils.logger_.debug('Making', params.type, 'request to URL', params.url, 'with data', params.data);
+};
+
 
 neon.util.AjaxUtils.showDefaultSpinner_ = function () {
     $('body').append($('<div>').attr('id', neon.util.AjaxUtils.overlayId_).addClass('overlay-container'));
@@ -159,3 +169,7 @@ neon.util.AjaxRequest = function (xhr) {
 neon.util.AjaxRequest.prototype.cancel = function () {
     this.xhr.abort();
 };
+
+(function () {
+    neon.util.LoggerUtils.useBrowserConsoleAppender(neon.util.AjaxUtils.errorLogger_, true);
+})();
