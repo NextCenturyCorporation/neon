@@ -52,8 +52,10 @@ javascript.source {
         js {
             srcDir jsSrcDir
             include "**/*.js"
+            // the excluded files are added individually since their ordering matters relative to other files
             exclude 'intro.js'
             exclude 'outro.js'
+            exclude 'util/loggerUtils.js'
         }
     }
     test {
@@ -324,7 +326,11 @@ def doCreateJasmineSpec(testDir, templateSuffix, neonJsPath) {
 }
 
 combineJs {
-    source = javascript.source.lib.js.files + file("${jsSrcDir}/intro.js") + javascript.source.dev.js.files + file("${jsSrcDir}/outro.js")
+    source = javascript.source.lib.js.files +
+            file("${jsSrcDir}/intro.js") +
+            file("${jsSrcDir}/util/loggerUtils.js") +
+            javascript.source.dev.js.files +
+            file("${jsSrcDir}/outro.js")
     dest = file("${buildDir}/${archivesBaseName}.js")
 }
 
