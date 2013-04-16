@@ -200,6 +200,20 @@ class MongoQueryExecutorIntegrationTest {
         assertQueryResult(expected, result)
     }
 
+
+    @Test
+    void "group by count"() {
+        def groupByStateClause = new GroupByFieldClause(field: 'state')
+        def sortByStateClause = new SortClause(fieldName: 'state', sortOrder: SortOrder.ASCENDING)
+        def countClause = new AggregateClause(name: 'counter', operation: 'count')
+        def expected = readJson('groupByStateAsc_count.json')
+        def result = mongoQueryExecutor.execute(new Query(filter: ALL_DATA_FILTER,
+                groupByClauses: [groupByStateClause],
+                aggregates: [countClause],
+                sortClauses: [sortByStateClause]), false)
+        assertQueryResult(expected, result)
+    }
+
     @Test
     void "distinct"() {
         def distinctStateClause = new DistinctClause(fieldName: 'state')

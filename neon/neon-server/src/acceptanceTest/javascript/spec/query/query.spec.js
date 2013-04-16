@@ -110,6 +110,16 @@ describe('query mapping', function () {
         assertQueryResults(query, expectedData);
     });
 
+    it('group by count', function () {
+        var query = baseQuery()
+            .groupBy('state')
+            .sortBy('state', neon.query.ASCENDING)
+            .aggregate(neon.query.COUNT, null, 'counter');
+        var expectedData = getJSONFixture('groupByStateAsc_count.json');
+        assertQueryResults(query, expectedData);
+    });
+
+
     it('distinct fields', function () {
         var query = baseQuery().distinct('state');
         var expectedData = ["DC", "MD", "VA"];
