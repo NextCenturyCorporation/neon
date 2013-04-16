@@ -71,6 +71,29 @@ neon.query.COUNT = 'count';
 neon.query.SUM = 'sum';
 
 /**
+ * The aggregation operation to get the maximum value
+ * @property MAX
+ * @type {String}
+ */
+neon.query.MAX = 'max';
+
+/**
+ * The aggregation operation to get the minimum value
+ * @property MIN
+ * @type {String}
+ */
+neon.query.MIN = 'min';
+
+/**
+ * The aggregation operation to get the average value
+ * @property MAX
+ * @type {String}
+ */
+neon.query.AVG = 'avg';
+
+
+
+/**
  * The sort parameter for clauses to sort ascending
  * @property ASCENDING
  * @type {int}

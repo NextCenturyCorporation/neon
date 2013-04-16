@@ -109,7 +109,7 @@ class MongoQueryExecutorIntegrationTest {
         def collection = db.getCollection(DATASET_ID)
         def dbList = parseJSON("/mongo-json/data.json")
         collection.insert(dbList)
-        collection.ensureIndex(new BasicDBObject("location","2dsphere"))
+        collection.ensureIndex(new BasicDBObject("location", "2dsphere"))
     }
 
     @SuppressWarnings('CoupledTestCase') // this method incorrectly throws this codenarc error
@@ -125,7 +125,7 @@ class MongoQueryExecutorIntegrationTest {
     @Test
     void "field names"() {
         def fieldNames = mongoQueryExecutor.getFieldNames(DATASOURCE_NAME, DATASET_ID)
-        def expected = ['_id', 'firstname', 'lastname', 'city', 'state', 'salary', 'hiredate','location']
+        def expected = ['_id', 'firstname', 'lastname', 'city', 'state', 'salary', 'hiredate', 'location']
         AssertUtils.assertEqualCollections(expected, fieldNames)
     }
 
@@ -158,6 +158,45 @@ class MongoQueryExecutorIntegrationTest {
                 groupByClauses: [groupByStateClause, groupByCityClause],
                 aggregates: [salaryAggregateClause],
                 sortClauses: [sortByStateClause, sortByCityClause]), false)
+        assertQueryResult(expected, result)
+    }
+
+    @Test
+    void "group by average"() {
+        def groupByStateClause = new GroupByFieldClause(field: 'state')
+        def sortByStateClause = new SortClause(fieldName: 'state', sortOrder: SortOrder.ASCENDING)
+        def salaryAverageClause = new AggregateClause(name: 'salary_avg', operation: 'avg', field: 'salary')
+        def expected = readJson('groupByStateAsc_avgSalary.json')
+        def result = mongoQueryExecutor.execute(new Query(filter: ALL_DATA_FILTER,
+                groupByClauses: [groupByStateClause],
+                aggregates: [salaryAverageClause],
+                sortClauses: [sortByStateClause]), false)
+        assertQueryResult(expected, result)
+    }
+
+    @Test
+    void "group by min"() {
+        def groupByStateClause = new GroupByFieldClause(field: 'state')
+        def sortByStateClause = new SortClause(fieldName: 'state', sortOrder: SortOrder.ASCENDING)
+        def salaryMinClause = new AggregateClause(name: 'salary_min', operation: 'min', field: 'salary')
+        def expected = readJson('groupByStateAsc_minSalary.json')
+        def result = mongoQueryExecutor.execute(new Query(filter: ALL_DATA_FILTER,
+                groupByClauses: [groupByStateClause],
+                aggregates: [salaryMinClause],
+                sortClauses: [sortByStateClause]), false)
+        assertQueryResult(expected, result)
+    }
+
+    @Test
+    void "group by max"() {
+        def groupByStateClause = new GroupByFieldClause(field: 'state')
+        def sortByStateClause = new SortClause(fieldName: 'state', sortOrder: SortOrder.ASCENDING)
+        def salaryMaxClause = new AggregateClause(name: 'salary_max', operation: 'max', field: 'salary')
+        def expected = readJson('groupByStateAsc_maxSalary.json')
+        def result = mongoQueryExecutor.execute(new Query(filter: ALL_DATA_FILTER,
+                groupByClauses: [groupByStateClause],
+                aggregates: [salaryMaxClause],
+                sortClauses: [sortByStateClause]), false)
         assertQueryResult(expected, result)
     }
 
@@ -376,11 +415,11 @@ class MongoQueryExecutorIntegrationTest {
                 distance: 35d,
                 distanceUnit: DistanceUnit.MILE
         )
-        def expected = rows(2,0)
+        def expected = rows(2, 0)
         def query = new Query(filter: new Filter(dataSourceName: DATASOURCE_NAME, datasetId: DATASET_ID, whereClause: withinDistance))
 
         def result = mongoQueryExecutor.execute(query, false)
-        assertQueryResult(expected,result)
+        assertQueryResult(expected, result)
     }
 
     @Test
@@ -393,11 +432,11 @@ class MongoQueryExecutorIntegrationTest {
         )
         def expected = rows(2)
         def dcStateClause = new SingularWhereClause(lhs: 'state', operator: '=', rhs: 'DC')
-        def whereClause = new AndWhereClause(whereClauses: [withinDistance,dcStateClause])
+        def whereClause = new AndWhereClause(whereClauses: [withinDistance, dcStateClause])
         def query = new Query(filter: new Filter(dataSourceName: DATASOURCE_NAME, datasetId: DATASET_ID, whereClause: whereClause))
 
         def result = mongoQueryExecutor.execute(query, false)
-        assertQueryResult(expected,result)
+        assertQueryResult(expected, result)
 
     }
 

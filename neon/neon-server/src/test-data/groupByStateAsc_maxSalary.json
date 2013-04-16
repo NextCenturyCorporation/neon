@@ -1,0 +1,23 @@
+[
+    {
+        "_id": {
+            "state": "DC"
+        },
+        "state": "DC",
+        "salary_max": 175000
+    },
+    {
+        "_id": {
+            "state": "MD"
+        },
+        "state": "MD",
+        "salary_max": 105000
+    },
+    {
+        "_id": {
+            "state": "VA"
+        },
+        "state": "VA",
+        "salary_max": 118000
+    }
+]

@@ -1,0 +1,23 @@
+[
+    {
+        "_id": {
+            "state": "DC"
+        },
+        "state": "DC",
+        "salary_min": 85000
+    },
+    {
+        "_id": {
+            "state": "MD"
+        },
+        "state": "MD",
+        "salary_min": 105000
+    },
+    {
+        "_id": {
+            "state": "VA"
+        },
+        "state": "VA",
+        "salary_min": 55000
+    }
+]

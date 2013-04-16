@@ -82,6 +82,34 @@ describe('query mapping', function () {
         assertQueryResults(query, expectedData);
     });
 
+    it('group by average', function () {
+        var query = baseQuery()
+            .groupBy('state')
+            .sortBy('state', neon.query.ASCENDING)
+            .aggregate(neon.query.AVG, 'salary', 'salary_avg');
+        var expectedData = getJSONFixture('groupByStateAsc_avgSalary.json');
+        assertQueryResults(query, expectedData);
+    });
+
+    it('group by max', function () {
+        var query = baseQuery()
+            .groupBy('state')
+            .sortBy('state', neon.query.ASCENDING)
+            .aggregate(neon.query.MAX, 'salary', 'salary_max');
+        var expectedData = getJSONFixture('groupByStateAsc_maxSalary.json');
+        assertQueryResults(query, expectedData);
+    });
+
+
+    it('group by min', function () {
+        var query = baseQuery()
+            .groupBy('state')
+            .sortBy('state', neon.query.ASCENDING)
+            .aggregate(neon.query.MIN, 'salary', 'salary_min');
+        var expectedData = getJSONFixture('groupByStateAsc_minSalary.json');
+        assertQueryResults(query, expectedData);
+    });
+
     it('distinct fields', function () {
         var query = baseQuery().distinct('state');
         var expectedData = ["DC", "MD", "VA"];
