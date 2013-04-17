@@ -34,44 +34,66 @@ class FilterFactoryTest {
 
 
     @Test
-    void "create filter from unique field values query"() {
+    void "create filter from unique field values"() {
         def queryExecutor = createQueryExecutor()
 
         def dataSourceName = "dataSourceName"
         def datasetId = "testDatasetId"
         def subfilter = new Filter(dataSourceName: dataSourceName, datasetId: datasetId)
         def field = "field1"
-        def operator = 'notin'
-        def filter = FilterFactory.createFieldFilter(queryExecutor, subfilter, field, operator)
-        def inClause = filter.whereClause
+        def operator = "notin"
 
-        assert inClause instanceof SingularWhereClause
-        assert inClause.lhs == field
-        assert inClause.operator == operator
+        // the resulting filter should be "field1 notin [a,c]" since a and c are the unique field values for field1
+        // from the queryExecutor
+        def filter = FilterFactory.createFieldFilter(queryExecutor, subfilter, field, operator)
+        verifyFilter(filter, dataSourceName, datasetId, field, operator)
+    }
+
+    private static def verifyFilter(filter, dataSourceName, datasetId, field, operator) {
+        def whereClause = filter.whereClause
+
+        assert whereClause instanceof SingularWhereClause
+        assert whereClause.lhs == field
+        assert whereClause.operator == operator
         // these values are take from the query executor's result
-        assert inClause.rhs == (["a","c"] as Set)
+        assert whereClause.rhs == (["a", "c"] as Set)
         assert filter.dataSourceName == dataSourceName
         assert filter.datasetId == datasetId
     }
 
+    /**
+     * Creates a stub query executor that returns some canned values for field1 and field2
+     * @return
+     */
     private static def createQueryExecutor() {
+        // not the values for field2 (b and d) are not actually used. they are provided to show that only the
+        // values from the field1 are used
         def values = [
                 createFieldMap("a", "b"),
                 createFieldMap("c", "d")
         ]
-        def delegate =  values.iterator()
-        // this iterator wraps the results in a Row that has a getFieldValue method
-        def iterator = [
-            hasNext : {delegate.hasNext()},
-            next : {
-                def map = delegate.next()
-                def row = [ getFieldValue: {field -> map[field] } ] as Row
-                return row
-            }
-        ] as Iterator
+        def iterator = createRowIterator(values)
+        def queryResult = [iterator: { iterator }] as QueryResult
+        return [execute: { query, filtered -> queryResult }] as QueryExecutor
+    }
 
-        def queryResult = [ iterator : { iterator } ] as QueryResult
-        return [ execute : { query, filtered -> queryResult } ] as QueryExecutor
+    /**
+     * Wraps a list's iterator with an iterator that returns Rows
+     * @param list
+     */
+    private static def createRowIterator(list) {
+        def delegate = list.iterator()
+
+        // this iterator wraps the values list in a Row
+        def iterator = [
+                hasNext: { delegate.hasNext() },
+                next: {
+                    def map = delegate.next()
+                    def row = [getFieldValue: { field -> map[field] }] as Row
+                    return row
+                }
+        ] as Iterator
+        return iterator
     }
 
     private static def createFieldMap(field1Val, field2Val) {

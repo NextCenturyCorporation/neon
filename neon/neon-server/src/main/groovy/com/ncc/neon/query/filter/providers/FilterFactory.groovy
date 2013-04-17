@@ -45,8 +45,8 @@ class FilterFactory {
         def queryResult = queryExecutor.execute(QueryUtils.queryFromFilter(subfilter), false)
 
         def uniqueFieldValues = queryResult.collect([] as Set) { it.getFieldValue(field) }
-        def inClause = new SingularWhereClause(lhs: field, operator: operator , rhs: uniqueFieldValues)
-        return new Filter(dataSourceName: subfilter.dataSourceName, datasetId: subfilter.datasetId, whereClause: inClause)
+        def whereClause = new SingularWhereClause(lhs: field, operator: operator , rhs: uniqueFieldValues)
+        return new Filter(dataSourceName: subfilter.dataSourceName, datasetId: subfilter.datasetId, whereClause: whereClause)
     }
 
 }
