@@ -102,5 +102,4 @@ class FilterState implements Serializable {
         return new DataSource(dataSourceName: filter.dataSourceName, datasetId: filter.datasetId)
     }
 
-
 }
