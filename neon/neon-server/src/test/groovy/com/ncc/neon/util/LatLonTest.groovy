@@ -29,7 +29,7 @@ class LatLonTest {
 
     @Test
     void "valid lat/lon pairs"() {
-        assertLatLon(latLon(25.2, -125), 25.2, -125)
+        assertLatLon(latLon(25.2, -125), 25.2, -125);
         assertLatLon(latLon(-90, -180), -90, -180)
         assertLatLon(latLon(90, 180), 90, 180)
     }
