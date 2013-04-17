@@ -29,6 +29,6 @@ class BooleanWhereClause implements WhereClause, Serializable {
 
     private static final long serialVersionUID = -1686544619324087210L
 
-    List<WhereClause> whereClauses;
+    List<WhereClause> whereClauses
 
 }

@@ -227,7 +227,7 @@ class MongoQueryExecutorIntegrationTest {
     @Test
     void "set selection WHERE"() {
         def dcStateFilter = new Filter(dataSourceName: DATASOURCE_NAME, datasetId: DATASET_ID, whereClause: new SingularWhereClause(lhs: 'state', operator: '=', rhs: 'DC'))
-        mongoQueryExecutor.setSelectionWhere(dcStateFilter);
+        mongoQueryExecutor.setSelectionWhere(dcStateFilter)
 
         def result = mongoQueryExecutor.getSelectionWhere(ALL_DATA_FILTER)
         def dcStateRecords = rows(1, 2, 5)

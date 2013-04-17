@@ -38,7 +38,7 @@ class TimeoutService {
     @GET
     @Produces(MediaType.TEXT_PLAIN)
     String timeout() {
-        Thread.sleep(10000);
+        Thread.sleep(10000)
         return "done"
     }
 }

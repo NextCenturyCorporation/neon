@@ -62,7 +62,7 @@ class RestServiceTransform implements JsonTransform {
      * @return
      */
     private static def parsePath(path) {
-        def pathParts = path.split("\\?");
+        def pathParts = path.split("\\?")
         def queryParams = [:]
 
         if (pathParts.length == 2) {

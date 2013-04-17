@@ -25,12 +25,10 @@ import org.codehaus.jackson.map.annotate.JsonDeserialize
  * OF NEXT CENTURY CORPORATION EXCEPT BY PRIOR WRITTEN PERMISSION AND WHEN
  * RECIPIENT IS UNDER OBLIGATION TO MAINTAIN SECRECY.
  */
-// TODO: NEON-80 A codenarc bug incorrectly throws the UnnecessaryPackageReference error on enums. We should upgrade codenarc to fix this.
-@SuppressWarnings('UnnecessaryPackageReference')
 @JsonDeserialize(using = SortOrderDeserializer)
 enum SortOrder {
 
-    ASCENDING(1), DESCENDING(-1);
+    ASCENDING(1), DESCENDING(-1)
 
     def direction
 

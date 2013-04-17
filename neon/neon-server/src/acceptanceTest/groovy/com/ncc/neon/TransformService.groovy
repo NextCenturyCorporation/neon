@@ -43,7 +43,7 @@ class TransformService {
     @Produces(MediaType.APPLICATION_JSON)
     String transform(String inputJsonArray, @QueryParam("replacethis") String replaceThis, @QueryParam("replacewith") String replaceWith) {
         def jsonArray = new JSONArray(inputJsonArray)
-        def output = jsonArray.toString().replaceAll(replaceThis,replaceWith);
+        def output = jsonArray.toString().replaceAll(replaceThis,replaceWith)
         return output
     }
 }

@@ -38,7 +38,7 @@ class QueryValueDeserializerTest {
     def deserializer
 
     // the config/context are just populated with enough default values to allow them to be instantiated
-    def config = new DeserializationConfig(ObjectMapper.DEFAULT_INTROSPECTOR, null, VisibilityChecker.Std.defaultInstance(), null, null, null, null);
+    def config = new DeserializationConfig(ObjectMapper.DEFAULT_INTROSPECTOR, null, VisibilityChecker.Std.defaultInstance(), null, null, null, null)
     def context = new StdDeserializationContext(config, null, null, null)
 
     @Before

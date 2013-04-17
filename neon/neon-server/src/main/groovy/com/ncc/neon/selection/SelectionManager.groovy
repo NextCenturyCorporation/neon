@@ -44,8 +44,8 @@ class SelectionManager implements Serializable {
     }
 
     def replaceSelectionWith(ids) {
-        selectedIds.clear();
-        addIds(ids);
+        selectedIds.clear()
+        addIds(ids)
     }
 
     def clear() {

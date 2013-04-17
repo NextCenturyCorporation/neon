@@ -33,9 +33,9 @@ class MongoQueryBuilder implements QueryBuilder {
 
     private def selectClause
     private def distinctClause
-    private def groupByClauses = []
-    private def aggregateClauses = []
-    private def sortClauses = []
+    private final def groupByClauses = []
+    private final def aggregateClauses = []
+    private final def sortClauses = []
     private def limitClause
 
     MongoQueryBuilder() {

@@ -130,7 +130,7 @@ dependencies {
     integrationTestCompile files(sourceSets.test.output.classesDir)
 
 
-
+    codenarc "org.codenarc:CodeNarc:0.18.1"
 }
 
 // configure codenarc for each of the source sets

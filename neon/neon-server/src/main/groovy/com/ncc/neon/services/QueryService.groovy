@@ -63,7 +63,7 @@ class QueryService {
             filterProvider.queryExecutor = queryExecutor
         }
         def filter = filterProvider.provideFilter()
-        def addedId = queryExecutor.addFilter(filter).toString();
+        def addedId = queryExecutor.addFilter(filter).toString()
         return new FilterEvent(addedIds: [addedId])
     }
 

@@ -85,7 +85,7 @@ abstract class AbstractQueryExecutor implements QueryExecutor {
 
     @Override
     void removeSelectedIds(Collection<Object> ids) {
-        selectionManager.removeIds(transformIdFields(ids));
+        selectionManager.removeIds(transformIdFields(ids))
     }
 
     @Override
@@ -134,14 +134,14 @@ abstract class AbstractQueryExecutor implements QueryExecutor {
         return builder.build()
     }
 
-    protected abstract QueryResult doExecuteQuery(query);
+    protected abstract QueryResult doExecuteQuery(query)
 
     private def applySelectClause(builder, query) {
         builder.apply(new SelectClause(dataSourceName: query.dataSourceName, datasetId: query.datasetId))
     }
 
     private def applyWhereClause(builder, query, additionalWhereClauseGenerator, includeFiltered) {
-        def whereClauses = [];
+        def whereClauses = []
 
         if (!includeFiltered) {
             whereClauses.addAll(createWhereClausesForFilters(query))
@@ -198,7 +198,7 @@ abstract class AbstractQueryExecutor implements QueryExecutor {
      * @return The transformed collection of ids
      */
     protected def transformIdFields(Collection<Object> ids) {
-        return ids;
+        return ids
     }
 
     /**

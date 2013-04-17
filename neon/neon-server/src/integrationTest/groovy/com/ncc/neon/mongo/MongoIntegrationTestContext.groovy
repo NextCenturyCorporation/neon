@@ -39,7 +39,7 @@ import org.springframework.context.annotation.Profile
 @Profile('mongo-integrationtest')
 class MongoIntegrationTestContext {
 
-    static final MongoClient MONGO;
+    static final MongoClient MONGO
 
     static {
         def hostsString = System.getProperty("mongo.hosts", "localhost")

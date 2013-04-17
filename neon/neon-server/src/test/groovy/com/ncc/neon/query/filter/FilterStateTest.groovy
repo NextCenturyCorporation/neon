@@ -62,8 +62,8 @@ class FilterStateTest {
         def datasetId1 = "dataset1"
         def filter1 = new Filter(dataSourceName:  dataSourceName1, datasetId: datasetId1)
         def filter2 = new Filter(dataSourceName:  dataSourceName1, datasetId: datasetId1)
-        def id1 = filterState.addFilter(filter1);
-        def id2 = filterState.addFilter(filter2);
+        def id1 = filterState.addFilter(filter1)
+        def id2 = filterState.addFilter(filter2)
         filterState.removeFilter(id1)
         verifyFilters(dataSourceName1, datasetId1, [filter2])
         filterState.removeFilter(id2)
@@ -76,8 +76,8 @@ class FilterStateTest {
         def datasetId = "dataset1"
         def filter1 = new Filter(dataSourceName:  dataSourceName, datasetId: datasetId)
         def filter2 = new Filter(dataSourceName:  dataSourceName, datasetId: datasetId)
-        filterState.addFilter(filter1);
-        filterState.addFilter(filter2);
+        filterState.addFilter(filter1)
+        filterState.addFilter(filter2)
         filterState.clearFilters()
         verifyFilters(dataSourceName, datasetId, [])
     }

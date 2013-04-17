@@ -33,6 +33,6 @@ interface JsonTransform {
      * @param inputJsonArray
      * @return
      */
-    String apply(inputJsonArray);
+    String apply(inputJsonArray)
 
 }

@@ -54,7 +54,7 @@ class SelectionManagerTest {
     void "remove ids"() {
         selectionManager.addIds(["a","b","c"])
         selectionManager.removeIds(["b"])
-        verifySelectedIds(["a","c"]);
+        verifySelectedIds(["a","c"])
     }
 
     @Test
@@ -72,6 +72,6 @@ class SelectionManagerTest {
     }
 
     private def verifySelectedIds(expected) {
-        AssertUtils.assertEqualCollections(expected, selectionManager.selectedIds);
+        AssertUtils.assertEqualCollections(expected, selectionManager.selectedIds)
     }
 }

@@ -31,7 +31,7 @@ public interface QueryResult extends Iterable<Row> {
      * Converts the results of the query to JSON
      * @return
      */
-    String toJson();
+    String toJson()
 
 
 }

@@ -50,7 +50,7 @@ class QueryValueDeserializer extends JsonDeserializer<Object> {
                 catch (IllegalArgumentException ex) {
                     return text
                 }
-                break;
+                break
             default:
                 return DEFAULT_SERIALIZER.deserialize(jp, ctxt)
         }

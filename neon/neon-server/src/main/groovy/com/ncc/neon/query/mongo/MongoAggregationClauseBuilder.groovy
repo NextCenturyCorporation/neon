@@ -79,12 +79,12 @@ class MongoAggregationClauseBuilder {
     }
 
     private static def createFunctionDBObject(function, field) {
-        def lhs = '$' + function;
-        def rhs = '$' + field;
+        def lhs = '$' + function
+        def rhs = '$' + field
         // count is implemented as sum with a value of 1
         if (function == 'count') {
-            lhs = '$sum';
-            rhs = 1;
+            lhs = '$sum'
+            rhs = 1
         }
         return new BasicDBObject(lhs, rhs)
     }
