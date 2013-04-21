@@ -1,7 +1,7 @@
-package com.ncc.neon
+package com.ncc.neon.query
 
-import javax.ws.rs.*
-import javax.ws.rs.core.MediaType
+import org.junit.Before
+import org.junit.Test
 
 /*
  * ************************************************************************
@@ -26,22 +26,38 @@ import javax.ws.rs.core.MediaType
  * RECIPIENT IS UNDER OBLIGATION TO MAINTAIN SECRECY.
  */
 
-/**
- * A web service used during testing to transform json
- */
-@Path('/transformtest')
-class TransformService {
+class BatchQueryResultTest {
 
-    @POST
-    @Consumes(MediaType.APPLICATION_JSON)
-    @Produces(MediaType.APPLICATION_JSON)
-    String transform(String inputJson, @QueryParam("replacethis") String replaceThis, @QueryParam("replacewith") String replaceWith) {
-        def output = inputJson.toString().replaceAll(replaceThis,replaceWith)
-        // if the input data is not an array, transform it to an array
-        if ( !output.startsWith("[")) {
-            output = "[" + output + "]"
-        }
+    private static final def QUERY1_JSON = '[{"q1a":"v1a"},{"q1b":"v1b"}]'
 
-        return output
+    private static final def QUERY2_JSON = '[{"q2a":"v2a"},{"q2b":"v2b"}]'
+
+    private static final def QUERY1_RESULT = createQueryResult(QUERY1_JSON)
+    private static final def QUERY2_RESULT = createQueryResult(QUERY2_JSON)
+
+    def batchQueryResult
+
+    @Before
+    void before() {
+        batchQueryResult = new BatchQueryResult()
+        batchQueryResult.namedResults.q1 = QUERY1_RESULT
+        batchQueryResult.namedResults.q2 = QUERY2_RESULT
     }
+
+    @Test
+    void "convert batch query to json"() {
+        def actual = batchQueryResult.toJson()
+        def expected = '{"q1":' + QUERY1_JSON + ',"q2":' + QUERY2_JSON + '}'
+
+        assert actual == expected
+    }
+
+    private static def createQueryResult(json) {
+        def result = [
+                toJson: { json }
+        ] as QueryResult
+        return result
+
+    }
+
 }

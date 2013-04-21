@@ -367,29 +367,89 @@ describe('query mapping', function () {
         assertQueryResults(query, rows(1, 2));
     });
 
+    it('concatenates the results of a batch query', function () {
+        var query1 = baseQuery().where('state', '=', 'VA');
+        var query2 = baseQuery().where('state', '=', 'MD');
+        var query3 = baseQuery().where('state', '=', 'DC');
+
+        var batchQuery = new neon.query.BatchQuery();
+        batchQuery.addQuery('Virginia', query1);
+        batchQuery.addQuery('Maryland', query2);
+        batchQuery.addQuery('DistrictOfColumbia', query3);
+
+
+        var expectedData = getJSONFixture('batchQuery.json');
+        assertBatchQueryResults(batchQuery, expectedData);
+    });
+
+    it('transforms batch query results with a RESTful service', function () {
+        // the port comes from build.gradle
+        var host = 'http://localhost:10008';
+        var path = '/neon/transformtest?replacethis=Virginia&replacewith=VirginiaState';
+        var transformClassName = 'com.ncc.neon.query.transform.RestServiceTransform';
+        var transformParams = [host, path];
+
+        var query1 = baseQuery().where('state', '=', 'VA');
+        var query2 = baseQuery().where('state', '=', 'MD');
+        var query3 = baseQuery().where('state', '=', 'DC');
+
+        var batchQuery = new neon.query.BatchQuery();
+        batchQuery.addQuery('Virginia', query1);
+        batchQuery.addQuery('Maryland', query2);
+        batchQuery.addQuery('DistrictOfColumbia', query3);
+        batchQuery.transform(transformClassName, transformParams);
+
+        executeAndWait(neon.query.executeBatchQuery, batchQuery);
+        runs(function () {
+            expect(currentResult.data.length).toBe(1);
+            // the state should be converted from Virginia to VirginiaState
+            expect(currentResult.data[0].Virginia).toBeUndefined();
+            expect(currentResult.data[0].VirginiaState).toBeDefined();
+        });
+    });
+
+
     /**
      * Executes the specified query and verifies that the results match the expected data
      * @param query
      * @param expectedData
      */
     function assertQueryResults(query, expectedData) {
-        assertAsync(neon.query.executeQuery, query, expectedData);
+        doAssertQueryResults(neon.query.executeQuery, query, expectedData, false);
+    }
+
+    /**
+     * Executes the specified batch query and verifies that the results match the expected data
+     * @param query
+     * @param expectedData
+     */
+    function assertBatchQueryResults(query, expectedData) {
+        doAssertQueryResults(neon.query.executeBatchQuery, query, expectedData, true);
     }
 
 
+    function doAssertQueryResults(queryMethod, query, expectedData, ignoreDataSourceInfo) {
+        assertAsync(queryMethod, query, expectedData, ignoreDataSourceInfo);
+    }
+
+
+    // TODO: NEON-156 The ignoreDataSourceInfo param is a bit hacky to support queries that do not return the data source info. We need to figure out a better way to handle this and decide if we need to include the data source info
     /**
      * Executes the specified async function with the given argument. The function must also take a second
      * argument with a callback to invoke when the operation completes and a third argument that is an error callback
      * @param asyncFunction The asynchronous function to call
      * @param arg The argument to pass to the function
      * @param expectedData The data expected to be returned from the function
+     * @param ignoreDataSourceInfo
      */
-    function assertAsync(asyncFunction, arg, expectedData) {
+    function assertAsync(asyncFunction, arg, expectedData, ignoreDataSourceInfo) {
         executeAndWait(asyncFunction, arg);
         runs(function () {
-            expect(currentResult.data).toBeEqualArray(expectedData);
-            expect(currentResult.dataSourceName).toEqual(dataSourceName);
-            expect(currentResult.datasetId).toEqual(datasetId);
+            expect(currentResult.data).toEqual(expectedData);
+            if (!ignoreDataSourceInfo) {
+                expect(currentResult.dataSourceName).toEqual(dataSourceName);
+                expect(currentResult.datasetId).toEqual(datasetId);
+            }
         });
     }
 

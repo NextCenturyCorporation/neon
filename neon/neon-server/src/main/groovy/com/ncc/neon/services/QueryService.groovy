@@ -22,6 +22,7 @@
  */
 package com.ncc.neon.services
 
+import com.ncc.neon.query.BatchQuery
 import com.ncc.neon.query.Query
 import com.ncc.neon.query.QueryExecutor
 import com.ncc.neon.query.filter.Filter
@@ -50,6 +51,18 @@ class QueryService {
                         @DefaultValue("false") @QueryParam("includefiltered") boolean includeFiltered,
                         @QueryParam("transform") String transformClassName,
                         @QueryParam("param") List<String> transformParams
+    ) {
+        return wrapInDataJson(queryExecutor.execute(query, includeFiltered), transformClassName, transformParams)
+    }
+
+    @POST
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    @Path("batchquery")
+    String executeBatchQuery(BatchQuery query,
+                             @DefaultValue("false") @QueryParam("includefiltered") boolean includeFiltered,
+                             @QueryParam("transform") String transformClassName,
+                             @QueryParam("param") List<String> transformParams
     ) {
         return wrapInDataJson(queryExecutor.execute(query, includeFiltered), transformClassName, transformParams)
     }

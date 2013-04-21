@@ -1,8 +1,4 @@
-package com.ncc.neon
-
-import javax.ws.rs.*
-import javax.ws.rs.core.MediaType
-
+package com.ncc.neon.query
 /*
  * ************************************************************************
  * Copyright (c), 2013 Next Century Corporation. All Rights Reserved.
@@ -26,22 +22,27 @@ import javax.ws.rs.core.MediaType
  * RECIPIENT IS UNDER OBLIGATION TO MAINTAIN SECRECY.
  */
 
-/**
- * A web service used during testing to transform json
- */
-@Path('/transformtest')
-class TransformService {
+class BatchQueryResult implements QueryResult {
 
-    @POST
-    @Consumes(MediaType.APPLICATION_JSON)
-    @Produces(MediaType.APPLICATION_JSON)
-    String transform(String inputJson, @QueryParam("replacethis") String replaceThis, @QueryParam("replacewith") String replaceWith) {
-        def output = inputJson.toString().replaceAll(replaceThis,replaceWith)
-        // if the input data is not an array, transform it to an array
-        if ( !output.startsWith("[")) {
-            output = "[" + output + "]"
+    /** a map of row names to the query results associated with that name */
+    final def namedResults = [:] as LinkedHashMap
+
+    @Override
+    String toJson() {
+        def builder = new StringBuilder()
+        builder.append("{")
+        namedResults.eachWithIndex { name, result, index ->
+            if (index > 0) {
+                builder.append(",")
+            }
+            builder.append('"').append(name).append('":').append(result.toJson())
         }
+        builder.append("}")
+        return builder.toString()
+    }
 
-        return output
+    @Override
+    Iterator<Row> iterator() {
+        throw new UnsupportedOperationException("Cannot iterate over a batch query result. It is not a collection of results.")
     }
 }

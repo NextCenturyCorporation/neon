@@ -66,6 +66,16 @@ abstract class AbstractQueryExecutor implements QueryExecutor {
     }
 
     @Override
+    QueryResult execute(BatchQuery query, boolean includeFiltered) {
+        def batchQueryResult = new BatchQueryResult()
+        query.namedQueries.each {
+            def result = execute(it.query, includeFiltered)
+            batchQueryResult.namedResults[it.name] = result
+        }
+        return batchQueryResult
+    }
+
+    @Override
     void setSelectionWhere(Filter filter) {
         def res = executeQuery(QueryUtils.queryFromFilter(filter))
         def idField = this.idFieldName
@@ -109,7 +119,7 @@ abstract class AbstractQueryExecutor implements QueryExecutor {
     private QueryResult executeQuery(query, additionalWhereClauseGenerator = null, includeFiltered = false) {
         // construct the query in a way that is specific to this query executor
         def builderResult = buildQuery(query, additionalWhereClauseGenerator, includeFiltered)
-        LOGGER.debug("Executing query {}",query)
+        LOGGER.debug("Executing query {}", query)
         return doExecuteQuery(builderResult)
     }
 
@@ -125,10 +135,10 @@ abstract class AbstractQueryExecutor implements QueryExecutor {
             applyClauses(builder, query.groupByClauses)
             applyClauses(builder, query.aggregates)
         }
-        if ( query.sortClauses ) {
+        if (query.sortClauses) {
             applyClauses(builder, query.sortClauses)
         }
-        if ( query.limitClause ) {
+        if (query.limitClause) {
             builder.apply(query.limitClause)
         }
         return builder.build()

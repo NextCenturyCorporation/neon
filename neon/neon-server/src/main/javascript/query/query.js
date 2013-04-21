@@ -92,7 +92,6 @@ neon.query.MIN = 'min';
 neon.query.AVG = 'avg';
 
 
-
 /**
  * The sort parameter for clauses to sort ascending
  * @property ASCENDING
@@ -421,10 +420,35 @@ neon.query.getFieldNames = function (dataSourceName, datasetId, successCallback,
  * @return {neon.util.AjaxRequest} The xhr request object
  */
 neon.query.executeQuery = function (query, successCallback, errorCallback) {
-    var queryParams = neon.query.buildQueryParamsString_(query);
+    var transform = query.filter.transform_;
+    return neon.query.doExecuteQuery_(query, transform, successCallback, errorCallback, 'query');
+};
+
+/**
+ * Executes the specified batch query (a series of queries whose results are aggregate),
+ * and fires the callback when complete
+ * @method executeBatchQuery
+ * @param {neon.query.BatchQuery} query the query to execute
+ * @param {Function} successCallback The callback to fire when the query successfully completes
+ * @param {Function} [errorCallback] The optional callback when an error occurs. This is a 3 parameter function that contains the xhr, a short error status and the full error message.
+ * @return {neon.util.AjaxRequest} The xhr request object
+ */
+neon.query.executeBatchQuery = function (query, successCallback, errorCallback) {
+    query.namedQueries.forEach(function (namedQuery) {
+        // TODO: These don't actually need to be set but it makes the query values consistent
+        // with the batch queries. We're still working on a better way to handle batch queries.
+        namedQuery.query.includeFiltered_ = query.includeFiltered_;
+        namedQuery.query.filter.transform_ = query.transform_;
+    });
+
+    return neon.query.doExecuteQuery_(query, query.transform_, successCallback, errorCallback, 'batchquery');
+};
+
+neon.query.doExecuteQuery_ = function (query, transform, successCallback, errorCallback, serviceName) {
+    var queryParams = neon.query.buildQueryParamsString_(query, transform);
     return neon.util.AjaxUtils.doPostJSON(
         query,
-        neon.query.queryUrl_('/services/queryservice/query?' + queryParams),
+        neon.query.queryUrl_('/services/queryservice/' + serviceName + '?' + queryParams),
         {
             success: neon.query.wrapCallback_(successCallback, neon.query.wrapperArgsForQuery_(query)),
             error: errorCallback
@@ -433,13 +457,12 @@ neon.query.executeQuery = function (query, successCallback, errorCallback) {
 };
 
 
-neon.query.buildQueryParamsString_ = function (query) {
+neon.query.buildQueryParamsString_ = function (query, transform) {
     var queryParams = 'includefiltered=' + query.includeFiltered_;
-    var filter = query.filter;
-    if (filter && filter.transform_) {
-        queryParams += '&transform=' + filter.transform_.transformName;
-        if (filter.transform_.transformParams) {
-            filter.transform_.transformParams.forEach(function (param) {
+    if (transform) {
+        queryParams += '&transform=' + transform.transformName;
+        if (transform.transformParams) {
+            transform.transformParams.forEach(function (param) {
                 queryParams += '&param=' + encodeURIComponent(param);
             });
         }
@@ -651,6 +674,10 @@ neon.query.clearSelection = function (successCallback, errorCallback) {
 
 
 neon.query.wrapperArgsForQuery_ = function (query) {
+    // TODO: We need a better way to handle batch queries. We might just need to remove the dataset callback args all together
+    if (query instanceof neon.query.BatchQuery) {
+        return query;
+    }
     return neon.query.wrapperArgsForDataset_(query.filter.dataSourceName, query.filter.datasetId);
 };
 
@@ -898,3 +925,71 @@ neon.query.SimpleFilterProvider = function (filter) {
 // TODO: NEON-73 (Javascript inheritance library)
 neon.query.SimpleFilterProvider.prototype = new neon.query.FilterProvider();
 
+
+/**
+ * A batch query is one that encompasses multiple queries. The results of all queries in the batch are
+ * combined into a single json object (the resulting json object has one key for each of the queries where the
+ * value of each key is the result of that query). The entire batch query results can also be sent to a transform
+ * service to manipulate all of the results at once
+ * @constructor
+ * @class BatchQuery
+ */
+neon.query.BatchQuery = function () {
+    this.namedQueries = [];
+
+    /*jshint expr: true */
+    this.transform_;
+    this.includeFiltered_ = false;
+};
+
+/**
+ * Adds a query to execute as part of the batch query
+ * @method addQuery
+ * @param {String} name The name associated with this query in the batch (the name is used as the key in the resulting json)
+ * @param {neon.query.Query} query The query to execute as part of the batch query
+ * @return {neon.query.BatchQuery} This object
+ */
+neon.query.BatchQuery.prototype.addQuery = function (name, query) {
+    this.namedQueries.push(new neon.query.NamedQuery(name, query));
+    return this;
+};
+
+/**
+ * Sets the transform to execute on the results of the batch query.
+ * See {{#crossLink "neon.query.Query/transform"}}{{/crossLink}} for parameter details
+ * @method transform
+ * @param {String} transformName
+ * @param {Array} transformParams
+ * @return {neon.query.BatchQuery} This batch query
+ */
+neon.query.BatchQuery.prototype.transform = function (transformName, transformParams) {
+    this.transform_ = new neon.query.Transform(transformName, transformParams);
+    return this;
+};
+
+/**
+ * Sets whether or not the results of the query should include data that is filtered out. When true,
+ * all data, regardless of filters, will be included in the query
+ * See {{#crossLink "neon.query.Query/includedFiltered"}}{{/crossLink}} for parameter details
+ * @param includeFiltered
+ * @returns {neon.query.BatchQuery} This batch query
+ */
+neon.query.BatchQuery.prototype.includeFiltered = function (includeFiltered) {
+    this.includeFiltered_ = includeFiltered;
+    return this;
+};
+
+
+/**
+ * A named query is one that is included as part of a batch query. Each query is executed as part of the batch, and
+ * the name is used to indicate the json key to use for its results
+ * @param name
+ * @param query
+ * @class NamedQuery
+ * @constructor
+ * @private
+ */
+neon.query.NamedQuery = function (name, query) {
+    this.name = name;
+    this.query = query;
+};

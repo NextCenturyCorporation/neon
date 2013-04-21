@@ -61,6 +61,7 @@ $(document).ready(function () {
                         else {
                             executeQuery(new Query().selectFrom(dataSourceName, datasetId), function (all) {
                                 table.setData(all.data);
+                                console.log(JSON.stringify(all.data));
                             });
                         }
                     });
