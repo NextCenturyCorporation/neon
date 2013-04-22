@@ -54,7 +54,8 @@ neon.util.LoggerUtils.useBrowserConsoleAppender = function (logger, use) {
 /**
  * Gets a global logger (with no name) that can be used by different classes. Any configuration changes to the
  * global logger will affect all usages of it.
- * @returns {Object} The global logger
+ * @method getGlobalLogger
+ * @return {Object} The global logger
  */
 neon.util.LoggerUtils.getGlobalLogger = function () {
     return log4javascript.getLogger("[global]");
