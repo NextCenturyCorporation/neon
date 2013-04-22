@@ -1,0 +1,30 @@
+[
+    {
+        "_id": {
+            "hire_year": 2010
+        },
+        "hire_year": 2010,
+        "salary_sum": 118000
+    },
+    {
+        "_id": {
+            "hire_year": 2011
+        },
+        "hire_year": 2011,
+        "salary_sum": 260000
+    },
+    {
+        "_id": {
+            "hire_year": 2012
+        },
+        "hire_year": 2012,
+        "salary_sum": 353000
+    },
+    {
+        "_id": {
+            "hire_year": 2013
+        },
+        "hire_year": 2013,
+        "salary_sum": 55000
+    }
+]

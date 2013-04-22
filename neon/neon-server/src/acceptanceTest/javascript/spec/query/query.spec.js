@@ -246,13 +246,20 @@ describe('query mapping', function () {
         });
     });
 
-    it('group by derived field', function () {
+    it('group by month', function () {
         var groupByMonthClause = new neon.query.GroupByFunctionClause(neon.query.MONTH, 'hiredate', 'hire_month');
         var query = baseQuery().groupBy(groupByMonthClause).aggregate(neon.query.SUM, 'salary', 'salary_sum').sortBy('hire_month', neon.query.ASCENDING);
-        var expectedData = getJSONFixture('groupByDerivedField.json');
+        var expectedData = getJSONFixture('groupByMonth.json');
         assertQueryResults(query, expectedData);
-
     });
+
+    it('group by year', function () {
+        var groupByYearClause = new neon.query.GroupByFunctionClause(neon.query.YEAR, 'hiredate', 'hire_year');
+        var query = baseQuery().groupBy(groupByYearClause).aggregate(neon.query.SUM, 'salary', 'salary_sum').sortBy('hire_year', neon.query.ASCENDING);
+        var expectedData = getJSONFixture('groupByYear.json');
+        assertQueryResults(query, expectedData);
+    });
+
 
     it('query WHERE less than', function () {
         var query = baseQuery().where('salary', '<', 61000);
