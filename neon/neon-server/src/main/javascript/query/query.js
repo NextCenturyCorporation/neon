@@ -970,9 +970,10 @@ neon.query.BatchQuery.prototype.transform = function (transformName, transformPa
 /**
  * Sets whether or not the results of the query should include data that is filtered out. When true,
  * all data, regardless of filters, will be included in the query
- * See {{#crossLink "neon.query.Query/includedFiltered"}}{{/crossLink}} for parameter details
- * @param includeFiltered
- * @returns {neon.query.BatchQuery} This batch query
+ * See {{#crossLink "neon.query.Query/includeFiltered"}}{{/crossLink}} for parameter details
+ * @method includeFiltered
+ * @param {Boolean} includeFiltered
+ * @return {neon.query.BatchQuery} This batch query
  */
 neon.query.BatchQuery.prototype.includeFiltered = function (includeFiltered) {
     this.includeFiltered_ = includeFiltered;
