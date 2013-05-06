@@ -177,6 +177,12 @@ war {
     version ""
 }
 
+test {
+    def props = [:]
+    props['unit.test'] = true
+    systemProperties props
+}
+
 
 def isRunJavascriptTests() {
     return hasProperty('jsUnitTest')
@@ -198,6 +204,7 @@ task integrationTests(type: Test) {
         props["mongo.hosts"] = mongoHostProperty
     }
     props['spring.profiles.active'] = 'mongo-integrationtest'
+    props['integration.test'] = true
     systemProperties props
 
 }

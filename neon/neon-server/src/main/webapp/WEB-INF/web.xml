@@ -15,6 +15,14 @@
         <param-value>production</param-value>
     </context-param>
 
+    <!-- Ensures logs are created in the correct directory -->
+    <listener>
+        <listener-class>
+            com.ncc.neon.config.LogPathServletContextListener
+        </listener-class>
+    </listener>
+
+
     <listener>
         <listener-class>
             org.springframework.web.context.ContextLoaderListener
@@ -27,7 +35,6 @@
             org.springframework.web.context.request.RequestContextListener
         </listener-class>
     </listener>
-
 
     <servlet>
         <servlet-name>jersey-serlvet</servlet-name>
