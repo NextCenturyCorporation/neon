@@ -337,7 +337,7 @@ class MongoQueryExecutorIntegrationTest {
                 groupByClauses: [groupByMonthClause], aggregates: [salaryAggregateClause], sortClauses: [sortByMonth])
 
         def result = mongoQueryExecutor.execute(query, false)
-        def expected = readJson('groupByDerivedField.json')
+        def expected = readJson('groupByMonth.json')
 
         assertQueryResult(expected, result)
     }
