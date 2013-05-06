@@ -5,4 +5,10 @@
         <Arg>mongo.hosts</Arg>
         <Arg>@mongo.hosts@</Arg>
     </Call>
+    <Call class="java.lang.System" name="setProperty">
+        <Arg>acceptance.test</Arg>
+        <Arg>true</Arg>
+    </Call>
+
+
 </Configure>
