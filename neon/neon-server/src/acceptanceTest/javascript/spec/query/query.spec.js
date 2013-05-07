@@ -415,7 +415,7 @@ describe('query mapping', function () {
      * @param expectedData
      */
     function assertQueryResults(query, expectedData) {
-        doAssertQueryResults(neon.query.executeQuery, query, expectedData, false);
+        doAssertQueryResults(neon.query.executeQuery, query, expectedData);
     }
 
     /**
@@ -424,32 +424,25 @@ describe('query mapping', function () {
      * @param expectedData
      */
     function assertBatchQueryResults(query, expectedData) {
-        doAssertQueryResults(neon.query.executeBatchQuery, query, expectedData, true);
+        doAssertQueryResults(neon.query.executeBatchQuery, query, expectedData);
     }
 
 
-    function doAssertQueryResults(queryMethod, query, expectedData, ignoreDataSourceInfo) {
-        assertAsync(queryMethod, query, expectedData, ignoreDataSourceInfo);
+    function doAssertQueryResults(queryMethod, query, expectedData) {
+        assertAsync(queryMethod, query, expectedData);
     }
 
-
-    // TODO: NEON-156 The ignoreDataSourceInfo param is a bit hacky to support queries that do not return the data source info. We need to figure out a better way to handle this and decide if we need to include the data source info
     /**
      * Executes the specified async function with the given argument. The function must also take a second
      * argument with a callback to invoke when the operation completes and a third argument that is an error callback
      * @param asyncFunction The asynchronous function to call
      * @param arg The argument to pass to the function
      * @param expectedData The data expected to be returned from the function
-     * @param ignoreDataSourceInfo
      */
-    function assertAsync(asyncFunction, arg, expectedData, ignoreDataSourceInfo) {
+    function assertAsync(asyncFunction, arg, expectedData) {
         executeAndWait(asyncFunction, arg);
         runs(function () {
             expect(currentResult.data).toEqual(expectedData);
-            if (!ignoreDataSourceInfo) {
-                expect(currentResult.dataSourceName).toEqual(dataSourceName);
-                expect(currentResult.datasetId).toEqual(datasetId);
-            }
         });
     }
 

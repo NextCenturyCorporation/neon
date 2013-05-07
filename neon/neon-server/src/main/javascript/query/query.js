@@ -405,7 +405,7 @@ neon.query.getFieldNames = function (dataSourceName, datasetId, successCallback,
     return neon.util.AjaxUtils.doGet(
         neon.query.queryUrl_('/services/queryservice/fieldnames?datasourcename=' + dataSourceName + '&datasetid=' + datasetId),
         {
-            success: neon.query.wrapCallback_(successCallback, neon.query.wrapperArgsForDataset_(dataSourceName, datasetId)),
+            success: successCallback,
             error: errorCallback
         }
     );
@@ -450,7 +450,7 @@ neon.query.doExecuteQuery_ = function (query, transform, successCallback, errorC
         query,
         neon.query.queryUrl_('/services/queryservice/' + serviceName + '?' + queryParams),
         {
-            success: neon.query.wrapCallback_(successCallback, neon.query.wrapperArgsForQuery_(query)),
+            success: successCallback,
             error: errorCallback
         }
     );
@@ -486,7 +486,7 @@ neon.query.addFilter = function (filter, successCallback, errorCallback) {
         filterProvider,
         neon.query.queryUrl_('/services/queryservice/addfilter'),
         {
-            success: neon.query.wrapCallback_(successCallback, neon.query.wrapperArgsForFilter_(filterProvider.filter)),
+            success: successCallback,
             error: errorCallback
         }
     );
@@ -527,7 +527,7 @@ neon.query.replaceFilter = function (filterId, filter, successCallback, errorCal
         filterProvider,
         neon.query.queryUrl_('/services/queryservice/replacefilter/' + filterId),
         {
-            success: neon.query.wrapCallback_(successCallback, neon.query.wrapperArgsForFilter_(filterProvider.filter)),
+            success: successCallback,
             error: errorCallback
         }
     );
@@ -567,7 +567,7 @@ neon.query.setSelectionWhere = function (filter, successCallback, errorCallback)
         filter,
         neon.query.queryUrl_('/services/queryservice/setselectionwhere'),
         {
-            success: neon.query.wrapCallback_(successCallback, neon.query.wrapperArgsForFilter_(filter)),
+            success: successCallback,
             error: errorCallback
         }
     );
@@ -590,7 +590,7 @@ neon.query.getSelectionWhere = function (filter, successCallback, errorCallback)
         filter,
         neon.query.queryUrl_('/services/queryservice/getselectionwhere' + queryParams),
         {
-            success: neon.query.wrapCallback_(successCallback, neon.query.wrapperArgsForFilter_(filter)),
+            success: successCallback,
             error: errorCallback
         }
     );
@@ -670,50 +670,6 @@ neon.query.clearSelection = function (successCallback, errorCallback) {
             error: errorCallback
         }
     );
-};
-
-
-neon.query.wrapperArgsForQuery_ = function (query) {
-    // TODO: We need a better way to handle batch queries. We might just need to remove the dataset callback args all together
-    if (query instanceof neon.query.BatchQuery) {
-        return query;
-    }
-    return neon.query.wrapperArgsForDataset_(query.filter.dataSourceName, query.filter.datasetId);
-};
-
-neon.query.wrapperArgsForFilter_ = function (filter) {
-    return neon.query.wrapperArgsForDataset_(filter.dataSourceName, filter.datasetId);
-};
-
-neon.query.wrapperArgsForDataset_ = function (dataSourceName, datasetId) {
-    var args = {};
-    args[this.DATASOURCE_NAME_IDENTIFIER] = dataSourceName;
-    args[this.DATASET_ID_IDENTIFIER] = datasetId;
-    return args;
-};
-
-
-/**
- * Wraps the specified callback function so it is invoked with the data source and any additional arguments
- * @param {Function} callback
- * @param {Object} additionalArgs An associative array of any additional arguments to add to the result
- * @method wrapCallback_
- * @private
- */
-neon.query.wrapCallback_ = function (callback, additionalArgs) {
-
-    return function () {
-        var newArgs = {};
-        _.extend(newArgs, additionalArgs);
-        // element 0 is the json array of args to the original callback (if any). if there are no arguments,
-        // this will just return undef
-        var args = neon.util.ArrayUtils.argumentsToArray(arguments)[0];
-        if (args) {
-            _.extend(newArgs, args);
-        }
-        callback.call(null, newArgs);
-    };
-
 };
 
 neon.query.queryUrl_ = function (path) {
