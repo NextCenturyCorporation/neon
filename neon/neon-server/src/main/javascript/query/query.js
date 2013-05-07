@@ -434,12 +434,6 @@ neon.query.executeQuery = function (query, successCallback, errorCallback) {
  * @return {neon.util.AjaxRequest} The xhr request object
  */
 neon.query.executeQueryGroup = function (queryGroup, successCallback, errorCallback) {
-    queryGroup.namedQueries.forEach(function (namedQuery) {
-        // TODO: These don't actually need to be set but it makes the query values consistent with the batch queries. We're still working on a better way to handle batch queries.
-        namedQuery.query.includeFiltered_ = queryGroup.includeFiltered_;
-        namedQuery.query.filter.transform_ = queryGroup.transform_;
-    });
-
     return neon.query.doExecuteQuery_(queryGroup, queryGroup.transform_, successCallback, errorCallback, 'querygroup');
 };
 
@@ -909,8 +903,10 @@ neon.query.QueryGroup.prototype.addQuery = function (name, query) {
     return this;
 };
 
+// TODO: When NEON-170 is complete, update documentation indicating that individual query settings of trasnform are ignored
 /**
- * Sets the transform to execute on the results of the query group.
+ * Sets the transform to execute on the results of the query group (individual query settings of transform are
+ * ignored, and all queries in the group will use this value).
  * See {{#crossLink "neon.query.Query/transform"}}{{/crossLink}} for parameter details
  * @method transform
  * @param {String} transformName
@@ -922,9 +918,11 @@ neon.query.QueryGroup.prototype.transform = function (transformName, transformPa
     return this;
 };
 
+// TODO: When NEON-170 is complete, update documentation indicating that individual query settings of includedFiltered are ignored
 /**
  * Sets whether or not the results of the query should include data that is filtered out. When true,
- * all data, regardless of filters, will be included in the query
+ * all data, regardless of filters, will be included in the query (individual query settings of includeFiltered are
+ * ignored, and all queries in the group will use this value).
  * See {{#crossLink "neon.query.Query/includeFiltered"}}{{/crossLink}} for parameter details
  * @method includeFiltered
  * @param {Boolean} includeFiltered
