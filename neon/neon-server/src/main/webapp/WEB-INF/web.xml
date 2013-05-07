@@ -42,6 +42,10 @@
             com.sun.jersey.spi.spring.container.servlet.SpringServlet
         </servlet-class>
         <init-param>
+            <param-name>com.sun.jersey.spi.container.ContainerResponseFilters</param-name>
+            <param-value>com.ncc.neon.services.CorsFilter</param-value>
+        </init-param>
+        <init-param>
             <param-name>
                 com.sun.jersey.config.property.packages
             </param-name>
