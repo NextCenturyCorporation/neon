@@ -2,9 +2,9 @@ package com.ncc.neon.mongo
 
 import com.mongodb.BasicDBObject
 import com.mongodb.util.JSON
-import com.ncc.neon.query.BatchQuery
 import com.ncc.neon.query.NamedQuery
 import com.ncc.neon.query.Query
+import com.ncc.neon.query.QueryGroup
 import com.ncc.neon.query.clauses.*
 import com.ncc.neon.query.filter.Filter
 import com.ncc.neon.query.mongo.MongoQueryExecutor
@@ -459,7 +459,7 @@ class MongoQueryExecutorIntegrationTest {
     @Test
     @SuppressWarnings('CoupledTestCase') // this method incorrectly throws this codenarc error - it was fixed in 0.19
     @SuppressWarnings('MethodSize') // there is a lot of setup in this method but it is pretty straightforward and would be harder to read if extracted
-    void "batch query aggregates results"() {
+    void "query group aggregates results"() {
         def whereClause1 = new SingularWhereClause(lhs: 'state', operator: '=', rhs: 'VA')
         def query1 = new Query(filter: new Filter(dataSourceName: DATASOURCE_NAME, datasetId: DATASET_ID, whereClause: whereClause1))
 
@@ -469,18 +469,18 @@ class MongoQueryExecutorIntegrationTest {
         def whereClause3 = new SingularWhereClause(lhs: 'state', operator: '=', rhs: 'DC')
         def query3 = new Query(filter: new Filter(dataSourceName: DATASOURCE_NAME, datasetId: DATASET_ID, whereClause: whereClause3))
 
-        def batchQuery = new BatchQuery()
-        batchQuery.namedQueries << new NamedQuery(name: 'Virginia', query: query1)
-        batchQuery.namedQueries << new NamedQuery(name: 'Maryland', query: query2)
-        batchQuery.namedQueries << new NamedQuery(name: 'DistrictOfColumbia', query: query3)
+        def queryGroup = new QueryGroup()
+        queryGroup.namedQueries << new NamedQuery(name: 'Virginia', query: query1)
+        queryGroup.namedQueries << new NamedQuery(name: 'Maryland', query: query2)
+        queryGroup.namedQueries << new NamedQuery(name: 'DistrictOfColumbia', query: query3)
 
         // since these are not arrays/maps (which assertQueryResults expects),
         // convert them to their raw json string forms and compare that way
-        def batchResult = mongoQueryExecutor.execute(batchQuery, false)
-        def batchResultJson = new JSONObject(batchResult.toJson()).toString()
+        def queryGroupResult = mongoQueryExecutor.execute(queryGroup, false)
+        def actualJson = new JSONObject(queryGroupResult.toJson()).toString()
         // use the raw json instead of the mongo json since that's what our end result will have
-        def expected = new JSONObject(MongoQueryExecutorIntegrationTest.getResourceAsStream("/batchQuery.json").text).toString()
-        assert batchResultJson == expected
+        def expectedJson = new JSONObject(MongoQueryExecutorIntegrationTest.getResourceAsStream("/queryGroup.json").text).toString()
+        assert actualJson == expectedJson
     }
 
     private static def assertQueryResult(expected, actual) {

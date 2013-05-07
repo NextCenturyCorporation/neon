@@ -22,7 +22,7 @@ package com.ncc.neon.query
  * RECIPIENT IS UNDER OBLIGATION TO MAINTAIN SECRECY.
  */
 
-class BatchQueryResult implements QueryResult {
+class QueryGroupResult implements QueryResult {
 
     /** a map of row names to the query results associated with that name */
     final def namedResults = [:] as LinkedHashMap
@@ -43,6 +43,6 @@ class BatchQueryResult implements QueryResult {
 
     @Override
     Iterator<Row> iterator() {
-        throw new UnsupportedOperationException("Cannot iterate over a batch query result. It is not a collection of results.")
+        throw new UnsupportedOperationException("Cannot iterate over a query group result")
     }
 }

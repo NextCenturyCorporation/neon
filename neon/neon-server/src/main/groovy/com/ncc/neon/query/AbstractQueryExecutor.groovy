@@ -66,13 +66,13 @@ abstract class AbstractQueryExecutor implements QueryExecutor {
     }
 
     @Override
-    QueryResult execute(BatchQuery query, boolean includeFiltered) {
-        def batchQueryResult = new BatchQueryResult()
+    QueryResult execute(QueryGroup query, boolean includeFiltered) {
+        def queryGroupResult = new QueryGroupResult()
         query.namedQueries.each {
             def result = execute(it.query, includeFiltered)
-            batchQueryResult.namedResults[it.name] = result
+            queryGroupResult.namedResults[it.name] = result
         }
-        return batchQueryResult
+        return queryGroupResult
     }
 
     @Override

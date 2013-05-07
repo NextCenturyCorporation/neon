@@ -24,7 +24,7 @@ package com.ncc.neon.query
  */
 
 /**
- * A container for a query and a name for the query. This is used for batch queries to indicate which
+ * A container for a query and a name for the query. This is used for grouping queries to indicate which
  * results came from which query
  */
 class NamedQuery {

@@ -43,7 +43,7 @@ public interface QueryExecutor {
      * @param includeFiltered
      * @return
      */
-    QueryResult execute(BatchQuery query, boolean includeFiltered)
+    QueryResult execute(QueryGroup query, boolean includeFiltered)
 
     /**
      * Gets the names of the fields in the specified dataset

@@ -30,7 +30,7 @@ import org.codehaus.jackson.annotate.JsonIgnoreProperties
  * to a client as if it was a single query
  */
 @JsonIgnoreProperties(value = ['transform_', 'includeFiltered_'])
-class BatchQuery {
+class QueryGroup {
 
     List<NamedQuery> namedQueries = []
 

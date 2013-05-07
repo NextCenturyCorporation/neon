@@ -26,7 +26,7 @@ import org.junit.Test
  * RECIPIENT IS UNDER OBLIGATION TO MAINTAIN SECRECY.
  */
 
-class BatchQueryResultTest {
+class QueryGroupResultTest {
 
     private static final def QUERY1_JSON = '[{"q1a":"v1a"},{"q1b":"v1b"}]'
 
@@ -35,18 +35,18 @@ class BatchQueryResultTest {
     private static final def QUERY1_RESULT = createQueryResult(QUERY1_JSON)
     private static final def QUERY2_RESULT = createQueryResult(QUERY2_JSON)
 
-    def batchQueryResult
+    def queryGroupResult
 
     @Before
     void before() {
-        batchQueryResult = new BatchQueryResult()
-        batchQueryResult.namedResults.q1 = QUERY1_RESULT
-        batchQueryResult.namedResults.q2 = QUERY2_RESULT
+        queryGroupResult = new QueryGroupResult()
+        queryGroupResult.namedResults.q1 = QUERY1_RESULT
+        queryGroupResult.namedResults.q2 = QUERY2_RESULT
     }
 
     @Test
-    void "convert batch query to json"() {
-        def actual = batchQueryResult.toJson()
+    void "convert query group to json"() {
+        def actual = queryGroupResult.toJson()
         def expected = '{"q1":' + QUERY1_JSON + ',"q2":' + QUERY2_JSON + '}'
 
         assert actual == expected

@@ -425,23 +425,22 @@ neon.query.executeQuery = function (query, successCallback, errorCallback) {
 };
 
 /**
- * Executes the specified batch query (a series of queries whose results are aggregate),
+ * Executes the specified query group (a series of queries whose results are aggregate),
  * and fires the callback when complete
- * @method executeBatchQuery
- * @param {neon.query.BatchQuery} query the query to execute
+ * @method executeQueryGroup
+ * @param {neon.query.QueryGroup} queryGroup the query to execute
  * @param {Function} successCallback The callback to fire when the query successfully completes
  * @param {Function} [errorCallback] The optional callback when an error occurs. This is a 3 parameter function that contains the xhr, a short error status and the full error message.
  * @return {neon.util.AjaxRequest} The xhr request object
  */
-neon.query.executeBatchQuery = function (query, successCallback, errorCallback) {
-    query.namedQueries.forEach(function (namedQuery) {
-        // TODO: These don't actually need to be set but it makes the query values consistent
-        // with the batch queries. We're still working on a better way to handle batch queries.
-        namedQuery.query.includeFiltered_ = query.includeFiltered_;
-        namedQuery.query.filter.transform_ = query.transform_;
+neon.query.executeQueryGroup = function (queryGroup, successCallback, errorCallback) {
+    queryGroup.namedQueries.forEach(function (namedQuery) {
+        // TODO: These don't actually need to be set but it makes the query values consistent with the batch queries. We're still working on a better way to handle batch queries.
+        namedQuery.query.includeFiltered_ = queryGroup.includeFiltered_;
+        namedQuery.query.filter.transform_ = queryGroup.transform_;
     });
 
-    return neon.query.doExecuteQuery_(query, query.transform_, successCallback, errorCallback, 'batchquery');
+    return neon.query.doExecuteQuery_(queryGroup, queryGroup.transform_, successCallback, errorCallback, 'querygroup');
 };
 
 neon.query.doExecuteQuery_ = function (query, transform, successCallback, errorCallback, serviceName) {
@@ -883,14 +882,14 @@ neon.query.SimpleFilterProvider.prototype = new neon.query.FilterProvider();
 
 
 /**
- * A batch query is one that encompasses multiple queries. The results of all queries in the batch are
+ * A query group is one that encompasses multiple queries. The results of all queries in the group are
  * combined into a single json object (the resulting json object has one key for each of the queries where the
- * value of each key is the result of that query). The entire batch query results can also be sent to a transform
+ * value of each key is the result of that query). The entire query result can also be sent to a transform
  * service to manipulate all of the results at once
  * @constructor
- * @class BatchQuery
+ * @class QueryGroup
  */
-neon.query.BatchQuery = function () {
+neon.query.QueryGroup = function () {
     this.namedQueries = [];
 
     /*jshint expr: true */
@@ -899,26 +898,26 @@ neon.query.BatchQuery = function () {
 };
 
 /**
- * Adds a query to execute as part of the batch query
+ * Adds a query to execute as part of the query group
  * @method addQuery
- * @param {String} name The name associated with this query in the batch (the name is used as the key in the resulting json)
- * @param {neon.query.Query} query The query to execute as part of the batch query
- * @return {neon.query.BatchQuery} This object
+ * @param {String} name The name associated with this query in the group (the name is used as the key in the resulting json)
+ * @param {neon.query.Query} query The query to execute as part of the query group
+ * @return {neon.query.QueryGroup} This object
  */
-neon.query.BatchQuery.prototype.addQuery = function (name, query) {
+neon.query.QueryGroup.prototype.addQuery = function (name, query) {
     this.namedQueries.push(new neon.query.NamedQuery(name, query));
     return this;
 };
 
 /**
- * Sets the transform to execute on the results of the batch query.
+ * Sets the transform to execute on the results of the query group.
  * See {{#crossLink "neon.query.Query/transform"}}{{/crossLink}} for parameter details
  * @method transform
  * @param {String} transformName
  * @param {Array} transformParams
- * @return {neon.query.BatchQuery} This batch query
+ * @return {neon.query.QueryGroup} This query group
  */
-neon.query.BatchQuery.prototype.transform = function (transformName, transformParams) {
+neon.query.QueryGroup.prototype.transform = function (transformName, transformParams) {
     this.transform_ = new neon.query.Transform(transformName, transformParams);
     return this;
 };
@@ -929,16 +928,16 @@ neon.query.BatchQuery.prototype.transform = function (transformName, transformPa
  * See {{#crossLink "neon.query.Query/includeFiltered"}}{{/crossLink}} for parameter details
  * @method includeFiltered
  * @param {Boolean} includeFiltered
- * @return {neon.query.BatchQuery} This batch query
+ * @return {neon.query.QueryGroup} This query group
  */
-neon.query.BatchQuery.prototype.includeFiltered = function (includeFiltered) {
+neon.query.QueryGroup.prototype.includeFiltered = function (includeFiltered) {
     this.includeFiltered_ = includeFiltered;
     return this;
 };
 
 
 /**
- * A named query is one that is included as part of a batch query. Each query is executed as part of the batch, and
+ * A named query is one that is included as part of a query group. Each query is executed as part of the group, and
  * the name is used to indicate the json key to use for its results
  * @param name
  * @param query

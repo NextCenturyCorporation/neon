@@ -367,22 +367,22 @@ describe('query mapping', function () {
         assertQueryResults(query, rows(1, 2));
     });
 
-    it('concatenates the results of a batch query', function () {
+    it('concatenates the results of a query group', function () {
         var query1 = baseQuery().where('state', '=', 'VA');
         var query2 = baseQuery().where('state', '=', 'MD');
         var query3 = baseQuery().where('state', '=', 'DC');
 
-        var batchQuery = new neon.query.BatchQuery();
-        batchQuery.addQuery('Virginia', query1);
-        batchQuery.addQuery('Maryland', query2);
-        batchQuery.addQuery('DistrictOfColumbia', query3);
+        var queryGroup = new neon.query.QueryGroup();
+        queryGroup.addQuery('Virginia', query1);
+        queryGroup.addQuery('Maryland', query2);
+        queryGroup.addQuery('DistrictOfColumbia', query3);
 
 
-        var expectedData = getJSONFixture('batchQuery.json');
-        assertBatchQueryResults(batchQuery, expectedData);
+        var expectedData = getJSONFixture('queryGroup.json');
+        assertQueryGroupResults(queryGroup, expectedData);
     });
 
-    it('transforms batch query results with a RESTful service', function () {
+    it('transforms query group results with a RESTful service', function () {
         // the port comes from build.gradle
         var host = 'http://localhost:10008';
         var path = '/neon/transformtest?replacethis=Virginia&replacewith=VirginiaState';
@@ -393,13 +393,13 @@ describe('query mapping', function () {
         var query2 = baseQuery().where('state', '=', 'MD');
         var query3 = baseQuery().where('state', '=', 'DC');
 
-        var batchQuery = new neon.query.BatchQuery();
-        batchQuery.addQuery('Virginia', query1);
-        batchQuery.addQuery('Maryland', query2);
-        batchQuery.addQuery('DistrictOfColumbia', query3);
-        batchQuery.transform(transformClassName, transformParams);
+        var queryGroup = new neon.query.QueryGroup();
+        queryGroup.addQuery('Virginia', query1);
+        queryGroup.addQuery('Maryland', query2);
+        queryGroup.addQuery('DistrictOfColumbia', query3);
+        queryGroup.transform(transformClassName, transformParams);
 
-        executeAndWait(neon.query.executeBatchQuery, batchQuery);
+        executeAndWait(neon.query.executeQueryGroup, queryGroup);
         runs(function () {
             expect(currentResult.data.length).toBe(1);
             // the state should be converted from Virginia to VirginiaState
@@ -419,12 +419,12 @@ describe('query mapping', function () {
     }
 
     /**
-     * Executes the specified batch query and verifies that the results match the expected data
+     * Executes the specified query group and verifies that the results match the expected data
      * @param query
      * @param expectedData
      */
-    function assertBatchQueryResults(query, expectedData) {
-        doAssertQueryResults(neon.query.executeBatchQuery, query, expectedData);
+    function assertQueryGroupResults(query, expectedData) {
+        doAssertQueryResults(neon.query.executeQueryGroup, query, expectedData);
     }
 
 
