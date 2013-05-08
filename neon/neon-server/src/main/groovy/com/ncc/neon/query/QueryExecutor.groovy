@@ -38,6 +38,14 @@ public interface QueryExecutor {
     QueryResult execute(Query query, boolean includedFiltered)
 
     /**
+     * Executes a group of queries and returns the results as a single json object
+     * @param query
+     * @param includeFiltered
+     * @return
+     */
+    QueryResult execute(QueryGroup query, boolean includeFiltered)
+
+    /**
      * Gets the names of the fields in the specified dataset
      * @param dataSourceName
      * @param datasetId

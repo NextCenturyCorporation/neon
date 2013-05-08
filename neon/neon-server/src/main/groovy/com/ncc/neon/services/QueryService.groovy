@@ -24,6 +24,7 @@ package com.ncc.neon.services
 
 import com.ncc.neon.query.Query
 import com.ncc.neon.query.QueryExecutor
+import com.ncc.neon.query.QueryGroup
 import com.ncc.neon.query.filter.Filter
 import com.ncc.neon.query.filter.FilterEvent
 import com.ncc.neon.query.filter.providers.FilterProvider
@@ -50,6 +51,18 @@ class QueryService {
                         @DefaultValue("false") @QueryParam("includefiltered") boolean includeFiltered,
                         @QueryParam("transform") String transformClassName,
                         @QueryParam("param") List<String> transformParams
+    ) {
+        return wrapInDataJson(queryExecutor.execute(query, includeFiltered), transformClassName, transformParams)
+    }
+
+    @POST
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    @Path("querygroup")
+    String executeQueryGroup(QueryGroup query,
+                             @DefaultValue("false") @QueryParam("includefiltered") boolean includeFiltered,
+                             @QueryParam("transform") String transformClassName,
+                             @QueryParam("param") List<String> transformParams
     ) {
         return wrapInDataJson(queryExecutor.execute(query, includeFiltered), transformClassName, transformParams)
     }

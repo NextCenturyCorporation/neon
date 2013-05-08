@@ -1,7 +1,6 @@
-package com.ncc.neon
+package com.ncc.neon.query
 
-import javax.ws.rs.*
-import javax.ws.rs.core.MediaType
+import org.codehaus.jackson.annotate.JsonIgnoreProperties
 
 /*
  * ************************************************************************
@@ -27,21 +26,12 @@ import javax.ws.rs.core.MediaType
  */
 
 /**
- * A web service used during testing to transform json
+ * A group of queries that can be executed and results aggregated to be returned
+ * to a client as if it was a single query
  */
-@Path('/transformtest')
-class TransformService {
+@JsonIgnoreProperties(value = ['transform_', 'includeFiltered_'])
+class QueryGroup {
 
-    @POST
-    @Consumes(MediaType.APPLICATION_JSON)
-    @Produces(MediaType.APPLICATION_JSON)
-    String transform(String inputJson, @QueryParam("replacethis") String replaceThis, @QueryParam("replacewith") String replaceWith) {
-        def output = inputJson.toString().replaceAll(replaceThis,replaceWith)
-        // if the input data is not an array, transform it to an array
-        if ( !output.startsWith("[")) {
-            output = "[" + output + "]"
-        }
+    List<NamedQuery> namedQueries = []
 
-        return output
-    }
 }

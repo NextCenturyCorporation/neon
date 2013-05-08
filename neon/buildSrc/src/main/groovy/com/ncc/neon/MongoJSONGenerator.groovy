@@ -42,13 +42,27 @@ class MongoJSONGenerator {
      */
     static void generateMongoJson(inputDirPath, outputDirPath) {
         new File(inputDirPath).eachFileMatch(~/.*\.json/) { file ->
-            def jsonArray = new JSONArray(file.text)
-            jsonArray.length().times { index ->
-                def row = jsonArray.get(index)
-                rewriteIdField(row)
-                rewriteDateFields(row)
+            def text = file.text
+            def json
+            if (text.startsWith("[")) {
+                json = new JSONArray(text)
+                rewriteMongoSpecificFields(json)
+            } else {
+                json = new JSONObject(text)
+                json.keys().each { key ->
+                    def jsonArray = json.getJSONArray(key)
+                    rewriteMongoSpecificFields(jsonArray)
+                }
             }
-            writeOutputFile(jsonArray, new File(outputDirPath), file.name)
+            writeOutputFile(json, new File(outputDirPath), file.name)
+        }
+    }
+
+    private static def rewriteMongoSpecificFields(jsonArray) {
+        jsonArray.length().times { index ->
+            def row = jsonArray.get(index)
+            rewriteIdField(row)
+            rewriteDateFields(row)
         }
     }
 
@@ -74,11 +88,11 @@ class MongoJSONGenerator {
         }
     }
 
-    private static writeOutputFile(jsonArray, outDir, fileName) {
+    private static writeOutputFile(json, outDir, fileName) {
         outDir.mkdirs()
         def outfile = new File(outDir, fileName)
         outfile.withWriter { w ->
-            w << jsonArray.toString(INDENT_FACTOR)
+            w << json.toString(INDENT_FACTOR)
         }
     }
 

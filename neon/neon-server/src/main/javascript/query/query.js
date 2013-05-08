@@ -92,7 +92,6 @@ neon.query.MIN = 'min';
 neon.query.AVG = 'avg';
 
 
-
 /**
  * The sort parameter for clauses to sort ascending
  * @property ASCENDING
@@ -406,7 +405,7 @@ neon.query.getFieldNames = function (dataSourceName, datasetId, successCallback,
     return neon.util.AjaxUtils.doGet(
         neon.query.queryUrl_('/services/queryservice/fieldnames?datasourcename=' + dataSourceName + '&datasetid=' + datasetId),
         {
-            success: neon.query.wrapCallback_(successCallback, neon.query.wrapperArgsForDataset_(dataSourceName, datasetId)),
+            success: successCallback,
             error: errorCallback
         }
     );
@@ -421,25 +420,42 @@ neon.query.getFieldNames = function (dataSourceName, datasetId, successCallback,
  * @return {neon.util.AjaxRequest} The xhr request object
  */
 neon.query.executeQuery = function (query, successCallback, errorCallback) {
-    var queryParams = neon.query.buildQueryParamsString_(query);
+    var transform = query.filter.transform_;
+    return neon.query.doExecuteQuery_(query, transform, successCallback, errorCallback, 'query');
+};
+
+/**
+ * Executes the specified query group (a series of queries whose results are aggregate),
+ * and fires the callback when complete
+ * @method executeQueryGroup
+ * @param {neon.query.QueryGroup} queryGroup the query to execute
+ * @param {Function} successCallback The callback to fire when the query successfully completes
+ * @param {Function} [errorCallback] The optional callback when an error occurs. This is a 3 parameter function that contains the xhr, a short error status and the full error message.
+ * @return {neon.util.AjaxRequest} The xhr request object
+ */
+neon.query.executeQueryGroup = function (queryGroup, successCallback, errorCallback) {
+    return neon.query.doExecuteQuery_(queryGroup, queryGroup.transform_, successCallback, errorCallback, 'querygroup');
+};
+
+neon.query.doExecuteQuery_ = function (query, transform, successCallback, errorCallback, serviceName) {
+    var queryParams = neon.query.buildQueryParamsString_(query, transform);
     return neon.util.AjaxUtils.doPostJSON(
         query,
-        neon.query.queryUrl_('/services/queryservice/query?' + queryParams),
+        neon.query.queryUrl_('/services/queryservice/' + serviceName + '?' + queryParams),
         {
-            success: neon.query.wrapCallback_(successCallback, neon.query.wrapperArgsForQuery_(query)),
+            success: successCallback,
             error: errorCallback
         }
     );
 };
 
 
-neon.query.buildQueryParamsString_ = function (query) {
+neon.query.buildQueryParamsString_ = function (query, transform) {
     var queryParams = 'includefiltered=' + query.includeFiltered_;
-    var filter = query.filter;
-    if (filter && filter.transform_) {
-        queryParams += '&transform=' + filter.transform_.transformName;
-        if (filter.transform_.transformParams) {
-            filter.transform_.transformParams.forEach(function (param) {
+    if (transform) {
+        queryParams += '&transform=' + transform.transformName;
+        if (transform.transformParams) {
+            transform.transformParams.forEach(function (param) {
                 queryParams += '&param=' + encodeURIComponent(param);
             });
         }
@@ -463,7 +479,7 @@ neon.query.addFilter = function (filter, successCallback, errorCallback) {
         filterProvider,
         neon.query.queryUrl_('/services/queryservice/addfilter'),
         {
-            success: neon.query.wrapCallback_(successCallback, neon.query.wrapperArgsForFilter_(filterProvider.filter)),
+            success: successCallback,
             error: errorCallback
         }
     );
@@ -504,7 +520,7 @@ neon.query.replaceFilter = function (filterId, filter, successCallback, errorCal
         filterProvider,
         neon.query.queryUrl_('/services/queryservice/replacefilter/' + filterId),
         {
-            success: neon.query.wrapCallback_(successCallback, neon.query.wrapperArgsForFilter_(filterProvider.filter)),
+            success: successCallback,
             error: errorCallback
         }
     );
@@ -544,7 +560,7 @@ neon.query.setSelectionWhere = function (filter, successCallback, errorCallback)
         filter,
         neon.query.queryUrl_('/services/queryservice/setselectionwhere'),
         {
-            success: neon.query.wrapCallback_(successCallback, neon.query.wrapperArgsForFilter_(filter)),
+            success: successCallback,
             error: errorCallback
         }
     );
@@ -567,7 +583,7 @@ neon.query.getSelectionWhere = function (filter, successCallback, errorCallback)
         filter,
         neon.query.queryUrl_('/services/queryservice/getselectionwhere' + queryParams),
         {
-            success: neon.query.wrapCallback_(successCallback, neon.query.wrapperArgsForFilter_(filter)),
+            success: successCallback,
             error: errorCallback
         }
     );
@@ -647,46 +663,6 @@ neon.query.clearSelection = function (successCallback, errorCallback) {
             error: errorCallback
         }
     );
-};
-
-
-neon.query.wrapperArgsForQuery_ = function (query) {
-    return neon.query.wrapperArgsForDataset_(query.filter.dataSourceName, query.filter.datasetId);
-};
-
-neon.query.wrapperArgsForFilter_ = function (filter) {
-    return neon.query.wrapperArgsForDataset_(filter.dataSourceName, filter.datasetId);
-};
-
-neon.query.wrapperArgsForDataset_ = function (dataSourceName, datasetId) {
-    var args = {};
-    args[this.DATASOURCE_NAME_IDENTIFIER] = dataSourceName;
-    args[this.DATASET_ID_IDENTIFIER] = datasetId;
-    return args;
-};
-
-
-/**
- * Wraps the specified callback function so it is invoked with the data source and any additional arguments
- * @param {Function} callback
- * @param {Object} additionalArgs An associative array of any additional arguments to add to the result
- * @method wrapCallback_
- * @private
- */
-neon.query.wrapCallback_ = function (callback, additionalArgs) {
-
-    return function () {
-        var newArgs = {};
-        _.extend(newArgs, additionalArgs);
-        // element 0 is the json array of args to the original callback (if any). if there are no arguments,
-        // this will just return undef
-        var args = neon.util.ArrayUtils.argumentsToArray(arguments)[0];
-        if (args) {
-            _.extend(newArgs, args);
-        }
-        callback.call(null, newArgs);
-    };
-
 };
 
 neon.query.queryUrl_ = function (path) {
@@ -898,3 +874,76 @@ neon.query.SimpleFilterProvider = function (filter) {
 // TODO: NEON-73 (Javascript inheritance library)
 neon.query.SimpleFilterProvider.prototype = new neon.query.FilterProvider();
 
+
+/**
+ * A query group is one that encompasses multiple queries. The results of all queries in the group are
+ * combined into a single json object (the resulting json object has one key for each of the queries where the
+ * value of each key is the result of that query). The entire query result can also be sent to a transform
+ * service to manipulate all of the results at once
+ * @constructor
+ * @class QueryGroup
+ */
+neon.query.QueryGroup = function () {
+    this.namedQueries = [];
+
+    /*jshint expr: true */
+    this.transform_;
+    this.includeFiltered_ = false;
+};
+
+/**
+ * Adds a query to execute as part of the query group
+ * @method addQuery
+ * @param {String} name The name associated with this query in the group (the name is used as the key in the resulting json)
+ * @param {neon.query.Query} query The query to execute as part of the query group
+ * @return {neon.query.QueryGroup} This object
+ */
+neon.query.QueryGroup.prototype.addQuery = function (name, query) {
+    this.namedQueries.push(new neon.query.NamedQuery(name, query));
+    return this;
+};
+
+// TODO: When NEON-170 is complete, update documentation indicating that individual query settings of trasnform are ignored
+/**
+ * Sets the transform to execute on the results of the query group (individual query settings of transform are
+ * ignored, and all queries in the group will use this value).
+ * See {{#crossLink "neon.query.Query/transform"}}{{/crossLink}} for parameter details
+ * @method transform
+ * @param {String} transformName
+ * @param {Array} transformParams
+ * @return {neon.query.QueryGroup} This query group
+ */
+neon.query.QueryGroup.prototype.transform = function (transformName, transformParams) {
+    this.transform_ = new neon.query.Transform(transformName, transformParams);
+    return this;
+};
+
+// TODO: When NEON-170 is complete, update documentation indicating that individual query settings of includedFiltered are ignored
+/**
+ * Sets whether or not the results of the query should include data that is filtered out. When true,
+ * all data, regardless of filters, will be included in the query (individual query settings of includeFiltered are
+ * ignored, and all queries in the group will use this value).
+ * See {{#crossLink "neon.query.Query/includeFiltered"}}{{/crossLink}} for parameter details
+ * @method includeFiltered
+ * @param {Boolean} includeFiltered
+ * @return {neon.query.QueryGroup} This query group
+ */
+neon.query.QueryGroup.prototype.includeFiltered = function (includeFiltered) {
+    this.includeFiltered_ = includeFiltered;
+    return this;
+};
+
+
+/**
+ * A named query is one that is included as part of a query group. Each query is executed as part of the group, and
+ * the name is used to indicate the json key to use for its results
+ * @param name
+ * @param query
+ * @class NamedQuery
+ * @constructor
+ * @private
+ */
+neon.query.NamedQuery = function (name, query) {
+    this.name = name;
+    this.query = query;
+};

@@ -45,10 +45,10 @@ class RestServiceTransform implements JsonTransform {
     }
 
     @Override
-    String apply(inputJsonArray) {
+    String apply(inputJson) {
         def rows = restClient.post(
                 path: path,
-                body: inputJsonArray,
+                body: inputJson,
                 query: queryParams,
                 contentType: ContentType.JSON,
                 requestContentType: ContentType.JSON
