@@ -33,7 +33,7 @@ class SelectionManager implements Serializable {
 
     private static final long serialVersionUID = 8224297040031252632L
 
-    def selectedIds = [] as Set
+    Set selectedIds = [] as Set
 
     def addIds(ids) {
         selectedIds.addAll(ids)
@@ -52,7 +52,7 @@ class SelectionManager implements Serializable {
         selectedIds.clear()
     }
 
-    def getSelectedIds() {
+    Set getSelectedIds() {
         Collections.unmodifiableSet(selectedIds)
     }
 

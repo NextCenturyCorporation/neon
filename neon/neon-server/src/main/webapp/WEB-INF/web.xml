@@ -7,7 +7,7 @@
 
     <context-param>
         <param-name>contextConfigLocation</param-name>
-        <param-value>/WEB-INF/spring/applicationContext.xml</param-value>
+        <param-value>classpath:applicationContext.xml</param-value>
     </context-param>
 
     <context-param>
@@ -21,7 +21,6 @@
             com.ncc.neon.config.LogPathServletContextListener
         </listener-class>
     </listener>
-
 
     <listener>
         <listener-class>

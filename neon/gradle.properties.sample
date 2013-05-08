@@ -1,0 +1,4 @@
+org.gradle.jvmargs=-Xmx1024m -XX:MaxPermSize=256m
+org.gradle.daemon=true
+jsUnitTest
+integrationTest
