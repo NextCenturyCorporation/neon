@@ -10,6 +10,7 @@ build
 .gradle
 buildSrc/build
 buildSrc/.gradle
+gradle.properties
 
 # intellij files
 .idea
