@@ -28,6 +28,12 @@ buildscript {
     }
 }
 
+repositories {
+    maven {
+        url 'https://repository.cloudera.com/artifactory/public'
+    }
+}
+
 // properties defined in here are available in tasks and helper methods as
 // properties of the project
 project.ext {
@@ -117,6 +123,8 @@ dependencies {
     }
     compile 'commons-lang:commons-lang:2.6'
     compile 'org.json:json:20090211'
+    compile 'org.apache.hive:hive-jdbc:0.10.0'
+    compile 'org.apache.hadoop:hadoop-core:1.1.2'
 
     providedCompile 'javax.servlet:javax.servlet-api:3.0.1'
 
