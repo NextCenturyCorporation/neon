@@ -1,7 +1,4 @@
-package com.ncc.neon
-
-import javax.ws.rs.*
-import javax.ws.rs.core.MediaType
+package com.ncc.neon.query
 
 /*
  * ************************************************************************
@@ -27,21 +24,12 @@ import javax.ws.rs.core.MediaType
  */
 
 /**
- * A web service used during testing to transform json
+ * A container for a query and a name for the query. This is used for grouping queries to indicate which
+ * results came from which query
  */
-@Path('/transformtest')
-class TransformService {
+class NamedQuery {
 
-    @POST
-    @Consumes(MediaType.APPLICATION_JSON)
-    @Produces(MediaType.APPLICATION_JSON)
-    String transform(String inputJson, @QueryParam("replacethis") String replaceThis, @QueryParam("replacewith") String replaceWith) {
-        def output = inputJson.toString().replaceAll(replaceThis,replaceWith)
-        // if the input data is not an array, transform it to an array
-        if ( !output.startsWith("[")) {
-            output = "[" + output + "]"
-        }
+    String name
+    Query query
 
-        return output
-    }
 }

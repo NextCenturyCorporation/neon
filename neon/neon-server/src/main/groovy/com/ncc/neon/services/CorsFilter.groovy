@@ -1,7 +1,10 @@
-package com.ncc.neon
+package com.ncc.neon.services
 
-import javax.ws.rs.*
-import javax.ws.rs.core.MediaType
+import com.sun.jersey.spi.container.ContainerRequest
+import com.sun.jersey.spi.container.ContainerResponse
+import com.sun.jersey.spi.container.ContainerResponseFilter
+
+import javax.ws.rs.core.Response
 
 /*
  * ************************************************************************
@@ -24,24 +27,26 @@ import javax.ws.rs.core.MediaType
  * PROPRIETARY AND CONFIDENTIAL TRADE SECRET MATERIAL NOT FOR DISCLOSURE OUTSIDE
  * OF NEXT CENTURY CORPORATION EXCEPT BY PRIOR WRITTEN PERMISSION AND WHEN
  * RECIPIENT IS UNDER OBLIGATION TO MAINTAIN SECRECY.
+ *
+ * 
+ * @author tbrooks
  */
 
-/**
- * A web service used during testing to transform json
- */
-@Path('/transformtest')
-class TransformService {
+class CorsFilter implements ContainerResponseFilter{
 
-    @POST
-    @Consumes(MediaType.APPLICATION_JSON)
-    @Produces(MediaType.APPLICATION_JSON)
-    String transform(String inputJson, @QueryParam("replacethis") String replaceThis, @QueryParam("replacewith") String replaceWith) {
-        def output = inputJson.toString().replaceAll(replaceThis,replaceWith)
-        // if the input data is not an array, transform it to an array
-        if ( !output.startsWith("[")) {
-            output = "[" + output + "]"
+    @Override
+    ContainerResponse filter(ContainerRequest request, ContainerResponse response){
+        Response.ResponseBuilder builder = Response.fromResponse(response.response)
+        builder.header("Access-Control-Allow-Origin", "*")
+                .header("Access-Control-Allow-Methods", "GET, POST, OPTIONS")
+
+        String reqHead = request.getHeaderValue("Access-Control-Request-Headers")
+
+        if (reqHead != null){
+            builder.header("Access-Control-Allow-Headers", reqHead)
         }
 
-        return output
+        response.setResponse(builder.build())
+        return response
     }
 }

@@ -3,13 +3,12 @@ neon-server/src/test/javascript/spec_runner_unit.html
 neon-server/src/acceptanceTest/javascript/spec_runner_acceptance.html
 neon-server/src/test-data/mongo-json/
 
-
-
 # gradle files
 build
 .gradle
 buildSrc/build
 buildSrc/.gradle
+gradle.properties
 
 # intellij files
 .idea

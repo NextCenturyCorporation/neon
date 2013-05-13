@@ -1,7 +1,7 @@
-package com.ncc.neon
+package com.ncc.neon.config
 
-import javax.ws.rs.*
-import javax.ws.rs.core.MediaType
+import javax.servlet.ServletContextEvent
+import javax.servlet.ServletContextListener
 
 /*
  * ************************************************************************
@@ -27,21 +27,18 @@ import javax.ws.rs.core.MediaType
  */
 
 /**
- * A web service used during testing to transform json
+ * Listens for the app to initialize and sets the root path for the logs
  */
-@Path('/transformtest')
-class TransformService {
+class LogPathServletContextListener implements ServletContextListener {
 
-    @POST
-    @Consumes(MediaType.APPLICATION_JSON)
-    @Produces(MediaType.APPLICATION_JSON)
-    String transform(String inputJson, @QueryParam("replacethis") String replaceThis, @QueryParam("replacewith") String replaceWith) {
-        def output = inputJson.toString().replaceAll(replaceThis,replaceWith)
-        // if the input data is not an array, transform it to an array
-        if ( !output.startsWith("[")) {
-            output = "[" + output + "]"
-        }
+    @Override
+    void contextInitialized(ServletContextEvent sce) {
+        def context = sce.servletContext
+        System.setProperty("log.dir", "${context.getRealPath('/')}logs")
+    }
 
-        return output
+    @Override
+    void contextDestroyed(ServletContextEvent sce) {
+        // no-op
     }
 }

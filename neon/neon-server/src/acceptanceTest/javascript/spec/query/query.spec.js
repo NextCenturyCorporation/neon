@@ -367,15 +367,70 @@ describe('query mapping', function () {
         assertQueryResults(query, rows(1, 2));
     });
 
+    it('concatenates the results of a query group', function () {
+        var query1 = baseQuery().where('state', '=', 'VA');
+        var query2 = baseQuery().where('state', '=', 'MD');
+        var query3 = baseQuery().where('state', '=', 'DC');
+
+        var queryGroup = new neon.query.QueryGroup();
+        queryGroup.addQuery('Virginia', query1);
+        queryGroup.addQuery('Maryland', query2);
+        queryGroup.addQuery('DistrictOfColumbia', query3);
+
+
+        var expectedData = getJSONFixture('queryGroup.json');
+        assertQueryGroupResults(queryGroup, expectedData);
+    });
+
+    it('transforms query group results with a RESTful service', function () {
+        // the port comes from build.gradle
+        var host = 'http://localhost:10008';
+        var path = '/neon/transformtest?replacethis=Virginia&replacewith=VirginiaState';
+        var transformClassName = 'com.ncc.neon.query.transform.RestServiceTransform';
+        var transformParams = [host, path];
+
+        var query1 = baseQuery().where('state', '=', 'VA');
+        var query2 = baseQuery().where('state', '=', 'MD');
+        var query3 = baseQuery().where('state', '=', 'DC');
+
+        var queryGroup = new neon.query.QueryGroup();
+        queryGroup.addQuery('Virginia', query1);
+        queryGroup.addQuery('Maryland', query2);
+        queryGroup.addQuery('DistrictOfColumbia', query3);
+        queryGroup.transform(transformClassName, transformParams);
+
+        executeAndWait(neon.query.executeQueryGroup, queryGroup);
+        runs(function () {
+            expect(currentResult.data.length).toBe(1);
+            // the state should be converted from Virginia to VirginiaState
+            expect(currentResult.data[0].Virginia).toBeUndefined();
+            expect(currentResult.data[0].VirginiaState).toBeDefined();
+        });
+    });
+
+
     /**
      * Executes the specified query and verifies that the results match the expected data
      * @param query
      * @param expectedData
      */
     function assertQueryResults(query, expectedData) {
-        assertAsync(neon.query.executeQuery, query, expectedData);
+        doAssertQueryResults(neon.query.executeQuery, query, expectedData);
     }
 
+    /**
+     * Executes the specified query group and verifies that the results match the expected data
+     * @param query
+     * @param expectedData
+     */
+    function assertQueryGroupResults(query, expectedData) {
+        doAssertQueryResults(neon.query.executeQueryGroup, query, expectedData);
+    }
+
+
+    function doAssertQueryResults(queryMethod, query, expectedData) {
+        assertAsync(queryMethod, query, expectedData);
+    }
 
     /**
      * Executes the specified async function with the given argument. The function must also take a second
@@ -387,9 +442,7 @@ describe('query mapping', function () {
     function assertAsync(asyncFunction, arg, expectedData) {
         executeAndWait(asyncFunction, arg);
         runs(function () {
-            expect(currentResult.data).toBeEqualArray(expectedData);
-            expect(currentResult.dataSourceName).toEqual(dataSourceName);
-            expect(currentResult.datasetId).toEqual(datasetId);
+            expect(currentResult.data).toEqual(expectedData);
         });
     }
 

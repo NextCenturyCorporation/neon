@@ -54,18 +54,14 @@ describe('publishing events to OWF channels', function(){
      * @param args The args to that query method
      * @param delegateMethodName The underlying query method to which the OWF query executor delegates its calls to. This
      * is used to ensure that the correct method is actually called.
-     * @param {Array} additionalArgs Any additional args that should be provided to the callback in addition to the results (such as dataset id)
      */
-    function testResultsPublishedToChannel_(channel,queryExecutorMethod,args,delegateMethodName,additionalArgs) {
+    function testResultsPublishedToChannel_(channel,queryExecutorMethod,args,delegateMethodName) {
         // not all of the real methods actually return any results , but for this test it doesn't matter
         var mockResults = {mock:"results"};
         var delegateSpy = spyOn(neon.query,delegateMethodName).andCallThrough();
         neon.mock.AjaxMockUtils.mockNextAjaxCall(mockResults);
         queryExecutorMethod.apply(owfEventPublisher,args);
         var expectedArgs = {};
-        if ( additionalArgs ) {
-            _.extend(expectedArgs,additionalArgs);
-        }
         _.extend(expectedArgs,mockResults);
         // the owf query executor appends a source, so add it here
         expectedArgs._source = messageHandler.id;
@@ -78,16 +74,11 @@ describe('publishing events to OWF channels', function(){
 
     it('should publish add filter results', function() {
         var filter = new neon.query.Filter().selectFrom(dataSourceName,datasetId);
-        var additionalArgs = {};
-        additionalArgs[neon.query.DATASOURCE_NAME_IDENTIFIER] = dataSourceName;
-        additionalArgs[neon.query.DATASET_ID_IDENTIFIER] = datasetId;
-
         testResultsPublishedToChannel_(
             neon.eventing.Channels.FILTERS_CHANGED,
             neon.eventing.OWFEventPublisher.prototype.addFilter,
             [filter],
-            'addFilter',
-            additionalArgs
+            'addFilter'
         );
     });
 
@@ -112,16 +103,11 @@ describe('publishing events to OWF channels', function(){
 
     it('should publish set selection by filter', function() {
         var filter  = new neon.query.Filter().selectFrom(dataSourceName,datasetId);
-        var additionalArgs = {};
-        additionalArgs[neon.query.DATASET_ID_IDENTIFIER] = datasetId;
-        additionalArgs[neon.query.DATASOURCE_NAME_IDENTIFIER] = dataSourceName;
-
         testResultsPublishedToChannel_(
             neon.eventing.Channels.SELECTION_CHANGED,
             neon.eventing.OWFEventPublisher.prototype.setSelectionWhere,
             [filter],
-            'setSelectionWhere',
-            additionalArgs
+            'setSelectionWhere'
         );
     });
 

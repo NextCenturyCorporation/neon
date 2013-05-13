@@ -1,14 +1,16 @@
 package com.ncc.neon.mongo
-
 import com.mongodb.BasicDBObject
 import com.mongodb.util.JSON
+import com.ncc.neon.query.NamedQuery
 import com.ncc.neon.query.Query
+import com.ncc.neon.query.QueryGroup
 import com.ncc.neon.query.clauses.*
 import com.ncc.neon.query.filter.Filter
 import com.ncc.neon.query.mongo.MongoQueryExecutor
 import com.ncc.neon.util.AssertUtils
 import com.ncc.neon.util.LatLon
 import org.bson.BSONObject
+import org.json.JSONObject
 import org.junit.AfterClass
 import org.junit.BeforeClass
 import org.junit.Test
@@ -18,7 +20,6 @@ import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.context.ContextConfiguration
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner
 import org.springframework.test.context.web.WebAppConfiguration
-
 /*
  * ************************************************************************
  * Copyright (c), 2013 Next Century Corporation. All Rights Reserved.
@@ -48,8 +49,8 @@ import org.springframework.test.context.web.WebAppConfiguration
  */
 @RunWith(SpringJUnit4ClassRunner)
 @ContextConfiguration(classes = MongoIntegrationTestContext)
-@WebAppConfiguration
 @ActiveProfiles("mongo-integrationtest")
+@WebAppConfiguration
 class MongoQueryExecutorIntegrationTest {
 
     private static final String DATASOURCE_NAME = 'integrationTest'
@@ -79,7 +80,7 @@ class MongoQueryExecutorIntegrationTest {
         deleteData()
     }
 
-    @SuppressWarnings('CoupledTestCase') // this method incorrectly throws this codenarc error
+    @SuppressWarnings('CoupledTestCase') // this method incorrectly throws this codenarc error - it was fixed in 0.19
     private static def readJson(def fileName) {
         def data = []
         def dbList = parseJSON("/mongo-json/${fileName}")
@@ -329,20 +330,20 @@ class MongoQueryExecutorIntegrationTest {
         assertQueryResult(ALL_DATA, result)
     }
 
-//    @Test
-//    void "group by derived field"() {
-//        def groupByMonthClause = new GroupByFunctionClause(name: 'hire_month', operation: 'month', field: 'hiredate')
-//        def salaryAggregateClause = new AggregateClause(name: 'salary_sum', operation: 'sum', field: 'salary')
-//        def sortByMonth = new SortClause(fieldName: 'hire_month', sortOrder: SortOrder.ASCENDING)
-//
-//        def query = new Query(filter: new Filter(dataSourceName: DATASOURCE_NAME, datasetId: DATASET_ID),
-//                groupByClauses: [groupByMonthClause], aggregates: [salaryAggregateClause], sortClauses: [sortByMonth])
-//
-//        def result = mongoQueryExecutor.execute(query, false)
-//        def expected = readJson('groupByDerivedField.json')
-//
-//        assertQueryResult(expected, result)
-//    }
+    @Test
+    void "group by derived field"() {
+        def groupByMonthClause = new GroupByFunctionClause(name: 'hire_month', operation: 'month', field: 'hiredate')
+        def salaryAggregateClause = new AggregateClause(name: 'salary_sum', operation: 'sum', field: 'salary')
+        def sortByMonth = new SortClause(fieldName: 'hire_month', sortOrder: SortOrder.ASCENDING)
+
+        def query = new Query(filter: new Filter(dataSourceName: DATASOURCE_NAME, datasetId: DATASET_ID),
+                groupByClauses: [groupByMonthClause], aggregates: [salaryAggregateClause], sortClauses: [sortByMonth])
+
+        def result = mongoQueryExecutor.execute(query, false)
+        def expected = readJson('groupByMonth.json')
+
+        assertQueryResult(expected, result)
+    }
 
     @Test
     void "query WHERE less than"() {
@@ -453,7 +454,33 @@ class MongoQueryExecutorIntegrationTest {
 
         def result = mongoQueryExecutor.execute(query, false)
         assertQueryResult(expected, result)
+    }
 
+    @Test
+    @SuppressWarnings('CoupledTestCase') // this method incorrectly throws this codenarc error - it was fixed in 0.19
+    @SuppressWarnings('MethodSize') // there is a lot of setup in this method but it is pretty straightforward and would be harder to read if extracted
+    void "query group aggregates results"() {
+        def whereClause1 = new SingularWhereClause(lhs: 'state', operator: '=', rhs: 'VA')
+        def query1 = new Query(filter: new Filter(dataSourceName: DATASOURCE_NAME, datasetId: DATASET_ID, whereClause: whereClause1))
+
+        def whereClause2 = new SingularWhereClause(lhs: 'state', operator: '=', rhs: 'MD')
+        def query2 = new Query(filter: new Filter(dataSourceName: DATASOURCE_NAME, datasetId: DATASET_ID, whereClause: whereClause2))
+
+        def whereClause3 = new SingularWhereClause(lhs: 'state', operator: '=', rhs: 'DC')
+        def query3 = new Query(filter: new Filter(dataSourceName: DATASOURCE_NAME, datasetId: DATASET_ID, whereClause: whereClause3))
+
+        def queryGroup = new QueryGroup()
+        queryGroup.namedQueries << new NamedQuery(name: 'Virginia', query: query1)
+        queryGroup.namedQueries << new NamedQuery(name: 'Maryland', query: query2)
+        queryGroup.namedQueries << new NamedQuery(name: 'DistrictOfColumbia', query: query3)
+
+        // since these are not arrays/maps (which assertQueryResults expects),
+        // convert them to their raw json string forms and compare that way
+        def queryGroupResult = mongoQueryExecutor.execute(queryGroup, false)
+        def actualJson = new JSONObject(queryGroupResult.toJson()).toString()
+        // use the raw json instead of the mongo json since that's what our end result will have
+        def expectedJson = new JSONObject(MongoQueryExecutorIntegrationTest.getResourceAsStream("/queryGroup.json").text).toString()
+        assert actualJson == expectedJson
     }
 
     private static def assertQueryResult(expected, actual) {

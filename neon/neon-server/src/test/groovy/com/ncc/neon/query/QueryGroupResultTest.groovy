@@ -1,8 +1,7 @@
-package com.ncc.neon.config
+package com.ncc.neon.query
 
-import org.springframework.beans.factory.config.PropertyPlaceholderConfigurer
-import org.springframework.context.support.PropertySourcesPlaceholderConfigurer
-import org.springframework.core.Ordered
+import org.junit.Before
+import org.junit.Test
 
 /*
  * ************************************************************************
@@ -26,19 +25,39 @@ import org.springframework.core.Ordered
  * OF NEXT CENTURY CORPORATION EXCEPT BY PRIOR WRITTEN PERMISSION AND WHEN
  * RECIPIENT IS UNDER OBLIGATION TO MAINTAIN SECRECY.
  */
-class AppContextUtils {
 
-    private AppContextUtils() {
-        // utility class, no public constructor needed
+class QueryGroupResultTest {
+
+    private static final def QUERY1_JSON = '[{"q1a":"v1a"},{"q1b":"v1b"}]'
+
+    private static final def QUERY2_JSON = '[{"q2a":"v2a"},{"q2b":"v2b"}]'
+
+    private static final def QUERY1_RESULT = createQueryResult(QUERY1_JSON)
+    private static final def QUERY2_RESULT = createQueryResult(QUERY2_JSON)
+
+    def queryGroupResult
+
+    @Before
+    void before() {
+        queryGroupResult = new QueryGroupResult()
+        queryGroupResult.namedResults.q1 = QUERY1_RESULT
+        queryGroupResult.namedResults.q2 = QUERY2_RESULT
     }
 
-    static def createPropertyPlaceholderConfig(location) {
-       // def config = new PropertyPlaceholderConfigurer()
-        def config = new PropertySourcesPlaceholderConfigurer()
-        config.order = Ordered.HIGHEST_PRECEDENCE
-        config.ignoreResourceNotFound = true
-        config.location = location
-        return config
+    @Test
+    void "convert query group to json"() {
+        def actual = queryGroupResult.toJson()
+        def expected = '{"q1":' + QUERY1_JSON + ',"q2":' + QUERY2_JSON + '}'
+
+        assert actual == expected
+    }
+
+    private static def createQueryResult(json) {
+        def result = [
+                toJson: { json }
+        ] as QueryResult
+        return result
+
     }
 
 }
