@@ -1,6 +1,7 @@
 package com.ncc.neon.query.jdbc
 
 import java.sql.Connection
+import java.sql.DatabaseMetaData
 import java.sql.DriverManager
 import java.sql.ResultSet
 import java.sql.ResultSetMetaData
@@ -69,5 +70,17 @@ class JdbcClient {
         statement.close()
         connection.close()
         return resultList
+    }
+
+    public List<String> getColumnNames(String dataSourceName, String datasetId) {
+        Connection connection = DriverManager.getConnection("jdbc:" + databaseType + "://" + dbHostString + "/" + databaseName, "", "")
+        DatabaseMetaData metadata = connection.getMetaData()
+        ResultSet resultSet = metadata.getColumns(dataSourceName, null, datasetId, null)
+        List<String> columnNames = []
+        while (resultSet.next()) {
+            columnNames << resultSet.getString("COLUMN_NAME")
+        }
+
+        return columnNames
     }
 }
