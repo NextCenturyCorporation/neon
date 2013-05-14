@@ -64,7 +64,6 @@ class JdbcQueryExecutor extends AbstractQueryExecutor {
 
     @Override
     Collection<String> getFieldNames(String dataSourceName, String datasetId) {
-        // TODO: implement this
-        return []
+        return jdbcClient.getColumnNames(dataSourceName, datasetId)
     }
 }
