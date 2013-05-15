@@ -15,9 +15,6 @@ repositories {
     mavenCentral()
 }
 
-def wrapperVersion = '1.5'
-
-
 // task groupings we add
 def DEPLOY_GROUP = 'deploy'
 
@@ -33,7 +30,6 @@ subprojects {
     apply plugin: 'jetty'
 
     version = '1.0-SNAPSHOT'
-
 
     jshint {
         dest = file("${buildDir}/jshint.out")
@@ -72,14 +68,4 @@ subprojects {
         }
     }
 
-
-    task wrapper(type: Wrapper) {
-        gradleVersion = wrapperVersion
-    }
-
-}
-
-
-task wrapper(type: Wrapper) {
-    gradleVersion = wrapperVersion
 }
