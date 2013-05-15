@@ -54,6 +54,7 @@
         <exclude name='UnnecessaryDefInFieldDeclaration'/>
         <exclude name='UnnecessaryDefInMethodDeclaration'/>
         <exclude name='UnnecessaryDefInVariableDeclaration'/>
+        <exclude name='UnnecessaryGetter'/>
         <exclude name='UnnecessaryGString'/>
         <exclude name='UnnecessaryPublicModifier'/>
         <exclude name='UnnecessaryReturnKeyword'/>
