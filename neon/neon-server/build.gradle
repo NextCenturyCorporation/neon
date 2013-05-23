@@ -123,8 +123,8 @@ dependencies {
     }
     compile 'commons-lang:commons-lang:2.6'
     compile 'org.json:json:20090211'
-    compile 'org.apache.hive:hive-jdbc:0.10.0'
-    compile 'org.apache.hadoop:hadoop-core:1.1.2'
+    compile 'org.apache.hive:hive-jdbc:0.10.0-cdh4.2.1'
+    compile 'org.apache.hadoop:hadoop-core:2.0.0-mr1-cdh4.2.1'
 
     providedCompile 'javax.servlet:javax.servlet-api:3.0.1'
 
@@ -132,6 +132,7 @@ dependencies {
 
     testCompile 'junit:junit:4.11'
     testCompile 'commons-collections:commons-collections:3.2.1'
+    testCompile 'commons-io:commons-io:2.4'
     testCompile "org.springframework:spring-test:$springVersion"
 
     integrationTestCompile files(sourceSets.main.output.classesDir)
