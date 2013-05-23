@@ -72,6 +72,14 @@ class JdbcClient {
         return resultList
     }
 
+    public void execute(String query) {
+        Connection connection = DriverManager.getConnection("jdbc:" + databaseType + "://" + dbHostString + "/" + databaseName, "", "")
+        Statement statement = connection.createStatement()
+        statement.execute(query)
+        statement.close()
+        connection.close()
+    }
+
     public List<String> getColumnNames(String dataSourceName, String datasetId) {
         Connection connection = DriverManager.getConnection("jdbc:" + databaseType + "://" + dbHostString + "/" + databaseName, "", "")
         DatabaseMetaData metadata = connection.getMetaData()
