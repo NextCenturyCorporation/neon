@@ -101,7 +101,7 @@ class HiveQueryBuilder implements QueryBuilder {
 
     @Override
     def apply(DistinctClause clause) {
-        // TODO: refactor DISTINCT feature in order to support this correctly
+        // TODO: NEON-176 refactor DISTINCT feature in order to support this correctly
     }
 
     @Override
@@ -116,7 +116,7 @@ class HiveQueryBuilder implements QueryBuilder {
 
     @Override
     def apply(AggregateClause clause) {
-        // TODO: Figure out if this will be possible for Hive
+        // TODO: NEON-177 Implement aggregate clauses for Hive
     }
 
     @Override

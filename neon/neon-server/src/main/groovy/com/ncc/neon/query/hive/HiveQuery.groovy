@@ -43,7 +43,7 @@ class HiveQuery implements SqlQuery {
     @Override
     String getQueryString() {
         StringBuilder builder = new StringBuilder()
-        // TODO: implement selecting specific columns when that is supported
+        // TODO: NEON-82 implement selecting specific columns when that is supported
         builder << "select * from " << selectClause.dataSourceName << "." << selectClause.datasetId
         if (whereClause != null) {
             builder << " where " << whereClause.toString()
@@ -51,7 +51,7 @@ class HiveQuery implements SqlQuery {
         if (groupByClauses.size > 0) {
             builder << " group by " << groupByClauses.collect { it.field }.join(",")
         }
-        // TODO: implement "cluster by"
+        // TODO: implement "cluster by"?
         if (sortClauses.size > 0) {
             builder << " order by " << sortClauses.collect { it.fieldName + (it.sortDirection == SortOrder.ASCENDING) ? " ASC" : " DESC" }.join(",")
         }

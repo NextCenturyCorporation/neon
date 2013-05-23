@@ -54,7 +54,7 @@ class JdbcQueryExecutor extends AbstractQueryExecutor {
 
     @Override
     protected getIdFieldName() {
-        // TODO: revisit this - there will not necessarily be an Id field
+        // TODO: NEON-75 revisit this - there will not necessarily be an Id field
     }
 
     @Override
