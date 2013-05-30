@@ -12,17 +12,17 @@
     <h4>
     Enter a Query
     </h4>
-    <textarea id="queryText">
-
-    </textarea>
+    <textarea id="queryText" cols="80" rows="3"></textarea>
     <br/><br/>
     <button id="submit" onclick="submitter();">Submit</button>
+    <br/><br/>
+    <div id="resp"></div>
 
     <script>
         function submitter(){
             var query = $('#queryText').val();
             $.post("", query, function(data){
-                console.log(data);
+                $('#resp').html(data);
             });
         }
     </script>

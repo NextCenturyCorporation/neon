@@ -1,9 +1,8 @@
 package com.ncc.neon.query
-
 import com.ncc.neon.services.QueryService
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Controller
-import org.springframework.ui.Model
+import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestMethod
 import org.springframework.web.bind.annotation.ResponseBody
@@ -41,15 +40,13 @@ class QueryBuilderController{
     QueryService queryService
 
     @RequestMapping(method = RequestMethod.GET)
-    String goToBuilder(Model model){
+    String goToBuilder(){
         return "builder"
     }
 
     @RequestMapping(method = RequestMethod.POST)
     @ResponseBody
-    String submitQuery(String queryText){
-
-
+    String submitQuery(@RequestBody String queryText){
         QueryParser parser = new QueryParser()
         Query query = parser.parse(queryText)
         queryService.executeQuery(query,false,null,null)

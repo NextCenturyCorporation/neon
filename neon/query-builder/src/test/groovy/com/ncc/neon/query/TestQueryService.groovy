@@ -43,10 +43,7 @@ class TestQueryService{
     void testSomething(){
         QueryParser parser = new QueryParser()
         Query query = parser.parse("")
-
-
-
-        println service.executeQuery(query, false, null, null)
+        assert service.executeQuery(query, false, null, null)
 
     }
 }
