@@ -1,5 +1,10 @@
 package com.ncc.neon.query
-
+import com.ncc.neon.services.QueryService
+import org.junit.Test
+import org.junit.runner.RunWith
+import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.test.context.ContextConfiguration
+import org.springframework.test.context.junit4.SpringJUnit4ClassRunner
 /*
  * ************************************************************************
  * Copyright (c), 2013 Next Century Corporation. All Rights Reserved.
@@ -26,6 +31,22 @@ package com.ncc.neon.query
  * @author tbrooks
  */
 
-class Query{
-    String text
+
+@RunWith(SpringJUnit4ClassRunner.class)
+@ContextConfiguration(locations = "classpath:test-applicationContext.xml")
+class TestQueryService{
+
+    @Autowired
+    QueryService service
+
+    @Test
+    void testSomething(){
+        QueryParser parser = new QueryParser()
+        Query query = parser.parse("")
+
+
+
+        println service.executeQuery(query, false, null, null)
+
+    }
 }

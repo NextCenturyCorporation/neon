@@ -1,12 +1,8 @@
 package com.ncc.neon.query
 
-import com.ncc.neon.services.QueryService
-import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.stereotype.Controller
-import org.springframework.ui.Model
-import org.springframework.web.bind.annotation.RequestMapping
-import org.springframework.web.bind.annotation.RequestMethod
-import org.springframework.web.bind.annotation.ResponseBody
+import com.ncc.neon.query.filter.Filter
+
+
 /*
  * ************************************************************************
  * Copyright (c), 2013 Next Century Corporation. All Rights Reserved.
@@ -33,25 +29,14 @@ import org.springframework.web.bind.annotation.ResponseBody
  * @author tbrooks
  */
 
-@Controller
-@RequestMapping(value = "/")
-class QueryBuilderController{
+class QueryParser{
 
-    @Autowired
-    QueryService queryService
+    Query parse(String text){
+        Query query =  new Query()
 
-    @RequestMapping(method = RequestMethod.GET)
-    String goToBuilder(Model model){
-        return "builder"
-    }
+        Filter filter = new Filter(dataSourceName: "mydb", datasetId: "things")
 
-    @RequestMapping(method = RequestMethod.POST)
-    @ResponseBody
-    String submitQuery(String queryText){
-
-
-        QueryParser parser = new QueryParser()
-        Query query = parser.parse(queryText)
-        queryService.executeQuery(query,false,null,null)
+        query.filter = filter
+        return query
     }
 }

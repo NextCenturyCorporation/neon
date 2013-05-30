@@ -21,7 +21,6 @@ def DEPLOY_GROUP = 'deploy'
 def owfTomcat = (hasProperty('OWF_TOMCAT') ? OWF_TOMCAT : System.env.OWF_TOMCAT) ?: '/opt/owf/apache-tomcat-7.0.21'
 def owfTomcatWebapps = owfTomcat + '/webapps'
 
-
 subprojects {
 
     apply plugin: 'war'
