@@ -39,6 +39,9 @@ class QueryBuilderController{
     @Autowired
     QueryService queryService
 
+    @Autowired
+    QueryParser queryParser
+
     @RequestMapping(method = RequestMethod.GET)
     String goToBuilder(){
         return "builder"
@@ -47,8 +50,7 @@ class QueryBuilderController{
     @RequestMapping(method = RequestMethod.POST)
     @ResponseBody
     String submitQuery(@RequestBody String queryText){
-        QueryParser parser = new QueryParser()
-        Query query = parser.parse(queryText)
+        Query query = queryParser.parse(queryText)
         queryService.executeQuery(query,false,null,null)
     }
 }

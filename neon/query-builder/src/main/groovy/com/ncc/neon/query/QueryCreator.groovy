@@ -1,10 +1,8 @@
 package com.ncc.neon.query
-import com.ncc.neon.services.QueryService
-import org.junit.Test
-import org.junit.runner.RunWith
-import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.test.context.ContextConfiguration
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner
+
+import com.ncc.neon.query.clauses.LimitClause
+import com.ncc.neon.query.filter.Filter
+import com.ncc.neon.query.parse.NeonBaseListener
 /*
  * ************************************************************************
  * Copyright (c), 2013 Next Century Corporation. All Rights Reserved.
@@ -31,19 +29,16 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner
  * @author tbrooks
  */
 
+class QueryCreator extends NeonBaseListener{
 
-@RunWith(SpringJUnit4ClassRunner.class)
-@ContextConfiguration(locations = "classpath:test-applicationContext.xml")
-class TestQueryService{
-
-    @Autowired
-    QueryService service
-
-    @Test
-    void testExecuteQueryFromService(){
-        BasicQueryParser parser = new BasicQueryParser()
-        Query query = parser.parse("")
-        assert service.executeQuery(query, false, null, null)
+    Query createQuery(){
+        Query query =  new Query()
+        query.filter = new Filter(dataSourceName: "insert", datasetId: "data")
+        query.limitClause = new LimitClause(limit: 100)
+        return query
 
     }
+
+
+
 }

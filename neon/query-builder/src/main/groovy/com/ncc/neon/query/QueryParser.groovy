@@ -1,9 +1,5 @@
 package com.ncc.neon.query
 
-import com.ncc.neon.query.clauses.LimitClause
-import com.ncc.neon.query.filter.Filter
-
-
 /*
  * ************************************************************************
  * Copyright (c), 2013 Next Century Corporation. All Rights Reserved.
@@ -30,22 +26,7 @@ import com.ncc.neon.query.filter.Filter
  * @author tbrooks
  */
 
-class QueryParser{
+public interface QueryParser{
 
-    Query parse(String text){
-        def arr = text.split("\\+")
-        if(arr.length < 4)
-            return new Query(filter: new Filter(dataSourceName: "jibberishzxc",datasetId: "foobarbazboom"))
-
-        String collectionName = arr[1]
-        String databaseName = arr[3][0..<arr[3].length()-1]
-
-        println collectionName
-        println databaseName
-
-        Query query =  new Query()
-        query.filter = new Filter(dataSourceName: databaseName, datasetId: collectionName)
-        query.limitClause = new LimitClause(limit: 100)
-        return query
-    }
+    Query parse(String text)
 }

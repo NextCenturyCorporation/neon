@@ -12,6 +12,8 @@
     <bean class="com.ncc.neon.query.mongo.MongoQueryExecutor" />
     <bean class="com.mongodb.MongoClient" />
 
+    <bean class="com.ncc.neon.query.BasicQueryParser"></bean>
+
     <bean class="org.springframework.beans.factory.config.CustomScopeConfigurer">
         <property name="scopes">
             <map>

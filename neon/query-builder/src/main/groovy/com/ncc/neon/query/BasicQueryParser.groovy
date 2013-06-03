@@ -1,10 +1,9 @@
 package com.ncc.neon.query
-import com.ncc.neon.services.QueryService
-import org.junit.Test
-import org.junit.runner.RunWith
-import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.test.context.ContextConfiguration
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner
+
+import com.ncc.neon.query.clauses.LimitClause
+import com.ncc.neon.query.filter.Filter
+
+
 /*
  * ************************************************************************
  * Copyright (c), 2013 Next Century Corporation. All Rights Reserved.
@@ -31,19 +30,19 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner
  * @author tbrooks
  */
 
+class BasicQueryParser implements QueryParser{
 
-@RunWith(SpringJUnit4ClassRunner.class)
-@ContextConfiguration(locations = "classpath:test-applicationContext.xml")
-class TestQueryService{
+    Query parse(String text){
+        def arr = text.split("\\+")
+        if(arr.length < 4)
+            return new Query(filter: new Filter(dataSourceName: "jibberishzxc",datasetId: "foobarbazboom"))
 
-    @Autowired
-    QueryService service
+        String collectionName = arr[1]
+        String databaseName = arr[3][0..<arr[3].length()-1]
 
-    @Test
-    void testExecuteQueryFromService(){
-        BasicQueryParser parser = new BasicQueryParser()
-        Query query = parser.parse("")
-        assert service.executeQuery(query, false, null, null)
-
+        Query query =  new Query()
+        query.filter = new Filter(dataSourceName: databaseName, datasetId: collectionName)
+        query.limitClause = new LimitClause(limit: 100)
+        return query
     }
 }
