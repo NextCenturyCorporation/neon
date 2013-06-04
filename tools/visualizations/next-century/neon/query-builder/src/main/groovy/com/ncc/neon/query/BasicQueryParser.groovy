@@ -33,12 +33,12 @@ import com.ncc.neon.query.filter.Filter
 class BasicQueryParser implements QueryParser{
 
     Query parse(String text){
-        def arr = text.split("\\+")
+        def arr = text.split(" ")
         if(arr.length < 4)
             return new Query(filter: new Filter(dataSourceName: "jibberishzxc",datasetId: "foobarbazboom"))
 
         String collectionName = arr[1]
-        String databaseName = arr[3][0..<arr[3].length()-1]
+        String databaseName = arr[3]
 
         Query query =  new Query()
         query.filter = new Filter(dataSourceName: databaseName, datasetId: collectionName)

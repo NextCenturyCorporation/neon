@@ -3,6 +3,8 @@ package com.ncc.neon.query
 import com.ncc.neon.query.clauses.LimitClause
 import com.ncc.neon.query.filter.Filter
 import com.ncc.neon.query.parse.NeonBaseListener
+import com.ncc.neon.query.parse.NeonParser
+
 /*
  * ************************************************************************
  * Copyright (c), 2013 Next Century Corporation. All Rights Reserved.
@@ -31,14 +33,24 @@ import com.ncc.neon.query.parse.NeonBaseListener
 
 class QueryCreator extends NeonBaseListener{
 
+    private String collectionName
+    private String databaseName
+
     Query createQuery(){
         Query query =  new Query()
-        query.filter = new Filter(dataSourceName: "insert", datasetId: "data")
+        query.filter = new Filter(dataSourceName: databaseName, datasetId: collectionName)
         query.limitClause = new LimitClause(limit: 100)
         return query
-
     }
 
+    @Override
+    public void exitDatabase(NeonParser.DatabaseContext ctx) {
+        databaseName = ctx.STRING()
+    }
 
+    @Override
+    public void exitQuery(NeonParser.QueryContext ctx) {
+        collectionName = ctx.STRING()
+    }
 
 }

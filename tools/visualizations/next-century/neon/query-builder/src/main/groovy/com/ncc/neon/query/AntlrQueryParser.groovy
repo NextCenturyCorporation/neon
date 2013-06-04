@@ -31,24 +31,16 @@ import org.antlr.v4.runtime.CommonTokenStream
 
 class AntlrQueryParser implements QueryParser{
 
-
     @Override
     Query parse(String text){
-        text = decodeUrlText(text)
-
-        println text
-
         QueryCreator queryCreator = new QueryCreator()
         NeonLexer lexer = new NeonLexer(new ANTLRInputStream(text))
         NeonParser parser = new NeonParser(new CommonTokenStream(lexer))
         parser.setBuildParseTree(true);
-        parser.addParseListener(new QueryCreator())
+        parser.addParseListener(queryCreator)
         parser.statement()
 
         queryCreator.createQuery()
     }
 
-    public static final String decodeUrlText(String text){
-        return URLDecoder.decode(text,"UTF-8")[0..-2]
-    }
 }

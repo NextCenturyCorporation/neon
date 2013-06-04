@@ -50,7 +50,12 @@ class QueryBuilderController{
     @RequestMapping(method = RequestMethod.POST)
     @ResponseBody
     String submitQuery(@RequestBody String queryText){
+        queryText = decodeUrlText(queryText)
         Query query = queryParser.parse(queryText)
         queryService.executeQuery(query,false,null,null)
+    }
+
+    public static final String decodeUrlText(String text){
+        return URLDecoder.decode(text,"UTF-8")[0..-2]
     }
 }
