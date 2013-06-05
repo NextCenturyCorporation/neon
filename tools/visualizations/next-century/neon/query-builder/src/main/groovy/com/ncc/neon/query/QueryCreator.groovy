@@ -1,6 +1,6 @@
 package com.ncc.neon.query
 
-import com.ncc.neon.query.clauses.LimitClause
+import com.ncc.neon.query.clauses.*
 import com.ncc.neon.query.filter.Filter
 import com.ncc.neon.query.parse.NeonBaseListener
 import com.ncc.neon.query.parse.NeonParser
@@ -33,24 +33,76 @@ import com.ncc.neon.query.parse.NeonParser
 
 class QueryCreator extends NeonBaseListener{
 
-    private String collectionName
-    private String databaseName
+    private Map<String, WhereClause> parsedWhereClauses = [:]
+
+    private String collectionName = ""
+    private String databaseName = ""
+    private WhereClause whereClause
 
     Query createQuery(){
-        Query query =  new Query()
+        Query query = new Query()
         query.filter = new Filter(dataSourceName: databaseName, datasetId: collectionName)
+        if (whereClause)
+            query.filter.whereClause = whereClause
+
         query.limitClause = new LimitClause(limit: 100)
         return query
     }
 
     @Override
-    public void exitDatabase(NeonParser.DatabaseContext ctx) {
+    public void exitDatabase(NeonParser.DatabaseContext ctx){
         databaseName = ctx.STRING()
     }
 
     @Override
-    public void exitQuery(NeonParser.QueryContext ctx) {
+    public void exitQuery(NeonParser.QueryContext ctx){
         collectionName = ctx.STRING()
+    }
+
+    @Override
+    void exitWhereClause(NeonParser.WhereClauseContext ctx){
+        if(ctx.AND()){
+            createBooleanWhereClause(ctx, new AndWhereClause())
+        }
+
+        if(ctx.OR()){
+            createBooleanWhereClause(ctx, new OrWhereClause())
+        }
+
+        if(parsedWhereClauses.size() == 1){
+            whereClause = parsedWhereClauses.find().value
+        }
+    }
+
+    private void createBooleanWhereClause(NeonParser.WhereClauseContext ctx, BooleanWhereClause booleanWhereClause){
+        List<WhereClause> clauses = []
+        ctx.whereClause().each{ NeonParser.WhereClauseContext context ->
+            clauses << parsedWhereClauses.remove(escapeContextText(context.text))
+        }
+        booleanWhereClause.whereClauses = clauses
+        parsedWhereClauses.put(escapeContextText(ctx.text), booleanWhereClause)
+    }
+
+    private static String escapeContextText(String text){
+        if(text.startsWith("(") && text.endsWith(")")){
+            text = text[1..-2]
+        }
+        return text
+    }
+
+    @Override
+    void exitSimpleWhereClause(NeonParser.SimpleWhereClauseContext ctx){
+        parsedWhereClauses.put(ctx.text, singularWhereClause(ctx))
+    }
+
+    private SingularWhereClause singularWhereClause(NeonParser.SimpleWhereClauseContext whereContext){
+        SingularWhereClause singularWhereClause = new SingularWhereClause()
+
+        singularWhereClause.lhs = whereContext.STRING()[0].text
+        singularWhereClause.operator = whereContext.operator().text
+        singularWhereClause.rhs = whereContext.STRING()[1].text
+
+        return singularWhereClause
     }
 
 }

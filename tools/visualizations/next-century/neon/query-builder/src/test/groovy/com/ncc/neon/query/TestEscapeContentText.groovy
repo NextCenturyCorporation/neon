@@ -1,11 +1,7 @@
 package com.ncc.neon.query
-import com.ncc.neon.services.QueryService
-import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.stereotype.Controller
-import org.springframework.web.bind.annotation.RequestBody
-import org.springframework.web.bind.annotation.RequestMapping
-import org.springframework.web.bind.annotation.RequestMethod
-import org.springframework.web.bind.annotation.ResponseBody
+
+import org.junit.Test
+
 /*
  * ************************************************************************
  * Copyright (c), 2013 Next Century Corporation. All Rights Reserved.
@@ -32,30 +28,19 @@ import org.springframework.web.bind.annotation.ResponseBody
  * @author tbrooks
  */
 
-@Controller
-@RequestMapping(value = "/")
-class QueryBuilderController{
+class TestEscapeContentText{
 
-    @Autowired
-    QueryService queryService
-
-    @Autowired
-    QueryParser queryParser
-
-    @RequestMapping(method = RequestMethod.GET)
-    String goToBuilder(){
-        return "builder"
+    @Test
+    public void testEscapeContextText(){
+        String text = "(test)"
+        String result = QueryCreator.escapeContextText(text)
+        assert "test" == result
     }
 
-    @RequestMapping(method = RequestMethod.POST)
-    @ResponseBody
-    String submitQuery(@RequestBody String queryText){
-        queryText = decodeUrlText(queryText)
-        Query query = queryParser.parse(queryText)
-        queryService.executeQuery(query,false,null,null)
-    }
-
-    public static final String decodeUrlText(String text){
-        return URLDecoder.decode(text,"UTF-8")[0..-1]
+    @Test
+    public void testEscapeContextTextWithoutParens(){
+        String text = "test"
+        String result = QueryCreator.escapeContextText(text)
+        assert text == result
     }
 }

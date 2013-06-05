@@ -1,13 +1,10 @@
 package com.ncc.neon.query.mongo
-
 import com.mongodb.BasicDBObject
 import com.ncc.neon.query.InvalidQueryException
 import com.ncc.neon.query.clauses.AndWhereClause
 import com.ncc.neon.query.clauses.OrWhereClause
 import com.ncc.neon.query.clauses.SingularWhereClause
 import com.ncc.neon.query.clauses.WithinDistanceClause
-import org.bson.types.ObjectId
-
 /*
  * ************************************************************************
  * Copyright (c), 2013 Next Century Corporation. All Rights Reserved.
@@ -110,6 +107,6 @@ class MongoWhereClauseBuilder {
         if (rhs instanceof Collection) {
             return MongoUtils.oidsToObjectIds(rhs)
         }
-        return new ObjectId(MongoUtils.toObjectId(rhs))
+        MongoUtils.toObjectId(rhs)
     }
 }
