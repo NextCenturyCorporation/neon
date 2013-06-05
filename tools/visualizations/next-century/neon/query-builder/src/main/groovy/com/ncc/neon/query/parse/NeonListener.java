@@ -12,8 +12,11 @@ public interface NeonListener extends ParseTreeListener {
 	void enterWhereClause(NeonParser.WhereClauseContext ctx);
 	void exitWhereClause(NeonParser.WhereClauseContext ctx);
 
-	void enterSortBy(NeonParser.SortByContext ctx);
-	void exitSortBy(NeonParser.SortByContext ctx);
+	void enterSort(NeonParser.SortContext ctx);
+	void exitSort(NeonParser.SortContext ctx);
+
+	void enterSortClause(NeonParser.SortClauseContext ctx);
+	void exitSortClause(NeonParser.SortClauseContext ctx);
 
 	void enterQuery(NeonParser.QueryContext ctx);
 	void exitQuery(NeonParser.QueryContext ctx);
@@ -26,9 +29,6 @@ public interface NeonListener extends ParseTreeListener {
 
 	void enterDatabase(NeonParser.DatabaseContext ctx);
 	void exitDatabase(NeonParser.DatabaseContext ctx);
-
-	void enterOptions(NeonParser.OptionsContext ctx);
-	void exitOptions(NeonParser.OptionsContext ctx);
 
 	void enterSimpleWhereClause(NeonParser.SimpleWhereClauseContext ctx);
 	void exitSimpleWhereClause(NeonParser.SimpleWhereClauseContext ctx);

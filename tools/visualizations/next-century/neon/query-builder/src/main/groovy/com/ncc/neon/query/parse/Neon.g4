@@ -12,7 +12,7 @@ options {
 // parser rules
 statement : ((query|database) (';')?)+;
 database : USE STRING;
-query: SELECT FROM STRING (where)? (options)*;
+query: SELECT FROM STRING (where)? (sort)?;
 
 where: WHERE whereClause;
 
@@ -34,10 +34,9 @@ operator  : GT
 AND : 'AND' | 'and';
 OR : 'OR' | 'or';
 
-//options is any clause that is not part of the where (sort, aggregate, etc)
-options: sortBy;
+sort: SORT sortClause (',' sortClause)*;
 
-sortBy: SORT_BY STRING (SORT_DIRECTION)?;
+sortClause: STRING (SORT_DIRECTION)?;
 
 // lexer rules
 GT: '>';
@@ -51,7 +50,7 @@ USE: 'USE' | 'use';
 SELECT: 'SELECT' | 'select';
 FROM: 'FROM' | 'from';
 WHERE: 'WHERE' | 'where';
-SORT_BY: 'SORT' | 'sort';
+SORT: 'SORT' | 'sort';
 SORT_DIRECTION : 'ASC'
                | 'asc'
                | 'DESC'
