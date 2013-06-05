@@ -15,17 +15,11 @@ public class NeonBaseListener implements NeonListener {
 	@Override public void enterWhereClause(NeonParser.WhereClauseContext ctx) { }
 	@Override public void exitWhereClause(NeonParser.WhereClauseContext ctx) { }
 
-	@Override public void enterParentheticalWhereClause(NeonParser.ParentheticalWhereClauseContext ctx) { }
-	@Override public void exitParentheticalWhereClause(NeonParser.ParentheticalWhereClauseContext ctx) { }
-
 	@Override public void enterSortBy(NeonParser.SortByContext ctx) { }
 	@Override public void exitSortBy(NeonParser.SortByContext ctx) { }
 
 	@Override public void enterQuery(NeonParser.QueryContext ctx) { }
 	@Override public void exitQuery(NeonParser.QueryContext ctx) { }
-
-	@Override public void enterBooleanOperator(NeonParser.BooleanOperatorContext ctx) { }
-	@Override public void exitBooleanOperator(NeonParser.BooleanOperatorContext ctx) { }
 
 	@Override public void enterWhere(NeonParser.WhereContext ctx) { }
 	@Override public void exitWhere(NeonParser.WhereContext ctx) { }

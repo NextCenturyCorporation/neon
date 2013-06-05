@@ -2,7 +2,8 @@
 
 package com.ncc.neon.query.parse;
 
-import org.antlr.v4.runtime.tree.ParseTreeListener;
+import org.antlr.v4.runtime.tree.*;
+import org.antlr.v4.runtime.Token;
 
 public interface NeonListener extends ParseTreeListener {
 	void enterStatement(NeonParser.StatementContext ctx);
@@ -11,17 +12,11 @@ public interface NeonListener extends ParseTreeListener {
 	void enterWhereClause(NeonParser.WhereClauseContext ctx);
 	void exitWhereClause(NeonParser.WhereClauseContext ctx);
 
-	void enterParentheticalWhereClause(NeonParser.ParentheticalWhereClauseContext ctx);
-	void exitParentheticalWhereClause(NeonParser.ParentheticalWhereClauseContext ctx);
-
 	void enterSortBy(NeonParser.SortByContext ctx);
 	void exitSortBy(NeonParser.SortByContext ctx);
 
 	void enterQuery(NeonParser.QueryContext ctx);
 	void exitQuery(NeonParser.QueryContext ctx);
-
-	void enterBooleanOperator(NeonParser.BooleanOperatorContext ctx);
-	void exitBooleanOperator(NeonParser.BooleanOperatorContext ctx);
 
 	void enterWhere(NeonParser.WhereContext ctx);
 	void exitWhere(NeonParser.WhereContext ctx);

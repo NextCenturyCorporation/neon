@@ -17,22 +17,21 @@ public class NeonParser extends Parser {
 	protected static final PredictionContextCache _sharedContextCache =
 		new PredictionContextCache();
 	public static final int
-		T__4=1, T__3=2, T__2=3, T__1=4, T__0=5, GT=6, GTE=7, LT=8, LTE=9, EQ=10, 
-		NE=11, LPAREN=12, RPAREN=13, USE=14, SELECT=15, FROM=16, WHERE=17, SORT_BY=18, 
-		SORT_DIRECTION=19, STRING=20, WHITESPACE=21;
+		T__2=1, T__1=2, T__0=3, AND=4, OR=5, GT=6, GTE=7, LT=8, LTE=9, EQ=10, 
+		NE=11, USE=12, SELECT=13, FROM=14, WHERE=15, SORT_BY=16, SORT_DIRECTION=17, 
+		STRING=18, WHITESPACE=19;
 	public static final String[] tokenNames = {
-		"<INVALID>", "'AND'", "'and'", "'OR'", "'or'", "';'", "'>'", "'>='", "'<'", 
-		"'<='", "'='", "'!='", "'('", "')'", "USE", "SELECT", "FROM", "WHERE", 
-		"SORT_BY", "SORT_DIRECTION", "STRING", "WHITESPACE"
+		"<INVALID>", "')'", "'('", "';'", "AND", "OR", "'>'", "'>='", "'<'", "'<='", 
+		"'='", "'!='", "USE", "SELECT", "FROM", "WHERE", "SORT_BY", "SORT_DIRECTION", 
+		"STRING", "WHITESPACE"
 	};
 	public static final int
 		RULE_statement = 0, RULE_database = 1, RULE_query = 2, RULE_where = 3, 
-		RULE_whereClause = 4, RULE_simpleWhereClause = 5, RULE_parentheticalWhereClause = 6, 
-		RULE_operator = 7, RULE_booleanOperator = 8, RULE_options = 9, RULE_sortBy = 10;
+		RULE_whereClause = 4, RULE_simpleWhereClause = 5, RULE_operator = 6, RULE_options = 7, 
+		RULE_sortBy = 8;
 	public static final String[] ruleNames = {
 		"statement", "database", "query", "where", "whereClause", "simpleWhereClause", 
-		"parentheticalWhereClause", "operator", "booleanOperator", "options", 
-		"sortBy"
+		"operator", "options", "sortBy"
 	};
 
 	@Override
@@ -85,31 +84,38 @@ public class NeonParser extends Parser {
 		try {
 			enterOuterAlt(_localctx, 1);
 			{
-			setState(28); 
+			setState(25); 
 			_errHandler.sync(this);
 			_la = _input.LA(1);
 			do {
 				{
 				{
-				setState(24);
+				setState(20);
 				switch (_input.LA(1)) {
 				case SELECT:
 					{
-					setState(22); query();
+					setState(18); query();
 					}
 					break;
 				case USE:
 					{
-					setState(23); database();
+					setState(19); database();
 					}
 					break;
 				default:
 					throw new NoViableAltException(this);
 				}
-				setState(26); match(5);
+				setState(23);
+				_la = _input.LA(1);
+				if (_la==3) {
+					{
+					setState(22); match(3);
+					}
+				}
+
 				}
 				}
-				setState(30); 
+				setState(27); 
 				_errHandler.sync(this);
 				_la = _input.LA(1);
 			} while ( _la==USE || _la==SELECT );
@@ -149,8 +155,8 @@ public class NeonParser extends Parser {
 		try {
 			enterOuterAlt(_localctx, 1);
 			{
-			setState(32); match(USE);
-			setState(33); match(STRING);
+			setState(29); match(USE);
+			setState(30); match(STRING);
 			}
 		}
 		catch (RecognitionException re) {
@@ -198,27 +204,27 @@ public class NeonParser extends Parser {
 		try {
 			enterOuterAlt(_localctx, 1);
 			{
-			setState(35); match(SELECT);
-			setState(36); match(FROM);
-			setState(37); match(STRING);
-			setState(39);
+			setState(32); match(SELECT);
+			setState(33); match(FROM);
+			setState(34); match(STRING);
+			setState(36);
 			_la = _input.LA(1);
 			if (_la==WHERE) {
 				{
-				setState(38); where();
+				setState(35); where();
 				}
 			}
 
-			setState(44);
+			setState(41);
 			_errHandler.sync(this);
 			_la = _input.LA(1);
 			while (_la==SORT_BY) {
 				{
 				{
-				setState(41); options();
+				setState(38); options();
 				}
 				}
-				setState(46);
+				setState(43);
 				_errHandler.sync(this);
 				_la = _input.LA(1);
 			}
@@ -260,8 +266,8 @@ public class NeonParser extends Parser {
 		try {
 			enterOuterAlt(_localctx, 1);
 			{
-			setState(47); match(WHERE);
-			setState(48); whereClause();
+			setState(44); match(WHERE);
+			setState(45); whereClause(0);
 			}
 		}
 		catch (RecognitionException re) {
@@ -276,20 +282,22 @@ public class NeonParser extends Parser {
 	}
 
 	public static class WhereClauseContext extends ParserRuleContext {
-		public ParentheticalWhereClauseContext parentheticalWhereClause() {
-			return getRuleContext(ParentheticalWhereClauseContext.class,0);
+		public int _p;
+		public List<WhereClauseContext> whereClause() {
+			return getRuleContexts(WhereClauseContext.class);
 		}
-		public SimpleWhereClauseContext simpleWhereClause(int i) {
-			return getRuleContext(SimpleWhereClauseContext.class,i);
+		public TerminalNode AND() { return getToken(NeonParser.AND, 0); }
+		public TerminalNode OR() { return getToken(NeonParser.OR, 0); }
+		public SimpleWhereClauseContext simpleWhereClause() {
+			return getRuleContext(SimpleWhereClauseContext.class,0);
 		}
-		public BooleanOperatorContext booleanOperator() {
-			return getRuleContext(BooleanOperatorContext.class,0);
+		public WhereClauseContext whereClause(int i) {
+			return getRuleContext(WhereClauseContext.class,i);
 		}
-		public List<SimpleWhereClauseContext> simpleWhereClause() {
-			return getRuleContexts(SimpleWhereClauseContext.class);
-		}
-		public WhereClauseContext(ParserRuleContext parent, int invokingState) {
+		public WhereClauseContext(ParserRuleContext parent, int invokingState) { super(parent, invokingState); }
+		public WhereClauseContext(ParserRuleContext parent, int invokingState, int _p) {
 			super(parent, invokingState);
+			this._p = _p;
 		}
 		@Override public int getRuleIndex() { return RULE_whereClause; }
 		@Override
@@ -302,34 +310,73 @@ public class NeonParser extends Parser {
 		}
 	}
 
-	public final WhereClauseContext whereClause() throws RecognitionException {
-		WhereClauseContext _localctx = new WhereClauseContext(_ctx, getState());
-		enterRule(_localctx, 8, RULE_whereClause);
+	public final WhereClauseContext whereClause(int _p) throws RecognitionException {
+		ParserRuleContext _parentctx = _ctx;
+		int _parentState = getState();
+		WhereClauseContext _localctx = new WhereClauseContext(_ctx, _parentState, _p);
+		WhereClauseContext _prevctx = _localctx;
+		int _startState = 8;
+		enterRecursionRule(_localctx, RULE_whereClause);
 		try {
-			setState(56);
-			switch ( getInterpreter().adaptivePredict(_input,4,_ctx) ) {
-			case 1:
-				enterOuterAlt(_localctx, 1);
-				{
-				setState(50); simpleWhereClause();
-				}
-				break;
-
+			int _alt;
+			enterOuterAlt(_localctx, 1);
+			{
+			setState(53);
+			switch (_input.LA(1)) {
 			case 2:
-				enterOuterAlt(_localctx, 2);
 				{
-				setState(51); parentheticalWhereClause();
+				setState(48); match(2);
+				setState(49); whereClause(0);
+				setState(50); match(1);
 				}
 				break;
-
-			case 3:
-				enterOuterAlt(_localctx, 3);
+			case STRING:
 				{
 				setState(52); simpleWhereClause();
-				setState(53); booleanOperator();
-				setState(54); simpleWhereClause();
 				}
 				break;
+			default:
+				throw new NoViableAltException(this);
+			}
+			_ctx.stop = _input.LT(-1);
+			setState(63);
+			_errHandler.sync(this);
+			_alt = getInterpreter().adaptivePredict(_input,7,_ctx);
+			while ( _alt!=2 && _alt!=-1 ) {
+				if ( _alt==1 ) {
+					if ( _parseListeners!=null ) triggerExitRuleEvent();
+					_prevctx = _localctx;
+					{
+					setState(61);
+					switch ( getInterpreter().adaptivePredict(_input,6,_ctx) ) {
+					case 1:
+						{
+						_localctx = new WhereClauseContext(_parentctx, _parentState, _p);
+						pushNewRecursionContext(_localctx, _startState, RULE_whereClause);
+						setState(55);
+						if (!(3 >= _localctx._p)) throw new FailedPredicateException(this, "3 >= $_p");
+						setState(56); match(AND);
+						setState(57); whereClause(4);
+						}
+						break;
+
+					case 2:
+						{
+						_localctx = new WhereClauseContext(_parentctx, _parentState, _p);
+						pushNewRecursionContext(_localctx, _startState, RULE_whereClause);
+						setState(58);
+						if (!(2 >= _localctx._p)) throw new FailedPredicateException(this, "2 >= $_p");
+						setState(59); match(OR);
+						setState(60); whereClause(3);
+						}
+						break;
+					}
+					} 
+				}
+				setState(65);
+				_errHandler.sync(this);
+				_alt = getInterpreter().adaptivePredict(_input,7,_ctx);
+			}
 			}
 		}
 		catch (RecognitionException re) {
@@ -338,7 +385,7 @@ public class NeonParser extends Parser {
 			_errHandler.recover(this, re);
 		}
 		finally {
-			exitRule();
+			unrollRecursionContexts(_parentctx);
 		}
 		return _localctx;
 	}
@@ -371,51 +418,9 @@ public class NeonParser extends Parser {
 		try {
 			enterOuterAlt(_localctx, 1);
 			{
-			setState(58); match(STRING);
-			setState(59); operator();
-			setState(60); match(STRING);
-			}
-		}
-		catch (RecognitionException re) {
-			_localctx.exception = re;
-			_errHandler.reportError(this, re);
-			_errHandler.recover(this, re);
-		}
-		finally {
-			exitRule();
-		}
-		return _localctx;
-	}
-
-	public static class ParentheticalWhereClauseContext extends ParserRuleContext {
-		public WhereClauseContext whereClause() {
-			return getRuleContext(WhereClauseContext.class,0);
-		}
-		public TerminalNode RPAREN() { return getToken(NeonParser.RPAREN, 0); }
-		public TerminalNode LPAREN() { return getToken(NeonParser.LPAREN, 0); }
-		public ParentheticalWhereClauseContext(ParserRuleContext parent, int invokingState) {
-			super(parent, invokingState);
-		}
-		@Override public int getRuleIndex() { return RULE_parentheticalWhereClause; }
-		@Override
-		public void enterRule(ParseTreeListener listener) {
-			if ( listener instanceof NeonListener ) ((NeonListener)listener).enterParentheticalWhereClause(this);
-		}
-		@Override
-		public void exitRule(ParseTreeListener listener) {
-			if ( listener instanceof NeonListener ) ((NeonListener)listener).exitParentheticalWhereClause(this);
-		}
-	}
-
-	public final ParentheticalWhereClauseContext parentheticalWhereClause() throws RecognitionException {
-		ParentheticalWhereClauseContext _localctx = new ParentheticalWhereClauseContext(_ctx, getState());
-		enterRule(_localctx, 12, RULE_parentheticalWhereClause);
-		try {
-			enterOuterAlt(_localctx, 1);
-			{
-			setState(62); match(LPAREN);
-			setState(63); whereClause();
-			setState(64); match(RPAREN);
+			setState(66); match(STRING);
+			setState(67); operator();
+			setState(68); match(STRING);
 			}
 		}
 		catch (RecognitionException re) {
@@ -452,55 +457,14 @@ public class NeonParser extends Parser {
 
 	public final OperatorContext operator() throws RecognitionException {
 		OperatorContext _localctx = new OperatorContext(_ctx, getState());
-		enterRule(_localctx, 14, RULE_operator);
+		enterRule(_localctx, 12, RULE_operator);
 		int _la;
 		try {
 			enterOuterAlt(_localctx, 1);
 			{
-			setState(66);
+			setState(70);
 			_la = _input.LA(1);
 			if ( !((((_la) & ~0x3f) == 0 && ((1L << _la) & ((1L << GT) | (1L << GTE) | (1L << LT) | (1L << LTE) | (1L << EQ) | (1L << NE))) != 0)) ) {
-			_errHandler.recoverInline(this);
-			}
-			consume();
-			}
-		}
-		catch (RecognitionException re) {
-			_localctx.exception = re;
-			_errHandler.reportError(this, re);
-			_errHandler.recover(this, re);
-		}
-		finally {
-			exitRule();
-		}
-		return _localctx;
-	}
-
-	public static class BooleanOperatorContext extends ParserRuleContext {
-		public BooleanOperatorContext(ParserRuleContext parent, int invokingState) {
-			super(parent, invokingState);
-		}
-		@Override public int getRuleIndex() { return RULE_booleanOperator; }
-		@Override
-		public void enterRule(ParseTreeListener listener) {
-			if ( listener instanceof NeonListener ) ((NeonListener)listener).enterBooleanOperator(this);
-		}
-		@Override
-		public void exitRule(ParseTreeListener listener) {
-			if ( listener instanceof NeonListener ) ((NeonListener)listener).exitBooleanOperator(this);
-		}
-	}
-
-	public final BooleanOperatorContext booleanOperator() throws RecognitionException {
-		BooleanOperatorContext _localctx = new BooleanOperatorContext(_ctx, getState());
-		enterRule(_localctx, 16, RULE_booleanOperator);
-		int _la;
-		try {
-			enterOuterAlt(_localctx, 1);
-			{
-			setState(68);
-			_la = _input.LA(1);
-			if ( !((((_la) & ~0x3f) == 0 && ((1L << _la) & ((1L << 1) | (1L << 2) | (1L << 3) | (1L << 4))) != 0)) ) {
 			_errHandler.recoverInline(this);
 			}
 			consume();
@@ -537,11 +501,11 @@ public class NeonParser extends Parser {
 
 	public final OptionsContext options() throws RecognitionException {
 		OptionsContext _localctx = new OptionsContext(_ctx, getState());
-		enterRule(_localctx, 18, RULE_options);
+		enterRule(_localctx, 14, RULE_options);
 		try {
 			enterOuterAlt(_localctx, 1);
 			{
-			setState(70); sortBy();
+			setState(72); sortBy();
 			}
 		}
 		catch (RecognitionException re) {
@@ -575,13 +539,21 @@ public class NeonParser extends Parser {
 
 	public final SortByContext sortBy() throws RecognitionException {
 		SortByContext _localctx = new SortByContext(_ctx, getState());
-		enterRule(_localctx, 20, RULE_sortBy);
+		enterRule(_localctx, 16, RULE_sortBy);
+		int _la;
 		try {
 			enterOuterAlt(_localctx, 1);
 			{
-			setState(72); match(SORT_BY);
-			setState(73); match(STRING);
-			setState(74); match(SORT_DIRECTION);
+			setState(74); match(SORT_BY);
+			setState(75); match(STRING);
+			setState(77);
+			_la = _input.LA(1);
+			if (_la==SORT_DIRECTION) {
+				{
+				setState(76); match(SORT_DIRECTION);
+				}
+			}
+
 			}
 		}
 		catch (RecognitionException re) {
@@ -595,25 +567,42 @@ public class NeonParser extends Parser {
 		return _localctx;
 	}
 
+	public boolean sempred(RuleContext _localctx, int ruleIndex, int predIndex) {
+		switch (ruleIndex) {
+		case 4: return whereClause_sempred((WhereClauseContext)_localctx, predIndex);
+		}
+		return true;
+	}
+	private boolean whereClause_sempred(WhereClauseContext _localctx, int predIndex) {
+		switch (predIndex) {
+		case 0: return 3 >= _localctx._p;
+
+		case 1: return 2 >= _localctx._p;
+		}
+		return true;
+	}
+
 	public static final String _serializedATN =
-		"\2\3\27O\4\2\t\2\4\3\t\3\4\4\t\4\4\5\t\5\4\6\t\6\4\7\t\7\4\b\t\b\4\t\t"+
-		"\t\4\n\t\n\4\13\t\13\4\f\t\f\3\2\3\2\5\2\33\n\2\3\2\3\2\6\2\37\n\2\r\2"+
-		"\16\2 \3\3\3\3\3\3\3\4\3\4\3\4\3\4\5\4*\n\4\3\4\7\4-\n\4\f\4\16\4\60\13"+
-		"\4\3\5\3\5\3\5\3\6\3\6\3\6\3\6\3\6\3\6\5\6;\n\6\3\7\3\7\3\7\3\7\3\b\3"+
-		"\b\3\b\3\b\3\t\3\t\3\n\3\n\3\13\3\13\3\f\3\f\3\f\3\f\3\f\2\r\2\4\6\b\n"+
-		"\f\16\20\22\24\26\2\4\3\b\r\3\3\6I\2\36\3\2\2\2\4\"\3\2\2\2\6%\3\2\2\2"+
-		"\b\61\3\2\2\2\n:\3\2\2\2\f<\3\2\2\2\16@\3\2\2\2\20D\3\2\2\2\22F\3\2\2"+
-		"\2\24H\3\2\2\2\26J\3\2\2\2\30\33\5\6\4\2\31\33\5\4\3\2\32\30\3\2\2\2\32"+
-		"\31\3\2\2\2\33\34\3\2\2\2\34\35\7\7\2\2\35\37\3\2\2\2\36\32\3\2\2\2\37"+
-		" \3\2\2\2 \36\3\2\2\2 !\3\2\2\2!\3\3\2\2\2\"#\7\20\2\2#$\7\26\2\2$\5\3"+
-		"\2\2\2%&\7\21\2\2&\'\7\22\2\2\')\7\26\2\2(*\5\b\5\2)(\3\2\2\2)*\3\2\2"+
-		"\2*.\3\2\2\2+-\5\24\13\2,+\3\2\2\2-\60\3\2\2\2.,\3\2\2\2./\3\2\2\2/\7"+
-		"\3\2\2\2\60.\3\2\2\2\61\62\7\23\2\2\62\63\5\n\6\2\63\t\3\2\2\2\64;\5\f"+
-		"\7\2\65;\5\16\b\2\66\67\5\f\7\2\678\5\22\n\289\5\f\7\29;\3\2\2\2:\64\3"+
-		"\2\2\2:\65\3\2\2\2:\66\3\2\2\2;\13\3\2\2\2<=\7\26\2\2=>\5\20\t\2>?\7\26"+
-		"\2\2?\r\3\2\2\2@A\7\16\2\2AB\5\n\6\2BC\7\17\2\2C\17\3\2\2\2DE\t\2\2\2"+
-		"E\21\3\2\2\2FG\t\3\2\2G\23\3\2\2\2HI\5\26\f\2I\25\3\2\2\2JK\7\24\2\2K"+
-		"L\7\26\2\2LM\7\25\2\2M\27\3\2\2\2\7\32 ).:";
+		"\2\3\25R\4\2\t\2\4\3\t\3\4\4\t\4\4\5\t\5\4\6\t\6\4\7\t\7\4\b\t\b\4\t\t"+
+		"\t\4\n\t\n\3\2\3\2\5\2\27\n\2\3\2\5\2\32\n\2\6\2\34\n\2\r\2\16\2\35\3"+
+		"\3\3\3\3\3\3\4\3\4\3\4\3\4\5\4\'\n\4\3\4\7\4*\n\4\f\4\16\4-\13\4\3\5\3"+
+		"\5\3\5\3\6\3\6\3\6\3\6\3\6\3\6\5\68\n\6\3\6\3\6\3\6\3\6\3\6\3\6\7\6@\n"+
+		"\6\f\6\16\6C\13\6\3\7\3\7\3\7\3\7\3\b\3\b\3\t\3\t\3\n\3\n\3\n\5\nP\n\n"+
+		"\3\n\2\13\2\4\6\b\n\f\16\20\22\2\3\3\b\rQ\2\33\3\2\2\2\4\37\3\2\2\2\6"+
+		"\"\3\2\2\2\b.\3\2\2\2\n\67\3\2\2\2\fD\3\2\2\2\16H\3\2\2\2\20J\3\2\2\2"+
+		"\22L\3\2\2\2\24\27\5\6\4\2\25\27\5\4\3\2\26\24\3\2\2\2\26\25\3\2\2\2\27"+
+		"\31\3\2\2\2\30\32\7\5\2\2\31\30\3\2\2\2\31\32\3\2\2\2\32\34\3\2\2\2\33"+
+		"\26\3\2\2\2\34\35\3\2\2\2\35\33\3\2\2\2\35\36\3\2\2\2\36\3\3\2\2\2\37"+
+		" \7\16\2\2 !\7\24\2\2!\5\3\2\2\2\"#\7\17\2\2#$\7\20\2\2$&\7\24\2\2%\'"+
+		"\5\b\5\2&%\3\2\2\2&\'\3\2\2\2\'+\3\2\2\2(*\5\20\t\2)(\3\2\2\2*-\3\2\2"+
+		"\2+)\3\2\2\2+,\3\2\2\2,\7\3\2\2\2-+\3\2\2\2./\7\21\2\2/\60\5\n\6\2\60"+
+		"\t\3\2\2\2\61\62\b\6\1\2\62\63\7\4\2\2\63\64\5\n\6\2\64\65\7\3\2\2\65"+
+		"8\3\2\2\2\668\5\f\7\2\67\61\3\2\2\2\67\66\3\2\2\28A\3\2\2\29:\6\6\2\3"+
+		":;\7\6\2\2;@\5\n\6\2<=\6\6\3\3=>\7\7\2\2>@\5\n\6\2?9\3\2\2\2?<\3\2\2\2"+
+		"@C\3\2\2\2A?\3\2\2\2AB\3\2\2\2B\13\3\2\2\2CA\3\2\2\2DE\7\24\2\2EF\5\16"+
+		"\b\2FG\7\24\2\2G\r\3\2\2\2HI\t\2\2\2I\17\3\2\2\2JK\5\22\n\2K\21\3\2\2"+
+		"\2LM\7\22\2\2MO\7\24\2\2NP\7\23\2\2ON\3\2\2\2OP\3\2\2\2P\23\3\2\2\2\13"+
+		"\26\31\35&+\67?AO";
 	public static final ATN _ATN =
 		ATNSimulator.deserialize(_serializedATN.toCharArray());
 	static {

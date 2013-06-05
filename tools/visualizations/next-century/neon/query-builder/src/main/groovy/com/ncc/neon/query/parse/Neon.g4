@@ -10,19 +10,19 @@ options {
 }
 
 // parser rules
-statement : ((query|database) ';')+;
+statement : ((query|database) (';')?)+;
 database : USE STRING;
 query: SELECT FROM STRING (where)? (options)*;
 
 where: WHERE whereClause;
 
-whereClause : simpleWhereClause
-            | parentheticalWhereClause
-            | simpleWhereClause booleanOperator simpleWhereClause;
+whereClause
+     : '(' whereClause ')'
+     | whereClause AND whereClause
+     | whereClause OR whereClause
+     | simpleWhereClause;
 
 simpleWhereClause : STRING operator STRING;
-parentheticalWhereClause: LPAREN whereClause RPAREN;
-
 
 operator  : GT
           | GTE
@@ -31,16 +31,13 @@ operator  : GT
           | EQ
           | NE;
 
-booleanOperator : 'AND'
-                | 'and'
-                | 'OR'
-                | 'or';
-
+AND : 'AND' | 'and';
+OR : 'OR' | 'or';
 
 //options is any clause that is not part of the where (sort, aggregate, etc)
 options: sortBy;
 
-sortBy: SORT_BY STRING SORT_DIRECTION;
+sortBy: SORT_BY STRING (SORT_DIRECTION)?;
 
 // lexer rules
 GT: '>';
@@ -49,8 +46,6 @@ LT: '<';
 LTE: '<=';
 EQ: '=';
 NE: '!=';
-LPAREN: '(';
-RPAREN: ')';
 
 USE: 'USE' | 'use';
 SELECT: 'SELECT' | 'select';
