@@ -117,6 +117,7 @@ dependencies {
     compile "ch.qos.logback:logback-core:$logbackVersion"
     compile "ch.qos.logback:logback-classic:$logbackVersion"
     compile "com.google.guava:guava:14.0.1"
+    compile 'org.antlr:antlr4-runtime:4.0'
     compile ('org.codehaus.groovy.modules.http-builder:http-builder:0.6') {
         // we already include groovy-all - this prevents bringing groovy in twice
         exclude module: 'groovy'
@@ -132,7 +133,6 @@ dependencies {
         exclude module: 'jsp-api'
         exclude module: 'jasper-runtime'
         exclude module: 'jasper-compiler'
-
     }
 
     providedCompile 'javax.servlet:javax.servlet-api:3.0.1'

@@ -1,11 +1,16 @@
-package com.ncc.neon.query
-import com.ncc.neon.services.QueryService
+package com.ncc.neon.services
+
+import com.ncc.neon.language.QueryParser
+import com.ncc.neon.query.Query
+import com.ncc.neon.query.QueryExecutor
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.stereotype.Controller
-import org.springframework.web.bind.annotation.RequestBody
-import org.springframework.web.bind.annotation.RequestMapping
-import org.springframework.web.bind.annotation.RequestMethod
-import org.springframework.web.bind.annotation.ResponseBody
+import org.springframework.stereotype.Component
+
+import javax.ws.rs.Consumes
+import javax.ws.rs.POST
+import javax.ws.rs.Path
+import javax.ws.rs.Produces
+import javax.ws.rs.core.MediaType
 /*
  * ************************************************************************
  * Copyright (c), 2013 Next Century Corporation. All Rights Reserved.
@@ -32,30 +37,31 @@ import org.springframework.web.bind.annotation.ResponseBody
  * @author tbrooks
  */
 
-@Controller
-@RequestMapping(value = "/")
-class QueryBuilderController{
-
-    @Autowired
-    QueryService queryService
+@Component
+@Path("/languageservice")
+class LanguageService{
 
     @Autowired
     QueryParser queryParser
 
-    @RequestMapping(method = RequestMethod.GET)
-    String goToBuilder(){
-        return "builder"
+    @Autowired
+    QueryExecutor queryExecutor
+
+    @POST
+    @Consumes(MediaType.TEXT_PLAIN)
+    @Produces(MediaType.APPLICATION_JSON)
+    @Path("query")
+    String executeQuery(String text){
+        Query query = queryParser.parse(text)
+
+        return wrapInDataJson(queryExecutor.execute(query, false))
     }
 
-    @RequestMapping(method = RequestMethod.POST)
-    @ResponseBody
-    String submitQuery(@RequestBody String queryText){
-        queryText = decodeUrlText(queryText)
-        Query query = queryParser.parse(queryText)
-        queryService.executeQuery(query,false,null,null)
-    }
+    private String wrapInDataJson(queryResult) {
+        def json = queryResult.toJson()
 
-    public static final String decodeUrlText(String text){
-        return URLDecoder.decode(text,"UTF-8")[0..-1]
+        '{"data":' + json + '}'
     }
 }
+
+

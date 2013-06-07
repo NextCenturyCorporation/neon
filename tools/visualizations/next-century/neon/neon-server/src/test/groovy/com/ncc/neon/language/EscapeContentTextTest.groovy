@@ -1,10 +1,7 @@
-package com.ncc.neon.query
-import com.ncc.neon.services.QueryService
+package com.ncc.neon.language
+
 import org.junit.Test
-import org.junit.runner.RunWith
-import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.test.context.ContextConfiguration
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner
+
 /*
  * ************************************************************************
  * Copyright (c), 2013 Next Century Corporation. All Rights Reserved.
@@ -31,19 +28,19 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner
  * @author tbrooks
  */
 
-
-@RunWith(SpringJUnit4ClassRunner.class)
-@ContextConfiguration(locations = "classpath:test-applicationContext.xml")
-class TestQueryService{
-
-    @Autowired
-    QueryService service
+class EscapeContentTextTest{
 
     @Test
-    void testExecuteQueryFromService(){
-        BasicQueryParser parser = new BasicQueryParser()
-        Query query = parser.parse("")
-        assert service.executeQuery(query, false, null, null)
+    public void testEscapeContextText(){
+        String text = "(test)"
+        String result = QueryCreator.escapeContextText(text)
+        assert "test" == result
+    }
 
+    @Test
+    public void testEscapeContextTextWithoutParens(){
+        String text = "test"
+        String result = QueryCreator.escapeContextText(text)
+        assert text == result
     }
 }

@@ -1,9 +1,10 @@
-package com.ncc.neon.query
+package com.ncc.neon.language
 
+import com.ncc.neon.query.Query
 import com.ncc.neon.query.clauses.*
 import com.ncc.neon.query.filter.Filter
-import com.ncc.neon.query.parse.NeonBaseListener
-import com.ncc.neon.query.parse.NeonParser
+import com.ncc.neon.language.parse.NeonBaseListener
+import com.ncc.neon.language.parse.NeonParser
 
 /*
  * ************************************************************************
@@ -33,24 +34,25 @@ import com.ncc.neon.query.parse.NeonParser
 
 class QueryCreator extends NeonBaseListener{
 
-    private Map<String, WhereClause> parsedWhereClauses = [:]
+    private final Map<String, WhereClause> parsedWhereClauses = [:]
 
     private String collectionName = ""
     private String databaseName = ""
     private WhereClause whereClause
-    private List<SortClause> sortClauses = []
-    private List<AggregateClause> aggregates = []
-    private List<GroupByClause> groupByClauses = []
+    private final List<SortClause> sortClauses = []
+    private final List<AggregateClause> aggregates = []
+    private final List<GroupByClause> groupByClauses = []
 
     Query createQuery(){
         Query query = new Query()
         query.filter = new Filter(dataSourceName: databaseName, datasetId: collectionName)
-        if (whereClause)
+        if (whereClause){
             query.filter.whereClause = whereClause
-
+        }
         query.sortClauses = sortClauses
         query.aggregates = aggregates
         query.groupByClauses = groupByClauses
+        query.limitClause = new LimitClause(limit: 20)
         return query
     }
 
@@ -105,7 +107,7 @@ class QueryCreator extends NeonBaseListener{
 
     private static String escapeContextText(String text){
         if(text.startsWith("(") && text.endsWith(")")){
-            text = text[1..-2]
+            return text[1..-2]
         }
         return text
     }
@@ -115,7 +117,7 @@ class QueryCreator extends NeonBaseListener{
         SortClause sortClause = new SortClause(sortOrder: SortOrder.ASCENDING)
         sortClause.fieldName = ctx.STRING().text
         if(ctx.SORT_DIRECTION()){
-            if(ctx.SORT_DIRECTION().text.toLowerCase().equals("desc")){
+            if(ctx.SORT_DIRECTION().text.toLowerCase() == "desc"){
                 sortClause.sortOrder = SortOrder.DESCENDING
             }
         }
@@ -125,7 +127,7 @@ class QueryCreator extends NeonBaseListener{
     @Override
     void exitGroupClause(NeonParser.GroupClauseContext ctx){
         if(!ctx.STRING()){
-            return;
+            return
         }
 
         GroupByFieldClause fieldClause = new GroupByFieldClause()

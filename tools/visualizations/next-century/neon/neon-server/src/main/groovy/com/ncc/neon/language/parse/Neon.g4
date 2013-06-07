@@ -2,7 +2,7 @@ grammar Neon;
 
 @header
 {
-package com.ncc.neon.query.parse;
+package com.ncc.neon.language.parse;
 }
 
 options {

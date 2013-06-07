@@ -1,8 +1,12 @@
-package com.ncc.neon.query
-import com.ncc.neon.query.parse.NeonLexer
-import com.ncc.neon.query.parse.NeonParser
+package com.ncc.neon.language
+
+import com.ncc.neon.query.Query
+import com.ncc.neon.language.parse.NeonLexer
+import com.ncc.neon.language.parse.NeonParser
 import org.antlr.v4.runtime.ANTLRInputStream
 import org.antlr.v4.runtime.CommonTokenStream
+import org.springframework.stereotype.Component
+
 /*
  * ************************************************************************
  * Copyright (c), 2013 Next Century Corporation. All Rights Reserved.
@@ -29,6 +33,7 @@ import org.antlr.v4.runtime.CommonTokenStream
  * @author tbrooks
  */
 
+@Component
 class AntlrQueryParser implements QueryParser{
 
     @Override
@@ -36,7 +41,7 @@ class AntlrQueryParser implements QueryParser{
         QueryCreator queryCreator = new QueryCreator()
         NeonLexer lexer = new NeonLexer(new ANTLRInputStream(text))
         NeonParser parser = new NeonParser(new CommonTokenStream(lexer))
-        parser.setBuildParseTree(true);
+        parser.setBuildParseTree(true)
         parser.addParseListener(queryCreator)
         parser.statement()
 

@@ -5,21 +5,15 @@
 		  http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd"
          version="2.5">
 
+    <context-param>
+        <param-name>owf.url</param-name>
+        <param-value>https://localhost:8443/owf</param-value>
+    </context-param>
 
-    <servlet>
-        <servlet-name>query-builder</servlet-name>
-        <servlet-class>org.springframework.web.servlet.DispatcherServlet</servlet-class>
-        <init-param>
-            <param-name>contextConfigLocation</param-name>
-            <param-value>classpath:applicationContext.xml</param-value>
-        </init-param>
-        <load-on-startup>1</load-on-startup>
-    </servlet>
-
-    <servlet-mapping>
-        <servlet-name>query-builder</servlet-name>
-        <url-pattern>/</url-pattern>
-    </servlet-mapping>
+    <context-param>
+        <param-name>neon.url</param-name>
+        <param-value>https://localhost:9443/neon</param-value>
+    </context-param>
 
 </web-app>
 

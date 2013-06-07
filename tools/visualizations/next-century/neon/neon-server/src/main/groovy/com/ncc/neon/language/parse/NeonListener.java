@@ -1,6 +1,6 @@
 // Generated from Neon.g4 by ANTLR 4.0
 
-package com.ncc.neon.query.parse;
+package com.ncc.neon.language.parse;
 
 import org.antlr.v4.runtime.tree.ParseTreeListener;
 

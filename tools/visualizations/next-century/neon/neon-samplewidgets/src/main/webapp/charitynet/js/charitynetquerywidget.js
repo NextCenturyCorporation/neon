@@ -22,9 +22,9 @@
  */
 // TODO: A lot of the intents stuff can be extracted to a more generic file that can be used by other query widgets
 var intentsLauncher = new neon.eventing.OWFIntentsLauncher();
-var dataSourceName = 'charitynetd';
-var transactionsDatasetId = 'transactions';
-var charitiesDatasetId = 'charities';
+var dataSourceName = 'CharityNet';
+var transactionsDatasetId = 'CharityNet_Donations';
+var charitiesDatasetId = 'CharityNet_Donations';
 
 $(document).ready(function () {
     OWF.ready(function () {
