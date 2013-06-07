@@ -12,7 +12,7 @@ options {
 // parser rules
 statement : ((query|database) (';')?)+;
 database : USE STRING;
-query: SELECT FROM STRING (where)? (sort)?;
+query: SELECT FROM STRING (where)? (sort)? (group)?;
 
 where: WHERE whereClause;
 
@@ -38,6 +38,22 @@ sort: SORT sortClause (',' sortClause)*;
 
 sortClause: STRING (SORT_DIRECTION)?;
 
+group: GROUP groupClause (',' groupClause)*;
+
+groupClause: STRING | function;
+
+function: functionName '(' STRING ')';
+
+functionName: 'addToSet'
+            | 'first'
+            | 'last'
+            | 'max'
+            | 'count'
+            | 'min'
+            | 'avg'
+            | 'push'
+            | 'sum';
+
 // lexer rules
 GT: '>';
 GTE: '>=';
@@ -50,6 +66,7 @@ USE: 'USE' | 'use';
 SELECT: 'SELECT' | 'select';
 FROM: 'FROM' | 'from';
 WHERE: 'WHERE' | 'where';
+GROUP: 'GROUP' | 'group';
 SORT: 'SORT' | 'sort';
 SORT_DIRECTION : 'ASC'
                | 'asc'
@@ -61,8 +78,7 @@ STRING: CHAR+;
 fragment CHAR : 'a'..'z'
               | 'A'..'Z'
               | '0'..'9'
-              | '_'
-              | '-';
+              | '_' | '-' | '.';
 
 WHITESPACE : [ \t\r\n]+ -> skip;
 

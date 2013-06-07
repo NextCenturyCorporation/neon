@@ -38,6 +38,9 @@ class QueryCreator extends NeonBaseListener{
     private String collectionName = ""
     private String databaseName = ""
     private WhereClause whereClause
+    private List<SortClause> sortClauses = []
+    private List<AggregateClause> aggregates = []
+    private List<GroupByClause> groupByClauses = []
 
     Query createQuery(){
         Query query = new Query()
@@ -45,7 +48,9 @@ class QueryCreator extends NeonBaseListener{
         if (whereClause)
             query.filter.whereClause = whereClause
 
-        query.limitClause = new LimitClause(limit: 100)
+        query.sortClauses = sortClauses
+        query.aggregates = aggregates
+        query.groupByClauses = groupByClauses
         return query
     }
 
@@ -74,6 +79,21 @@ class QueryCreator extends NeonBaseListener{
         }
     }
 
+    @Override
+    void exitSimpleWhereClause(NeonParser.SimpleWhereClauseContext ctx){
+        parsedWhereClauses.put(ctx.text, singularWhereClause(ctx))
+    }
+
+    private SingularWhereClause singularWhereClause(NeonParser.SimpleWhereClauseContext whereContext){
+        SingularWhereClause singularWhereClause = new SingularWhereClause()
+
+        singularWhereClause.lhs = whereContext.STRING()[0].text
+        singularWhereClause.operator = whereContext.operator().text
+        singularWhereClause.rhs = whereContext.STRING()[1].text
+
+        return singularWhereClause
+    }
+
     private void createBooleanWhereClause(NeonParser.WhereClauseContext ctx, BooleanWhereClause booleanWhereClause){
         List<WhereClause> clauses = []
         ctx.whereClause().each{ NeonParser.WhereClauseContext context ->
@@ -91,18 +111,35 @@ class QueryCreator extends NeonBaseListener{
     }
 
     @Override
-    void exitSimpleWhereClause(NeonParser.SimpleWhereClauseContext ctx){
-        parsedWhereClauses.put(ctx.text, singularWhereClause(ctx))
+    public void exitSortClause(NeonParser.SortClauseContext ctx) {
+        SortClause sortClause = new SortClause(sortOrder: SortOrder.ASCENDING)
+        sortClause.fieldName = ctx.STRING().text
+        if(ctx.SORT_DIRECTION()){
+            if(ctx.SORT_DIRECTION().text.toLowerCase().equals("desc")){
+                sortClause.sortOrder = SortOrder.DESCENDING
+            }
+        }
+        sortClauses << sortClause
     }
 
-    private SingularWhereClause singularWhereClause(NeonParser.SimpleWhereClauseContext whereContext){
-        SingularWhereClause singularWhereClause = new SingularWhereClause()
+    @Override
+    void exitGroupClause(NeonParser.GroupClauseContext ctx){
+        if(!ctx.STRING()){
+            return;
+        }
 
-        singularWhereClause.lhs = whereContext.STRING()[0].text
-        singularWhereClause.operator = whereContext.operator().text
-        singularWhereClause.rhs = whereContext.STRING()[1].text
-
-        return singularWhereClause
+        GroupByFieldClause fieldClause = new GroupByFieldClause()
+        fieldClause.field = ctx.STRING().text
+        groupByClauses << fieldClause
     }
 
+    @Override
+    void exitFunction(NeonParser.FunctionContext ctx){
+        AggregateClause aggregateClause = new AggregateClause()
+        aggregateClause.operation = ctx.functionName().text
+        aggregateClause.field = ctx.STRING()
+        aggregateClause.name = "${ctx.functionName().text}Of${ctx.STRING()}"
+
+        aggregates << aggregateClause
+    }
 }
