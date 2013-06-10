@@ -4,6 +4,8 @@ import com.ncc.neon.language.parse.NeonParser
 import com.ncc.neon.query.Query
 import com.ncc.neon.query.clauses.*
 import com.ncc.neon.query.filter.Filter
+import org.apache.commons.lang.math.NumberUtils
+
 /*
  * ************************************************************************
  * Copyright (c), 2013 Next Century Corporation. All Rights Reserved.
@@ -90,10 +92,9 @@ class QueryCreator extends NeonBaseListener{
         singularWhereClause.operator = whereContext.operator().text
         singularWhereClause.rhs = whereContext.STRING()[1].text
 
-        try{
+        if(NumberUtils.isNumber(singularWhereClause.rhs)){
             singularWhereClause.rhs = Double.valueOf(singularWhereClause.rhs)
-        }catch(def e){}
-
+        }
         return singularWhereClause
     }
 
