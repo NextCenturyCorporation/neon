@@ -1,11 +1,9 @@
 package com.ncc.neon.language
-
+import com.ncc.neon.language.parse.NeonBaseListener
+import com.ncc.neon.language.parse.NeonParser
 import com.ncc.neon.query.Query
 import com.ncc.neon.query.clauses.*
 import com.ncc.neon.query.filter.Filter
-import com.ncc.neon.language.parse.NeonBaseListener
-import com.ncc.neon.language.parse.NeonParser
-
 /*
  * ************************************************************************
  * Copyright (c), 2013 Next Century Corporation. All Rights Reserved.
@@ -33,7 +31,6 @@ import com.ncc.neon.language.parse.NeonParser
  */
 
 class QueryCreator extends NeonBaseListener{
-
     private final Map<String, WhereClause> parsedWhereClauses = [:]
 
     private String collectionName = ""
@@ -92,6 +89,10 @@ class QueryCreator extends NeonBaseListener{
         singularWhereClause.lhs = whereContext.STRING()[0].text
         singularWhereClause.operator = whereContext.operator().text
         singularWhereClause.rhs = whereContext.STRING()[1].text
+
+        try{
+            singularWhereClause.rhs = Double.valueOf(singularWhereClause.rhs)
+        }catch(def e){}
 
         return singularWhereClause
     }
