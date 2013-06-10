@@ -15,7 +15,6 @@
     <script src="<%=owfServerUrl%>/js/owf-widget.js"></script>
     <script src="<%=neonServerUrl%>/js/neon.js"></script>
 
-
     <script>
         neon.query.SERVER_URL = '<%=neonServerUrl%>';
         neon.util.AjaxUtils.useDefaultStartStopCallbacks();
@@ -41,7 +40,7 @@
                 data : query,
                 contentType: "text/plain",
                 success : function(data){
-                    $('#resp').html(data);
+                    $('#resp').html(JSON.stringify(data));
                 }
             });
         }
