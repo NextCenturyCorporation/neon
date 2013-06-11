@@ -12,7 +12,7 @@ options {
 // parser rules
 statement : ((query|database) (';')?)+;
 database : USE STRING;
-query: SELECT FROM STRING (where)? (sort)? (group)?;
+query: SELECT FROM STRING (where)? (sort)? (group)? (limit)?;
 
 where: WHERE whereClause;
 
@@ -54,6 +54,8 @@ functionName: 'addToSet'
             | 'push'
             | 'sum';
 
+limit: LIMIT STRING;
+
 // lexer rules
 GT: '>';
 GTE: '>=';
@@ -67,6 +69,7 @@ SELECT: 'SELECT' | 'select';
 FROM: 'FROM' | 'from';
 WHERE: 'WHERE' | 'where';
 GROUP: 'GROUP' | 'group';
+LIMIT: 'LIMIT' | 'limit';
 SORT: 'SORT' | 'sort';
 SORT_DIRECTION : 'ASC'
                | 'asc'

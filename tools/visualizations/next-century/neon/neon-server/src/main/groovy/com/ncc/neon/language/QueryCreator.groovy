@@ -38,6 +38,7 @@ class QueryCreator extends NeonBaseListener{
     private String collectionName = ""
     private String databaseName = ""
     private WhereClause whereClause
+    private LimitClause limitClause
     private final List<SortClause> sortClauses = []
     private final List<AggregateClause> aggregates = []
     private final List<GroupByClause> groupByClauses = []
@@ -48,10 +49,12 @@ class QueryCreator extends NeonBaseListener{
         if (whereClause){
             query.filter.whereClause = whereClause
         }
+        if(limitClause){
+            query.limitClause = limitClause
+        }
         query.sortClauses = sortClauses
         query.aggregates = aggregates
         query.groupByClauses = groupByClauses
-        query.limitClause = new LimitClause(limit: 20)
         return query
     }
 
@@ -92,7 +95,7 @@ class QueryCreator extends NeonBaseListener{
         singularWhereClause.operator = whereContext.operator().text
         singularWhereClause.rhs = whereContext.STRING()[1].text
 
-        if(NumberUtils.isNumber(singularWhereClause.rhs)){
+        if(NumberUtils.isNumber(singularWhereClause.rhs.toString())){
             singularWhereClause.rhs = Double.valueOf(singularWhereClause.rhs)
         }
         return singularWhereClause
@@ -145,5 +148,12 @@ class QueryCreator extends NeonBaseListener{
         aggregateClause.name = "${ctx.functionName().text}Of${ctx.STRING()}"
 
         aggregates << aggregateClause
+    }
+
+    @Override
+    public void exitLimit(NeonParser.LimitContext ctx) {
+        LimitClause clause = new LimitClause()
+        clause.limit = Integer.valueOf(ctx.STRING().text)
+        limitClause = clause
     }
 }

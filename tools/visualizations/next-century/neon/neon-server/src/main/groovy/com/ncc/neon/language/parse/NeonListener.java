@@ -2,9 +2,13 @@
 
 package com.ncc.neon.language.parse;
 
-import org.antlr.v4.runtime.tree.ParseTreeListener;
+import org.antlr.v4.runtime.tree.*;
+import org.antlr.v4.runtime.Token;
 
 public interface NeonListener extends ParseTreeListener {
+	void enterLimit(NeonParser.LimitContext ctx);
+	void exitLimit(NeonParser.LimitContext ctx);
+
 	void enterWhereClause(NeonParser.WhereClauseContext ctx);
 	void exitWhereClause(NeonParser.WhereClauseContext ctx);
 
