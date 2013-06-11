@@ -28,6 +28,8 @@
 <div id="table-container">
     Hello World!
     <table id="datatable"></table>
+    <script src="js/table.js"></script>
+
 </div>
 
 </body>
