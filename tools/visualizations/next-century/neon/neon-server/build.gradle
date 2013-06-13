@@ -1,7 +1,6 @@
 import com.mongodb.BasicDBObject
 import com.mongodb.MongoClient
 import com.mongodb.util.JSON
-import com.ncc.neon.JasmineIncludesGenerator
 import com.ncc.neon.MongoJSONGenerator
 import org.apache.tools.ant.filters.ReplaceTokens
 
@@ -41,11 +40,7 @@ project.ext {
     jsUnitTestDir = "src/test/javascript"
     jsAcceptanceTestDir = "src/acceptanceTest/javascript"
     testDataDir = "${projectDir}/src/test-data"
-    jsdocDir = "${project.docsDir}/jsdocs"
-    javadocDir = "${project.docsDir}/javadocs"
-    libraryName = "$archivesBaseName-${project.version}"
     javadocTitle = "$libraryName API Documentation"
-    phantomJsRunner = "${projectDir}/src/js-test-support/lib/phantomjs-jasmine/run_jasmine_test.coffee"
 
     // a mongo instance for inserting/deleting test data (will be lazy initialized)
     mongoInstance = null
@@ -314,40 +309,13 @@ def getMongo() {
 task createJasmineUnitSpecRunnerHtml << {
     description = 'Creates the jasmine spec runner html file for javascript unit tests'
     group = TEST_GROUP
-    doCreateJasmineSpec(jsUnitTestDir, 'unit', '../../../build')
+    doCreateJasmineSpec(projectDir, jsUnitTestDir, 'unit', '../../../build/neon.js')
 }
 
 task createJasmineAcceptanceSpecRunnerHtml << {
     description = 'Creates the jasmine spec runner html file for javascript acceptance tests'
     group = TEST_GROUP
-    doCreateJasmineSpec(jsAcceptanceTestDir, 'acceptance', "http://localhost:${acceptanceTestWar.httpPort}/neon/js")
-}
-
-
-def doCreateJasmineSpec(testDir, templateSuffix, neonJsPath) {
-    def templateFile = 'spec_runner.template.html'
-
-    def scriptIncludes = new StringBuilder()
-
-    def includesGenerator = new JasmineIncludesGenerator()
-    includesGenerator.generateIncludes(projectDir, testDir)
-    includesGenerator.matchingFiles.each { scriptIncludes.append('  <script src="').append(it).append('"></script>').append(System.properties['line.separator']) }
-    def specRunnerOut = templateFile.replace('.template', "_${templateSuffix}")
-    new File(testDir, specRunnerOut).delete()
-    copy {
-        from('src/js-test-support') {
-            filter(ReplaceTokens, tokens: [
-                    includes: scriptIncludes.toString(),
-                    "neonjs.path": neonJsPath.toString()
-            ])
-            include(templateFile)
-        }
-        into testDir
-        rename { String filename ->
-            // only one file, so just return the new name
-            specRunnerOut
-        }
-    }
+    doCreateJasmineSpec(projectDir, jsAcceptanceTestDir, 'acceptance', "http://localhost:${acceptanceTestWar.httpPort}/neon/js/neon.js")
 }
 
 combineJs {
@@ -371,50 +339,6 @@ jshint {
     source = javascript.source.dev.js.files + javascript.source.test.js.files
 }
 
-
-task jsDocs(type: Exec) {
-    description = 'Creates the javascript API documentation. This requires yuidocjs (minimum version 0.3.38) to be installed'
-    group = JavaBasePlugin.DOCUMENTATION_GROUP
-
-    // replace the tokens in the yuidoc descriptor file
-    doFirst {
-        new File(jsdocDir).mkdirs()
-        copy {
-            includeEmptyDirs = false
-            from('yuidoc') {
-                include('**/*.json')
-                // replace the tokens in the yuidoc file and put it in a temp dir so the yuidoc task can access it.
-                // this file is not part of the final docs output
-                filter(ReplaceTokens, tokens: [
-                        projectDir: projectDir.absolutePath,
-                        libraryName: libraryName.toString(),
-                        outDir: jsdocDir.toString()
-                ]
-                )
-            }
-            into temporaryDir
-        }
-    }
-    commandLine "yuidoc", "-c", "$temporaryDir/yuidoc.json"
-
-    // copy the images after the yuidoc tasks runs because the yuidoc task will delete the output directory
-    // these files are needed for the final docs output since they will be referenced in the html output
-    doLast {
-        copy {
-            from('yuidoc') {
-                include('images/*')
-            }
-            into jsdocDir
-        }
-    }
-}
-
-task copyJsDocs(type: org.gradle.api.tasks.Copy) {
-    description = 'Copies the javascript documentation to a directory to be zipped'
-    dependsOn 'jsDocs'
-    doCopyDocsIntoZipDir('javascript-api-docs', copyJsDocs, jsdocDir)
-}
-
 groovydoc {
     destinationDir = file(javadocDir)
     docTitle = javadocTitle
@@ -424,53 +348,12 @@ groovydoc {
 task copyJavadocs(type: org.gradle.api.tasks.Copy) {
     description = 'Copies the javadocs to a directory to be zipped'
     dependsOn 'groovydoc'
-    doCopyDocsIntoZipDir('javadocs', copyJavadocs, javadocDir)
-}
-
-/**
- * Configures a copy task to copy documentation into another directory for zipping
- * @param classifier A string appended to the doc zip file name (e.g. javadoc)
- * @param copyTask The task being configured for copying
- * @param docDir The directory containing the documentation to be zipped
- */
-def doCopyDocsIntoZipDir(classifier, copyTask, docDir) {
-    copyTask.ext.zipBaseName = "$libraryName-$classifier"
-
-    // the zipDir is another directory with the same name as the zip file
-    // used as the top level directory in the zip
-    copyTask.ext.zipDir = "${copyTask.temporaryDir}/$copyTask.zipBaseName"
-
-    copyTask.doFirst {
-        new File(zipDir).mkdirs()
-    }
-
-    copyTask.from new File(docDir).path
-    copyTask.into copyTask.zipDir
-
-}
-
-
-task zipJsDocs(type: Zip) {
-    description = 'Creates a zip file containing the javascript API documentation'
-    group = JavaBasePlugin.DOCUMENTATION_GROUP
-    dependsOn 'copyJsDocs'
-    doZipDocs(copyJsDocs, zipJsDocs)
+    doCopyDocsIntoZipDir('javadocs', libraryName, copyJavadocs, javadocDir)
 }
 
 task zipJavadocs(type: Zip) {
     description = 'Creates a zip file containing the javadocs'
     group = JavaBasePlugin.DOCUMENTATION_GROUP
     dependsOn 'copyJavadocs'
-    doZipDocs(copyJavadocs, zipJavadocs)
-}
-
-/**
- * Configures the zip task to create a zip the documentation generated by the docs task
- * @param copyDocsTask
- * @param zipTask
- */
-def doZipDocs(copyDocsTask, zipTask) {
-    zipTask.from new File(copyDocsTask.zipDir).parent
-    zipTask.destinationDir buildDir
-    zipTask.archiveName "${copyDocsTask.zipBaseName}.zip"
+    doZipDocs(copyJavadocs, zipJavadocs, project.buildDir)
 }

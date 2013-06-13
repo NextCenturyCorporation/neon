@@ -1,1 +1,1 @@
-include 'neon-server','neon-samplewidgets','query-builder', 'table-widget'
+ include 'neon-server','neon-samplewidgets','query-builder', 'timeline', 'table-widget'
