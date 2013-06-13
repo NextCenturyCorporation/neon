@@ -132,7 +132,7 @@ subprojects {
 
     // yuidoc will look in src/main/javascript for the js files
    [jsDocs,copyJsDocs,zipJsDocs]*.onlyIf {
-       new File(projectDir,'src/main/javascript').exists()
+       project.file('src/main/javascript').exists()
    }
 
 }
