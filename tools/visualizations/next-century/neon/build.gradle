@@ -135,6 +135,10 @@ subprojects {
        project.file('src/main/javascript').exists()
    }
 
+    task wrapper(type: Wrapper) {
+        gradleVersion = 1.5
+    }
+
 }
 
 /**
