@@ -64,7 +64,7 @@ charts.Timeline = function (chartSelector, data, opts) {
     var interval = opts.interval || charts.Timeline.DEFAULT_INTERVAL_;
     this.timeInterval_ = charts.Timeline.TIME_INTERVALS_[interval].interval;
     this.tickFormat_ = charts.Timeline.TIME_INTERVALS_[interval].tickFormat;
-    this.tickValuesFunction_ = charts.Timeline.TIME_INTERVALS_[interval].tickValuesFunction;
+    this.tickStep_ = charts.Timeline.TIME_INTERVALS_[interval].step;
     this.height_ = opts.height || charts.Timeline.DEFAULT_HEIGHT_;
     this.width_ = opts.width || charts.Timeline.DEFAULT_WIDTH_;
     this.xAttribute_ = opts.x || 'x';
@@ -188,12 +188,22 @@ charts.Timeline.prototype.computePlotWidth_ = function () {
 };
 
 charts.Timeline.prototype.createXAxis_ = function () {
-    var tickValues = this.data_.length > 0 ? this.tickValuesFunction_(this.timeInterval_(this.minDate_), this.maxDate_) : [];
+    var tickValues = this.computeTickValues_();
     return d3.svg.axis()
         .scale(this.x_)
         .orient('bottom')
         .tickFormat(d3.time.format(this.tickFormat_))
         .tickValues(tickValues);
+};
+
+charts.Timeline.prototype.computeTickValues_ = function() {
+    var tickValues = [];
+    var currentTick = this.minDate_;
+    while ( currentTick < this.maxDate_ ) {
+        tickValues.push(currentTick);
+        currentTick = this.timeInterval_.offset(this.timeInterval_.floor(currentTick),this.tickStep_);
+    }
+    return tickValues;
 };
 
 charts.Timeline.prototype.createYAxis_ = function () {
@@ -308,22 +318,21 @@ charts.Timeline.prototype.getDate_ = function (sliderValue) {
  * Creates the information necessary to properly format time for the given interval
  * @param {String} interval The interval for which the metadata is being created
  * @param {String} tickFormat The format used to show the tick labels
- * @param {Object} tickValuesFunction The function that is responsible for calculating the tick values
- *
+ * @param {int} step The number of the particular interval units to place the ticks
  * @returns {Object}
  * @method
  * @private
  */
-charts.Timeline.createTimeIntervalMethods_ = function (interval, tickFormat, tickValuesFunction) {
+charts.Timeline.createTimeIntervalMethods_ = function (interval, tickFormat, step) {
     return {
         'interval': interval,
         'tickFormat': tickFormat,
-        'tickValuesFunction': tickValuesFunction
+        'step': step || 1
     };
 };
 
 (function () {
-    charts.Timeline.TIME_INTERVALS_[charts.Timeline.DAY] = charts.Timeline.createTimeIntervalMethods_(d3.time.day, '%d-%b-%Y', d3.time.weeks);
-    charts.Timeline.TIME_INTERVALS_[charts.Timeline.MONTH] = charts.Timeline.createTimeIntervalMethods_(d3.time.month, '%b-%Y', d3.time.months);
-    charts.Timeline.TIME_INTERVALS_[charts.Timeline.YEAR] = charts.Timeline.createTimeIntervalMethods_(d3.time.year, '%Y', d3.time.years);
+    charts.Timeline.TIME_INTERVALS_[charts.Timeline.DAY] = charts.Timeline.createTimeIntervalMethods_(d3.time.day, '%d-%b-%Y', 7);
+    charts.Timeline.TIME_INTERVALS_[charts.Timeline.MONTH] = charts.Timeline.createTimeIntervalMethods_(d3.time.month, '%b-%Y');
+    charts.Timeline.TIME_INTERVALS_[charts.Timeline.YEAR] = charts.Timeline.createTimeIntervalMethods_(d3.time.year, '%Y');
 })();
