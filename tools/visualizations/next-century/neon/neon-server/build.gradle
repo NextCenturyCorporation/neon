@@ -336,7 +336,7 @@ minifyJs {
 }
 
 jshint {
-    source = javascript.source.dev.js.files + javascript.source.test.js.files
+    source = javascript.source.dev.js.files + file("${jsSrcDir}/util/loggerUtils.js") + javascript.source.test.js.files
 }
 
 groovydoc {
