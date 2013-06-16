@@ -110,4 +110,9 @@ public interface QueryExecutor {
      */
     QueryResult getSelectionWhere(Filter filter)
 
+    /**
+     * Return a key that uniquely identifies the datastore to which this executor is connected
+     * @return the identifier of the datastore
+     */
+    String getDatastoreName()
 }
