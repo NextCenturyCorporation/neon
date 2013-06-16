@@ -6,11 +6,10 @@ import com.ncc.neon.query.QueryExecutor
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
 
-import javax.ws.rs.Consumes
-import javax.ws.rs.POST
-import javax.ws.rs.Path
-import javax.ws.rs.Produces
+import javax.annotation.Resource
+import javax.ws.rs.*
 import javax.ws.rs.core.MediaType
+
 /*
  * ************************************************************************
  * Copyright (c), 2013 Next Century Corporation. All Rights Reserved.
@@ -44,17 +43,24 @@ class LanguageService{
     @Autowired
     QueryParser queryParser
 
-    @Autowired
-    QueryExecutor queryExecutor
+    @Resource
+    Map<String, QueryExecutor> dataStores
 
     @POST
-    @Consumes(MediaType.TEXT_PLAIN)
+    @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
     @Produces(MediaType.APPLICATION_JSON)
     @Path("query")
-    String executeQuery(String text){
+    String executeQuery(@FormParam("text") String text, @FormParam("datastore") String datastore){
         Query query = queryParser.parse(text)
 
-        return wrapInDataJson(queryExecutor.execute(query, false))
+        return wrapInDataJson(dataStores[datastore].execute(query, false))
+    }
+
+    @GET
+    @Produces(MediaType.APPLICATION_JSON)
+    @Path("datastores")
+    List getDatastoreNames() {
+        return dataStores.keySet().asList()
     }
 
     private String wrapInDataJson(queryResult) {
