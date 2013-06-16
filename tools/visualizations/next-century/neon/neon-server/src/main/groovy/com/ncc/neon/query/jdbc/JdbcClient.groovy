@@ -38,10 +38,10 @@ import java.sql.Statement
 @SuppressWarnings('ClassForName')
 class JdbcClient {
 
-    private final String driverName
-    private final String databaseType
-    private final String databaseName
-    private final String dbHostString
+    final String driverName
+    final String databaseType
+    final String databaseName
+    final String dbHostString
 
     JdbcClient(String driverName, String databaseType, String databaseName, String dbHostString) {
         this.driverName = driverName
