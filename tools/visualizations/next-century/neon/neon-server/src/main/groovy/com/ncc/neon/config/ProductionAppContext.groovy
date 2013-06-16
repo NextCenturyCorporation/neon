@@ -2,6 +2,9 @@ package com.ncc.neon.config
 
 import com.mongodb.MongoClient
 import com.ncc.neon.query.QueryExecutor
+import com.ncc.neon.query.hive.HiveQueryBuilder
+import com.ncc.neon.query.jdbc.JdbcClient
+import com.ncc.neon.query.jdbc.JdbcQueryExecutor
 import com.ncc.neon.query.mongo.MongoQueryExecutor
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
@@ -68,6 +71,31 @@ class ProductionAppContext {
     }
 
     @Bean
+    List<QueryExecutor> queryExecutors() {
+        return [mongoQueryExecutor(), hiveQueryExecutor()]
+    }
+
+    @Bean
+    MongoQueryExecutor mongoQueryExecutor() {
+        return new MongoQueryExecutor()
+    }
+
+    @Bean
+    JdbcQueryExecutor hiveQueryExecutor() {
+        return new JdbcQueryExecutor(new HiveQueryBuilder())
+    }
+
+    @Bean
+    Map<String, QueryExecutor> dataStores() {
+        Map dataStores = [:]
+        queryExecutors().each {
+            dataStores.put(it.getDatastoreName(), it)
+        }
+
+        return dataStores
+    }
+
+    @Bean
     MongoClient mongo() {
         def hostsString = environment.getProperty("mongo.hosts")
         def serverAddresses = MongoConfigParser.createServerAddresses(hostsString)
@@ -75,4 +103,10 @@ class ProductionAppContext {
         return new MongoClient(serverAddresses)
     }
 
+    @Bean
+    JdbcClient jdbcClient() {
+        String hostName = environment.getProperty("hive.host", "localhost")
+
+        return new JdbcClient("org.apache.hive.jdbc.HiveDriver", "hive2", "default", hostName)
+    }
 }
