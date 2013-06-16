@@ -18,11 +18,25 @@
     <script>
         neon.query.SERVER_URL = '<%=neonServerUrl%>';
         neon.util.AjaxUtils.useDefaultStartStopCallbacks();
+
+        neon.util.AjaxUtils.doGet(neon.query.SERVER_URL + "/services/languageservice/datastores", {
+            success : function(data) {
+                data.forEach(function(datastoreName) {
+                    datastoreOption = document.createElement("option");
+                    datastoreOption.text = datastoreName;
+                    datastoreOption.setAttribute("value", datastoreName);
+                    $("#datastoreSelect").append(datastoreOption);
+                })
+            }
+        });
     </script>
     <link rel="stylesheet" type="text/css" href="<%=neonServerUrl%>/css/neon.css" />
 
 </head>
 <body>
+    <h4>Select a Datastore</h4>
+    <select id="datastoreSelect">
+    </select>
     <h4>
     Enter a Query
     </h4>
@@ -35,13 +49,14 @@
     <script>
         function submitter(){
             var query = $('#queryText').val();
+            var datastore = $('#datastoreSelect').val();
 
-            neon.util.AjaxUtils.doPost(neon.query.SERVER_URL + "/services/languageservice/query", {
-                data : query,
-                contentType: "text/plain",
-                success : function(data){
-                    $('#resp').html(JSON.stringify(data));
-                }
+            neon.util.AjaxUtils.doPost(neon.query.SERVER_URL + "/services/languageservice/query",
+                    {
+                        data: { text: query, datastore: datastore },
+                        success : function(data){
+                            $('#resp').html(JSON.stringify(data));
+                    }
             });
         }
     </script>
