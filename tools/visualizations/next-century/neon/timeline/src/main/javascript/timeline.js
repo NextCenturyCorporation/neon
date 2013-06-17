@@ -36,11 +36,12 @@
  * <ul>
  *     <li>height - The height of the chart in pixels</li>
  *     <li>width - The width of the chart in pixels. This will be honored as closely as possible, while still allowing bar widths to be evenly drawn</li>
- *     <li>interval - The interval at which to group the data (e.g. day, month). See the constants in this class</li>
+ *     <li>margin - An object with any of the elements `top`, `left`, `bottom` or `right`. These are pixel values to override the default margin.</li>
  *     <li>x - The name of the x-attribute (time). Defaults to `x` if not specified</li>
  *     <li>y - The name of the y-attribute (count). Default to `y` if not specified</li>
+ *     <li>interval - The interval at which to group the data (e.g. day, month). See the constants in this class</li>
+ *     <li>step - The number of the specified intervals </li>
  *     <li>tickFormat - The format of the tick labels (if not using the default). Use the formatting specified by d3 at <a href="https://github.com/mbostock/d3/wiki/Time-Formatting">Time Formatting</a></li>
- *     <li>margin - An object with any of the elements `top`, `left`, `bottom` or `right`. These are pixel values to override the default margin.</li>
  * </ul>
  *
  * @constructor
@@ -65,7 +66,7 @@ charts.Timeline = function (chartSelector, data, opts) {
     var interval = opts.interval || charts.Timeline.DEFAULT_INTERVAL_;
     this.timeInterval_ = charts.Timeline.TIME_INTERVALS_[interval].interval;
     this.tickFormat_ = opts.tickFormat || charts.Timeline.TIME_INTERVALS_[interval].tickFormat;
-    this.tickStep_ = charts.Timeline.TIME_INTERVALS_[interval].step;
+    this.tickStep_ = opts.step || charts.Timeline.TIME_INTERVALS_[interval].step;
     this.height_ = opts.height || charts.Timeline.DEFAULT_HEIGHT_;
     this.width_ = opts.width || charts.Timeline.DEFAULT_WIDTH_;
     this.xAttribute_ = opts.x || 'x';
