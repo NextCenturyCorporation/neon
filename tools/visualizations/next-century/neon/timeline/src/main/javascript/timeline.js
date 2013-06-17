@@ -39,6 +39,7 @@
  *     <li>interval - The interval at which to group the data (e.g. day, month). See the constants in this class</li>
  *     <li>x - The name of the x-attribute (time). Defaults to `x` if not specified</li>
  *     <li>y - The name of the y-attribute (count). Default to `y` if not specified</li>
+ *     <li>tickFormat - The format of the tick labels (if not using the default). Use the formatting specified by d3 at <a href="https://github.com/mbostock/d3/wiki/Time-Formatting">Time Formatting</a></li>
  * </ul>
  *
  * @constructor
@@ -120,7 +121,7 @@ charts.Timeline.ZERO_DATE_ = new Date(0);
 /**
  * Draws the timeline in the component specified in the constructor
  * @method draw
- * @returns {charts.Timeline} This timeline
+ * @return {charts.Timeline} This timeline
  */
 charts.Timeline.prototype.draw = function () {
     this.drawChart_();
@@ -319,7 +320,7 @@ charts.Timeline.prototype.getDate_ = function (sliderValue) {
  * @param {String} interval The interval for which the metadata is being created
  * @param {String} tickFormat The format used to show the tick labels
  * @param {int} step The number of the particular interval units to place the ticks
- * @returns {Object}
+ * @return {Object}
  * @method
  * @private
  */
