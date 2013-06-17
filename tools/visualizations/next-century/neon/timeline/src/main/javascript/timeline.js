@@ -118,6 +118,7 @@ charts.Timeline.TIME_INTERVALS_ = {};
 charts.Timeline.SLIDER_DIV_NAME_ = 'slider';
 charts.Timeline.ZERO_DATE_ = new Date(0);
 charts.Timeline.DEFAULT_MARGIN_ = {top: 20, bottom: 20, left: 30, right: 30};
+charts.Timeline.FILTER_EVENT_TYPE_ = 'filter';
 
 
 /**
@@ -283,7 +284,7 @@ charts.Timeline.prototype.createSlider_ = function () {
         max: this.plotWidth_,
         step: this.x_.rangeBand(),
         values: [ 0, this.plotWidth_ ],
-        change: $.proxy(charts.Timeline.prototype.hideInactiveData_, me)
+        change: $.proxy(charts.Timeline.prototype.doSliderChange_, me)
     });
     $('#' + charts.Timeline.SLIDER_DIV_NAME_).width(me.plotWidth_).css({'margin-left': me.margin_.left + 'px', 'margin-right': me.margin_.right + 'px'});
     if (me.data_.length === 0) {
@@ -291,11 +292,40 @@ charts.Timeline.prototype.createSlider_ = function () {
     }
 };
 
-charts.Timeline.prototype.hideInactiveData_ = function (event, ui) {
+charts.Timeline.prototype.doSliderChange_ = function (event, slider) {
     // ordinal scales to not support inverting, so figure out the time period that was selected
     // Note: If we turn off snapping, we'll have to first find the nearest period boundary and use that value
-    var filterStartDate = this.getDate_(ui.values[0]);
-    var filterEndDate = this.getDate_(ui.values[1]);
+    var filterStartDate = this.getDate_(slider.values[0]);
+    var filterEndDate = this.getDate_(slider.values[1]);
+    this.hideInactiveData_(filterStartDate, filterEndDate);
+    this.notifyFilterListeners_(filterStartDate, filterEndDate);
+};
+
+charts.Timeline.prototype.notifyFilterListeners_ = function (filterStartDate, filterEndDate) {
+    $(this).trigger(charts.Timeline.FILTER_EVENT_TYPE_, [filterStartDate, filterEndDate]);
+};
+
+/**
+ * Adds a listener to be notified of filter events
+ * @method onFilter
+ * @param {Function} callback Notified when the filters change. It is called with 2 parameters - the start date
+ * and end dates of the filters
+ */
+charts.Timeline.prototype.onFilter = function (callback) {
+    $(this).on(charts.Timeline.FILTER_EVENT_TYPE_,
+        function (event, filterStartDate, filterEndDate) {
+            callback(filterStartDate, filterEndDate);
+        });
+};
+
+/**
+ * Removes the listener for filters
+ */
+charts.Timeline.prototype.removeFilterListeners = function () {
+    $(this).off(charts.Timeline.FILTER_EVENT_TYPE_);
+};
+
+charts.Timeline.prototype.hideInactiveData_ = function (filterStartDate, filterEndDate) {
     var me = this;
     d3.selectAll('.bar').attr('class', function (d) {
         var date = d[me.xAttribute_];
