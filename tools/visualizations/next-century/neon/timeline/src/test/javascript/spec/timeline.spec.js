@@ -80,4 +80,19 @@ describe('timeline', function () {
 
     });
 
+    it('should allow margins to be overridden', function() {
+        var marginOverrides = { "top" : 100, "left" : 120};
+        var opts = { "x": "date", "y": "count", "interval": charts.Timeline.DAY, "margin" : marginOverrides};
+        var timeline = new charts.Timeline('#chart', [], opts);
+        var margin = timeline.margin_;
+        expect(margin.top).toEqual(marginOverrides.top);
+        expect(margin.left).toEqual(marginOverrides.left);
+        expect(margin.bottom).toEqual(charts.Timeline.DEFAULT_MARGIN_.bottom);
+        expect(margin.right).toEqual(charts.Timeline.DEFAULT_MARGIN_.right);
+
+        // make sure we didn't set the override value equal to the default value
+        expect(margin.top).not.toEqual(charts.Timeline.DEFAULT_MARGIN_.top);
+        expect(margin.left).not.toEqual(charts.Timeline.DEFAULT_MARGIN_.left);
+    });
+
 });

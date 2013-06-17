@@ -40,6 +40,7 @@
  *     <li>x - The name of the x-attribute (time). Defaults to `x` if not specified</li>
  *     <li>y - The name of the y-attribute (count). Default to `y` if not specified</li>
  *     <li>tickFormat - The format of the tick labels (if not using the default). Use the formatting specified by d3 at <a href="https://github.com/mbostock/d3/wiki/Time-Formatting">Time Formatting</a></li>
+ *     <li>margin - An object with any of the elements `top`, `left`, `bottom` or `right`. These are pixel values to override the default margin.</li>
  * </ul>
  *
  * @constructor
@@ -58,7 +59,6 @@
  *
  */
 charts.Timeline = function (chartSelector, data, opts) {
-
     opts = opts || {};
     this.chartSelector_ = chartSelector;
     this.data_ = data;
@@ -70,7 +70,7 @@ charts.Timeline = function (chartSelector, data, opts) {
     this.width_ = opts.width || charts.Timeline.DEFAULT_WIDTH_;
     this.xAttribute_ = opts.x || 'x';
     this.yAttribute_ = opts.y || 'y';
-    this.margin_ = {top: 20, bottom: 20, left: 30, right: 30};
+    this.margin_ = $.extend({}, charts.Timeline.DEFAULT_MARGIN_, opts.margin || {});
     this.hMargin_ = this.margin_.left + this.margin_.right;
     this.vMargin_ = this.margin_.top + this.margin_.bottom;
     this.minDate_ = this.computeMinDate_();
@@ -116,6 +116,7 @@ charts.Timeline.INACTIVE_BAR_CLASS_ = 'bar inactive';
 charts.Timeline.TIME_INTERVALS_ = {};
 charts.Timeline.SLIDER_DIV_NAME_ = 'slider';
 charts.Timeline.ZERO_DATE_ = new Date(0);
+charts.Timeline.DEFAULT_MARGIN_ = {top: 20, bottom: 20, left: 30, right: 30};
 
 
 /**
@@ -197,12 +198,12 @@ charts.Timeline.prototype.createXAxis_ = function () {
         .tickValues(tickValues);
 };
 
-charts.Timeline.prototype.computeTickValues_ = function() {
+charts.Timeline.prototype.computeTickValues_ = function () {
     var tickValues = [];
     var currentTick = this.minDate_;
-    while ( currentTick < this.maxDate_ ) {
+    while (currentTick < this.maxDate_) {
         tickValues.push(currentTick);
-        currentTick = this.timeInterval_.offset(this.timeInterval_.floor(currentTick),this.tickStep_);
+        currentTick = this.timeInterval_.offset(this.timeInterval_.floor(currentTick), this.tickStep_);
     }
     return tickValues;
 };
