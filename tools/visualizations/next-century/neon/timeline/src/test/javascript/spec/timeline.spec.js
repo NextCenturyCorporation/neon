@@ -26,7 +26,7 @@ describe('timeline', function () {
 
     it('should compute the time periods', function () {
         var data = [
-            {"date": new Date(2013, 2, 7), "count": 2},
+            {"date": new Date(2013, 1, 7), "count": 2},
             {"date": new Date(2013, 3, 1), "count": 4},
             {"date": new Date(2013, 0, 8), "count": 7},
             {"date": new Date(2013, 2, 1), "count": 1},
@@ -80,6 +80,61 @@ describe('timeline', function () {
 
     });
 
+    it('should compute the x scale bounds', function () {
+        var data = [
+            {"date": new Date(2013, 1, 7), "count": 2},
+            {"date": new Date(2013, 3, 1), "count": 4},
+            {"date": new Date(2013, 0, 8), "count": 7},
+            {"date": new Date(2013, 2, 1), "count": 1},
+            {"date": new Date(2013, 4, 1), "count": 9},
+            {"date": new Date(2013, 5, 13), "count": 8}
+        ];
+        var opts = { "x": "date", "y": "count", "interval": charts.Timeline.MONTH, "width": 600, "margin": {"left": 0, "right": 0}};
+        var timeline = new charts.Timeline('#chart', data, opts);
+        expect(timeline.x_(timeline.timePeriods_[0])).toEqual(0);
+        expect(timeline.x_(timeline.timePeriods_[1])).toEqual(100);
+        expect(timeline.x_(timeline.timePeriods_[2])).toEqual(200);
+        expect(timeline.x_(timeline.timePeriods_[3])).toEqual(300);
+        expect(timeline.x_(timeline.timePeriods_[4])).toEqual(400);
+        expect(timeline.x_(timeline.timePeriods_[5])).toEqual(500);
+    });
+
+    it('should compute the y scale bounds', function () {
+        var data = [
+            {"date": new Date(2013, 1, 7), "count": 1},
+            {"date": new Date(2013, 3, 1), "count": 5},
+            {"date": new Date(2013, 0, 8), "count": 10}
+        ];
+        var opts = { "x": "date", "y": "count", "interval": charts.Timeline.MONTH, "height": 100, "margin": {"top": 0, "bottom": 0}};
+        var timeline = new charts.Timeline('#chart', data, opts);
+        // the y scale is inverted (but is drawn properly)
+        expect(timeline.y_(0)).toEqual(100);
+        expect(timeline.y_(5)).toEqual(50);
+        expect(timeline.y_(10)).toEqual(0);
+    });
+
+    it('should compute the minimum date', function () {
+        var data = [
+            {"date": new Date(2013, 1, 7), "count": 2},
+            {"date": new Date(2013, 3, 1), "count": 4},
+            {"date": new Date(2013, 0, 8), "count": 7}];
+        var opts = { "x": "date", "y": "count", "interval": charts.Timeline.MONTH};
+        var timeline = new charts.Timeline('#chart', data, opts);
+        expect(timeline.computeMinDate_()).toEqual(new Date(2013,0,8));
+    });
+
+    it('should compute the maximum date', function () {
+        var data = [
+            {"date": new Date(2013, 1, 7), "count": 2},
+            {"date": new Date(2013, 3, 1), "count": 4},
+            {"date": new Date(2013, 0, 8), "count": 7}];
+        var opts = { "x": "date", "y": "count", "interval": charts.Timeline.MONTH};
+        var timeline = new charts.Timeline('#chart', data, opts);
+        // the max date is exclusive so it is 1ms higher than the end of the chart
+        expect(timeline.computeMaxDate_()).toEqual(new Date(new Date(2013,3,1).getTime()+1));
+    });
+
+
     it('should allow margins to be overridden', function () {
         var marginOverrides = { "top": 100, "left": 120};
         var opts = { "x": "date", "y": "count", "interval": charts.Timeline.DAY, "margin": marginOverrides};
@@ -95,7 +150,7 @@ describe('timeline', function () {
         expect(margin.left).not.toEqual(charts.Timeline.DEFAULT_MARGIN_.left);
     });
 
-    it('should notify listeners of filter events', function() {
+    it('should notify listeners of filter events', function () {
 
         var data = [
             {"date": new Date(2013, 0, 1), "count": 2},
@@ -114,14 +169,14 @@ describe('timeline', function () {
 
         var startDate = new Date(2013, 0, 1);
         var endDate = new Date(2013, 2, 1);
-        timeline.notifyFilterListeners_(startDate,endDate);
+        timeline.notifyFilterListeners_(startDate, endDate);
 
-        expect(callback1).toHaveBeenCalledWith(startDate,endDate);
-        expect(callback2).toHaveBeenCalledWith(startDate,endDate);
+        expect(callback1).toHaveBeenCalledWith(startDate, endDate);
+        expect(callback2).toHaveBeenCalledWith(startDate, endDate);
 
         // remove the listeners and make sure they are not notified again
         timeline.removeFilterListeners();
-        timeline.notifyFilterListeners_(startDate,endDate);
+        timeline.notifyFilterListeners_(startDate, endDate);
 
         expect(callback1.callCount).toEqual(1);
         expect(callback2.callCount).toEqual(1);
