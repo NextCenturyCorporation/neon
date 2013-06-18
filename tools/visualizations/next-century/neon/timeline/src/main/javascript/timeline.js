@@ -295,7 +295,7 @@ charts.Timeline.prototype.centerTooltip_ = function (tooltip, data, periodStartP
         'top': centerPointY + 'px',
         'left': (centerPointX - $('#' + charts.Timeline.TOOLTIP_ID_).innerWidth() / 2) + 'px'
     });
-}
+};
 
 charts.Timeline.prototype.hideTooltip_ = function () {
     $('#' + charts.Timeline.TOOLTIP_ID_).remove();
@@ -377,8 +377,7 @@ charts.Timeline.prototype.hideInactiveData_ = function (filterStartDate, filterE
     var me = this;
     d3.selectAll('.bar').attr('class', function (d) {
         var date = d[me.xAttribute_];
-        var newClass = (filterStartDate <= date && date < filterEndDate) ? charts.Timeline.ACTIVE_BAR_CLASS_ : charts.Timeline.INACTIVE_BAR_CLASS_;
-        return newClass;
+        return (filterStartDate <= date && date < filterEndDate) ? charts.Timeline.ACTIVE_BAR_CLASS_ : charts.Timeline.INACTIVE_BAR_CLASS_;
     });
 };
 
@@ -412,8 +411,6 @@ charts.Timeline.createTimeIntervalMethods_ = function (interval, tickFormat, ste
     };
 };
 
-(function () {
-    charts.Timeline.TIME_INTERVALS_[charts.Timeline.DAY] = charts.Timeline.createTimeIntervalMethods_(d3.time.day, '%d-%b-%Y', 7);
-    charts.Timeline.TIME_INTERVALS_[charts.Timeline.MONTH] = charts.Timeline.createTimeIntervalMethods_(d3.time.month, '%b-%Y');
-    charts.Timeline.TIME_INTERVALS_[charts.Timeline.YEAR] = charts.Timeline.createTimeIntervalMethods_(d3.time.year, '%Y');
-})();
+charts.Timeline.TIME_INTERVALS_[charts.Timeline.DAY] = charts.Timeline.createTimeIntervalMethods_(d3.time.day, '%d-%b-%Y', 7);
+charts.Timeline.TIME_INTERVALS_[charts.Timeline.MONTH] = charts.Timeline.createTimeIntervalMethods_(d3.time.month, '%b-%Y');
+charts.Timeline.TIME_INTERVALS_[charts.Timeline.YEAR] = charts.Timeline.createTimeIntervalMethods_(d3.time.year, '%Y');
