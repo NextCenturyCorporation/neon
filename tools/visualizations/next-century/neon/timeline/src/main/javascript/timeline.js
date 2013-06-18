@@ -367,6 +367,7 @@ charts.Timeline.prototype.onFilter = function (callback) {
 
 /**
  * Removes the listener for filters
+ * @method removeFilterListeners
  */
 charts.Timeline.prototype.removeFilterListeners = function () {
     $(this).off(charts.Timeline.FILTER_EVENT_TYPE_);
