@@ -31,7 +31,7 @@ package com.ncc.neon.connect
  * For example, connect to mongo, or hive.
  */
 
-public interface Connection{
+public interface Connection extends Closeable{
 
     /**
      * @param info Parameters needed to connect to a db

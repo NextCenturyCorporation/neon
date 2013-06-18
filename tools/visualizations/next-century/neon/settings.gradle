@@ -1,1 +1,1 @@
- include 'neon-server','neon-samplewidgets','query-builder', 'timeline', 'table-widget'
+gi include 'neon-server','neon-samplewidgets','filter-builder', 'timeline', 'table-widget'

@@ -16,6 +16,7 @@
         <rule-config name='BuilderMethodWithSideEffects'>
             <property name='methodNameRegex' value='build.*'/>
         </rule-config>
+        <exclude name='CloseWithoutCloseable'/>
     </ruleset-ref>
     <ruleset-ref path='rulesets/dry.xml'>
         <exclude name='DuplicateNumberLiteral'/>
