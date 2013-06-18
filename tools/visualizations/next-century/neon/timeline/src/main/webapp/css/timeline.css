@@ -26,3 +26,17 @@ rect.inactive {
     stroke-width: 1px;
     fill: none;
 }
+
+.tooltip {
+
+    /* just use a big number to ensure the tooltip is on top */
+    z-index: 10000;
+    position: absolute;
+    padding: 10px;
+    background-color: white;
+    border: 2px solid black;
+    border-radius: 15px;
+    font-family: sans-serif;
+    text-align: center;
+    pointer-events: none;
+}

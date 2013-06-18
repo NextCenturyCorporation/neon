@@ -65,7 +65,7 @@ charts.Timeline = function (chartSelector, data, opts) {
     this.data_ = data;
     var interval = opts.interval || charts.Timeline.DEFAULT_INTERVAL_;
     this.timeInterval_ = charts.Timeline.TIME_INTERVALS_[interval].interval;
-    this.tickFormat_ = opts.tickFormat || charts.Timeline.TIME_INTERVALS_[interval].tickFormat;
+    this.tickFormat_ = d3.time.format(opts.tickFormat || charts.Timeline.TIME_INTERVALS_[interval].tickFormat);
     this.tickStep_ = opts.step || charts.Timeline.TIME_INTERVALS_[interval].step;
     this.height_ = opts.height || charts.Timeline.DEFAULT_HEIGHT_;
     this.width_ = opts.width || charts.Timeline.DEFAULT_WIDTH_;
@@ -119,6 +119,7 @@ charts.Timeline.SLIDER_DIV_NAME_ = 'slider';
 charts.Timeline.ZERO_DATE_ = new Date(0);
 charts.Timeline.DEFAULT_MARGIN_ = {top: 20, bottom: 20, left: 30, right: 30};
 charts.Timeline.FILTER_EVENT_TYPE_ = 'filter';
+charts.Timeline.TOOLTIP_ID_ = 'tooltip';
 
 
 /**
@@ -196,7 +197,7 @@ charts.Timeline.prototype.createXAxis_ = function () {
     return d3.svg.axis()
         .scale(this.x_)
         .orient('bottom')
-        .tickFormat(d3.time.format(this.tickFormat_))
+        .tickFormat(this.tickFormat_)
         .tickValues(tickValues);
 };
 
@@ -251,7 +252,53 @@ charts.Timeline.prototype.bindData_ = function (chart) {
         .attr('width', this.x_.rangeBand())
         .attr('height', function (d) {
             return me.height_ - me.vMargin_ - me.y_(d[me.yAttribute_]);
+        })
+        .on('mouseover', function (d) {
+            me.showTooltip_(d);
+        })
+        .on('mouseout', function () {
+            me.hideTooltip_();
         });
+};
+
+charts.Timeline.prototype.showTooltip_ = function (data) {
+    var periodStartPixels = this.x_(this.timeInterval_(data[this.xAttribute_]));
+    var tooltip = this.createTooltip_(data, this.getDate_(periodStartPixels));
+    // initially hidden because it will fade in
+    tooltip.hide();
+    $(this.chartSelector_).append(tooltip);
+    // must center after appending so its width can be properly computed
+    this.centerTooltip_(tooltip, data, periodStartPixels);
+    tooltip.fadeIn(500);
+
+};
+
+charts.Timeline.prototype.createTooltip_ = function (data, periodStartDate) {
+    var tooltip = $('<div/>', {
+        "class": "tooltip",
+        id: charts.Timeline.TOOLTIP_ID_
+    });
+
+    var xAttributeHtml = $('<div/>').html(this.xAttribute_ + ': ' + this.tickFormat_(periodStartDate));
+    var yAttributeHtml = $('<div/>').html(this.yAttribute_ + ': ' + data[this.yAttribute_]);
+    tooltip.append(xAttributeHtml);
+    tooltip.append(yAttributeHtml);
+    return tooltip;
+};
+
+charts.Timeline.prototype.centerTooltip_ = function (tooltip, data, periodStartPixels) {
+    var centerPointX = periodStartPixels + this.x_.rangeBand() / 2;
+    var centerPointY = this.y_(data[this.yAttribute_]);
+    // center the tooltip on the selected bar
+    tooltip.css({
+        'margin-left': this.margin_.left + $(this.chartSelector_).position().left + 'px',
+        'top': centerPointY + 'px',
+        'left': (centerPointX - $('#' + charts.Timeline.TOOLTIP_ID_).innerWidth() / 2) + 'px'
+    });
+}
+
+charts.Timeline.prototype.hideTooltip_ = function () {
+    $('#' + charts.Timeline.TOOLTIP_ID_).remove();
 };
 
 charts.Timeline.prototype.drawXAxis_ = function (chart) {
@@ -334,15 +381,15 @@ charts.Timeline.prototype.hideInactiveData_ = function (filterStartDate, filterE
     });
 };
 
-charts.Timeline.prototype.getDate_ = function (sliderValue) {
-    // the d3 chart uses even intervals, but if the minimum point is selected, return the true minimum data
-    if (sliderValue === 0) {
+charts.Timeline.prototype.getDate_ = function (pixelValue) {
+    // the d3 chart uses even intervals, but if the minimum/maximum point is selected, return those true points
+    if (pixelValue === 0) {
         return this.minDate_;
     }
-    if (sliderValue === this.plotWidth_) {
+    if (pixelValue === this.plotWidth_) {
         return this.maxDate_;
     }
-    var index = sliderValue / this.x_.rangeBand();
+    var index = pixelValue / this.x_.rangeBand();
     return this.timePeriods_[index];
 };
 
