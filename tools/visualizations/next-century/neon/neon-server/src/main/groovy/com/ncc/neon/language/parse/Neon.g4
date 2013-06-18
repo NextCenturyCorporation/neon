@@ -10,7 +10,7 @@ options {
 }
 
 // parser rules
-statement : ((query|database) (';')?)+;
+statement : ((query|database) (';'?))+;
 database : USE STRING;
 query: SELECT FROM STRING (where)? (sort)? (group)? (limit)?;
 

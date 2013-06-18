@@ -38,22 +38,14 @@ import java.sql.Statement
 @SuppressWarnings('ClassForName')
 class JdbcClient {
 
-    final String driverName
-    final String databaseType
-    final String databaseName
-    final String dbHostString
+    private final Connection connection
 
     JdbcClient(String driverName, String databaseType, String databaseName, String dbHostString) {
-        this.driverName = driverName
-        this.databaseType = databaseType
-        this.databaseName = databaseName
-        this.dbHostString = dbHostString
-
         Class.forName(driverName)
+        this.connection = DriverManager.getConnection("jdbc:" + databaseType + "://" + dbHostString + "/" + databaseName, "", "")
     }
 
     public List<Map> executeQuery(String query) {
-        Connection connection = DriverManager.getConnection("jdbc:" + databaseType + "://" + dbHostString + "/" + databaseName, "", "")
         Statement statement = connection.createStatement()
         ResultSet resultSet = statement.executeQuery(query)
         List<Map> resultList = []
@@ -68,20 +60,16 @@ class JdbcClient {
         }
         resultSet.close()
         statement.close()
-        connection.close()
         return resultList
     }
 
     public void execute(String query) {
-        Connection connection = DriverManager.getConnection("jdbc:" + databaseType + "://" + dbHostString + "/" + databaseName, "", "")
         Statement statement = connection.createStatement()
         statement.execute(query)
         statement.close()
-        connection.close()
     }
 
     public List<String> getColumnNames(String dataSourceName, String datasetId) {
-        Connection connection = DriverManager.getConnection("jdbc:" + databaseType + "://" + dbHostString + "/" + databaseName, "", "")
         DatabaseMetaData metadata = connection.getMetaData()
         ResultSet resultSet = metadata.getColumns(dataSourceName, null, datasetId, null)
         List<String> columnNames = []
@@ -90,5 +78,9 @@ class JdbcClient {
         }
 
         return columnNames
+    }
+
+    public void close(){
+        connection.close()
     }
 }
