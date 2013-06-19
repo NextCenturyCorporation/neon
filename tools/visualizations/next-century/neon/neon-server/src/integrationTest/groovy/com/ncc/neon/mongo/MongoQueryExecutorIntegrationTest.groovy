@@ -1,12 +1,13 @@
 package com.ncc.neon.mongo
+
 import com.mongodb.BasicDBObject
 import com.mongodb.util.JSON
+import com.ncc.neon.connect.ConnectionState
 import com.ncc.neon.query.NamedQuery
 import com.ncc.neon.query.Query
 import com.ncc.neon.query.QueryGroup
 import com.ncc.neon.query.clauses.*
 import com.ncc.neon.query.filter.Filter
-import com.ncc.neon.query.mongo.MongoQueryExecutor
 import com.ncc.neon.util.AssertUtils
 import com.ncc.neon.util.LatLon
 import org.bson.BSONObject
@@ -20,6 +21,7 @@ import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.context.ContextConfiguration
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner
 import org.springframework.test.context.web.WebAppConfiguration
+
 /*
  * ************************************************************************
  * Copyright (c), 2013 Next Century Corporation. All Rights Reserved.
@@ -68,7 +70,7 @@ class MongoQueryExecutorIntegrationTest {
 
 
     @Autowired
-    private MongoQueryExecutor mongoQueryExecutor
+    private ConnectionState connectionState
 
     @BeforeClass
     static void beforeClass() {
@@ -507,5 +509,9 @@ class MongoQueryExecutorIntegrationTest {
             data << ALL_DATA[it]
         }
         data
+    }
+
+    private getMongoQueryExecutor(){
+        connectionState.queryExecutor
     }
 }

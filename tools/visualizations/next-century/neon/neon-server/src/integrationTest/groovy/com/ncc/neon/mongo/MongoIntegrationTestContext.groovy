@@ -1,13 +1,12 @@
 package com.ncc.neon.mongo
-
 import com.mongodb.MongoClient
 import com.ncc.neon.config.MongoConfigParser
-import com.ncc.neon.query.mongo.MongoQueryExecutor
+import com.ncc.neon.connect.ConnectionInfo
+import com.ncc.neon.connect.ConnectionState
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.ComponentScan
 import org.springframework.context.annotation.Configuration
 import org.springframework.context.annotation.Profile
-
 /*
  * ************************************************************************
  * Copyright (c), 2013 Next Century Corporation. All Rights Reserved.
@@ -48,8 +47,12 @@ class MongoIntegrationTestContext {
     }
 
     @Bean
-    MongoQueryExecutor mongoQueryExecutor() {
-        return new MongoQueryExecutor(MONGO)
+    ConnectionState connectionState(){
+        ConnectionState connectionState = new ConnectionState()
+        ConnectionInfo info = new ConnectionInfo(dataSource: ConnectionInfo.DataSource.MONGO, connectionUrl: "localhost")
+        connectionState.createConnection(info)
+        return connectionState
     }
+
 
 }

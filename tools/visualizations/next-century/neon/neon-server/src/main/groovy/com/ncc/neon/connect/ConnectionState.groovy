@@ -1,11 +1,8 @@
 package com.ncc.neon.connect
-
 import com.ncc.neon.query.QueryExecutor
 import org.springframework.context.annotation.Scope
 import org.springframework.context.annotation.ScopedProxyMode
-import org.springframework.stereotype.Component
 import org.springframework.web.context.WebApplicationContext
-
 /*
  * ************************************************************************
  * Copyright (c), 2013 Next Century Corporation. All Rights Reserved.
@@ -37,7 +34,6 @@ import org.springframework.web.context.WebApplicationContext
  * but can be updated to hold multiple connections or a connection pool..
  */
 
-@Component
 @Scope(value = WebApplicationContext.SCOPE_SESSION, proxyMode = ScopedProxyMode.TARGET_CLASS)
 class ConnectionState implements Serializable{
 
