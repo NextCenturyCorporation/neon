@@ -76,7 +76,7 @@ class FilterService{
     }
 
     @POST
-    @Consumes(MediaType.TEXT_PLAIN)
+    @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
     @Produces(MediaType.APPLICATION_JSON)
     @Path("tableNames")
     List<String> getTableNames(@FormParam("database") String database) {

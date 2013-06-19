@@ -65,7 +65,9 @@
             </tr>
             <tr>
                 <td>
-                    <select id="database-select"></select>
+                    <select id="database-select">
+                        <option value="">Select Database...</option>
+                    </select>
                 </td>
                 <td>
                     <select id="table-select"></select>

@@ -52,14 +52,13 @@
                             {
                                 data: { database: selectedDatabase.val() },
                                 success: function (tableNames) {
+                                    $('#table-select').find('option').remove();
                                     $.each(tableNames, function (index, value) {
                                         $('<option>').val(value).text(value).appendTo('#table-select');
                                     });
-                                    //Execute change right away.
-                                    databaseSelectSelector.change();
+
                                 }
                             });
-
                     });
 
                 }
