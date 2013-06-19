@@ -20,6 +20,13 @@
  * OF NEXT CENTURY CORPORATION EXCEPT BY PRIOR WRITTEN PERMISSION AND WHEN
  * RECIPIENT IS UNDER OBLIGATION TO MAINTAIN SECRECY.
  */
+
+/**
+ * Checks if the expected array is equal to the actual array. This comparison
+ * uses a deeper equality check (checks actual keys and values).
+ * @param expectedArray
+ * @returns {boolean}
+ */
 jasmine.Matchers.prototype.toBeEqualArray = function (expectedArray) {
 
     var err = '';
@@ -74,6 +81,14 @@ jasmine.Matchers.prototype.toBeInstanceOf = function(expectedType) {
     return actual instanceof expectedType;
 };
 
+/**
+ *
+ * Checks if the expected array is the same as the actual, independent of order. This does not
+ * compare individual keys/values of objects, it just uses equality checks
+ * @param expectedArray
+ * @methods
+ * @returns {boolean}
+ */
 jasmine.Matchers.prototype.toBeArrayWithSameElements = function(expectedArray)  {
 
     var actual = this.actual;
@@ -81,7 +96,7 @@ jasmine.Matchers.prototype.toBeArrayWithSameElements = function(expectedArray)  
         return 'expected: ' + expectedArray + ', actual: ' + actual;
     };
 
-    return expectedArray.length == actual.length && _.difference(expectedArray, actual).length == 0;
+    return expectedArray.length == actual.length && lodash.difference(expectedArray, actual).length == 0;
 };
 
 jasmine.Spy.prototype.wasInvoked = function() {

@@ -131,9 +131,9 @@ subprojects {
     }
 
     // yuidoc will look in src/main/javascript for the js files
-   [jsDocs,copyJsDocs,zipJsDocs]*.onlyIf {
-       project.file('src/main/javascript').exists()
-   }
+    [jsDocs, copyJsDocs, zipJsDocs]*.onlyIf {
+        project.file('src/main/javascript').exists()
+    }
 
     task wrapper(type: Wrapper) {
         gradleVersion = 1.5
@@ -152,7 +152,6 @@ def doZipDocs(copyDocsTask, zipTask, buildDir) {
     zipTask.destinationDir buildDir
     zipTask.archiveName "${copyDocsTask.zipBaseName}.zip"
 }
-
 
 /**
  * Configures a copy task to copy documentation into another directory for zipping
@@ -177,25 +176,26 @@ def doCopyDocsIntoZipDir(classifier, libraryName, copyTask, docDir) {
 
 }
 
-def doCreateJasmineSpec(subprojectDir, testDir, templateSuffix, scriptPath) {
+def doCreateJasmineSpec(subprojectDir, testDir, templateSuffix, scriptPath, additionalIncludesString = "") {
     def templateFile = 'spec_runner.template.html'
 
-    def scriptIncludes = new StringBuilder()
-
+    def testIncludes = new StringBuilder()
     def includesGenerator = new JasmineIncludesGenerator()
     includesGenerator.generateIncludes(subprojectDir, testDir)
-    includesGenerator.matchingFiles.each { scriptIncludes.append('  <script src="').append(it).append('"></script>').append(System.properties['line.separator']) }
+    includesGenerator.matchingFiles.each { testIncludes.append('  <script src="').append(it).append('"></script>').append(System.properties['line.separator']) }
+
     def specRunnerOut = templateFile.replace('.template', "_${templateSuffix}")
-    new File(new File(subprojectDir,testDir), specRunnerOut).delete()
+    new File(new File(subprojectDir, testDir), specRunnerOut).delete()
     copy {
-        from("${subprojectDir}/src/js-test-support") {
+        from("${rootDir}/js-test-support") {
             filter(ReplaceTokens, tokens: [
-                    includes: scriptIncludes.toString(),
-                    script : scriptPath.toString()
+                    includes: additionalIncludesString.toString(),
+                    tests: testIncludes.toString(),
+                    script: scriptPath.toString()
             ])
             include(templateFile)
         }
-        into new File(subprojectDir,testDir).toString()
+        into new File(subprojectDir, testDir).toString()
         rename { String filename ->
             // only one file, so just return the new name
             specRunnerOut
