@@ -95,7 +95,6 @@ class ProductionAppContext {
         return dataStores
     }
 
-    @Bean
     MongoClient mongo() {
         def hostsString = environment.getProperty("mongo.hosts")
         def serverAddresses = MongoConfigParser.createServerAddresses(hostsString)
@@ -103,10 +102,8 @@ class ProductionAppContext {
         return new MongoClient(serverAddresses)
     }
 
-    @Bean
     JdbcClient jdbcClient() {
         String hostName = environment.getProperty("hive.host", "localhost")
-
         return new JdbcClient("org.apache.hive.jdbc.HiveDriver", "hive2", "default", hostName)
     }
 }

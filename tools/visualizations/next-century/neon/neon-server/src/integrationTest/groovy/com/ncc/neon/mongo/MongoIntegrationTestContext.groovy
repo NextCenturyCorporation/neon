@@ -52,10 +52,4 @@ class MongoIntegrationTestContext {
         return new MongoQueryExecutor(MONGO)
     }
 
-    @Bean
-    @SuppressWarnings('ConfusingMethodName') // method name is used for autowiring
-    MongoClient mongo() {
-        return MONGO
-    }
-
 }
