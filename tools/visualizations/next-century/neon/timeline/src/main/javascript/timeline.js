@@ -261,6 +261,17 @@ charts.Timeline.prototype.bindData_ = function (chart) {
         });
 };
 
+/**
+ * Aggregates the data based on the currently selected time period
+ * @method aggregateData_
+ * @private
+ * @return {Object} An array of objects whose key is when time period starts and the value is the counts for
+ * that time period. The keys will be `x` and `y` respectively.
+ */
+charts.Timeline.prototype.aggregateData_ = function() {
+    return [];
+};
+
 charts.Timeline.prototype.showTooltip_ = function (data) {
     var periodStartPixels = this.x_(this.timeInterval_(data[this.xAttribute_]));
     var tooltip = this.createTooltip_(data, this.getDate_(periodStartPixels));

@@ -45,6 +45,13 @@ project.ext {
     // a mongo instance for inserting/deleting test data (will be lazy initialized)
     mongoInstance = null
 
+    // additional includes included in the jasmine test spec
+    mockIncludes = '''
+<script src="../../js-test-support/mockNamespaces.js"></script>
+<script src="../../js-test-support/ajaxMockUtils.js"></script>
+<script src="../../js-test-support/owfEventingMock.js"></script>
+'''
+
 }
 
 
@@ -309,13 +316,13 @@ def getMongo() {
 task createJasmineUnitSpecRunnerHtml << {
     description = 'Creates the jasmine spec runner html file for javascript unit tests'
     group = TEST_GROUP
-    doCreateJasmineSpec(projectDir, jsUnitTestDir, 'unit', '../../../build/neon.js')
+    doCreateJasmineSpec(projectDir, jsUnitTestDir, 'unit', '../../../build/neon.js',mockIncludes)
 }
 
 task createJasmineAcceptanceSpecRunnerHtml << {
     description = 'Creates the jasmine spec runner html file for javascript acceptance tests'
     group = TEST_GROUP
-    doCreateJasmineSpec(projectDir, jsAcceptanceTestDir, 'acceptance', "http://localhost:${acceptanceTestWar.httpPort}/neon/js/neon.js")
+    doCreateJasmineSpec(projectDir, jsAcceptanceTestDir, 'acceptance', "http://localhost:${acceptanceTestWar.httpPort}/neon/js/neon.js",mockIncludes)
 }
 
 combineJs {
