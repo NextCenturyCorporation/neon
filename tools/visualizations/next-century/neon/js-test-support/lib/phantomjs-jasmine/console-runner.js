@@ -1,11 +1,14 @@
 /**
- Jasmine Reporter that outputs test results to the browser console. 
+ Jasmine Reporter that outputs test results to the browser console.
  Useful for running in a headless environment such as PhantomJs, ZombieJs etc.
 
  Usage:
- // From your html file that loads jasmine:  
+ // From your html file that loads jasmine:
  jasmine.getEnv().addReporter(new jasmine.ConsoleReporter());
  jasmine.getEnv().execute();
+
+
+ NOTE: THIS FILE HAS BEEN MODIFIED TO CHECK THAT AT LEAST ONE TEST HAS BEEN RUN (NEON-254)
 */
 
 (function(jasmine, console) {
@@ -23,7 +26,7 @@
     var color_code = this.color_map[color];
     return "\033[" + color_code + "m" + text + "\033[0m";
   }
-  
+
   var ConsoleReporter = function() {
     if (!console || !console.log) { throw "console isn't present!"; }
     this.status = this.statuses.stopped;
@@ -57,7 +60,13 @@
     this.log("-----------------");
     this.log(spec_str + fail_str + (dur/1000) + "s.", color);
 
-    this.status = (failed > 0)? this.statuses.fail : this.statuses.success;
+      if ( this.executed_specs > 0 ) {
+        this.status = (failed > 0)? this.statuses.fail : this.statuses.success;
+      }
+      else {
+        this.log("0 tests run. This likely indicates a configuration. Check the logs.","red");
+        this.status = this.statuses.fail;
+      }
 
     /* Print something that signals that testing is over so that headless browsers
        like PhantomJs know when to terminate. */
