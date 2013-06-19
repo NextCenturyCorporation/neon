@@ -3,8 +3,8 @@ import com.ncc.neon.connect.Connection
 import com.ncc.neon.connect.ConnectionInfo
 import com.ncc.neon.connect.HiveConnection
 import com.ncc.neon.connect.MongoConnection
-import com.ncc.neon.database.DatabaseTableSelector
-import com.ncc.neon.database.SelectorFactory
+import com.ncc.neon.query.QueryExecutor
+import com.ncc.neon.connect.QueryExecutorFactory
 import org.springframework.stereotype.Component
 
 import javax.ws.rs.*
@@ -39,7 +39,7 @@ import javax.ws.rs.core.MediaType
 @Path("/filterservice")
 class FilterService{
 
-    private final SelectorFactory selectorFactory = new SelectorFactory()
+    private final QueryExecutorFactory executorFactory = new QueryExecutorFactory()
     private def connectionClient
 
     @POST
@@ -71,7 +71,7 @@ class FilterService{
     @Produces(MediaType.APPLICATION_JSON)
     @Path("databaseNames")
     List<String> getDatabaseNames() {
-        DatabaseTableSelector selector = selectorFactory.create(connectionClient)
+        QueryExecutor selector = executorFactory.create(connectionClient)
         selector.showDatabases()
     }
 
@@ -80,7 +80,7 @@ class FilterService{
     @Produces(MediaType.APPLICATION_JSON)
     @Path("tableNames")
     List<String> getTableNames(@FormParam("database") String database) {
-        DatabaseTableSelector selector = selectorFactory.create(connectionClient)
+        QueryExecutor selector = executorFactory.create(connectionClient)
         selector.showTables(database)
     }
 

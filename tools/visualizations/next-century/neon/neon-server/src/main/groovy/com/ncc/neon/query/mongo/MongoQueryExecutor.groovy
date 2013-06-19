@@ -1,6 +1,6 @@
 package com.ncc.neon.query.mongo
-
 import com.mongodb.BasicDBObject
+import com.mongodb.DB
 import com.mongodb.DBObject
 import com.mongodb.MongoClient
 import com.ncc.neon.query.AbstractQueryExecutor
@@ -8,8 +8,6 @@ import com.ncc.neon.query.QueryResult
 import com.ncc.neon.query.clauses.SortOrder
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
-import org.springframework.beans.factory.annotation.Autowired
-
 /*
  * ************************************************************************
  * Copyright (c), 2013 Next Century Corporation. All Rights Reserved.
@@ -42,8 +40,11 @@ class MongoQueryExecutor extends AbstractQueryExecutor {
     private static final DESCENDING_STRING_COMPARATOR = { a, b -> b <=> a }
     private static final Logger LOGGER = LoggerFactory.getLogger(MongoQueryExecutor)
 
-    @Autowired
-    private MongoClient mongo
+    private final MongoClient mongo
+
+    MongoQueryExecutor(MongoClient mongo){
+        this.mongo = mongo
+    }
 
     @Override
     protected QueryResult doExecuteQuery(mongoQuery) {
@@ -143,4 +144,14 @@ class MongoQueryExecutor extends AbstractQueryExecutor {
         return new MongoQueryBuilder()
     }
 
+    @Override
+    List<String> showDatabases(){
+        mongo.databaseNames
+    }
+
+    @Override
+    List<String> showTables(String dbName){
+        DB database = mongo.getDB(dbName)
+        database.getCollectionNames().collect { it }
+    }
 }

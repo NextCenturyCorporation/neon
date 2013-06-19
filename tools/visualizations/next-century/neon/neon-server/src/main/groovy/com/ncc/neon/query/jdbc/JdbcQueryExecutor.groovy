@@ -1,11 +1,9 @@
 package com.ncc.neon.query.jdbc
-
 import com.ncc.neon.query.AbstractQueryExecutor
 import com.ncc.neon.query.QueryBuilder
 import com.ncc.neon.query.QueryResult
-import org.springframework.beans.factory.annotation.Autowired
 
-
+import java.sql.SQLException
 /*
  *
  *  ************************************************************************
@@ -36,12 +34,11 @@ import org.springframework.beans.factory.annotation.Autowired
  */
 class JdbcQueryExecutor extends AbstractQueryExecutor {
 
-    @Autowired
-    private JdbcClient jdbcClient
+    private final JdbcClient jdbcClient
+    private final QueryBuilder queryBuilder
 
-    QueryBuilder queryBuilder
-
-    JdbcQueryExecutor(QueryBuilder queryBuilder) {
+    JdbcQueryExecutor(JdbcClient jdbcClient, QueryBuilder queryBuilder) {
+        this.jdbcClient = jdbcClient
         this.queryBuilder = queryBuilder
     }
 
@@ -70,5 +67,26 @@ class JdbcQueryExecutor extends AbstractQueryExecutor {
     @Override
     String getDatastoreName() {
         return "JDBC(" + jdbcClient.databaseType + ")@" + jdbcClient.dbHostString
+    }
+
+    @Override
+    List<String> showDatabases(){
+        jdbcClient.executeQuery("SHOW DATABASES").collect{ Map<String,String> map ->
+            map.get("database_name")
+        }
+    }
+
+    @Override
+    List<String> showTables(String dbName){
+        try{
+            jdbcClient.execute("USE " + dbName)
+        }
+        catch (SQLException ex){
+            return []
+        }
+
+        jdbcClient.executeQuery("SHOW TABLES").collect{ Map<String,String> map ->
+            map.get("tab_name")
+        }
     }
 }

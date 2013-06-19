@@ -49,7 +49,7 @@ class MongoIntegrationTestContext {
 
     @Bean
     MongoQueryExecutor mongoQueryExecutor() {
-        return new MongoQueryExecutor()
+        return new MongoQueryExecutor(MONGO)
     }
 
     @Bean

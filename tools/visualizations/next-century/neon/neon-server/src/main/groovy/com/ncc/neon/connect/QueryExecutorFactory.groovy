@@ -1,8 +1,10 @@
-package com.ncc.neon.database
+package com.ncc.neon.connect
 
+import com.mongodb.MongoClient
+import com.ncc.neon.query.QueryExecutor
 import com.ncc.neon.query.jdbc.JdbcClient
-
-import java.sql.SQLException
+import com.ncc.neon.query.jdbc.JdbcQueryExecutor
+import com.ncc.neon.query.mongo.MongoQueryExecutor
 
 /*
  * ************************************************************************
@@ -30,32 +32,16 @@ import java.sql.SQLException
  * @author tbrooks
  */
 
-class HiveSelector implements DatabaseTableSelector{
+class QueryExecutorFactory{
 
-    JdbcClient client
-
-    HiveSelector(JdbcClient client){
-        this.client = client
-    }
-
-    @Override
-    List<String> showDatabases(){
-        client.executeQuery("SHOW DATABASES").collect{ Map<String,String> map ->
-            map.get("database_name")
+    QueryExecutor create(def client){
+        if(client instanceof MongoClient){
+            return new MongoQueryExecutor(client)
         }
-    }
-
-    @Override
-    List<String> showTables(String dbName){
-        try{
-            client.execute("USE " + dbName)
-        }
-        catch (SQLException ex){
-            return []
+        if(client instanceof JdbcClient){
+            return JdbcQueryExecutor(client)
         }
 
-        client.executeQuery("SHOW TABLES").collect{ Map<String,String> map ->
-            map.get("tab_name")
-        }
+        throw new IllegalArgumentException("Unable to create database selector.")
     }
 }

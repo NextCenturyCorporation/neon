@@ -115,4 +115,15 @@ public interface QueryExecutor {
      * @return the identifier of the datastore
      */
     String getDatastoreName()
+
+    /**
+     * @return Returns all the databases
+     */
+    List<String> showDatabases()
+
+    /**
+     * @param dbName The current database
+     * @return Returns all the table names
+     */
+    List<String> showTables(String dbName)
 }

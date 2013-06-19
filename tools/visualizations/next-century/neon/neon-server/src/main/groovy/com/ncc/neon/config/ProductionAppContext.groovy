@@ -67,7 +67,7 @@ class ProductionAppContext {
 
     @Bean
     QueryExecutor queryExecutor() {
-        return new MongoQueryExecutor()
+        return new MongoQueryExecutor(mongo())
     }
 
     @Bean
@@ -77,12 +77,12 @@ class ProductionAppContext {
 
     @Bean
     MongoQueryExecutor mongoQueryExecutor() {
-        return new MongoQueryExecutor()
+        return new MongoQueryExecutor(mongo())
     }
 
     @Bean
     JdbcQueryExecutor hiveQueryExecutor() {
-        return new JdbcQueryExecutor(new HiveQueryBuilder())
+        return new JdbcQueryExecutor(jdbcClient(), new HiveQueryBuilder())
     }
 
     @Bean
