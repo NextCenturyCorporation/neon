@@ -39,8 +39,12 @@ import java.sql.Statement
 class JdbcClient {
 
     private final Connection connection
+    String databaseType
+    String dbHostString
 
     JdbcClient(String driverName, String databaseType, String databaseName, String dbHostString) {
+        this.databaseType = databaseType
+        this.dbHostString = dbHostString
         Class.forName(driverName)
         this.connection = DriverManager.getConnection("jdbc:" + databaseType + "://" + dbHostString + "/" + databaseName, "", "")
     }

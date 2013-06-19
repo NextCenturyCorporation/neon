@@ -1,9 +1,14 @@
 package com.ncc.neon.services
-
+import com.ncc.neon.connect.Connection
+import com.ncc.neon.connect.ConnectionInfo
+import com.ncc.neon.connect.HiveConnection
+import com.ncc.neon.connect.MongoConnection
+import com.ncc.neon.database.DatabaseTableSelector
+import com.ncc.neon.database.SelectorFactory
 import org.springframework.stereotype.Component
 
-import javax.ws.rs.Path
-
+import javax.ws.rs.*
+import javax.ws.rs.core.MediaType
 /*
  * ************************************************************************
  * Copyright (c), 2013 Next Century Corporation. All Rights Reserved.
@@ -33,4 +38,50 @@ import javax.ws.rs.Path
 @Component
 @Path("/filterservice")
 class FilterService{
+
+    private final SelectorFactory selectorFactory = new SelectorFactory()
+    private def connectionClient
+
+    @POST
+    @Produces(MediaType.APPLICATION_JSON)
+    @Path("hostnames")
+    List<String> getHostnames() {
+        return ["localhost", "xdata2"]
+    }
+
+    @POST
+    @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
+    @Produces(MediaType.APPLICATION_JSON)
+    @Path("connect")
+    String connect(@FormParam("datastore") String datastore, @FormParam("hostname") String hostname){
+        ConnectionInfo connectionInfo = new ConnectionInfo(connectionUrl: hostname)
+        if(datastore == "mongo"){
+            Connection connection = new MongoConnection()
+            connectionClient = connection.connect(connectionInfo)
+        }
+        if(datastore == "hive"){
+            Connection connection = new HiveConnection()
+            connectionClient = connection.connect(connectionInfo)
+        }
+
+        return '{ "success": true }'
+    }
+
+    @POST
+    @Produces(MediaType.APPLICATION_JSON)
+    @Path("databaseNames")
+    List<String> getDatabaseNames() {
+        DatabaseTableSelector selector = selectorFactory.create(connectionClient)
+        selector.showDatabases()
+    }
+
+    @POST
+    @Consumes(MediaType.TEXT_PLAIN)
+    @Produces(MediaType.APPLICATION_JSON)
+    @Path("tableNames")
+    List<String> getTableNames(@FormParam("database") String database) {
+        DatabaseTableSelector selector = selectorFactory.create(connectionClient)
+        selector.showTables(database)
+    }
+
 }

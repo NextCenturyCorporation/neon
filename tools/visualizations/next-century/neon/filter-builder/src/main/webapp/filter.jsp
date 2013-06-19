@@ -7,8 +7,20 @@
 <head>
     <title>Query Builder</title>
 
+    <%
+        String neonServerUrl = getServletContext().getInitParameter("neon.url");
+    %>
+
+    <script src="<%=neonServerUrl%>/js/neon.js"></script>
+
+    <script>
+        neon.query.SERVER_URL = '<%=neonServerUrl%>';
+        neon.util.AjaxUtils.useDefaultStartStopCallbacks();
+    </script>
+
+
     <link href="css/ui-darkness/jquery-ui-1.10.3.custom.min.css" rel="stylesheet">
-    <script src="js/jquery/jquery-1.10.1.min.js"></script>
+    <!--<script src="js/jquery/jquery-1.10.1.min.js"></script> -->
     <script src="js/jquery/jquery-ui-1.10.3.custom.min.js"></script>
     <script src="js/filterwizard.js"></script>
 

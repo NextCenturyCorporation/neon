@@ -1,48 +1,72 @@
-(function(){
+(function () {
 
-    function init(){
+    function init() {
         hideWizardSteps();
         setupHostnames();
         addClickHandlers();
     }
 
-    function hideWizardSteps(){
+    function hideWizardSteps() {
         $("#db-table").hide();
     }
 
-    function setupHostnames(){
-        var hostnames = ["localhost", "xdata2"];
-
-        $("#hostname-input").autocomplete({
-            source: hostnames
-        });
+    function setupHostnames() {
+        neon.util.AjaxUtils.doPost(neon.query.SERVER_URL + "/services/filterservice/hostnames",
+            {
+                success: function (data) {
+                    $("#hostname-input").autocomplete({
+                        source: data
+                    });
+                }
+            });
     }
 
-    function addClickHandlers(){
+    function addClickHandlers() {
         $("#datastore-button").click(connectToDatastore);
     }
 
-    function connectToDatastore(){
+    function connectToDatastore() {
         $("#db-table").show();
-        var databaseSelectSelector = $('#database-select');
+        var databaseSelectedOption = $('#datastore-select option:selected');
+        var hostnameSelector = $('#hostname-input');
 
-        var databaseNames = ["cn_db", "mydb", "insert"];
-        $.each(databaseNames, function(index, value){
-            $('<option>').val(value).text(value).appendTo(databaseSelectSelector);
-        });
-
-        databaseSelectSelector.change(function(){
-            var tableNames = ["things"];
-            $.each(tableNames, function(index, value){
-                $('<option>').val(value).text(value).appendTo('#table-select');
+        neon.util.AjaxUtils.doPost(neon.query.SERVER_URL + "/services/filterservice/connect",
+            {
+                data: { datastore: databaseSelectedOption.val(), hostname: hostnameSelector.val() },
+                success: successfulConnect
             });
-        });
-        //Execute change right away.
-        databaseSelectSelector.change();
     }
 
+    function successfulConnect() {
+        var databaseSelectSelector = $('#database-select');
+        neon.util.AjaxUtils.doPost(neon.query.SERVER_URL + "/services/filterservice/databaseNames",
+            {
+                success: function (databaseNames) {
+                    $.each(databaseNames, function (index, value) {
+                        $('<option>').val(value).text(value).appendTo(databaseSelectSelector);
+                    });
 
-    $(function(){
+                    databaseSelectSelector.change(function () {
+                        var selectedDatabase = $('#database-select option:selected');
+                        neon.util.AjaxUtils.doPost(neon.query.SERVER_URL + "/services/filterservice/tableNames",
+                            {
+                                data: { database: selectedDatabase.val() },
+                                success: function (tableNames) {
+                                    $.each(tableNames, function (index, value) {
+                                        $('<option>').val(value).text(value).appendTo('#table-select');
+                                    });
+                                    //Execute change right away.
+                                    databaseSelectSelector.change();
+                                }
+                            });
+
+                    });
+
+                }
+            });
+    }
+
+    $(function () {
         init();
     });
 
