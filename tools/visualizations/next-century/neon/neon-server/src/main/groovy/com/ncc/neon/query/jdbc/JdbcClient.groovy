@@ -1,11 +1,9 @@
 package com.ncc.neon.query.jdbc
 
-import java.sql.Connection
-import java.sql.DatabaseMetaData
-import java.sql.DriverManager
-import java.sql.ResultSet
-import java.sql.ResultSetMetaData
-import java.sql.Statement
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
+
+import java.sql.*
 
 /*
  *
@@ -38,6 +36,8 @@ import java.sql.Statement
 @SuppressWarnings('ClassForName')
 class JdbcClient {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(JdbcClient)
+
     private final Connection connection
     String databaseType
     String dbHostString
@@ -46,7 +46,12 @@ class JdbcClient {
         this.databaseType = databaseType
         this.dbHostString = dbHostString
         Class.forName(driverName)
-        this.connection = DriverManager.getConnection("jdbc:" + databaseType + "://" + dbHostString + "/" + databaseName, "", "")
+
+        try{
+            this.connection = DriverManager.getConnection("jdbc:" + databaseType + "://" + dbHostString + "/" + databaseName, "", "")
+        }catch(SQLException e){
+            LOGGER.error("Unable to create connection",e)
+        }
     }
 
     public List<Map> executeQuery(String query) {
