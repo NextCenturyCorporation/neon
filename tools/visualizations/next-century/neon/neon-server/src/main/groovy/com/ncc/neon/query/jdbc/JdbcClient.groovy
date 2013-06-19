@@ -1,10 +1,6 @@
 package com.ncc.neon.query.jdbc
 
-import org.slf4j.Logger
-import org.slf4j.LoggerFactory
-
 import java.sql.*
-
 /*
  *
  *  ************************************************************************
@@ -35,8 +31,6 @@ import java.sql.*
  */
 @SuppressWarnings('ClassForName')
 class JdbcClient {
-
-    private static final Logger LOGGER = LoggerFactory.getLogger(JdbcClient)
 
     private final Connection connection
     String databaseType
