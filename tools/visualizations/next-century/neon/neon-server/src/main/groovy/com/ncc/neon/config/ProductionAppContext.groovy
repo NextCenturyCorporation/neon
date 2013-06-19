@@ -58,8 +58,9 @@ class ProductionAppContext {
 
     @Bean
     ConnectionState connectionState(){
+        def hostsString = System.getProperty("mongo.hosts", "localhost")
         ConnectionState connectionState = new ConnectionState()
-        ConnectionInfo info = new ConnectionInfo(dataSource: ConnectionInfo.DataSource.MONGO, connectionUrl: "localhost")
+        ConnectionInfo info = new ConnectionInfo(dataSource: ConnectionInfo.DataSource.MONGO, connectionUrl: hostsString)
         connectionState.createConnection(info)
         return connectionState
     }
