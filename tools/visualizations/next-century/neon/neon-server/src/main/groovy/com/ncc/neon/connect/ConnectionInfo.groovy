@@ -1,5 +1,8 @@
 package com.ncc.neon.connect
 
+import groovy.transform.EqualsAndHashCode
+import groovy.transform.ToString
+
 /*
  * ************************************************************************
  * Copyright (c), 2013 Next Century Corporation. All Rights Reserved.
@@ -26,7 +29,18 @@ package com.ncc.neon.connect
  * @author tbrooks
  */
 
-class ConnectionInfo{
+@EqualsAndHashCode
+@ToString
+class ConnectionInfo implements Serializable{
+
+    private static final long serialVersionUID = 1L
+
+    enum DataSource{
+        MONGO,
+        HIVE
+    }
+
+    DataSource dataSource
     String connectionUrl
     Map<String,String> options = [:]
 }

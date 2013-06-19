@@ -125,11 +125,6 @@ class MongoQueryExecutor extends AbstractQueryExecutor {
     }
 
     @Override
-    String getDatastoreName() {
-        return "Mongo@" + mongo.getAllAddress()
-    }
-
-    @Override
     protected def transformIdFields(Collection<Object> ids) {
         return MongoUtils.oidsToObjectIds(ids)
     }

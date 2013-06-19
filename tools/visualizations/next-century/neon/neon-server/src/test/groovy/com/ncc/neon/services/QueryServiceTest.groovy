@@ -1,5 +1,6 @@
 package com.ncc.neon.services
 
+import com.ncc.neon.connect.ConnectionState
 import com.ncc.neon.query.Query
 import com.ncc.neon.query.QueryExecutor
 import com.ncc.neon.query.QueryResult
@@ -79,7 +80,7 @@ class QueryServiceTest {
         def filter = [] as Filter
         def filterProvider = [provideFilter: { filter }] as FilterProvider
         def queryExecutor = [addFilter: { f -> assert f.is(filter); filterId }] as QueryExecutor
-        queryService.queryExecutor = queryExecutor
+        setQueryServiceConnection(queryExecutor)
 
         def filterEvent = queryService.addFilter(filterProvider)
         AssertUtils.assertEqualCollections([filterId.toString()], filterEvent.addedIds)
@@ -93,7 +94,7 @@ class QueryServiceTest {
         def queryExecutorMock = new MockFor(QueryExecutor)
         queryExecutorMock.demand.removeFilter { id -> assert id == filterId }
         def queryExecutor = queryExecutorMock.proxyInstance()
-        queryService.queryExecutor = queryExecutor
+        setQueryServiceConnection(queryExecutor)
 
         def event = queryService.removeFilter(filterId.toString())
         queryExecutorMock.verify(queryExecutor)
@@ -115,7 +116,7 @@ class QueryServiceTest {
         queryExecutorMock.demand.addFilter { f -> assert f.is(filter); addId }
 
         def queryExecutor = queryExecutorMock.proxyInstance()
-        queryService.queryExecutor = queryExecutor
+        setQueryServiceConnection(queryExecutor)
 
         def event = queryService.replaceFilter(removeId.toString(), filterProvider)
         queryExecutorMock.verify(queryExecutor)
@@ -131,7 +132,7 @@ class QueryServiceTest {
         def filter = [] as Filter
         def queryExecutorMock = createQueryExecutorMockForGetSelection(filter, inputJson)
         def queryExecutor = queryExecutorMock.proxyInstance()
-        queryService.queryExecutor = queryExecutor
+        setQueryServiceConnection(queryExecutor)
 
         def result = queryService.getSelectionWhere(filter, null,  null)
         queryExecutorMock.verify(queryExecutor)
@@ -151,7 +152,7 @@ class QueryServiceTest {
         def transform = ValueStringReplaceTransform.name
         def queryExecutorMock = createQueryExecutorMockForGetSelection(filter, inputJson)
         def queryExecutor = queryExecutorMock.proxyInstance()
-        queryService.queryExecutor = queryExecutor
+        setQueryServiceConnection(queryExecutor)
 
         def result = queryService.getSelectionWhere(filter, transform,  null)
         queryExecutorMock.verify(queryExecutor)
@@ -171,7 +172,7 @@ class QueryServiceTest {
         def transform = ValueStringReplaceTransform.name
         def queryExecutorMock = createQueryExecutorMockForGetSelection(filter, inputJson)
         def queryExecutor = queryExecutorMock.proxyInstance()
-        queryService.queryExecutor = queryExecutor
+        setQueryServiceConnection(queryExecutor)
 
         def result = queryService.getSelectionWhere(filter, transform, ["val1","25"])
         queryExecutorMock.verify(queryExecutor)
@@ -198,13 +199,18 @@ class QueryServiceTest {
     private def executeQuery(inputJson, transform = null, transformParams = null) {
         def queryResult = [toJson: { inputJson }] as QueryResult
         def executor = [execute: { query, includeFiltered -> queryResult }] as QueryExecutor
-        queryService.queryExecutor = executor
+        setQueryServiceConnection(executor)
         def query = [toString: { "mock query" }] as Query
         def outputJson = queryService.executeQuery(query, false, transform, transformParams)
         def jsonObject = new JSONObject(outputJson)
         return jsonObject.getJSONArray("data")
     }
 
+    private void setQueryServiceConnection(QueryExecutor executor){
+        ConnectionState connectionState = new ConnectionState()
+        connectionState.queryExecutor = executor
+        queryService.connectionState = connectionState
+    }
 
     private static assertKeyValue(array, index, key, value) {
         def jsonObject = array.getJSONObject(index)

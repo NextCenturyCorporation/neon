@@ -22,6 +22,7 @@
  */
 package com.ncc.neon.services
 
+import com.ncc.neon.connect.ConnectionState
 import com.ncc.neon.query.Query
 import com.ncc.neon.query.QueryExecutor
 import com.ncc.neon.query.QueryGroup
@@ -41,7 +42,7 @@ import javax.ws.rs.core.MediaType
 class QueryService {
 
     @Autowired
-    QueryExecutor queryExecutor
+    ConnectionState connectionState
 
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
@@ -180,6 +181,9 @@ class QueryService {
         return constructor.newInstance(typedParams as Object[])
     }
 
+    private QueryExecutor getQueryExecutor(){
+        connectionState.queryExecutor
+    }
 }
 
 

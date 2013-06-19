@@ -1,12 +1,6 @@
 package com.ncc.neon.config
-
-import com.mongodb.MongoClient
-import com.ncc.neon.query.QueryExecutor
-import com.ncc.neon.query.hive.HiveQueryBuilder
-import com.ncc.neon.query.jdbc.JdbcClient
-import com.ncc.neon.query.jdbc.JdbcQueryExecutor
-import com.ncc.neon.query.mongo.MongoQueryExecutor
-import org.slf4j.LoggerFactory
+import com.ncc.neon.connect.ConnectionInfo
+import com.ncc.neon.connect.ConnectionState
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
@@ -16,7 +10,6 @@ import org.springframework.core.env.Environment
 import org.springframework.core.env.PropertiesPropertySource
 
 import javax.annotation.PostConstruct
-
 /*
  * ************************************************************************
  * Copyright (c), 2013 Next Century Corporation. All Rights Reserved.
@@ -48,8 +41,6 @@ import javax.annotation.PostConstruct
 @Profile("production")
 class ProductionAppContext {
 
-    private static final def LOGGER = LoggerFactory.getLogger(ProductionAppContext)
-
     @Autowired
     private Environment environment
 
@@ -66,44 +57,11 @@ class ProductionAppContext {
     }
 
     @Bean
-    QueryExecutor queryExecutor() {
-        return new MongoQueryExecutor(mongo())
+    ConnectionState connectionState(){
+        ConnectionState connectionState = new ConnectionState()
+        ConnectionInfo info = new ConnectionInfo(dataSource: ConnectionInfo.DataSource.MONGO, connectionUrl: "localhost")
+        connectionState.createConnection(info)
+        return connectionState
     }
 
-    @Bean
-    List<QueryExecutor> queryExecutors() {
-        return [mongoQueryExecutor(), hiveQueryExecutor()]
-    }
-
-    @Bean
-    MongoQueryExecutor mongoQueryExecutor() {
-        return new MongoQueryExecutor(mongo())
-    }
-
-    @Bean
-    JdbcQueryExecutor hiveQueryExecutor() {
-        return new JdbcQueryExecutor(jdbcClient(), new HiveQueryBuilder())
-    }
-
-    @Bean
-    Map<String, QueryExecutor> dataStores() {
-        Map dataStores = [:]
-        queryExecutors().each {
-            dataStores.put(it.getDatastoreName(), it)
-        }
-
-        return dataStores
-    }
-
-    MongoClient mongo() {
-        def hostsString = environment.getProperty("mongo.hosts")
-        def serverAddresses = MongoConfigParser.createServerAddresses(hostsString)
-        LOGGER.debug("connecting to mongo at {}",serverAddresses)
-        return new MongoClient(serverAddresses)
-    }
-
-    JdbcClient jdbcClient() {
-        String hostName = environment.getProperty("hive.host", "localhost")
-        return new JdbcClient("org.apache.hive.jdbc.HiveDriver", "hive2", "default", hostName)
-    }
 }

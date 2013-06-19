@@ -1,10 +1,8 @@
 package com.ncc.neon.services
-import com.ncc.neon.connect.Connection
+
 import com.ncc.neon.connect.ConnectionInfo
-import com.ncc.neon.connect.HiveConnection
-import com.ncc.neon.connect.MongoConnection
-import com.ncc.neon.query.QueryExecutor
-import com.ncc.neon.connect.QueryExecutorFactory
+import com.ncc.neon.connect.ConnectionState
+import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
 
 import javax.ws.rs.*
@@ -39,14 +37,14 @@ import javax.ws.rs.core.MediaType
 @Path("/filterservice")
 class FilterService{
 
-    private final QueryExecutorFactory executorFactory = new QueryExecutorFactory()
-    private def connectionClient
+    @Autowired
+    ConnectionState connectionState
 
     @POST
     @Produces(MediaType.APPLICATION_JSON)
     @Path("hostnames")
     List<String> getHostnames() {
-        return ["localhost", "xdata2"]
+        return ["localhost"]
     }
 
     @POST
@@ -54,15 +52,13 @@ class FilterService{
     @Produces(MediaType.APPLICATION_JSON)
     @Path("connect")
     String connect(@FormParam("datastore") String datastore, @FormParam("hostname") String hostname){
-        ConnectionInfo connectionInfo = new ConnectionInfo(connectionUrl: hostname)
-        if(datastore == "mongo"){
-            Connection connection = new MongoConnection()
-            connectionClient = connection.connect(connectionInfo)
+        ConnectionInfo.DataSource dataSource = ConnectionInfo.DataSource.MONGO
+        if(datastore == "hive") {
+            dataSource = ConnectionInfo.DataSource.HIVE
         }
-        if(datastore == "hive"){
-            Connection connection = new HiveConnection()
-            connectionClient = connection.connect(connectionInfo)
-        }
+
+        ConnectionInfo connectionInfo = new ConnectionInfo(dataSource: dataSource, connectionUrl: hostname)
+        connectionState.createConnection(connectionInfo)
 
         return '{ "success": true }'
     }
@@ -71,8 +67,7 @@ class FilterService{
     @Produces(MediaType.APPLICATION_JSON)
     @Path("databaseNames")
     List<String> getDatabaseNames() {
-        QueryExecutor selector = executorFactory.create(connectionClient)
-        selector.showDatabases()
+        connectionState.queryExecutor.showDatabases()
     }
 
     @POST
@@ -80,8 +75,7 @@ class FilterService{
     @Produces(MediaType.APPLICATION_JSON)
     @Path("tableNames")
     List<String> getTableNames(@FormParam("database") String database) {
-        QueryExecutor selector = executorFactory.create(connectionClient)
-        selector.showTables(database)
+        connectionState.queryExecutor.showTables(database)
     }
 
 }

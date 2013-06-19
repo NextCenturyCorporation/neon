@@ -42,6 +42,7 @@
         neon.util.AjaxUtils.doPost(neon.query.SERVER_URL + "/services/filterservice/databaseNames",
             {
                 success: function (databaseNames) {
+                    databaseSelectSelector.find('option').remove();
                     $.each(databaseNames, function (index, value) {
                         $('<option>').val(value).text(value).appendTo(databaseSelectSelector);
                     });

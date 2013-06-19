@@ -1,5 +1,4 @@
 package com.ncc.neon.query
-
 import com.ncc.neon.query.clauses.AndWhereClause
 import com.ncc.neon.query.clauses.SelectClause
 import com.ncc.neon.query.clauses.SingularWhereClause
@@ -7,8 +6,6 @@ import com.ncc.neon.query.filter.Filter
 import com.ncc.neon.query.filter.FilterState
 import com.ncc.neon.selection.SelectionManager
 import org.slf4j.LoggerFactory
-import org.springframework.beans.factory.annotation.Autowired
-
 /*
  * ************************************************************************
  * Copyright (c), 2013 Next Century Corporation. All Rights Reserved.
@@ -39,11 +36,8 @@ abstract class AbstractQueryExecutor implements QueryExecutor {
 
     private static final def LOGGER = LoggerFactory.getLogger(AbstractQueryExecutor)
 
-    @Autowired
-    private SelectionManager selectionManager
-
-    @Autowired
-    private FilterState filterState
+    private final SelectionManager selectionManager = new SelectionManager()
+    private final FilterState filterState = new FilterState()
 
     @Override
     UUID addFilter(Filter filter) {

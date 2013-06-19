@@ -1,15 +1,14 @@
 package com.ncc.neon.services
 
+import com.ncc.neon.connect.ConnectionInfo
+import com.ncc.neon.connect.ConnectionState
 import com.ncc.neon.language.QueryParser
 import com.ncc.neon.query.Query
-import com.ncc.neon.query.QueryExecutor
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
 
-import javax.annotation.Resource
 import javax.ws.rs.*
 import javax.ws.rs.core.MediaType
-
 /*
  * ************************************************************************
  * Copyright (c), 2013 Next Century Corporation. All Rights Reserved.
@@ -43,8 +42,8 @@ class LanguageService{
     @Autowired
     QueryParser queryParser
 
-    @Resource
-    Map<String, QueryExecutor> dataStores
+    @Autowired
+    ConnectionState connectionState
 
     @POST
     @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
@@ -52,15 +51,25 @@ class LanguageService{
     @Path("query")
     String executeQuery(@FormParam("text") String text, @FormParam("datastore") String datastore){
         Query query = queryParser.parse(text)
+        //Hard coded for illustration, eventually this service will not require this
+        ConnectionInfo connectionInfo
+        if(datastore.startsWith("Mongo")){
+            connectionInfo = new ConnectionInfo(dataSource: ConnectionInfo.DataSource.MONGO, connectionUrl: "localhost")
+        }
+        else{
+            connectionInfo = new ConnectionInfo(dataSource: ConnectionInfo.DataSource.HIVE, connectionUrl: "xdata2")
+        }
+        connectionState.createConnection(connectionInfo)
 
-        return wrapInDataJson(dataStores[datastore].execute(query, false))
+        return wrapInDataJson(connectionState.queryExecutor.execute(query, false))
     }
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     @Path("datastores")
     List getDatastoreNames() {
-        return dataStores.keySet().asList()
+        //Hard coded for illustration, eventually this service will not require this
+        return ["Mongo@localhost","JDBC(hive2)@xdata2"]
     }
 
     private String wrapInDataJson(queryResult) {
