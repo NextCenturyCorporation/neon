@@ -46,12 +46,7 @@ class JdbcClient {
         this.databaseType = databaseType
         this.dbHostString = dbHostString
         Class.forName(driverName)
-
-        try{
-            this.connection = DriverManager.getConnection("jdbc:" + databaseType + "://" + dbHostString + "/" + databaseName, "", "")
-        }catch(SQLException e){
-            LOGGER.error("Unable to create connection",e)
-        }
+        this.connection = DriverManager.getConnection("jdbc:" + databaseType + "://" + dbHostString + "/" + databaseName, "", "")
     }
 
     public List<Map> executeQuery(String query) {
