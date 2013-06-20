@@ -26,56 +26,51 @@
  * Creates a new timeline component
  * @namespace charts
  * @class Timeline
- * @param {String} chartSelector The selector for the component in which the timeline will be drawn
- * @param {Array} data An array of data bins. By default, each bin must have an `x` component with the
- * date at the start of the time period and a `y` component that has the value for this bucket. For example, if
- * the timeline is showing by month, there would be dates for the first of each month and the counts for that
- * month (only non zero counts are required). The `x` and `y` field names can be configured in the options.
- *
- * @param {Object} opts A collection of key/value pairs of optional configuration parameters that include
+ * @param {String} chartSelector The selector for the component in which the timeline will be drawn*
+ * @param {Object} opts A collection of key/value pairs used for configuration parameters:
  * <ul>
- *     <li>height - The height of the chart in pixels</li>
- *     <li>width - The width of the chart in pixels. This will be honored as closely as possible, while still allowing bar widths to be evenly drawn</li>
- *     <li>margin - An object with any of the elements `top`, `left`, `bottom` or `right`. These are pixel values to override the default margin.</li>
- *     <li>x - The name of the x-attribute (time). Defaults to `x` if not specified</li>
- *     <li>y - The name of the y-attribute (count). Default to `y` if not specified</li>
- *     <li>interval - The interval at which to group the data (e.g. day, month). See the constants in this class</li>
- *     <li>step - The number of the specified intervals </li>
- *     <li>tickFormat - The format of the tick labels (if not using the default). Use the formatting specified by d3 at <a href="https://github.com/mbostock/d3/wiki/Time-Formatting">Time Formatting</a></li>
+ *     <li>data (required) - An array of data with the specified x-y data values (note the `y` is optional - see the description of the `y` parameter).</li>
+ *     <li>x (required) - The name of the x-attribute (time)</li>
+ *     <li>y (optional) - The name of the y-attribute (count). If not specified, each item will contribute 1 to the current count./li>
+ *     <li>interval (required) - The interval at which to group the data (e.g. day, month). See the constants in this class</li>
+ *     <li>height (optional) - The height of the chart in pixels. If not specified, a preconfigured default value will be used.</li>
+ *     <li>width (optional) - The width of the chart in pixels. This will be honored as closely as possible, while still allowing bar widths to be evenly drawn. If not specified, a preconfigured default value will be used.</li>
+ *     <li>margin (optional) - An object with any of the elements `top`, `left`, `bottom` or `right`. These are pixel values to override the default margin. If not specified, a preconfigured default value will be used.</li>
+ *     <li>step (optional) - The number of the specified intervals. If not specified, a preconfigured default value will be used based on the tick interval that was selected.</li>
+ *     <li>tickFormat (optional) - The format of the tick labels. Use the formatting specified by d3 at <a href="https://github.com/mbostock/d3/wiki/Time-Formatting">Time Formatting</a>. If not specified, a preconfigured default value will be used.</li>
  * </ul>
  *
  * @constructor
  *
  * @example
  *     var data = [
- *                 {"date": new Date('2013-03-01'), "count": 2},
- *                 {"date": new Date('2013-04-01'), "count": 4},
- *                 {"date": new Date('2013-01-01'), "count": 7},
- *                 {"date": new Date('2013-02-01'), "count": 1},
- *                 {"date": new Date('2013-05-01'), "count": 9},
- *                 {"date": new Date('2013-06-01'), "count": 8}
+ *                 {"date": new Date(2013,2,4), "count": 2},
+ *                 {"date": new Date(2013,4,8), "count": 4},
+ *                 {"date": new Date(2013,1,1), "count": 7},
+ *                 {"date": new Date(2013,1,7), "count": 1}
  *                ];
- *     var opts = { "x": "date", "y": "count", "interval" : charts.Timeline.MONTH};
- *     var timeline = new charts.Timeline('#chart', data, opts).draw();
+ *     var opts = { "data" : data, "x": "date", "y": "count", "interval" : charts.Timeline.MONTH};
+ *     var timeline = new charts.Timeline('#chart', opts).draw();
  *
  */
-charts.Timeline = function (chartSelector, data, opts) {
+charts.Timeline = function (chartSelector, opts) {
     opts = opts || {};
     this.chartSelector_ = chartSelector;
-    this.data_ = data;
     var interval = opts.interval || charts.Timeline.DEFAULT_INTERVAL_;
     this.timeInterval_ = charts.Timeline.TIME_INTERVALS_[interval].interval;
     this.tickFormat_ = d3.time.format(opts.tickFormat || charts.Timeline.TIME_INTERVALS_[interval].tickFormat);
     this.tickStep_ = opts.step || charts.Timeline.TIME_INTERVALS_[interval].step;
     this.height_ = opts.height || charts.Timeline.DEFAULT_HEIGHT_;
     this.width_ = opts.width || charts.Timeline.DEFAULT_WIDTH_;
-    this.xAttribute_ = opts.x || 'x';
-    this.yAttribute_ = opts.y || 'y';
+    this.xAttribute_ = opts.x;
+    this.yAttribute_ = opts.y;
     this.margin_ = $.extend({}, charts.Timeline.DEFAULT_MARGIN_, opts.margin || {});
     this.hMargin_ = this.margin_.left + this.margin_.right;
     this.vMargin_ = this.margin_.top + this.margin_.bottom;
-    this.minDate_ = this.computeMinDate_();
-    this.maxDate_ = this.computeMaxDate_();
+    this.data_ = this.aggregateData_(opts.data);
+    // use the raw data for min and max date so we can get the true values
+    this.minDate_ = this.computeMinDate_(opts.data);
+    this.maxDate_ = this.computeMaxDate_(opts.data);
     this.timePeriods_ = this.computeTimePeriods_();
     this.x_ = this.createXScale_();
     // set the width to be as close to the user specified size (but not larger) so the bars divide evenly into
@@ -145,18 +140,18 @@ charts.Timeline.isValidDate_ = function (date) {
     return date > charts.Timeline.ZERO_DATE_;
 };
 
-charts.Timeline.prototype.computeMinDate_ = function () {
+charts.Timeline.prototype.computeMinDate_ = function (data) {
     var me = this;
-    var minDate = d3.min(this.data_, function (d) {
+    var minDate = d3.min(data, function (d) {
         return d[me.xAttribute_];
     });
     // minDate will be undefined if data is empty
     return minDate ? minDate : charts.Timeline.ZERO_DATE_;
 };
 
-charts.Timeline.prototype.computeMaxDate_ = function () {
+charts.Timeline.prototype.computeMaxDate_ = function (data) {
     var me = this;
-    var maxDate = d3.max(this.data_, function (d) {
+    var maxDate = d3.max(data, function (d) {
         return d[me.xAttribute_];
     });
     // maxDate will be undefined if data is empty
@@ -172,9 +167,8 @@ charts.Timeline.prototype.createXScale_ = function () {
 };
 
 charts.Timeline.prototype.createYScale_ = function () {
-    var me = this;
     var maxCount = d3.max(this.data_, function (d) {
-        return d[me.yAttribute_];
+        return d.values;
     });
     // may be NaN if no data
     if (!maxCount) {
@@ -244,14 +238,14 @@ charts.Timeline.prototype.bindData_ = function (chart) {
         .enter().append('rect')
         .attr('class', charts.Timeline.ACTIVE_BAR_CLASS_)
         .attr('x', function (d) {
-            return me.x_(me.timeInterval_(d[me.xAttribute_]));
+            return me.x_(me.timeInterval_(d.key));
         })
         .attr('y', function (d) {
-            return me.y_(d[me.yAttribute_]);
+            return me.y_(d.values);
         })
         .attr('width', this.x_.rangeBand())
         .attr('height', function (d) {
-            return me.height_ - me.vMargin_ - me.y_(d[me.yAttribute_]);
+            return me.height_ - me.vMargin_ - me.y_(d.values);
         })
         .on('mouseover', function (d) {
             me.showTooltip_(d);
@@ -264,16 +258,28 @@ charts.Timeline.prototype.bindData_ = function (chart) {
 /**
  * Aggregates the data based on the currently selected time period
  * @method aggregateData_
+ * @param {Array} data The raw data to aggregate
  * @private
- * @return {Object} An array of objects whose key is when time period starts and the value is the counts for
- * that time period. The keys will be `x` and `y` respectively.
+ * @return {Object} An array of objects whose keys are `key` and `values`, whose values are the time period start
+ * and the number of items in that time period respectively
  */
-charts.Timeline.prototype.aggregateData_ = function() {
-    return [];
+charts.Timeline.prototype.aggregateData_ = function (data) {
+    var me = this;
+    return d3.nest().key(function (d) {
+        return me.timeInterval_(d[me.xAttribute_]);
+    }).rollup(function (d) {
+            return d3.sum(d, function (el) {
+                return me.yAttribute_ ? el[me.yAttribute_] : 1;
+            });
+        }).entries(data).map(function(d) {
+            // d3 will create a string for the date but we want the data object
+            d.key = new Date(d.key);
+            return d;
+        });
 };
 
 charts.Timeline.prototype.showTooltip_ = function (data) {
-    var periodStartPixels = this.x_(this.timeInterval_(data[this.xAttribute_]));
+    var periodStartPixels = this.x_(this.timeInterval_(data.key));
     var tooltip = this.createTooltip_(data, this.getDate_(periodStartPixels));
     // initially hidden because it will fade in
     tooltip.hide();
@@ -291,7 +297,8 @@ charts.Timeline.prototype.createTooltip_ = function (data, periodStartDate) {
     });
 
     var xAttributeHtml = $('<div/>').html(this.xAttribute_ + ': ' + this.tickFormat_(periodStartDate));
-    var yAttributeHtml = $('<div/>').html(this.yAttribute_ + ': ' + data[this.yAttribute_]);
+    var yLabel = this.yAttribute_ ? this.yAttribute_ : "Count";
+    var yAttributeHtml = $('<div/>').html(yLabel + ': ' + data.values);
     tooltip.append(xAttributeHtml);
     tooltip.append(yAttributeHtml);
     return tooltip;
@@ -299,7 +306,7 @@ charts.Timeline.prototype.createTooltip_ = function (data, periodStartDate) {
 
 charts.Timeline.prototype.centerTooltip_ = function (tooltip, data, periodStartPixels) {
     var centerPointX = periodStartPixels + this.x_.rangeBand() / 2;
-    var centerPointY = this.y_(data[this.yAttribute_]);
+    var centerPointY = this.y_(data.values);
     // center the tooltip on the selected bar
     tooltip.css({
         'margin-left': this.margin_.left + $(this.chartSelector_).position().left + 'px',
@@ -387,7 +394,7 @@ charts.Timeline.prototype.removeFilterListeners = function () {
 charts.Timeline.prototype.hideInactiveData_ = function (filterStartDate, filterEndDate) {
     var me = this;
     d3.selectAll('.bar').attr('class', function (d) {
-        var date = d[me.xAttribute_];
+        var date = d.key;
         return (filterStartDate <= date && date < filterEndDate) ? charts.Timeline.ACTIVE_BAR_CLASS_ : charts.Timeline.INACTIVE_BAR_CLASS_;
     });
 };
