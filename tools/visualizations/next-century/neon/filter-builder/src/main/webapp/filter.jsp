@@ -36,7 +36,7 @@
     <div id="datastore">
         <h3>Select a Datastore</h3>
 
-        <div class="controls controls-row">
+        <div class=" controls-row">
 
             <div class="control-group">
                 <label class="control-label" for="datastore-select">Datastore Type</label>
