@@ -134,7 +134,7 @@ class QueryServiceTest {
         def queryExecutor = queryExecutorMock.proxyInstance()
         setQueryServiceConnection(queryExecutor)
 
-        def result = queryService.getSelectionWhere(filter, null,  null)
+        def result = queryService.getSelectionWhere(filter, null, null)
         queryExecutorMock.verify(queryExecutor)
 
         // in this case the input and output is the same because there is no transform
@@ -154,7 +154,7 @@ class QueryServiceTest {
         def queryExecutor = queryExecutorMock.proxyInstance()
         setQueryServiceConnection(queryExecutor)
 
-        def result = queryService.getSelectionWhere(filter, transform,  null)
+        def result = queryService.getSelectionWhere(filter, transform, null)
         queryExecutorMock.verify(queryExecutor)
 
         def array = new JSONObject(result).getJSONArray("data")
@@ -174,13 +174,27 @@ class QueryServiceTest {
         def queryExecutor = queryExecutorMock.proxyInstance()
         setQueryServiceConnection(queryExecutor)
 
-        def result = queryService.getSelectionWhere(filter, transform, ["val1","25"])
+        def result = queryService.getSelectionWhere(filter, transform, ["val1", "25"])
         queryExecutorMock.verify(queryExecutor)
 
         def array = new JSONObject(result).getJSONArray("data")
         assert array.length() == 2
         assertKeyValue(array, 0, "key1", 25)
         assertKeyValue(array, 1, "notReplaced", "abc")
+    }
+
+    @Test
+    void "set connection state"() {
+        def connectionStateMock = new MockFor(ConnectionState)
+        def expectedDatastore = "mockdatastore"
+        def expectedHostName = "mockhostname"
+        connectionStateMock.demand.createConnection { datastore, hostname ->
+            assert datastore == expectedDatastore; assert hostname == expectedHostName
+        }
+        def connectionState = connectionStateMock.proxyInstance()
+        queryService.connectionState = connectionState
+        queryService.connect(expectedDatastore,expectedHostName)
+        connectionStateMock.verify(connectionState)
     }
 
     /**
@@ -206,7 +220,7 @@ class QueryServiceTest {
         return jsonObject.getJSONArray("data")
     }
 
-    private void setQueryServiceConnection(QueryExecutor executor){
+    private void setQueryServiceConnection(QueryExecutor executor) {
         ConnectionState connectionState = new ConnectionState()
         connectionState.queryExecutor = executor
         queryService.connectionState = connectionState

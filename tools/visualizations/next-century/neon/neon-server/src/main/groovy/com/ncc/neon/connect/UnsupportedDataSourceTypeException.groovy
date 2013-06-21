@@ -1,3 +1,5 @@
+package com.ncc.neon.connect
+
 /*
  * ************************************************************************
  * Copyright (c), 2013 Next Century Corporation. All Rights Reserved.
@@ -22,28 +24,12 @@
  */
 
 /**
- * This class has a list of the available channels that are used for messaging between
- * OWF widgets
- * @namespace neon.eventing
- * @class Channels
+ * Indicates neon does not know how to connect to this data source type
  */
+class UnsupportedDataSourceTypeException extends RuntimeException {
 
-neon.eventing.Channels = {};
+    UnsupportedDataSourceTypeException(DataSource source) {
+        super("Connecting to a " + source.name + " is not currently supported")
+    }
 
-/**
- * @property SELECTION_CHANGED
- * @type {String}
- */
-neon.eventing.Channels.SELECTION_CHANGED = 'selection_changed';
-
-/**
- * @property FILTERS_CHANGED
- * @type {String}
- */
-neon.eventing.Channels.FILTERS_CHANGED = 'filters_changed';
-
-/**
- * @property ACTIVE_DATASET_CHANGED
- * @type {String}
- */
-neon.eventing.Channels.ACTIVE_DATASET_CHANGED = 'active_dataset_changed';
+}

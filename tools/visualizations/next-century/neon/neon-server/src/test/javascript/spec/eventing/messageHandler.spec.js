@@ -52,6 +52,11 @@ describe('message handler', function () {
         testPublishedMessageReceived_(neon.eventing.Channels.FILTERS_CHANGED, 'filtersChanged', {id:"filtersChanged"});
     });
 
+    it('should be notified when a message is published to the active dataset changed channel', function() {
+        testPublishedMessageReceived_(neon.eventing.Channels.ACTIVE_DATASET_CHANGED, 'activeDatasetChanged', {id:"activeDatasetChanged"});
+    });
+
+
     it('should use the passed in context', function() {
         // for this test, the callback should act on the the context object
         var called = false;

@@ -1,3 +1,4 @@
+package com.ncc.neon.connect
 /*
  * ************************************************************************
  * Copyright (c), 2013 Next Century Corporation. All Rights Reserved.
@@ -19,31 +20,20 @@
  * PROPRIETARY AND CONFIDENTIAL TRADE SECRET MATERIAL NOT FOR DISCLOSURE OUTSIDE
  * OF NEXT CENTURY CORPORATION EXCEPT BY PRIOR WRITTEN PERMISSION AND WHEN
  * RECIPIENT IS UNDER OBLIGATION TO MAINTAIN SECRECY.
+ *
+ *
  */
+public enum DataSource {
 
-/**
- * This class has a list of the available channels that are used for messaging between
- * OWF widgets
- * @namespace neon.eventing
- * @class Channels
- */
+    MONGO("mongo"), HIVE("hive")
 
-neon.eventing.Channels = {};
+    String name
 
-/**
- * @property SELECTION_CHANGED
- * @type {String}
- */
-neon.eventing.Channels.SELECTION_CHANGED = 'selection_changed';
+    DataSource(name) {
+        this.name = name
+    }
 
-/**
- * @property FILTERS_CHANGED
- * @type {String}
- */
-neon.eventing.Channels.FILTERS_CHANGED = 'filters_changed';
-
-/**
- * @property ACTIVE_DATASET_CHANGED
- * @type {String}
- */
-neon.eventing.Channels.ACTIVE_DATASET_CHANGED = 'active_dataset_changed';
+    static DataSource fromName(name) {
+        DataSource.values().find { name == it.name }
+    }
+}

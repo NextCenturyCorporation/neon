@@ -1,12 +1,12 @@
 package com.ncc.neon.services
 
-import com.ncc.neon.connect.ConnectionInfo
 import com.ncc.neon.connect.ConnectionState
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
 
 import javax.ws.rs.*
 import javax.ws.rs.core.MediaType
+
 /*
  * ************************************************************************
  * Copyright (c), 2013 Next Century Corporation. All Rights Reserved.
@@ -49,18 +49,9 @@ class FilterService{
 
     @POST
     @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
-    @Produces(MediaType.APPLICATION_JSON)
     @Path("connect")
-    String connect(@FormParam("datastore") String datastore, @FormParam("hostname") String hostname){
-        ConnectionInfo.DataSource dataSource = ConnectionInfo.DataSource.MONGO
-        if(datastore == "hive") {
-            dataSource = ConnectionInfo.DataSource.HIVE
-        }
-
-        ConnectionInfo connectionInfo = new ConnectionInfo(dataSource: dataSource, connectionUrl: hostname)
-        connectionState.createConnection(connectionInfo)
-
-        return '{ "success": true }'
+    void connect(@FormParam("datastore") String datastore, @FormParam("hostname") String hostname){
+        connectionState.createConnection(datastore,hostname)
     }
 
     @POST

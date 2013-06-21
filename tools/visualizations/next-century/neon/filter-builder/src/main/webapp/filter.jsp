@@ -9,8 +9,15 @@
 
     <%
         String neonServerUrl = getServletContext().getInitParameter("neon.url");
+        String owfServerUrl = getServletContext().getInitParameter("owf.url");
     %>
 
+    <link rel="stylesheet" type="text/css" href="css/bootstrap/bootstrap.min.css">
+    <link rel="stylesheet" type="text/css" href="<%=neonServerUrl%>/css/neon.css">
+    <link rel="stylesheet" type="text/css" href="css/filter.css">
+    <link href="css/ui-darkness/jquery-ui-1.10.3.custom.min.css" rel="stylesheet">
+
+    <script src="<%=owfServerUrl%>/js/owf-widget.js"></script>
     <script src="<%=neonServerUrl%>/js/neon.js"></script>
 
     <script>
@@ -19,65 +26,83 @@
     </script>
 
 
-    <link href="css/ui-darkness/jquery-ui-1.10.3.custom.min.css" rel="stylesheet">
-    <!--<script src="js/jquery/jquery-1.10.1.min.js"></script> -->
     <script src="js/jquery/jquery-ui-1.10.3.custom.min.js"></script>
     <script src="js/filterwizard.js"></script>
 
 </head>
 <body>
 
-    <h3>Select a Datastore</h3>
+<div class="container">
+    <div id="datastore">
+        <h3>Select a Datastore</h3>
 
-    <table>
-        <tr>
-            <td style="width : 200px;">Datastore Type</td>
-            <td style="width : 250px;">Datastore Host Name</td>
-            <td></td>
-        </tr>
-        <tr>
-            <td>
-                <select id="datastore-select">
-                    <option value="mongo">Mongo</option>
-                    <option value="hive">Hive</option>
-                </select>
-            </td>
-            <td>
-                <div class="ui-widget">
-                    <input id="hostname-input" />
+        <div class="controls controls-row">
+
+            <div class="control-group">
+                <label class="control-label" for="datastore-select">Datastore Type</label>
+
+                <div class="controls">
+                    <select id="datastore-select">
+                        <option value="mongo">Mongo</option>
+                        <option value="hive">Hive</option>
+                    </select>
                 </div>
-            </td>
-            <td>
-                <button id="datastore-button"> Continue</button>
-            </td>
-        </tr>
-    </table>
+            </div>
 
-    <br/>
+            <div class="control-group">
+                <label class="control-label" for="hostname-input">Datastore Host Name</label>
+
+                <div class="controls">
+                    <input type="text" id="hostname-input"/>
+                </div>
+            </div>
+
+            <div class="control-group">
+                <!-- spacer label to align the button -->
+                <label class="control-label" for="datastore-button">&nbsp;</label>
+
+                <div class="controls">
+                    <button class="btn" id="datastore-button">Continue</button>
+                </div>
+            </div>
+        </div>
+    </div>
 
     <div id="db-table">
-        <h4> Select a Database and Table </h4>
+        <h4>Select a Database and Table</h4>
 
-        <table>
-            <tr>
-                <td style="width : 200px">Database Name</td>
-                <td style="width : 250px">Table Name</td>
-            </tr>
-            <tr>
-                <td>
+        <div class="controls controls-row">
+
+            <div class="control-group">
+                <label class="control-label" for="database-select">Database Name</label>
+
+                <div class="controls">
                     <select id="database-select">
                         <option value="">Select Database...</option>
                     </select>
-                </td>
-                <td>
+                </div>
+            </div>
+
+            <div class="control-group">
+                <label class="control-label" for="table-select">Table Name</label>
+
+                <div class="controls">
                     <select id="table-select"></select>
-                </td>
-                <td>
-                    <button id="database-table-button"> Continue</button>
-                </td>
-            </tr>
-        </table>
+                </div>
+            </div>
+
+            <div class="control-group">
+                <!-- spacer label to align the button -->
+                <label class="control-label" for="database-table-button">&nbsp;</label>
+
+                <div class="controls">
+                    <button class="btn" id="database-table-button">Continue</button>
+                </div>
+            </div>
+        </div>
+
     </div>
+</div>
 
 </body>
 </html>

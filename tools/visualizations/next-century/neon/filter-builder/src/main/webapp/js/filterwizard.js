@@ -1,5 +1,16 @@
 (function () {
 
+
+    var messageHandler;
+    OWF.ready(function () {
+        // right now the message handler only receives messages (which happens just by creating it),
+        // but in the future we might want to send messages based on actions performed on the table
+        messageHandler = new neon.eventing.MessageHandler({
+            activeDatasetChaged: broadcastActiveDataset
+        });
+
+    });
+
     function init() {
         hideWizardSteps();
         setupHostnames();
@@ -23,6 +34,7 @@
 
     function addClickHandlers() {
         $("#datastore-button").click(connectToDatastore);
+        $("#database-table-button").click(broadcastActiveDataset);
     }
 
     function connectToDatastore() {
@@ -47,24 +59,34 @@
                         $('<option>').val(value).text(value).appendTo(databaseSelectSelector);
                     });
 
-                    databaseSelectSelector.change(function () {
-                        var selectedDatabase = $('#database-select option:selected');
-                        neon.util.AjaxUtils.doPost(neon.query.SERVER_URL + "/services/filterservice/tableNames",
-                            {
-                                data: { database: selectedDatabase.val() },
-                                success: function (tableNames) {
-                                    $('#table-select').find('option').remove();
-                                    $.each(tableNames, function (index, value) {
-                                        $('<option>').val(value).text(value).appendTo('#table-select');
-                                    });
+                    databaseSelectSelector.change(populateTables);
+                    populateTables();
+                }
+            });
+    }
 
-                                }
-                            });
+    function populateTables() {
+        var selectedDatabase = $('#database-select option:selected');
+        neon.util.AjaxUtils.doPost(neon.query.SERVER_URL + "/services/filterservice/tableNames",
+            {
+                data: { database: selectedDatabase.val() },
+                success: function (tableNames) {
+                    $('#table-select').find('option').remove();
+                    $.each(tableNames, function (index, value) {
+                        $('<option>').val(value).text(value).appendTo('#table-select');
                     });
 
                 }
             });
     }
+
+    function broadcastActiveDataset() {
+        var database = $('#database-select').val();
+        var table = $('#table-select').val();
+        var message = { "database" : database, "table" : table };
+        messageHandler.publishMessage(neon.eventing.Channels.ACTIVE_DATASET_CHANGED, message);
+    };
+
 
     $(function () {
         init();

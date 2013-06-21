@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html>
+<head>
+
+    <script>
+        widgetData = {
+            "universalName":"neon.charts.filterbuilder",
+            "displayName":"Filter Builder Widget",
+            "description": "Displays the data source importer and filter builder",
+            "widgetVersion":"1.0.0",
+            "widgetUrl":"https://localhost:9443/filter-builder/filter.jsp",
+            "imageUrlSmall":"https://localhost:9443/filter-builder/img/datastore.png",
+            "imageUrlLarge":"https://localhost:9443/filter-builder/img/datastore.png",
+            "width":800,
+            "height":600,
+            "visible":true,
+            "singleton":false,
+            "background":false,
+            "widgetTypes":[
+                "standard"
+            ],
+            "defaultTags":[
+            ],
+            "intents":{
+                "send": [],
+                "receive": []
+            }
+        };
+        var jsonData = JSON.stringify({
+            status:200,
+            data:widgetData
+        });
+        window.name = jsonData;
+
+    </script>
+
+</head>
+<body>
+
+</body>
+</html>

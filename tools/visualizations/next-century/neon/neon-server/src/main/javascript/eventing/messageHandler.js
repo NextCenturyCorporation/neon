@@ -37,7 +37,9 @@ neon.eventing.MessageHandler = function (callbackOpts) {
     var registerChannels = function() {
         _.each([
             {channel: neon.eventing.Channels.SELECTION_CHANGED, callback: me.selectionChanged},
-            {channel: neon.eventing.Channels.FILTERS_CHANGED, callback: me.filtersChanged}
+            {channel: neon.eventing.Channels.FILTERS_CHANGED, callback: me.filtersChanged},
+            {channel: neon.eventing.Channels.ACTIVE_DATASET_CHANGED, callback: me.activeDatasetChanged}
+
         ],
             function (channelConfig) {
                 OWF.Eventing.subscribe(channelConfig.channel,
@@ -64,6 +66,14 @@ neon.eventing.MessageHandler = function (callbackOpts) {
      * @type {Function}
      */
     this.filtersChanged = function (message) {
+    };
+
+    /**
+     * The callback function that is invoked when the active dataset changes
+     * @property activeDatasetChanged
+     * @type {Function}
+     */
+    this.activeDatasetChanged = function (message) {
     };
 
     /**

@@ -1,8 +1,10 @@
 package com.ncc.neon.connect
+
 import com.ncc.neon.query.QueryExecutor
 import org.springframework.context.annotation.Scope
 import org.springframework.context.annotation.ScopedProxyMode
 import org.springframework.web.context.WebApplicationContext
+
 /*
  * ************************************************************************
  * Copyright (c), 2013 Next Century Corporation. All Rights Reserved.
@@ -25,26 +27,25 @@ import org.springframework.web.context.WebApplicationContext
  * OF NEXT CENTURY CORPORATION EXCEPT BY PRIOR WRITTEN PERMISSION AND WHEN
  * RECIPIENT IS UNDER OBLIGATION TO MAINTAIN SECRECY.
  *
- * 
- * @author tbrooks
  */
 
 /**
- * Holds the current connection. Currently, this holds one connection to a datasource,
- * but can be updated to hold multiple connections or a connection pool..
+ * Holds the current connection
  */
 
 @Scope(value = WebApplicationContext.SCOPE_SESSION, proxyMode = ScopedProxyMode.TARGET_CLASS)
-class ConnectionState implements Serializable{
+class ConnectionState implements Serializable {
 
     private static final long serialVersionUID = 1L
 
     private transient Connection connection
     private transient QueryExecutor queryExecutor
+    private transient boolean init = false
     private ConnectionInfo info
 
-    void createConnection(ConnectionInfo info){
-        if(!info || info == this.info){
+    void createConnection(ConnectionInfo info) {
+        // the init check ensures the connection is re-established after deserialization
+        if (init && (!info || info == this.info)) {
             return
         }
 
@@ -55,28 +56,42 @@ class ConnectionState implements Serializable{
         def client = connection?.connect(info)
 
         queryExecutor = QueryExecutorFactory.create(client)
+        init = true
     }
 
-    private void setupConnection(ConnectionInfo info){
-        if (info.dataSource == ConnectionInfo.DataSource.MONGO){
-            connection = new MongoConnection()
-        }
-        if (info.dataSource == ConnectionInfo.DataSource.HIVE){
-            connection = new HiveConnection()
+    void createConnection(String datastore, String hostname) {
+        DataSource dataSource = DataSource.fromName(datastore)
+        ConnectionInfo connectionInfo = new ConnectionInfo(dataSource: dataSource, connectionUrl: hostname)
+        createConnection(connectionInfo)
+    }
+
+    private void setupConnection(ConnectionInfo info) {
+        switch (info.dataSource) {
+            case DataSource.MONGO:
+                connection = new MongoConnection()
+                break
+            case DataSource.HIVE:
+                connection = new HiveConnection()
+                break
+            default:
+                throw new UnsupportedDataSourceTypeException(info.dataSource)
         }
     }
 
-    QueryExecutor getQueryExecutor(){
+    QueryExecutor getQueryExecutor() {
         queryExecutor
     }
 
-    Object readResolve() throws ObjectStreamException {
-        ConnectionState connectionState = new ConnectionState()
-        connectionState.createConnection(info)
-        return connectionState
+    // allow this method for deserializaiton
+    @SuppressWarnings('UnusedPrivateMethod')
+    private void readObject(ObjectInputStream ois)  {
+        ois.defaultReadObject()
+        init = false
+        createConnection(info)
     }
 
-    void closeConnection(){
+    void closeConnection() {
         connection?.close()
     }
+
 }

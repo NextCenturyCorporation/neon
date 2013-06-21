@@ -3,6 +3,7 @@ import com.mongodb.MongoClient
 import com.ncc.neon.config.MongoConfigParser
 import com.ncc.neon.connect.ConnectionInfo
 import com.ncc.neon.connect.ConnectionState
+import com.ncc.neon.connect.DataSource
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.ComponentScan
 import org.springframework.context.annotation.Configuration
@@ -50,7 +51,7 @@ class MongoIntegrationTestContext {
     ConnectionState connectionState(){
         def hostsString = System.getProperty("mongo.hosts", "localhost")
         ConnectionState connectionState = new ConnectionState()
-        ConnectionInfo info = new ConnectionInfo(dataSource: ConnectionInfo.DataSource.MONGO, connectionUrl: hostsString)
+        ConnectionInfo info = new ConnectionInfo(dataSource: DataSource.MONGO, connectionUrl: hostsString)
         connectionState.createConnection(info)
         return connectionState
     }

@@ -20,30 +20,7 @@
  * OF NEXT CENTURY CORPORATION EXCEPT BY PRIOR WRITTEN PERMISSION AND WHEN
  * RECIPIENT IS UNDER OBLIGATION TO MAINTAIN SECRECY.
  */
-
-/**
- * This class has a list of the available channels that are used for messaging between
- * OWF widgets
- * @namespace neon.eventing
- * @class Channels
- */
-
-neon.eventing.Channels = {};
-
-/**
- * @property SELECTION_CHANGED
- * @type {String}
- */
-neon.eventing.Channels.SELECTION_CHANGED = 'selection_changed';
-
-/**
- * @property FILTERS_CHANGED
- * @type {String}
- */
-neon.eventing.Channels.FILTERS_CHANGED = 'filters_changed';
-
-/**
- * @property ACTIVE_DATASET_CHANGED
- * @type {String}
- */
-neon.eventing.Channels.ACTIVE_DATASET_CHANGED = 'active_dataset_changed';
+.control-group {
+    display: inline-block;
+    vertical-align: top;
+}

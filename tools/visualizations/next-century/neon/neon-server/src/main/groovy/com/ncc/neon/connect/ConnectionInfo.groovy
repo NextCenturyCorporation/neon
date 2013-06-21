@@ -31,16 +31,11 @@ import groovy.transform.ToString
 
 @EqualsAndHashCode
 @ToString
-class ConnectionInfo implements Serializable{
+class ConnectionInfo implements Serializable {
 
     private static final long serialVersionUID = 1L
 
-    enum DataSource{
-        MONGO,
-        HIVE
-    }
-
     DataSource dataSource
     String connectionUrl
-    Map<String,String> options = [:]
+    Map<String, String> options = [:]
 }
