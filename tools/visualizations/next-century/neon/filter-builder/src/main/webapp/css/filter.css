@@ -24,3 +24,7 @@
     display: inline-block;
     vertical-align: top;
 }
+
+.container {
+    padding: 10px;
+}
