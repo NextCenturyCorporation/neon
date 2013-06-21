@@ -271,7 +271,7 @@ charts.Timeline.prototype.aggregateData_ = function (data) {
             return d3.sum(d, function (el) {
                 return me.yAttribute_ ? el[me.yAttribute_] : 1;
             });
-        }).entries(data).map(function(d) {
+        }).entries(data).map(function (d) {
             // d3 will create a string for the date but we want the data object
             d.key = new Date(d.key);
             return d;
@@ -292,7 +292,7 @@ charts.Timeline.prototype.showTooltip_ = function (data) {
 
 charts.Timeline.prototype.createTooltip_ = function (data, periodStartDate) {
     var tooltip = $('<div/>', {
-        "class": "tooltip",
+        "class": "charttooltip",
         id: charts.Timeline.TOOLTIP_ID_
     });
 
@@ -335,9 +335,7 @@ charts.Timeline.prototype.drawYAxis_ = function (chart) {
 charts.Timeline.prototype.drawSlider_ = function () {
     var me = this;
     $(this.chartSelector_).append('<div id="' + charts.Timeline.SLIDER_DIV_NAME_ + '"/>');
-    $(function () {
-        me.createSlider_();
-    });
+    me.createSlider_();
 };
 
 charts.Timeline.prototype.createSlider_ = function () {

@@ -21,46 +21,6 @@
  * RECIPIENT IS UNDER OBLIGATION TO MAINTAIN SECRECY.
  */
 
-#plot {
-    font: 10px sans-serif;
-    text-align: right;
-    background-color: white;
-}
-
-#slider {
-    /* fix for chrome redraw bug that leaves a stray mark when dragging sometimes */
-    outline: 1px solid rgba(0,0,0,0);
-}
-
-rect.active {
-    fill: steelblue;
-}
-
-rect.inactive {
-    fill: lightgrey;
-}
-
-.axis {
-    shape-rendering: crispEdges;
-}
-
-.axis line, .axis path {
-    stroke: darkgrey;
-    stroke-width: 1px;
-    fill: none;
-}
-
-/* do not use .tooltip to avoid conflict with boostrap */
-.charttooltip {
-
-    /* just use a big number to ensure the tooltip is on top */
-    z-index: 10000;
-    position: absolute;
+.container {
     padding: 10px;
-    background-color: white;
-    border: 2px solid black;
-    border-radius: 15px;
-    font-family: sans-serif;
-    text-align: center;
-    pointer-events: none;
 }

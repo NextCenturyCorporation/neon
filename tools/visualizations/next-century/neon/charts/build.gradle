@@ -13,6 +13,7 @@ javascript.source {
             srcDir jsSrcDir
             include '**/*.js'
             exclude 'namespaces.js'
+            exclude 'timelinewidget.js'
         }
     }
     // the libs need to be included in certain orders, so break the libs up
@@ -53,6 +54,9 @@ war {
     }
 
     from(jsOutputFile) {
+        into 'js'
+    }
+    from("${jsSrcDir}/timelinewidget.js") {
         into 'js'
     }
 }
