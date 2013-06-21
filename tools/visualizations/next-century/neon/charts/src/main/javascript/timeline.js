@@ -310,7 +310,8 @@ charts.Timeline.prototype.centerTooltip_ = function (tooltip, data, periodStartP
     // center the tooltip on the selected bar
     tooltip.css({
         'margin-left': this.margin_.left + $(this.chartSelector_).position().left + 'px',
-        'top': centerPointY + 'px',
+        'margin-top': this.margin_.top + $(this.chartSelector_).position().top + 'px',
+        'top': (centerPointY - $('#' + charts.Timeline.TOOLTIP_ID_).innerHeight() / 2) + 'px',
         'left': (centerPointX - $('#' + charts.Timeline.TOOLTIP_ID_).innerWidth() / 2) + 'px'
     });
 };

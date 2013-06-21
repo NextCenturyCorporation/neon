@@ -8,7 +8,7 @@
 
     <title>Timeline widget</title>
 
-    <%--<link rel="stylesheet" type="text/css" href="css/bootstrap/bootstrap.min.css">--%>
+    <link rel="stylesheet" type="text/css" href="css/bootstrap/bootstrap.min.css">
     <link rel="stylesheet" type="text/css" href="css/timelinewidget.css">
     <link rel="stylesheet" type="text/css" href="css/timeline.css">
     <link rel="stylesheet" type="text/css" href="css/jqueryui/smoothness/jquery-ui-1.10.3.custom.min.css">
