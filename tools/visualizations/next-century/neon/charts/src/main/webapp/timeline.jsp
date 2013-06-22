@@ -14,6 +14,7 @@
     <link rel="stylesheet" type="text/css" href="css/jqueryui/smoothness/jquery-ui-1.10.3.custom.min.css">
     <link rel="stylesheet" type="text/css" href="<%=neonServerUrl%>/css/neon.css">
 
+
     <script src="<%=owfServerUrl%>/js/owf-widget.js"></script>
     <script src="<%=neonServerUrl%>/js/neon.js"></script>
 
@@ -30,17 +31,38 @@
 <div class="container">
 
 
-    <div>
-        <label for="x">X (Date):</label>
-        <select id="x"></select>
+    <div class="controls-row">
+        <div class="control-group">
+            <label class="control-label" for="x">x-axis (Date)</label>
 
-        <label for="y">Y:</label>
-        <select id="y"></select>
+            <div class="controls">
+                <select id="x"></select>
+            </div>
+        </div>
+
+        <div class="control-group">
+            <label class="control-label" for="y">y-axis</label>
+
+            <div class="controls">
+                <select id="y"></select>
+            </div>
+        </div>
     </div>
 
     <div id="timeline">
         <div id="chart"></div>
     </div>
+
+
+    <div class="control-group">
+        <label class="control-label" for="time-granularity">Time Granularity</label>
+
+        <div class="controls">
+            <select id="time-granularity">
+            </select>
+        </div>
+    </div>
+
 
 </div>
 

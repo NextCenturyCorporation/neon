@@ -29,7 +29,7 @@ $(document).ready(function () {
 
     OWF.ready(function () {
         var messageHandler = new neon.eventing.MessageHandler({
-            activeDatasetChanged: populateDropdowns,
+            activeDatasetChanged: populateAttributeDropdowns,
             filtersChanged: updateFilterId
 
         });
@@ -42,13 +42,13 @@ $(document).ready(function () {
             }
         }
 
-        function populateDropdowns(message) {
+        function populateAttributeDropdowns(message) {
             datasource = message.database;
             datasetId = message.table;
-            neon.query.getFieldNames(datasource, datasetId, doPopuplateDropdowns);
+            neon.query.getFieldNames(datasource, datasetId, doPopuplateAttributeDropdowns);
         };
 
-        function doPopuplateDropdowns(data) {
+        function doPopuplateAttributeDropdowns(data) {
             ['x', 'y'].forEach(function (selectId) {
                 var select = $('#' + selectId);
                 select.empty();
@@ -109,15 +109,18 @@ $(document).ready(function () {
                 return result;
             }) : [];
 
+
+            var granularity = $('#time-granularity option:selected').val()
             var opts = { "data": dataByDate, "x": xAttr, "y": yAttr,
-                "interval": charts.Timeline.DAY, width: 600, height: 300};
+                "interval": granularity, width: 600, height: 400};
+
 
             var timeline = new charts.Timeline('#chart', opts);
-            configureFiltering(timeline,xAttr,yAttr);
+            configureFiltering(timeline, xAttr, yAttr);
             timeline.draw();
         };
 
-        function configureFiltering(timeline,xAttr,yAttr) {
+        function configureFiltering(timeline, xAttr, yAttr) {
             timeline.onFilter(function (startDate, endDate) {
                 var startFilterClause = neon.query.where(xAttr, '>=', startDate);
                 var endFilterClause = neon.query.where(yAttr, '<', endDate);
@@ -133,8 +136,21 @@ $(document).ready(function () {
             });
         };
 
-        drawChart();
+        function populateTimeGranularityDropdown() {
+            var dropdown = $('#time-granularity');
+            [charts.Timeline.HOUR, charts.Timeline.DAY, charts.Timeline.MONTH, charts.Timeline.YEAR].forEach(function (el) {
+                var displayText = el.charAt(0).toUpperCase() + el.slice(1);
+                var option = $('<option></option>').attr('value', el).text(displayText);
+                if (el === charts.Timeline.MONTH) {
+                    option.attr('selected', true);
+                }
+                dropdown.append(option);
+            });
+            dropdown.change(drawChart);
+        };
 
+        populateTimeGranularityDropdown();
+        drawChart();
     });
 
 });

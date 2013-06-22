@@ -24,3 +24,8 @@
 .container {
     padding: 10px;
 }
+
+.control-group {
+    display: inline-block;
+    vertical-align: top;
+}
