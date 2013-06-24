@@ -64,16 +64,20 @@ subprojects {
     }
 
 
-    task deployToTomcat {
-        dependsOn 'war'
+    task ('deployToTomcat', type: Copy) {
+        dependsOn war
         description = "Copies the project's war file to the owf tomcat webapps dir"
         group = DEPLOY_GROUP
+
+        doFirst{
+            delete "${owfTomcatWebapps}/${war.baseName}", "${owfTomcatWebapps}/${war.baseName}.war"
+        }
+
+        from war.destinationDir
+        into owfTomcatWebapps
+
         doLast {
             println "Copying $war.archivePath into $owfTomcatWebapps"
-            copy {
-                from war.archivePath
-                into owfTomcatWebapps
-            }
         }
     }
 
