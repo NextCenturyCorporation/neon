@@ -1,15 +1,19 @@
 (function () {
 
 
-    var messageHandler;
-    OWF.ready(function () {
-        // right now the message handler only receives messages (which happens just by creating it),
-        // but in the future we might want to send messages based on actions performed on the table
-        messageHandler = new neon.eventing.MessageHandler({
-            activeDatasetChaged: broadcastActiveDataset
-        });
+    var messageHandler = {
+        publishMessage: function(){}
+    };
 
-    });
+    if(typeof (OWF) !== "undefined"){
+        OWF.ready(function () {
+            // right now the message handler only receives messages (which happens just by creating it),
+            // but in the future we might want to send messages based on actions performed on the table
+            messageHandler = new neon.eventing.MessageHandler({
+                activeDatasetChaged: broadcastActiveDataset
+            });
+        });
+    }
 
     function init() {
         hideWizardSteps();
@@ -85,7 +89,7 @@
         var table = $('#table-select').val();
         var message = { "database" : database, "table" : table };
         messageHandler.publishMessage(neon.eventing.Channels.ACTIVE_DATASET_CHANGED, message);
-    };
+    }
 
 
     $(function () {

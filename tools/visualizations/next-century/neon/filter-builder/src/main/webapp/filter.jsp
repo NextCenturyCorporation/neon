@@ -69,7 +69,7 @@
     </div>
 
     <div id="db-table">
-        <h4>Select a Database and Table</h4>
+        <h3>Select a Database and Table</h3>
 
         <div class="controls controls-row">
 
