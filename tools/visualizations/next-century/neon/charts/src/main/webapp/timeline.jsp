@@ -49,11 +49,6 @@
         </div>
     </div>
 
-    <div id="timeline">
-        <div id="chart"></div>
-    </div>
-
-
     <div class="control-group">
         <label class="control-label" for="time-granularity">Time Granularity</label>
 
@@ -63,6 +58,9 @@
         </div>
     </div>
 
+    <div id="timeline">
+        <div id="chart"></div>
+    </div>
 
 </div>
 
