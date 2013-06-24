@@ -384,6 +384,7 @@ charts.Timeline.prototype.notifyFilterListeners_ = function (filterStartDate, fi
  * and end dates of the filters
  */
 charts.Timeline.prototype.onFilter = function (callback) {
+
     $(this).on(charts.Timeline.FILTER_EVENT_TYPE_,
         function (event, filterStartDate, filterEndDate) {
             callback(filterStartDate, filterEndDate);
@@ -399,7 +400,6 @@ charts.Timeline.prototype.removeFilterListeners = function () {
 };
 
 charts.Timeline.prototype.hideInactiveData_ = function (filterStartDate, filterEndDate) {
-    var me = this;
     d3.selectAll('.bar').attr('class', function (d) {
         var date = d.key;
         return (filterStartDate <= date && date < filterEndDate) ? charts.Timeline.ACTIVE_BAR_CLASS_ : charts.Timeline.INACTIVE_BAR_CLASS_;

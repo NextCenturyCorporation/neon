@@ -116,16 +116,17 @@ $(document).ready(function () {
 
 
             var timeline = new charts.Timeline('#chart', opts);
-            configureFiltering(timeline, xAttr, yAttr);
+            configureFiltering(timeline, xAttr);
             timeline.draw();
         };
 
-        function configureFiltering(timeline, xAttr, yAttr) {
+        function configureFiltering(timeline, xAttr) {
             timeline.onFilter(function (startDate, endDate) {
                 var startFilterClause = neon.query.where(xAttr, '>=', startDate);
-                var endFilterClause = neon.query.where(yAttr, '<', endDate);
+                var endFilterClause = neon.query.where(xAttr, '<', endDate);
                 var filterClause = neon.query.and(startFilterClause, endFilterClause);
                 var filter = new neon.query.Filter().selectFrom(datasource, datasetId).where(filterClause);
+
 
                 if (filterId) {
                     eventPublisher.replaceFilter(filterId, filter)
