@@ -71,6 +71,7 @@ charts.Timeline = function (chartSelector, opts) {
     // use the raw data for min and max date so we can get the true values
     this.minDate_ = this.computeMinDate_(opts.data);
     this.maxDate_ = this.computeMaxDate_(opts.data);
+    // the timePeriods_ contain the starting dates for each time period
     this.timePeriods_ = this.computeTimePeriods_();
     this.x_ = this.createXScale_();
     // set the width to be as close to the user specified size (but not larger) so the bars divide evenly into
@@ -126,27 +127,19 @@ charts.Timeline.TOOLTIP_ID_ = 'tooltip';
 
 
 /**
- * Draws the timeline in the component specified in the constructor
- * @method draw
- * @return {charts.Timeline} This timeline
+ * Adds a listener to be notified of filter events
+ * @method onFilter
+ * @param {Function} callback Notified when the filters change. It is called with 2 parameters - the start date
+ * and end dates of the filters
  */
-charts.Timeline.prototype.draw = function () {
-    this.drawChart_();
-    this.drawSlider_();
-    return this;
+charts.Timeline.prototype.onFilter = function (callback) {
+
+    $(this).on(charts.Timeline.FILTER_EVENT_TYPE_,
+        function (event, filterStartDate, filterEndDate) {
+            callback(filterStartDate, filterEndDate);
+        });
 };
 
-charts.Timeline.prototype.computeTimePeriods_ = function () {
-    var timePeriods = [];
-    if (charts.Timeline.isValidDate_(this.minDate_) && charts.Timeline.isValidDate_(this.maxDate_)) {
-        Array.prototype.push.apply(timePeriods, this.timeInterval_.range(this.timeInterval_(this.minDate_), this.maxDate_));
-    }
-    return timePeriods;
-};
-
-charts.Timeline.isValidDate_ = function (date) {
-    return date > charts.Timeline.ZERO_DATE_;
-};
 
 charts.Timeline.prototype.computeMinDate_ = function (data) {
     var me = this;
@@ -166,6 +159,26 @@ charts.Timeline.prototype.computeMaxDate_ = function (data) {
     // the +1 is so the max date is exclusive
     return maxDate ? new Date(maxDate.getTime() + 1) : charts.Timeline.ZERO_DATE_;
 };
+
+
+/**
+ * Computes the start dates for each of the time periods in the chart
+ * @method computeTimePeriods_
+ * @return {Array}
+ * @private
+ */
+charts.Timeline.prototype.computeTimePeriods_ = function () {
+    var timePeriods = [];
+    if (charts.Timeline.isValidDate_(this.minDate_) && charts.Timeline.isValidDate_(this.maxDate_)) {
+        Array.prototype.push.apply(timePeriods, this.timeInterval_.range(this.timeInterval_(this.minDate_), this.maxDate_));
+    }
+    return timePeriods;
+};
+
+charts.Timeline.isValidDate_ = function (date) {
+    return date > charts.Timeline.ZERO_DATE_;
+};
+
 
 charts.Timeline.prototype.createXScale_ = function () {
     // use an ordinal scale since each bar represents a discrete time block
@@ -228,6 +241,18 @@ charts.Timeline.createYAxisTickFormat_ = function () {
     };
 };
 
+
+/**
+ * Draws the timeline in the component specified in the constructor
+ * @method draw
+ * @return {charts.Timeline} This timeline
+ */
+charts.Timeline.prototype.draw = function () {
+    this.drawChart_();
+    this.drawSlider_();
+    return this;
+};
+
 charts.Timeline.prototype.drawChart_ = function () {
     var chart = this.drawChartSVG_();
     this.bindData_(chart);
@@ -270,28 +295,6 @@ charts.Timeline.prototype.bindData_ = function (chart) {
         });
 };
 
-/**
- * Aggregates the data based on the currently selected time period
- * @method aggregateData_
- * @param {Array} data The raw data to aggregate
- * @private
- * @return {Object} An array of objects whose keys are `key` and `values`, whose values are the time period start
- * and the number of items in that time period respectively
- */
-charts.Timeline.prototype.aggregateData_ = function (data) {
-    var me = this;
-    return d3.nest().key(function (d) {
-        return me.timeInterval_(d[me.xAttribute_]);
-    }).rollup(function (d) {
-            return d3.sum(d, function (el) {
-                return me.yAttribute_ ? el[me.yAttribute_] : 1;
-            });
-        }).entries(data).map(function (d) {
-            // d3 will create a string for the date but we want the data object
-            d.key = new Date(d.key);
-            return d;
-        });
-};
 
 charts.Timeline.prototype.showTooltip_ = function (data) {
     var periodStartPixels = this.x_(this.timeInterval_(data.key));
@@ -334,6 +337,7 @@ charts.Timeline.prototype.centerTooltip_ = function (tooltip, data, periodStartP
 charts.Timeline.prototype.hideTooltip_ = function () {
     $('#' + charts.Timeline.TOOLTIP_ID_).remove();
 };
+
 
 charts.Timeline.prototype.drawXAxis_ = function (chart) {
     chart.append('g')
@@ -380,23 +384,6 @@ charts.Timeline.prototype.doSliderChange_ = function (event, slider) {
     this.notifyFilterListeners_(filterStartDate, filterEndDate);
 };
 
-charts.Timeline.prototype.notifyFilterListeners_ = function (filterStartDate, filterEndDate) {
-    $(this).trigger(charts.Timeline.FILTER_EVENT_TYPE_, [filterStartDate, filterEndDate]);
-};
-
-/**
- * Adds a listener to be notified of filter events
- * @method onFilter
- * @param {Function} callback Notified when the filters change. It is called with 2 parameters - the start date
- * and end dates of the filters
- */
-charts.Timeline.prototype.onFilter = function (callback) {
-
-    $(this).on(charts.Timeline.FILTER_EVENT_TYPE_,
-        function (event, filterStartDate, filterEndDate) {
-            callback(filterStartDate, filterEndDate);
-        });
-};
 
 /**
  * Removes the listener for filters
@@ -412,6 +399,34 @@ charts.Timeline.prototype.hideInactiveData_ = function (filterStartDate, filterE
         return (filterStartDate <= date && date < filterEndDate) ? charts.Timeline.ACTIVE_BAR_CLASS_ : charts.Timeline.INACTIVE_BAR_CLASS_;
     });
 };
+
+charts.Timeline.prototype.notifyFilterListeners_ = function (filterStartDate, filterEndDate) {
+    $(this).trigger(charts.Timeline.FILTER_EVENT_TYPE_, [filterStartDate, filterEndDate]);
+};
+
+/**
+ * Aggregates the data based on the currently selected time period
+ * @method aggregateData_
+ * @param {Array} data The raw data to aggregate
+ * @private
+ * @return {Object} An array of objects whose keys are `key` and `values`, whose values are the time period start
+ * and the number of items in that time period respectively
+ */
+charts.Timeline.prototype.aggregateData_ = function (data) {
+    var me = this;
+    return d3.nest().key(function (d) {
+        return me.timeInterval_(d[me.xAttribute_]);
+    }).rollup(function (d) {
+            return d3.sum(d, function (el) {
+                return me.yAttribute_ ? el[me.yAttribute_] : 1;
+            });
+        }).entries(data).map(function (d) {
+            // d3 will create a string for the date but we want the data object
+            d.key = new Date(d.key);
+            return d;
+        });
+};
+
 
 charts.Timeline.prototype.getDate_ = function (pixelValue) {
     // the d3 chart uses even intervals, but if the minimum/maximum point is selected, return those true points
