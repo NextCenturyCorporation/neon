@@ -13,11 +13,11 @@
     <link rel="stylesheet" type="text/css" href="css/timeline.css">
     <link rel="stylesheet" type="text/css" href="css/jqueryui/smoothness/jquery-ui-1.10.3.custom.min.css">
     <link rel="stylesheet" type="text/css" href="<%=neonServerUrl%>/css/neon.css">
-
-
     <script src="<%=owfServerUrl%>/js/owf-widget.js"></script>
     <script src="<%=neonServerUrl%>/js/neon.js"></script>
 
+    <script src="js/charts.js"></script>
+    <script src="js/timelinewidget.js"></script>
 
     <script>
         OWF.relayFile = 'js/eventing/rpc_relay.uncompressed.html';
@@ -63,10 +63,6 @@
     </div>
 
 </div>
-
-<script src="js/charts.js"></script>
-<script src="js/timelinewidget.js"></script>
-
 
 </body>
 </html>

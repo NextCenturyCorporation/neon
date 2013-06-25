@@ -21,13 +21,16 @@
  * RECIPIENT IS UNDER OBLIGATION TO MAINTAIN SECRECY.
  */
 
+
 $(document).ready(function () {
 
-    var datasource;
-    var datasetId;
-    var filterId;
+    OWF.ready(function (o) {
 
-    OWF.ready(function () {
+        var datasource;
+        var datasetId;
+        var filterId;
+
+
         var messageHandler = new neon.eventing.MessageHandler({
             activeDatasetChanged: populateAttributeDropdowns,
             filtersChanged: updateFilterId
@@ -83,13 +86,14 @@ $(document).ready(function () {
                 return;
             }
 
+            var groupByHourClause = new neon.query.GroupByFunctionClause(neon.query.HOUR, xAttr, 'hour');
             var groupByDayClause = new neon.query.GroupByFunctionClause(neon.query.DAY, xAttr, 'day');
             var groupByMonthClause = new neon.query.GroupByFunctionClause(neon.query.MONTH, xAttr, 'month');
             var groupByYearClause = new neon.query.GroupByFunctionClause(neon.query.YEAR, xAttr, 'year');
 
             var query = new neon.query.Query()
                 .selectFrom(datasource, datasetId)
-                .groupBy(groupByYearClause, groupByMonthClause, groupByDayClause)
+                .groupBy(groupByYearClause, groupByMonthClause, groupByDayClause, groupByHourClause)
                 .aggregate(neon.query.SUM, yAttr, yAttr);
 
             neon.query.executeQuery(query, doDrawChart);
@@ -101,7 +105,8 @@ $(document).ready(function () {
             var yAttr = getYAttribute();
 
             var dataByDate = data ? data.data.map(function (el) {
-                var date = new Date(el.month + '-' + el.day + '-' + el.year);
+                //month is 1-based
+                var date = new Date(el.year, el.month - 1, el.day, el.hour);
                 var count = el[yAttr];
                 var result = {};
                 result[xAttr] = date;
@@ -109,8 +114,7 @@ $(document).ready(function () {
                 return result;
             }) : [];
 
-
-            var granularity = $('#time-granularity option:selected').val()
+            var granularity = $('#time-granularity option:selected').val();
             var opts = { "data": dataByDate, "x": xAttr, "y": yAttr,
                 "interval": granularity, width: 600, height: 400};
 
@@ -152,6 +156,8 @@ $(document).ready(function () {
 
         populateTimeGranularityDropdown();
         drawChart();
+
     });
+
 
 });
