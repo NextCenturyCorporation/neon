@@ -120,7 +120,7 @@ charts.Timeline.INACTIVE_BAR_CLASS_ = 'bar inactive';
 charts.Timeline.TIME_INTERVALS_ = {};
 charts.Timeline.SLIDER_DIV_NAME_ = 'slider';
 charts.Timeline.ZERO_DATE_ = new Date(0);
-charts.Timeline.DEFAULT_MARGIN_ = {top: 20, bottom: 20, left: 30, right: 30};
+charts.Timeline.DEFAULT_MARGIN_ = {top: 20, bottom: 20, left: 40, right: 30};
 charts.Timeline.FILTER_EVENT_TYPE_ = 'filter';
 charts.Timeline.TOOLTIP_ID_ = 'tooltip';
 
@@ -178,6 +178,7 @@ charts.Timeline.prototype.createYScale_ = function () {
     var maxCount = d3.max(this.data_, function (d) {
         return d.values;
     });
+
     // may be NaN if no data
     if (!maxCount) {
         maxCount = 0;
@@ -217,8 +218,14 @@ charts.Timeline.prototype.createYAxis_ = function () {
     return d3.svg.axis()
         .scale(this.y_)
         .orient('left')
-        .tickFormat(d3.format('d'))
+        .tickFormat(charts.Timeline.createYAxisTickFormat_())
         .tickValues(this.y_.domain());
+};
+
+charts.Timeline.createYAxisTickFormat_ = function () {
+    return function (val) {
+        return val === 0 ? val : d3.format('.2s')(val);
+    };
 };
 
 charts.Timeline.prototype.drawChart_ = function () {
