@@ -65,6 +65,14 @@ class ConnectionState implements Serializable {
         createConnection(connectionInfo)
     }
 
+    QueryExecutor getQueryExecutor() {
+        queryExecutor
+    }
+
+    void closeConnection() {
+        connection?.close()
+    }
+
     private void setupConnection(ConnectionInfo info) {
         switch (info.dataSource) {
             case DataSource.MONGO:
@@ -78,20 +86,12 @@ class ConnectionState implements Serializable {
         }
     }
 
-    QueryExecutor getQueryExecutor() {
-        queryExecutor
-    }
-
     // allow this method for deserializaiton
     @SuppressWarnings('UnusedPrivateMethod')
     private void readObject(ObjectInputStream ois)  {
         ois.defaultReadObject()
         init = false
         createConnection(info)
-    }
-
-    void closeConnection() {
-        connection?.close()
     }
 
 }

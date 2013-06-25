@@ -25,6 +25,10 @@
     vertical-align: top;
 }
 
+.group-label {
+    width: 220px;
+}
+
 .container {
     padding: 10px;
 }

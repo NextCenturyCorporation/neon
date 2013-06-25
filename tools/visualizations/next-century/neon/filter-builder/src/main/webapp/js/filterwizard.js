@@ -1,6 +1,5 @@
 (function () {
 
-
     var messageHandler = {
         publishMessage: function(){}
     };
@@ -23,6 +22,7 @@
 
     function hideWizardSteps() {
         $("#db-table").hide();
+        $("#filter-content").hide();
     }
 
     function setupHostnames() {
@@ -38,10 +38,11 @@
 
     function addClickHandlers() {
         $("#datastore-button").click(connectToDatastore);
-        $("#database-table-button").click(broadcastActiveDataset);
+        $("#database-table-button").click(selectDatabaseAndTable);
     }
 
     function connectToDatastore() {
+        $("#filter-content").hide();
         $("#db-table").show();
         var databaseSelectedOption = $('#datastore-select option:selected');
         var hostnameSelector = $('#hostname-input');
@@ -49,11 +50,11 @@
         neon.util.AjaxUtils.doPost(neon.query.SERVER_URL + "/services/filterservice/connect",
             {
                 data: { datastore: databaseSelectedOption.val(), hostname: hostnameSelector.val() },
-                success: successfulConnect
+                success: populateDatabases
             });
     }
 
-    function successfulConnect() {
+    function populateDatabases() {
         var databaseSelectSelector = $('#database-select');
         neon.util.AjaxUtils.doPost(neon.query.SERVER_URL + "/services/filterservice/databaseNames",
             {
@@ -79,9 +80,22 @@
                     $.each(tableNames, function (index, value) {
                         $('<option>').val(value).text(value).appendTo('#table-select');
                     });
-
                 }
             });
+    }
+
+    function selectDatabaseAndTable(){
+        var selectedDatabase = $('#database-select option:selected');
+        var selectedTable = $('#table-select option:selected');
+        neon.util.AjaxUtils.doPost(neon.query.SERVER_URL + "/services/filterservice/columnNames",
+            {
+                data: { database: selectedDatabase.val(), table: selectedTable.val() },
+                success: function (columnNames) {
+                    neon.filter.grid(columnNames);
+                    $("#filter-content").show();
+                }
+            });
+        broadcastActiveDataset();
     }
 
     function broadcastActiveDataset() {

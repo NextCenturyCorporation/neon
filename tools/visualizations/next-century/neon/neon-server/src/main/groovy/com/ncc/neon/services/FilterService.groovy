@@ -62,11 +62,19 @@ class FilterService{
     }
 
     @POST
-    @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
     @Produces(MediaType.APPLICATION_JSON)
     @Path("tableNames")
     List<String> getTableNames(@FormParam("database") String database) {
         connectionState.queryExecutor.showTables(database)
+    }
+
+
+    @POST
+    @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
+    @Produces(MediaType.APPLICATION_JSON)
+    @Path("columnNames")
+    List<String> getColumnNames(@FormParam("database") String database, @FormParam("table") String table) {
+        connectionState.queryExecutor.getFieldNames(database, table).collect{ it }
     }
 
 }
