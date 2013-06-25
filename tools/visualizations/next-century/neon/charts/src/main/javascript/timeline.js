@@ -60,13 +60,13 @@ charts.Timeline = function (chartSelector, opts) {
     this.timeInterval_ = charts.Timeline.TIME_INTERVALS_[interval].interval;
     this.tickFormat_ = d3.time.format(opts.tickFormat || charts.Timeline.TIME_INTERVALS_[interval].tickFormat);
     this.tickStep_ = opts.step || charts.Timeline.TIME_INTERVALS_[interval].step;
-    this.height_ = opts.height || charts.Timeline.DEFAULT_HEIGHT_;
-    this.width_ = opts.width || charts.Timeline.DEFAULT_WIDTH_;
+    this.height = opts.height || charts.Timeline.DEFAULT_HEIGHT_;
+    this.width = opts.width || charts.Timeline.DEFAULT_WIDTH_;
     this.xAttribute_ = opts.x;
     this.yAttribute_ = opts.y;
-    this.margin_ = $.extend({}, charts.Timeline.DEFAULT_MARGIN_, opts.margin || {});
-    this.hMargin_ = this.margin_.left + this.margin_.right;
-    this.vMargin_ = this.margin_.top + this.margin_.bottom;
+    this.margin = $.extend({}, charts.Timeline.DEFAULT_MARGIN_, opts.margin || {});
+    this.hMargin_ = this.margin.left + this.margin.right;
+    this.vMargin_ = this.margin.top + this.margin.bottom;
     this.data_ = this.aggregateData_(opts.data);
     // use the raw data for min and max date so we can get the true values
     this.minDate_ = this.computeMinDate_(opts.data);
@@ -171,7 +171,7 @@ charts.Timeline.prototype.createXScale_ = function () {
     // use an ordinal scale since each bar represents a discrete time block
     return d3.scale.ordinal()
         .domain(this.timePeriods_)
-        .rangeRoundBands([0, this.width_ - this.hMargin_]);
+        .rangeRoundBands([0, this.width - this.hMargin_]);
 };
 
 charts.Timeline.prototype.createYScale_ = function () {
@@ -185,14 +185,14 @@ charts.Timeline.prototype.createYScale_ = function () {
     }
     return d3.scale.linear()
         .domain([0, maxCount])
-        .rangeRound([this.height_ - this.vMargin_, 0]);
+        .rangeRound([this.height - this.vMargin_, 0]);
 };
 
 charts.Timeline.prototype.computePlotWidth_ = function () {
     if (this.timePeriods_.length > 0) {
         return this.x_.rangeBand() * this.timePeriods_.length;
     }
-    return this.width_;
+    return this.width;
 };
 
 charts.Timeline.prototype.createXAxis_ = function () {
@@ -240,9 +240,9 @@ charts.Timeline.prototype.drawChartSVG_ = function () {
         .append('svg')
         .attr('id', 'plot')
         .attr('width', this.plotWidth_ + this.hMargin_)
-        .attr('height', this.height_)
+        .attr('height', this.height)
         .append('g')
-        .attr('transform', 'translate(' + this.margin_.left + ',' + this.margin_.top + ')');
+        .attr('transform', 'translate(' + this.margin.left + ',' + this.margin.top + ')');
     return chart;
 };
 
@@ -260,7 +260,7 @@ charts.Timeline.prototype.bindData_ = function (chart) {
         })
         .attr('width', this.x_.rangeBand())
         .attr('height', function (d) {
-            return me.height_ - me.vMargin_ - me.y_(d.values);
+            return me.height - me.vMargin_ - me.y_(d.values);
         })
         .on('mouseover', function (d) {
             me.showTooltip_(d);
@@ -324,8 +324,8 @@ charts.Timeline.prototype.centerTooltip_ = function (tooltip, data, periodStartP
     var centerPointY = this.y_(data.values);
     // center the tooltip on the selected bar
     tooltip.css({
-        'margin-left': this.margin_.left + $(this.chartSelector_).position().left + 'px',
-        'margin-top': this.margin_.top + $(this.chartSelector_).position().top + 'px',
+        'margin-left': this.margin.left + $(this.chartSelector_).position().left + 'px',
+        'margin-top': this.margin.top + $(this.chartSelector_).position().top + 'px',
         'top': (centerPointY - $('#' + charts.Timeline.TOOLTIP_ID_).innerHeight() / 2) + 'px',
         'left': (centerPointX - $('#' + charts.Timeline.TOOLTIP_ID_).innerWidth() / 2) + 'px'
     });
@@ -338,7 +338,7 @@ charts.Timeline.prototype.hideTooltip_ = function () {
 charts.Timeline.prototype.drawXAxis_ = function (chart) {
     chart.append('g')
         .attr('class', 'x axis')
-        .attr('transform', 'translate(0,' + (this.height_ - this.vMargin_) + ')')
+        .attr('transform', 'translate(0,' + (this.height - this.vMargin_) + ')')
         .call(this.xAxis_);
 };
 
@@ -365,7 +365,7 @@ charts.Timeline.prototype.createSlider_ = function () {
         values: [ 0, this.plotWidth_ ],
         change: $.proxy(charts.Timeline.prototype.doSliderChange_, me)
     });
-    $('#' + charts.Timeline.SLIDER_DIV_NAME_).width(me.plotWidth_).css({'margin-left': me.margin_.left + 'px', 'margin-right': me.margin_.right + 'px'});
+    $('#' + charts.Timeline.SLIDER_DIV_NAME_).width(me.plotWidth_).css({'margin-left': me.margin.left + 'px', 'margin-right': me.margin.right + 'px'});
     if (me.data_.length === 0) {
         $('#' + charts.Timeline.SLIDER_DIV_NAME_).slider('disable');
     }

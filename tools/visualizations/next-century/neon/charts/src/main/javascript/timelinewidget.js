@@ -24,7 +24,7 @@
 
 $(document).ready(function () {
 
-    OWF.ready(function (o) {
+    OWF.ready(function () {
 
         var datasource;
         var datasetId;
@@ -38,10 +38,39 @@ $(document).ready(function () {
         });
         var eventPublisher = new neon.eventing.OWFEventPublisher(messageHandler);
 
+        function configureButtons() {
+            configureResetFilterButton();
+        }
+
+        function getResetFilterButton() {
+            return $('#reset-filter');
+        }
+
+        function disableResetFilterButton() {
+            getResetFilterButton().attr('disabled','disabled');
+        }
+
+        function configureResetFilterButton() {
+            // initially disabled until filter added
+            disableResetFilterButton();
+            getResetFilterButton().click(function () {
+                eventPublisher.removeFilter(filterId);
+            });
+        }
+
         function updateFilterId(message) {
-            // keep track of own filter so we can just replace it rather than keep adding new ones
+
             if (message._source === messageHandler.id) {
-                filterId = message.addedIds[0];
+                if (message.addedIds.length) {
+                    // keep track of own filter so we can just replace it rather than keep adding new ones
+                    filterId = message.addedIds[0];
+                    getResetFilterButton().removeAttr('disabled');
+                }
+                else if (message.removedIds.length) {
+                    filterId = undefined;
+                    drawChart();
+                    disableResetFilterButton();
+                }
             }
         }
 
@@ -49,7 +78,7 @@ $(document).ready(function () {
             datasource = message.database;
             datasetId = message.table;
             neon.query.getFieldNames(datasource, datasetId, doPopuplateAttributeDropdowns);
-        };
+        }
 
         function doPopuplateAttributeDropdowns(data) {
             ['x', 'y'].forEach(function (selectId) {
@@ -97,7 +126,7 @@ $(document).ready(function () {
                 .aggregate(neon.query.SUM, yAttr, yAttr);
 
             neon.query.executeQuery(query, doDrawChart);
-        };
+        }
 
         function doDrawChart(data) {
 
@@ -122,7 +151,9 @@ $(document).ready(function () {
             var timeline = new charts.Timeline('#chart', opts);
             configureFiltering(timeline, xAttr);
             timeline.draw();
-        };
+            // make sure the reset button is aligned with the chart and has some spacing between it and the chart
+            $('#reset-filter').css({'margin-left': timeline.margin.left + 'px', 'margin-top': '20px'});
+        }
 
         function configureFiltering(timeline, xAttr) {
             timeline.onFilter(function (startDate, endDate) {
@@ -139,7 +170,7 @@ $(document).ready(function () {
                     eventPublisher.addFilter(filter);
                 }
             });
-        };
+        }
 
         function populateTimeGranularityDropdown() {
             var dropdown = $('#time-granularity');
@@ -152,9 +183,10 @@ $(document).ready(function () {
                 dropdown.append(option);
             });
             dropdown.change(drawChart);
-        };
+        }
 
         populateTimeGranularityDropdown();
+        configureButtons();
         drawChart();
 
     });

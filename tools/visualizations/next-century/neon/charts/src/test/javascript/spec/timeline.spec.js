@@ -163,7 +163,7 @@ describe('timeline', function () {
         var marginOverrides = { "top": 100, "left": 120};
         var opts = {  "data" : [], "x": "date", "y": "count", "interval": charts.Timeline.DAY, "margin": marginOverrides};
         var timeline = new charts.Timeline('#chart', opts);
-        var margin = timeline.margin_;
+        var margin = timeline.margin;
         expect(margin.top).toEqual(marginOverrides.top);
         expect(margin.left).toEqual(marginOverrides.left);
         expect(margin.bottom).toEqual(charts.Timeline.DEFAULT_MARGIN_.bottom);
