@@ -11,7 +11,9 @@ neon.filter = function () {
         });
     }
 
+    var filterId;
     var columnOptions;
+
     var operatorOptions = [
         { "value": "=", "text": "="},
         { "value": "!=", "text": "!="},
@@ -36,18 +38,35 @@ neon.filter = function () {
 
     var addFilter = function (id) {
         var updatingExisting = filterState.data[id].submittable;
-        var filterData = updateDataFromForm(id);
-
+        updateDataFromForm(id);
         var filter = buildFilterFromData();
 
-        neon.util.AjaxUtils.doPostJSON(filter, neon.query.SERVER_URL + "/services/filterservice/updateFilter",
+        var filterString = filterId ? "/" + filterId : "";
+
+        neon.util.AjaxUtils.doPostJSON(filter, neon.query.SERVER_URL + "/services/filterservice/updateFilter" + filterString,
             {
-                success: function () {
+                success: function (uuid) {
+                    filterId = uuid.addedIds[0];
                     if(!updatingExisting){
                         filterState.data.push(new CreateFilterData());
                     }
                     messageHandler.publishMessage(neon.eventing.Channels.FILTERS_CHANGED, {});
-                    refresh();
+                    redrawTemplateFromData();
+                }
+            });
+    };
+
+    var removeFilter = function (id) {
+        filterState.data.splice(id, 1);
+        var filter = buildFilterFromData();
+
+        var filterString = filterId ? "/" + filterId : "";
+        neon.util.AjaxUtils.doPostJSON(filter, neon.query.SERVER_URL + "/services/filterservice/updateFilter" + filterString,
+            {
+                success: function (uuid) {
+                    filterId = uuid.addedIds[0];
+                    messageHandler.publishMessage(neon.eventing.Channels.FILTERS_CHANGED, {});
+                    redrawTemplateFromData();
                 }
             });
     };
@@ -105,26 +124,12 @@ neon.filter = function () {
         if (!isNaN(filterData.value)) {
             filterData.value = parseFloat(filterData.value);
         }
-        return filterData;
     }
 
-    var removeFilter = function (id) {
-        filterState.data.splice(id, 1);
-        var filter = buildFilterFromData();
-        neon.util.AjaxUtils.doPostJSON(filter, neon.query.SERVER_URL + "/services/filterservice/updateFilter",
-            {
-                success: function () {
-                    messageHandler.publishMessage(neon.eventing.Channels.FILTERS_CHANGED, {});
-                    refresh();
-                }
-            });
-    };
-
-    var refresh = function () {
+    var redrawTemplateFromData = function () {
         var source = $("#filters").html();
         var template = Handlebars.compile(source);
         var html = template(filterState);
-
         $('#filter-content').html(html);
     };
 
@@ -132,17 +137,14 @@ neon.filter = function () {
         columnOptions = columnNames;
         filterState.data = [];
         filterState.data.push(new CreateFilterData());
-        refresh();
+        redrawTemplateFromData();
     };
 
     return {
-        filterState: filterState,
         addFilter: addFilter,
         removeFilter: removeFilter,
-        grid: grid,
-        refresh: refresh
+        grid: grid
     };
-
 }();
 
 $(function () {
