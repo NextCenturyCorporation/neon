@@ -22,7 +22,7 @@
 
     function hideWizardSteps() {
         $("#db-table").hide();
-        $("#filter-content").hide();
+        $("#filter-container").hide();
     }
 
     function setupHostnames() {
@@ -42,7 +42,7 @@
     }
 
     function connectToDatastore() {
-        $("#filter-content").hide();
+        $("#filter-container").hide();
         $("#db-table").show();
         var databaseSelectedOption = $('#datastore-select option:selected');
         var hostnameSelector = $('#hostname-input');
@@ -50,11 +50,11 @@
         neon.util.AjaxUtils.doPost(neon.query.SERVER_URL + "/services/filterservice/connect",
             {
                 data: { datastore: databaseSelectedOption.val(), hostname: hostnameSelector.val() },
-                success: populateDatabases
+                success: populateDatabaseDropdown
             });
     }
 
-    function populateDatabases() {
+    function populateDatabaseDropdown() {
         var databaseSelectSelector = $('#database-select');
         neon.util.AjaxUtils.doPost(neon.query.SERVER_URL + "/services/filterservice/databaseNames",
             {
@@ -64,13 +64,13 @@
                         $('<option>').val(value).text(value).appendTo(databaseSelectSelector);
                     });
 
-                    databaseSelectSelector.change(populateTables);
-                    populateTables();
+                    databaseSelectSelector.change(populateTableDropdown);
+                    populateTableDropdown();
                 }
             });
     }
 
-    function populateTables() {
+    function populateTableDropdown() {
         var selectedDatabase = $('#database-select option:selected');
         neon.util.AjaxUtils.doPost(neon.query.SERVER_URL + "/services/filterservice/tableNames",
             {
@@ -85,14 +85,12 @@
     }
 
     function selectDatabaseAndTable(){
-        var selectedDatabase = $('#database-select option:selected');
-        var selectedTable = $('#table-select option:selected');
         neon.util.AjaxUtils.doPost(neon.query.SERVER_URL + "/services/filterservice/columnNames",
             {
-                data: { database: selectedDatabase.val(), table: selectedTable.val() },
+                data: neon.wizard.dataset(),
                 success: function (columnNames) {
                     neon.filter.grid(columnNames);
-                    $("#filter-content").show();
+                    $("#filter-container").show();
                 }
             });
         broadcastActiveDataset();
@@ -103,13 +101,25 @@
         var table = $('#table-select').val();
         var message = { "database" : database, "table" : table };
         messageHandler.publishMessage(neon.eventing.Channels.ACTIVE_DATASET_CHANGED, message);
-    }
 
+    }
 
     $(function () {
         init();
     });
 
-
 })();
 
+var neon = neon || {};
+neon.wizard = function () {
+
+    function getBaseDatasetInfo(){
+        var selectedDatabase = $('#database-select option:selected');
+        var selectedTable = $('#table-select option:selected');
+        return { database: selectedDatabase.val(), table: selectedTable.val() }
+    }
+
+    return {
+        dataset : getBaseDatasetInfo
+    }
+}();

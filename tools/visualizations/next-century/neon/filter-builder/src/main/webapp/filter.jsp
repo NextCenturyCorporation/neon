@@ -32,30 +32,6 @@
     <script src="js/filtertable.js"></script>
 
     <script id="filters" type="text/x-handlebars-template">
-        <h3>Add Global Filters</h3>
-
-        <div class="controls controls-row">
-            <div class="control-group">
-                <label class="group-label">Column Name</label>
-            </div>
-            <div class="control-group">
-                <label class="group-label">Operator</label>
-            </div>
-            <div class="control-group">
-                <label class="group-label">Value</label>
-            </div>
-            <div class="control-group">
-                <label class="radio inline">
-                    <input type="radio" name="boolean" checked/>
-                    AND
-                </label>
-                <label class="radio inline">
-                    <input type="radio" name="boolean" />
-                    OR
-                </label>
-            </div>
-        </div>
-
         {{#data}}
         <div class="controls controls-row">
 
@@ -91,12 +67,15 @@
             </div>
 
             <div class="control-group">
-                {{#unless reachedServer}}
+                {{#unless submittable}}
                 <div class="btn-group">
                     <button class="btn btn-primary" id="add-filter-button" onclick="neon.filter.addFilter({{@index}})">Add</button>
                 </div>
                 {{/unless}}
-                {{#if reachedServer}}
+                {{#if submittable}}
+                <div class="btn-group">
+                    <button class="btn btn-primary" id="add-filter-button" onclick="neon.filter.addFilter({{@index}})">Update</button>
+                </div>
                 <div class="btn-group">
                     <button class="btn btn-danger" id="remove-filter-button" onclick="neon.filter.removeFilter({{@index}})">Remove</button>
                 </div>
@@ -112,7 +91,6 @@
 <body>
 
 <div class="container">
-
     <div id="datastore">
         <h3>Select a Datastore</h3>
 
@@ -183,7 +161,33 @@
 
     </div>
 
-    <div id="filter-content" />
+    <div id="filter-container">
+        <h3>Add Global Filters</h3>
+
+        <div class="controls controls-row">
+            <div class="control-group">
+                <label class="group-label">Column Name</label>
+            </div>
+            <div class="control-group">
+                <label class="group-label">Operator</label>
+            </div>
+            <div class="control-group">
+                <label class="group-label">Value</label>
+            </div>
+            <div class="control-group">
+                <label class="radio inline">
+                    <input type="radio" name="boolean" value="AND" checked/>
+                    AND
+                </label>
+                <label class="radio inline">
+                    <input type="radio" name="boolean" value="OR"/>
+                    OR
+                </label>
+            </div>
+        </div>
+        <div id="filter-content" />
+
+    </div>
 
 
 </div>
