@@ -60,17 +60,18 @@ charts.Timeline = function (chartSelector, opts) {
     this.timeInterval_ = charts.Timeline.TIME_INTERVALS_[interval].interval;
     this.tickFormat_ = d3.time.format(opts.tickFormat || charts.Timeline.TIME_INTERVALS_[interval].tickFormat);
     this.tickStep_ = opts.step || charts.Timeline.TIME_INTERVALS_[interval].step;
-    this.height_ = opts.height || charts.Timeline.DEFAULT_HEIGHT_;
-    this.width_ = opts.width || charts.Timeline.DEFAULT_WIDTH_;
+    this.height = opts.height || charts.Timeline.DEFAULT_HEIGHT_;
+    this.width = opts.width || charts.Timeline.DEFAULT_WIDTH_;
     this.xAttribute_ = opts.x;
     this.yAttribute_ = opts.y;
-    this.margin_ = $.extend({}, charts.Timeline.DEFAULT_MARGIN_, opts.margin || {});
-    this.hMargin_ = this.margin_.left + this.margin_.right;
-    this.vMargin_ = this.margin_.top + this.margin_.bottom;
+    this.margin = $.extend({}, charts.Timeline.DEFAULT_MARGIN_, opts.margin || {});
+    this.hMargin_ = this.margin.left + this.margin.right;
+    this.vMargin_ = this.margin.top + this.margin.bottom;
     this.data_ = this.aggregateData_(opts.data);
     // use the raw data for min and max date so we can get the true values
     this.minDate_ = this.computeMinDate_(opts.data);
     this.maxDate_ = this.computeMaxDate_(opts.data);
+    // the timePeriods_ contain the starting dates for each time period
     this.timePeriods_ = this.computeTimePeriods_();
     this.x_ = this.createXScale_();
     // set the width to be as close to the user specified size (but not larger) so the bars divide evenly into
@@ -126,27 +127,19 @@ charts.Timeline.TOOLTIP_ID_ = 'tooltip';
 
 
 /**
- * Draws the timeline in the component specified in the constructor
- * @method draw
- * @return {charts.Timeline} This timeline
+ * Adds a listener to be notified of filter events
+ * @method onFilter
+ * @param {Function} callback Notified when the filters change. It is called with 2 parameters - the start date
+ * and end dates of the filters
  */
-charts.Timeline.prototype.draw = function () {
-    this.drawChart_();
-    this.drawSlider_();
-    return this;
+charts.Timeline.prototype.onFilter = function (callback) {
+
+    $(this).on(charts.Timeline.FILTER_EVENT_TYPE_,
+        function (event, filterStartDate, filterEndDate) {
+            callback(filterStartDate, filterEndDate);
+        });
 };
 
-charts.Timeline.prototype.computeTimePeriods_ = function () {
-    var timePeriods = [];
-    if (charts.Timeline.isValidDate_(this.minDate_) && charts.Timeline.isValidDate_(this.maxDate_)) {
-        Array.prototype.push.apply(timePeriods, this.timeInterval_.range(this.timeInterval_(this.minDate_), this.maxDate_));
-    }
-    return timePeriods;
-};
-
-charts.Timeline.isValidDate_ = function (date) {
-    return date > charts.Timeline.ZERO_DATE_;
-};
 
 charts.Timeline.prototype.computeMinDate_ = function (data) {
     var me = this;
@@ -167,11 +160,31 @@ charts.Timeline.prototype.computeMaxDate_ = function (data) {
     return maxDate ? new Date(maxDate.getTime() + 1) : charts.Timeline.ZERO_DATE_;
 };
 
+
+/**
+ * Computes the start dates for each of the time periods in the chart
+ * @method computeTimePeriods_
+ * @return {Array}
+ * @private
+ */
+charts.Timeline.prototype.computeTimePeriods_ = function () {
+    var timePeriods = [];
+    if (charts.Timeline.isValidDate_(this.minDate_) && charts.Timeline.isValidDate_(this.maxDate_)) {
+        Array.prototype.push.apply(timePeriods, this.timeInterval_.range(this.timeInterval_(this.minDate_), this.maxDate_));
+    }
+    return timePeriods;
+};
+
+charts.Timeline.isValidDate_ = function (date) {
+    return date > charts.Timeline.ZERO_DATE_;
+};
+
+
 charts.Timeline.prototype.createXScale_ = function () {
     // use an ordinal scale since each bar represents a discrete time block
     return d3.scale.ordinal()
         .domain(this.timePeriods_)
-        .rangeRoundBands([0, this.width_ - this.hMargin_]);
+        .rangeRoundBands([0, this.width - this.hMargin_]);
 };
 
 charts.Timeline.prototype.createYScale_ = function () {
@@ -185,14 +198,14 @@ charts.Timeline.prototype.createYScale_ = function () {
     }
     return d3.scale.linear()
         .domain([0, maxCount])
-        .rangeRound([this.height_ - this.vMargin_, 0]);
+        .rangeRound([this.height - this.vMargin_, 0]);
 };
 
 charts.Timeline.prototype.computePlotWidth_ = function () {
     if (this.timePeriods_.length > 0) {
         return this.x_.rangeBand() * this.timePeriods_.length;
     }
-    return this.width_;
+    return this.width;
 };
 
 charts.Timeline.prototype.createXAxis_ = function () {
@@ -228,6 +241,18 @@ charts.Timeline.createYAxisTickFormat_ = function () {
     };
 };
 
+
+/**
+ * Draws the timeline in the component specified in the constructor
+ * @method draw
+ * @return {charts.Timeline} This timeline
+ */
+charts.Timeline.prototype.draw = function () {
+    this.drawChart_();
+    this.drawSlider_();
+    return this;
+};
+
 charts.Timeline.prototype.drawChart_ = function () {
     var chart = this.drawChartSVG_();
     this.bindData_(chart);
@@ -240,9 +265,9 @@ charts.Timeline.prototype.drawChartSVG_ = function () {
         .append('svg')
         .attr('id', 'plot')
         .attr('width', this.plotWidth_ + this.hMargin_)
-        .attr('height', this.height_)
+        .attr('height', this.height)
         .append('g')
-        .attr('transform', 'translate(' + this.margin_.left + ',' + this.margin_.top + ')');
+        .attr('transform', 'translate(' + this.margin.left + ',' + this.margin.top + ')');
     return chart;
 };
 
@@ -260,7 +285,7 @@ charts.Timeline.prototype.bindData_ = function (chart) {
         })
         .attr('width', this.x_.rangeBand())
         .attr('height', function (d) {
-            return me.height_ - me.vMargin_ - me.y_(d.values);
+            return me.height - me.vMargin_ - me.y_(d.values);
         })
         .on('mouseover', function (d) {
             me.showTooltip_(d);
@@ -270,28 +295,6 @@ charts.Timeline.prototype.bindData_ = function (chart) {
         });
 };
 
-/**
- * Aggregates the data based on the currently selected time period
- * @method aggregateData_
- * @param {Array} data The raw data to aggregate
- * @private
- * @return {Object} An array of objects whose keys are `key` and `values`, whose values are the time period start
- * and the number of items in that time period respectively
- */
-charts.Timeline.prototype.aggregateData_ = function (data) {
-    var me = this;
-    return d3.nest().key(function (d) {
-        return me.timeInterval_(d[me.xAttribute_]);
-    }).rollup(function (d) {
-            return d3.sum(d, function (el) {
-                return me.yAttribute_ ? el[me.yAttribute_] : 1;
-            });
-        }).entries(data).map(function (d) {
-            // d3 will create a string for the date but we want the data object
-            d.key = new Date(d.key);
-            return d;
-        });
-};
 
 charts.Timeline.prototype.showTooltip_ = function (data) {
     var periodStartPixels = this.x_(this.timeInterval_(data.key));
@@ -324,8 +327,8 @@ charts.Timeline.prototype.centerTooltip_ = function (tooltip, data, periodStartP
     var centerPointY = this.y_(data.values);
     // center the tooltip on the selected bar
     tooltip.css({
-        'margin-left': this.margin_.left + $(this.chartSelector_).position().left + 'px',
-        'margin-top': this.margin_.top + $(this.chartSelector_).position().top + 'px',
+        'margin-left': this.margin.left + $(this.chartSelector_).position().left + 'px',
+        'margin-top': this.margin.top + $(this.chartSelector_).position().top + 'px',
         'top': (centerPointY - $('#' + charts.Timeline.TOOLTIP_ID_).innerHeight() / 2) + 'px',
         'left': (centerPointX - $('#' + charts.Timeline.TOOLTIP_ID_).innerWidth() / 2) + 'px'
     });
@@ -335,10 +338,11 @@ charts.Timeline.prototype.hideTooltip_ = function () {
     $('#' + charts.Timeline.TOOLTIP_ID_).remove();
 };
 
+
 charts.Timeline.prototype.drawXAxis_ = function (chart) {
     chart.append('g')
         .attr('class', 'x axis')
-        .attr('transform', 'translate(0,' + (this.height_ - this.vMargin_) + ')')
+        .attr('transform', 'translate(0,' + (this.height - this.vMargin_) + ')')
         .call(this.xAxis_);
 };
 
@@ -365,7 +369,7 @@ charts.Timeline.prototype.createSlider_ = function () {
         values: [ 0, this.plotWidth_ ],
         change: $.proxy(charts.Timeline.prototype.doSliderChange_, me)
     });
-    $('#' + charts.Timeline.SLIDER_DIV_NAME_).width(me.plotWidth_).css({'margin-left': me.margin_.left + 'px', 'margin-right': me.margin_.right + 'px'});
+    $('#' + charts.Timeline.SLIDER_DIV_NAME_).width(me.plotWidth_).css({'margin-left': me.margin.left + 'px', 'margin-right': me.margin.right + 'px'});
     if (me.data_.length === 0) {
         $('#' + charts.Timeline.SLIDER_DIV_NAME_).slider('disable');
     }
@@ -380,23 +384,6 @@ charts.Timeline.prototype.doSliderChange_ = function (event, slider) {
     this.notifyFilterListeners_(filterStartDate, filterEndDate);
 };
 
-charts.Timeline.prototype.notifyFilterListeners_ = function (filterStartDate, filterEndDate) {
-    $(this).trigger(charts.Timeline.FILTER_EVENT_TYPE_, [filterStartDate, filterEndDate]);
-};
-
-/**
- * Adds a listener to be notified of filter events
- * @method onFilter
- * @param {Function} callback Notified when the filters change. It is called with 2 parameters - the start date
- * and end dates of the filters
- */
-charts.Timeline.prototype.onFilter = function (callback) {
-
-    $(this).on(charts.Timeline.FILTER_EVENT_TYPE_,
-        function (event, filterStartDate, filterEndDate) {
-            callback(filterStartDate, filterEndDate);
-        });
-};
 
 /**
  * Removes the listener for filters
@@ -412,6 +399,34 @@ charts.Timeline.prototype.hideInactiveData_ = function (filterStartDate, filterE
         return (filterStartDate <= date && date < filterEndDate) ? charts.Timeline.ACTIVE_BAR_CLASS_ : charts.Timeline.INACTIVE_BAR_CLASS_;
     });
 };
+
+charts.Timeline.prototype.notifyFilterListeners_ = function (filterStartDate, filterEndDate) {
+    $(this).trigger(charts.Timeline.FILTER_EVENT_TYPE_, [filterStartDate, filterEndDate]);
+};
+
+/**
+ * Aggregates the data based on the currently selected time period
+ * @method aggregateData_
+ * @param {Array} data The raw data to aggregate
+ * @private
+ * @return {Object} An array of objects whose keys are `key` and `values`, whose values are the time period start
+ * and the number of items in that time period respectively
+ */
+charts.Timeline.prototype.aggregateData_ = function (data) {
+    var me = this;
+    return d3.nest().key(function (d) {
+        return me.timeInterval_(d[me.xAttribute_]);
+    }).rollup(function (d) {
+            return d3.sum(d, function (el) {
+                return me.yAttribute_ ? el[me.yAttribute_] : 1;
+            });
+        }).entries(data).map(function (d) {
+            // d3 will create a string for the date but we want the data object
+            d.key = new Date(d.key);
+            return d;
+        });
+};
+
 
 charts.Timeline.prototype.getDate_ = function (pixelValue) {
     // the d3 chart uses even intervals, but if the minimum/maximum point is selected, return those true points

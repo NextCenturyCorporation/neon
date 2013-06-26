@@ -49,18 +49,29 @@
         </div>
     </div>
 
-    <div class="control-group">
-        <label class="control-label" for="time-granularity">Time Granularity</label>
+    <div class="controls-row">
+        <div class="control-group">
+            <label class="control-label" for="time-granularity">Time Granularity</label>
 
-        <div class="controls">
-            <select id="time-granularity">
-            </select>
+            <div class="controls">
+                <select id="time-granularity">
+                </select>
+            </div>
         </div>
     </div>
 
     <div id="timeline">
         <div id="chart"></div>
     </div>
+
+    <div class="controls-row">
+        <div class="control-group">
+            <div class="controls">
+                <button type="button" type="button" id="reset-filter" class="btn btn-danger">Reset Time Period</button>
+            </div>
+        </div>
+    </div>
+
 
 </div>
 

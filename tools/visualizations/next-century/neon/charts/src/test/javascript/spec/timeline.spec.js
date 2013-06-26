@@ -81,7 +81,7 @@ describe('timeline', function () {
         expect(tickValues).toBeEqualArray([]);
     });
 
-    it('should compute tick intervals at regular intervals when charting by day', function () {
+    it('should compute tick intervals at weekly intervals when charting by day', function () {
         var data = [
             {"date": new Date(2013, 2, 07), "count": 2},
             {"date": new Date(2013, 3, 15), "count": 4}
@@ -113,6 +113,8 @@ describe('timeline', function () {
         ];
         var opts = {  "data" : data, "x": "date", "y": "count", "interval": charts.Timeline.MONTH, "width": 600, "margin": {"left": 0, "right": 0}};
         var timeline = new charts.Timeline('#chart', opts);
+
+        // the x scale values map to the pixels in the width of the chart
         expect(timeline.x_(timeline.timePeriods_[0])).toEqual(0);
         expect(timeline.x_(timeline.timePeriods_[1])).toEqual(100);
         expect(timeline.x_(timeline.timePeriods_[2])).toEqual(200);
@@ -129,7 +131,9 @@ describe('timeline', function () {
         ];
         var opts = { "data" : data, "x": "date", "y": "count", "interval": charts.Timeline.MONTH, "height": 100, "margin": {"top": 0, "bottom": 0}};
         var timeline = new charts.Timeline('#chart', opts);
-        // the y scale is inverted (but is drawn properly)
+
+        // the y scale values map to the pixels in the height of the chart
+        // note: the y scale is inverted (but is drawn properly)
         expect(timeline.y_(0)).toEqual(100);
         expect(timeline.y_(5)).toEqual(50);
         expect(timeline.y_(10)).toEqual(0);
@@ -163,7 +167,7 @@ describe('timeline', function () {
         var marginOverrides = { "top": 100, "left": 120};
         var opts = {  "data" : [], "x": "date", "y": "count", "interval": charts.Timeline.DAY, "margin": marginOverrides};
         var timeline = new charts.Timeline('#chart', opts);
-        var margin = timeline.margin_;
+        var margin = timeline.margin;
         expect(margin.top).toEqual(marginOverrides.top);
         expect(margin.left).toEqual(marginOverrides.left);
         expect(margin.bottom).toEqual(charts.Timeline.DEFAULT_MARGIN_.bottom);
