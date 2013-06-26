@@ -44,6 +44,20 @@ class DateUtilsTest {
     }
 
     @Test
+    void "create date from ISO8601 string with no timezone"() {
+        def date = DateUtils.fromISO8601String("2012-04-15")
+        assert date == new DateTime(2012,04,15,0,0,0,DateTimeZone.UTC).toDate()
+    }
+
+    @Test
+    void "create date from ISO8601 string with non GMT timezone"() {
+        def date = DateUtils.fromISO8601String("2012-04-15T16:30-04:00")
+        assert date == new DateTime(2012,04,15,16,30,0,DateTimeZone.forOffsetHours(-4)).toDate()
+    }
+
+
+
+    @Test
     void "convert ISO8601 no millis string to date"() {
         def iso860String = DateUtils.toISO8601String(DATE_NO_MILLIS)
         assert iso860String == ISO8601_DATE_STRING_NO_MILLIS
