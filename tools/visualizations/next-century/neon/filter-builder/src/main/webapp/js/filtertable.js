@@ -1,6 +1,16 @@
 var neon = neon || {};
 neon.filter = function () {
 
+    var messageHandler = {
+        publishMessage: function(){}
+    };
+
+    if(typeof (OWF) !== "undefined"){
+        OWF.ready(function () {
+            messageHandler = new neon.eventing.MessageHandler();
+        });
+    }
+
     var columnOptions;
     var operatorOptions = [
         { "value": "=", "text": "="},
@@ -29,7 +39,6 @@ neon.filter = function () {
         var filterData = updateDataFromForm(id);
 
         var filter = buildFilterFromData();
-        console.log(JSON.stringify(filter));
 
         neon.util.AjaxUtils.doPostJSON(filter, neon.query.SERVER_URL + "/services/filterservice/updateFilter",
             {
@@ -37,6 +46,7 @@ neon.filter = function () {
                     if(!updatingExisting){
                         filterState.data.push(new CreateFilterData());
                     }
+                    messageHandler.publishMessage(neon.eventing.Channels.FILTERS_CHANGED, {});
                     refresh();
                 }
             });
@@ -104,6 +114,7 @@ neon.filter = function () {
         neon.util.AjaxUtils.doPostJSON(filter, neon.query.SERVER_URL + "/services/filterservice/updateFilter",
             {
                 success: function () {
+                    messageHandler.publishMessage(neon.eventing.Channels.FILTERS_CHANGED, {});
                     refresh();
                 }
             });
@@ -141,6 +152,5 @@ $(function () {
             return this.value == context;
         }).attr('selected', 'selected');
         return el.html();
-
     });
 });
