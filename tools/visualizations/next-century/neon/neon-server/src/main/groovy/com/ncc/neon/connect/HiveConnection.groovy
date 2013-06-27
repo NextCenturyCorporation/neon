@@ -46,6 +46,6 @@ class HiveConnection implements Connection{
 
     @Override
     void close(){
-        client.close()
+        client?.close()
     }
 }

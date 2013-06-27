@@ -46,7 +46,7 @@ class MongoConnection implements Connection{
 
     @Override
     void close(){
-        mongo.close()
+        mongo?.close()
     }
 
 }

@@ -111,7 +111,7 @@
                 <label class="control-label" for="hostname-input">Datastore Host Name</label>
 
                 <div class="controls">
-                    <input type="text" id="hostname-input"/>
+                    <input type="text" id="hostname-input" value="localhost"/>
                 </div>
             </div>
 
