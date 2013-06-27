@@ -92,8 +92,12 @@ class FilterService{
     @Path("updateFilter/{filterId}")
     FilterEvent updateFilter(Filter filter, @PathParam("filterId") String replaceId) {
         connectionState.queryExecutor.removeFilter(UUID.fromString(replaceId))
-        String uuid = connectionState.queryExecutor.addFilter(filter).toString()
-        return new FilterEvent(addedIds: [uuid])
+        if(filter.whereClause){
+            String uuid = connectionState.queryExecutor.addFilter(filter).toString()
+            return new FilterEvent(addedIds: [uuid])
+        }
+
+        return new FilterEvent(addedIds: [])
 
     }
 }
