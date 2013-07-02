@@ -51,7 +51,6 @@ class HiveQuery implements SqlQuery {
         if (groupByClauses.size > 0) {
             builder << " group by " << groupByClauses.collect { it.field }.join(",")
         }
-        // TODO: implement "cluster by"?
         if (sortClauses.size > 0) {
             builder << " order by " << sortClauses.collect { it.fieldName + (it.sortDirection == SortOrder.ASCENDING) ? " ASC" : " DESC" }.join(",")
         }
