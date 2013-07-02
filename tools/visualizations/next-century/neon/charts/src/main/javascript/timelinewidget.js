@@ -47,7 +47,7 @@ $(document).ready(function () {
         }
 
         function disableResetFilterButton() {
-            getResetFilterButton().attr('disabled','disabled');
+            getResetFilterButton().attr('disabled', 'disabled');
         }
 
         function configureResetFilterButton() {
@@ -77,10 +77,10 @@ $(document).ready(function () {
         function populateAttributeDropdowns(message) {
             datasource = message.database;
             datasetId = message.table;
-            neon.query.getFieldNames(datasource, datasetId, doPopuplateAttributeDropdowns);
+            neon.query.getFieldNames(datasource, datasetId, doPopulateAttributeDropdowns);
         }
 
-        function doPopuplateAttributeDropdowns(data) {
+        function doPopulateAttributeDropdowns(data) {
             ['x', 'y'].forEach(function (selectId) {
                 var select = $('#' + selectId);
                 select.empty();
@@ -105,13 +105,11 @@ $(document).ready(function () {
          */
         function drawChart() {
 
-            $('#chart').empty();
-
             var xAttr = getXAttribute();
             var yAttr = getYAttribute();
 
             if (!xAttr || !yAttr) {
-                doDrawChart(null);
+                doDrawChart({data: []});
                 return;
             }
 
@@ -130,10 +128,13 @@ $(document).ready(function () {
 
         function doDrawChart(data) {
 
+            $('#chart').empty();
+
+
             var xAttr = getXAttribute();
             var yAttr = getYAttribute();
 
-            var dataByDate = data ? data.data.map(function (el) {
+            var dataByDate = data.data.map(function (el) {
                 //month is 1-based
                 var date = new Date(el.year, el.month - 1, el.day, el.hour);
                 var count = el[yAttr];
@@ -141,7 +142,7 @@ $(document).ready(function () {
                 result[xAttr] = date;
                 result[yAttr] = count;
                 return result;
-            }) : [];
+            });
 
             var granularity = $('#time-granularity option:selected').val();
             var opts = { "data": dataByDate, "x": xAttr, "y": yAttr,
@@ -174,7 +175,7 @@ $(document).ready(function () {
 
         function populateTimeGranularityDropdown() {
             var dropdown = $('#time-granularity');
-            [charts.Timeline.HOUR, charts.Timeline.DAY, charts.Timeline.MONTH, charts.Timeline.YEAR].forEach(function (el) {
+            charts.Timeline.GRANULARITIES_.forEach(function (el) {
                 var displayText = el.charAt(0).toUpperCase() + el.slice(1);
                 var option = $('<option></option>').attr('value', el).text(displayText);
                 if (el === charts.Timeline.MONTH) {

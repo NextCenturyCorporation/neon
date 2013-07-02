@@ -124,6 +124,7 @@ charts.Timeline.ZERO_DATE_ = new Date(0);
 charts.Timeline.DEFAULT_MARGIN_ = {top: 20, bottom: 20, left: 40, right: 30};
 charts.Timeline.FILTER_EVENT_TYPE_ = 'filter';
 charts.Timeline.TOOLTIP_ID_ = 'tooltip';
+charts.Timeline.GRANULARITIES_ = [charts.Timeline.HOUR, charts.Timeline.DAY, charts.Timeline.MONTH, charts.Timeline.YEAR];
 
 
 /**
