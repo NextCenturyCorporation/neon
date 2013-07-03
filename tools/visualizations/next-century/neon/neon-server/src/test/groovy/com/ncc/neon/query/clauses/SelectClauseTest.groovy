@@ -1,14 +1,7 @@
-package com.ncc.neon.query
+package com.ncc.neon.query.clauses
 
-import com.ncc.neon.query.clauses.AggregateClause
-import com.ncc.neon.query.clauses.DistinctClause
-import com.ncc.neon.query.clauses.GroupByClause
-import com.ncc.neon.query.clauses.LimitClause
-import com.ncc.neon.query.clauses.SelectClause
-import com.ncc.neon.query.clauses.SortClause
-import com.ncc.neon.query.filter.Filter
-import groovy.transform.ToString
-import org.codehaus.jackson.annotate.JsonIgnoreProperties
+import org.junit.Before
+import org.junit.Test
 
 /*
  * ************************************************************************
@@ -33,28 +26,23 @@ import org.codehaus.jackson.annotate.JsonIgnoreProperties
  * RECIPIENT IS UNDER OBLIGATION TO MAINTAIN SECRECY.
  */
 
-/**
- * A query stores a filter for selecting data and optional aggregation methods for grouping the data.
- * The query is translated to a datastore specific operation which returns the appropriate data.
- */
-@ToString(includeNames = true)
-@JsonIgnoreProperties(value = ['includeFiltered_'])
-class Query {
+class SelectClauseTest {
 
-    Filter filter
-    List<AggregateClause> aggregates = []
-    List<GroupByClause> groupByClauses = []
-    DistinctClause distinctClause
-    List<SortClause> sortClauses
-    LimitClause limitClause
-    List<String> fields = SelectClause.ALL_FIELDS
+    def selectClause
 
-    def getDataSourceName() {
-        filter.dataSourceName
+    @Before
+    void before() {
+        selectClause = new SelectClause()
     }
 
-    def getDatasetId() {
-        filter.datasetId
+
+    @Test
+    void "indicates if all or subset of fields is selected"() {
+        // should default to all fields
+        assert selectClause.selectAllFields
+
+        selectClause.fields = ["field1","field2"]
+        assert !selectClause.selectAllFields
     }
 
 }

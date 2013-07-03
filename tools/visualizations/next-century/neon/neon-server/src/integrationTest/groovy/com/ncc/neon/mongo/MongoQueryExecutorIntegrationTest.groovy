@@ -485,6 +485,36 @@ class MongoQueryExecutorIntegrationTest {
         assert actualJson == expectedJson
     }
 
+    @Test
+    void "select a subset of fields"() {
+        def fields = ["firstname", "lastname", "salary"]
+        def query = new Query(filter: ALL_DATA_FILTER, fields: fields)
+
+        // _id field is always included
+        def expectedFields = fields + "_id"
+        def expected = ALL_DATA.collect { it.subMap(expectedFields) }
+        def result = mongoQueryExecutor.execute(query, false)
+        assertQueryResult(expected, result)
+    }
+
+    @Test
+    void "select a subset of fields from a group by query"() {
+        def groupByMonthClause = new GroupByFunctionClause(name: 'hire_month', operation: 'month', field: 'hiredate')
+        def salaryAggregateClause = new AggregateClause(name: 'salary_sum', operation: 'sum', field: 'salary')
+        def sortByMonth = new SortClause(fieldName: 'hire_month', sortOrder: SortOrder.ASCENDING)
+
+        def fields = ["hire_month"]
+        def query = new Query(filter: new Filter(dataSourceName: DATASOURCE_NAME, datasetId: DATASET_ID),
+                groupByClauses: [groupByMonthClause], aggregates: [salaryAggregateClause], sortClauses: [sortByMonth], fields: fields)
+
+        def result = mongoQueryExecutor.execute(query, false)
+        // _id is always included
+        def expectedFields = fields + "_id"
+        def expected = readJson('groupByMonth.json').collect { it.subMap(expectedFields) }
+        assertQueryResult(expected, result)
+
+    }
+
     private static def assertQueryResult(expected, actual) {
         int actualCount = 0
         // we know mongo returns BSON objects, so convert them to a map for easier testing
@@ -511,7 +541,7 @@ class MongoQueryExecutorIntegrationTest {
         data
     }
 
-    private getMongoQueryExecutor(){
+    private getMongoQueryExecutor() {
         connectionState.queryExecutor
     }
 }

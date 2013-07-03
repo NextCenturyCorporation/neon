@@ -1,4 +1,5 @@
 package com.ncc.neon.query.mongo
+
 import com.mongodb.BasicDBObject
 import com.mongodb.DB
 import com.mongodb.DBObject
@@ -8,6 +9,7 @@ import com.ncc.neon.query.QueryResult
 import com.ncc.neon.query.clauses.SortOrder
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
+
 /*
  * ************************************************************************
  * Copyright (c), 2013 Next Century Corporation. All Rights Reserved.
@@ -42,7 +44,7 @@ class MongoQueryExecutor extends AbstractQueryExecutor {
 
     private final MongoClient mongo
 
-    MongoQueryExecutor(MongoClient mongo){
+    MongoQueryExecutor(MongoClient mongo) {
         this.mongo = mongo
     }
 
@@ -64,7 +66,8 @@ class MongoQueryExecutor extends AbstractQueryExecutor {
     }
 
     private def executeSimpleQuery(collection, mongoQuery) {
-        def results = collection.find(mongoQuery.dbObject)
+        def fields = createFieldsDbObject(mongoQuery)
+        def results = collection.find(mongoQuery.dbObject, fields)
         if (mongoQuery.sortClauses) {
             results = results.sort(createSortDBObject(mongoQuery.sortClauses))
         }
@@ -72,6 +75,22 @@ class MongoQueryExecutor extends AbstractQueryExecutor {
             results = results.limit(mongoQuery.limitClause.limit)
         }
         return results
+    }
+
+    /**
+     * Creates a db object that specifies the fields to select from the documents. If all fields were specified,
+     * an empty DBObject will be returned, which indicates to return all fields
+     * @param mongoQuery
+     */
+    private static def createFieldsDbObject(mongoQuery) {
+        def dbObject = new BasicDBObject()
+        def selectClause = mongoQuery.selectClause
+        if (!selectClause.selectAllFields) {
+            selectClause.fields.each {
+                dbObject[it] = 1
+            }
+        }
+        return dbObject
     }
 
     private static def createSortDBObject(sortClauses) {
@@ -103,7 +122,7 @@ class MongoQueryExecutor extends AbstractQueryExecutor {
     private def executeGroupByQuery(collection, mongoQuery) {
         // the "match" clause is the query. the "additionalClauses" are the aggregate/group/sort clauses
         def match = new BasicDBObject('$match', mongoQuery.dbObject)
-        def additionalClauses = MongoAggregationClauseBuilder.buildAggregateClauses(mongoQuery.aggregateClauses, mongoQuery.groupByClauses)
+        def additionalClauses = MongoAggregationClauseBuilder.buildAggregateClauses(mongoQuery.selectClause, mongoQuery.aggregateClauses, mongoQuery.groupByClauses)
         if (mongoQuery.sortClauses) {
             additionalClauses << new BasicDBObject('$sort', createSortDBObject(mongoQuery.sortClauses))
         }
@@ -140,12 +159,12 @@ class MongoQueryExecutor extends AbstractQueryExecutor {
     }
 
     @Override
-    List<String> showDatabases(){
+    List<String> showDatabases() {
         mongo.databaseNames
     }
 
     @Override
-    List<String> showTables(String dbName){
+    List<String> showTables(String dbName) {
         DB database = mongo.getDB(dbName)
         database.getCollectionNames().collect { it }
     }

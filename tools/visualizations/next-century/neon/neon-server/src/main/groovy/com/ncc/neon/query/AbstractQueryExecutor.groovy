@@ -1,4 +1,5 @@
 package com.ncc.neon.query
+
 import com.ncc.neon.query.clauses.AndWhereClause
 import com.ncc.neon.query.clauses.SelectClause
 import com.ncc.neon.query.clauses.SingularWhereClause
@@ -6,6 +7,7 @@ import com.ncc.neon.query.filter.Filter
 import com.ncc.neon.query.filter.FilterState
 import com.ncc.neon.selection.SelectionManager
 import org.slf4j.LoggerFactory
+
 /*
  * ************************************************************************
  * Copyright (c), 2013 Next Century Corporation. All Rights Reserved.
@@ -141,7 +143,11 @@ abstract class AbstractQueryExecutor implements QueryExecutor {
     protected abstract QueryResult doExecuteQuery(query)
 
     private def applySelectClause(builder, query) {
-        builder.apply(new SelectClause(dataSourceName: query.dataSourceName, datasetId: query.datasetId))
+        def selectClause = new SelectClause(dataSourceName: query.dataSourceName, datasetId: query.datasetId)
+        if (query.fields) {
+            selectClause.fields = query.fields
+        }
+        builder.apply(selectClause)
     }
 
     private def applyWhereClause(builder, query, additionalWhereClauseGenerator, includeFiltered) {
