@@ -1,5 +1,5 @@
 org.gradle.jvmargs=-Xmx1024m -XX:MaxPermSize=256m
 org.gradle.daemon=true
-OWF_TOMCAT=/home/HQ/tbrooks/Tools/apache-tomcat-7.0.39
+OWF_TOMCAT=/my/tomcat/path/apache-tomcat-7.0.39
 jsUnitTest
 integrationTest
