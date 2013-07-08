@@ -102,6 +102,7 @@ $(document).ready(function () {
 
         /**
          * Redraws the chart based on the user selected attribtues
+         * @method drawChart
          */
         function drawChart() {
 
