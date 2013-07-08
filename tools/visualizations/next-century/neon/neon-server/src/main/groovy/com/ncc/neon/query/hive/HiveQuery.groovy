@@ -44,7 +44,7 @@ class HiveQuery implements SqlQuery {
     String getQueryString() {
         StringBuilder builder = new StringBuilder()
         // TODO: NEON-82 implement selecting specific columns when that is supported
-        builder << "select * from " << selectClause.dataSourceName << "." << selectClause.datasetId
+        builder << "select " << selectClause.fields.join(",") << " from " << selectClause.dataSourceName << "." << selectClause.datasetId
         if (whereClause != null) {
             builder << " where " << whereClause.toString()
         }
