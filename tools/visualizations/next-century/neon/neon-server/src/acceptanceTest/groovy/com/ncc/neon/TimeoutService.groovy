@@ -37,8 +37,16 @@ class TimeoutService {
 
     @GET
     @Produces(MediaType.TEXT_PLAIN)
+    @SuppressWarnings('EmptyCatchBlock') // see comment in the catch block
     String timeout() {
-        Thread.sleep(10000)
+        try {
+            Thread.sleep(10000)
+        }
+        catch(InterruptedException e) {
+            // ignore this. if the test finishes before this method actually finishes executing (even though the request
+            // that invoked it was cancelled), this can throw an interruptedexception. in this case, we really
+            // don't care
+        }
         return "done"
     }
 }

@@ -44,6 +44,7 @@ neon.query.Query = function () {
 
 
     this.filter = new neon.query.Filter();
+    this.fields = ['*'];
 
     /*jshint expr: true */
     this.includeFiltered_ = false;
@@ -189,6 +190,20 @@ neon.query.Query.prototype.selectFrom = function (dataSourceName, datasetId) {
 };
 
 /**
+ * Sets the fields that should be included in the result. If not specified,
+ * all fields will be included (equivalent to SELECT *).
+ * @method withFields
+ * @param {...String} fields A variable number of strings indicating which fields should be included
+ * @return {neon.query.Query} This query object
+ * @example
+ *     new neon.query.Query(...).withFields("field1","field2");
+ */
+neon.query.Query.prototype.withFields = function (fields) {
+    this.fields = neon.util.ArrayUtils.argumentsToArray(arguments);
+    return this;
+};
+
+/**
  * Sets the *where* clause of the query to determine how to select the data
  * @method where
  * @param {Object} arguments The arguments can be in either multiple formats<br>
@@ -216,9 +231,12 @@ neon.query.Query.prototype.where = function () {
 /**
  * Groups the results by the specified field(s)
  * @method groupBy
- * @param {String|neon.query.GroupByFunctionClause} fields One or more fields to group the results by.
+ * @param {...String|...neon.query.GroupByFunctionClause} fields One or more fields to group the results by.
  * Each parameter can be a single field name or a {{#crossLink "neon.query.GroupByFunctionClause"}}{{/crossLink}}
  * @return {neon.query.Query} This query object
+ * @example
+ *    var averageAmount = new neon.query.GroupByFunctionClause(neon.query.AVG, 'amount', 'avg_amount');
+ *    new neon.query.Query(...).groupBy('field1',averageAmount);
  */
 neon.query.Query.prototype.groupBy = function (fields) {
     // even though internally each groupBy clause is a separate object (since single field and functions
@@ -283,7 +301,7 @@ neon.query.Query.prototype.limit = function (limit) {
  * @param {int} sortOrder The sort order (see the constants in this class)
  * @return {neon.query.Query} This query object
  * @example
- *     new neon.query.Query(...).sortBy("field1",neon.query.ASC,"field2",neon.query.DESC);
+ *     new neon.query.Query(...).sortBy('field1',neon.query.ASC,'field2',neon.query.DESC);
  */
 neon.query.Query.prototype.sortBy = function (fieldName, sortOrder) {
     // even though internally each sortBy clause is a separate object, the user will think about a single sortBy

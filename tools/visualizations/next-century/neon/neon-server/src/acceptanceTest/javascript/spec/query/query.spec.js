@@ -66,6 +66,42 @@ describe('query mapping', function () {
         assertQueryResults(baseQuery(), allData);
     });
 
+
+    it('select subset of fields from result', function () {
+        var fields = ['firstname', 'lastname'];
+        var expected = [];
+        allData.forEach(function (row) {
+            var expectedRow = {};
+            // the _id field is always included
+            // TODO: NEON-84 id field issues. this field may not always be named _id
+            expectedRow._id = row._id;
+            fields.forEach(function (field) {
+                expectedRow[field] = row[field];
+            });
+            expected.push(expectedRow);
+        });
+        assertQueryResults(baseQuery().withFields(fields[0], fields[1]), expected);
+    });
+
+    it('select derived field', function () {
+        var groupedByMonthData = getJSONFixture('groupByMonth.json');
+        // the results should be the data grouped by month but only include _id and hire_month
+        // TODO: NEON-84 id field issues. this field may not always be named _id
+        var expectedData = [];
+        groupedByMonthData.forEach(function(row) {
+            var expectedRow = {};
+            expectedRow._id = row._id;
+            expectedRow.hire_month = row.hire_month;
+            expectedData.push(expectedRow);
+        });
+        var groupByMonthClause = new neon.query.GroupByFunctionClause(neon.query.MONTH, 'hiredate', 'hire_month');
+        var query = baseQuery().groupBy(groupByMonthClause).aggregate(neon.query.SUM, 'salary', 'salary_sum').sortBy('hire_month', neon.query.ASCENDING).withFields('hire_month');
+        assertQueryResults(query, expectedData);
+    });
+
+
+
+
     it('query WHERE', function () {
         var whereStateClause = or(where('state', '=', 'VA'), where('state', '=', 'DC'));
         var salaryAndStateClause = and(where('salary', '>=', 100000), whereStateClause);
