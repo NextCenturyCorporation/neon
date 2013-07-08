@@ -12,7 +12,17 @@ options {
 // parser rules
 statement : ((query|database) (';'?))+;
 database : USE STRING;
-query: SELECT FROM STRING (where)? (sort)? (group)? (limit)?;
+query: select FROM STRING (where)? (sort)? (group)? (limit)?;
+
+select: SELECT selectFields;
+
+selectFields
+    : ALL_FIELDS
+    | fieldList;
+
+ALL_FIELDS : '*';
+
+fieldList : STRING (',' STRING)*;
 
 where: WHERE whereClause;
 

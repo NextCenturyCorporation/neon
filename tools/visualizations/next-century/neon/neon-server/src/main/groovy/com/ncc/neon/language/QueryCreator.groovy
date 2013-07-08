@@ -1,4 +1,5 @@
 package com.ncc.neon.language
+
 import com.ncc.neon.language.parse.NeonBaseListener
 import com.ncc.neon.language.parse.NeonParser
 import com.ncc.neon.query.Query
@@ -32,7 +33,7 @@ import org.apache.commons.lang.math.NumberUtils
  * @author tbrooks
  */
 
-class QueryCreator extends NeonBaseListener{
+class QueryCreator extends NeonBaseListener {
     private final Map<String, WhereClause> parsedWhereClauses = [:]
 
     private String collectionName = ""
@@ -42,14 +43,16 @@ class QueryCreator extends NeonBaseListener{
     private final List<SortClause> sortClauses = []
     private final List<AggregateClause> aggregates = []
     private final List<GroupByClause> groupByClauses = []
+    private final List<String> fields = []
 
-    Query createQuery(){
+    Query createQuery() {
         Query query = new Query()
+        query.fields = fields
         query.filter = new Filter(dataSourceName: databaseName, datasetId: collectionName)
-        if (whereClause){
+        if (whereClause) {
             query.filter.whereClause = whereClause
         }
-        if(limitClause){
+        if (limitClause) {
             query.limitClause = limitClause
         }
         query.sortClauses = sortClauses
@@ -59,59 +62,64 @@ class QueryCreator extends NeonBaseListener{
     }
 
     @Override
-    public void exitDatabase(NeonParser.DatabaseContext ctx){
+    public void exitDatabase(NeonParser.DatabaseContext ctx) {
         databaseName = ctx.STRING()
     }
 
     @Override
-    public void exitQuery(NeonParser.QueryContext ctx){
+    public void exitQuery(NeonParser.QueryContext ctx) {
         collectionName = ctx.STRING()
     }
 
     @Override
-    void exitWhereClause(NeonParser.WhereClauseContext ctx){
-        if(ctx.AND()){
+    void exitSelectFields(NeonParser.SelectFieldsContext ctx) {
+        fields.addAll(ctx.text.split(','))
+    }
+
+    @Override
+    void exitWhereClause(NeonParser.WhereClauseContext ctx) {
+        if (ctx.AND()) {
             createBooleanWhereClause(ctx, new AndWhereClause())
         }
 
-        if(ctx.OR()){
+        if (ctx.OR()) {
             createBooleanWhereClause(ctx, new OrWhereClause())
         }
 
-        if(parsedWhereClauses.size() == 1){
+        if (parsedWhereClauses.size() == 1) {
             whereClause = parsedWhereClauses.find().value
         }
     }
 
     @Override
-    void exitSimpleWhereClause(NeonParser.SimpleWhereClauseContext ctx){
+    void exitSimpleWhereClause(NeonParser.SimpleWhereClauseContext ctx) {
         parsedWhereClauses.put(ctx.text, singularWhereClause(ctx))
     }
 
-    private SingularWhereClause singularWhereClause(NeonParser.SimpleWhereClauseContext whereContext){
+    private SingularWhereClause singularWhereClause(NeonParser.SimpleWhereClauseContext whereContext) {
         SingularWhereClause singularWhereClause = new SingularWhereClause()
 
         singularWhereClause.lhs = whereContext.STRING()[0].text
         singularWhereClause.operator = whereContext.operator().text
         singularWhereClause.rhs = whereContext.STRING()[1].text
 
-        if(NumberUtils.isNumber(singularWhereClause.rhs.toString())){
+        if (NumberUtils.isNumber(singularWhereClause.rhs.toString())) {
             singularWhereClause.rhs = Double.valueOf(singularWhereClause.rhs)
         }
         return singularWhereClause
     }
 
-    private void createBooleanWhereClause(NeonParser.WhereClauseContext ctx, BooleanWhereClause booleanWhereClause){
+    private void createBooleanWhereClause(NeonParser.WhereClauseContext ctx, BooleanWhereClause booleanWhereClause) {
         List<WhereClause> clauses = []
-        ctx.whereClause().each{ NeonParser.WhereClauseContext context ->
+        ctx.whereClause().each { NeonParser.WhereClauseContext context ->
             clauses << parsedWhereClauses.remove(escapeContextText(context.text))
         }
         booleanWhereClause.whereClauses = clauses
         parsedWhereClauses.put(escapeContextText(ctx.text), booleanWhereClause)
     }
 
-    private static String escapeContextText(String text){
-        if(text.startsWith("(") && text.endsWith(")")){
+    private static String escapeContextText(String text) {
+        if (text.startsWith("(") && text.endsWith(")")) {
             return text[1..-2]
         }
         return text
@@ -121,8 +129,8 @@ class QueryCreator extends NeonBaseListener{
     public void exitSortClause(NeonParser.SortClauseContext ctx) {
         SortClause sortClause = new SortClause(sortOrder: SortOrder.ASCENDING)
         sortClause.fieldName = ctx.STRING().text
-        if(ctx.SORT_DIRECTION()){
-            if(ctx.SORT_DIRECTION().text.toLowerCase() == "desc"){
+        if (ctx.SORT_DIRECTION()) {
+            if (ctx.SORT_DIRECTION().text.toLowerCase() == "desc") {
                 sortClause.sortOrder = SortOrder.DESCENDING
             }
         }
@@ -130,8 +138,8 @@ class QueryCreator extends NeonBaseListener{
     }
 
     @Override
-    void exitGroupClause(NeonParser.GroupClauseContext ctx){
-        if(!ctx.STRING()){
+    void exitGroupClause(NeonParser.GroupClauseContext ctx) {
+        if (!ctx.STRING()) {
             return
         }
 
@@ -141,7 +149,7 @@ class QueryCreator extends NeonBaseListener{
     }
 
     @Override
-    void exitFunction(NeonParser.FunctionContext ctx){
+    void exitFunction(NeonParser.FunctionContext ctx) {
         AggregateClause aggregateClause = new AggregateClause()
         aggregateClause.operation = ctx.functionName().text
         aggregateClause.field = ctx.STRING()

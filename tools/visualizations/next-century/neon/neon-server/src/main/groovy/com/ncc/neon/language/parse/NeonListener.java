@@ -15,8 +15,14 @@ public interface NeonListener extends ParseTreeListener {
 	void enterSort(NeonParser.SortContext ctx);
 	void exitSort(NeonParser.SortContext ctx);
 
+	void enterFieldList(NeonParser.FieldListContext ctx);
+	void exitFieldList(NeonParser.FieldListContext ctx);
+
 	void enterQuery(NeonParser.QueryContext ctx);
 	void exitQuery(NeonParser.QueryContext ctx);
+
+	void enterSelect(NeonParser.SelectContext ctx);
+	void exitSelect(NeonParser.SelectContext ctx);
 
 	void enterSortClause(NeonParser.SortClauseContext ctx);
 	void exitSortClause(NeonParser.SortClauseContext ctx);
@@ -30,11 +36,11 @@ public interface NeonListener extends ParseTreeListener {
 	void enterOperator(NeonParser.OperatorContext ctx);
 	void exitOperator(NeonParser.OperatorContext ctx);
 
-	void enterSimpleWhereClause(NeonParser.SimpleWhereClauseContext ctx);
-	void exitSimpleWhereClause(NeonParser.SimpleWhereClauseContext ctx);
-
 	void enterFunction(NeonParser.FunctionContext ctx);
 	void exitFunction(NeonParser.FunctionContext ctx);
+
+	void enterSimpleWhereClause(NeonParser.SimpleWhereClauseContext ctx);
+	void exitSimpleWhereClause(NeonParser.SimpleWhereClauseContext ctx);
 
 	void enterStatement(NeonParser.StatementContext ctx);
 	void exitStatement(NeonParser.StatementContext ctx);
@@ -42,9 +48,12 @@ public interface NeonListener extends ParseTreeListener {
 	void enterGroupClause(NeonParser.GroupClauseContext ctx);
 	void exitGroupClause(NeonParser.GroupClauseContext ctx);
 
+	void enterFunctionName(NeonParser.FunctionNameContext ctx);
+	void exitFunctionName(NeonParser.FunctionNameContext ctx);
+
 	void enterGroup(NeonParser.GroupContext ctx);
 	void exitGroup(NeonParser.GroupContext ctx);
 
-	void enterFunctionName(NeonParser.FunctionNameContext ctx);
-	void exitFunctionName(NeonParser.FunctionNameContext ctx);
+	void enterSelectFields(NeonParser.SelectFieldsContext ctx);
+	void exitSelectFields(NeonParser.SelectFieldsContext ctx);
 }
