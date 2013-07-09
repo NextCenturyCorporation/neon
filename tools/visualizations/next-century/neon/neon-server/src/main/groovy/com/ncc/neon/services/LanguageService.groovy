@@ -52,7 +52,7 @@ class LanguageService{
     @Path("query")
     String executeQuery(@FormParam("text") String text, @FormParam("datastore") String datastore){
         Query query = queryParser.parse(text)
-        //Hard coded for illustration, eventually this service will not require this
+        // TODO NEON-369 Hard coded for illustration, eventually this service will not require this
         ConnectionInfo connectionInfo
         if(datastore.startsWith("Mongo")){
             connectionInfo = new ConnectionInfo(dataSource: DataSource.MONGO, connectionUrl: "localhost")
@@ -69,7 +69,7 @@ class LanguageService{
     @Produces(MediaType.APPLICATION_JSON)
     @Path("datastores")
     List getDatastoreNames() {
-        //Hard coded for illustration, eventually this service will not require this
+        // TODO NEON-369 Hard coded for illustration, eventually this service will not require this
         return ["Mongo@localhost","JDBC(hive2)@xdata2"]
     }
 
