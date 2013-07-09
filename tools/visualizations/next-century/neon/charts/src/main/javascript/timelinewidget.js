@@ -121,6 +121,7 @@ $(document).ready(function () {
 
             var query = new neon.query.Query()
                 .selectFrom(datasource, datasetId)
+                .where(xAttr, '!=', null)
                 .groupBy(groupByYearClause, groupByMonthClause, groupByDayClause, groupByHourClause)
                 .aggregate(neon.query.SUM, yAttr, yAttr);
 
