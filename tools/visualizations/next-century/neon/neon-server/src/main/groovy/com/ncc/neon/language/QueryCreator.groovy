@@ -106,6 +106,13 @@ class QueryCreator extends NeonBaseListener {
         if (NumberUtils.isNumber(singularWhereClause.rhs.toString())) {
             singularWhereClause.rhs = Double.valueOf(singularWhereClause.rhs)
         }
+        if (singularWhereClause.rhs == "null") {
+            singularWhereClause.rhs = null
+        }
+        if (singularWhereClause.rhs == '""') {
+            singularWhereClause.rhs = ""
+        }
+
         return singularWhereClause
     }
 

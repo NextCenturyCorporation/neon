@@ -54,14 +54,12 @@ groupClause: STRING | function;
 
 function: functionName '(' STRING ')';
 
-functionName: 'addToSet'
-            | 'first'
+functionName: 'first'
             | 'last'
             | 'max'
             | 'count'
             | 'min'
             | 'avg'
-            | 'push'
             | 'sum';
 
 limit: LIMIT STRING;
@@ -91,7 +89,7 @@ STRING: CHAR+;
 fragment CHAR : 'a'..'z'
               | 'A'..'Z'
               | '0'..'9'
-              | '_' | '-' | '.';
+              | '_' | '-' | '.' | '"';
 
 WHITESPACE : [ \t\r\n]+ -> skip;
 
