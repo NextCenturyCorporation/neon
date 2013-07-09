@@ -85,6 +85,22 @@ class QueryValueDeserializerTest {
         assert actual == val
     }
 
+    @Test
+    void "deserialize empty string"() {
+        String val = ""
+        def parser = createJsonParser(JsonToken.VALUE_STRING, [getText: { "" }])
+        def actual = deserializer.deserialize(parser, context)
+        assert actual == val
+    }
+
+    @Test
+    void "deserialize null"() {
+        String val = null
+        def parser = createJsonParser(JsonToken.VALUE_NULL, [getText: { null }])
+        def actual = deserializer.deserialize(parser, context)
+        assert actual == val
+    }
+
     private static def createJsonParser(currentToken, additionalMethods = [:]) {
         def mock = [:]
         mock['getCurrentToken'] = { currentToken }

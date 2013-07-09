@@ -53,7 +53,7 @@
                     <select id="operator-select-{{@index}}">
                         {{#select operatorValue}}
                         {{#operatorOptions}}
-                        <option value="{{value}}">{{text}}</option>
+                        <option value="{{.}}">{{.}}</option>
                         {{/operatorOptions}}
                         {{/select}}
                     </select>
@@ -62,7 +62,9 @@
 
             <div class="control-group">
                 <div class="controls">
+                    {{#escapeQuotes value}}
                     <input type="text" id="value-input-{{@index}}" value="{{value}}"/>
+                    {{/escapeQuotes}}
                 </div>
             </div>
 

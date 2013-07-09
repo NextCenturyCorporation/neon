@@ -14,16 +14,9 @@ neon.filter = function () {
     var filterId;
     var columnOptions;
 
-    var operatorOptions = [
-        { "value": "=", "text": "="},
-        { "value": "!=", "text": "!="},
-        { "value": ">", "text": ">"},
-        { "value": "<", "text": "<"},
-        { "value": ">=", "text": ">="},
-        { "value": "<=", "text": "<="}
-    ];
+    var operatorOptions = ["=","!=",">","<",">=","<="];
 
-    var CreateFilterData = function (columnValue, operatorValue, value) {
+    var FilterRow = function (columnValue, operatorValue, value) {
         this.columnOptions = columnOptions;
         this.columnValue = columnValue;
         this.operatorOptions = operatorOptions;
@@ -48,7 +41,7 @@ neon.filter = function () {
                 success: function (uuid) {
                     filterId = uuid.addedIds[0];
                     if(!updatingExisting){
-                        filterState.data.push(new CreateFilterData());
+                        filterState.data.push(new FilterRow());
                     }
                     messageHandler.publishMessage(neon.eventing.Channels.FILTERS_CHANGED, {});
                     redrawTemplateFromData();
@@ -71,6 +64,25 @@ neon.filter = function () {
             });
     };
 
+    function buildCompoundWhereClause(data) {
+        var whereClause;
+        var clauses = [];
+        var selected = $("input[type='radio'][name='boolean']:checked").val();
+
+        $.each(data, function (index, filterData) {
+            var clause = neon.query.where(filterData.columnValue, filterData.operatorValue, filterData.value);
+            clauses.push(clause);
+        });
+
+        if (selected == "AND") {
+            whereClause = neon.query.and.apply(this, clauses);
+        }
+        else {
+            whereClause = neon.query.or.apply(this, clauses);
+        }
+        return whereClause;
+    }
+
     function buildFilterFromData() {
         var dataset = neon.wizard.dataset();
         var baseFilter = new neon.query.Filter().selectFrom(dataset.database, dataset.table);
@@ -86,22 +98,9 @@ neon.filter = function () {
             whereClause = neon.query.where(filterData.columnValue, filterData.operatorValue, filterData.value);
         }
         else {
-            var selected = $("input[type='radio'][name='boolean']:checked").val();
-            var clauses = [];
-            $.each(data, function(index, filterData){
-                var clause = neon.query.where(filterData.columnValue, filterData.operatorValue, filterData.value);
-                clauses.push(clause);
-            });
-
-            if (selected == "AND") {
-                whereClause = neon.query.and.apply(this, clauses);
-            }
-            else {
-                whereClause = neon.query.or.apply(this, clauses);
-            }
+            whereClause = buildCompoundWhereClause.call(this, data);
         }
-        baseFilter.where(whereClause);
-        return baseFilter;
+        return baseFilter.where(whereClause);
     }
 
     var getSubmittableData = function () {
@@ -121,8 +120,15 @@ neon.filter = function () {
         filterData.operatorValue = $('#operator-select-' + id + ' option:selected').val();
         filterData.value = $('#value-input-' + id).val();
         filterData.submittable = true;
-        if (!isNaN(filterData.value)) {
+
+        if ($.isNumeric(filterData.value)) {
             filterData.value = parseFloat(filterData.value);
+        }
+        if (filterData.value === "null" || filterData.value === "") {
+            filterData.value = null;
+        }
+        if (filterData.value === '""') {
+            filterData.value = "";
         }
     }
 
@@ -136,7 +142,7 @@ neon.filter = function () {
     var grid = function (columnNames) {
         columnOptions = columnNames;
         filterState.data = [];
-        filterState.data.push(new CreateFilterData());
+        filterState.data.push(new FilterRow());
         redrawTemplateFromData();
     };
 
@@ -151,8 +157,15 @@ $(function () {
     Handlebars.registerHelper('select', function (context, options) {
         var el = $('<select />').html(options.fn(this));
         el.find('option').filter(function () {
-            return this.value == context;
+            return this.value === context;
         }).attr('selected', 'selected');
+        return el.html();
+    });
+    Handlebars.registerHelper('escapeQuotes', function (context, options) {
+        var el = $('<div/>').html(options.fn(this));
+        if(context === ""){
+            el.find('input').attr('value','""');
+        }
         return el.html();
     });
 });
