@@ -25,9 +25,18 @@
 describe('table', function () {
 
 
+    beforeEach(function () {
+        setFixtures("<div id='table'></div>");
+
+    });
+
     it('converts the column names to slick grid format', function () {
 
         var columnNames = ['c1', 'c2', 'c3'];
+        var data = [
+            {"c1": "v1", "c2": "v2", "c3": "v3"}
+        ];
+
         var slickgridFormat = [
             { id: 'c1', name: 'c1', field: 'c1'},
             { id: 'c2', name: 'c2', field: 'c2'},
@@ -36,11 +45,37 @@ describe('table', function () {
 
         // we only care about the id, name and field properties for this test since they indicate how the
         // column's data is configured
-        var actual = tables.Table.createSlickgridColumns_(columnNames).map(function (row) {
+        var table = new tables.Table('#table', {data: data, columns: columnNames});
+        var actual = table.columns_.map(function (row) {
             return lodash.pick(row, 'id', 'name', 'field');
         });
 
         expect(actual).toBeEqualArray(slickgridFormat);
+
+    });
+
+    it('gathers the column names if they are not explicitly specified', function () {
+
+        var data = [
+            {"c1": "v1", "c2": "v2"},
+            {"c1": "v1", "c2": "v2", "c3": "v3"}
+        ];
+
+        var slickgridFormat = [
+            { id: 'c1', name: 'c1', field: 'c1'},
+            { id: 'c2', name: 'c2', field: 'c2'},
+            { id: 'c3', name: 'c3', field: 'c3'}
+        ];
+
+        // we only care about the id, name and field properties for this test since they indicate how the
+        // column's data is configured
+        var table = new tables.Table('#table', {data: data});
+        var actual = table.columns_.map(function (row) {
+            return lodash.pick(row, 'id', 'name', 'field');
+        });
+
+        expect(actual).toBeEqualArray(slickgridFormat);
+
 
     });
 
@@ -107,7 +142,6 @@ describe('table', function () {
     });
 
     it('sorts the data descending', function () {
-        setFixtures("<div id='table'></div>");
         var data = [
             { "field1": 3, "field2": 2},
             { "field1": 5, "field2": 4},
