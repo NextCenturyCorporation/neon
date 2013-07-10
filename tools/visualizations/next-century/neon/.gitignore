@@ -3,6 +3,7 @@ neon-server/src/test/javascript/spec_runner_unit.html
 neon-server/src/acceptanceTest/javascript/spec_runner_acceptance.html
 neon-server/src/test-data/mongo-json/
 charts/src/test/javascript/spec_runner_unit.html
+tables/src/test/javascript/spec_runner_unit.html
 
 
 # gradle files
