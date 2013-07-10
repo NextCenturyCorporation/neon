@@ -14,6 +14,7 @@
 
     <script src="<%=owfServerUrl%>/js/owf-widget.js"></script>
     <script src="<%=neonServerUrl%>/js/neon.js"></script>
+    <script src="js/tables.js"></script>
 
     <script>
         neon.query.SERVER_URL = '<%=neonServerUrl%>';
@@ -30,6 +31,10 @@
             }
         });
     </script>
+
+    <link rel="stylesheet" type="text/css" href="css/builder.css"/>
+    <link rel="stylesheet" type="text/css" href="css/slickgrid/slick.grid.css"/>
+    <link rel="stylesheet" type="text/css" href="css/smoothness/jquery-ui-1.8.16.custom.css"/>
     <link rel="stylesheet" type="text/css" href="<%=neonServerUrl%>/css/neon.css" />
 
 </head>
@@ -44,7 +49,8 @@
     <br/><br/>
     <button id="submit" onclick="submitter();">Submit</button>
     <br/><br/>
-    <div id="resp"></div>
+
+    <div id="results"></div>
 
     <script>
         function submitter(){
@@ -55,7 +61,8 @@
                     {
                         data: { text: query, datastore: datastore },
                         success : function(data){
-                            $('#resp').html(JSON.stringify(data));
+                            $('#results').empty();
+                            new tables.Table('#results', {data: data.data}).draw();
                     }
             });
         }
