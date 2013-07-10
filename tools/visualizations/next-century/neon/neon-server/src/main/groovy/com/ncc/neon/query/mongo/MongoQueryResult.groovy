@@ -28,8 +28,6 @@ import com.ncc.neon.query.Row
 
 class MongoQueryResult implements QueryResult {
 
-    private def currentRow
-
     /** the underlying iterable wrapped by the this result */
     private def mongoIterable
 
@@ -37,19 +35,35 @@ class MongoQueryResult implements QueryResult {
     Iterator<Row> iterator() {
         // wrap the result in a Row and set the current row
         def delegate = mongoIterable.iterator()
-        def iterator = [
-            hasNext : { delegate.hasNext() },
-            next : {
-                def row = new MongoRow(mongoRow: delegate.next())
-                currentRow = row
-                return row
-            }
-        ] as Iterator
-        return iterator
+        return new MongoQueryIterator(delegate)
     }
 
     @Override
     String toJson() {
         return MongoUtils.serialize(mongoIterable)
+    }
+
+    private static class MongoQueryIterator implements Iterator<Row>{
+
+        private final Iterator delegate
+
+        public MongoQueryIterator(Iterator delegate){
+            this.delegate = delegate
+        }
+
+        @Override
+        boolean hasNext() {
+            return delegate.hasNext()
+        }
+
+        @Override
+        Row next() {
+            return new MongoRow(mongoRow: delegate.next())
+        }
+
+        @Override
+        void remove() {
+            delegate.remove()
+        }
     }
 }
