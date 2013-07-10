@@ -29,12 +29,17 @@ describe('table', function () {
 
         var columnNames = ['c1', 'c2', 'c3'];
         var slickgridFormat = [
-            { id: 'c1', name: 'c1', field: 'c1', sortable: true },
-            { id: 'c2', name: 'c2', field: 'c2', sortable: true },
-            { id: 'c3', name: 'c3', field: 'c3', sortable: true }
+            { id: 'c1', name: 'c1', field: 'c1'},
+            { id: 'c2', name: 'c2', field: 'c2'},
+            { id: 'c3', name: 'c3', field: 'c3'}
         ];
 
-        var actual = tables.Table.createSlickgridColumns_(columnNames);
+        // we only care about the id, name and field properties for this test since they indicate how the
+        // column's data is configured
+        var actual = tables.Table.createSlickgridColumns_(columnNames).map(function (row) {
+            return lodash.pick(row, 'id', 'name', 'field');
+        });
+
         expect(actual).toBeEqualArray(slickgridFormat);
 
     });
@@ -91,7 +96,7 @@ describe('table', function () {
 
         // simulate a sort
         var table = new tables.Table('#table', { data: data, columns: ['field1', 'field2']}).draw();
-        clickHeader(table,'field1');
+        clickHeader(table, 'field1');
 
         // the data should have been sorted
         var sorted = table.dataView_.getItems();
@@ -111,8 +116,8 @@ describe('table', function () {
 
         // simulate a sort, but click twice to get to descending (first click is ascending)
         var table = new tables.Table('#table', { data: data, columns: ['field1', 'field2']}).draw();
-        clickHeader(table,'field1');
-        clickHeader(table,'field1');
+        clickHeader(table, 'field1');
+        clickHeader(table, 'field1');
 
         // the data should have been sorted
         var sorted = table.dataView_.getItems();
@@ -122,7 +127,7 @@ describe('table', function () {
 
     });
 
-    function clickHeader(table,columnName) {
+    function clickHeader(table, columnName) {
         var colIndex = table.table_.getColumnIndex(columnName);
         $('.slick-header-columns').children().eq(colIndex).trigger('click');
     }

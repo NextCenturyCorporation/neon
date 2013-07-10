@@ -123,11 +123,44 @@ tables.Table.createSlickgridColumns_ = function (columnNames) {
         slickgridColumn.name = col;
         slickgridColumn.field = col;
         slickgridColumn.sortable = true;
+        slickgridColumn.formatter = tables.Table.defaultCellFormatter_;
         slickgridColumns.push(slickgridColumn);
     });
     return slickgridColumns;
 };
 
+tables.Table.defaultCellFormatter_ = function (row, cell, value, columnDef, dataContext) {
+    // most of this taken from slick.grid.js defaultFormatter but modified to support nested objects
+    if (!value) {
+        return "";
+    }
+
+    // check if nested object. if it is, append each of the key/value pairs
+    var keys = tables.Table.getObjectKeys_(value);
+
+    if (keys.length === 0) {
+        return (value + "").replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+    }
+
+    return tables.Table.createKeyValuePairsString_(value, keys, row, cell, columnDef, dataContext);
+
+};
+
+tables.Table.getObjectKeys_ = function (object) {
+    var keys = [];
+    if (typeof object === 'object') {
+        keys = Object.keys(object);
+    }
+    return keys;
+};
+
+tables.Table.createKeyValuePairsString_ = function (object, keys, row, cell, columnDef, dataContext) {
+    var keyValueStrings = [];
+    keys.forEach(function (key) {
+        keyValueStrings.push(key + ': ' + tables.Table.defaultCellFormatter_(row, cell, object[key], columnDef, dataContext));
+    });
+    return keyValueStrings.join(', ');
+};
 
 /**
  * Draws the table in the selector specified in the constructor
