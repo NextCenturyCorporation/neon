@@ -296,6 +296,14 @@ describe('query mapping', function () {
         assertQueryResults(query, expectedData);
     });
 
+    it('group by with limit', function () {
+        var groupByMonthClause = new neon.query.GroupByFunctionClause(neon.query.MONTH, 'hiredate', 'hire_month');
+        var query = baseQuery().groupBy(groupByMonthClause).aggregate(neon.query.SUM, 'salary', 'salary_sum').sortBy('hire_month', neon.query.ASCENDING).limit(1);
+        // we should only get the first element since we're limiting the query to 1 result
+        var expectedData = getJSONFixture('groupByMonth.json').slice(0,1);
+        assertQueryResults(query, expectedData);
+    });
+
 
     it('query WHERE less than', function () {
         var query = baseQuery().where('salary', '<', 61000);

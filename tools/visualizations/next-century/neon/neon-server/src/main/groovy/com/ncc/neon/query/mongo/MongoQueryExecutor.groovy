@@ -126,6 +126,9 @@ class MongoQueryExecutor extends AbstractQueryExecutor {
         if (mongoQuery.sortClauses) {
             additionalClauses << new BasicDBObject('$sort', createSortDBObject(mongoQuery.sortClauses))
         }
+        if (mongoQuery.limitClause) {
+            additionalClauses << new BasicDBObject('$limit', mongoQuery.limitClause.limit)
+        }
         return collection.aggregate(match, additionalClauses as DBObject[]).results()
     }
 
