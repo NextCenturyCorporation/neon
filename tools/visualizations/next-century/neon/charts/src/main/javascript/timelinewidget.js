@@ -29,6 +29,7 @@ $(document).ready(function () {
         var datasource;
         var datasetId;
         var filterId;
+        var COUNT_FIELD_NAME = 'count_';
 
         var messageHandler = new neon.eventing.MessageHandler({
             activeDatasetChanged: populateAttributeDropdowns,
@@ -54,8 +55,8 @@ $(document).ready(function () {
             getResetFilterButton().attr('disabled', 'disabled');
         }
 
-        function configureRedrawBoundsButton(){
-            getRedrawBoundsButton().click(function (){
+        function configureRedrawBoundsButton() {
+            getRedrawBoundsButton().click(function () {
                 drawChart();
             });
         }
@@ -119,7 +120,7 @@ $(document).ready(function () {
             var xAttr = getXAttribute();
             var yAttr = getYAttribute();
 
-            if (!xAttr || !yAttr) {
+            if (!xAttr) {
                 doDrawChart({data: []});
                 return;
             }
@@ -132,9 +133,14 @@ $(document).ready(function () {
             var query = new neon.query.Query()
                 .selectFrom(datasource, datasetId)
                 .where(xAttr, '!=', null)
-                .groupBy(groupByYearClause, groupByMonthClause, groupByDayClause, groupByHourClause)
-                .aggregate(neon.query.SUM, yAttr, yAttr);
+                .groupBy(groupByYearClause, groupByMonthClause, groupByDayClause, groupByHourClause);
 
+            if (yAttr) {
+                query.aggregate(neon.query.SUM, yAttr, yAttr);
+            }
+            else {
+                query.aggregate(neon.query.COUNT, null, COUNT_FIELD_NAME);
+            }
             neon.query.executeQuery(query, doDrawChart);
         }
 
