@@ -2,6 +2,8 @@ apply {
     plugin 'jetty'
 }
 
+// TODO: NEON-168 (too much code in build.gradle) and INF-28 (javascript dependencies abstraction) should result in most of this being abstracted out of this specific project
+
 project.ext {
 
     // which other javascript projects this is dependent on
