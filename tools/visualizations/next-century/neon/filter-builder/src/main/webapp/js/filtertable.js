@@ -146,9 +146,14 @@ neon.filter = function () {
         redrawTemplateFromData();
     };
 
+    var clearFilter = function(){
+        filterId = undefined;
+    }
+
     return {
         addFilter: addFilter,
         removeFilter: removeFilter,
+        clearFilter: clearFilter,
         grid: grid
     };
 }();

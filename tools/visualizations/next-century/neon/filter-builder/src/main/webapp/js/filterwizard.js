@@ -1,5 +1,7 @@
 (function () {
 
+    var columns = [];
+
     var messageHandler = {
         publishMessage: function(){}
     };
@@ -23,6 +25,7 @@
     function hideWizardSteps() {
         $("#db-table").hide();
         $("#filter-container").hide();
+        $("#clear-filters-button").hide();
     }
 
     function setupHostnames() {
@@ -39,10 +42,12 @@
     function addClickHandlers() {
         $("#datastore-button").click(connectToDatastore);
         $("#database-table-button").click(selectDatabaseAndTable);
+        $("#clear-filters-button").click(clearAllFilters);
     }
 
     function connectToDatastore() {
         $("#filter-container").hide();
+        $("#clear-filters-button").hide();
         $("#db-table").show();
         var databaseSelectedOption = $('#datastore-select option:selected');
         var hostnameSelector = $('#hostname-input');
@@ -89,11 +94,24 @@
             {
                 data: neon.wizard.dataset(),
                 success: function (columnNames) {
-                    neon.filter.grid(columnNames);
+                    columns = columnNames;
+                    neon.filter.grid(columns);
                     $("#filter-container").show();
+                    $("#clear-filters-button").show();
                 }
             });
         broadcastActiveDataset();
+    }
+
+    function clearAllFilters(){
+        neon.query.clearFilters(function(){
+            var database = $('#database-select').val();
+            var table = $('#table-select').val();
+            var message = { "database" : database, "table" : table };
+            neon.filter.clearFilter();
+            neon.filter.grid(columns);
+            messageHandler.publishMessage(neon.eventing.Channels.FILTERS_CHANGED, message);
+        });
     }
 
     function broadcastActiveDataset() {
@@ -101,7 +119,6 @@
         var table = $('#table-select').val();
         var message = { "database" : database, "table" : table };
         messageHandler.publishMessage(neon.eventing.Channels.ACTIVE_DATASET_CHANGED, message);
-
     }
 
     $(function () {
@@ -112,7 +129,6 @@
 
 var neon = neon || {};
 neon.wizard = function () {
-
     function getBaseDatasetInfo(){
         var selectedDatabase = $('#database-select option:selected');
         var selectedTable = $('#table-select option:selected');

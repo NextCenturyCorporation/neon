@@ -157,6 +157,9 @@
 
                 <div class="controls">
                     <button class="btn" id="database-table-button">Continue</button>
+                    <span class="button-spacing">
+                        <button class="btn btn-danger" id="clear-filters-button">Clear All Filters</button>
+                    </span>
                 </div>
             </div>
         </div>
