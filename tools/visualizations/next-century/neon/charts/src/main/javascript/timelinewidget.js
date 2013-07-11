@@ -30,7 +30,6 @@ $(document).ready(function () {
         var datasetId;
         var filterId;
 
-
         var messageHandler = new neon.eventing.MessageHandler({
             activeDatasetChanged: populateAttributeDropdowns,
             filtersChanged: updateFilterId
@@ -39,7 +38,12 @@ $(document).ready(function () {
         var eventPublisher = new neon.eventing.OWFEventPublisher(messageHandler);
 
         function configureButtons() {
+            configureRedrawBoundsButton();
             configureResetFilterButton();
+        }
+
+        function getRedrawBoundsButton() {
+            return $('#redraw-bounds');
         }
 
         function getResetFilterButton() {
@@ -48,6 +52,12 @@ $(document).ready(function () {
 
         function disableResetFilterButton() {
             getResetFilterButton().attr('disabled', 'disabled');
+        }
+
+        function configureRedrawBoundsButton(){
+            getRedrawBoundsButton().click(function (){
+                drawChart();
+            });
         }
 
         function configureResetFilterButton() {
@@ -132,7 +142,6 @@ $(document).ready(function () {
 
             $('#chart').empty();
 
-
             var xAttr = getXAttribute();
             var yAttr = getYAttribute();
 
@@ -155,7 +164,7 @@ $(document).ready(function () {
             configureFiltering(timeline, xAttr);
             timeline.draw();
             // make sure the reset button is aligned with the chart and has some spacing between it and the chart
-            $('#reset-filter').css({'margin-left': timeline.margin.left + 'px', 'margin-top': '20px'});
+            $('#button-row').css({'margin-left': timeline.margin.left + 'px', 'margin-top': '20px'});
         }
 
         function configureFiltering(timeline, xAttr) {

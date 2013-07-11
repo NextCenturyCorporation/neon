@@ -65,8 +65,10 @@
     </div>
 
     <div class="controls-row">
-        <div class="control-group">
+        <div id="button-row" class="control-group">
             <div class="controls">
+                <button type="button" type="button" id="redraw-bounds" class="btn btn-info">Redraw Bounds</button>
+
                 <button type="button" type="button" id="reset-filter" class="btn btn-danger">Reset Time Period</button>
             </div>
         </div>
