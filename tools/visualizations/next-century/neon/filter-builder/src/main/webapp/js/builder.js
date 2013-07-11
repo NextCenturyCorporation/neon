@@ -20,25 +20,12 @@
  * OF NEXT CENTURY CORPORATION EXCEPT BY PRIOR WRITTEN PERMISSION AND WHEN
  * RECIPIENT IS UNDER OBLIGATION TO MAINTAIN SECRECY.
  */
+$(function() {
+    var sizeTableToRemainingSpace = function() {
+        $('#results').css('top',  $('#query').position().top + $('#query').outerHeight() );
+        table.refreshLayout();
+    };
 
-html, body {
-    height: 100%;
-    width: 100%;
-    padding: 0;
-    margin: 0;
-}
-
-#results, #query {
-    position: absolute;
-    width: 100%;
-    padding: 8px;
-    box-sizing: border-box;
-}
-
-#results {
-    bottom: 0;
-}
-
-.slick-viewport {
-
-}
+    $(window).resize(sizeTableToRemainingSpace);
+    sizeTableToRemainingSpace();
+});

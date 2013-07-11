@@ -196,6 +196,14 @@ tables.Table.prototype.draw = function () {
     return this;
 };
 
+tables.Table.prototype.refreshLayout = function () {
+    // the table may not be drawn yet when this is called (this method can be used as a hook to resize a table, but
+    // if the browser is resized before the table is drawn, the table will be undefined here)
+    if (this.table_) {
+        this.table_.resizeCanvas();
+    }
+};
+
 
 tables.Table.prototype.addSortSupport_ = function () {
     var me = this;
