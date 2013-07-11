@@ -67,10 +67,11 @@ charts.Timeline = function (chartSelector, opts) {
     this.margin = $.extend({}, charts.Timeline.DEFAULT_MARGIN_, opts.margin || {});
     this.hMargin_ = this.margin.left + this.margin.right;
     this.vMargin_ = this.margin.top + this.margin.bottom;
-    this.data_ = this.aggregateData_(opts.data);
     // use the raw data for min and max date so we can get the true values
     this.minDate_ = this.computeMinDate_(opts.data);
     this.maxDate_ = this.computeMaxDate_(opts.data);
+    this.data_ = this.aggregateData_(opts.data);
+
     // the timePeriods_ contain the starting dates for each time period
     this.timePeriods_ = this.computeTimePeriods_();
     this.x_ = this.createXScale_();
@@ -172,6 +173,10 @@ charts.Timeline.prototype.computeTimePeriods_ = function () {
     var timePeriods = [];
     if (charts.Timeline.isValidDate_(this.minDate_) && charts.Timeline.isValidDate_(this.maxDate_)) {
         Array.prototype.push.apply(timePeriods, this.timeInterval_.range(this.timeInterval_(this.minDate_), this.maxDate_));
+        // set the start time period to the true start. do this after the time periods are computed, otherwise the
+        // timeInterval_.range method above will return the first time period after the start if the time period
+        // does not start exactly at an even interval
+        timePeriods[0] = this.computeTimePeriodStart_(timePeriods[0]);
     }
     return timePeriods;
 };
@@ -223,7 +228,7 @@ charts.Timeline.prototype.computeTickValues_ = function () {
     var currentTick = this.minDate_;
     while (currentTick < this.maxDate_) {
         tickValues.push(currentTick);
-        currentTick = this.timeInterval_.offset(this.timeInterval_.floor(currentTick), this.tickStep_);
+        currentTick = this.timeInterval_.offset(this.timeInterval_(currentTick), this.tickStep_);
     }
     return tickValues;
 };
@@ -279,7 +284,7 @@ charts.Timeline.prototype.bindData_ = function (chart) {
         .enter().append('rect')
         .attr('class', charts.Timeline.ACTIVE_BAR_CLASS_)
         .attr('x', function (d) {
-            return me.x_(me.timeInterval_(d.key));
+            return me.x_(me.computeTimePeriodStart_(d.key));
         })
         .attr('y', function (d) {
             return me.y_(d.values);
@@ -298,7 +303,7 @@ charts.Timeline.prototype.bindData_ = function (chart) {
 
 
 charts.Timeline.prototype.showTooltip_ = function (data) {
-    var periodStartPixels = this.x_(this.timeInterval_(data.key));
+    var periodStartPixels = this.x_(this.computeTimePeriodStart_(data.key));
     var tooltip = this.createTooltip_(data, this.getDate_(periodStartPixels));
     // initially hidden because it will fade in
     tooltip.hide();
@@ -416,7 +421,7 @@ charts.Timeline.prototype.notifyFilterListeners_ = function (filterStartDate, fi
 charts.Timeline.prototype.aggregateData_ = function (data) {
     var me = this;
     return d3.nest().key(function (d) {
-        return me.timeInterval_(d[me.xAttribute_]);
+        return me.computeTimePeriodStart_(d[me.xAttribute_]);
     }).rollup(function (d) {
             return d3.sum(d, function (el) {
                 return me.yAttribute_ ? el[me.yAttribute_] : 1;
@@ -430,15 +435,21 @@ charts.Timeline.prototype.aggregateData_ = function (data) {
 
 
 charts.Timeline.prototype.getDate_ = function (pixelValue) {
-    // the d3 chart uses even intervals, but if the minimum/maximum point is selected, return those true points
-    if (pixelValue === 0) {
-        return this.minDate_;
-    }
     if (pixelValue === this.plotWidth_) {
         return this.maxDate_;
     }
     var index = pixelValue / this.x_.rangeBand();
     return this.timePeriods_[index];
+};
+
+charts.Timeline.prototype.computeTimePeriodStart_ = function (date) {
+    var timePeriodStart = this.timeInterval_(date);
+    // if the date is in the first time period, taking the floor to get the time period start
+    // may result in a date before the true start. check for that case.
+    if (timePeriodStart < this.minDate_) {
+        timePeriodStart = this.minDate_;
+    }
+    return timePeriodStart;
 };
 
 /**

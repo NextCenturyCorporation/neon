@@ -39,7 +39,8 @@ describe('timeline', function () {
 
         var expected = [];
 
-        expected.push({ "key": new Date(2013, 0), "values": 9});
+        // the first value will use the true start date
+        expected.push({ "key": new Date(2013, 0, 7), "values": 9});
         expected.push({ "key": new Date(2013, 1), "values": 13});
         expected.push({ "key": new Date(2013, 2), "values": 1});
         expected.push({ "key": new Date(2013, 4), "values": 8});
@@ -60,11 +61,9 @@ describe('timeline', function () {
         var timeline = new charts.Timeline('#chart', opts);
         var timePeriods = timeline.timePeriods_;
 
-        // even though the data starts at 1/8, the time period begins at the beginning of the month (the user
-        // only ever sees the date indicating the beginning of the data - internally it uses the beginning of the
-        // time period date)
+        // the first time period uses the true date
         var expected = [
-            new Date(2013, 0, 1),
+            new Date(2013, 0, 8),
             new Date(2013, 1, 1),
             new Date(2013, 2, 1),
             new Date(2013, 3, 1),
@@ -181,7 +180,7 @@ describe('timeline', function () {
     it('should notify listeners of filter events', function () {
 
         var data = [
-            {"date": new Date(2013, 0, 1), "events": 2},
+            {"date": new Date(2013, 0, 4), "events": 2},
             {"date": new Date(2013, 1, 1), "events": 4},
             {"date": new Date(2013, 2, 1), "events": 7},
             {"date": new Date(2013, 3, 1), "events": 1}
