@@ -77,7 +77,7 @@ class MongoWhereClauseBuilder {
     }
 
     private static def buildBooleanClause(booleanClause, opName) {
-        // TODO: Mongo has a bug such that it can't use geospatial clauses in AND or OR operators - https://jira.mongodb.org/browse/SERVER-4572. AND can be partially used by putting the geospatial clause outside the rest of them (as long as the location field is not used inside the AND query as well)
+        // TODO: NEON-422 Mongo has a bug such that it can't use geospatial clauses in AND or OR operators - https://jira.mongodb.org/browse/SERVER-4572. AND can be partially used by putting the geospatial clause outside the rest of them (as long as the location field is not used inside the AND query as well)
         def geospatialClauses = []
         def clauses = []
 
