@@ -37,6 +37,7 @@ html, body {
 
 #results {
     bottom: 0;
+    min-height: 200px;
 }
 
 .slick-viewport {
