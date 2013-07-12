@@ -48,6 +48,30 @@ describe('timeline', function () {
         expect(timeline.data_).toBeEqualArray(expected);
     });
 
+    it('should use the count if there is no y-attribute specified', function () {
+        var data = [
+            {"date": new Date(2013, 0, 7), "count": 2},
+            {"date": new Date(2013, 1, 1), "count": 4},
+            {"date": new Date(2013, 0, 8), "count": 7},
+            {"date": new Date(2013, 0, 8), "count": 3},
+            {"date": new Date(2013, 2, 1), "count": 1},
+            {"date": new Date(2013, 1, 1), "count": 9},
+            {"date": new Date(2013, 4, 13), "count": 8}
+        ];
+        var opts = { "data" : data, "x": "date", "interval": charts.Timeline.MONTH};
+        var timeline = new charts.Timeline('#chart', opts);
+
+        var expected = [];
+
+        // the first value will use the true start date
+        expected.push({ "key": new Date(2013, 0, 7), "values": 3});
+        expected.push({ "key": new Date(2013, 1), "values": 2});
+        expected.push({ "key": new Date(2013, 2), "values": 1});
+        expected.push({ "key": new Date(2013, 4), "values": 1});
+
+        expect(timeline.data_).toBeEqualArray(expected);
+    });
+
     it('should compute the time periods', function () {
         var data = [
             {"date": new Date(2013, 1, 7), "count": 2},
