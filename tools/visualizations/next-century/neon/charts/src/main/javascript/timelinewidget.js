@@ -151,6 +151,10 @@ $(document).ready(function () {
             var xAttr = getXAttribute();
             var yAttr = getYAttribute();
 
+            if(yAttr === ""){
+                yAttr = COUNT_FIELD_NAME;
+            }
+
             var dataByDate = data.data.map(function (el) {
                 //month is 1-based
                 var date = new Date(el.year, el.month - 1, el.day, el.hour);
