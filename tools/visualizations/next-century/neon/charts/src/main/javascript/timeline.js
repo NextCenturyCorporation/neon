@@ -38,6 +38,11 @@
  *     <li>margin (optional) - An object with any of the elements `top`, `left`, `bottom` or `right`. These are pixel values to override the default margin. If not specified, a preconfigured default value will be used.</li>
  *     <li>step (optional) - The number of the specified intervals. If not specified, a preconfigured default value will be used based on the tick interval that was selected.</li>
  *     <li>tickFormat (optional) - The format of the tick labels. Use the formatting specified by d3 at <a href="https://github.com/mbostock/d3/wiki/Time-Formatting">Time Formatting</a>. If not specified, a preconfigured default value will be used.</li>
+ *     <li>style (optional) - a mapping of a bar state to the different attributes to style for that attribute. The available bar states
+ *     are active, inactive and hover. The attributes that can be toggled correspond to the underlying svg type used to render the
+ *     bar. For example, to modify the the active/inactive bar states, but not do anything on hover this attribute would be
+ *     `{ "active" : { "fill" : "blue" }, "inactive" : { "fill" : "red" } }`. The values for the attributes can also be functions
+ *     to compute the values. The function takes 2 parameters - the current data for the bar and its index.</li>
  * </ul>
  *
  * @constructor
@@ -82,6 +87,7 @@ charts.Timeline = function (chartSelector, opts) {
     this.y_ = this.createYScale_();
     this.xAxis_ = this.createXAxis_();
     this.yAxis_ = this.createYAxis_();
+    this.style_ = $.extend({}, charts.Timeline.DEFAULT_STYLE_, opts.style);
 };
 
 /**
@@ -117,8 +123,6 @@ charts.Timeline.YEAR = 'year';
 charts.Timeline.DEFAULT_HEIGHT_ = 400;
 charts.Timeline.DEFAULT_WIDTH_ = 600;
 charts.Timeline.DEFAULT_INTERVAL_ = charts.Timeline.MONTH;
-charts.Timeline.ACTIVE_BAR_CLASS_ = 'bar active';
-charts.Timeline.INACTIVE_BAR_CLASS_ = 'bar inactive';
 charts.Timeline.TIME_INTERVALS_ = {};
 charts.Timeline.SLIDER_DIV_NAME_ = 'slider';
 charts.Timeline.ZERO_DATE_ = new Date(0);
@@ -126,6 +130,32 @@ charts.Timeline.DEFAULT_MARGIN_ = {top: 20, bottom: 20, left: 40, right: 30};
 charts.Timeline.FILTER_EVENT_TYPE_ = 'filter';
 charts.Timeline.TOOLTIP_ID_ = 'tooltip';
 charts.Timeline.GRANULARITIES_ = [charts.Timeline.HOUR, charts.Timeline.DAY, charts.Timeline.MONTH, charts.Timeline.YEAR];
+charts.Timeline.SVG_ELEMENT_ = 'rect';
+charts.Timeline.ACTIVE_STYLE_KEY_ = 'active';
+charts.Timeline.INACTIVE_STYLE_KEY_ = 'inactive';
+charts.Timeline.HOVER_STYLE_KEY_ = 'hover';
+
+// the bar classes are not used for styling directly through the CSS but as
+// selectors to indicate which style functions to apply. this is because the styles are
+// applied by functions and not by straight CSS
+charts.Timeline.BAR_CLASS_ = 'bar';
+
+// the active/inactive/hover classes are additional classes appended to the bars but just use the same name
+// as the bar class concatenated with the state, so an active bar would have the classes 'bar active-bar'
+charts.Timeline.ACTIVE_BAR_CLASS_ = charts.Timeline.ACTIVE_STYLE_KEY_ + '-' + charts.Timeline.BAR_CLASS_;
+charts.Timeline.INACTIVE_BAR_CLASS_ = charts.Timeline.INACTIVE_STYLE_KEY_ + '-' + charts.Timeline.BAR_CLASS_;
+charts.Timeline.HOVER_BAR_CLASS_ = charts.Timeline.HOVER_STYLE_KEY_ + '-' + charts.Timeline.BAR_CLASS_;
+
+charts.Timeline.DEFAULT_ACTIVE_BAR_FILL_COLOR_ = 'steelblue';
+charts.Timeline.DEFAULT_INACTIVE_BAR_FILL_COLOR_ = 'lightgrey';
+charts.Timeline.defaultActiveBarStyle_ = { 'fill': charts.Timeline.DEFAULT_ACTIVE_BAR_FILL_COLOR_ };
+charts.Timeline.defaultInactiveBarStyle_ = { 'fill': charts.Timeline.DEFAULT_INACTIVE_BAR_FILL_COLOR_ };
+charts.Timeline.defaultHoverBarStyle_ = {};
+
+charts.Timeline.DEFAULT_STYLE_ = {};
+charts.Timeline.DEFAULT_STYLE_[charts.Timeline.ACTIVE_STYLE_KEY_] = charts.Timeline.defaultActiveBarStyle_;
+charts.Timeline.DEFAULT_STYLE_[charts.Timeline.INACTIVE_STYLE_KEY_] = charts.Timeline.defaultInactiveBarStyle_;
+charts.Timeline.DEFAULT_STYLE_[charts.Timeline.HOVER_STYLE_KEY_] = charts.Timeline.defaultHoverBarStyle_;
 
 
 /**
@@ -279,10 +309,10 @@ charts.Timeline.prototype.drawChartSVG_ = function () {
 
 charts.Timeline.prototype.bindData_ = function (chart) {
     var me = this;
-    chart.selectAll('rect')
+    var bars = chart.selectAll(charts.Timeline.SVG_ELEMENT_)
         .data(this.data_)
-        .enter().append('rect')
-        .attr('class', charts.Timeline.ACTIVE_BAR_CLASS_)
+        .enter().append(charts.Timeline.SVG_ELEMENT_)
+        .attr('class', charts.Timeline.BAR_CLASS_ + ' ' + charts.Timeline.ACTIVE_BAR_CLASS_)
         .attr('x', function (d) {
             return me.x_(me.computeTimePeriodStart_(d.key));
         })
@@ -294,11 +324,39 @@ charts.Timeline.prototype.bindData_ = function (chart) {
             return me.height - me.vMargin_ - me.y_(d.values);
         })
         .on('mouseover', function (d) {
+            me.toggleHoverStyle_(d3.select(this), true);
             me.showTooltip_(d);
         })
         .on('mouseout', function () {
+            me.toggleHoverStyle_(d3.select(this), false);
             me.hideTooltip_();
         });
+    // initially all bars active, so just apply the active style
+    this.applyStyle_(bars, charts.Timeline.ACTIVE_STYLE_KEY_);
+};
+
+charts.Timeline.prototype.toggleHoverStyle_ = function (selection, hover) {
+    selection.classed(charts.Timeline.HOVER_BAR_CLASS_, hover);
+
+    // when hovering, apply the hover style, otherwise revert the style based on the current class
+    var style;
+    if (hover) {
+        style = charts.Timeline.HOVER_STYLE_KEY_;
+    }
+    else {
+        style = selection.classed(charts.Timeline.ACTIVE_BAR_CLASS_) ?
+            charts.Timeline.ACTIVE_STYLE_KEY_ : charts.Timeline.INACTIVE_STYLE_KEY_;
+    }
+
+    this.applyStyle_(selection, style);
+};
+
+charts.Timeline.prototype.applyStyle_ = function (selection, styleKey) {
+    var attrMap = this.style_[styleKey];
+    Object.keys(attrMap).forEach(function (key) {
+        var attrVal = attrMap[key];
+        selection.attr(key, attrVal);
+    });
 };
 
 
@@ -400,10 +458,39 @@ charts.Timeline.prototype.removeFilterListeners = function () {
 };
 
 charts.Timeline.prototype.hideInactiveData_ = function (filterStartDate, filterEndDate) {
-    d3.selectAll('.bar').attr('class', function (d) {
+    // this is a little inefficient to first loop through the data to apply classes and then to
+    // loop through the classes of each type to apply functions, but it makes it easier for the user
+    // to specify different functions for active and inactive data
+    charts.Timeline.applyBarStateClasses_(filterStartDate, filterEndDate);
+    this.applyStyle_(d3.selectAll('.' + charts.Timeline.ACTIVE_BAR_CLASS_), charts.Timeline.ACTIVE_STYLE_KEY_);
+    this.applyStyle_(d3.selectAll('.' + charts.Timeline.INACTIVE_BAR_CLASS_), charts.Timeline.INACTIVE_STYLE_KEY_);
+};
+
+/**
+ * Sets the classes on the bars based on whether they are active or not
+ * @param {Date} filterStartDate
+ * @param {Date} filterEndDate
+ * @method applyBarStateClasses_
+ * @private
+ */
+charts.Timeline.applyBarStateClasses_ = function (filterStartDate, filterEndDate) {
+    var allBars = d3.selectAll('.' + charts.Timeline.BAR_CLASS_);
+
+    // remove existing active/inactive classes then toggle on the correct one. this allows us to keep any other
+    // classes (rather than just replacing the class with inactive/active)
+    allBars.classed(charts.Timeline.INACTIVE_BAR_CLASS_, false);
+    allBars.classed(charts.Timeline.ACTIVE_BAR_CLASS_, false);
+
+    // those within the filter range are set to active
+    allBars.classed(charts.Timeline.ACTIVE_BAR_CLASS_, function (d) {
         var date = d.key;
-        return (filterStartDate <= date && date < filterEndDate) ? charts.Timeline.ACTIVE_BAR_CLASS_ : charts.Timeline.INACTIVE_BAR_CLASS_;
+        return filterStartDate <= date && date < filterEndDate;
     });
+
+    // those that are not active are set to inactive
+    d3.selectAll('.' + charts.Timeline.BAR_CLASS_ + ':not(.' + charts.Timeline.ACTIVE_BAR_CLASS_ + ')')
+        .classed(charts.Timeline.INACTIVE_BAR_CLASS_, true);
+
 };
 
 charts.Timeline.prototype.notifyFilterListeners_ = function (filterStartDate, filterEndDate) {
