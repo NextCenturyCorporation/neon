@@ -77,11 +77,7 @@ task jsPhantomUnitTest(type: Exec) {
 
 task createJasmineUnitSpecRunnerHtml << {
     description = 'Creates the jasmine spec runner html file for javascript unit tests'
-    doCreateJasmineSpec(projectDir, jsUnitTestDir, 'unit',
-            ["../../../build/${combinedJsFileName}",
-                    "../../../src/main/javascript/tablewidget.js"
-            ]
-    )
+    doCreateJasmineSpec(projectDir, jsUnitTestDir, 'unit', "../../../build/${combinedJsFileName}")
 }
 
 def isRunJavascriptTests() {
