@@ -28,6 +28,7 @@ combineJs {
             file("${jsLibDir}/slickgrid/slick.dataview.js"),
             file("${jsLibDir}/slickgrid/plugins/slick.autotooltips.js"),
             file("${jsLibDir}/mergesort/merge-sort.js"),
+            file("${jsLibDir}/bootstrap/bootstrap.min.js"),
             javascript.source.dev.js.files)
     dest = file(jsOutputFile)
 }
@@ -76,7 +77,11 @@ task jsPhantomUnitTest(type: Exec) {
 
 task createJasmineUnitSpecRunnerHtml << {
     description = 'Creates the jasmine spec runner html file for javascript unit tests'
-    doCreateJasmineSpec(projectDir, jsUnitTestDir, 'unit', "../../../build/${combinedJsFileName}")
+    doCreateJasmineSpec(projectDir, jsUnitTestDir, 'unit',
+            ["../../../build/${combinedJsFileName}",
+                    "../../../src/main/javascript/tablewidget.js"
+            ]
+    )
 }
 
 def isRunJavascriptTests() {

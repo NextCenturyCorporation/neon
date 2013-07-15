@@ -21,4 +21,128 @@
  * RECIPIENT IS UNDER OBLIGATION TO MAINTAIN SECRECY.
  */
 
-// TODO: NEON-390 implement table widget
+$(document).ready(function () {
+
+    OWF.ready(function () {
+
+        var datasource;
+        var datasetId;
+        var table;
+
+        // just creating the message handler will register the listeners
+        var messageHandler = new neon.eventing.MessageHandler({
+            activeDatasetChanged: populateInitialData,
+            filtersChanged: updateTable
+
+        });
+
+        function populateInitialData(message) {
+            saveDatasetInfo(message);
+            neon.query.getFieldNames(datasource, datasetId, populateSortFieldDropdown);
+            updateTable();
+        }
+
+        function saveDatasetInfo(message) {
+            datasource = message.database;
+            datasetId = message.table;
+        }
+
+        function populateSortFieldDropdown(data) {
+            var select = $('#sort-field');
+            select.empty();
+            select.append($('<option></option>').attr('value', '').text('(Select Field)'));
+            data.fieldNames.forEach(function (field) {
+                select.append($('<option></option>').attr('value', field).text(field));
+            });
+            select.change(updateSortField);
+        }
+
+        function getSortField() {
+            return $('#sort-field').val();
+        }
+
+        function updateSortField() {
+            if (getSortField()) {
+                updateTable();
+            }
+        }
+
+        function populateSortDirection() {
+            var ascending = $('#sort-ascending');
+            var descending = $('#sort-descending');
+
+            ascending.val(neon.query.ASCENDING);
+            descending.val(neon.query.DESCENDING);
+
+            ascending.click(updateSortDirection);
+            descending.click(updateSortDirection);
+
+            var defaultButton = ascending;
+            defaultButton.addClass('active');
+            $('#sort-direction').val(defaultButton.val());
+        }
+
+
+        function updateSortDirection() {
+            var sortVal = $(this).val();
+            $('#sort-direction').val(sortVal);
+
+            if (getSortField()) {
+                updateTable();
+            }
+        }
+
+        function updateTable() {
+            var query = new neon.query.Query().selectFrom(datasource, datasetId);
+            if ($('#limit')[0].validity.valid) {
+                applyLimit(query);
+            }
+            else {
+                return;
+            }
+            applySort(query);
+            neon.query.executeQuery(query, populateTable);
+        }
+
+        function applyLimit(query) {
+            var limitVal = $('#limit').val();
+            // make sure there is a value - it could be empty (no limit) which is valid
+            if (limitVal) {
+                query.limit(parseInt(limitVal));
+            }
+        }
+
+        function applySort(query) {
+            var sortField = getSortField();
+            if (sortField) {
+                var sortDirection = $('#sort-direction').val();
+                query.sortBy(sortField, sortDirection);
+            }
+        }
+
+        function populateTable(data) {
+            table = new tables.Table('#table', {data: data.data}).draw();
+        }
+
+        function sizeTableToRemainingSpace() {
+            $('#table').css('top', $('#controls').position().top + $('#controls').outerHeight());
+            table.refreshLayout();
+        }
+
+        function addLimitListener() {
+            $('#limit').change(updateTable);
+        }
+
+        populateSortDirection();
+        addLimitListener();
+
+        // show table initially empty
+        populateTable({data: []});
+
+        $(window).resize(sizeTableToRemainingSpace);
+        sizeTableToRemainingSpace();
+
+    });
+
+
+});
