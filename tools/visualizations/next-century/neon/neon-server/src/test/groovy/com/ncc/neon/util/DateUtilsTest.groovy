@@ -39,19 +39,19 @@ class DateUtilsTest {
 
     @Test
     void "create date from ISO8601 string no millis"() {
-        def date = DateUtils.fromISO8601String(ISO8601_DATE_STRING_NO_MILLIS)
+        def date = DateUtils.parseDate(ISO8601_DATE_STRING_NO_MILLIS)
         assert date == DATE_NO_MILLIS
     }
 
     @Test
     void "create date from ISO8601 string with no timezone"() {
-        def date = DateUtils.fromISO8601String("2012-04-15")
+        def date = DateUtils.parseDate("2012-04-15")
         assert date == new DateTime(2012,04,15,0,0,0,DateTimeZone.UTC).toDate()
     }
 
     @Test
     void "create date from ISO8601 string with non GMT timezone"() {
-        def date = DateUtils.fromISO8601String("2012-04-15T16:30-04:00")
+        def date = DateUtils.parseDate("2012-04-15T16:30-04:00")
         assert date == new DateTime(2012,04,15,16,30,0,DateTimeZone.forOffsetHours(-4)).toDate()
     }
 
@@ -59,19 +59,19 @@ class DateUtilsTest {
 
     @Test
     void "convert ISO8601 no millis string to date"() {
-        def iso860String = DateUtils.toISO8601String(DATE_NO_MILLIS)
+        def iso860String = DateUtils.dateTimeToString(DATE_NO_MILLIS)
         assert iso860String == ISO8601_DATE_STRING_NO_MILLIS
     }
 
     @Test
     void "create date from ISO8601 string with millis"() {
-        def date = DateUtils.fromISO8601String(ISO8601_DATE_STRING_WITH_MILLIS)
+        def date = DateUtils.parseDate(ISO8601_DATE_STRING_WITH_MILLIS)
         assert date == DATE_WITH_MILLIS
     }
 
     @Test
     void "convert ISO8601 with millis string to date"() {
-        def iso860String = DateUtils.toISO8601String(DATE_WITH_MILLIS)
+        def iso860String = DateUtils.dateTimeToString(DATE_WITH_MILLIS)
         // the formatter still truncates the millis
         assert iso860String == ISO8601_DATE_STRING_NO_MILLIS
     }

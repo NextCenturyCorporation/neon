@@ -35,15 +35,25 @@ class DateUtils {
      * Converts a date from a string ISO-8601 format to a date object
      * @param iso8601DateString
      */
-    static def fromISO8601String(iso8601DateString) {
-        return DATE_PARSER.parseDateTime(iso8601DateString).toDate()
+    @SuppressWarnings('EmptyCatchBlock')
+    static Date parseDate(String dateString) {
+        try{
+            return DATE_PARSER.parseDateTime(dateString).toDate()
+        }
+        catch(UnsupportedOperationException uoe){
+
+        }
+        catch (IllegalArgumentException iae){
+
+        }
+        return null
     }
 
     /**
      * Converts a date to an ISO-8601 formatted string
      * @param date
      */
-    static def toISO8601String(def date) {
+    static String dateTimeToString(def date) {
         return DATE_FORMATTER.print(new DateTime(date).withZone(DateTimeZone.UTC))
     }
 

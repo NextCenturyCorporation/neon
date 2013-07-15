@@ -29,7 +29,7 @@ class SimpleDateSerializer implements ObjectSerializer {
 
     @Override
     void serialize(Object obj, StringBuilder buf) {
-        def isoDateString = DateUtils.toISO8601String(obj)
+        def isoDateString = DateUtils.dateTimeToString(obj)
         buf.append("\"").append(isoDateString).append("\"")
     }
 

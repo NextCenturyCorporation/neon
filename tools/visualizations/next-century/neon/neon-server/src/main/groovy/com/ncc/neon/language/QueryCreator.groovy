@@ -1,12 +1,11 @@
 package com.ncc.neon.language
-
 import com.ncc.neon.language.parse.NeonBaseListener
 import com.ncc.neon.language.parse.NeonParser
 import com.ncc.neon.query.Query
 import com.ncc.neon.query.clauses.*
 import com.ncc.neon.query.filter.Filter
+import com.ncc.neon.util.DateUtils
 import org.apache.commons.lang.math.NumberUtils
-
 /*
  * ************************************************************************
  * Copyright (c), 2013 Next Century Corporation. All Rights Reserved.
@@ -101,19 +100,25 @@ class QueryCreator extends NeonBaseListener {
 
         singularWhereClause.lhs = whereContext.STRING()[0].text
         singularWhereClause.operator = whereContext.operator().text
-        singularWhereClause.rhs = whereContext.STRING()[1].text
+        String text = whereContext.STRING()[1].text
+        singularWhereClause.rhs = handleRhsTypes(text)
 
-        if (NumberUtils.isNumber(singularWhereClause.rhs.toString())) {
-            singularWhereClause.rhs = Double.valueOf(singularWhereClause.rhs)
-        }
-        if (singularWhereClause.rhs == "null") {
-            singularWhereClause.rhs = null
-        }
-        if (singularWhereClause.rhs == '""') {
-            singularWhereClause.rhs = ""
-        }
 
         return singularWhereClause
+    }
+
+    private def handleRhsTypes(String text) {
+        if (NumberUtils.isNumber(text)) {
+            return Double.valueOf(text)
+        }
+        if (text == "null") {
+            return null
+        }
+        if (text == '""') {
+            return ""
+        }
+        return DateUtils.parseDate(text) ?: text
+
     }
 
     private void createBooleanWhereClause(NeonParser.WhereClauseContext ctx, BooleanWhereClause booleanWhereClause) {
