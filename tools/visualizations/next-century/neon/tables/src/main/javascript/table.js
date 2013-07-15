@@ -161,7 +161,7 @@ tables.Table.defaultCellFormatter_ = function (row, cell, value, columnDef, data
     var keys = tables.Table.getObjectKeys_(value);
 
     if (keys.length === 0) {
-        return (value + "").replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+        return value;
     }
 
     return tables.Table.createKeyValuePairsString_(value, keys, row, cell, columnDef, dataContext);

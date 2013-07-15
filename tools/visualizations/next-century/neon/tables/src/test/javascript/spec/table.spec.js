@@ -79,6 +79,16 @@ describe('table', function () {
 
     });
 
+    it('appends sets up the slickgrid dataview', function() {
+        var columnNames = ['c1', 'c2', 'c3'];
+        var data = [
+            {"c1": "v1", "c2": "v2", "c3": "v3"}
+        ];
+        var table = new tables.Table('#table', {data: data, columns: columnNames});
+        expect(table.dataView_.getItems()).toBeEqualArray(data);
+
+    });
+
     it('appends an id field to the data if none is specified', function () {
         var data = [
             {"field1": 1, "field2": 2},
