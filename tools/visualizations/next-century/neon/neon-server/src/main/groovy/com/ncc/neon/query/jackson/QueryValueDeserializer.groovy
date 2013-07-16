@@ -43,8 +43,7 @@ class QueryValueDeserializer extends JsonDeserializer<Object> {
         switch (jp.currentToken) {
             case JsonToken.VALUE_STRING:
                 // check if the string is a date, if not, fallback to plain string
-                def value = DateUtils.parseDate(jp.text) ?: jp.text
-                return value
+                return DateUtils.parseDate(jp.text) ?: jp.text
             default:
                 return DEFAULT_SERIALIZER.deserialize(jp, ctxt)
         }
