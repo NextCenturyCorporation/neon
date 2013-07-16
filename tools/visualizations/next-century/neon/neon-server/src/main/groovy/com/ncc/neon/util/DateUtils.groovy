@@ -35,18 +35,24 @@ class DateUtils {
      * Converts a date from a string ISO-8601 format to a date object
      * @param iso8601DateString
      */
-    @SuppressWarnings('EmptyCatchBlock')
+    @SuppressWarnings('CatchException')
     static Date parseDate(String dateString) {
         try{
             return DATE_PARSER.parseDateTime(dateString).toDate()
         }
-        catch(UnsupportedOperationException uoe){
-
+        catch(Exception e){
+            throw new DateParsingException()
         }
-        catch (IllegalArgumentException iae){
+    }
 
+
+    static def tryToParseDate(String dateString){
+        try{
+            return parseDate(dateString)
         }
-        return null
+        catch(DateParsingException){
+            return dateString
+        }
     }
 
     /**

@@ -117,7 +117,7 @@ class QueryCreator extends NeonBaseListener {
         if (text == '""') {
             return ""
         }
-        return DateUtils.parseDate(text) ?: text
+        return DateUtils.tryToParseDate(text)
 
     }
 
