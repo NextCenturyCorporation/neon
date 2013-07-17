@@ -134,8 +134,8 @@ describe('table', function () {
     it('sorts the data ascending', function () {
         setFixtures("<div id='table'></div>");
         var data = [
-            { "field1": 3, "field2": 2},
-            { "field1": 5, "field2": 4},
+            { "field1": 3, "field2": 3},
+            { "field1": 5, "field2": 7},
             { "field1": 1, "field2": 6}
         ];
 
@@ -149,12 +149,20 @@ describe('table', function () {
         expect(sorted[1].field1).toEqual(3);
         expect(sorted[2].field1).toEqual(5);
 
+        // click on a different column and the header should be resorted
+        clickHeader(table, 'field2');
+        sorted = table.dataView_.getItems();
+        expect(sorted[0].field2).toEqual(3);
+        expect(sorted[1].field2).toEqual(6);
+        expect(sorted[2].field2).toEqual(7);
+
+
     });
 
     it('sorts the data descending', function () {
         var data = [
-            { "field1": 3, "field2": 2},
-            { "field1": 5, "field2": 4},
+            { "field1": 3, "field2": 3},
+            { "field1": 5, "field2": 7},
             { "field1": 1, "field2": 6}
         ];
 
@@ -168,6 +176,15 @@ describe('table', function () {
         expect(sorted[0].field1).toEqual(5);
         expect(sorted[1].field1).toEqual(3);
         expect(sorted[2].field1).toEqual(1);
+
+        // click on a different column and the header should be resorted (click twice to sort descending)
+        clickHeader(table, 'field2');
+        clickHeader(table, 'field2');
+        sorted = table.dataView_.getItems();
+        expect(sorted[0].field2).toEqual(7);
+        expect(sorted[1].field2).toEqual(6);
+        expect(sorted[2].field2).toEqual(3);
+
 
     });
 
