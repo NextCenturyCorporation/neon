@@ -34,7 +34,7 @@ describe('timeline', function () {
             {"date": new Date(2013, 1, 1), "count": 9},
             {"date": new Date(2013, 4, 13), "count": 8}
         ];
-        var opts = { "data" : data, "x": "date", "y": "count", "interval": charts.Timeline.MONTH};
+        var opts = { "data": data, "x": "date", "y": "count", "interval": charts.Timeline.MONTH};
         var timeline = new charts.Timeline('#chart', opts);
 
         var expected = [];
@@ -58,7 +58,7 @@ describe('timeline', function () {
             {"date": new Date(2013, 1, 1), "count": 9},
             {"date": new Date(2013, 4, 13), "count": 8}
         ];
-        var opts = { "data" : data, "x": "date", "interval": charts.Timeline.MONTH};
+        var opts = { "data": data, "x": "date", "interval": charts.Timeline.MONTH};
         var timeline = new charts.Timeline('#chart', opts);
 
         var expected = [];
@@ -81,9 +81,9 @@ describe('timeline', function () {
             {"date": new Date(2013, 4, 1), "count": 9},
             {"date": new Date(2013, 5, 13), "count": 8}
         ];
-        var opts = {  "data" : data, "x": "date", "y": "count", "interval": charts.Timeline.MONTH};
+        var opts = {  "data": data, "x": "date", "y": "count", "interval": charts.Timeline.MONTH};
         var timeline = new charts.Timeline('#chart', opts);
-        var timePeriods = timeline.timePeriods_;
+        var timePeriods = timeline.xAxisCategories_;
 
         // the first time period uses the true date
         var expected = [
@@ -97,11 +97,10 @@ describe('timeline', function () {
         expect(timePeriods).toBeEqualArray(expected);
     });
 
-    it('should not have any tick values when there is not data', function () {
-        var opts = {  "data" : [], "x": "date", "y": "count", "interval": charts.Timeline.MONTH};
+    it('should not have any tick values when there is no data', function () {
+        var opts = {  "data": [], "x": "date", "y": "count", "interval": charts.Timeline.MONTH};
         var timeline = new charts.Timeline('#chart', opts);
-        var tickValues = timeline.computeTickValues_();
-        expect(tickValues).toBeEqualArray([]);
+        expect(timeline.tickValues_).toBeEqualArray([]);
     });
 
     it('should compute tick intervals at weekly intervals when charting by day', function () {
@@ -109,7 +108,7 @@ describe('timeline', function () {
             {"date": new Date(2013, 2, 07), "count": 2},
             {"date": new Date(2013, 3, 15), "count": 4}
         ];
-        var opts = {  "data" : data, "x": "date", "y": "count", "interval": charts.Timeline.DAY};
+        var opts = {  "data": data, "x": "date", "y": "count", "interval": charts.Timeline.DAY};
         var timeline = new charts.Timeline('#chart', opts);
         var expected = [
             new Date(2013, 2, 7),
@@ -119,47 +118,8 @@ describe('timeline', function () {
             new Date(2013, 3, 4),
             new Date(2013, 3, 11)
         ];
+        expect(timeline.tickValues_).toBeEqualArray(expected);
 
-        var tickValues = timeline.computeTickValues_();
-        expect(tickValues).toBeEqualArray(expected);
-
-    });
-
-    it('should compute the x scale bounds', function () {
-        var data = [
-            {"date": new Date(2013, 1, 7), "count": 2},
-            {"date": new Date(2013, 3, 1), "count": 4},
-            {"date": new Date(2013, 0, 8), "count": 7},
-            {"date": new Date(2013, 2, 1), "count": 1},
-            {"date": new Date(2013, 4, 1), "count": 9},
-            {"date": new Date(2013, 5, 13), "count": 8}
-        ];
-        var opts = {  "data" : data, "x": "date", "y": "count", "interval": charts.Timeline.MONTH, "width": 600, "margin": {"left": 0, "right": 0}};
-        var timeline = new charts.Timeline('#chart', opts);
-
-        // the x scale values map to the pixels in the width of the chart
-        expect(timeline.x_(timeline.timePeriods_[0])).toEqual(0);
-        expect(timeline.x_(timeline.timePeriods_[1])).toEqual(100);
-        expect(timeline.x_(timeline.timePeriods_[2])).toEqual(200);
-        expect(timeline.x_(timeline.timePeriods_[3])).toEqual(300);
-        expect(timeline.x_(timeline.timePeriods_[4])).toEqual(400);
-        expect(timeline.x_(timeline.timePeriods_[5])).toEqual(500);
-    });
-
-    it('should compute the y scale bounds', function () {
-        var data = [
-            {"date": new Date(2013, 1, 7), "count": 1},
-            {"date": new Date(2013, 3, 1), "count": 5},
-            {"date": new Date(2013, 0, 8), "count": 10}
-        ];
-        var opts = { "data" : data, "x": "date", "y": "count", "interval": charts.Timeline.MONTH, "height": 100, "margin": {"top": 0, "bottom": 0}};
-        var timeline = new charts.Timeline('#chart', opts);
-
-        // the y scale values map to the pixels in the height of the chart
-        // note: the y scale is inverted (but is drawn properly)
-        expect(timeline.y_(0)).toEqual(100);
-        expect(timeline.y_(5)).toEqual(50);
-        expect(timeline.y_(10)).toEqual(0);
     });
 
     it('should compute the minimum date', function () {
@@ -168,7 +128,7 @@ describe('timeline', function () {
             {"date": new Date(2013, 3, 1), "count": 4},
             {"date": new Date(2013, 0, 8), "count": 7}
         ];
-        var opts = {  "data" : data, "x": "date", "y": "count", "interval": charts.Timeline.MONTH};
+        var opts = {  "data": data, "x": "date", "y": "count", "interval": charts.Timeline.MONTH};
         var timeline = new charts.Timeline('#chart', opts);
         expect(timeline.computeMinDate_(data)).toEqual(new Date(2013, 0, 8));
     });
@@ -179,26 +139,10 @@ describe('timeline', function () {
             {"date": new Date(2013, 3, 1), "count": 4},
             {"date": new Date(2013, 0, 8), "count": 7}
         ];
-        var opts = {  "data" : data, "x": "date", "y": "count", "interval": charts.Timeline.MONTH};
+        var opts = {  "data": data, "x": "date", "y": "count", "interval": charts.Timeline.MONTH};
         var timeline = new charts.Timeline('#chart', opts);
         // the max date is exclusive so it is 1ms higher than the end of the chart
         expect(timeline.computeMaxDate_(data)).toEqual(new Date(new Date(2013, 3, 1).getTime() + 1));
-    });
-
-
-    it('should allow margins to be overridden', function () {
-        var marginOverrides = { "top": 100, "left": 120};
-        var opts = {  "data" : [], "x": "date", "y": "count", "interval": charts.Timeline.DAY, "margin": marginOverrides};
-        var timeline = new charts.Timeline('#chart', opts);
-        var margin = timeline.margin;
-        expect(margin.top).toEqual(marginOverrides.top);
-        expect(margin.left).toEqual(marginOverrides.left);
-        expect(margin.bottom).toEqual(charts.Timeline.DEFAULT_MARGIN_.bottom);
-        expect(margin.right).toEqual(charts.Timeline.DEFAULT_MARGIN_.right);
-
-        // make sure we didn't set the override value equal to the default value
-        expect(margin.top).not.toEqual(charts.Timeline.DEFAULT_MARGIN_.top);
-        expect(margin.left).not.toEqual(charts.Timeline.DEFAULT_MARGIN_.left);
     });
 
     it('should notify listeners of filter events', function () {
@@ -209,7 +153,7 @@ describe('timeline', function () {
             {"date": new Date(2013, 2, 1), "events": 7},
             {"date": new Date(2013, 3, 1), "events": 1}
         ];
-        var opts = {  "data" : data, "x": "date", "y": "events", "interval": charts.Timeline.MONTH};
+        var opts = {  "data": data, "x": "date", "y": "events", "interval": charts.Timeline.MONTH};
         var timeline = new charts.Timeline('#chart', opts);
 
         var callback1 = jasmine.createSpy();

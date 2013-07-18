@@ -101,7 +101,7 @@ $(document).ready(function () {
                 });
                 select.change(drawChart);
             });
-        };
+        }
 
         function getXAttribute() {
             return $('#x option:selected').val();
@@ -186,7 +186,7 @@ $(document).ready(function () {
 
 
                 if (filterId) {
-                    eventPublisher.replaceFilter(filterId, filter)
+                    eventPublisher.replaceFilter(filterId, filter);
                 }
                 else {
                     eventPublisher.addFilter(filter);

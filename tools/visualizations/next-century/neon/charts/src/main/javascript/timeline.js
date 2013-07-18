@@ -59,36 +59,49 @@
  *
  */
 charts.Timeline = function (chartSelector, opts) {
+    var me = this;
     opts = opts || {};
-    this.chartSelector_ = chartSelector;
+    this.dateField_ = opts.x;
     var interval = opts.interval || charts.Timeline.DEFAULT_INTERVAL_;
     this.timeInterval_ = charts.Timeline.TIME_INTERVALS_[interval].interval;
-    this.tickFormat_ = d3.time.format(opts.tickFormat || charts.Timeline.TIME_INTERVALS_[interval].tickFormat);
     this.tickStep_ = opts.step || charts.Timeline.TIME_INTERVALS_[interval].step;
-    this.height = opts.height || charts.Timeline.DEFAULT_HEIGHT_;
-    this.width = opts.width || charts.Timeline.DEFAULT_WIDTH_;
-    this.xAttribute_ = opts.x;
-    this.yAttribute_ = opts.y;
-    this.margin = $.extend({}, charts.Timeline.DEFAULT_MARGIN_, opts.margin || {});
-    this.hMargin_ = this.margin.left + this.margin.right;
-    this.vMargin_ = this.margin.top + this.margin.bottom;
-    // use the raw data for min and max date so we can get the true values
-    this.minDate_ = this.computeMinDate_(opts.data);
-    this.maxDate_ = this.computeMaxDate_(opts.data);
-    this.data_ = this.aggregateData_(opts.data);
+    var tickFormat = d3.time.format(opts.tickFormat || charts.Timeline.TIME_INTERVALS_[interval].tickFormat);
 
-    // the timePeriods_ contain the starting dates for each time period
-    this.timePeriods_ = this.computeTimePeriods_();
-    this.x_ = this.createXScale_();
-    // set the width to be as close to the user specified size (but not larger) so the bars divide evenly into
-    // the plot area
-    this.plotWidth_ = this.computePlotWidth_();
-    this.x_.rangeRoundBands([0, this.plotWidth_]);
-    this.y_ = this.createYScale_();
-    this.xAxis_ = this.createXAxis_();
-    this.yAxis_ = this.createYAxis_();
-    this.style_ = $.extend({}, charts.Timeline.DEFAULT_STYLE_, opts.style);
+
+    // TODO: Extract methods
+    charts.BarChart.call(this, chartSelector,
+        $.extend({}, opts, {
+                'init': this.init_,
+                'x': function (item) {
+                    return me.computeTimePeriodStart_(item[me.dateField_]);
+                },
+                'categories': this.computeTimePeriods_,
+                'tickValues': this.computeTimeIntervalTicks_,
+                'tickFormat': tickFormat,
+                'xLabel': 'date',
+                'dataKeyTransform': function (aggregated) {
+                    // d3 will create a string for the date but we want a date object
+                    return aggregated.map(function (d) {
+                        d.key = new Date(d.key);
+                        return d;
+                    });
+                }
+            }
+        ));
 };
+
+// TODO: NEON-73 Javascript inheritance library
+charts.Timeline.prototype = Object.create(charts.BarChart.prototype);
+
+(function () {
+    // override the draw method to also draw the slider
+    var oldDrawMethod = charts.Timeline.prototype.draw;
+    charts.Timeline.prototype.draw = function () {
+        oldDrawMethod.call(this);
+        this.drawSlider_();
+        return this;
+    };
+})();
 
 /**
  * The time interval for charting by hour
@@ -120,43 +133,17 @@ charts.Timeline.MONTH = 'month';
 charts.Timeline.YEAR = 'year';
 
 
-charts.Timeline.DEFAULT_HEIGHT_ = 400;
-charts.Timeline.DEFAULT_WIDTH_ = 600;
 charts.Timeline.DEFAULT_INTERVAL_ = charts.Timeline.MONTH;
 charts.Timeline.TIME_INTERVALS_ = {};
 charts.Timeline.SLIDER_DIV_NAME_ = 'slider';
 charts.Timeline.ZERO_DATE_ = new Date(0);
-charts.Timeline.DEFAULT_MARGIN_ = {top: 20, bottom: 20, left: 40, right: 30};
 charts.Timeline.FILTER_EVENT_TYPE_ = 'filter';
-charts.Timeline.TOOLTIP_ID_ = 'tooltip';
 charts.Timeline.GRANULARITIES_ = [charts.Timeline.HOUR, charts.Timeline.DAY, charts.Timeline.MONTH, charts.Timeline.YEAR];
-charts.Timeline.SVG_ELEMENT_ = 'rect';
-charts.Timeline.ACTIVE_STYLE_KEY_ = 'active';
-charts.Timeline.INACTIVE_STYLE_KEY_ = 'inactive';
-charts.Timeline.HOVER_STYLE_KEY_ = 'hover';
 
-// the bar classes are not used for styling directly through the CSS but as
-// selectors to indicate which style functions to apply. this is because the styles are
-// applied by functions and not by straight CSS
-charts.Timeline.BAR_CLASS_ = 'bar';
-
-// the active/inactive/hover classes are additional classes appended to the bars but just use the same name
-// as the bar class concatenated with the state, so an active bar would have the classes 'bar active-bar'
-charts.Timeline.ACTIVE_BAR_CLASS_ = charts.Timeline.ACTIVE_STYLE_KEY_ + '-' + charts.Timeline.BAR_CLASS_;
-charts.Timeline.INACTIVE_BAR_CLASS_ = charts.Timeline.INACTIVE_STYLE_KEY_ + '-' + charts.Timeline.BAR_CLASS_;
-charts.Timeline.HOVER_BAR_CLASS_ = charts.Timeline.HOVER_STYLE_KEY_ + '-' + charts.Timeline.BAR_CLASS_;
-
-charts.Timeline.DEFAULT_ACTIVE_BAR_FILL_COLOR_ = 'steelblue';
-charts.Timeline.DEFAULT_INACTIVE_BAR_FILL_COLOR_ = 'lightgrey';
-charts.Timeline.defaultActiveBarStyle_ = { 'fill': charts.Timeline.DEFAULT_ACTIVE_BAR_FILL_COLOR_ };
-charts.Timeline.defaultInactiveBarStyle_ = { 'fill': charts.Timeline.DEFAULT_INACTIVE_BAR_FILL_COLOR_ };
-charts.Timeline.defaultHoverBarStyle_ = {};
-
-charts.Timeline.DEFAULT_STYLE_ = {};
-charts.Timeline.DEFAULT_STYLE_[charts.Timeline.ACTIVE_STYLE_KEY_] = charts.Timeline.defaultActiveBarStyle_;
-charts.Timeline.DEFAULT_STYLE_[charts.Timeline.INACTIVE_STYLE_KEY_] = charts.Timeline.defaultInactiveBarStyle_;
-charts.Timeline.DEFAULT_STYLE_[charts.Timeline.HOVER_STYLE_KEY_] = charts.Timeline.defaultHoverBarStyle_;
-
+charts.Timeline.prototype.init_ = function (opts) {
+    this.minDate_ = this.computeMinDate_(opts.data);
+    this.maxDate_ = this.computeMaxDate_(opts.data);
+};
 
 /**
  * Adds a listener to be notified of filter events
@@ -176,7 +163,7 @@ charts.Timeline.prototype.onFilter = function (callback) {
 charts.Timeline.prototype.computeMinDate_ = function (data) {
     var me = this;
     var minDate = d3.min(data, function (d) {
-        return d[me.xAttribute_];
+        return d[me.dateField_];
     });
     // minDate will be undefined if data is empty
     return minDate ? minDate : charts.Timeline.ZERO_DATE_;
@@ -185,7 +172,7 @@ charts.Timeline.prototype.computeMinDate_ = function (data) {
 charts.Timeline.prototype.computeMaxDate_ = function (data) {
     var me = this;
     var maxDate = d3.max(data, function (d) {
-        return d[me.xAttribute_];
+        return d[me.dateField_];
     });
     // maxDate will be undefined if data is empty
     // the +1 is so the max date is exclusive
@@ -196,10 +183,11 @@ charts.Timeline.prototype.computeMaxDate_ = function (data) {
 /**
  * Computes the start dates for each of the time periods in the chart
  * @method computeTimePeriods_
+ * @param {Array} data The data being displayed in the chart
  * @return {Array}
  * @private
  */
-charts.Timeline.prototype.computeTimePeriods_ = function () {
+charts.Timeline.prototype.computeTimePeriods_ = function (data) {
     var timePeriods = [];
     if (charts.Timeline.isValidDate_(this.minDate_) && charts.Timeline.isValidDate_(this.maxDate_)) {
         Array.prototype.push.apply(timePeriods, this.timeInterval_.range(this.timeInterval_(this.minDate_), this.maxDate_));
@@ -215,45 +203,7 @@ charts.Timeline.isValidDate_ = function (date) {
     return date > charts.Timeline.ZERO_DATE_;
 };
 
-
-charts.Timeline.prototype.createXScale_ = function () {
-    // use an ordinal scale since each bar represents a discrete time block
-    return d3.scale.ordinal()
-        .domain(this.timePeriods_)
-        .rangeRoundBands([0, this.width - this.hMargin_]);
-};
-
-charts.Timeline.prototype.createYScale_ = function () {
-    var maxCount = d3.max(this.data_, function (d) {
-        return d.values;
-    });
-
-    // may be NaN if no data
-    if (!maxCount) {
-        maxCount = 0;
-    }
-    return d3.scale.linear()
-        .domain([0, maxCount])
-        .rangeRound([this.height - this.vMargin_, 0]);
-};
-
-charts.Timeline.prototype.computePlotWidth_ = function () {
-    if (this.timePeriods_.length > 0) {
-        return this.x_.rangeBand() * this.timePeriods_.length;
-    }
-    return this.width;
-};
-
-charts.Timeline.prototype.createXAxis_ = function () {
-    var tickValues = this.computeTickValues_();
-    return d3.svg.axis()
-        .scale(this.x_)
-        .orient('bottom')
-        .tickFormat(this.tickFormat_)
-        .tickValues(tickValues);
-};
-
-charts.Timeline.prototype.computeTickValues_ = function () {
+charts.Timeline.prototype.computeTimeIntervalTicks_ = function () {
     var tickValues = [];
     var currentTick = this.minDate_;
     while (currentTick < this.maxDate_) {
@@ -261,159 +211,6 @@ charts.Timeline.prototype.computeTickValues_ = function () {
         currentTick = this.timeInterval_.offset(this.timeInterval_(currentTick), this.tickStep_);
     }
     return tickValues;
-};
-
-charts.Timeline.prototype.createYAxis_ = function () {
-    return d3.svg.axis()
-        .scale(this.y_)
-        .orient('left')
-        .tickFormat(charts.Timeline.createYAxisTickFormat_())
-        .tickValues(this.y_.domain());
-};
-
-charts.Timeline.createYAxisTickFormat_ = function () {
-    return function (val) {
-        return val === 0 ? val : d3.format('.2s')(val);
-    };
-};
-
-
-/**
- * Draws the timeline in the component specified in the constructor
- * @method draw
- * @return {charts.Timeline} This timeline
- */
-charts.Timeline.prototype.draw = function () {
-    this.drawChart_();
-    this.drawSlider_();
-    return this;
-};
-
-charts.Timeline.prototype.drawChart_ = function () {
-    var chart = this.drawChartSVG_();
-    this.bindData_(chart);
-    this.drawXAxis_(chart);
-    this.drawYAxis_(chart);
-};
-
-charts.Timeline.prototype.drawChartSVG_ = function () {
-    var chart = d3.select(this.chartSelector_)
-        .append('svg')
-        .attr('id', 'plot')
-        .attr('width', this.plotWidth_ + this.hMargin_)
-        .attr('height', this.height)
-        .append('g')
-        .attr('transform', 'translate(' + this.margin.left + ',' + this.margin.top + ')');
-    return chart;
-};
-
-charts.Timeline.prototype.bindData_ = function (chart) {
-    var me = this;
-    var bars = chart.selectAll(charts.Timeline.SVG_ELEMENT_)
-        .data(this.data_)
-        .enter().append(charts.Timeline.SVG_ELEMENT_)
-        .attr('class', charts.Timeline.BAR_CLASS_ + ' ' + charts.Timeline.ACTIVE_BAR_CLASS_)
-        .attr('x', function (d) {
-            return me.x_(me.computeTimePeriodStart_(d.key));
-        })
-        .attr('y', function (d) {
-            return me.y_(d.values);
-        })
-        .attr('width', this.x_.rangeBand())
-        .attr('height', function (d) {
-            return me.height - me.vMargin_ - me.y_(d.values);
-        })
-        .on('mouseover', function (d) {
-            me.toggleHoverStyle_(d3.select(this), true);
-            me.showTooltip_(d);
-        })
-        .on('mouseout', function () {
-            me.toggleHoverStyle_(d3.select(this), false);
-            me.hideTooltip_();
-        });
-    // initially all bars active, so just apply the active style
-    this.applyStyle_(bars, charts.Timeline.ACTIVE_STYLE_KEY_);
-};
-
-charts.Timeline.prototype.toggleHoverStyle_ = function (selection, hover) {
-    selection.classed(charts.Timeline.HOVER_BAR_CLASS_, hover);
-
-    // when hovering, apply the hover style, otherwise revert the style based on the current class
-    var style;
-    if (hover) {
-        style = charts.Timeline.HOVER_STYLE_KEY_;
-    }
-    else {
-        style = selection.classed(charts.Timeline.ACTIVE_BAR_CLASS_) ?
-            charts.Timeline.ACTIVE_STYLE_KEY_ : charts.Timeline.INACTIVE_STYLE_KEY_;
-    }
-
-    this.applyStyle_(selection, style);
-};
-
-charts.Timeline.prototype.applyStyle_ = function (selection, styleKey) {
-    var attrMap = this.style_[styleKey];
-    Object.keys(attrMap).forEach(function (key) {
-        var attrVal = attrMap[key];
-        selection.attr(key, attrVal);
-    });
-};
-
-
-charts.Timeline.prototype.showTooltip_ = function (data) {
-    var periodStartPixels = this.x_(this.computeTimePeriodStart_(data.key));
-    var tooltip = this.createTooltip_(data, this.getDate_(periodStartPixels));
-    // initially hidden because it will fade in
-    tooltip.hide();
-    $(this.chartSelector_).append(tooltip);
-    // must center after appending so its width can be properly computed
-    this.centerTooltip_(tooltip, data, periodStartPixels);
-    tooltip.fadeIn(500);
-
-};
-
-charts.Timeline.prototype.createTooltip_ = function (data, periodStartDate) {
-    var tooltip = $('<div/>', {
-        "class": "charttooltip",
-        id: charts.Timeline.TOOLTIP_ID_
-    });
-
-    var xAttributeHtml = $('<div/>').html(this.xAttribute_ + ': ' + this.tickFormat_(periodStartDate));
-    var yLabel = this.yAttribute_ ? this.yAttribute_ : "Count";
-    var yAttributeHtml = $('<div/>').html(yLabel + ': ' + data.values);
-    tooltip.append(xAttributeHtml);
-    tooltip.append(yAttributeHtml);
-    return tooltip;
-};
-
-charts.Timeline.prototype.centerTooltip_ = function (tooltip, data, periodStartPixels) {
-    var centerPointX = periodStartPixels + this.x_.rangeBand() / 2;
-    var centerPointY = this.y_(data.values);
-    // center the tooltip on the selected bar
-    tooltip.css({
-        'margin-left': this.margin.left + $(this.chartSelector_).position().left + 'px',
-        'margin-top': this.margin.top + $(this.chartSelector_).position().top + 'px',
-        'top': (centerPointY - $('#' + charts.Timeline.TOOLTIP_ID_).outerHeight() / 2) + 'px',
-        'left': (centerPointX - $('#' + charts.Timeline.TOOLTIP_ID_).outerWidth() / 2) + 'px'
-    });
-};
-
-charts.Timeline.prototype.hideTooltip_ = function () {
-    $('#' + charts.Timeline.TOOLTIP_ID_).remove();
-};
-
-
-charts.Timeline.prototype.drawXAxis_ = function (chart) {
-    chart.append('g')
-        .attr('class', 'x axis')
-        .attr('transform', 'translate(0,' + (this.height - this.vMargin_) + ')')
-        .call(this.xAxis_);
-};
-
-charts.Timeline.prototype.drawYAxis_ = function (chart) {
-    chart.append('g')
-        .attr('class', 'y axis')
-        .call(this.yAxis_);
 };
 
 charts.Timeline.prototype.drawSlider_ = function () {
@@ -444,7 +241,7 @@ charts.Timeline.prototype.doSliderChange_ = function (event, slider) {
     // Note: If we turn off snapping, we'll have to first find the nearest period boundary and use that value
     var filterStartDate = this.getDate_(slider.values[0]);
     var filterEndDate = this.getDate_(slider.values[1]);
-    this.hideInactiveData_(filterStartDate, filterEndDate);
+    this.styleInactiveData_(filterStartDate, filterEndDate);
     this.notifyFilterListeners_(filterStartDate, filterEndDate);
 };
 
@@ -457,67 +254,17 @@ charts.Timeline.prototype.removeFilterListeners = function () {
     $(this).off(charts.Timeline.FILTER_EVENT_TYPE_);
 };
 
-charts.Timeline.prototype.hideInactiveData_ = function (filterStartDate, filterEndDate) {
-    // this is a little inefficient to first loop through the data to apply classes and then to
-    // loop through the classes of each type to apply functions, but it makes it easier for the user
-    // to specify different functions for active and inactive data
-    charts.Timeline.applyBarStateClasses_(filterStartDate, filterEndDate);
-    this.applyStyle_(d3.selectAll('.' + charts.Timeline.ACTIVE_BAR_CLASS_), charts.Timeline.ACTIVE_STYLE_KEY_);
-    this.applyStyle_(d3.selectAll('.' + charts.Timeline.INACTIVE_BAR_CLASS_), charts.Timeline.INACTIVE_STYLE_KEY_);
-};
+charts.Timeline.prototype.styleInactiveData_ = function (filterStartDate, filterEndDate) {
 
-/**
- * Sets the classes on the bars based on whether they are active or not
- * @param {Date} filterStartDate
- * @param {Date} filterEndDate
- * @method applyBarStateClasses_
- * @private
- */
-charts.Timeline.applyBarStateClasses_ = function (filterStartDate, filterEndDate) {
-    var allBars = d3.selectAll('.' + charts.Timeline.BAR_CLASS_);
-
-    // remove existing active/inactive classes then toggle on the correct one. this allows us to keep any other
-    // classes (rather than just replacing the class with inactive/active)
-    allBars.classed(charts.Timeline.INACTIVE_BAR_CLASS_, false);
-    allBars.classed(charts.Timeline.ACTIVE_BAR_CLASS_, false);
-
-    // those within the filter range are set to active
-    allBars.classed(charts.Timeline.ACTIVE_BAR_CLASS_, function (d) {
-        var date = d.key;
-        return filterStartDate <= date && date < filterEndDate;
+    this.setInactive(function (item) {
+        var date = item.key;
+        return !(filterStartDate <= date && date < filterEndDate);
     });
-
-    // those that are not active are set to inactive
-    d3.selectAll('.' + charts.Timeline.BAR_CLASS_ + ':not(.' + charts.Timeline.ACTIVE_BAR_CLASS_ + ')')
-        .classed(charts.Timeline.INACTIVE_BAR_CLASS_, true);
 
 };
 
 charts.Timeline.prototype.notifyFilterListeners_ = function (filterStartDate, filterEndDate) {
     $(this).trigger(charts.Timeline.FILTER_EVENT_TYPE_, [filterStartDate, filterEndDate]);
-};
-
-/**
- * Aggregates the data based on the currently selected time period
- * @method aggregateData_
- * @param {Array} data The raw data to aggregate
- * @private
- * @return {Object} An array of objects whose keys are `key` and `values`, whose values are the time period start
- * and the number of items in that time period respectively
- */
-charts.Timeline.prototype.aggregateData_ = function (data) {
-    var me = this;
-    return d3.nest().key(function (d) {
-        return me.computeTimePeriodStart_(d[me.xAttribute_]);
-    }).rollup(function (d) {
-            return d3.sum(d, function (el) {
-                return me.yAttribute_ ? el[me.yAttribute_] : 1;
-            });
-        }).entries(data).map(function (d) {
-            // d3 will create a string for the date but we want the data object
-            d.key = new Date(d.key);
-            return d;
-        });
 };
 
 
@@ -526,7 +273,7 @@ charts.Timeline.prototype.getDate_ = function (pixelValue) {
         return this.maxDate_;
     }
     var index = pixelValue / this.x_.rangeBand();
-    return this.timePeriods_[index];
+    return this.xAxisCategories_[index];
 };
 
 charts.Timeline.prototype.computeTimePeriodStart_ = function (date) {

@@ -8,20 +8,25 @@ project.ext {
 }
 
 javascript.source {
-    dev {
+    // the files need to be included in certain orders, so break them up
+    barchart {
         js {
             srcDir jsSrcDir
-            include '**/*.js'
-            exclude 'namespaces.js'
-            exclude 'timelinewidget.js'
+            include 'barchart.js'
         }
     }
-    // the libs need to be included in certain orders, so break the libs up
+    timeline {
+        js {
+            srcDir jsSrcDir
+            include 'timeline.js'
+        }
+    }
     lib1 {
         js {
             srcDir 'src/main/js-lib'
             include 'd3/**/*.js'
             include 'jquery/**/*.js'
+            include 'lodash/**/*.js'
         }
     }
     lib2 {
@@ -33,14 +38,14 @@ javascript.source {
 }
 
 combineJs {
-    source = javascript.source.lib1.js.files + javascript.source.lib2.js.files + file("${jsSrcDir}/namespaces.js") + javascript.source.dev.js.files
+    source = javascript.source.lib1.js.files + javascript.source.lib2.js.files + file("${jsSrcDir}/namespaces.js") + javascript.source.barchart.js.files + javascript.source.timeline.js.files
     dest = file(jsOutputFile)
 }
 
 
 
 jshint {
-    source = javascript.source.dev.js.files
+    source = javascript.source.timeline.js.files + javascript.source.barchart.js.files
 }
 
 war {
