@@ -33,7 +33,7 @@
  *     description of the `y` parameter).</li>
  *     <li>x (required) - The name of the x-attribute or a function that takes 1 parameter (the current item)
  *     and returns the x value from the item. Note that all x-values must be of the same data type</li>
- *     <li>y (optional) - The name of the y-attribute. If not specified, each item will contribute 1 to the current count./li>
+ *     <li>y (optional) - The name of the y-attribute. If not specified, each item will contribute 1 to the current count.</li>
  *     <li>xLabel (optional) - The label to show for the x-attribute (e.g. on tooltips). If not specified, this will
  *     default to using the name of the attribute specified in x (if x is a function, then the value "x" will be used).
  *     This is useful if the x-attribute name is not the same as how it should be displayed to users.</li>
@@ -45,7 +45,7 @@
  *     <li>margin (optional) - An object with any of the elements `top`, `left`, `bottom` or `right`. These are pixel values to override the default margin. If not specified, a preconfigured default value will be used.</li>
  *     <li>style (optional) - a mapping of a bar state to the different attributes to style for that attribute. The available bar states
  *     are active (default bar state), inactive (a visual state to indicate to the user that the bar should be seen
- *     as inactive - the meaning of this is chart specified - see {{#crossLink "charts.BarChart.setInactive"}}{{/crossLink}}),
+ *     as inactive - the meaning of this is chart specified - see {{#crossLink "charts.BarChart/setInactive"}}{{/crossLink}}),
  *     and hover. The attributes that can be toggled correspond
  *     to the underlying svg type used to render the bar. For example, to modify the the active/inactive bar states,
  *     but not do anything on hover this attribute would be
@@ -58,7 +58,12 @@
  *     <li>tickValues (optional) - A list of tick values to show on the chart. If not specified, all bars will be labeled</li>
  *     <li>categories (optional) - A list of values to use as the x-axis categories (bins). This can also be a function
  *     that takes 1 parameter (the data) and will compute the categories. If not specified, all unique values from the
- *     x-attribute will used as the category values</li>.
+ *     x-attribute will used as the category values</li>
+ *     <li>init (optional) - An optional method for the bar chart to invoke before aggregating the data, but after setting
+ *     up the x/y attributes. This allows callers to use the {{#crossLink "charts.BarChart/categoryForItem"}}{{/crossLink}})
+ *     method to perform any preprocessing. This is useful because the bar chart will take the appropriate action to
+ *     resolve the x attribute, which can be a string or a function.
+ *     The init method is called with a single parameter containing the options passed into the bar chart.</li>
 
  * </ul>
  *
@@ -153,10 +158,10 @@ charts.BarChart.STRING_KEY_ = 'string';
  * Gets the label for the category (bin on the x-axis) for this item.
  * @param {Object} item
  * @return {Object} The x-value for this item
- * @method categoryForItem_
+ * @method categoryForItem
  * @protected
  */
-charts.BarChart.prototype.categoryForItem_ = function (item) {
+charts.BarChart.prototype.categoryForItem = function (item) {
     if (typeof this.xAttribute_ === 'function') {
         return this.xAttribute_.call(this, item);
     }
@@ -191,7 +196,7 @@ charts.BarChart.prototype.computeTickValues_ = function (tickValues) {
 charts.BarChart.prototype.createCategoriesFromUniqueValues_ = function (data) {
     var me = this;
     return _.chain(data).map(function (item) {
-        return me.categoryForItem_(item);
+        return me.categoryForItem(item);
     }).unique().filter(function (item) {
             return !_.isNull(item) && !_.isUndefined(item);
         }).sort(charts.BarChart.sortComparator_).value();
@@ -345,6 +350,12 @@ charts.BarChart.prototype.applyStyle_ = function (selection, styleKey) {
     });
 };
 
+/**
+ * Sets all data to the inactive state that matches the specified predicate. All other data is marked as active.
+ * @param {Function} predicate A function that takes an item as a parameter and returns `true` if it should be inactive,
+ * `false` if it should be active
+ * @method setInactive
+ */
 charts.BarChart.prototype.setInactive = function (predicate) {
     var allBars = d3.selectAll('.' + charts.BarChart.BAR_CLASS_);
 
@@ -449,7 +460,7 @@ charts.BarChart.prototype.rollupDataByCategory_ = function (data) {
     var keyTypes;
 
     var aggregated = d3.nest().key(function (d) {
-        var category = me.categoryForItem_(d);
+        var category = me.categoryForItem(d);
         if (keyTypes !== charts.BarChart.STRING_KEY_) {
             var keyType = charts.BarChart.keyType_(category);
             // the first time we see a value, set that as the key type

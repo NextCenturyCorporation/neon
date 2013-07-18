@@ -72,11 +72,11 @@ charts.Timeline = function (chartSelector, opts) {
 // TODO: NEON-73 Javascript inheritance library
 charts.Timeline.prototype = Object.create(charts.BarChart.prototype);
 
-// the original categoryForItem_ method will return the raw data. the category in the timeline case is
+// the original categoryForItem method will return the raw data. the category in the timeline case is
 // the start of the time period but we want to preserve the method for getting the raw data
-charts.Timeline.prototype.dateForItem_ = charts.Timeline.prototype.categoryForItem_;
+charts.Timeline.prototype.dateForItem_ = charts.Timeline.prototype.categoryForItem;
 (function () {
-    charts.Timeline.prototype.categoryForItem_ = function (item) {
+    charts.Timeline.prototype.categoryForItem = function (item) {
         var date = this.dateForItem_.call(this, item);
         return this.timePeriodStart_(date);
     };
@@ -128,6 +128,8 @@ charts.Timeline.FILTER_EVENT_TYPE_ = 'filter';
 charts.Timeline.GRANULARITIES_ = [charts.Timeline.HOUR, charts.Timeline.DAY, charts.Timeline.MONTH, charts.Timeline.YEAR];
 
 charts.Timeline.prototype.init_ = function (opts) {
+    // compute these in here rather than in the constructor so we can use the categoryForItem method from the
+    // bar chart to properly extract the date
     this.minDate_ = this.computeMinDate_(opts.data);
     this.maxDate_ = this.computeMaxDate_(opts.data);
 };
