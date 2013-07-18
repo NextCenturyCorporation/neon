@@ -61,7 +61,10 @@ war {
     from(jsOutputFile) {
         into 'js'
     }
-    from("${jsSrcDir}/timelinewidget.js") {
+    from(jsSrcDir) {
+        include 'timelinewidget.js'
+        include 'barchartwidget.js'
+        include 'chartwidget.js'
         into 'js'
     }
 }

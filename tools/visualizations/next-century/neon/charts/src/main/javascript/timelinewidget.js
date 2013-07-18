@@ -26,13 +26,13 @@ $(document).ready(function () {
 
     OWF.ready(function () {
 
-        var datasource;
-        var datasetId;
         var filterId;
         var COUNT_FIELD_NAME = 'count_';
 
         var messageHandler = new neon.eventing.MessageHandler({
-            activeDatasetChanged: populateAttributeDropdowns,
+            activeDatasetChanged: function (message) {
+                populateAttributeDropdowns(message, drawChart);
+            },
             filtersChanged: updateFilterId
 
         });
@@ -85,32 +85,6 @@ $(document).ready(function () {
             }
         }
 
-        function populateAttributeDropdowns(message) {
-            datasource = message.database;
-            datasetId = message.table;
-            neon.query.getFieldNames(datasource, datasetId, doPopulateAttributeDropdowns);
-        }
-
-        function doPopulateAttributeDropdowns(data) {
-            ['x', 'y'].forEach(function (selectId) {
-                var select = $('#' + selectId);
-                select.empty();
-                select.append($('<option></option>').attr('value', '').text('(Select Field)'));
-                data.fieldNames.forEach(function (field) {
-                    select.append($('<option></option>').attr('value', field).text(field));
-                });
-                select.change(drawChart);
-            });
-        }
-
-        function getXAttribute() {
-            return $('#x option:selected').val();
-        }
-
-        function getYAttribute() {
-            return $('#y option:selected').val();
-        }
-
         /**
          * Redraws the chart based on the user selected attribtues
          * @method drawChart
@@ -151,7 +125,7 @@ $(document).ready(function () {
             var xAttr = getXAttribute();
             var yAttr = getYAttribute();
 
-            if(yAttr === ""){
+            if (yAttr === "") {
                 yAttr = COUNT_FIELD_NAME;
             }
 

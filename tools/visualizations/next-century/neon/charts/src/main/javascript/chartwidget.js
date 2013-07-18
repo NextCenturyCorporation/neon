@@ -21,7 +21,34 @@
  * RECIPIENT IS UNDER OBLIGATION TO MAINTAIN SECRECY.
  */
 
-#slider {
-    /* fix for chrome redraw bug that leaves a stray mark when dragging sometimes */
-    outline: 1px solid rgba(0,0,0,0);
+// this file contains some javascript functions that are useful for the chart based widgets
+var datasource;
+var datasetId;
+
+function populateAttributeDropdowns(message, changeHandler) {
+    datasource = message.database;
+    datasetId = message.table;
+    neon.query.getFieldNames(datasource, datasetId, function(data){
+        doPopulateAttributeDropdowns(data,changeHandler);
+    });
+}
+
+function doPopulateAttributeDropdowns(data, changeHandler) {
+    ['x', 'y'].forEach(function (selectId) {
+        var select = $('#' + selectId);
+        select.empty();
+        select.append($('<option></option>').attr('value', '').text('(Select Field)'));
+        data.fieldNames.forEach(function (field) {
+            select.append($('<option></option>').attr('value', field).text(field));
+        });
+        select.change(changeHandler);
+    });
+}
+
+function getXAttribute() {
+    return $('#x option:selected').val();
+}
+
+function getYAttribute() {
+    return $('#y option:selected').val();
 }

@@ -21,7 +21,11 @@
  * RECIPIENT IS UNDER OBLIGATION TO MAINTAIN SECRECY.
  */
 
-#slider {
-    /* fix for chrome redraw bug that leaves a stray mark when dragging sometimes */
-    outline: 1px solid rgba(0,0,0,0);
+.container {
+    padding: 10px;
+}
+
+.control-group {
+    display: inline-block;
+    vertical-align: top;
 }
