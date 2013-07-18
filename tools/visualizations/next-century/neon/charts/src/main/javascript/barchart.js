@@ -29,30 +29,52 @@
  * @param {String} chartSelector The selector for the component in which the chart will be drawn
  * @param {Object} opts A collection of key/value pairs used for configuration parameters:
  * <ul>
- *     <li>data (required) - An array of data with the specified x-y data values (note the `y` is optional - see the description of the `y` parameter).</li>
- *     <li>x (required) - The name of the x-attribute</li>
+ *     <li>data (required) - An array of data with the specified x-y data values (note the `y` is optional - see the
+ *     description of the `y` parameter).</li>
+ *     <li>x (required) - The name of the x-attribute or a function that takes 1 parameter (the current item)
+ *     and returns the x value from the item. Note that all x-values must be of the same data type</li>
  *     <li>y (optional) - The name of the y-attribute. If not specified, each item will contribute 1 to the current count./li>
+ *     <li>xLabel (optional) - The label to show for the x-attribute (e.g. on tooltips). If not specified, this will
+ *     default to using the name of the attribute specified in x (if x is a function, then the value "x" will be used).
+ *     This is useful if the x-attribute name is not the same as how it should be displayed to users.</li>
+ *     <li>yLabel (optional) - The label to show for the y-attribute (e.g. on tooltips). If not specified, this will
+ *     default to using the name of the attribute specified in y (if no y value is specified, then the value "Count" will be used).
+ *     This is useful if the y-attribute name is not the same as how it should be displayed to users.</li>
  *     <li>height (optional) - The height of the chart in pixels. If not specified, a preconfigured default value will be used.</li>
  *     <li>width (optional) - The width of the chart in pixels. This will be honored as closely as possible, while still allowing bar widths to be evenly drawn. If not specified, a preconfigured default value will be used.</li>
  *     <li>margin (optional) - An object with any of the elements `top`, `left`, `bottom` or `right`. These are pixel values to override the default margin. If not specified, a preconfigured default value will be used.</li>
  *     <li>style (optional) - a mapping of a bar state to the different attributes to style for that attribute. The available bar states
- *     are active, inactive and hover. The attributes that can be toggled correspond to the underlying svg type used to render the
- *     bar. For example, to modify the the active/inactive bar states, but not do anything on hover this attribute would be
+ *     are active (default bar state), inactive (a visual state to indicate to the user that the bar should be seen
+ *     as inactive - the meaning of this is chart specified - see {{#crossLink "charts.BarChart.setInactive"}}{{/crossLink}}),
+ *     and hover. The attributes that can be toggled correspond
+ *     to the underlying svg type used to render the bar. For example, to modify the the active/inactive bar states,
+ *     but not do anything on hover this attribute would be
  *     `{ "active" : { "fill" : "blue" }, "inactive" : { "fill" : "red" } }`. The values for the attributes can also be functions
  *     to compute the values. The function takes 2 parameters - the current data for the bar and its index.</li>
+ *     <li>tickFormat (optional) - The format of the tick labels on the x-axis. Use the formatting specified by d3 at
+ *     <a href="https://github.com/mbostock/d3/wiki/API-Reference">D3 API reference</a>. The actual d3 format object is
+ *     required, not just the string to format it, such as `d3.format('04d')`. The type of formatting used
+ *     will vary based on the axis values. If not specified, a preconfigured default value will be used.</li>
+ *     <li>tickValues (optional) - A list of tick values to show on the chart. If not specified, all bars will be labeled</li>
+ *     <li>categories (optional) - A list of values to use as the x-axis categories (bins). This can also be a function
+ *     that takes 1 parameter (the data) and will compute the categories. If not specified, all unique values from the
+ *     x-attribute will used as the category values</li>.
+
  * </ul>
  *
  * @constructor
  *
  * @example
- *     var data = [
- *                 {"date": new Date(2013,2,4), "count": 2},
- *                 {"date": new Date(2013,4,8), "count": 4},
- *                 {"date": new Date(2013,1,1), "count": 7},
- *                 {"date": new Date(2013,1,7), "count": 1}
- *                ];
- *     var opts = { "data" : data, "x": "date", "y": "count", "interval" : charts.BarChart.MONTH};
- *     var barchart = new charts.BarChart('#chart', opts).draw();
+ *    var data = [
+ *    { "country": "US", "events": 9},
+ *    { "country": "Japan", "events": 8},
+ *    { "country": "China", "events": 2},
+ *    { "country": "Japan", "events": 3},
+ *    { "country": "US", "events": 1},
+ *    { "country": "Canada", "events": 7}
+ *    ];
+ *    var opts = { "data": data, "x": "country", "y" : "events"};
+ *    var barchart = new charts.BarChart('#chart', opts).draw();
  *
  */
 charts.BarChart = function (chartSelector, opts) {
@@ -63,10 +85,10 @@ charts.BarChart = function (chartSelector, opts) {
     this.xAttribute_ = opts.x;
     this.xLabel_ = opts.xLabel || this.determineXLabel_();
     this.yAttribute_ = opts.y;
+    this.yLabel_ = opts.yLabel || this.determineYLabel_();
     this.margin = $.extend({}, charts.BarChart.DEFAULT_MARGIN_, opts.margin || {});
     this.hMargin_ = this.margin.left + this.margin.right;
     this.vMargin_ = this.margin.top + this.margin.bottom;
-    this.dataKeyTransform_ = opts.dataKeyTransform;
 
     if (opts.init) {
         opts.init.call(this, opts);
@@ -75,7 +97,7 @@ charts.BarChart = function (chartSelector, opts) {
     // tick formatting/values may be undefined in which case d3's default will be used
     this.tickFormat_ = opts.tickFormat;
     this.tickValues_ = this.computeTickValues_(opts.tickValues);
-    this.xAxisCategories_ = this.createCategories_(opts.categories ? opts.categories : this.createXAxisCategoriesFromUniqueValues_, opts.data);
+    this.categories_ = this.createCategories_(opts.categories ? opts.categories : this.createCategoriesFromUniqueValues_, opts.data);
     this.data_ = this.aggregateData_(opts.data);
 
     this.x_ = this.createXScale_();
@@ -120,6 +142,20 @@ charts.BarChart.DEFAULT_STYLE_[charts.BarChart.ACTIVE_STYLE_KEY_] = charts.BarCh
 charts.BarChart.DEFAULT_STYLE_[charts.BarChart.INACTIVE_STYLE_KEY_] = charts.BarChart.defaultInactiveBarStyle_;
 charts.BarChart.DEFAULT_STYLE_[charts.BarChart.HOVER_STYLE_KEY_] = charts.BarChart.defaultHoverBarStyle_;
 
+// d3 maps keys as strings but this prevents us from tying it back to the original data, since the original data
+// may have different types
+charts.BarChart.NUMERIC_KEY_ = 'numeric';
+charts.BarChart.DATE_KEY_ = 'date';
+charts.BarChart.BOOLEAN_KEY_ = 'boolean';
+charts.BarChart.STRING_KEY_ = 'string';
+
+/**
+ * Gets the label for the category (bin on the x-axis) for this item.
+ * @param {Object} item
+ * @return {Object} The x-value for this item
+ * @method categoryForItem_
+ * @protected
+ */
 charts.BarChart.prototype.categoryForItem_ = function (item) {
     if (typeof this.xAttribute_ === 'function') {
         return this.xAttribute_.call(this, item);
@@ -132,6 +168,10 @@ charts.BarChart.prototype.determineXLabel_ = function () {
         return this.xAttribute_;
     }
     return 'x';
+};
+
+charts.BarChart.prototype.determineYLabel_ = function () {
+    return this.yAttribute_ ? this.yAttribute_ : "Count";
 };
 
 charts.BarChart.prototype.createCategories_ = function (categories, data) {
@@ -148,16 +188,35 @@ charts.BarChart.prototype.computeTickValues_ = function (tickValues) {
     return tickValues;
 };
 
-charts.BarChart.prototype.createXAxisCategoriesFromUniqueValues_ = function (data) {
+charts.BarChart.prototype.createCategoriesFromUniqueValues_ = function (data) {
     var me = this;
     return _.chain(data).map(function (item) {
         return me.categoryForItem_(item);
-    }).unique().compact().sort().value();
+    }).unique().filter(function (item) {
+            return !_.isNull(item) && !_.isUndefined(item);
+        }).sort(charts.BarChart.sortComparator_).value();
+};
+
+charts.BarChart.sortComparator_ = function (a, b) {
+    if (a instanceof Date && b instanceof Date) {
+        return charts.BarChart.compareValues_(a.getTime(), b.getTime());
+    }
+    return charts.BarChart.compareValues_(a, b);
+};
+
+charts.BarChart.compareValues_ = function (a, b) {
+    if (a < b) {
+        return -1;
+    }
+    if (a > b) {
+        return 1;
+    }
+    return 0;
 };
 
 charts.BarChart.prototype.createXScale_ = function () {
     return d3.scale.ordinal()
-        .domain(this.xAxisCategories_)
+        .domain(this.categories_)
         .rangeRoundBands([0, this.width - this.hMargin_]);
 };
 
@@ -176,8 +235,8 @@ charts.BarChart.prototype.createYScale_ = function () {
 };
 
 charts.BarChart.prototype.computePlotWidth_ = function () {
-    if (this.xAxisCategories_.length > 0) {
-        return this.x_.rangeBand() * this.xAxisCategories_.length;
+    if (this.categories_.length > 0) {
+        return this.x_.rangeBand() * this.categories_.length;
     }
     return this.width;
 };
@@ -327,8 +386,7 @@ charts.BarChart.prototype.createTooltip_ = function (item) {
     // if a tick format was specified, use that to format the tooltip for a consistent look
     var xValue = this.tickFormat_ ? this.tickFormat_(item.key) : item.key;
     var xAttributeHtml = $('<div/>').html(this.xLabel_ + ': ' + xValue);
-    var yLabel = this.yAttribute_ ? this.yAttribute_ : "Count";
-    var yAttributeHtml = $('<div/>').html(yLabel + ': ' + item.values);
+    var yAttributeHtml = $('<div/>').html(this.yLabel_ + ': ' + item.values);
     tooltip.append(xAttributeHtml);
     tooltip.append(yAttributeHtml);
     return tooltip;
@@ -373,27 +431,123 @@ charts.BarChart.prototype.drawYAxis_ = function (chart) {
  * and the number of items in that category period respectively
  */
 charts.BarChart.prototype.aggregateData_ = function (data) {
-    // TODO: Extract methods
+    var aggregated = this.rollupDataByCategory_(data);
+    return this.removeDataWithNoMatchingCategory_(aggregated);
+};
+
+/**
+ * Takes the raw data and aggregates it by category. This is one step in the data aggregation process.
+ * @param data
+ * @method rollupDataByCategory_
+ * @private
+ */
+charts.BarChart.prototype.rollupDataByCategory_ = function (data) {
     var me = this;
+
+    // if the attributes are non-strings, they must be converted because d3 rolls them up as strings, so
+    // check for those cases
+    var keyTypes;
+
     var aggregated = d3.nest().key(function (d) {
-        return me.categoryForItem_(d);
+        var category = me.categoryForItem_(d);
+        if (keyTypes !== charts.BarChart.STRING_KEY_) {
+            var keyType = charts.BarChart.keyType_(category);
+            // the first time we see a value, set that as the key type
+            if (!keyTypes) {
+                keyTypes = keyType;
+            }
+            // if the key type has changed across values, just treat everything as strings
+            else if (keyType !== keyTypes) {
+                keyTypes = charts.BarChart.STRING_KEY_;
+            }
+        }
+        return category;
     }).rollup(function (d) {
             return d3.sum(d, function (el) {
                 return me.yAttribute_ ? el[me.yAttribute_] : 1;
             });
         }).entries(data);
 
+    return charts.BarChart.transformByKeyTypes_(aggregated, keyTypes);
+};
 
-    // The keys here will be a string, but some charts may want it in another form
-    if (this.dataKeyTransform_) {
-        aggregated = this.dataKeyTransform_.call(this, aggregated);
+charts.BarChart.keyType_ = function (value) {
+    if (_.isNumber(value)) {
+        return charts.BarChart.NUMERIC_KEY_;
     }
 
-    // TODO: Extract methods
-    // if there is data in non-existent categories, remove it
-    aggregated = _.reject(aggregated, function (item) {
+    if (_.isDate(value)) {
+        return charts.BarChart.DATE_KEY_;
+    }
+
+    if (_.isBoolean(value)) {
+        return charts.BarChart.BOOLEAN_KEY_;
+    }
+
+    // treat everything else as strings. if the user passes an object, results will be unpredictable
+    return charts.BarChart.STRING_KEY_;
+
+};
+
+/**
+ * d3 stores all keys as strings in the aggregated data. this converts them to the original data type
+ * @param aggregatedData
+ * @param keyTypes
+ * @return {Object} The original data with the keys transformed
+ * @private
+ * @method transformByKeyTypes_
+ */
+charts.BarChart.transformByKeyTypes_ = function (aggregatedData, keyTypes) {
+    if (keyTypes === charts.BarChart.DATE_KEY_) {
+        return charts.BarChart.mapKeysToDates_(aggregatedData);
+    }
+
+    if (keyTypes === charts.BarChart.NUMERIC_KEY_) {
+        return charts.BarChart.mapKeysToNumbers_(aggregatedData);
+    }
+
+    if (keyTypes === charts.BarChart.BOOLEAN_KEY_) {
+        return charts.BarChart.mapKeysToBooleans_(aggregatedData);
+    }
+
+    return aggregatedData;
+};
+
+
+charts.BarChart.mapKeysToDates_ = function (aggregatedData) {
+    return aggregatedData.map(function (d) {
+        d.key = new Date(d.key);
+        return d;
+    });
+};
+
+charts.BarChart.mapKeysToNumbers_ = function (aggregatedData) {
+    return aggregatedData.map(function (d) {
+        d.key = +d.key;
+        return d;
+    });
+};
+
+charts.BarChart.mapKeysToBooleans_ = function (aggregatedData) {
+    return aggregatedData.map(function (d) {
+        d.key = (d.key.toLowerCase() === 'true');
+        return d;
+    });
+};
+
+
+/**
+ * Removes any data from the aggregate for which there is a key that has no corresponding category. This can
+ * happen if the categories are set explicitly rather than pulling them from the data values
+ * @param aggregatedData
+ * @private
+ * @method removeDataWithNoMatchingCategory_
+ */
+charts.BarChart.prototype.removeDataWithNoMatchingCategory_ = function (aggregatedData) {
+    var me = this;
+    return _.reject(aggregatedData, function (item) {
         var key = item.key;
-        return _.isUndefined(_.find(me.xAxisCategories_, function (category) {
+        return _.isUndefined(_.find(me.categories_, function (category) {
             // dates won't compare with === since they are different object, so compare using the time values
             if (key instanceof Date && category instanceof Date) {
                 return category.getTime() === key.getTime();
@@ -401,6 +555,4 @@ charts.BarChart.prototype.aggregateData_ = function (data) {
             return category === key;
         }));
     });
-
-    return aggregated;
 };

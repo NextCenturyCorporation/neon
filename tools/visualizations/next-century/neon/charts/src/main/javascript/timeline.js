@@ -26,27 +26,19 @@
  * Creates a new timeline component
  * @namespace charts
  * @class Timeline
- * @param {String} chartSelector The selector for the component in which the timeline will be drawn*
- * @param {Object} opts A collection of key/value pairs used for configuration parameters:
+ * @extends charts.BarChart
+ * @param {String} chartSelector The selector for the component in which the timeline will be drawn
+ * @param {Object} opts A collection of key/value pairs used for configuration parameters. These parameters
+ * are in addition to those specified in {{#crossLink "charts.BarChart"}}{{/crossLink}}
  * <ul>
- *     <li>data (required) - An array of data with the specified x-y data values (note the `y` is optional - see the description of the `y` parameter).</li>
- *     <li>x (required) - The name of the x-attribute (time)</li>
- *     <li>y (optional) - The name of the y-attribute (count). If not specified, each item will contribute 1 to the current count./li>
  *     <li>interval (required) - The interval at which to group the data (e.g. day, month). See the constants in this class</li>
- *     <li>height (optional) - The height of the chart in pixels. If not specified, a preconfigured default value will be used.</li>
- *     <li>width (optional) - The width of the chart in pixels. This will be honored as closely as possible, while still allowing bar widths to be evenly drawn. If not specified, a preconfigured default value will be used.</li>
- *     <li>margin (optional) - An object with any of the elements `top`, `left`, `bottom` or `right`. These are pixel values to override the default margin. If not specified, a preconfigured default value will be used.</li>
  *     <li>step (optional) - The number of the specified intervals. If not specified, a preconfigured default value will be used based on the tick interval that was selected.</li>
- *     <li>tickFormat (optional) - The format of the tick labels. Use the formatting specified by d3 at <a href="https://github.com/mbostock/d3/wiki/Time-Formatting">Time Formatting</a>. If not specified, a preconfigured default value will be used.</li>
- *     <li>style (optional) - a mapping of a bar state to the different attributes to style for that attribute. The available bar states
- *     are active, inactive and hover. The attributes that can be toggled correspond to the underlying svg type used to render the
- *     bar. For example, to modify the the active/inactive bar states, but not do anything on hover this attribute would be
- *     `{ "active" : { "fill" : "blue" }, "inactive" : { "fill" : "red" } }`. The values for the attributes can also be functions
- *     to compute the values. The function takes 2 parameters - the current data for the bar and its index.</li>
  * </ul>
  *
- * @constructor
+ * Note the formatting object (specified in the {{#crossLink "charts.BarChart"}}{{/crossLink}} parameters) should use
+ * <a href="https://github.com/mbostock/d3/wiki/Time-Formatting">D3 Time Formatting</a>
  *
+ * @constructor
  * @example
  *     var data = [
  *                 {"date": new Date(2013,2,4), "count": 2},
@@ -59,33 +51,20 @@
  *
  */
 charts.Timeline = function (chartSelector, opts) {
-    var me = this;
     opts = opts || {};
-    this.dateField_ = opts.x;
     var interval = opts.interval || charts.Timeline.DEFAULT_INTERVAL_;
     this.timeInterval_ = charts.Timeline.TIME_INTERVALS_[interval].interval;
     this.tickStep_ = opts.step || charts.Timeline.TIME_INTERVALS_[interval].step;
     var tickFormat = d3.time.format(opts.tickFormat || charts.Timeline.TIME_INTERVALS_[interval].tickFormat);
 
 
-    // TODO: Extract methods
     charts.BarChart.call(this, chartSelector,
         $.extend({}, opts, {
                 'init': this.init_,
-                'x': function (item) {
-                    return me.computeTimePeriodStart_(item[me.dateField_]);
-                },
-                'categories': this.computeTimePeriods_,
-                'tickValues': this.computeTimeIntervalTicks_,
+                'categories': this.timePeriods_,
+                'tickValues': this.timeIntervalTicks_,
                 'tickFormat': tickFormat,
-                'xLabel': 'date',
-                'dataKeyTransform': function (aggregated) {
-                    // d3 will create a string for the date but we want a date object
-                    return aggregated.map(function (d) {
-                        d.key = new Date(d.key);
-                        return d;
-                    });
-                }
+                'xLabel': 'date'
             }
         ));
 };
@@ -93,7 +72,15 @@ charts.Timeline = function (chartSelector, opts) {
 // TODO: NEON-73 Javascript inheritance library
 charts.Timeline.prototype = Object.create(charts.BarChart.prototype);
 
+// the original categoryForItem_ method will return the raw data. the category in the timeline case is
+// the start of the time period but we want to preserve the method for getting the raw data
+charts.Timeline.prototype.dateForItem_ = charts.Timeline.prototype.categoryForItem_;
 (function () {
+    charts.Timeline.prototype.categoryForItem_ = function (item) {
+        var date = this.dateForItem_.call(this, item);
+        return this.timePeriodStart_(date);
+    };
+
     // override the draw method to also draw the slider
     var oldDrawMethod = charts.Timeline.prototype.draw;
     charts.Timeline.prototype.draw = function () {
@@ -159,11 +146,10 @@ charts.Timeline.prototype.onFilter = function (callback) {
         });
 };
 
-
 charts.Timeline.prototype.computeMinDate_ = function (data) {
     var me = this;
     var minDate = d3.min(data, function (d) {
-        return d[me.dateField_];
+        return me.dateForItem_(d);
     });
     // minDate will be undefined if data is empty
     return minDate ? minDate : charts.Timeline.ZERO_DATE_;
@@ -172,7 +158,7 @@ charts.Timeline.prototype.computeMinDate_ = function (data) {
 charts.Timeline.prototype.computeMaxDate_ = function (data) {
     var me = this;
     var maxDate = d3.max(data, function (d) {
-        return d[me.dateField_];
+        return me.dateForItem_(d);
     });
     // maxDate will be undefined if data is empty
     // the +1 is so the max date is exclusive
@@ -182,19 +168,19 @@ charts.Timeline.prototype.computeMaxDate_ = function (data) {
 
 /**
  * Computes the start dates for each of the time periods in the chart
- * @method computeTimePeriods_
+ * @method timePeriods_
  * @param {Array} data The data being displayed in the chart
  * @return {Array}
  * @private
  */
-charts.Timeline.prototype.computeTimePeriods_ = function (data) {
+charts.Timeline.prototype.timePeriods_ = function (data) {
     var timePeriods = [];
     if (charts.Timeline.isValidDate_(this.minDate_) && charts.Timeline.isValidDate_(this.maxDate_)) {
         Array.prototype.push.apply(timePeriods, this.timeInterval_.range(this.timeInterval_(this.minDate_), this.maxDate_));
         // set the start time period to the true start. do this after the time periods are computed, otherwise the
         // timeInterval_.range method above will return the first time period after the start if the time period
         // does not start exactly at an even interval
-        timePeriods[0] = this.computeTimePeriodStart_(timePeriods[0]);
+        timePeriods[0] = this.timePeriodStart_(timePeriods[0]);
     }
     return timePeriods;
 };
@@ -203,7 +189,7 @@ charts.Timeline.isValidDate_ = function (date) {
     return date > charts.Timeline.ZERO_DATE_;
 };
 
-charts.Timeline.prototype.computeTimeIntervalTicks_ = function () {
+charts.Timeline.prototype.timeIntervalTicks_ = function () {
     var tickValues = [];
     var currentTick = this.minDate_;
     while (currentTick < this.maxDate_) {
@@ -255,12 +241,10 @@ charts.Timeline.prototype.removeFilterListeners = function () {
 };
 
 charts.Timeline.prototype.styleInactiveData_ = function (filterStartDate, filterEndDate) {
-
     this.setInactive(function (item) {
         var date = item.key;
         return !(filterStartDate <= date && date < filterEndDate);
     });
-
 };
 
 charts.Timeline.prototype.notifyFilterListeners_ = function (filterStartDate, filterEndDate) {
@@ -273,10 +257,10 @@ charts.Timeline.prototype.getDate_ = function (pixelValue) {
         return this.maxDate_;
     }
     var index = pixelValue / this.x_.rangeBand();
-    return this.xAxisCategories_[index];
+    return this.categories_[index];
 };
 
-charts.Timeline.prototype.computeTimePeriodStart_ = function (date) {
+charts.Timeline.prototype.timePeriodStart_ = function (date) {
     var timePeriodStart = this.timeInterval_(date);
     // if the date is in the first time period, taking the floor to get the time period start
     // may result in a date before the true start. check for that case.
@@ -293,7 +277,7 @@ charts.Timeline.prototype.computeTimePeriodStart_ = function (date) {
  * @param {String} tickFormat The format used to show the tick labels
  * @param {int} step The number of the particular interval units to place the ticks
  * @return {Object}
- * @method
+ * @method createTimeIntervalMethods_
  * @private
  */
 charts.Timeline.createTimeIntervalMethods_ = function (interval, tickFormat, step) {
