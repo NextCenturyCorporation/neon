@@ -41,7 +41,7 @@ class DateUtils {
             return DATE_PARSER.parseDateTime(dateString).toDate()
         }
         catch (Exception e) {
-            throw new DateParsingException(e)
+            throw new DateParsingException(dateString, e)
         }
     }
 

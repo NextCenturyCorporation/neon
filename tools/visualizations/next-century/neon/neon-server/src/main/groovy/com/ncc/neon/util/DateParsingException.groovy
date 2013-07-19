@@ -26,7 +26,7 @@ package com.ncc.neon.util
 
 class DateParsingException extends RuntimeException {
 
-    DateParsingException(Throwable cause) {
-        super("Unable to parse date.", cause)
+    DateParsingException(String dateString, Throwable cause) {
+        super("Unable to parse date ${dateString}", cause)
     }
 }
