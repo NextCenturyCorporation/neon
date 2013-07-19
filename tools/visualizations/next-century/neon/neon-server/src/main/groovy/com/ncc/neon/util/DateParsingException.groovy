@@ -22,13 +22,11 @@ package com.ncc.neon.util
  * OF NEXT CENTURY CORPORATION EXCEPT BY PRIOR WRITTEN PERMISSION AND WHEN
  * RECIPIENT IS UNDER OBLIGATION TO MAINTAIN SECRECY.
  *
- * 
- * @author tbrooks
  */
 
-class DateParsingException extends RuntimeException{
+class DateParsingException extends RuntimeException {
 
-    DateParsingException(){
-        super("Unable to parse date.")
+    DateParsingException(Throwable cause) {
+        super("Unable to parse date.", cause)
     }
 }

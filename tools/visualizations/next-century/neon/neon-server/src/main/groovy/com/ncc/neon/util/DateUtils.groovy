@@ -37,20 +37,25 @@ class DateUtils {
      */
     @SuppressWarnings('CatchException')
     static Date parseDate(String dateString) {
-        try{
+        try {
             return DATE_PARSER.parseDateTime(dateString).toDate()
         }
-        catch(Exception e){
-            throw new DateParsingException()
+        catch (Exception e) {
+            throw new DateParsingException(e)
         }
     }
 
-
-    static def tryToParseDate(String dateString){
-        try{
+    /**
+     * Tries to parse the date string. If parsing fails, it returns the original text
+     * @param dateString
+     * @return
+     * @see #parseDate(java.lang.String)
+     */
+    static def tryToParseDate(String dateString) {
+        try {
             return parseDate(dateString)
         }
-        catch(DateParsingException){
+        catch (DateParsingException) {
             return dateString
         }
     }
