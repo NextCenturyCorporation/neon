@@ -31,19 +31,6 @@ class DateUtils {
     private static final def DATE_PARSER = ISODateTimeFormat.dateTimeParser().withZone(DateTimeZone.UTC)
     private static final def DATE_FORMATTER = ISODateTimeFormat.dateTimeNoMillis()
 
-    /**
-     * Converts a date from a string ISO-8601 format to a date object
-     * @param iso8601DateString
-     */
-    @SuppressWarnings('CatchException')
-    static Date parseDate(String dateString) {
-        try {
-            return DATE_PARSER.parseDateTime(dateString).toDate()
-        }
-        catch (Exception e) {
-            throw new DateParsingException(dateString, e)
-        }
-    }
 
     /**
      * Tries to parse the date string. If parsing fails, it returns the original text
@@ -57,6 +44,20 @@ class DateUtils {
         }
         catch (DateParsingException) {
             return dateString
+        }
+    }
+
+    /**
+     * Converts a date from a string ISO-8601 format to a date object
+     * @param iso8601DateString
+     */
+    @SuppressWarnings('CatchException')
+    private static Date parseDate(String dateString) {
+        try {
+            return DATE_PARSER.parseDateTime(dateString).toDate()
+        }
+        catch (Exception e) {
+            throw new DateParsingException(dateString, e)
         }
     }
 
