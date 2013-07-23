@@ -293,7 +293,7 @@ charts.Timeline.createTimeIntervalMethods_ = function (interval, tickFormat, ste
     };
 };
 
-charts.Timeline.TIME_INTERVALS_[charts.Timeline.HOUR] = charts.Timeline.createTimeIntervalMethods_(d3.time.hour, '%d-%b %H:%M', 12);
-charts.Timeline.TIME_INTERVALS_[charts.Timeline.DAY] = charts.Timeline.createTimeIntervalMethods_(d3.time.day, '%d-%b-%Y', 7);
-charts.Timeline.TIME_INTERVALS_[charts.Timeline.MONTH] = charts.Timeline.createTimeIntervalMethods_(d3.time.month, '%b-%Y');
-charts.Timeline.TIME_INTERVALS_[charts.Timeline.YEAR] = charts.Timeline.createTimeIntervalMethods_(d3.time.year, '%Y');
+charts.Timeline.TIME_INTERVALS_[charts.Timeline.HOUR] = charts.Timeline.createTimeIntervalMethods_(d3.time.hour.utc, '%d-%b %H:%M', 12);
+charts.Timeline.TIME_INTERVALS_[charts.Timeline.DAY] = charts.Timeline.createTimeIntervalMethods_(d3.time.day.utc, '%d-%b-%Y', 7);
+charts.Timeline.TIME_INTERVALS_[charts.Timeline.MONTH] = charts.Timeline.createTimeIntervalMethods_(d3.time.month.utc, '%b-%Y');
+charts.Timeline.TIME_INTERVALS_[charts.Timeline.YEAR] = charts.Timeline.createTimeIntervalMethods_(d3.time.year.utc, '%Y');

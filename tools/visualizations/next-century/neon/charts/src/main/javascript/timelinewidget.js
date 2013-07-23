@@ -131,7 +131,7 @@ $(document).ready(function () {
 
             var dataByDate = data.data.map(function (el) {
                 //month is 1-based
-                var date = new Date(el.year, el.month - 1, el.day, el.hour);
+                var date = new Date(Date.UTC(el.year, el.month - 1, el.day, el.hour));
                 var count = el[yAttr];
                 var result = {};
                 result[xAttr] = date;
