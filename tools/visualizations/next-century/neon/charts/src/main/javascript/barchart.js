@@ -136,7 +136,7 @@ charts.BarChart.ACTIVE_BAR_CLASS_ = charts.BarChart.ACTIVE_STYLE_KEY_ + '-' + ch
 charts.BarChart.INACTIVE_BAR_CLASS_ = charts.BarChart.INACTIVE_STYLE_KEY_ + '-' + charts.BarChart.BAR_CLASS_;
 charts.BarChart.HOVER_BAR_CLASS_ = charts.BarChart.HOVER_STYLE_KEY_ + '-' + charts.BarChart.BAR_CLASS_;
 
-charts.BarChart.DEFAULT_ACTIVE_BAR_FILL_COLOR_ = 'black';
+charts.BarChart.DEFAULT_ACTIVE_BAR_FILL_COLOR_ = 'steelblue';
 charts.BarChart.DEFAULT_INACTIVE_BAR_FILL_COLOR_ = 'lightgrey';
 charts.BarChart.defaultActiveBarStyle_ = { 'fill': charts.BarChart.DEFAULT_ACTIVE_BAR_FILL_COLOR_ };
 charts.BarChart.defaultInactiveBarStyle_ = { 'fill': charts.BarChart.DEFAULT_INACTIVE_BAR_FILL_COLOR_ };
