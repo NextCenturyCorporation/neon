@@ -55,7 +55,7 @@ charts.Timeline = function (chartSelector, opts) {
     var interval = opts.interval || charts.Timeline.DEFAULT_INTERVAL_;
     this.timeInterval_ = charts.Timeline.TIME_INTERVALS_[interval].interval;
     this.tickStep_ = opts.step || charts.Timeline.TIME_INTERVALS_[interval].step;
-    var tickFormat = d3.time.format(opts.tickFormat || charts.Timeline.TIME_INTERVALS_[interval].tickFormat);
+    var tickFormat = d3.time.format.utc(opts.tickFormat || charts.Timeline.TIME_INTERVALS_[interval].tickFormat);
 
 
     charts.BarChart.call(this, chartSelector,
