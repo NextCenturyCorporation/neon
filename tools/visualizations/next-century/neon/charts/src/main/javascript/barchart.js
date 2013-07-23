@@ -558,10 +558,13 @@ charts.BarChart.prototype.removeDataWithNoMatchingCategory_ = function (aggregat
     var me = this;
     return _.reject(aggregatedData, function (item) {
         var key = item.key;
+
         return _.isUndefined(_.find(me.categories_, function (category) {
             // dates won't compare with === since they are different object, so compare using the time values
             if (key instanceof Date && category instanceof Date) {
-                return category.getTime() === key.getTime();
+                // d3 truncates the milliseconds, so just use seconds as the granularity for checking if
+                // the category exists. this should generally be sufficient (NEON-471)
+                return (category.getTime() - category.getMilliseconds()) === (key.getTime() - key.getMilliseconds());
             }
             return category === key;
         }));

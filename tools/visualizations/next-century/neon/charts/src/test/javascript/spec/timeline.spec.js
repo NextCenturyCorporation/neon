@@ -27,7 +27,7 @@ describe('timeline', function () {
 
     it('should aggregate the data values based on the chart time period', function () {
         var data = [
-            {"date": new Date(2013, 0, 7), "count": 2},
+            {"date": new Date(2013, 0, 7, 11, 30, 5, 125), "count": 2},
             {"date": new Date(2013, 1, 1), "count": 4},
             {"date": new Date(2013, 0, 8), "count": 7},
             {"date": new Date(2013, 2, 1), "count": 1},
@@ -39,8 +39,8 @@ describe('timeline', function () {
 
         var expected = [];
 
-        // the first value will use the true start date
-        expected.push({ "key": new Date(2013, 0, 7), "values": 9});
+        // the first value will use the true start date (but truncates milliseconds - see NEON-471)
+        expected.push({ "key": new Date(2013, 0, 7, 11, 30, 5), "values": 9});
         expected.push({ "key": new Date(2013, 1), "values": 13});
         expected.push({ "key": new Date(2013, 2), "values": 1});
         expected.push({ "key": new Date(2013, 4), "values": 8});

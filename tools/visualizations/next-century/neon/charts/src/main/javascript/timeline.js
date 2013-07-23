@@ -218,7 +218,11 @@ charts.Timeline.prototype.createSlider_ = function () {
         values: [ 0, this.plotWidth_ ],
         change: $.proxy(charts.Timeline.prototype.doSliderChange_, me)
     });
-    $('#' + charts.Timeline.SLIDER_DIV_NAME_).width(me.plotWidth_).css({'margin-left': me.margin.left + 'px', 'margin-right': me.margin.right + 'px'});
+    $('#' + charts.Timeline.SLIDER_DIV_NAME_).width(me.plotWidth_).css({
+        'margin-left': me.margin.left + 'px',
+        'margin-right': me.margin.right + 'px',
+        'top': $(me.chartSelector_).position().top + $(me.chartSelector_).innerHeight() - this.margin.bottom
+    });
     if (me.data_.length === 0) {
         $('#' + charts.Timeline.SLIDER_DIV_NAME_).slider('disable');
     }
