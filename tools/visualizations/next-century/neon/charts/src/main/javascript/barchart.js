@@ -136,7 +136,7 @@ charts.BarChart.ACTIVE_BAR_CLASS_ = charts.BarChart.ACTIVE_STYLE_KEY_ + '-' + ch
 charts.BarChart.INACTIVE_BAR_CLASS_ = charts.BarChart.INACTIVE_STYLE_KEY_ + '-' + charts.BarChart.BAR_CLASS_;
 charts.BarChart.HOVER_BAR_CLASS_ = charts.BarChart.HOVER_STYLE_KEY_ + '-' + charts.BarChart.BAR_CLASS_;
 
-charts.BarChart.DEFAULT_ACTIVE_BAR_FILL_COLOR_ = 'steelblue';
+charts.BarChart.DEFAULT_ACTIVE_BAR_FILL_COLOR_ = 'black';
 charts.BarChart.DEFAULT_INACTIVE_BAR_FILL_COLOR_ = 'lightgrey';
 charts.BarChart.defaultActiveBarStyle_ = { 'fill': charts.BarChart.DEFAULT_ACTIVE_BAR_FILL_COLOR_ };
 charts.BarChart.defaultInactiveBarStyle_ = { 'fill': charts.BarChart.DEFAULT_INACTIVE_BAR_FILL_COLOR_ };
@@ -314,6 +314,8 @@ charts.BarChart.prototype.bindData_ = function (chart) {
         .attr('height', function (d) {
             return me.height - me.vMargin_ - me.y_(d.values);
         })
+        // using the same color for the border of the bars as the svg background gives separation for adjacent bars
+        .attr('stroke', $('#plot').css('background-color'))
         .on('mouseover', function (d) {
             me.toggleHoverStyle_(d3.select(this), true);
             me.showTooltip_(d);

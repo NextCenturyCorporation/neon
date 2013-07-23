@@ -27,6 +27,11 @@
     background-color: white;
 }
 
+.bar {
+    /** provides a slight separation for adjacent bars. the barchart javascript sets the color based on the svg color */
+    stroke-width: 1;
+    stroke-opacity: .5;
+}
 
 .axis {
     shape-rendering: crispEdges;
@@ -52,3 +57,4 @@
     text-align: center;
     pointer-events: none;
 }
+
