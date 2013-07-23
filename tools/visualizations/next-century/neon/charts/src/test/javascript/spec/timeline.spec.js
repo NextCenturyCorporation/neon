@@ -39,8 +39,8 @@ describe('timeline', function () {
 
         var expected = [];
 
-        // the first value will use the true start date (but truncates milliseconds - see NEON-471)
-        expected.push({ "key": new Date(2013, 0, 7, 11, 30, 5), "values": 9});
+        // the first value will use the true start date
+        expected.push({ "key": new Date(2013, 0, 7, 11, 30, 5, 125), "values": 9});
         expected.push({ "key": new Date(2013, 1), "values": 13});
         expected.push({ "key": new Date(2013, 2), "values": 1});
         expected.push({ "key": new Date(2013, 4), "values": 8});

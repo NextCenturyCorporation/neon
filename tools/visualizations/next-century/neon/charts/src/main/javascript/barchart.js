@@ -471,6 +471,11 @@ charts.BarChart.prototype.rollupDataByCategory_ = function (data) {
             else if (keyType !== keyTypes) {
                 keyTypes = charts.BarChart.STRING_KEY_;
             }
+            // d3 will convert the date to a string, which loses any milliseconds. so convert it to a time. it will get
+            // converted back after the rollup is done
+            if (category instanceof Date) {
+                category = category.getTime();
+            }
         }
         return category;
     }).rollup(function (d) {
@@ -527,7 +532,7 @@ charts.BarChart.transformByKeyTypes_ = function (aggregatedData, keyTypes) {
 
 charts.BarChart.mapKeysToDates_ = function (aggregatedData) {
     return aggregatedData.map(function (d) {
-        d.key = new Date(d.key);
+        d.key = new Date(+d.key);
         return d;
     });
 };
@@ -562,9 +567,7 @@ charts.BarChart.prototype.removeDataWithNoMatchingCategory_ = function (aggregat
         return _.isUndefined(_.find(me.categories_, function (category) {
             // dates won't compare with === since they are different object, so compare using the time values
             if (key instanceof Date && category instanceof Date) {
-                // d3 truncates the milliseconds, so just use seconds as the granularity for checking if
-                // the category exists. this should generally be sufficient (NEON-471)
-                return (category.getTime() - category.getMilliseconds()) === (key.getTime() - key.getMilliseconds());
+                return category.getTime() === key.getTime();
             }
             return category === key;
         }));
