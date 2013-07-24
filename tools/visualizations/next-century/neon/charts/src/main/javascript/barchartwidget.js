@@ -26,7 +26,7 @@ $(document).ready(function () {
 
     OWF.ready(function () {
 
-        var COUNT_FIELD_NAME = 'count_';
+        var COUNT_FIELD_NAME = 'Count';
 
         // just creating the message handler will receive messages
         var messageHandler = new neon.eventing.MessageHandler({
@@ -69,7 +69,7 @@ $(document).ready(function () {
             var xAttr = getXAttribute();
             var yAttr = getYAttribute();
 
-            if (yAttr === "") {
+            if (!yAttr) {
                 yAttr = COUNT_FIELD_NAME;
             }
 

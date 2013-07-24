@@ -27,7 +27,7 @@ $(document).ready(function () {
     OWF.ready(function () {
 
         var filterId;
-        var COUNT_FIELD_NAME = 'count_';
+        var COUNT_FIELD_NAME = 'Count';
 
         var messageHandler = new neon.eventing.MessageHandler({
             activeDatasetChanged: function (message) {
@@ -125,7 +125,7 @@ $(document).ready(function () {
             var xAttr = getXAttribute();
             var yAttr = getYAttribute();
 
-            if (yAttr === "") {
+            if (!yAttr) {
                 yAttr = COUNT_FIELD_NAME;
             }
 

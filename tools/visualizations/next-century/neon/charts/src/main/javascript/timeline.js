@@ -64,7 +64,7 @@ charts.Timeline = function (chartSelector, opts) {
                 'categories': this.timePeriods_,
                 'tickValues': this.timeIntervalTicks_,
                 'tickFormat': tickFormat,
-                'xLabel': 'date'
+                'xLabel': 'Date'
             }
         ));
 };
