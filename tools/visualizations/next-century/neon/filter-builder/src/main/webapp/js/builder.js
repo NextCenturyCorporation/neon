@@ -27,5 +27,6 @@ $(function() {
     };
 
     $(window).resize(sizeTableToRemainingSpace);
+    $('#query').resize(sizeTableToRemainingSpace);
     sizeTableToRemainingSpace();
 });

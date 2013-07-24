@@ -24,7 +24,7 @@
         neon.util.AjaxUtils.doGet(neon.query.SERVER_URL + "/services/languageservice/datastores", {
             success: function (data) {
                 data.forEach(function (datastoreName) {
-                    datastoreOption = document.createElement("option");
+                    var datastoreOption = document.createElement("option");
                     datastoreOption.text = datastoreName;
                     datastoreOption.setAttribute("value", datastoreName);
                     $("#datastoreSelect").append(datastoreOption);
@@ -37,6 +37,7 @@
     <link rel="stylesheet" type="text/css" href="css/slickgrid/slick.grid.css"/>
     <link rel="stylesheet" type="text/css" href="css/smoothness/jquery-ui-1.8.16.custom.css"/>
     <link rel="stylesheet" type="text/css" href="<%=neonServerUrl%>/css/neon.css"/>
+    <script src="js/jquery/jquery.ba-resize-1.1.min.js"></script>
 
 </head>
 <body>
