@@ -41,6 +41,10 @@
     margin-bottom: 20px;
 }
 
+#filter-container {
+    width: 760px;
+}
+
 fieldset {
     border: 1px solid #DDD;
     border-radius: 10px;
