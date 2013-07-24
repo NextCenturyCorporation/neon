@@ -50,7 +50,7 @@
 
             <div class="control-group">
                 <div class="controls">
-                    <select id="operator-select-{{@index}}">
+                    <select id="operator-select-{{@index}}" class="input-small">
                         {{#select operatorValue}}
                         {{#operatorOptions}}
                         <option value="{{.}}">{{.}}</option>
@@ -71,15 +71,21 @@
             <div class="control-group">
                 {{#unless submittable}}
                 <div class="btn-group">
-                    <button class="btn btn-primary" id="add-filter-button" onclick="neon.filter.addFilter({{@index}})">Add</button>
+                    <button class="btn btn-primary" id="add-filter-button" onclick="neon.filter.addFilter({{@index}})">
+                        Add
+                    </button>
                 </div>
                 {{/unless}}
                 {{#if submittable}}
                 <div class="btn-group">
-                    <button class="btn btn-primary" id="add-filter-button" onclick="neon.filter.addFilter({{@index}})">Update</button>
+                    <button class="btn btn-primary" id="add-filter-button" onclick="neon.filter.addFilter({{@index}})">
+                        Update
+                    </button>
                 </div>
                 <div class="btn-group">
-                    <button class="btn btn-danger" id="remove-filter-button" onclick="neon.filter.removeFilter({{@index}})">Remove</button>
+                    <button class="btn btn-danger" id="remove-filter-button"
+                            onclick="neon.filter.removeFilter({{@index}})">Remove
+                    </button>
                 </div>
                 {{/if}}
             </div>
@@ -94,8 +100,6 @@
 
 <div class="container">
     <div id="datastore">
-        <h3>Select a Datastore</h3>
-
         <div class="controls-row">
 
             <div class="control-group">
@@ -129,8 +133,6 @@
     </div>
 
     <div id="db-table">
-        <h3>Select a Database and Table</h3>
-
         <div class="controls controls-row">
 
             <div class="control-group">
@@ -157,24 +159,24 @@
 
                 <div class="controls">
                     <button class="btn" id="database-table-button">Continue</button>
-                    <span class="button-spacing">
-                        <button class="btn btn-danger" id="clear-filters-button">Clear All Filters</button>
-                    </span>
                 </div>
             </div>
         </div>
 
     </div>
 
-    <div id="filter-container">
-        <h3>Add Global Filters</h3>
+    <fieldset id="filter-container">
+        <legend>Filters</legend>
+        <div class="controls controls-row">
+            <button class="btn btn-danger" id="clear-filters-button">Clear All Filters</button>
+        </div>
 
         <div class="controls controls-row">
             <div class="control-group">
                 <label class="group-label">Column Name</label>
             </div>
             <div class="control-group">
-                <label class="group-label">Operator</label>
+                <label class="group-label-small">Operator</label>
             </div>
             <div class="control-group">
                 <label class="group-label">Value</label>
@@ -190,9 +192,9 @@
                 </label>
             </div>
         </div>
-        <div id="filter-content" />
+        <div id="filter-content"/>
 
-    </div>
+    </fieldset>
 
 
 </div>

@@ -29,10 +29,25 @@
     width: 220px;
 }
 
+.group-label-small {
+    width: 90px;
+}
+
 .container {
     padding: 10px;
 }
 
-.button-spacing {
-    padding-left: 30px;
+#clear-filters-button {
+    margin-bottom: 20px;
+}
+
+fieldset {
+    border: 1px solid #DDD;
+    border-radius: 10px;
+    padding: 0 1.4em 1.4em 1.4em;
+    margin: 1.5em 0 1.5em 0;
+}
+
+legend {
+    line-height: 0
 }
