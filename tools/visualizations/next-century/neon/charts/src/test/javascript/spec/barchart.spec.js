@@ -24,9 +24,12 @@
 
 describe('bar chart', function () {
 
+    /** some example key/value data. it will be reset before each test, so tests can modify it as needed */
+    var categoryData;
+    var categoryDataSums;
 
-    it('should aggregate the data values based when the chart categories are strings', function () {
-        var data = [
+    beforeEach(function () {
+        categoryData = [
             {"category": "category0", "count": 2},
             {"category": "category1", "count": 4},
             {"category": "category0", "count": 7},
@@ -34,222 +37,86 @@ describe('bar chart', function () {
             {"category": "category1", "count": 9},
             {"category": "category3", "count": 8}
         ];
-        var opts = { "data": data, "x": "category", "y": "count"};
-        var chart = new charts.BarChart('#chart', opts);
-        var expected = [];
-
-        expected.push({ "key": "category0", "values": 9});
-        expected.push({ "key": "category1", "values": 13});
-        expected.push({ "key": "category2", "values": 1});
-        expected.push({ "key": "category3", "values": 8});
-
-        expect(chart.data_).toBeEqualArray(expected);
+        categoryDataSums = expectedData({"category0": 9, "category1": 13, "category2": 1, "category3": 8});
     });
 
-    it('should aggregate the data values based when the chart categories are numbers', function () {
-        var data = [
-            {"category": 0, "count": 2},
-            {"category": 1, "count": 4},
-            {"category": 0, "count": 7},
-            {"category": 2, "count": 1},
-            {"category": 2.5, "count": 6},
-            {"category": 2.5, "count": 4},
-            {"category": 1, "count": 9},
-            {"category": 3, "count": 8}
-        ];
-        var opts = { "data": data, "x": "category", "y": "count"};
+
+    it('should aggregate the data values based when the chart categories are strings', function () {
+        var opts = { "data": categoryData, "x": "category", "y": "count"};
         var chart = new charts.BarChart('#chart', opts);
-        var expected = [];
-
-        expected.push({ "key": 0, "values": 9});
-        expected.push({ "key": 1, "values": 13});
-        expected.push({ "key": 2, "values": 1});
-        expected.push({ "key": 2.5, "values": 10});
-        expected.push({ "key": 3, "values": 8});
-
-        expect(chart.data_).toBeEqualArray(expected);
+        expect(chart.data_).toBeEqualArray(categoryDataSums);
     });
 
-    it('should aggregate the data values based when the chart categories are booleans', function () {
-        var data = [
-            {"category": true, "count": 2},
-            {"category": false, "count": 4},
-            {"category": false, "count": 7},
-            {"category": true, "count": 1},
-            {"category": true, "count": 9},
-            {"category": false, "count": 8}
-        ];
-        var opts = { "data": data, "x": "category", "y": "count"};
-        var chart = new charts.BarChart('#chart', opts);
-        var expected = [];
-
-        expected.push({ "key": true, "values": 12});
-        expected.push({ "key": false, "values": 19});
-
-        expect(chart.data_).toBeEqualArray(expected);
-    });
-
-    it('should aggregate the data values based when the chart categories are dates', function () {
-        var data = [
-            {"category": new Date(2013, 2, 15), "count": 2},
-            {"category": new Date(2013, 2, 16), "count": 4},
-            {"category": new Date(2013, 2, 15), "count": 7},
-            {"category": new Date(2013, 2, 17), "count": 1},
-            {"category": new Date(2013, 2, 16), "count": 9},
-            {"category": new Date(2013, 2, 18), "count": 8}
-        ];
-        var opts = { "data": data, "x": "category", "y": "count"};
-        var chart = new charts.BarChart('#chart', opts);
-        var expected = [];
-
-        expected.push({ "key": new Date(2013, 2, 15), "values": 9});
-        expected.push({ "key": new Date(2013, 2, 16), "values": 13});
-        expected.push({ "key": new Date(2013, 2, 17), "values": 1});
-        expected.push({ "key": new Date(2013, 2, 18), "values": 8});
-
-        expect(chart.data_).toBeEqualArray(expected);
-    });
 
     it('should ignores data missing the x or y attributes', function () {
-        var data = [
-            {"category": "category0"},
-            {"count": 4},
-            {"category": "category0", "count": 7},
-            {"category": "category2", "count": 1},
-            {"category": "category1", "count": 9},
-            {"category": "category3", "count": 8}
-        ];
-        var opts = { "data": data, "x": "category", "y": "count"};
+        // remove some of the attributes
+        delete categoryData[0].count;
+        delete categoryData[1].category;
+        var opts = { "data": categoryData, "x": "category", "y": "count"};
         var chart = new charts.BarChart('#chart', opts);
         var expected = [];
 
         // data appears in this array in the order it was read in, but when on the chart,
         // the categories are sorted
-        expected.push({ "key": "category0", "values": 7});
-        expected.push({ "key": "category2", "values": 1});
-        expected.push({ "key": "category1", "values": 9});
-        expected.push({ "key": "category3", "values": 8});
-
+        var expected = expectedData({"category0": 7, "category2": 1, "category1": 9, "category3": 8});
         expect(chart.data_).toBeEqualArray(expected);
     });
 
 
     it('should sort the categories when they are dervied from the data', function () {
-        var data = [
-            {"category": "category0"},
-            {"count": 4},
-            {"category": "category0", "count": 7},
-            {"category": "category2", "count": 1},
-            {"category": "category1", "count": 9},
-            {"category": "category3", "count": 8}
-        ];
-        var opts = { "data": data, "x": "category", "y": "count"};
+        // by deleting categoryData[1].category, it causes the categories to be in non ascending order, but
+        // the chart still sorts them
+        delete categoryData[1].category;
+        var opts = { "data": categoryData, "x": "category", "y": "count"};
         var chart = new charts.BarChart('#chart', opts);
         var expected = ["category0", "category1", "category2", "category3"];
-        expect(chart.categories_).toBeEqualArray(expected);
+        expect(chart.categories).toBeEqualArray(expected);
     });
 
 
     it('should be able to take a function to get the category name', function () {
-        var data = [
-            {"category": "category0", "count": 2},
-            {"category": "category1", "count": 4},
-            {"category": "category0", "count": 7},
-            {"category": "category2", "count": 1},
-            {"category": "category1", "count": 9},
-            {"category": "category3", "count": 8}
-        ];
-        var opts = { "data": data, "x": function (item) {
+        var opts = { "data": categoryData, "x": function (item) {
             return item.category;
         }, "y": "count"};
         var chart = new charts.BarChart('#chart', opts);
-        var expected = [];
-
-        expected.push({ "key": "category0", "values": 9});
-        expected.push({ "key": "category1", "values": 13});
-        expected.push({ "key": "category2", "values": 1});
-        expected.push({ "key": "category3", "values": 8});
-
-        expect(chart.data_).toBeEqualArray(expected);
+        expect(chart.data_).toBeEqualArray(categoryDataSums);
     });
 
     it('should allow categories to be explicitly specified', function () {
-        var data = [
-            {"category": "category0", "count": 2},
-            {"category": "category1", "count": 4},
-            {"category": "category0", "count": 7},
-            {"category": "category2", "count": 1},
-            {"category": "category1", "count": 9},
-            {"category": "category3", "count": 8}
-        ];
-
         // add an additional 2 categories with no corresponding data
         var categories = ["category0", "category1", "category2", "category3", "category4", "category5"];
-        var opts = { "data": data, "x": function (item) {
+        var opts = { "data": categoryData, "x": function (item) {
             return item.category;
         }, "y": "count", "categories": categories};
         var chart = new charts.BarChart('#chart', opts);
-        var expected = [];
-
         // the data still should not have the categories, but the x-axis will show them
-        expected.push({ "key": "category0", "values": 9});
-        expected.push({ "key": "category1", "values": 13});
-        expected.push({ "key": "category2", "values": 1});
-        expected.push({ "key": "category3", "values": 8});
-
-        expect(chart.data_).toBeEqualArray(expected);
-        expect(chart.categories_).toBeEqualArray(categories);
-        expect(chart.x_.domain()).toBeEqualArray(categories);
+        expect(chart.data_).toBeEqualArray(categoryDataSums);
+        expect(chart.categories).toBeEqualArray(categories);
+        expect(chart.x.domain()).toBeEqualArray(categories);
     });
 
     it('should allow a function for categories', function () {
-        var data = [
-            {"category": "category0", "count": 2},
-            {"category": "category1", "count": 4},
-            {"category": "category0", "count": 7},
-            {"category": "category2", "count": 1},
-            {"category": "category1", "count": 9},
-            {"category": "category3", "count": 8}
-        ];
-
         var categories = function (data) {
             // leave off category3 intentonally to make sure not all values are being used if not specified in here
             return ["category0", "category1", "category2"];
         };
-        var opts = { "data": data, "x": function (item) {
+        var opts = { "data": categoryData, "x": function (item) {
             return item.category;
         }, "y": "count", "categories": categories};
         var chart = new charts.BarChart('#chart', opts);
-        var expected = [];
-
-        expected.push({ "key": "category0", "values": 9});
-        expected.push({ "key": "category1", "values": 13});
-        expected.push({ "key": "category2", "values": 1});
-
+        var expected = expectedData({"category0": 9, "category1": 13, "category2": 1});
         expect(chart.data_).toBeEqualArray(expected);
     });
 
 
     it('should use the count if there is no y-attribute specified', function () {
-        var data = [
-            {"category": "category0", "count": 2},
-            {"category": "category1", "count": 4},
-            {"category": "category0", "count": 7},
-            {"category": "category0", "count": 3},
-            {"category": "category2", "count": 1},
-            {"category": "category1", "count": 9},
-            {"category": "category3", "count": 8}
-        ];
-        var opts = { "data": data, "x": "category" };
+        // add another category0 value just to give another data point
+        categoryData.push({"category": "category0", "count": 8});
+
+        var opts = { "data": categoryData, "x": "category" };
         var chart = new charts.BarChart('#chart', opts);
 
-        var expected = [];
-
-        expected.push({ "key": "category0", "values": 3});
-        expected.push({ "key": "category1", "values": 2});
-        expected.push({ "key": "category2", "values": 1});
-        expected.push({ "key": "category3", "values": 1});
-
+        var expected = expectedData({"category0": 3, "category1": 2, "category2": 1, "category3": 1});
         expect(chart.data_).toBeEqualArray(expected);
     });
 
@@ -260,25 +127,20 @@ describe('bar chart', function () {
     });
 
     it('should compute the x scale bounds', function () {
-        var data = [
-            {"category": "category1", "count": 2},
-            {"category": "category3", "count": 4},
-            {"category": "category2", "count": 7},
-            {"category": "category5", "count": 1},
-            {"category": "category4", "count": 9},
-            {"category": "category0", "count": 8},
-            {"category": "category4", "count": 3}
-        ];
-        var opts = {  "data": data, "x": "category", "y": "count", "width": 600, "margin": {"left": 0, "right": 0}};
+        // add categories 4 and 5 to make the scale bounds computations simpler
+        categoryData.push({"category": "category5", "count": 1});
+        categoryData.push({"category": "category4", "count": 9});
+
+        var opts = {  "data": categoryData, "x": "category", "y": "count", "width": 600, "margin": {"left": 0, "right": 0}};
         var chart = new charts.BarChart('#chart', opts);
 
         // the x scale values map to the pixels in the width of the chart
-        expect(chart.x_(chart.categories_[0])).toEqual(0);
-        expect(chart.x_(chart.categories_[1])).toEqual(100);
-        expect(chart.x_(chart.categories_[2])).toEqual(200);
-        expect(chart.x_(chart.categories_[3])).toEqual(300);
-        expect(chart.x_(chart.categories_[4])).toEqual(400);
-        expect(chart.x_(chart.categories_[5])).toEqual(500);
+        expect(chart.x(chart.categories[0])).toEqual(0);
+        expect(chart.x(chart.categories[1])).toEqual(100);
+        expect(chart.x(chart.categories[2])).toEqual(200);
+        expect(chart.x(chart.categories[3])).toEqual(300);
+        expect(chart.x(chart.categories[4])).toEqual(400);
+        expect(chart.x(chart.categories[5])).toEqual(500);
     });
 
     it('should compute the y scale bounds', function () {
@@ -292,9 +154,9 @@ describe('bar chart', function () {
 
         // the y scale values map to the pixels in the height of the chart
         // note: the y scale is inverted (but is drawn properly)
-        expect(chart.y_(0)).toEqual(100);
-        expect(chart.y_(5)).toEqual(50);
-        expect(chart.y_(10)).toEqual(0);
+        expect(chart.y(0)).toEqual(100);
+        expect(chart.y(5)).toEqual(50);
+        expect(chart.y(10)).toEqual(0);
     });
 
     it('should allow margins to be overridden', function () {
@@ -311,5 +173,87 @@ describe('bar chart', function () {
         expect(margin.top).not.toEqual(charts.BarChart.DEFAULT_MARGIN_.top);
         expect(margin.left).not.toEqual(charts.BarChart.DEFAULT_MARGIN_.left);
     });
+
+    it('should aggregate the data values based when the chart categories are numbers', function () {
+        var data = [
+            {"category": 0, "count": 2},
+            {"category": 1, "count": 4},
+            {"category": 0, "count": 7},
+            {"category": 2, "count": 1},
+            {"category": 2.5, "count": 6},
+            {"category": 2.5, "count": 4},
+            {"category": 1, "count": 9},
+            {"category": 3, "count": 8}
+        ];
+        var opts = { "data": data, "x": "category", "y": "count"};
+        var chart = new charts.BarChart('#chart', opts);
+        var expected = expectedData({"0": 9, "1": 13, "2": 1, "2.5": 10, "3": 8}).map(function (el) {
+            return {"key": +el.key, "values": el.values};
+        });
+        expect(chart.data_).toBeEqualArray(expected);
+    });
+
+    it('should aggregate the data values based when the chart categories are booleans', function () {
+        var data = [
+            {"category": true, "count": 2},
+            {"category": false, "count": 4},
+            {"category": false, "count": 7},
+            {"category": true, "count": 1},
+            {"category": true, "count": 9},
+            {"category": false, "count": 8}
+        ];
+        var opts = { "data": data, "x": "category", "y": "count"};
+        var chart = new charts.BarChart('#chart', opts);
+        var expected = expectedData({ "true": 12, "false": 19}).map(function (el) {
+            return {"key": el.key === "true", "values": el.values};
+        });
+        expect(chart.data_).toBeEqualArray(expected);
+    });
+
+    it('should aggregate the data values based when the chart categories are dates', function () {
+        var data = [
+            {"category": new Date(2013, 2, 15), "count": 2},
+            {"category": new Date(2013, 2, 16), "count": 4},
+            {"category": new Date(2013, 2, 15), "count": 7},
+            {"category": new Date(2013, 2, 17), "count": 1},
+            {"category": new Date(2013, 2, 16), "count": 9},
+            {"category": new Date(2013, 2, 18), "count": 8}
+        ];
+        var opts = { "data": data, "x": "category", "y": "count"};
+        var chart = new charts.BarChart('#chart', opts);
+        // the javascript engine used by jasmine doesn't seem to be able to parse '2013-2-15' so use a date string it can read
+        var expected = expectedData({"Mar 15, 2013": 9, "Mar 16, 2013": 13, "Mar 17, 2013": 1, "Mar 18, 2013": 8}).map(function (el) {
+            return {"key": new Date(el.key), "values": el.values};
+        });
+        expect(chart.data_).toBeEqualArray(expected);
+    });
+
+
+    /**
+     * Takes an object whose key value pairs represent the expected output and transforms it into an array of
+     * data in the format returned by the chart
+     * @param {Object} keyValuePairs
+     * @return {Array}
+     * @method
+     */
+    function expectedData(keyValuePairs) {
+        var expected = [];
+        for (var key in keyValuePairs) {
+            expected.push({"key": key, "values": keyValuePairs[key]});
+        }
+        return expected;
+    }
+
+    /**
+     * Creates a set of data where the odd values are the "category" values and the even values are
+     * the "values"
+     * @param alternatingKeyValues
+     */
+    function createCategoryData(alternatingKeyValues) {
+        var data = [];
+        for (var i = 0; i < alternatingKeyValues.length; i += 2) {
+            data.push({"category": alternatingKeyValues[i], "count": alternatingKeyValues[i + 1]});
+        }
+    }
 
 });

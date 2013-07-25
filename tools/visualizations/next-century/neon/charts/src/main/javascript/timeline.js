@@ -213,12 +213,12 @@ charts.Timeline.prototype.createSlider_ = function () {
     $('#' + charts.Timeline.SLIDER_DIV_NAME_).slider({
         range: true,
         min: 0,
-        max: this.plotWidth_,
-        step: this.x_.rangeBand(),
-        values: [ 0, this.plotWidth_ ],
+        max: this.plotWidth,
+        step: this.x.rangeBand(),
+        values: [ 0, this.plotWidth ],
         change: $.proxy(charts.Timeline.prototype.doSliderChange_, me)
     });
-    $('#' + charts.Timeline.SLIDER_DIV_NAME_).width(me.plotWidth_).css({
+    $('#' + charts.Timeline.SLIDER_DIV_NAME_).width(me.plotWidth).css({
         'margin-left': me.margin.left + 'px',
         'margin-right': me.margin.right + 'px'
     });
@@ -258,11 +258,11 @@ charts.Timeline.prototype.notifyFilterListeners_ = function (filterStartDate, fi
 
 
 charts.Timeline.prototype.getDate_ = function (pixelValue) {
-    if (pixelValue === this.plotWidth_) {
+    if (pixelValue === this.plotWidth) {
         return this.maxDate_;
     }
-    var index = pixelValue / this.x_.rangeBand();
-    return this.categories_[index];
+    var index = pixelValue / this.x.rangeBand();
+    return this.categories[index];
 };
 
 charts.Timeline.prototype.timePeriodStart_ = function (date) {

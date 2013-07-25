@@ -83,7 +83,7 @@ describe('timeline', function () {
         ];
         var opts = {  "data": data, "x": "date", "y": "count", "interval": charts.Timeline.MONTH};
         var timeline = new charts.Timeline('#chart', opts);
-        var timePeriods = timeline.categories_;
+        var timePeriods = timeline.categories;
 
         // the first time period uses the true date
         var expected = [

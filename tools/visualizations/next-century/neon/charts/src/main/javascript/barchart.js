@@ -102,15 +102,15 @@ charts.BarChart = function (chartSelector, opts) {
     // tick formatting/values may be undefined in which case d3's default will be used
     this.tickFormat_ = opts.tickFormat;
     this.tickValues_ = this.computeTickValues_(opts.tickValues);
-    this.categories_ = this.createCategories_(opts.categories ? opts.categories : this.createCategoriesFromUniqueValues_, opts.data);
+    this.categories = this.createCategories_(opts.categories ? opts.categories : this.createCategoriesFromUniqueValues_, opts.data);
     this.data_ = this.aggregateData_(opts.data);
 
-    this.x_ = this.createXScale_();
+    this.x = this.createXScale_();
     // set the width to be as close to the user specified size (but not larger) so the bars divide evenly into
     // the plot area
-    this.plotWidth_ = this.computePlotWidth_();
-    this.x_.rangeRoundBands([0, this.plotWidth_]);
-    this.y_ = this.createYScale_();
+    this.plotWidth = this.computePlotWidth_();
+    this.x.rangeRoundBands([0, this.plotWidth]);
+    this.y = this.createYScale_();
     this.xAxis_ = this.createXAxis_();
     this.yAxis_ = this.createYAxis_();
     this.style_ = $.extend({}, charts.BarChart.DEFAULT_STYLE_, opts.style);
@@ -221,7 +221,7 @@ charts.BarChart.compareValues_ = function (a, b) {
 
 charts.BarChart.prototype.createXScale_ = function () {
     return d3.scale.ordinal()
-        .domain(this.categories_)
+        .domain(this.categories)
         .rangeRoundBands([0, this.width - this.hMargin_]);
 };
 
@@ -240,15 +240,15 @@ charts.BarChart.prototype.createYScale_ = function () {
 };
 
 charts.BarChart.prototype.computePlotWidth_ = function () {
-    if (this.categories_.length > 0) {
-        return this.x_.rangeBand() * this.categories_.length;
+    if (this.categories.length > 0) {
+        return this.x.rangeBand() * this.categories.length;
     }
     return this.width;
 };
 
 charts.BarChart.prototype.createXAxis_ = function () {
     var xAxis = d3.svg.axis()
-        .scale(this.x_)
+        .scale(this.x)
         .orient('bottom');
 
     if (this.tickFormat_) {
@@ -262,10 +262,10 @@ charts.BarChart.prototype.createXAxis_ = function () {
 
 charts.BarChart.prototype.createYAxis_ = function () {
     return d3.svg.axis()
-        .scale(this.y_)
+        .scale(this.y)
         .orient('left')
         .tickFormat(charts.BarChart.createYAxisTickFormat_())
-        .tickValues(this.y_.domain());
+        .tickValues(this.y.domain());
 };
 
 charts.BarChart.createYAxisTickFormat_ = function () {
@@ -291,7 +291,7 @@ charts.BarChart.prototype.drawChartSVG_ = function () {
     var chart = d3.select(this.chartSelector_)
         .append('svg')
         .attr('id', 'plot')
-        .attr('width', this.plotWidth_ + this.hMargin_)
+        .attr('width', this.plotWidth + this.hMargin_)
         .attr('height', this.height)
         .append('g')
         .attr('transform', 'translate(' + this.margin.left + ',' + this.margin.top + ')');
@@ -305,14 +305,14 @@ charts.BarChart.prototype.bindData_ = function (chart) {
         .enter().append(charts.BarChart.SVG_ELEMENT_)
         .attr('class', charts.BarChart.BAR_CLASS_ + ' ' + charts.BarChart.ACTIVE_BAR_CLASS_)
         .attr('x', function (d) {
-            return me.x_(d.key);
+            return me.x(d.key);
         })
         .attr('y', function (d) {
-            return me.y_(d.values);
+            return me.y(d.values);
         })
-        .attr('width', this.x_.rangeBand())
+        .attr('width', this.x.rangeBand())
         .attr('height', function (d) {
-            return me.height - me.vMargin_ - me.y_(d.values);
+            return me.height - me.vMargin_ - me.y(d.values);
         })
         // using the same color for the border of the bars as the svg background gives separation for adjacent bars
         .attr('stroke', $('#plot').css('background-color'))
@@ -379,7 +379,7 @@ charts.BarChart.prototype.setInactive = function (predicate) {
 };
 
 charts.BarChart.prototype.showTooltip_ = function (item) {
-    var periodStartPixels = this.x_(item.key);
+    var periodStartPixels = this.x(item.key);
     var tooltip = this.createTooltip_(item);
     // initially hidden because it will fade in
     tooltip.hide();
@@ -406,8 +406,8 @@ charts.BarChart.prototype.createTooltip_ = function (item) {
 };
 
 charts.BarChart.prototype.centerTooltip_ = function (tooltip, data, periodStartPixels) {
-    var centerPointX = periodStartPixels + this.x_.rangeBand() / 2;
-    var centerPointY = this.y_(data.values);
+    var centerPointX = periodStartPixels + this.x.rangeBand() / 2;
+    var centerPointY = this.y(data.values);
     // center the tooltip on the selected bar
     tooltip.css({
         'margin-left': this.margin.left + $(this.chartSelector_).position().left + 'px',
@@ -566,7 +566,7 @@ charts.BarChart.prototype.removeDataWithNoMatchingCategory_ = function (aggregat
     return _.reject(aggregatedData, function (item) {
         var key = item.key;
 
-        return _.isUndefined(_.find(me.categories_, function (category) {
+        return _.isUndefined(_.find(me.categories, function (category) {
             // dates won't compare with === since they are different object, so compare using the time values
             if (key instanceof Date && category instanceof Date) {
                 return category.getTime() === key.getTime();
