@@ -1,4 +1,7 @@
 package com.ncc.neon.query.clauses
+
+import groovy.transform.ToString
+
 /*
  * ************************************************************************
  * Copyright (c), 2013 Next Century Corporation. All Rights Reserved.
@@ -21,6 +24,7 @@ package com.ncc.neon.query.clauses
  * OF NEXT CENTURY CORPORATION EXCEPT BY PRIOR WRITTEN PERMISSION AND WHEN
  * RECIPIENT IS UNDER OBLIGATION TO MAINTAIN SECRECY.
  */
+@ToString(includeSuper = true, includeNames = true)
 class AggregateClause extends FieldFunction {
 
     // this class does not have additional functionality from its parent class, but
