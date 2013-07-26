@@ -39,6 +39,8 @@ describe('query mapping', function () {
     var allData;
 
     var dcStateFilter = baseFilter().where('state', '=', 'DC');
+    jasmine.getJSONFixtures().fixturesPath = 'src/test-data';
+
 
     /** the result of any asynchronously executed function. this is reset after each test */
     var currentResult;
@@ -98,9 +100,6 @@ describe('query mapping', function () {
         var query = baseQuery().groupBy(groupByMonthClause).aggregate(neon.query.SUM, 'salary', 'salary_sum').sortBy('hire_month', neon.query.ASCENDING).withFields('hire_month');
         assertQueryResults(query, expectedData);
     });
-
-
-
 
     it('query WHERE', function () {
         var whereStateClause = or(where('state', '=', 'VA'), where('state', '=', 'DC'));

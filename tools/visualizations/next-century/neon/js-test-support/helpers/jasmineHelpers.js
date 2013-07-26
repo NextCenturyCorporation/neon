@@ -21,13 +21,17 @@
  * RECIPIENT IS UNDER OBLIGATION TO MAINTAIN SECRECY.
  */
 
+var neontest = neontest || {};
+neontest.matchers = {};
+neontest.matchers.matcher = new jasmine.Matchers();
+
 /**
  * Checks if the expected array is equal to the actual array. This comparison
  * uses a deeper equality check (checks actual keys and values).
  * @param expectedArray
  * @returns {boolean}
  */
-jasmine.Matchers.prototype.toBeEqualArray = function (expectedArray) {
+neontest.matchers.toBeEqualArray = function (expectedArray) {
 
     var err = '';
 
@@ -35,25 +39,25 @@ jasmine.Matchers.prototype.toBeEqualArray = function (expectedArray) {
         return err;
     };
 
-    if ( !(this.actual instanceof Array)  ) {
+
+    if (!(this.actual instanceof Array)) {
         err = 'Actual value not an array, received a ' + this.actual.constructor.name + ' instead';
         return false;
     }
 
-    if ( !(expectedArray instanceof Array)  ) {
+    if (!(expectedArray instanceof Array)) {
         err = 'Test configuration error. Expected value not an array, received a ' + expectedArray.constructor.name + ' instead';
         return false;
     }
 
-    if ( expectedArray.length !== this.actual.length ) {
+    if (expectedArray.length !== this.actual.length) {
         err = 'Expected array of length ' + expectedArray.length + ', but was ' + this.actual.length;
         return false;
     }
 
-
     var matchError = false;
     this.actual.forEach(function (element, index, actual) {
-        if ( !jasmine.getEnv().equals_(actual[index],expectedArray[index])) {
+        if (!lodash.isEqual(actual[index], expectedArray[index])) {
             if (err) {
                 err += '\r\n';
             }
@@ -61,7 +65,8 @@ jasmine.Matchers.prototype.toBeEqualArray = function (expectedArray) {
             matchError = true;
         }
     });
-    if ( matchError ) {
+
+    if (matchError) {
         return false;
     }
 
@@ -69,10 +74,10 @@ jasmine.Matchers.prototype.toBeEqualArray = function (expectedArray) {
     return true;
 };
 
-jasmine.Matchers.prototype.toBeInstanceOf = function(expectedType) {
+neontest.matchers.toBeInstanceOf = function (expectedType) {
 
     var actual = this.actual;
-    this.message = function() {
+    this.message = function () {
         // constructor.name is not defined in all browsers
         var typeName = (Function.prototype.name !== undefined) ? actual.constructor.name : actual.constructor;
         return 'expected ' + actual + ' to be of type ' + expectedType + ', but was ' + typeName;
@@ -89,17 +94,28 @@ jasmine.Matchers.prototype.toBeInstanceOf = function(expectedType) {
  * @methods
  * @returns {boolean}
  */
-jasmine.Matchers.prototype.toBeArrayWithSameElements = function(expectedArray)  {
+neontest.matchers.toBeArrayWithSameElements = function (expectedArray) {
 
     var actual = this.actual;
-    this.message = function() {
+    this.message = function () {
         return 'expected: ' + expectedArray + ', actual: ' + actual;
     };
 
     return expectedArray.length == actual.length && lodash.difference(expectedArray, actual).length == 0;
 };
 
-jasmine.Spy.prototype.wasInvoked = function() {
+jasmine.Spy.prototype.wasInvoked = function () {
     return this.callCount > 0;
 };
 
+// this adds the matchers globally for all tests
+beforeEach(function () {
+
+    var matchers = {
+        toBeEqualArray: neontest.matchers.toBeEqualArray,
+        toBeInstanceOf: neontest.matchers.toBeInstanceOf,
+        toBeArrayWithSameElements: neontest.matchers.toBeArrayWithSameElements
+    };
+
+    this.addMatchers(matchers);
+});

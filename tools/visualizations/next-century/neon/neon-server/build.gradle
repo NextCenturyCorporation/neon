@@ -2,11 +2,10 @@ import com.mongodb.BasicDBObject
 import com.mongodb.MongoClient
 import com.mongodb.util.JSON
 import com.ncc.neon.MongoJSONGenerator
+import com.ncc.common.GruntTask
 import org.apache.tools.ant.filters.ReplaceTokens
 
-apply plugin: 'groovy'
-apply plugin: 'codenarc'
-apply plugin: 'jdepend'
+apply from: 'gradle/groovy.gradle'
 
 archivesBaseName = 'neon'
 sourceCompatibility = 1.7
@@ -33,53 +32,12 @@ repositories {
     }
 }
 
-// properties defined in here are available in tasks and helper methods as
-// properties of the project
 project.ext {
-    jsSrcDir = "src/main/javascript"
-    jsUnitTestDir = "src/test/javascript"
-    jsAcceptanceTestDir = "src/acceptanceTest/javascript"
     testDataDir = "${projectDir}/src/test-data"
     javadocTitle = "$libraryName API Documentation"
 
     // a mongo instance for inserting/deleting test data (will be lazy initialized)
     mongoInstance = null
-
-    // additional includes included in the jasmine test spec
-    mockIncludes = '''
-<script src="../../js-test-support/mockNamespaces.js"></script>
-<script src="../../js-test-support/ajaxMockUtils.js"></script>
-<script src="../../js-test-support/owfEventingMock.js"></script>
-'''
-
-}
-
-
-javascript.source {
-    dev {
-        js {
-            srcDir jsSrcDir
-            include "**/*.js"
-            // the excluded files are added individually since their ordering matters relative to other files
-            exclude 'intro.js'
-            exclude 'outro.js'
-            exclude 'util/loggerUtils.js'
-        }
-    }
-    test {
-        js {
-            srcDir jsUnitTestDir
-            srcDir jsAcceptanceTestDir
-            include "**/*.js"
-        }
-    }
-    lib {
-        js {
-            srcDir 'src/main/js-lib'
-            include "**/*.js"
-        }
-    }
-
 }
 
 sourceSets {
@@ -90,7 +48,6 @@ sourceSets {
             srcDir 'src/test-data'
         }
     }
-
     acceptanceTest
 }
 
@@ -100,12 +57,9 @@ configurations {
 
     acceptanceTestCompile { extendsFrom testCompile }
     acceptanceTestRuntime { extendsFrom testCompile, testRuntime }
-
 }
 
 dependencies {
-    groovy 'org.codehaus.groovy:groovy-all:2.0.5'
-
     compile 'com.sun.jersey:jersey-servlet:1.15'
     compile 'com.sun.jersey:jersey-core:1.15'
     compile 'com.sun.jersey:jersey-client:1.15'
@@ -120,17 +74,17 @@ dependencies {
     compile "ch.qos.logback:logback-classic:$logbackVersion"
     compile "com.google.guava:guava:14.0.1"
     compile 'org.antlr:antlr4-runtime:4.0'
-    compile ('org.codehaus.groovy.modules.http-builder:http-builder:0.6') {
+    compile('org.codehaus.groovy.modules.http-builder:http-builder:0.6') {
         // we already include groovy-all - this prevents bringing groovy in twice
         exclude module: 'groovy'
     }
     compile 'commons-lang:commons-lang:2.6'
     compile 'org.json:json:20090211'
-    compile ('org.apache.hive:hive-jdbc:0.10.0-cdh4.2.1'){
+    compile('org.apache.hive:hive-jdbc:0.10.0-cdh4.2.1') {
         exclude module: 'servlet-api'
         exclude module: 'slf4j-log4j12'
     }
-    compile ('org.apache.hadoop:hadoop-core:2.0.0-mr1-cdh4.2.1'){
+    compile('org.apache.hadoop:hadoop-core:2.0.0-mr1-cdh4.2.1') {
         exclude module: 'servlet-api'
         exclude module: 'jsp-api'
         exclude module: 'jasper-runtime'
@@ -148,53 +102,15 @@ dependencies {
 
     integrationTestCompile files(sourceSets.main.output.classesDir)
     integrationTestCompile files(sourceSets.test.output.classesDir)
-
-
-    codenarc "org.codenarc:CodeNarc:0.18.1"
-}
-
-// configure codenarc for each of the source sets
-sourceSets.each { sourceSet ->
-    def name = sourceSet.name
-    // this set should only have one element for each source set
-    def codenarcTasks = project.getTasksByName("codenarc${name.capitalize()}", false)
-    codenarcTasks.each { task ->
-        task.reports.xml.enabled = true
-        task.reports.html.enabled = true
-    }
-}
-
-jdepend {
-    sourceSets = [sourceSets.main]
-}
-
-jdependMain.doLast {
-    File file = new File(jdepend.reportsDir, "main.xml");
-    def cycleCount = new XmlSlurper().parse(file).Cycles.Package.size()
-    if (cycleCount > 0) {
-        throw new GradleException("Package cycles exist. See JDepend report at ${file}")
-    }
 }
 
 war {
-    dependsOn 'jshint', 'combineJs', 'check'
+    dependsOn 'check', 'gruntjs'
 
-    // add flags for the javascript and mongo integration tests since they require external software to be
-    // installed (nodejs/phantomjs, mongo). turning these off by default makes it easy for people to build the war
-    // even if they don't have them installed
-    if (isRunJavascriptTests()) {
-        dependsOn 'jsPhantomUnitTest'
-    }
-    if (isRunIntegrationTests()) {
-        dependsOn 'integrationTests'
-    }
-
-    from("${buildDir}/${archivesBaseName}.js") {
+    from(jsOutputFile) {
         into 'js'
     }
 
-    // strip out the version from the war
-    version ""
 }
 
 test {
@@ -204,16 +120,8 @@ test {
 }
 
 
-def isRunJavascriptTests() {
-    return hasProperty('jsUnitTest')
-}
-
-def isRunIntegrationTests() {
-    return hasProperty('integrationTest')
-}
-
 task integrationTests(type: Test) {
-    dependsOn 'integrationTestClasses', 'generateMongoJson'
+    dependsOn 'assemble', 'integrationTestClasses', 'generateMongoJson'
 
     testClassesDir = sourceSets.integrationTest.output.classesDir
     classpath = sourceSets.integrationTest.runtimeClasspath
@@ -226,7 +134,6 @@ task integrationTests(type: Test) {
 
     props['integration.test'] = true
     systemProperties props
-
 }
 
 task transformTestWebService(type: org.gradle.api.plugins.jetty.JettyRun) {
@@ -260,30 +167,21 @@ def getMongoHosts() {
     return project.hasProperty("mongo.hosts") ? getProperty("mongo.hosts") : "localhost"
 }
 
-task jsPhantomUnitTest(type: Exec) {
-    dependsOn 'createJasmineUnitSpecRunnerHtml'
+task acceptanceTest(type: GruntTask) {
+    dependsOn 'assemble', 'acceptanceTestWar', 'generateMongoJson', 'transformTestWebService'
     group = TEST_GROUP
-    description = 'Runs the Jasmine unit test suite using phantomjs (requires phantomjs to be installed and on path)'
-    commandLine "phantomjs", phantomJsRunner, "${projectDir}/${jsUnitTestDir}/spec_runner_unit.html"
-}
+    gruntArgs "jasmine:acceptance", "--outfile=${jsOutputFile}"
 
-
-task jsPhantomAcceptanceTest(type: Exec) {
-    dependsOn 'createJasmineAcceptanceSpecRunnerHtml', 'acceptanceTestWar', 'generateMongoJson', 'transformTestWebService'
-    group = TEST_GROUP
-    description = 'Runs the Jasmine acceptance test suite using phantomjs (requires phantomjs to be installed and on path)'
-    // disable websecurity so we can make the ajax calls to the neon server
     doFirst {
         // just in case any data got left around in the event that a cleanup failed, delete the data before inserting it
         deleteAcceptanceTestData()
         insertAcceptanceTestData()
     }
-    commandLine "phantomjs", "--web-security=no", phantomJsRunner, "${projectDir}/${jsAcceptanceTestDir}/spec_runner_acceptance.html"
 }
 
 
 gradle.taskGraph.afterTask { task ->
-    if (task == jsPhantomAcceptanceTest) {
+    if (task == acceptanceTest) {
         deleteAcceptanceTestData()
     }
 }
@@ -291,7 +189,6 @@ gradle.taskGraph.afterTask { task ->
 task generateMongoJson {
     MongoJSONGenerator.generateMongoJson(testDataDir, "${testDataDir}/mongo-json")
 }
-
 
 def insertAcceptanceTestData() {
     def db = getMongo().getDB("acceptanceTest")
@@ -311,56 +208,4 @@ def getMongo() {
         mongoInstance = new MongoClient(getMongoHosts())
     }
     return mongoInstance
-}
-
-task createJasmineUnitSpecRunnerHtml << {
-    description = 'Creates the jasmine spec runner html file for javascript unit tests'
-    group = TEST_GROUP
-    doCreateJasmineSpec(projectDir, jsUnitTestDir, 'unit', '../../../build/neon.js',mockIncludes)
-}
-
-task createJasmineAcceptanceSpecRunnerHtml << {
-    description = 'Creates the jasmine spec runner html file for javascript acceptance tests'
-    group = TEST_GROUP
-    doCreateJasmineSpec(projectDir, jsAcceptanceTestDir, 'acceptance', "http://localhost:${acceptanceTestWar.httpPort}/neon/js/neon.js",mockIncludes)
-}
-
-combineJs {
-    source = javascript.source.lib.js.files +
-            file("${jsSrcDir}/intro.js") +
-            file("${jsSrcDir}/util/loggerUtils.js") +
-            javascript.source.dev.js.files +
-            file("${jsSrcDir}/outro.js")
-    dest = file("${buildDir}/${archivesBaseName}.js")
-}
-
-minifyJs {
-    source = combineJs
-    dest = file("${buildDir}/${archivesBaseName}-min.js")
-    closure {
-        warningLevel = 'QUIET'
-    }
-}
-
-jshint {
-    source = javascript.source.dev.js.files + file("${jsSrcDir}/util/loggerUtils.js") + javascript.source.test.js.files
-}
-
-groovydoc {
-    destinationDir = file(javadocDir)
-    docTitle = javadocTitle
-    windowTitle = javadocTitle
-}
-
-task copyJavadocs(type: org.gradle.api.tasks.Copy) {
-    description = 'Copies the javadocs to a directory to be zipped'
-    dependsOn 'groovydoc'
-    doCopyDocsIntoZipDir('javadocs', libraryName, copyJavadocs, javadocDir)
-}
-
-task zipJavadocs(type: Zip) {
-    description = 'Creates a zip file containing the javadocs'
-    group = JavaBasePlugin.DOCUMENTATION_GROUP
-    dependsOn 'copyJavadocs'
-    doZipDocs(copyJavadocs, zipJavadocs, project.buildDir)
 }

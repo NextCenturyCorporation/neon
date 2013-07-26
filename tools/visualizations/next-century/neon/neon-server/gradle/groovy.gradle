@@ -1,0 +1,36 @@
+// configures a basic project with groovy support and common plugins used by a groovy project
+import static com.ncc.common.DocUtils.*
+
+apply plugin: 'groovy'
+
+apply from: 'gradle/codenarc.gradle'
+apply from: 'gradle/jdepend.gradle'
+apply from: "${rootDir}/gradle/docs.gradle"
+
+project.ext {
+    javadocDir = "${project.docsDir}/javadocs"
+    javadocTitle = "${libraryName} Javadocs"
+}
+
+dependencies {
+    groovy 'org.codehaus.groovy:groovy-all:2.1.4'
+}
+
+groovydoc {
+    destinationDir = file(javadocDir)
+    docTitle = javadocTitle
+    windowTitle = javadocTitle
+}
+
+task copyJavadocs(type: org.gradle.api.tasks.Copy) {
+    description = 'Copies the javadocs to a directory to be zipped'
+    dependsOn 'groovydoc'
+    doCopyDocsIntoZipDir('javadocs', libraryName, copyJavadocs, javadocDir)
+}
+
+task zipJavadocs(type: Zip) {
+    description = 'Creates a zip file containing the javadocs'
+    group = JavaBasePlugin.DOCUMENTATION_GROUP
+    dependsOn 'copyJavadocs'
+    doZipDocs(copyJavadocs, zipJavadocs, project.buildDir)
+}

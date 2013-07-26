@@ -20,8 +20,8 @@
  * OF NEXT CENTURY CORPORATION EXCEPT BY PRIOR WRITTEN PERMISSION AND WHEN
  * RECIPIENT IS UNDER OBLIGATION TO MAINTAIN SECRECY.
  */
-(function() {
-    window.neon = window.neon || {};
-    neon.eventing = neon.eventing || {};
-    neon.query = neon.query || {};
-    neon.util = neon.util || {};
+
+var neon = neon || {};
+neon.eventing = neon.eventing || {};
+neon.query = neon.query || {};
+neon.util = neon.util || {};

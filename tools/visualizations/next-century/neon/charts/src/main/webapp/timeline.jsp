@@ -17,7 +17,16 @@
     <script src="<%=owfServerUrl%>/js/owf-widget.js"></script>
     <script src="<%=neonServerUrl%>/js/neon.js"></script>
 
-    <script src="js/charts.js"></script>
+    <!-- build:js js/charts.js -->
+    <script src="d3/d3.v3.min.js"></script>
+    <script src="jquery/jquery-1.10.1.min.js"></script>
+    <script src="jqueryui/jquery-ui-1.10.3.custom.min.js"></script>
+    <script src="lodash/1.3.1/lodash.min.js"></script>
+    <script src="namespaces.js"></script>
+    <script src="barchart.js"></script>
+    <script src="timeline.js"></script>
+    <!-- endbuild -->
+
     <script src="js/chartwidget.js"></script>
     <script src="js/timelinewidget.js"></script>
 

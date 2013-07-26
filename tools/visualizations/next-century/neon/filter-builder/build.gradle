@@ -1,48 +1,9 @@
-apply {
-    plugin 'jetty'
-}
-
-// TODO: NEON-168 (too much code in build.gradle) and INF-28 (javascript dependencies abstraction) should result in most of this being abstracted out of this specific project
-
-project.ext {
-
-    // which other javascript projects this is dependent on
-    jsDependencies = ['tables']
-
-    // where javascript/css dependencies from other projects are copied
-    jsDependenciesDir = "${buildDir}/jsdependencies"
-    jsDependenciesOutputDir = file("${jsDependenciesDir}/js")
-    cssDependenciesOutputDir = file("${jsDependenciesDir}/css")
-}
-
-
-
-jsDependencies.each { dep ->
-    def copyJsTaskName = "copy${dep}JsDependencies"
-    task "${copyJsTaskName}"(type: Copy) {
-        dependsOn ":${dep}:war"
-        from(project(":${dep}").buildDir) {
-            include '*.js'
-        }
-        into jsDependenciesOutputDir
-    }
-
-    def copyCssTaskName = "copy${dep}CssDependencies"
-    task "${copyCssTaskName}"(type: Copy) {
-        dependsOn ":${dep}:war"
-        from("${project(":${dep}").webAppDir}/css") {
-            include '**/*'
-        }
-        into cssDependenciesOutputDir
-    }
-
-    processResources.dependsOn copyJsTaskName
-    processResources.dependsOn copyCssTaskName
-
-}
+archivesBaseName = 'filter-builder'
 
 war {
-    from(jsDependenciesDir) {
-        into '/'
+    dependsOn 'gruntjs'
+
+    from(jsOutputFile) {
+        into 'js'
     }
 }

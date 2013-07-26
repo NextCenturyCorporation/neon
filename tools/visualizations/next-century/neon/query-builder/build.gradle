@@ -1,0 +1,23 @@
+import static com.ncc.common.JSDependencyCopy.*
+
+archivesBaseName = 'query-builder'
+
+
+task copyJsDependencies {
+    copyDependencies(project, ['tables'])
+}
+
+project.processResources.dependsOn 'copyJsDependencies'
+
+war {
+    dependsOn 'gruntjs'
+
+    from(jsOutputFile) {
+        into 'js'
+    }
+
+    from(jsDependenciesDir) {
+        into '/'
+    }
+
+}

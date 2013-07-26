@@ -1,62 +1,7 @@
 archivesBaseName = 'charts'
 
-project.ext {
-    jsSrcDir = 'src/main/javascript'
-    combinedJsFileName = "${archivesBaseName}.js"
-    jsOutputFile = "${buildDir}/${combinedJsFileName}"
-    jsUnitTestDir = 'src/test/javascript'
-}
-
-javascript.source {
-    // the files need to be included in certain orders, so break them up
-    barchart {
-        js {
-            srcDir jsSrcDir
-            include 'barchart.js'
-        }
-    }
-    timeline {
-        js {
-            srcDir jsSrcDir
-            include 'timeline.js'
-        }
-    }
-    lib1 {
-        js {
-            srcDir 'src/main/js-lib'
-            include 'd3/**/*.js'
-            include 'jquery/**/*.js'
-            include 'lodash/**/*.js'
-        }
-    }
-    lib2 {
-        js {
-            srcDir 'src/main/js-lib'
-            include 'jqueryui/**/*.js'
-        }
-    }
-}
-
-combineJs {
-    source = javascript.source.lib1.js.files + javascript.source.lib2.js.files + file("${jsSrcDir}/namespaces.js") + javascript.source.barchart.js.files + javascript.source.timeline.js.files
-    dest = file(jsOutputFile)
-}
-
-
-
-jshint {
-    source = javascript.source.timeline.js.files + javascript.source.barchart.js.files
-}
-
 war {
-    dependsOn 'jshint', 'combineJs'
-
-    // add flags for the javascript tests since they require external software to be
-    // installed (nodejs/phantomjs). turning these off by default makes it easy for people to build the war
-    // even if they don't have them installed
-    if (isRunJavascriptTests()) {
-        dependsOn 'jsPhantomUnitTest'
-    }
+    dependsOn 'gruntjs'
 
     from(jsOutputFile) {
         into 'js'
@@ -67,31 +12,4 @@ war {
         include 'chartwidget.js'
         into 'js'
     }
-}
-
-// if you want to use jettyrun for testing, this allows you to just include the individual js files and not the
-// concatenated one
-jettyRun.doFirst {
-    jettyRun.webAppConfig = new org.gradle.api.plugins.jetty.internal.JettyPluginWebAppContext()
-    jettyRun.webAppConfig.baseResource = org.gradle.api.plugins.jetty.internal.JettyPluginWebAppContext.class.classLoader.loadClass("org.mortbay.resource.ResourceCollection").newInstance(
-            [
-                    "${file(webAppDirName)}",
-                    "${projectDir}/src/main/javascript",
-                    "${projectDir}/src/main/js-lib"
-            ] as String[])
-}
-
-task jsPhantomUnitTest(type: Exec) {
-    dependsOn 'createJasmineUnitSpecRunnerHtml'
-    description = 'Runs the Jasmine unit test suite using phantomjs (requires phantomjs to be installed and on path)'
-    commandLine "phantomjs", phantomJsRunner, "${projectDir}/${jsUnitTestDir}/spec_runner_unit.html"
-}
-
-task createJasmineUnitSpecRunnerHtml << {
-    description = 'Creates the jasmine spec runner html file for javascript unit tests'
-    doCreateJasmineSpec(projectDir, jsUnitTestDir, 'unit', "../../../build/${combinedJsFileName}")
-}
-
-def isRunJavascriptTests() {
-    return hasProperty('jsUnitTest')
 }

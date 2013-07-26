@@ -1,0 +1,3 @@
+project.ext {
+    libraryName = "${project.name}-${project.version}"
+}

@@ -16,8 +16,23 @@
 
     <script src="<%=owfServerUrl%>/js/owf-widget.js"></script>
     <script src="<%=neonServerUrl%>/js/neon.js"></script>
-    <script src="js/tables.js"></script>
-    <script src="js/tablewidget.js"></script>
+
+    <!-- build:js js/tables.js -->
+    <script src="jquery/jquery-1.7.min.js"></script>
+    <script src="jquery/jquery.event.drag-2.2.js"></script>
+    <script src="jquery/jquery-ui-1.8.16.custom.min.js"></script>
+    <script src="slickgrid/slick.core.js"></script>
+    <script src="slickgrid/slick.grid.js"></script>
+    <script src="slickgrid/slick.dataview.js"></script>
+    <script src="mergesort/merge-sort.js"></script>
+    <script src="slickgrid/plugins/slick.autotooltips.js"></script>
+    <script src="bootstrap/bootstrap.min.js"></script>
+    <script src="table.js"></script>
+    <!-- endbuild -->
+
+    <!-- build:js js/tablewidget.js -->
+    <script src="tablewidget.js"></script>
+    <!-- endbuild -->
 
     <script>
         OWF.relayFile = 'js/eventing/rpc_relay.uncompressed.html';

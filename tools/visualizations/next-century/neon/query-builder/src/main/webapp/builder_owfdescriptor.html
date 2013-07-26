@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html>
+<head>
+
+    <script>
+        widgetData = {
+            "universalName":"neon.querybuilder",
+            "displayName":"Query Builder Widget",
+            "description": "Allows free text queries",
+            "widgetVersion":"1.0.0",
+            "widgetUrl":"https://localhost:9443/query-builder/builder.jsp",
+            "imageUrlSmall":"https://localhost:9443/query-builder/img/datastore.png",
+            "imageUrlLarge":"https://localhost:9443/query-builder/img/datastore.png",
+            "width":800,
+            "height":600,
+            "visible":true,
+            "singleton":false,
+            "background":false,
+            "widgetTypes":[
+                "standard"
+            ],
+            "defaultTags":[
+            ],
+            "intents":{
+                "send": [],
+                "receive": []
+            }
+        };
+        var jsonData = JSON.stringify({
+            status:200,
+            data:widgetData
+        });
+        window.name = jsonData;
+
+    </script>
+
+</head>
+<body>
+
+</body>
+</html>

@@ -5,7 +5,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Query Builder</title>
+    <title>Filter Builder</title>
 
     <%
         String neonServerUrl = getServletContext().getInitParameter("neon.url");
@@ -25,11 +25,13 @@
         neon.util.AjaxUtils.useDefaultStartStopCallbacks();
     </script>
 
-
-    <script src="js/jquery/jquery-ui-1.10.3.custom.min.js"></script>
-    <script src="js/filterwizard.js"></script>
-    <script src="js/handlebars.js"></script>
-    <script src="js/filtertable.js"></script>
+    <!-- build:js js/filter-builder.js -->
+    <script src="jquery/jquery-1.10.1.min.js"></script>
+    <script src="jqueryui/jquery-ui-1.10.3.custom.min.js"></script>
+    <script src="handlebars/handlebars.js"></script>
+    <script src="filterwizard.js"></script>
+    <script src="filtertable.js"></script>
+    <!-- endbuild -->
 
     <script id="filters" type="text/x-handlebars-template">
         {{#data}}

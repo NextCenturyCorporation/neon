@@ -4,5 +4,6 @@
     OWF.Eventing = OWF.Eventing || {};
     OWF.Intents = OWF.Intents || {};
 
+    window.neon = window.neon || {};
     neon.mock = {};
 })();
