@@ -10,8 +10,6 @@ task copyJsDependencies {
 project.processResources.dependsOn 'copyJsDependencies'
 
 war {
-    dependsOn 'gruntjs'
-
     from(jsOutputFile) {
         into 'js'
     }

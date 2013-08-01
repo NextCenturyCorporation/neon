@@ -1,8 +1,6 @@
 archivesBaseName = 'filter-builder'
 
 war {
-    dependsOn 'gruntjs'
-
     from(jsOutputFile) {
         into 'js'
     }

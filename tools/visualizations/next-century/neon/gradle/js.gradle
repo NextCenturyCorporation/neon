@@ -93,3 +93,5 @@ task zipJsDocs(type: Zip) {
 [jsDocs, copyJsDocs, zipJsDocs]*.onlyIf {
     project.file(jsSrcDir).exists()
 }
+
+project.assemble.dependsOn 'gruntjs'

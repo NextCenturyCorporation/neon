@@ -34,3 +34,5 @@ task zipJavadocs(type: Zip) {
     dependsOn 'copyJavadocs'
     doZipDocs(copyJavadocs, zipJavadocs, project.buildDir)
 }
+
+project.assemble.dependsOn 'check'

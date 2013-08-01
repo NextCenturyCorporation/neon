@@ -105,8 +105,6 @@ dependencies {
 }
 
 war {
-    dependsOn 'check', 'gruntjs'
-
     from(jsOutputFile) {
         into 'js'
     }

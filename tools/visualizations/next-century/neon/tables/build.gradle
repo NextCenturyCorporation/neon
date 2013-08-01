@@ -1,24 +1,10 @@
 archivesBaseName = 'tables'
 
 war {
-    dependsOn 'gruntjs'
-
     from(jsOutputFile) {
         into 'js'
     }
     from("${jsSrcDir}/tablewidget.js") {
         into 'js'
     }
-}
-
-// if you want to use jettyrun for testing, this allows you to just include the individual js files and not the
-// concatenated one
-jettyRun.doFirst {
-    jettyRun.webAppConfig = new org.gradle.api.plugins.jetty.internal.JettyPluginWebAppContext()
-    jettyRun.webAppConfig.baseResource = org.gradle.api.plugins.jetty.internal.JettyPluginWebAppContext.class.classLoader.loadClass("org.mortbay.resource.ResourceCollection").newInstance(
-            [
-                    "${file(webAppDirName)}",
-                    "${projectDir}/${jsSrcDir}",
-                    "${projectDir}/src/main/js-lib"
-            ] as String[])
 }

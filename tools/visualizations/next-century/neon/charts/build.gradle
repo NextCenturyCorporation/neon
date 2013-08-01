@@ -1,8 +1,6 @@
 archivesBaseName = 'charts'
 
 war {
-    dependsOn 'gruntjs'
-
     from(jsOutputFile) {
         into 'js'
     }
