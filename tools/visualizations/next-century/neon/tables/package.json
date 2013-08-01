@@ -1,5 +1,6 @@
 {
   "name": "tables",
+  "version" : "1.0.0",
   "author": "Next Century Corporation",
   "devDependencies": {
     "grunt": "~0.4.1",

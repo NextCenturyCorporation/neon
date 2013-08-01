@@ -1,5 +1,6 @@
 {
   "name": "@name@",
+  "version" : "@version@",
   "author": "Next Century Corporation",
   "devDependencies": {
     "grunt": "~0.4.1",
