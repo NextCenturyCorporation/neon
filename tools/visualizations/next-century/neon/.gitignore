@@ -1,5 +1,6 @@
 # generated files
 neon-server/src/test-data/mongo-json/
+package.json
 
 # grunt files
 node_modules

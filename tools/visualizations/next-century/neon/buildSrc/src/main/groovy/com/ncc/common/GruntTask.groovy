@@ -7,7 +7,7 @@ import org.gradle.api.tasks.Exec
  * GruntTask adopted from http://naleid.com/blog/2013/01/24/calling-gruntjs-tasks-from-gradle/
  */
 class GruntTask extends Exec {
-    private static final String GRUNT_EXECUTABLE = Os.isFamily(Os.FAMILY_WINDOWS) ? "grunt.cmd" : "grunt"
+    static final String GRUNT_EXECUTABLE = Os.isFamily(Os.FAMILY_WINDOWS) ? "grunt.cmd" : "grunt"
 
     GruntTask() {
         executable = GRUNT_EXECUTABLE

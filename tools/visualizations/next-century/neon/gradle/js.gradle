@@ -96,3 +96,10 @@ task zipJsDocs(type: Zip) {
 }
 
 project.assemble.dependsOn 'gruntjs'
+
+// use the locally installed grunt
+project.tasks.withType(GruntTask) {
+    it.doFirst {
+        it.executable = "${projectDir}/node_modules/.bin/${GruntTask.GRUNT_EXECUTABLE}"
+    }
+}
