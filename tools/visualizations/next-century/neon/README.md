@@ -15,10 +15,10 @@ Neon contains a mix of groovy and javascript code and uses different build tools
 * npm/nodejs/grunt are used to build the javascript code
 * the gradle build files provide wrapper tasks for executing grunt tasks
 
-### setup instructions for npm/nodejs
+### setup instructions for npm/nodejs (Ubuntu)
 
-* install npm and nodejs
-* from the top level neon directory, run the gradle task installGruntDeps. this will install the necessary javascript
+* install nodejs and npm globally (installing nodejs through the package manager will install both)
+* from the top level neon directory, run the `gradle installGruntDeps`. this will install the necessary javascript
 build tools. this only needs to be re-run when the package.json file changes.
 
 ### Test tasks
