@@ -45,7 +45,7 @@ neon.util.AjaxUtils.errorLogger_ = log4javascript.getLogger('neon.util.AjaxUtils
  * @return {neon.util.AjaxRequest} The xhr request object
  */
 neon.util.AjaxUtils.doPost = function (url, opts) {
-    return this.doAjaxRequest('POST', url, opts);
+    return neon.util.AjaxUtils.doAjaxRequest('POST', url, opts);
 };
 
 /**
@@ -60,7 +60,7 @@ neon.util.AjaxUtils.doPost = function (url, opts) {
 neon.util.AjaxUtils.doPostJSON = function (object, url, opts) {
     var data = JSON.stringify(object);
     var fullOpts = _.extend({}, opts, {data: data, contentType: 'application/json', responseType: 'json'});
-    return this.doPost(url, fullOpts);
+    return neon.util.AjaxUtils.doPost(url, fullOpts);
 };
 
 /**
@@ -71,7 +71,7 @@ neon.util.AjaxUtils.doPostJSON = function (object, url, opts) {
  * @return {neon.util.AjaxRequest} The xhr request object
  */
 neon.util.AjaxUtils.doGet = function (url, opts) {
-    return this.doAjaxRequest('GET', url, opts);
+    return neon.util.AjaxUtils.doAjaxRequest('GET', url, opts);
 };
 
 /**
