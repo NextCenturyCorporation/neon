@@ -5,6 +5,19 @@ import com.ncc.neon.MongoJSONGenerator
 import com.ncc.common.GruntTask
 import org.apache.tools.ant.filters.ReplaceTokens
 
+// define source sets first so tasks that act dynamically on sourcesets have a list of all of them
+sourceSets {
+    // contains the server integration tests
+    integrationTest {
+        resources {
+            srcDir 'src/integrationTest/resources'
+            srcDir 'src/test-data'
+        }
+    }
+    acceptanceTest
+}
+
+
 apply from: 'gradle/groovy.gradle'
 
 archivesBaseName = 'neon'
@@ -40,16 +53,6 @@ project.ext {
     mongoInstance = null
 }
 
-sourceSets {
-    // contains the server integration tests
-    integrationTest {
-        resources {
-            srcDir 'src/integrationTest/resources'
-            srcDir 'src/test-data'
-        }
-    }
-    acceptanceTest
-}
 
 configurations {
     integrationTestCompile { extendsFrom testCompile }
