@@ -1,6 +1,5 @@
 import org.apache.tools.ant.filters.ReplaceTokens
 import com.ncc.common.GruntTask
-import static com.ncc.common.DocUtils.*
 
 apply from: "${rootDir}/gradle/docs.gradle"
 
@@ -87,13 +86,13 @@ task jsDocs(type: Exec) {
 task copyJsDocs(type: org.gradle.api.tasks.Copy) {
     description = 'Copies the javascript documentation to a directory to be zipped'
     dependsOn 'jsDocs'
-    doCopyDocsIntoZipDir('javascript-api-docs', libraryName, copyJsDocs, jsDocDir)
+    copyDocsIntoZipDir('javascript-api-docs', libraryName, copyJsDocs, jsDocDir)
 }
 
 task zipJsDocs(type: Zip) {
     description = 'Creates a zip file containing the javascript API documentation'
     dependsOn 'copyJsDocs'
-    doZipDocs(copyJsDocs, zipJsDocs, project.buildDir)
+    zipDocs(copyJsDocs, zipJsDocs, project.buildDir)
 }
 
 // yuidoc will look in src/main/javascript for the js files
