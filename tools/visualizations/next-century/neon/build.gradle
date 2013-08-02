@@ -37,6 +37,10 @@ subprojects {
 
     enableJSResourceFiltering(project, project.war)
 
+    // add an explicit dependency on concatenation so if you're doing a quick deploy using gradle deployToTomcat the
+    // javascript files are still created
+    war.dependsOn 'concatjs'
+
     task('deployToTomcat', type: Copy) {
         dependsOn war
         description = "Copies the project's war file to the owf tomcat webapps dir"

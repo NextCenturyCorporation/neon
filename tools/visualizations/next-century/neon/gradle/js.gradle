@@ -19,8 +19,14 @@ project.ext {
 }
 
 task gruntjs(type: GruntTask) {
-    dependsOn 'createPackageJson'
+    description = 'the default grunt task in Gruntfile.js'
     gruntArgs "--outfile=${jsOutputFile}"
+}
+
+task concatjs(type: GruntTask) {
+    description = 'runs the grunt javascript concatenation task'
+    gruntArgs "concat", "--outfile=${jsOutputFile}"
+
 }
 
 task installGruntDeps(type: Exec) {
@@ -97,9 +103,11 @@ task zipJsDocs(type: Zip) {
 
 project.assemble.dependsOn 'gruntjs'
 
-// use the locally installed grunt
 project.tasks.withType(GruntTask) { task ->
+    // use the locally installed grunt
     task.doFirst {
         task.executable = "${projectDir}/node_modules/.bin/${GruntTask.GRUNT_EXECUTABLE}"
     }
+
+    task.dependsOn 'createPackageJson'
 }
