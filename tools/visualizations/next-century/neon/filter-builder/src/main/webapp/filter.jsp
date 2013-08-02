@@ -20,11 +20,6 @@
     <script src="<%=owfServerUrl%>/js/owf-widget.js"></script>
     <script src="<%=neonServerUrl%>/js/neon.js"></script>
 
-    <script>
-        neon.query.SERVER_URL = '<%=neonServerUrl%>';
-        neon.util.AjaxUtils.useDefaultStartStopCallbacks();
-    </script>
-
     <!-- build:js js/filter-builder.js -->
     <script src="jquery/jquery-1.10.1.min.js"></script>
     <script src="jqueryui/jquery-ui-1.10.3.custom.min.js"></script>
@@ -32,6 +27,13 @@
     <script src="filterwizard.js"></script>
     <script src="filtertable.js"></script>
     <!-- endbuild -->
+
+    <script>
+        OWF.relayFile = 'js/eventing/rpc_relay.uncompressed.html';
+        neon.query.SERVER_URL = '<%=neonServerUrl%>';
+        neon.util.AjaxUtils.useDefaultStartStopCallbacks();
+    </script>
+
 
     <script id="filters" type="text/x-handlebars-template">
         {{#data}}
