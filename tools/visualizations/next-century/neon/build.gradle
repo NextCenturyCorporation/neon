@@ -1,5 +1,6 @@
 import static com.ncc.common.JSScriptReplacer.*
 
+apply from: "gradle/wrapper.gradle"
 defaultTasks 'clean', 'build'
 
 repositories {
