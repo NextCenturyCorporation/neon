@@ -16,6 +16,7 @@ sourceSets.each { sourceSet ->
     codenarcTasks.each { task ->
         task.reports.xml.enabled = true
         task.reports.html.enabled = true
+        task.enabled = !project.hasProperty('nocodenarc')
     }
 }
 
