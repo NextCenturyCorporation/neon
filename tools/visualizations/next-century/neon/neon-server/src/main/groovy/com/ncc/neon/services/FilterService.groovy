@@ -56,14 +56,14 @@ class FilterService{
 
     @POST
     @Produces(MediaType.APPLICATION_JSON)
-    @Path("databaseNames")
+    @Path("databasenames")
     List<String> getDatabaseNames() {
         connectionState.queryExecutor.showDatabases()
     }
 
     @POST
     @Produces(MediaType.APPLICATION_JSON)
-    @Path("tableNames")
+    @Path("tablenames")
     List<String> getTableNames(@FormParam("database") String database) {
         connectionState.queryExecutor.showTables(database)
     }
@@ -72,7 +72,7 @@ class FilterService{
     @POST
     @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
     @Produces(MediaType.APPLICATION_JSON)
-    @Path("columnNames")
+    @Path("columnnames")
     List<String> getColumnNames(@FormParam("database") String database, @FormParam("table") String table) {
         connectionState.queryExecutor.getFieldNames(database, table).collect{ it }
     }
@@ -80,7 +80,7 @@ class FilterService{
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-    @Path("updateFilter")
+    @Path("updatefilter")
     FilterEvent updateFilter(Filter filter) {
         String uuid = connectionState.queryExecutor.addFilter(filter).toString()
         return new FilterEvent(addedIds: [uuid])
@@ -89,7 +89,7 @@ class FilterService{
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-    @Path("updateFilter/{filterId}")
+    @Path("updatefilter/{filterId}")
     FilterEvent updateFilter(Filter filter, @PathParam("filterId") String replaceId) {
         connectionState.queryExecutor.removeFilter(UUID.fromString(replaceId))
         if(filter.whereClause){

@@ -36,7 +36,7 @@ neon.filter = (function () {
 
         var filterString = filterId ? "/" + filterId : "";
 
-        neon.util.AjaxUtils.doPostJSON(filter, neon.query.SERVER_URL + "/services/filterservice/updateFilter" + filterString,
+        neon.util.AjaxUtils.doPostJSON(filter, neon.query.SERVER_URL + "/services/filterservice/updatefilter" + filterString,
             {
                 success: function (uuid) {
                     filterId = uuid.addedIds[0];
@@ -54,7 +54,7 @@ neon.filter = (function () {
         var filter = buildFilterFromData();
 
         var filterString = filterId ? "/" + filterId : "";
-        neon.util.AjaxUtils.doPostJSON(filter, neon.query.SERVER_URL + "/services/filterservice/updateFilter" + filterString,
+        neon.util.AjaxUtils.doPostJSON(filter, neon.query.SERVER_URL + "/services/filterservice/updatefilter" + filterString,
             {
                 success: function (uuid) {
                     filterId = uuid.addedIds[0];

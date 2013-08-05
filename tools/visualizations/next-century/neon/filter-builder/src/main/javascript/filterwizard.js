@@ -61,7 +61,7 @@
 
     function populateDatabaseDropdown() {
         var databaseSelectSelector = $('#database-select');
-        neon.util.AjaxUtils.doPost(neon.query.SERVER_URL + "/services/filterservice/databaseNames",
+        neon.util.AjaxUtils.doPost(neon.query.SERVER_URL + "/services/filterservice/databasenames",
             {
                 success: function (databaseNames) {
                     databaseSelectSelector.find('option').remove();
@@ -77,7 +77,7 @@
 
     function populateTableDropdown() {
         var selectedDatabase = $('#database-select option:selected');
-        neon.util.AjaxUtils.doPost(neon.query.SERVER_URL + "/services/filterservice/tableNames",
+        neon.util.AjaxUtils.doPost(neon.query.SERVER_URL + "/services/filterservice/tablenames",
             {
                 data: { database: selectedDatabase.val() },
                 success: function (tableNames) {
@@ -90,7 +90,7 @@
     }
 
     function selectDatabaseAndTable(){
-        neon.util.AjaxUtils.doPost(neon.query.SERVER_URL + "/services/filterservice/columnNames",
+        neon.util.AjaxUtils.doPost(neon.query.SERVER_URL + "/services/filterservice/columnnames",
             {
                 data: neon.wizard.dataset(),
                 success: function (columnNames) {
