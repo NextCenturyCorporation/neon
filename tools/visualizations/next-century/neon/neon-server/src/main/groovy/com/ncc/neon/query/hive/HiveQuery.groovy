@@ -51,7 +51,7 @@ class HiveQuery implements SqlQuery {
             builder << " group by " << groupByClauses.collect { it.field }.join(",")
         }
         if (sortClauses.size > 0) {
-            builder << " order by " << sortClauses.collect { it.fieldName + (it.sortDirection == SortOrder.ASCENDING) ? " ASC" : " DESC" }.join(",")
+            builder << " order by " << sortClauses.collect { it.fieldName + ((it.sortOrder == SortOrder.ASCENDING) ? " ASC" : " DESC") }.join(",")
         }
         if (limitClause != null) {
             builder << " limit " << limitClause.limit
