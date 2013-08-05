@@ -4,7 +4,7 @@ repositories {
     mavenCentral()
 }
 dependencies {
-    groovy localGroovy()
+    compile localGroovy()
     compile 'org.json:json:20090211'
 }
 
