@@ -46,16 +46,16 @@ describe('intents launcher', function () {
 
 
     it('should create intent data', function () {
-        var dataSourceName = 'testDataSource';
-        var datasetId = 'testDatasetId';
+        var dataStoreName = 'testDataStoreName';
+        var databaseName = 'testDatabaseName';
         var dataType = 'dataType1';
         var metadata = {key1: 'val1', key2: 'val2'};
         launcher.addMetadataForDataType(dataType, metadata);
         var intent = {dataTypes: [dataType]};
-        var intentData = launcher.createIntentData_(intent, dataSourceName, datasetId);
+        var intentData = launcher.createIntentData_(intent, dataStoreName, databaseName);
         var data = intentData.data;
 
-        expect(data).toEqual({dataSourceName: dataSourceName, datasetId: datasetId, key1: 'val1', key2: 'val2'});
+        expect(data).toEqual({dataStoreName: dataStoreName, databaseName: databaseName, key1: 'val1', key2: 'val2'});
         expect(intentData.dataType).toEqual(dataType);
 
     });
@@ -79,11 +79,11 @@ describe('intents launcher', function () {
             callback('destWidget');
         };
 
-        var dataSourceName = 'testDataSource';
-        var datasetId = 'testDatasetId';
-        launcher.launchIntents_(intents, dataSourceName, datasetId);
-        var expectedData1 = {dataSourceName: dataSourceName, datasetId: datasetId, key1: 'val1', key2: 'val2'};
-        var expectedData2 = {dataSourceName: dataSourceName, datasetId: datasetId, key3: 'val3'};
+        var dataStoreName = 'testDataStoreName';
+        var databaseName = 'testDatabaseName';
+        launcher.launchIntents_(intents, dataStoreName, databaseName);
+        var expectedData1 = {dataStoreName: dataStoreName, databaseName: databaseName, key1: 'val1', key2: 'val2'};
+        var expectedData2 = {dataStoreName: dataStoreName, databaseName: databaseName, key3: 'val3'};
 
         var expectedIntent1Data = {intent: {action: action1, dataType: dataType1}, data: expectedData1};
         var expectedIntent2Data = {intent: {action: action2, dataType: dataType2}, data: expectedData2};

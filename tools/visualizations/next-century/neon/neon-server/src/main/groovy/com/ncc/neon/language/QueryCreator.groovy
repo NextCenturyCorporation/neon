@@ -47,7 +47,7 @@ class QueryCreator extends NeonBaseListener {
     Query createQuery() {
         Query query = new Query()
         query.fields = fields
-        query.filter = new Filter(dataSourceName: databaseName, datasetId: collectionName)
+        query.filter = new Filter(dataStoreName: databaseName, databaseName: collectionName)
         if (whereClause) {
             query.filter.whereClause = whereClause
         }

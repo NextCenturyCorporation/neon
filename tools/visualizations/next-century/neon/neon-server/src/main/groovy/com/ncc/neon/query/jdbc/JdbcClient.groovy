@@ -67,9 +67,9 @@ class JdbcClient {
         statement.close()
     }
 
-    public List<String> getColumnNames(String dataSourceName, String datasetId) {
+    public List<String> getColumnNames(String dataStoreName, String databaseName) {
         DatabaseMetaData metadata = connection.getMetaData()
-        ResultSet resultSet = metadata.getColumns(dataSourceName, null, datasetId, null)
+        ResultSet resultSet = metadata.getColumns(dataStoreName, null, databaseName, null)
         List<String> columnNames = []
         while (resultSet.next()) {
             columnNames << resultSet.getString("COLUMN_NAME")

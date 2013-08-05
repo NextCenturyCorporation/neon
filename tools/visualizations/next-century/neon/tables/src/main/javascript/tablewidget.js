@@ -25,8 +25,8 @@ $(document).ready(function () {
 
     OWF.ready(function () {
 
-        var datasource;
-        var datasetId;
+        var dataStoreName;
+        var databaseName;
         var table;
 
         // just creating the message handler will register the listeners
@@ -38,13 +38,13 @@ $(document).ready(function () {
 
         function populateInitialData(message) {
             saveDatasetInfo(message);
-            neon.query.getFieldNames(datasource, datasetId, populateSortFieldDropdown);
+            neon.query.getFieldNames(dataStoreName, databaseName, populateSortFieldDropdown);
             updateTable();
         }
 
         function saveDatasetInfo(message) {
-            datasource = message.database;
-            datasetId = message.table;
+            dataStoreName = message.database;
+            databaseName = message.table;
         }
 
         function populateSortFieldDropdown(data) {
@@ -93,7 +93,7 @@ $(document).ready(function () {
         }
 
         function updateTable() {
-            var query = new neon.query.Query().selectFrom(datasource, datasetId);
+            var query = new neon.query.Query().selectFrom(dataStoreName, databaseName);
             if ($('#limit')[0].validity.valid) {
                 applyLimit(query);
             }

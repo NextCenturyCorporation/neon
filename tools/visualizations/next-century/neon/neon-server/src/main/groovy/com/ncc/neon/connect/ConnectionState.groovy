@@ -1,10 +1,9 @@
 package com.ncc.neon.connect
-
 import com.ncc.neon.query.QueryExecutor
+import com.ncc.neon.query.filter.DataSet
 import org.springframework.context.annotation.Scope
 import org.springframework.context.annotation.ScopedProxyMode
 import org.springframework.web.context.WebApplicationContext
-
 /*
  * ************************************************************************
  * Copyright (c), 2013 Next Century Corporation. All Rights Reserved.
@@ -36,7 +35,7 @@ import org.springframework.web.context.WebApplicationContext
 @Scope(value = WebApplicationContext.SCOPE_SESSION, proxyMode = ScopedProxyMode.TARGET_CLASS)
 class ConnectionState implements Serializable {
 
-    private static final long serialVersionUID = 1L
+    private static final long serialVersionUID = -893383755378542295L
 
     private transient Connection connection
     private transient QueryExecutor queryExecutor
@@ -59,9 +58,8 @@ class ConnectionState implements Serializable {
         init = true
     }
 
-    void createConnection(String datastore, String hostname) {
-        DataSource dataSource = DataSource.fromName(datastore)
-        ConnectionInfo connectionInfo = new ConnectionInfo(dataSource: dataSource, connectionUrl: hostname)
+    void createConnection(String dataStoreName, String hostname) {
+        ConnectionInfo connectionInfo = new ConnectionInfo(dataStoreName: dataStoreName, connectionUrl: hostname)
         createConnection(connectionInfo)
     }
 
@@ -74,15 +72,15 @@ class ConnectionState implements Serializable {
     }
 
     private void setupConnection(ConnectionInfo info) {
-        switch (info.dataSource) {
-            case DataSource.MONGO:
+        switch (info.dataStoreName) {
+            case DataSet.MONGO:
                 connection = new MongoConnection()
                 break
-            case DataSource.HIVE:
+            case DataSet.HIVE:
                 connection = new HiveConnection()
                 break
             default:
-                throw new UnsupportedDataSourceTypeException(info.dataSource)
+                throw new UnsupportedDataStoreTypeException(info.dataStoreName)
         }
     }
 

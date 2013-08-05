@@ -174,17 +174,17 @@ neon.query.MILE = 'mile';
 
 
 // these ids are used for providing json args to the callback functions
-neon.query.DATASET_ID_IDENTIFIER = 'datasetId';
-neon.query.DATASOURCE_NAME_IDENTIFIER = 'dataSourceName';
+neon.query.DATABASE_NAME_IDENTIFIER = 'databaseName';
+neon.query.DATA_STORE_NAME_IDENTIFIER = 'dataStoreName';
 
 /**
  * Sets the *select* clause of the query to select data from the specified dataset
  * @method selectFrom
- * @param {String} dataSourceName The name of the data source that contains the data
- * @param {String} datasetId The dataset to select from
+ * @param {String} dataStoreName The name of the data source that contains the data
+ * @param {String} databaseName The dataset to select from
  * @return {neon.query.Query} This query object
  */
-neon.query.Query.prototype.selectFrom = function (dataSourceName, datasetId) {
+neon.query.Query.prototype.selectFrom = function (dataStoreName, databaseName) {
     this.filter.selectFrom.apply(this.filter, arguments);
     return this;
 };
@@ -413,15 +413,15 @@ neon.query.withinDistance = function (locationField, center, distance, distanceU
 /**
  * Executes a query that returns the field names from the data set. This method executes synchronously.
  * @method getFieldNames
- * @param {String} dataSourceName The name of the data source that holds this data
- * @param {String} datasetId The id of the dataset whose fields are being returned
+ * @param {String} dataStoreName The name of the data source that holds this data
+ * @param {String} databaseName The id of the dataset whose fields are being returned
  * @param {Function} successCallback The callback to call when the field names are successfully retrieved
  * @param {Function} [errorCallback] The optional callback when an error occurs. This is a 3 parameter function that contains the xhr, a short error status and the full error message.
  * @return {neon.util.AjaxRequest} The xhr request object
  */
-neon.query.getFieldNames = function (dataSourceName, datasetId, successCallback, errorCallback) {
+neon.query.getFieldNames = function (dataStoreName, databaseName, successCallback, errorCallback) {
     return neon.util.AjaxUtils.doGet(
-        neon.query.queryUrl_('/services/queryservice/fieldnames?datasourcename=' + dataSourceName + '&datasetid=' + datasetId),
+        neon.query.queryUrl_('/services/queryservice/fieldnames?dataStoreName=' + dataStoreName + '&databaseName=' + databaseName),
         {
             success: successCallback,
             error: errorCallback
@@ -703,13 +703,13 @@ neon.query.Filter = function () {
 /**
  * Sets the *select* clause of the filter to select data from the specified dataset
  * @method selectFrom
- * @param {String} dataSourceName The name of the data source that contains the data
- * @param {String} datasetId The dataset to select from
+ * @param {String} dataStoreName The name of the data source that contains the data
+ * @param {String} databaseName The dataset to select from
  * @return {neon.query.Filter} This filter object
  */
-neon.query.Filter.prototype.selectFrom = function (dataSourceName, datasetId) {
-    this.dataSourceName = dataSourceName;
-    this.datasetId = datasetId;
+neon.query.Filter.prototype.selectFrom = function (dataStoreName, databaseName) {
+    this.dataStoreName = dataStoreName;
+    this.databaseName = databaseName;
     return this;
 };
 

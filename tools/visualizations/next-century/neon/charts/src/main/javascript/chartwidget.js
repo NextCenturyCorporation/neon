@@ -22,13 +22,13 @@
  */
 
 // this file contains some javascript functions that are useful for the chart based widgets
-var datasource;
-var datasetId;
+var dataStoreName;
+var databaseName;
 
 function populateAttributeDropdowns(message, changeHandler) {
-    datasource = message.database;
-    datasetId = message.table;
-    neon.query.getFieldNames(datasource, datasetId, function(data){
+    dataStoreName = message.database;
+    databaseName = message.table;
+    neon.query.getFieldNames(dataStoreName, databaseName, function(data){
         doPopulateAttributeDropdowns(data,changeHandler);
     });
 }

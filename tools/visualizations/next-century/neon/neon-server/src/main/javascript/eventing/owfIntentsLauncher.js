@@ -56,15 +56,15 @@ neon.eventing.OWFIntentsLauncher.prototype.addMetadataForDataType = function (da
  * @method addIntentsSelector
  * @param {neon.eventing.OWFIntentsLauncher} launcher The launcher that launches the intents
  * @param {Array} intents An array of the intent descriptions that can be launched
- * @param {Function} dataSourceNameLookup A function that returns the name of the data source to pass with the intent
- * @param {Function} datasetIdLookup A function that returns the name of the data set id to pass with the intent
+ * @param {Function} dataStoreNameLookup A function that returns the name of the data source to pass with the intent
+ * @param {Function} databaseNameLookup A function that returns the name of the data set id to pass with the intent
  * @param {String} parentSelector The CSS selector to find the parent component to which this new component should be added
  *
  */
-neon.eventing.OWFIntentsLauncher.addIntentsSelector = function (launcher, intents, dataSourceNameLookup, datasetIdLookup, parentSelector) {
+neon.eventing.OWFIntentsLauncher.addIntentsSelector = function (launcher, intents, dataStoreNameLookup, databaseNameLookup, parentSelector) {
 
     var selector = neon.eventing.OWFIntentsLauncher.createIntentsSelector_(intents);
-    var launchButton = neon.eventing.OWFIntentsLauncher.createLaunchButton_(launcher,selector,intents,dataSourceNameLookup,datasetIdLookup);
+    var launchButton = neon.eventing.OWFIntentsLauncher.createLaunchButton_(launcher,selector,intents,dataStoreNameLookup,databaseNameLookup);
     neon.eventing.OWFIntentsLauncher.addSelectListener_(selector, launchButton);
 
     var parent = $(parentSelector);
@@ -91,11 +91,11 @@ neon.eventing.OWFIntentsLauncher.addSelectListener_ = function(selector, button)
     });
 };
 
-neon.eventing.OWFIntentsLauncher.prototype.launchIntents_ = function (intents, dataSourceName, datasetId) {
+neon.eventing.OWFIntentsLauncher.prototype.launchIntents_ = function (intents, dataStoreName, databaseName) {
     var me = this;
     if (intents.length > 0) {
         var intent = intents.shift();
-        var intentData = this.createIntentData_(intent, dataSourceName, datasetId);
+        var intentData = this.createIntentData_(intent, dataStoreName, databaseName);
         var action = intent.action;
         OWF.Intents.startActivity(
             {
@@ -104,29 +104,29 @@ neon.eventing.OWFIntentsLauncher.prototype.launchIntents_ = function (intents, d
             },
             intentData.data,
             function (dest) {
-                me.launchIntents_(intents, dataSourceName, datasetId);
+                me.launchIntents_(intents, dataStoreName, databaseName);
             }
         );
     }
 };
 
 
-neon.eventing.OWFIntentsLauncher.createLaunchButton_ = function(launcher, selector, intents, dataSourceNameLookup, datasetIdLookup) {
+neon.eventing.OWFIntentsLauncher.createLaunchButton_ = function(launcher, selector, intents, dataStoreNameLookup, databaseNameLookup) {
     var launchButton = $('<input/>').attr('type', 'button').attr('id', 'launch').attr('disabled', '').val('Display Data').click(function () {
-        var dataSourceName = dataSourceNameLookup.apply(null);
-        var datasetId = datasetIdLookup.apply(null);
+        var dataStoreName = dataStoreNameLookup.apply(null);
+        var databaseName = databaseNameLookup.apply(null);
         var selectedIntents = selector.val().map(function (intentIndex) {
             return intents[parseInt(intentIndex, 10)];
         });
-        launcher.launchIntents_(selectedIntents, dataSourceName, datasetId);
+        launcher.launchIntents_(selectedIntents, dataStoreName, databaseName);
     });
     return launchButton;
 };
 
-neon.eventing.OWFIntentsLauncher.prototype.createIntentData_ = function (intent, dataSourceName, datasetId) {
+neon.eventing.OWFIntentsLauncher.prototype.createIntentData_ = function (intent, dataStoreName, databaseName) {
     var data = {};
-    data.dataSourceName = dataSourceName;
-    data.datasetId = datasetId;
+    data.dataStoreName = dataStoreName;
+    data.databaseName = databaseName;
     var dataType = intent.dataTypes[0];
     if (this.metadata_.hasOwnProperty(dataType)) {
         _.extend(data, this.metadata_[dataType]);

@@ -38,53 +38,53 @@ class FilterStateTest {
     @Test
     void "add filter"() {
 
-        def dataSourceName1 = "dataSource1"
-        def dataSourceName2 = "dataSource2"
-        def datasetId1 = "dataset1"
-        def datasetId2 = "dataset2"
+        def dataStoreName1 = "dataStore1"
+        def dataStoreName2 = "dataStore2"
+        def databaseName1 = "database1"
+        def databaseName2 = "database2"
 
 
-        def filter1 = new Filter(dataSourceName:  dataSourceName1, datasetId: datasetId1)
-        def filter2 = new Filter(dataSourceName:  dataSourceName1, datasetId: datasetId1)
-        def filter3 = new Filter(dataSourceName:  dataSourceName2, datasetId: datasetId2)
+        def filter1 = new Filter(dataStoreName: dataStoreName1, databaseName: databaseName1)
+        def filter2 = new Filter(dataStoreName: dataStoreName1, databaseName: databaseName1)
+        def filter3 = new Filter(dataStoreName: dataStoreName2, databaseName: databaseName2)
 
         filterState.addFilter(filter1)
         filterState.addFilter(filter2)
         filterState.addFilter(filter3)
 
-        verifyFilters(dataSourceName1, datasetId1, [filter1,filter2])
-        verifyFilters(dataSourceName2, datasetId2, [filter3])
+        verifyFilters(dataStoreName1, databaseName1, [filter1, filter2])
+        verifyFilters(dataStoreName2, databaseName2, [filter3])
     }
 
     @Test
     void "remove filter"() {
-        def dataSourceName1 = "dataSource1"
-        def datasetId1 = "dataset1"
-        def filter1 = new Filter(dataSourceName:  dataSourceName1, datasetId: datasetId1)
-        def filter2 = new Filter(dataSourceName:  dataSourceName1, datasetId: datasetId1)
+        def dataStoreName1 = "dataStore1"
+        def databaseName = "dataset"
+        def filter1 = new Filter(dataStoreName: dataStoreName1, databaseName: databaseName)
+        def filter2 = new Filter(dataStoreName: dataStoreName1, databaseName: databaseName)
         def id1 = filterState.addFilter(filter1)
         def id2 = filterState.addFilter(filter2)
         filterState.removeFilter(id1)
-        verifyFilters(dataSourceName1, datasetId1, [filter2])
+        verifyFilters(dataStoreName1, databaseName, [filter2])
         filterState.removeFilter(id2)
-        verifyFilters(dataSourceName1, datasetId1, [])
+        verifyFilters(dataStoreName1, databaseName, [])
     }
 
     @Test
     void "clear filters"() {
-        def dataSourceName = "dataSource1"
-        def datasetId = "dataset1"
-        def filter1 = new Filter(dataSourceName:  dataSourceName, datasetId: datasetId)
-        def filter2 = new Filter(dataSourceName:  dataSourceName, datasetId: datasetId)
+        def dataStoreName1 = "dataStore1"
+        def databaseName = "dataset"
+        def filter1 = new Filter(dataStoreName: dataStoreName1, databaseName: databaseName)
+        def filter2 = new Filter(dataStoreName: dataStoreName1, databaseName: databaseName)
         filterState.addFilter(filter1)
         filterState.addFilter(filter2)
         filterState.clearFilters()
-        verifyFilters(dataSourceName, datasetId, [])
+        verifyFilters(dataStoreName1, databaseName, [])
     }
 
-    private def verifyFilters(dataSourceName,datasetId,expected) {
-        def actual =  filterState.getFiltersForDataset(dataSourceName,datasetId)
-        AssertUtils.assertEqualCollections(expected,actual)
+    private def verifyFilters(dataStoreName, databaseName, expected) {
+        def actual = filterState.getFiltersForDataset(dataStoreName, databaseName)
+        AssertUtils.assertEqualCollections(expected, actual)
     }
 
 }

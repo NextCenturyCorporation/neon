@@ -52,7 +52,7 @@ $(document).ready(function () {
             }
 
             var query = new neon.query.Query()
-                .selectFrom(datasource, datasetId)
+                .selectFrom(dataStoreName, databaseName)
                 .where(xAttr, '!=', null).groupBy(xAttr);
 
             if (yAttr) {

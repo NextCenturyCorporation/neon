@@ -1,5 +1,4 @@
 package com.ncc.neon.connect
-
 /*
  * ************************************************************************
  * Copyright (c), 2013 Next Century Corporation. All Rights Reserved.
@@ -26,10 +25,10 @@ package com.ncc.neon.connect
 /**
  * Indicates neon does not know how to connect to this data source type
  */
-class UnsupportedDataSourceTypeException extends RuntimeException {
+class UnsupportedDataStoreTypeException extends RuntimeException {
 
-    UnsupportedDataSourceTypeException(DataSource source) {
-        super("Connecting to a " + source.name + " is not currently supported")
+    UnsupportedDataStoreTypeException(String dataStoreName) {
+        super("Connecting to ${dataStoreName} is not currently supported")
     }
 
 }

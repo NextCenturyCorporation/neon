@@ -38,14 +38,14 @@ class FilterState implements Serializable {
     private static final long serialVersionUID = 5897358582328819569L
 
     private final def idsToFilters = [:]
-    private final def dataSourcesToFilters = [:]
+    private final def dataSetToFilters = [:]
 
     /**
      * Clears any existing filters
      */
     def clearFilters() {
         idsToFilters.clear()
-        dataSourcesToFilters.clear()
+        dataSetToFilters.clear()
     }
 
     /**
@@ -55,12 +55,12 @@ class FilterState implements Serializable {
      */
     def addFilter(filter) {
         def id = UUID.randomUUID()
-        def dataSource = dataSourceFromFilter(filter)
+        def dataSet = dataSetFromFilter(filter)
         idsToFilters.put(id, filter)
-        if (!dataSourcesToFilters.containsKey(dataSource)) {
-            dataSourcesToFilters.put(dataSource, [] as Set)
+        if (!dataSetToFilters.containsKey(dataSet)) {
+            dataSetToFilters.put(dataSet, [] as Set)
         }
-        dataSourcesToFilters[dataSource] << id
+        dataSetToFilters[dataSet] << id
         return id
     }
 
@@ -71,26 +71,26 @@ class FilterState implements Serializable {
      */
     def removeFilter(id) {
         def filter = idsToFilters.remove(id)
-        def dataSource = dataSourceFromFilter(filter)
-        def datasetFilters = dataSourcesToFilters[dataSource]
-        datasetFilters.remove(id)
-        if (datasetFilters.isEmpty()) {
-            dataSourcesToFilters.remove(dataSource)
+        def dataSet = dataSetFromFilter(filter)
+        def dataSetFilters = dataSetToFilters[dataSet]
+        dataSetFilters.remove(id)
+        if (dataSetFilters.isEmpty()) {
+            dataSetToFilters.remove(dataSet)
         }
 
     }
 
     /**
      * Gets any filters that are applied to the specified dataset
-     * @param dataSourceName The name of the data source containing the data set
-     * @param datasetId The id of the dataset whose filters are being returned
+     * @param dataStoreName The name of the data store containing the data
+     * @param databaseName The name of the database from which the filters are being returned.
      * @return
      */
-    def getFiltersForDataset(dataSourceName, datasetId) {
+    def getFiltersForDataset(dataStoreName, databaseName) {
         def filters = []
-        DataSource dataSource = new DataSource(dataSourceName: dataSourceName, datasetId: datasetId)
-        if (dataSourcesToFilters.containsKey(dataSource)) {
-            def ids = dataSourcesToFilters.get(dataSource)
+        DataSet dataSet = new DataSet(dataStoreName: dataStoreName, databaseName: databaseName)
+        if (dataSetToFilters.containsKey(dataSet)) {
+            def ids = dataSetToFilters.get(dataSet)
             ids.each {
                 filters << idsToFilters[it]
             }
@@ -98,8 +98,8 @@ class FilterState implements Serializable {
         return filters
     }
 
-    private static def dataSourceFromFilter(filter) {
-        return new DataSource(dataSourceName: filter.dataSourceName, datasetId: filter.datasetId)
+    private static def dataSetFromFilter(filter) {
+        return new DataSet(dataStoreName: filter.dataStoreName, databaseName: filter.databaseName)
     }
 
 }

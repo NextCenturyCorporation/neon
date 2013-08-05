@@ -31,11 +31,10 @@ class SelectClause {
     /** indicator to select all fields */
     static final ALL_FIELDS = ["*"]
 
-    def dataSourceName
-    def datasetId
+    String dataStoreName
+    String databaseName
 
     def fields = ALL_FIELDS
-
 
     boolean isSelectAllFields() {
         return fields == ALL_FIELDS

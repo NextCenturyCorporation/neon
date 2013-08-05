@@ -143,7 +143,7 @@ abstract class AbstractQueryExecutor implements QueryExecutor {
     protected abstract QueryResult doExecuteQuery(query)
 
     private def applySelectClause(builder, query) {
-        def selectClause = new SelectClause(dataSourceName: query.dataSourceName, datasetId: query.datasetId)
+        def selectClause = new SelectClause(dataStoreName: query.dataStoreName, databaseName: query.databaseName)
         if (query.fields) {
             selectClause.fields = query.fields
         }
@@ -180,7 +180,7 @@ abstract class AbstractQueryExecutor implements QueryExecutor {
 
     private def createWhereClausesForFilters(query) {
         def whereClauses = []
-        def filters = filterState.getFiltersForDataset(query.dataSourceName, query.datasetId)
+        def filters = filterState.getFiltersForDataset(query.dataStoreName, query.databaseName)
         if (!filters.isEmpty()) {
             filters.each {
                 whereClauses << it.whereClause

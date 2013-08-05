@@ -2,7 +2,6 @@ package com.ncc.neon.connect
 
 import groovy.transform.EqualsAndHashCode
 import groovy.transform.ToString
-
 /*
  * ************************************************************************
  * Copyright (c), 2013 Next Century Corporation. All Rights Reserved.
@@ -33,9 +32,9 @@ import groovy.transform.ToString
 @ToString
 class ConnectionInfo implements Serializable {
 
-    private static final long serialVersionUID = 1L
+    private static final long serialVersionUID = -2581266529277802620L
 
-    DataSource dataSource
+    String dataStoreName
     String connectionUrl
     Map<String, String> options = [:]
 }

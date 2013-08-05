@@ -32,8 +32,8 @@ describe('publishing events to OWF channels', function(){
     var owfEventPublisher;
     var messageHandler;
 
-    var dataSourceName = 'mockDataSource';
-    var datasetId = 'mockDatasetId';
+    var dataStoreName = 'mockDataStore';
+    var databaseName = 'mockDatabaseName';
 
     beforeEach(function() {
         publishMock = jasmine.createSpy('message publisher');
@@ -73,7 +73,7 @@ describe('publishing events to OWF channels', function(){
 
 
     it('should publish add filter results', function() {
-        var filter = new neon.query.Filter().selectFrom(dataSourceName,datasetId);
+        var filter = new neon.query.Filter().selectFrom(dataStoreName,databaseName);
         testResultsPublishedToChannel_(
             neon.eventing.Channels.FILTERS_CHANGED,
             neon.eventing.OWFEventPublisher.prototype.addFilter,
@@ -102,7 +102,7 @@ describe('publishing events to OWF channels', function(){
     });
 
     it('should publish set selection by filter', function() {
-        var filter  = new neon.query.Filter().selectFrom(dataSourceName,datasetId);
+        var filter  = new neon.query.Filter().selectFrom(dataStoreName,databaseName);
         testResultsPublishedToChannel_(
             neon.eventing.Channels.SELECTION_CHANGED,
             neon.eventing.OWFEventPublisher.prototype.setSelectionWhere,

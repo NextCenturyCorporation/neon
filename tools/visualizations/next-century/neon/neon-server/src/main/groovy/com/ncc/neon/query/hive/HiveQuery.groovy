@@ -43,7 +43,7 @@ class HiveQuery implements SqlQuery {
     @Override
     String getQueryString() {
         StringBuilder builder = new StringBuilder()
-        builder << "select " << selectClause.fields.join(",") << " from " << selectClause.dataSourceName << "." << selectClause.datasetId
+        builder << "select " << selectClause.fields.join(",") << " from " << selectClause.dataStoreName << "." << selectClause.databaseName
         if (whereClause != null) {
             builder << " where " << whereClause.toString()
         }

@@ -161,8 +161,8 @@ class QueryService {
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     @Path("fieldnames")
-    FieldNames getFieldNames(@QueryParam("datasourcename") String dataSourceName, @QueryParam("datasetid") String datasetId) {
-        def fieldNames = queryExecutor.getFieldNames(dataSourceName, datasetId)
+    FieldNames getFieldNames(@QueryParam("dataStoreName") String dataStoreName, @QueryParam("databaseName") String databaseName) {
+        def fieldNames = queryExecutor.getFieldNames(dataStoreName, databaseName)
         return new FieldNames(fieldNames: fieldNames)
     }
 

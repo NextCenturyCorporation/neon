@@ -27,15 +27,20 @@ import groovy.transform.ToString
  */
 
 /**
- * A wrapper around a dataSourceName/datasetId combination
+ * A DataSet is a dataStore, like hive or mongo and a database name.
+ *
+ * The database name is optional for some DataSets.
  */
 @EqualsAndHashCode
 @ToString(includeNames = true)
-class DataSource implements Serializable {
+class DataSet implements Serializable {
 
-    private static final long serialVersionUID = 7653634335470364210L
+    static final String MONGO = "mongo"
+    static final String HIVE = "hive"
 
-    def dataSourceName
-    def datasetId
+    private static final long serialVersionUID = 8027137024437027193L
+
+    String dataStoreName
+    String databaseName
 
 }

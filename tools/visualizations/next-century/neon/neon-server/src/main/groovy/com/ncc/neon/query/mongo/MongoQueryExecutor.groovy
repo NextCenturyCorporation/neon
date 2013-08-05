@@ -134,14 +134,14 @@ class MongoQueryExecutor extends AbstractQueryExecutor {
 
     private def getCollection(mongoQuery) {
         def selectClause = mongoQuery.selectClause
-        def db = mongo.getDB(selectClause.dataSourceName)
-        return db.getCollection(selectClause.datasetId)
+        def db = mongo.getDB(selectClause.dataStoreName)
+        return db.getCollection(selectClause.databaseName)
     }
 
     @Override
-    public Collection<String> getFieldNames(String dataSourceName, String datasetId) {
-        def db = mongo.getDB(dataSourceName)
-        def collection = db.getCollection(datasetId)
+    public Collection<String> getFieldNames(String dataStoreName, String databaseName) {
+        def db = mongo.getDB(dataStoreName)
+        def collection = db.getCollection(databaseName)
         def result = collection.findOne()
         return result.keySet()
     }
