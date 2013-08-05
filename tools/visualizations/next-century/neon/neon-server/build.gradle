@@ -41,6 +41,8 @@ buildscript {
 
 repositories {
     maven {
+        // the maven central versions of hadoop/hive don't have all of the necessary dependencies (presumably not
+        // on purpose), so include this repo to find any missing dependencies
         url 'https://repository.cloudera.com/artifactory/public'
     }
 }
@@ -78,21 +80,23 @@ dependencies {
     compile "com.google.guava:guava:14.0.1"
     compile 'org.antlr:antlr4-runtime:4.0'
     compile('org.codehaus.groovy.modules.http-builder:http-builder:0.6') {
-        // we already include groovy-all - this prevents bringing groovy in twice
+        // we already include groovy-all
         exclude module: 'groovy'
     }
     compile 'commons-lang:commons-lang:2.6'
     compile 'org.json:json:20090211'
-    compile('org.apache.hive:hive-jdbc:0.10.0-cdh4.2.1') {
-        exclude module: 'servlet-api'
+
+    // remove any of the jetty/tomcat dependencies. we don't use them and they conflict with app server libraries
+    compile('org.apache.hadoop:hadoop-core:1.2.1') {
+        exclude group: 'org.mortbay.jetty'
+        exclude group: 'tomcat'
+    }
+    compile('org.apache.hive:hive-jdbc:0.11.0') {
+        exclude group: 'org.mortbay.jetty'
+        // we already include slf4j
         exclude module: 'slf4j-log4j12'
     }
-    compile('org.apache.hadoop:hadoop-core:2.0.0-mr1-cdh4.2.1') {
-        exclude module: 'servlet-api'
-        exclude module: 'jsp-api'
-        exclude module: 'jasper-runtime'
-        exclude module: 'jasper-compiler'
-    }
+
 
     providedCompile 'javax.servlet:javax.servlet-api:3.0.1'
 
