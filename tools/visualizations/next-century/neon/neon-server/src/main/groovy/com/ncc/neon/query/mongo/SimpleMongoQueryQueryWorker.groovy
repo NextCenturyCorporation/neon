@@ -1,7 +1,8 @@
 package com.ncc.neon.query.mongo
 
-import com.mongodb.DBObject
-import com.ncc.neon.query.Query
+import com.mongodb.DBCursor
+import com.mongodb.MongoClient
+import com.ncc.neon.query.QueryResult
 
 /*
  * ************************************************************************
@@ -24,14 +25,34 @@ import com.ncc.neon.query.Query
  * PROPRIETARY AND CONFIDENTIAL TRADE SECRET MATERIAL NOT FOR DISCLOSURE OUTSIDE
  * OF NEXT CENTURY CORPORATION EXCEPT BY PRIOR WRITTEN PERMISSION AND WHEN
  * RECIPIENT IS UNDER OBLIGATION TO MAINTAIN SECRECY.
+ *
+ * 
+ * @author tbrooks
  */
 
-/**
- * A container for the information needed to execute a query against a mongo store
- */
-class MongoQuery {
+class SimpleMongoQueryQueryWorker extends AbstractMongoQueryWorker {
 
-    Query query
-    DBObject whereClauseParams
-    DBObject selectParams
+    SimpleMongoQueryQueryWorker(MongoClient mongo) {
+        super(mongo)
+    }
+
+    @Override
+    QueryResult executeQuery(MongoQuery mongoQuery) {
+        DBCursor results = queryDB(mongoQuery)
+
+        if (mongoQuery.query.sortClauses) {
+            results = results.sort(createSortDBObject(mongoQuery.query.sortClauses))
+        }
+        if (mongoQuery.query.limitClause) {
+            results = results.limit(mongoQuery.query.limitClause.limit)
+        }
+        return new MongoQueryResult(mongoIterable: results)
+    }
+
+    private DBCursor queryDB(MongoQuery query) {
+        if (!query.selectParams) {
+            return getCollection(query).find(query.whereClauseParams)
+        }
+        return getCollection(query).find(query.whereClauseParams, query.selectParams)
+    }
 }

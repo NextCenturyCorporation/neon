@@ -27,5 +27,5 @@ package com.ncc.neon.query.clauses
  */
 class LimitClause {
 
-    def limit
+    int limit
 }

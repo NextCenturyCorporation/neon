@@ -31,8 +31,6 @@ import org.bson.types.ObjectId
  */
 class MongoUtils {
 
-
-
     /**
      * Converts an oid object (typically created from a json mapping) to a mongo  {@link org.bson.types.ObjectId}.
      * If the oid object is already an ObjectId, it is returned as-is.
@@ -54,20 +52,6 @@ class MongoUtils {
             objectIds << toObjectId(it)
         }
         return objectIds
-    }
-
-    /**
-     * Converts a list of values to a list of maps where each map contains a single key value
-     * pair. The key is the is the provided key and the value is value from the list
-     * @param list
-     * @param key
-     */
-    static def listToMaps(list,key) {
-        def maps = []
-        list.each {
-            maps << [(key):it]
-        }
-        return maps
     }
 
     /**

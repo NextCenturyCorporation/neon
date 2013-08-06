@@ -1,7 +1,9 @@
 package com.ncc.neon.query.mongo
 
-import com.mongodb.DBObject
-import com.ncc.neon.query.Query
+import com.mongodb.BasicDBObject
+import com.mongodb.DBCollection
+import com.mongodb.MongoClient
+import com.ncc.neon.query.QueryResult
 
 /*
  * ************************************************************************
@@ -24,14 +26,33 @@ import com.ncc.neon.query.Query
  * PROPRIETARY AND CONFIDENTIAL TRADE SECRET MATERIAL NOT FOR DISCLOSURE OUTSIDE
  * OF NEXT CENTURY CORPORATION EXCEPT BY PRIOR WRITTEN PERMISSION AND WHEN
  * RECIPIENT IS UNDER OBLIGATION TO MAINTAIN SECRECY.
+ *
+ * 
+ * @author tbrooks
  */
 
-/**
- * A container for the information needed to execute a query against a mongo store
- */
-class MongoQuery {
+abstract class AbstractMongoQueryWorker {
+    protected static final ASCENDING_STRING_COMPARATOR = { a, b -> a <=> b }
+    protected static final DESCENDING_STRING_COMPARATOR = { a, b -> b <=> a }
 
-    Query query
-    DBObject whereClauseParams
-    DBObject selectParams
+    private final MongoClient mongo
+
+    protected AbstractMongoQueryWorker(MongoClient mongo) {
+        this.mongo = mongo
+    }
+
+    abstract QueryResult executeQuery(MongoQuery query)
+
+    protected DBCollection getCollection(MongoQuery mongoQuery) {
+        def db = mongo.getDB(mongoQuery.query.dataStoreName)
+        return db.getCollection(mongoQuery.query.databaseName)
+    }
+
+    protected def createSortDBObject(sortClauses) {
+        def sortDBObject = new BasicDBObject()
+        sortClauses.each {
+            sortDBObject.append(it.fieldName, it.sortDirection)
+        }
+        return sortDBObject
+    }
 }

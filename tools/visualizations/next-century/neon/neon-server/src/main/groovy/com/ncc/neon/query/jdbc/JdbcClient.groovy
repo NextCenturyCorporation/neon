@@ -29,18 +29,19 @@ import java.sql.*
 /**
  * Wrapper for JDBC API
  */
-
+//We have to suppress this warning in order to load the the JDBC driver via DriverManager. See NEON-459
+@SuppressWarnings('ClassForName')
 class JdbcClient {
 
     private final Connection connection
     String databaseType
     String dbHostString
 
-    //We have to suppress this warning in order to load the the JDBC driver via DriverManager. See NEON-459
-    @SuppressWarnings('ClassForName')
+
     JdbcClient(String driverName, String databaseType, String databaseName, String dbHostString) {
         this.databaseType = databaseType
         this.dbHostString = dbHostString
+
         Class.forName(driverName)
         this.connection = DriverManager.getConnection("jdbc:" + databaseType + "://" + dbHostString + "/" + databaseName, "", "")
     }

@@ -1,15 +1,19 @@
 package com.ncc.neon.query.mongo
 
-import com.mongodb.BasicDBObject
 import com.mongodb.DB
-import com.mongodb.DBObject
 import com.mongodb.MongoClient
-import com.ncc.neon.query.AbstractQueryExecutor
+import com.ncc.neon.query.Query
+import com.ncc.neon.query.QueryExecutor
+import com.ncc.neon.query.QueryGroup
+import com.ncc.neon.query.QueryGroupResult
 import com.ncc.neon.query.QueryResult
-import com.ncc.neon.query.clauses.SortOrder
+import com.ncc.neon.query.QueryUtils
+import com.ncc.neon.query.clauses.SingularWhereClause
+import com.ncc.neon.query.filter.Filter
+import com.ncc.neon.query.filter.FilterState
+import com.ncc.neon.selection.SelectionManager
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
-
 /*
  * ************************************************************************
  * Copyright (c), 2013 Next Century Corporation. All Rights Reserved.
@@ -36,12 +40,12 @@ import org.slf4j.LoggerFactory
 /**
  * Executes queries against a mongo data store
  */
-class MongoQueryExecutor extends AbstractQueryExecutor {
+class MongoQueryExecutor implements QueryExecutor {
 
-    private static final ASCENDING_STRING_COMPARATOR = { a, b -> a <=> b }
-    private static final DESCENDING_STRING_COMPARATOR = { a, b -> b <=> a }
     private static final Logger LOGGER = LoggerFactory.getLogger(MongoQueryExecutor)
 
+    private final SelectionManager selectionManager = new SelectionManager()
+    private final FilterState filterState = new FilterState()
     private final MongoClient mongo
 
     MongoQueryExecutor(MongoClient mongo) {
@@ -49,97 +53,37 @@ class MongoQueryExecutor extends AbstractQueryExecutor {
     }
 
     @Override
-    protected QueryResult doExecuteQuery(mongoQuery) {
-
-        def collection = this.getCollection(mongoQuery)
-        def result
-
-        if (mongoQuery.distinctClause) {
-            result = executeDistinctQuery(collection, mongoQuery)
-        } else if (mongoQuery.groupByClauses) {
-            result = executeGroupByQuery(collection, mongoQuery)
-        } else {
-            result = executeSimpleQuery(collection, mongoQuery)
-        }
-
-        return new MongoQueryResult(mongoIterable: result)
+    QueryResult execute(Query query, boolean includedFiltered) {
+        MongoQuery mongoQuery = convertQueryIntoMongoQuery(query, includedFiltered)
+        AbstractMongoQueryWorker worker = createMongoQueryWorker(query)
+        worker.executeQuery(mongoQuery)
     }
 
-    private def executeSimpleQuery(collection, mongoQuery) {
-        def fields = createFieldsDbObject(mongoQuery)
-        def results = collection.find(mongoQuery.dbObject, fields)
-        if (mongoQuery.sortClauses) {
-            results = results.sort(createSortDBObject(mongoQuery.sortClauses))
+    private AbstractMongoQueryWorker createMongoQueryWorker(Query query) {
+        if (query.distinctClause) {
+            LOGGER.debug("Using distinct mongo query worker")
+            return new DistinctMongoQueryQueryWorker(mongo)
         }
-        if (mongoQuery.limitClause) {
-            results = results.limit(mongoQuery.limitClause.limit)
+        else if (query.aggregates || query.groupByClauses) {
+            LOGGER.debug("Using aggregate mongo query worker")
+            return new AggregateMongoQueryWorker(mongo)
         }
-        return results
-    }
-
-    /**
-     * Creates a db object that specifies the fields to select from the documents. If all fields were specified,
-     * an empty DBObject will be returned, which indicates to return all fields
-     * @param mongoQuery
-     */
-    private static def createFieldsDbObject(mongoQuery) {
-        def dbObject = new BasicDBObject()
-        def selectClause = mongoQuery.selectClause
-        if (!selectClause.selectAllFields) {
-            selectClause.fields.each {
-                dbObject[it] = 1
-            }
-        }
-        return dbObject
-    }
-
-    private static def createSortDBObject(sortClauses) {
-        def sortDBObject = new BasicDBObject()
-        sortClauses.each {
-            sortDBObject.append(it.fieldName, it.sortDirection)
-        }
-        return sortDBObject
-    }
-
-    private def executeDistinctQuery(collection, mongoQuery) {
-        def distinctClause = mongoQuery.distinctClause
-        def distinct = collection.distinct(distinctClause.fieldName, mongoQuery.dbObject)
-        def distinctFieldName = distinctClause.fieldName
-        if (mongoQuery.sortClauses) {
-            // for now we only have one value in the distinct clause, so just see if that was provided as a sort field
-            def sortClause = mongoQuery.sortClauses.find { it.fieldName == distinctFieldName }
-            if (sortClause) {
-                def comparator = sortClause.sortOrder == SortOrder.ASCENDING ? ASCENDING_STRING_COMPARATOR : DESCENDING_STRING_COMPARATOR
-                distinct.sort comparator
-            } else {
-                LOGGER.warn("Field {} was specified in the distinct clause not but found in the sort clauses {}", distinctFieldName, mongoQuery.sortClauses.collect { it.fieldName })
-            }
-        }
-
-        return distinct
-    }
-
-    private def executeGroupByQuery(collection, mongoQuery) {
-        // the "match" clause is the query. the "additionalClauses" are the aggregate/group/sort clauses
-        def match = new BasicDBObject('$match', mongoQuery.dbObject)
-        def additionalClauses = MongoAggregationClauseBuilder.buildAggregateClauses(mongoQuery.selectClause, mongoQuery.aggregateClauses, mongoQuery.groupByClauses)
-        if (mongoQuery.sortClauses) {
-            additionalClauses << new BasicDBObject('$sort', createSortDBObject(mongoQuery.sortClauses))
-        }
-        if (mongoQuery.limitClause) {
-            additionalClauses << new BasicDBObject('$limit', mongoQuery.limitClause.limit)
-        }
-        return collection.aggregate(match, additionalClauses as DBObject[]).results()
-    }
-
-    private def getCollection(mongoQuery) {
-        def selectClause = mongoQuery.selectClause
-        def db = mongo.getDB(selectClause.dataStoreName)
-        return db.getCollection(selectClause.databaseName)
+        LOGGER.debug("Using simple mongo query worker")
+        return new SimpleMongoQueryQueryWorker(mongo)
     }
 
     @Override
-    public Collection<String> getFieldNames(String dataStoreName, String databaseName) {
+    QueryResult execute(QueryGroup query, boolean includeFiltered) {
+        QueryGroupResult queryGroupResult = new QueryGroupResult()
+        query.namedQueries.each {
+            def result = execute(it.query, includeFiltered)
+            queryGroupResult.namedResults[it.name] = result
+        }
+        return queryGroupResult
+    }
+
+    @Override
+    Collection<String> getFieldNames(String dataStoreName, String databaseName) {
         def db = mongo.getDB(dataStoreName)
         def collection = db.getCollection(databaseName)
         def result = collection.findOne()
@@ -147,18 +91,55 @@ class MongoQueryExecutor extends AbstractQueryExecutor {
     }
 
     @Override
-    protected def transformIdFields(Collection<Object> ids) {
-        return MongoUtils.oidsToObjectIds(ids)
+    UUID addFilter(Filter filter) {
+        return filterState.addFilter(filter)
     }
 
     @Override
-    protected def getIdFieldName() {
-        return "_id"
+    void removeFilter(UUID id) {
+        filterState.removeFilter(id)
     }
 
     @Override
-    protected createQueryBuilder() {
-        return new MongoQueryBuilder()
+    void clearFilters() {
+        filterState.clearFilters()
+    }
+
+    @Override
+    void setSelectionWhere(Filter filter) {
+        def res = execute(QueryUtils.queryFromFilter(filter), false)
+        def idField = this.idFieldName
+        def ids = res.collect { it.getFieldValue(idField) }
+        selectionManager.replaceSelectionWith(ids)
+    }
+
+    @Override
+    void setSelectedIds(Collection<Object> ids) {
+        selectionManager.replaceSelectionWith(transformIdFields(ids))
+    }
+
+    @Override
+    void addSelectedIds(Collection<Object> ids) {
+        selectionManager.addIds(transformIdFields(ids))
+    }
+
+    @Override
+    void removeSelectedIds(Collection<Object> ids) {
+        selectionManager.removeIds(transformIdFields(ids))
+    }
+
+    @Override
+    void clearSelection() {
+        selectionManager.clear()
+    }
+
+    @Override
+    QueryResult getSelectionWhere(Filter filter) {
+        MongoConversionStrategy mongoConversionStrategy = new MongoConversionStrategy(filterState)
+        Query query = QueryUtils.queryFromFilter(filter)
+        MongoQuery mongoQuery = mongoConversionStrategy.convertQuery(query, createWhereClauseFromSelection.curry(getIdFieldName()))
+        AbstractMongoQueryWorker worker = createMongoQueryWorker(query)
+        worker.executeQuery(mongoQuery)
     }
 
     @Override
@@ -170,5 +151,26 @@ class MongoQueryExecutor extends AbstractQueryExecutor {
     List<String> showTables(String dbName) {
         DB database = mongo.getDB(dbName)
         database.getCollectionNames().collect { it }
+    }
+
+    private String getIdFieldName() {
+        return "_id"
+    }
+
+    private def transformIdFields(Collection<Object> ids) {
+        return MongoUtils.oidsToObjectIds(ids)
+    }
+
+    private MongoQuery convertQueryIntoMongoQuery(Query query, boolean includedFiltered){
+        MongoConversionStrategy mongoConversionStrategy = new MongoConversionStrategy(filterState)
+        if(includedFiltered){
+            return mongoConversionStrategy.convertQuery(query)
+        }
+        return mongoConversionStrategy.convertQueryWithFilters(query)
+    }
+
+    private final def createWhereClauseFromSelection = { String idFieldName ->
+        def selectedIds = selectionManager.selectedIds
+        return new SingularWhereClause(lhs: idFieldName, operator: 'in', rhs: selectedIds)
     }
 }
