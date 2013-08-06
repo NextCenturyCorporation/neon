@@ -1,6 +1,5 @@
 import static com.ncc.common.JSScriptReplacer.*
 
-apply from: "gradle/wrapper.gradle"
 defaultTasks 'clean', 'build'
 
 repositories {
@@ -28,7 +27,6 @@ subprojects {
     apply plugin: 'idea'
     apply plugin: 'jetty'
     apply from: "${rootDir}/gradle/js.gradle"
-    apply from: "${rootDir}/gradle/wrapper.gradle"
 
     war {
         description = 'Creates a war file for the project'
