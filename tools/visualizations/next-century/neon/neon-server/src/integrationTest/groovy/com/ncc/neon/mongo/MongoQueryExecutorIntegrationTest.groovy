@@ -230,6 +230,17 @@ class MongoQueryExecutorIntegrationTest {
     }
 
     @Test
+    void "distinct with limit"() {
+        def distinctStateClause = new DistinctClause(fieldName: 'state')
+        def limitClause = new LimitClause(limit: 2)
+        def expected = ["DC", "VA"]
+        def result = mongoQueryExecutor.execute(new Query(filter: ALL_DATA_FILTER,
+                distinctClause: distinctStateClause, limitClause: limitClause), false).mongoIterable
+
+        AssertUtils.assertEqualCollections(expected, result)
+    }
+
+    @Test
     void "set selection WHERE"() {
         def dcStateFilter = new Filter(dataStoreName: DATASTORE_NAME, databaseName: DATABASE_NAME, whereClause: new SingularWhereClause(lhs: 'state', operator: '=', rhs: 'DC'))
         mongoQueryExecutor.setSelectionWhere(dcStateFilter)

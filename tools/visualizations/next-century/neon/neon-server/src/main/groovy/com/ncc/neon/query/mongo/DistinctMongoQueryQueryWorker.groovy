@@ -2,9 +2,8 @@ package com.ncc.neon.query.mongo
 
 import com.mongodb.MongoClient
 import com.ncc.neon.query.QueryResult
+import com.ncc.neon.query.clauses.SortClause
 import com.ncc.neon.query.clauses.SortOrder
-import org.slf4j.Logger
-import org.slf4j.LoggerFactory
 
 /*
  * ************************************************************************
@@ -34,8 +33,6 @@ import org.slf4j.LoggerFactory
 
 class DistinctMongoQueryQueryWorker extends AbstractMongoQueryWorker {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(DistinctMongoQueryQueryWorker)
-
     DistinctMongoQueryQueryWorker(MongoClient mongo) {
         super(mongo)
     }
@@ -44,20 +41,30 @@ class DistinctMongoQueryQueryWorker extends AbstractMongoQueryWorker {
     QueryResult executeQuery(MongoQuery mongoQuery) {
         def distinctClause = mongoQuery.query.distinctClause
         def distinct = getCollection(mongoQuery).distinct(distinctClause.fieldName, mongoQuery.whereClauseParams)
-        def distinctFieldName = distinctClause.fieldName
 
-        if (mongoQuery.query.sortClauses) {
+        sortDistinctResults(mongoQuery, distinct)
+        distinct = limitDistinctResults(mongoQuery, distinct)
+
+        return new MongoQueryResult(mongoIterable: distinct)
+    }
+
+    private List limitDistinctResults(MongoQuery mongoQuery, List distinct) {
+        if (mongoQuery.query.limitClause) {
+            return distinct[0..<mongoQuery.query.limitClause.limit]
+        }
+        return distinct
+    }
+
+    private void sortDistinctResults(MongoQuery mongoQuery, List distinct) {
+        def distinctFieldName = mongoQuery.query.distinctClause.fieldName
+        List<SortClause> sortClauses = mongoQuery.query.sortClauses
+        if (sortClauses) {
             // for now we only have one value in the distinct clause, so just see if that was provided as a sort field
-            def sortClause = mongoQuery.query.sortClauses.find { it.fieldName == distinctFieldName }
+            def sortClause = sortClauses.find { it.fieldName == distinctFieldName }
             if (sortClause) {
                 def comparator = sortClause.sortOrder == SortOrder.ASCENDING ? ASCENDING_STRING_COMPARATOR : DESCENDING_STRING_COMPARATOR
                 distinct.sort comparator
             }
-            else {
-                LOGGER.warn("Field {} was specified in the distinct clause not but found in the sort clauses {}", distinctFieldName, mongoQuery.sortClauses.collect { it.fieldName })
-            }
         }
-
-        return new MongoQueryResult(mongoIterable: distinct)
     }
 }
