@@ -124,7 +124,6 @@ test {
     systemProperties props
 }
 
-
 task integrationTests(type: Test) {
     dependsOn 'assemble', 'integrationTestClasses', 'generateMongoJson'
 
@@ -139,6 +138,13 @@ task integrationTests(type: Test) {
 
     props['integration.test'] = true
     systemProperties props
+}
+
+task jacocoFullTestReport(type: JacocoReport){
+    dependsOn integrationTests
+    executionData = files("$buildDir/jacoco/integrationTests.exec", "$buildDir/jacoco/test.exec")
+    classDirectories = files(sourceSets.main.output.classesDir)
+    sourceDirectories = files(sourceSets.main.output.classesDir)
 }
 
 task transformTestWebService(type: org.gradle.api.plugins.jetty.JettyRun) {
@@ -194,6 +200,7 @@ gradle.taskGraph.afterTask { task ->
 task generateMongoJson {
     MongoJSONGenerator.generateMongoJson(testDataDir, "${testDataDir}/mongo-json")
 }
+
 
 def insertAcceptanceTestData() {
     def db = getMongo().getDB("acceptanceTest")
