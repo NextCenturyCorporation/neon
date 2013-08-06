@@ -31,6 +31,10 @@ import com.ncc.neon.query.filter.FilterState
  * @author tbrooks
  */
 
+/**
+ * Converts a Query object into a hive based query.
+ */
+
 class HiveConversionStrategy implements QueryConversionStrategy{
 
     private final FilterState filterState
@@ -87,7 +91,7 @@ class HiveConversionStrategy implements QueryConversionStrategy{
     private void applySortByStatement(StringBuilder builder, Query query){
         List sortClauses = query.sortClauses
         if (sortClauses) {
-            builder << " order by " << sortClauses.collect { it.fieldName + (it.sortDirection == SortOrder.ASCENDING) ? " ASC" : " DESC" }.join(",")
+            builder << " order by " << sortClauses.collect { it.fieldName + ((it.sortOrder == SortOrder.ASCENDING) ? " ASC" : " DESC") }.join(",")
         }
     }
 

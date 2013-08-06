@@ -31,6 +31,11 @@ import com.ncc.neon.query.QueryResult
  * @author tbrooks
  */
 
+/**
+ * Mongo has different operations for distinct, aggregate, and find. Subclasses
+ * perform these different operations
+ */
+
 abstract class AbstractMongoQueryWorker {
     protected static final ASCENDING_STRING_COMPARATOR = { a, b -> a <=> b }
     protected static final DESCENDING_STRING_COMPARATOR = { a, b -> b <=> a }
