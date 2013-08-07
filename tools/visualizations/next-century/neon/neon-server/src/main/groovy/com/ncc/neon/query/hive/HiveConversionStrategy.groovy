@@ -78,7 +78,7 @@ class HiveConversionStrategy implements QueryConversionStrategy{
     }
 
     private void applyGroupByStatement(StringBuilder builder, Query query){
-        List groupByClauses = []
+        def groupByClauses = []
         groupByClauses.addAll(query.groupByClauses)
         groupByClauses.addAll(query.aggregates)
 
@@ -110,6 +110,7 @@ class HiveConversionStrategy implements QueryConversionStrategy{
         if (query.filter.whereClause) {
             whereClauses << query.filter.whereClause
         }
+        return whereClauses
     }
 
     private def createWhereClausesForFilters(query) {

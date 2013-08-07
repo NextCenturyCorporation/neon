@@ -87,7 +87,6 @@ class MongoConvertQueryWithFiltersTest {
         filterState.addFilter(filterWithWhere)
     }
 
-
     private MongoQuery whenExecutingConvertQueryWithFilters(Query query) {
         MongoConversionStrategy conversionStrategy = new MongoConversionStrategy(filterState)
         conversionStrategy.convertQueryWithFilters(query)

@@ -37,7 +37,6 @@ class JdbcClient {
     String databaseType
     String dbHostString
 
-
     JdbcClient(String driverName, String databaseType, String databaseName, String dbHostString) {
         this.databaseType = databaseType
         this.dbHostString = dbHostString
@@ -46,39 +45,57 @@ class JdbcClient {
         this.connection = DriverManager.getConnection("jdbc:" + databaseType + "://" + dbHostString + "/" + databaseName, "", "")
     }
 
-    public List<Map> executeQuery(String query) {
-        Statement statement = connection.createStatement()
-        ResultSet resultSet = statement.executeQuery(query)
-        List<Map> resultList = []
+    public List executeQuery(String query) {
+        //Synchonzied due to https://issues.apache.org/jira/browse/HIVE-1482
+        synchronized(connection){
+            Statement statement
+            ResultSet resultSet
+            try{
+                statement = connection.createStatement()
+                resultSet = statement.executeQuery(query)
+                return createMappedValuesFromResultSet(resultSet)
+            }
+            finally{
+                resultSet?.close()
+                statement?.close()
+            }
+        }
+        return []
+    }
+
+    private List createMappedValuesFromResultSet(ResultSet resultSet) {
+        List resultList = []
         ResultSetMetaData metadata = resultSet.metaData
         int columnCount = metadata.columnCount
         while (resultSet.next()) {
-            Map<String, Object> result = new HashMap<String, Object>() {}
+            def result = [:]
             for (ii in 1..columnCount) {
                 result[metadata.getColumnName(ii)] = resultSet.getObject(ii)
             }
             resultList.add(result)
         }
-        resultSet.close()
-        statement.close()
         return resultList
     }
 
     public void execute(String query) {
-        Statement statement = connection.createStatement()
-        statement.execute(query)
-        statement.close()
+        Statement statement
+        try{
+            statement = connection.createStatement()
+            statement.execute(query)
+        }
+        finally{
+            statement?.close()
+        }
     }
 
     public List<String> getColumnNames(String dataStoreName, String databaseName) {
-        DatabaseMetaData metadata = connection.getMetaData()
-        ResultSet resultSet = metadata.getColumns(dataStoreName, null, databaseName, null)
-        List<String> columnNames = []
-        while (resultSet.next()) {
-            columnNames << resultSet.getString("COLUMN_NAME")
-        }
+        String query = "select * from ${dataStoreName}.${databaseName}"
 
-        return columnNames
+        List list = executeQuery(query)
+        if(!list){
+            return []
+        }
+        list[0].keySet().asList()
     }
 
     public void close(){
