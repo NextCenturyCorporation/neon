@@ -1,7 +1,4 @@
-package com.ncc.neon.query.filter
-
-import groovy.transform.EqualsAndHashCode
-import groovy.transform.ToString
+package com.ncc.neon.connect
 
 /*
  * ************************************************************************
@@ -24,19 +21,13 @@ import groovy.transform.ToString
  * PROPRIETARY AND CONFIDENTIAL TRADE SECRET MATERIAL NOT FOR DISCLOSURE OUTSIDE
  * OF NEXT CENTURY CORPORATION EXCEPT BY PRIOR WRITTEN PERMISSION AND WHEN
  * RECIPIENT IS UNDER OBLIGATION TO MAINTAIN SECRECY.
- */
-
-/**
- * A DataSet is a dataStore, like hive or mongo and a database name.
  *
- * The database name is optional for some DataSets.
+ * 
+ * @author tbrooks
  */
-@EqualsAndHashCode
-@ToString(includeNames = true)
-class DataSet implements Serializable {
 
-    private static final long serialVersionUID = 1300981992049008425L
-    String databaseName
-    String tableName
+class DataSource {
+    static final String MONGO = "mongo"
+    static final String HIVE = "hive"
 
 }

@@ -1,15 +1,12 @@
 package com.ncc.neon.query.mongo
-
 import com.mongodb.BasicDBObject
 import com.ncc.neon.query.Query
 import com.ncc.neon.query.clauses.SingularWhereClause
-import com.ncc.neon.query.filter.DataSet
 import com.ncc.neon.query.filter.Filter
 import com.ncc.neon.query.filter.FilterState
 import org.junit.After
 import org.junit.Before
 import org.junit.Test
-
 /*
  * ************************************************************************
  * Copyright (c), 2013 Next Century Corporation. All Rights Reserved.
@@ -44,14 +41,14 @@ class MongoConvertQueryWithFiltersTest {
 
     @Before
     void setup() {
-        simpleFilter = new Filter(dataStoreName: DataSet.MONGO, databaseName: "test")
+        simpleFilter = new Filter(databaseName: "database", tableName: "test")
         simpleQuery = new Query(filter: simpleFilter)
         filterState = new FilterState()
     }
 
     @After
     void teardown(){
-        simpleFilter = new Filter(dataStoreName: DataSet.MONGO, databaseName: "test")
+        simpleFilter = new Filter(databaseName: "database", tableName: "test")
         simpleQuery = new Query(filter: simpleFilter)
         filterState = new FilterState()
     }
@@ -83,7 +80,7 @@ class MongoConvertQueryWithFiltersTest {
 
     private void givenFilterStateHasOneFilter() {
         SingularWhereClause whereClause = new SingularWhereClause(lhs: "column", operator: "=", rhs: "test")
-        Filter filterWithWhere = new Filter(dataStoreName: simpleFilter.dataStoreName, databaseName: simpleFilter.databaseName, whereClause: whereClause)
+        Filter filterWithWhere = new Filter(databaseName: simpleFilter.databaseName, tableName: simpleFilter.tableName, whereClause: whereClause)
         filterState.addFilter(filterWithWhere)
     }
 

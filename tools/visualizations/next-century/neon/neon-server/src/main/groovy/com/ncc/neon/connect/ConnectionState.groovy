@@ -1,6 +1,5 @@
 package com.ncc.neon.connect
 import com.ncc.neon.query.QueryExecutor
-import com.ncc.neon.query.filter.DataSet
 import org.springframework.context.annotation.Scope
 import org.springframework.context.annotation.ScopedProxyMode
 import org.springframework.web.context.WebApplicationContext
@@ -73,10 +72,10 @@ class ConnectionState implements Serializable {
 
     private void setupConnection(ConnectionInfo info) {
         switch (info.dataStoreName) {
-            case DataSet.MONGO:
+            case DataSource.MONGO:
                 connection = new MongoConnection()
                 break
-            case DataSet.HIVE:
+            case DataSource.HIVE:
                 connection = new HiveConnection()
                 break
             default:

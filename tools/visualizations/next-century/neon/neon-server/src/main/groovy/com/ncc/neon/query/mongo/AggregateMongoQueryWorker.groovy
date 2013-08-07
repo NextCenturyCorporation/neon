@@ -53,7 +53,7 @@ class AggregateMongoQueryWorker extends AbstractMongoQueryWorker{
     }
 
     private def createSelectClause(MongoQuery mongoQuery){
-        def selectClause = new SelectClause(dataStoreName: mongoQuery.query.dataStoreName, databaseName: mongoQuery.query.databaseName)
+        def selectClause = new SelectClause(databaseName: mongoQuery.query.databaseName, tableName: mongoQuery.query.tableName)
         if (mongoQuery.query.fields) {
             selectClause.fields = mongoQuery.query.fields
         }

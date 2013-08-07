@@ -105,7 +105,7 @@ $(document).ready(function () {
             var groupByYearClause = new neon.query.GroupByFunctionClause(neon.query.YEAR, xAttr, 'year');
 
             var query = new neon.query.Query()
-                .selectFrom(dataStoreName, databaseName)
+                .selectFrom(databaseName, tableName)
                 .where(xAttr, '!=', null)
                 .groupBy(groupByYearClause, groupByMonthClause, groupByDayClause, groupByHourClause);
 
@@ -156,7 +156,7 @@ $(document).ready(function () {
                 var startFilterClause = neon.query.where(xAttr, '>=', startDate);
                 var endFilterClause = neon.query.where(xAttr, '<', endDate);
                 var filterClause = neon.query.and(startFilterClause, endFilterClause);
-                var filter = new neon.query.Filter().selectFrom(dataStoreName, databaseName).where(filterClause);
+                var filter = new neon.query.Filter().selectFrom(databaseName, tableName).where(filterClause);
 
 
                 if (filterId) {

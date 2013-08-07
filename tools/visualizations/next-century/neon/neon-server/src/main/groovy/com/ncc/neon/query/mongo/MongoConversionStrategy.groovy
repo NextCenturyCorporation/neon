@@ -89,7 +89,7 @@ class MongoConversionStrategy implements QueryConversionStrategy {
 
     private def createWhereClausesForFilters(query) {
         def whereClauses = []
-        def filters = filterState.getFiltersForDataset(query.dataStoreName, query.databaseName)
+        def filters = filterState.getFiltersForDataset(query.databaseName, query.tableName)
         if (!filters.isEmpty()) {
             filters.each {
                 whereClauses << it.whereClause

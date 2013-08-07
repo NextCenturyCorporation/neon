@@ -1,7 +1,7 @@
 package com.ncc.neon.config
 import com.ncc.neon.connect.ConnectionInfo
 import com.ncc.neon.connect.ConnectionState
-import com.ncc.neon.query.filter.DataSet
+import com.ncc.neon.connect.DataSource
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
@@ -61,7 +61,7 @@ class ProductionAppContext {
     ConnectionState connectionState(){
         def hostsString = System.getProperty("mongo.hosts", "localhost")
         ConnectionState connectionState = new ConnectionState()
-        ConnectionInfo info = new ConnectionInfo(dataStoreName: DataSet.MONGO, connectionUrl: hostsString)
+        ConnectionInfo info = new ConnectionInfo(dataStoreName: DataSource.MONGO, connectionUrl: hostsString)
         connectionState.createConnection(info)
         return connectionState
     }

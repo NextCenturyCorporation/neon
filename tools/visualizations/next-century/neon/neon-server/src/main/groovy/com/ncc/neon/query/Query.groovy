@@ -49,12 +49,12 @@ class Query {
     LimitClause limitClause
     List<String> fields = SelectClause.ALL_FIELDS
 
-    def getDataStoreName() {
-        filter.dataStoreName
-    }
-
     def getDatabaseName() {
         filter.databaseName
+    }
+
+    def getTableName() {
+        filter.tableName
     }
 
 }

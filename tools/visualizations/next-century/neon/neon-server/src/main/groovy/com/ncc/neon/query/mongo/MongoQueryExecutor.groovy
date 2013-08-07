@@ -83,9 +83,9 @@ class MongoQueryExecutor implements QueryExecutor {
     }
 
     @Override
-    Collection<String> getFieldNames(String dataStoreName, String databaseName) {
-        def db = mongo.getDB(dataStoreName)
-        def collection = db.getCollection(databaseName)
+    Collection<String> getFieldNames(String databaseName, String tableName) {
+        def db = mongo.getDB(databaseName)
+        def collection = db.getCollection(tableName)
         def result = collection.findOne()
         return result.keySet()
     }

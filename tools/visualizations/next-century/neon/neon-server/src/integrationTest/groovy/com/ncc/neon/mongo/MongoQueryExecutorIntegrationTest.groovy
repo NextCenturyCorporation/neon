@@ -55,15 +55,15 @@ import org.springframework.test.context.web.WebAppConfiguration
 @WebAppConfiguration
 class MongoQueryExecutorIntegrationTest {
 
-    private static final String DATASTORE_NAME = 'integrationTest'
+    private static final String DATABASE_NAME = 'integrationTest'
 
-    private static final String DATABASE_NAME = 'records'
+    private static final String TABLE_NAME = 'records'
 
     /** all of the data in the test file */
     private static final ALL_DATA = readJson('data.json')
 
     /** a filter that just includes all of the data (no WHERE clause) */
-    private static final ALL_DATA_FILTER = new Filter(dataStoreName: DATASTORE_NAME, databaseName: DATABASE_NAME)
+    private static final ALL_DATA_FILTER = new Filter(databaseName: DATABASE_NAME, tableName: TABLE_NAME)
 
     /** a simple query that returns all of the data */
     private static final ALL_DATA_QUERY = new Query(filter: ALL_DATA_FILTER)
@@ -110,8 +110,8 @@ class MongoQueryExecutorIntegrationTest {
 
 
     private static void insertData() {
-        def db = MongoIntegrationTestContext.MONGO.getDB(DATASTORE_NAME)
-        def collection = db.getCollection(DATABASE_NAME)
+        def db = MongoIntegrationTestContext.MONGO.getDB(DATABASE_NAME)
+        def collection = db.getCollection(TABLE_NAME)
         def dbList = parseJSON("/mongo-json/data.json")
         collection.insert(dbList)
         collection.ensureIndex(new BasicDBObject("location", "2dsphere"))
@@ -123,13 +123,13 @@ class MongoQueryExecutorIntegrationTest {
     }
 
     private static void deleteData() {
-        def db = MongoIntegrationTestContext.MONGO.getDB(DATASTORE_NAME)
+        def db = MongoIntegrationTestContext.MONGO.getDB(DATABASE_NAME)
         db.dropDatabase()
     }
 
     @Test
     void "field names"() {
-        def fieldNames = mongoQueryExecutor.getFieldNames(DATASTORE_NAME, DATABASE_NAME)
+        def fieldNames = mongoQueryExecutor.getFieldNames(DATABASE_NAME, TABLE_NAME)
         def expected = ['_id', 'firstname', 'lastname', 'city', 'state', 'salary', 'hiredate', 'location']
         AssertUtils.assertEqualCollections(expected, fieldNames)
     }
@@ -145,7 +145,7 @@ class MongoQueryExecutorIntegrationTest {
         def whereStateClause = new OrWhereClause(whereClauses: [new SingularWhereClause(lhs: 'state', operator: '=', rhs: 'VA'), new SingularWhereClause(lhs: 'state', operator: '=', rhs: 'DC')])
         def salaryAndStateClause = new AndWhereClause(whereClauses: [new SingularWhereClause(lhs: 'salary', operator: '>=', rhs: 100000), whereStateClause])
 
-        def filter = new Filter(dataStoreName: DATASTORE_NAME, databaseName: DATABASE_NAME, whereClause: salaryAndStateClause)
+        def filter = new Filter(databaseName: DATABASE_NAME, tableName: TABLE_NAME, whereClause: salaryAndStateClause)
         def expected = rows(0, 2, 4)
         def result = mongoQueryExecutor.execute(new Query(filter: filter), false)
         assertQueryResult(expected, result)
@@ -242,7 +242,7 @@ class MongoQueryExecutorIntegrationTest {
 
     @Test
     void "set selection WHERE"() {
-        def dcStateFilter = new Filter(dataStoreName: DATASTORE_NAME, databaseName: DATABASE_NAME, whereClause: new SingularWhereClause(lhs: 'state', operator: '=', rhs: 'DC'))
+        def dcStateFilter = new Filter(databaseName: DATABASE_NAME, tableName: TABLE_NAME, whereClause: new SingularWhereClause(lhs: 'state', operator: '=', rhs: 'DC'))
         mongoQueryExecutor.setSelectionWhere(dcStateFilter)
 
         def result = mongoQueryExecutor.getSelectionWhere(ALL_DATA_FILTER)
@@ -298,7 +298,7 @@ class MongoQueryExecutorIntegrationTest {
     @Test
     @SuppressWarnings('MethodSize') // In this case, allow the long method because it is necessary to add a filter before removing the filter and having this all in one method maeks the test read more smoothly
     void "apply and remove filter"() {
-        def dcStateFilter = new Filter(dataStoreName: DATASTORE_NAME, databaseName: DATABASE_NAME, whereClause: new SingularWhereClause(lhs: 'state', operator: '=', rhs: 'DC'))
+        def dcStateFilter = new Filter(databaseName: DATABASE_NAME, tableName: TABLE_NAME, whereClause: new SingularWhereClause(lhs: 'state', operator: '=', rhs: 'DC'))
 
         // apply a filter and make sure only that data is returned
         def dcFilterId = mongoQueryExecutor.addFilter(dcStateFilter)
@@ -311,7 +311,7 @@ class MongoQueryExecutorIntegrationTest {
         assertQueryResult(ALL_DATA, allDataResult)
 
         // apply another filter and make sure both are applied
-        def salaryFilter = new Filter(dataStoreName: DATASTORE_NAME, databaseName: DATABASE_NAME, whereClause: new SingularWhereClause(lhs: 'salary', operator: '>', rhs: 85000))
+        def salaryFilter = new Filter(databaseName: DATABASE_NAME, tableName: TABLE_NAME, whereClause: new SingularWhereClause(lhs: 'salary', operator: '>', rhs: 85000))
         def salaryFilterId = mongoQueryExecutor.addFilter(salaryFilter)
 
         def dcStateWithSalaryFilterRecords = rows(2, 5)
@@ -330,7 +330,7 @@ class MongoQueryExecutorIntegrationTest {
 
     @Test
     void "clear filters"() {
-        def dcStateFilter = new Filter(dataStoreName: DATASTORE_NAME, databaseName: DATABASE_NAME, whereClause: new SingularWhereClause(lhs: 'state', operator: '=', rhs: 'DC'))
+        def dcStateFilter = new Filter(databaseName: DATABASE_NAME, tableName: TABLE_NAME, whereClause: new SingularWhereClause(lhs: 'state', operator: '=', rhs: 'DC'))
 
         // addFilter is tested separately, so we can be confident the filter is added properly
         mongoQueryExecutor.addFilter(dcStateFilter)
@@ -349,7 +349,7 @@ class MongoQueryExecutorIntegrationTest {
         def salaryAggregateClause = new AggregateClause(name: 'salary_sum', operation: 'sum', field: 'salary')
         def sortByMonth = new SortClause(fieldName: 'hire_month', sortOrder: SortOrder.ASCENDING)
 
-        def query = new Query(filter: new Filter(dataStoreName: DATASTORE_NAME, databaseName: DATABASE_NAME),
+        def query = new Query(filter: new Filter(databaseName: DATABASE_NAME, tableName: TABLE_NAME),
                 groupByClauses: [groupByMonthClause], aggregates: [salaryAggregateClause], sortClauses: [sortByMonth])
 
         def result = mongoQueryExecutor.execute(query, false)
@@ -361,7 +361,7 @@ class MongoQueryExecutorIntegrationTest {
     @Test
     void "query WHERE less than"() {
         def whereLessThan = new SingularWhereClause(lhs: 'salary', operator: '<', rhs: 61000)
-        def query = new Query(filter: new Filter(dataStoreName: DATASTORE_NAME, databaseName: DATABASE_NAME, whereClause: whereLessThan))
+        def query = new Query(filter: new Filter(databaseName: DATABASE_NAME, tableName: TABLE_NAME, whereClause: whereLessThan))
 
         def expected = rows(3, 7)
         def result = mongoQueryExecutor.execute(query, false)
@@ -371,7 +371,7 @@ class MongoQueryExecutorIntegrationTest {
     @Test
     void "query WHERE less than or equal"() {
         def whereLessThanOrEqual = new SingularWhereClause(lhs: 'salary', operator: '<=', rhs: 60000)
-        def query = new Query(filter: new Filter(dataStoreName: DATASTORE_NAME, databaseName: DATABASE_NAME, whereClause: whereLessThanOrEqual))
+        def query = new Query(filter: new Filter(databaseName: DATABASE_NAME, tableName: TABLE_NAME, whereClause: whereLessThanOrEqual))
         def expected = rows(3, 7)
         def result = mongoQueryExecutor.execute(query, false)
         assertQueryResult(expected, result)
@@ -380,7 +380,7 @@ class MongoQueryExecutorIntegrationTest {
     @Test
     void "query WHERE greater than"() {
         def whereGreaterThan = new SingularWhereClause(lhs: 'salary', operator: '>', rhs: 118000)
-        def query = new Query(filter: new Filter(dataStoreName: DATASTORE_NAME, databaseName: DATABASE_NAME, whereClause: whereGreaterThan))
+        def query = new Query(filter: new Filter(databaseName: DATABASE_NAME, tableName: TABLE_NAME, whereClause: whereGreaterThan))
         def expected = rows(2)
 
         def result = mongoQueryExecutor.execute(query, false)
@@ -390,7 +390,7 @@ class MongoQueryExecutorIntegrationTest {
     @Test
     void "query WHERE greater than or equal"() {
         def whereGreaterThanOrEqual = new SingularWhereClause(lhs: 'salary', operator: '>=', rhs: 118000)
-        def query = new Query(filter: new Filter(dataStoreName: DATASTORE_NAME, databaseName: DATABASE_NAME, whereClause: whereGreaterThanOrEqual))
+        def query = new Query(filter: new Filter(databaseName: DATABASE_NAME, tableName: TABLE_NAME, whereClause: whereGreaterThanOrEqual))
         def expected = rows(2, 4)
         def result = mongoQueryExecutor.execute(query, false)
         assertQueryResult(expected, result)
@@ -399,7 +399,7 @@ class MongoQueryExecutorIntegrationTest {
     @Test
     void "query WHERE not equal"() {
         def whereNotEqual = new SingularWhereClause(lhs: 'state', operator: '!=', rhs: 'VA')
-        def query = new Query(filter: new Filter(dataStoreName: DATASTORE_NAME, databaseName: DATABASE_NAME, whereClause: whereNotEqual))
+        def query = new Query(filter: new Filter(databaseName: DATABASE_NAME, tableName: TABLE_NAME, whereClause: whereNotEqual))
         def expected = rows(1, 2, 5, 6)
         def result = mongoQueryExecutor.execute(query, false)
         assertQueryResult(expected, result)
@@ -408,7 +408,7 @@ class MongoQueryExecutorIntegrationTest {
     @Test
     void "query WHERE IN"() {
         def whereIn = new SingularWhereClause(lhs: 'state', operator: 'in', rhs: ['MD', 'DC'])
-        def query = new Query(filter: new Filter(dataStoreName: DATASTORE_NAME, databaseName: DATABASE_NAME, whereClause: whereIn))
+        def query = new Query(filter: new Filter(databaseName: DATABASE_NAME, tableName: TABLE_NAME, whereClause: whereIn))
         def expected = rows(1, 2, 5, 6)
         def result = mongoQueryExecutor.execute(query, false)
         assertQueryResult(expected, result)
@@ -417,7 +417,7 @@ class MongoQueryExecutorIntegrationTest {
     @Test
     void "query WHERE not IN"() {
         def whereIn = new SingularWhereClause(lhs: 'state', operator: 'notin', rhs: ['VA', 'DC'])
-        def query = new Query(filter: new Filter(dataStoreName: DATASTORE_NAME, databaseName: DATABASE_NAME, whereClause: whereIn))
+        def query = new Query(filter: new Filter(databaseName: DATABASE_NAME, tableName: TABLE_NAME, whereClause: whereIn))
         def expected = rows(6)
         def result = mongoQueryExecutor.execute(query, false)
         assertQueryResult(expected, result)
@@ -446,7 +446,7 @@ class MongoQueryExecutorIntegrationTest {
                 distanceUnit: DistanceUnit.MILE
         )
         def expected = rows(2, 0)
-        def query = new Query(filter: new Filter(dataStoreName: DATASTORE_NAME, databaseName: DATABASE_NAME, whereClause: withinDistance))
+        def query = new Query(filter: new Filter(databaseName: DATABASE_NAME, tableName: TABLE_NAME, whereClause: withinDistance))
 
         def result = mongoQueryExecutor.execute(query, false)
         assertQueryResult(expected, result)
@@ -463,7 +463,7 @@ class MongoQueryExecutorIntegrationTest {
         def expected = rows(2)
         def dcStateClause = new SingularWhereClause(lhs: 'state', operator: '=', rhs: 'DC')
         def whereClause = new AndWhereClause(whereClauses: [withinDistance, dcStateClause])
-        def query = new Query(filter: new Filter(dataStoreName: DATASTORE_NAME, databaseName: DATABASE_NAME, whereClause: whereClause))
+        def query = new Query(filter: new Filter(databaseName: DATABASE_NAME, tableName: TABLE_NAME, whereClause: whereClause))
 
         def result = mongoQueryExecutor.execute(query, false)
         assertQueryResult(expected, result)
@@ -474,13 +474,13 @@ class MongoQueryExecutorIntegrationTest {
     @SuppressWarnings('MethodSize') // there is a lot of setup in this method but it is pretty straightforward and would be harder to read if extracted
     void "query group aggregates results"() {
         def whereClause1 = new SingularWhereClause(lhs: 'state', operator: '=', rhs: 'VA')
-        def query1 = new Query(filter: new Filter(dataStoreName: DATASTORE_NAME, databaseName: DATABASE_NAME, whereClause: whereClause1))
+        def query1 = new Query(filter: new Filter(databaseName: DATABASE_NAME, tableName: TABLE_NAME, whereClause: whereClause1))
 
         def whereClause2 = new SingularWhereClause(lhs: 'state', operator: '=', rhs: 'MD')
-        def query2 = new Query(filter: new Filter(dataStoreName: DATASTORE_NAME, databaseName: DATABASE_NAME, whereClause: whereClause2))
+        def query2 = new Query(filter: new Filter(databaseName: DATABASE_NAME, tableName: TABLE_NAME, whereClause: whereClause2))
 
         def whereClause3 = new SingularWhereClause(lhs: 'state', operator: '=', rhs: 'DC')
-        def query3 = new Query(filter: new Filter(dataStoreName: DATASTORE_NAME, databaseName: DATABASE_NAME, whereClause: whereClause3))
+        def query3 = new Query(filter: new Filter(databaseName: DATABASE_NAME, tableName: TABLE_NAME, whereClause: whereClause3))
 
         def queryGroup = new QueryGroup()
         queryGroup.namedQueries << new NamedQuery(name: 'Virginia', query: query1)
@@ -515,7 +515,7 @@ class MongoQueryExecutorIntegrationTest {
         def sortByMonth = new SortClause(fieldName: 'hire_month', sortOrder: SortOrder.ASCENDING)
 
         def fields = ["hire_month"]
-        def query = new Query(filter: new Filter(dataStoreName: DATASTORE_NAME, databaseName: DATABASE_NAME),
+        def query = new Query(filter: new Filter(databaseName: DATABASE_NAME, tableName: TABLE_NAME),
                 groupByClauses: [groupByMonthClause], aggregates: [salaryAggregateClause], sortClauses: [sortByMonth], fields: fields)
 
         def result = mongoQueryExecutor.execute(query, false)

@@ -47,11 +47,11 @@ public interface QueryExecutor {
 
     /**
      * Gets the names of the fields in the specified dataset
-     * @param dataStoreName
      * @param databaseName
+     * @param tableName
      * @return
      */
-    Collection<String> getFieldNames(String dataStoreName, String databaseName)
+    Collection<String> getFieldNames(String databaseName, String tableName)
 
     /**
      * Applies a filter so only data within this filter is returned by a query

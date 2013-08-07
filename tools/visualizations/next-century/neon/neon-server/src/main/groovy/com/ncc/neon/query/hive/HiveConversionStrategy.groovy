@@ -62,7 +62,7 @@ class HiveConversionStrategy implements QueryConversionStrategy{
     }
 
     private void applySelectFromStatement(StringBuilder builder, Query query) {
-        builder << "select " << query.fields.join(",") << " from " << query.filter.dataStoreName << "." << query.filter.databaseName
+        builder << "select " << query.fields.join(",") << " from " << query.filter.databaseName << "." << query.filter.tableName
     }
 
     private void applyWhereStatement(StringBuilder builder, Query query, boolean includeFilters, Closure additionalWhereClauseGenerator){
@@ -115,7 +115,7 @@ class HiveConversionStrategy implements QueryConversionStrategy{
 
     private def createWhereClausesForFilters(query) {
         def whereClauses = []
-        def filters = filterState.getFiltersForDataset(query.dataStoreName, query.databaseName)
+        def filters = filterState.getFiltersForDataset(query.databaseName, query.tableName)
         if (!filters.isEmpty()) {
             filters.each {
                 whereClauses << it.whereClause

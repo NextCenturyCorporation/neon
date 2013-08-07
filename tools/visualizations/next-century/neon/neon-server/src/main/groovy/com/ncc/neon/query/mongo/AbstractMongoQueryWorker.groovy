@@ -49,8 +49,8 @@ abstract class AbstractMongoQueryWorker {
     abstract QueryResult executeQuery(MongoQuery query)
 
     protected DBCollection getCollection(MongoQuery mongoQuery) {
-        def db = mongo.getDB(mongoQuery.query.dataStoreName)
-        return db.getCollection(mongoQuery.query.databaseName)
+        def db = mongo.getDB(mongoQuery.query.databaseName)
+        return db.getCollection(mongoQuery.query.tableName)
     }
 
     protected def createSortDBObject(sortClauses) {

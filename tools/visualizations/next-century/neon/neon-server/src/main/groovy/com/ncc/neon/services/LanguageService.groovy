@@ -1,10 +1,9 @@
 package com.ncc.neon.services
-
 import com.ncc.neon.connect.ConnectionInfo
 import com.ncc.neon.connect.ConnectionState
+import com.ncc.neon.connect.DataSource
 import com.ncc.neon.language.QueryParser
 import com.ncc.neon.query.Query
-import com.ncc.neon.query.filter.DataSet
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
 
@@ -55,10 +54,10 @@ class LanguageService{
         // TODO NEON-369 Hard coded for illustration, eventually this service will not require this
         ConnectionInfo connectionInfo
         if(datastore.toLowerCase().startsWith("mongo")){
-            connectionInfo = new ConnectionInfo(dataStoreName: DataSet.MONGO, connectionUrl: "localhost")
+            connectionInfo = new ConnectionInfo(dataStoreName: DataSource.MONGO, connectionUrl: "localhost")
         }
         else{
-            connectionInfo = new ConnectionInfo(dataStoreName: DataSet.HIVE, connectionUrl: "xdata2")
+            connectionInfo = new ConnectionInfo(dataStoreName: DataSource.HIVE, connectionUrl: "xdata2")
         }
         connectionState.createConnection(connectionInfo)
 

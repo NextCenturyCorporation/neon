@@ -34,8 +34,8 @@ describe('query mapping', function () {
     var and = neon.query.and;
 
 
-    var dataStoreName = 'acceptanceTest';
-    var databaseName = 'records';
+    var databaseName = 'acceptanceTest';
+    var tableName = 'records';
     var allData;
 
     var dcStateFilter = baseFilter().where('state', '=', 'DC');
@@ -56,7 +56,7 @@ describe('query mapping', function () {
     });
 
     it('get field names', function () {
-        executeAndWait(neon.query.getFieldNames, dataStoreName, databaseName);
+        executeAndWait(neon.query.getFieldNames, databaseName, tableName);
         var expected = ['_id', 'firstname', 'lastname', 'city', 'state', 'salary', 'hiredate', 'location'];
         runs(function () {
             expect(currentResult.fieldNames).toBeArrayWithSameElements(expected);
@@ -530,7 +530,7 @@ describe('query mapping', function () {
      * @return {neon.query.Query}
      */
     function baseQuery() {
-        return new neon.query.Query().selectFrom(dataStoreName, databaseName);
+        return new neon.query.Query().selectFrom(databaseName, tableName);
     }
 
     /**
@@ -538,7 +538,7 @@ describe('query mapping', function () {
      * @return {neon.query.Filter}
      */
     function baseFilter() {
-        return new neon.query.Filter().selectFrom(dataStoreName, databaseName);
+        return new neon.query.Filter().selectFrom(databaseName, tableName);
     }
 
 });

@@ -21,7 +21,7 @@
  * RECIPIENT IS UNDER OBLIGATION TO MAINTAIN SECRECY.
  */
 
-describe('publishing events to OWF channels', function(){
+describe('publishing events to OWF channels', function () {
 
     /** a mock method that stands in for the OWF channel publish method */
     var publishMock;
@@ -32,17 +32,17 @@ describe('publishing events to OWF channels', function(){
     var owfEventPublisher;
     var messageHandler;
 
-    var dataStoreName = 'mockDataStore';
     var databaseName = 'mockDatabaseName';
+    var tableName = 'mockTableName';
 
-    beforeEach(function() {
+    beforeEach(function () {
         publishMock = jasmine.createSpy('message publisher');
         messageHandler = new neon.eventing.MessageHandler();
         owfEventPublisher = new neon.eventing.OWFEventPublisher(messageHandler);
         OWF.Eventing.publish = publishMock;
     });
 
-    afterEach(function() {
+    afterEach(function () {
         // no good way way to do this only once after the whole test suite
         OWF.Eventing.publish = originalPublishMethod;
     });
@@ -55,25 +55,25 @@ describe('publishing events to OWF channels', function(){
      * @param delegateMethodName The underlying query method to which the OWF query executor delegates its calls to. This
      * is used to ensure that the correct method is actually called.
      */
-    function testResultsPublishedToChannel_(channel,queryExecutorMethod,args,delegateMethodName) {
+    function testResultsPublishedToChannel_(channel, queryExecutorMethod, args, delegateMethodName) {
         // not all of the real methods actually return any results , but for this test it doesn't matter
-        var mockResults = {mock:"results"};
-        var delegateSpy = spyOn(neon.query,delegateMethodName).andCallThrough();
+        var mockResults = {mock: "results"};
+        var delegateSpy = spyOn(neon.query, delegateMethodName).andCallThrough();
         neon.mock.AjaxMockUtils.mockNextAjaxCall(mockResults);
-        queryExecutorMethod.apply(owfEventPublisher,args);
+        queryExecutorMethod.apply(owfEventPublisher, args);
         var expectedArgs = {};
-        _.extend(expectedArgs,mockResults);
+        _.extend(expectedArgs, mockResults);
         // the owf query executor appends a source, so add it here
         expectedArgs._source = messageHandler.id;
-        expect(publishMock).toHaveBeenCalledWith(channel,expectedArgs);
+        expect(publishMock).toHaveBeenCalledWith(channel, expectedArgs);
 
         // verify that the correct delegate method on the query executor was actually called
         expect(delegateSpy).toHaveBeenCalled();
     }
 
 
-    it('should publish add filter results', function() {
-        var filter = new neon.query.Filter().selectFrom(dataStoreName,databaseName);
+    it('should publish add filter results', function () {
+        var filter = new neon.query.Filter().selectFrom(databaseName, tableName);
         testResultsPublishedToChannel_(
             neon.eventing.Channels.FILTERS_CHANGED,
             neon.eventing.OWFEventPublisher.prototype.addFilter,
@@ -82,7 +82,7 @@ describe('publishing events to OWF channels', function(){
         );
     });
 
-    it('should publish remove filter results', function() {
+    it('should publish remove filter results', function () {
         testResultsPublishedToChannel_(
             neon.eventing.Channels.FILTERS_CHANGED,
             neon.eventing.OWFEventPublisher.prototype.removeFilter,
@@ -91,7 +91,7 @@ describe('publishing events to OWF channels', function(){
         );
     });
 
-    it('should publish clear filter results', function() {
+    it('should publish clear filter results', function () {
 
         testResultsPublishedToChannel_(
             neon.eventing.Channels.FILTERS_CHANGED,
@@ -101,8 +101,8 @@ describe('publishing events to OWF channels', function(){
         );
     });
 
-    it('should publish set selection by filter', function() {
-        var filter  = new neon.query.Filter().selectFrom(dataStoreName,databaseName);
+    it('should publish set selection by filter', function () {
+        var filter = new neon.query.Filter().selectFrom(databaseName, tableName);
         testResultsPublishedToChannel_(
             neon.eventing.Channels.SELECTION_CHANGED,
             neon.eventing.OWFEventPublisher.prototype.setSelectionWhere,
@@ -111,38 +111,46 @@ describe('publishing events to OWF channels', function(){
         );
     });
 
-    it('should publish set selection by ids', function() {
+    it('should publish set selection by ids', function () {
         testResultsPublishedToChannel_(
             neon.eventing.Channels.SELECTION_CHANGED,
             neon.eventing.OWFEventPublisher.prototype.setSelectedIds,
-            [["id"]],
+            [
+                ["id"]
+            ],
             'setSelectedIds'
         );
     });
 
-    it('should publish add selection ids', function() {
+    it('should publish add selection ids', function () {
         testResultsPublishedToChannel_(
             neon.eventing.Channels.SELECTION_CHANGED,
             neon.eventing.OWFEventPublisher.prototype.addSelectedIds,
-            [["id"]],
+            [
+                ["id"]
+            ],
             'addSelectedIds'
         );
     });
 
-    it('should publish remove selection ids', function() {
+    it('should publish remove selection ids', function () {
         testResultsPublishedToChannel_(
             neon.eventing.Channels.SELECTION_CHANGED,
             neon.eventing.OWFEventPublisher.prototype.removeSelectedIds,
-            [["id"]],
+            [
+                ["id"]
+            ],
             'removeSelectedIds'
         );
     });
 
-    it('should publish clear selection', function() {
+    it('should publish clear selection', function () {
         testResultsPublishedToChannel_(
             neon.eventing.Channels.SELECTION_CHANGED,
             neon.eventing.OWFEventPublisher.prototype.clearSelection,
-            [["id"]],
+            [
+                ["id"]
+            ],
             'clearSelection'
         );
     });

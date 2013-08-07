@@ -46,16 +46,16 @@ describe('intents launcher', function () {
 
 
     it('should create intent data', function () {
-        var dataStoreName = 'testDataStoreName';
         var databaseName = 'testDatabaseName';
+        var tableName = 'testTableName';
         var dataType = 'dataType1';
         var metadata = {key1: 'val1', key2: 'val2'};
         launcher.addMetadataForDataType(dataType, metadata);
         var intent = {dataTypes: [dataType]};
-        var intentData = launcher.createIntentData_(intent, dataStoreName, databaseName);
+        var intentData = launcher.createIntentData_(intent, databaseName, tableName);
         var data = intentData.data;
 
-        expect(data).toEqual({dataStoreName: dataStoreName, databaseName: databaseName, key1: 'val1', key2: 'val2'});
+        expect(data).toEqual({databaseName: databaseName, tableName: tableName, key1: 'val1', key2: 'val2'});
         expect(intentData.dataType).toEqual(dataType);
 
     });
@@ -79,11 +79,11 @@ describe('intents launcher', function () {
             callback('destWidget');
         };
 
-        var dataStoreName = 'testDataStoreName';
         var databaseName = 'testDatabaseName';
-        launcher.launchIntents_(intents, dataStoreName, databaseName);
-        var expectedData1 = {dataStoreName: dataStoreName, databaseName: databaseName, key1: 'val1', key2: 'val2'};
-        var expectedData2 = {dataStoreName: dataStoreName, databaseName: databaseName, key3: 'val3'};
+        var tableName = 'testTableName';
+        launcher.launchIntents_(intents, databaseName, tableName);
+        var expectedData1 = {databaseName: databaseName, tableName: tableName, key1: 'val1', key2: 'val2'};
+        var expectedData2 = {databaseName: databaseName, tableName: tableName, key3: 'val3'};
 
         var expectedIntent1Data = {intent: {action: action1, dataType: dataType1}, data: expectedData1};
         var expectedIntent2Data = {intent: {action: action2, dataType: dataType2}, data: expectedData2};

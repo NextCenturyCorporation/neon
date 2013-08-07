@@ -37,19 +37,19 @@ class FilterFactoryTest {
     void "create filter from unique field values"() {
         def queryExecutor = createQueryExecutor()
 
-        def dataStoreName = "dataStoreName"
-        def databaseName = "testDatasetId"
-        def subfilter = new Filter(dataStoreName: dataStoreName, databaseName: databaseName)
+        def databaseName = "databaseName"
+        def tableName = "testDatasetId"
+        def subfilter = new Filter(databaseName: databaseName, tableName: tableName)
         def field = "field1"
         def operator = "notin"
 
         // the resulting filter should be "field1 notin [a,c]" since a and c are the unique field values for field1
         // from the queryExecutor
         def filter = FilterFactory.createFieldFilter(queryExecutor, subfilter, field, operator)
-        verifyFilter(filter, dataStoreName, databaseName, field, operator)
+        verifyFilter(filter, databaseName, tableName, field, operator)
     }
 
-    private static def verifyFilter(filter, dataStore, databaseName, field, operator) {
+    private static def verifyFilter(filter, databaseName, tableName, field, operator) {
         def whereClause = filter.whereClause
 
         assert whereClause instanceof SingularWhereClause
@@ -57,8 +57,8 @@ class FilterFactoryTest {
         assert whereClause.operator == operator
         // these values are take from the query executor's result
         assert whereClause.rhs == (["a", "c"] as Set)
-        assert filter.dataStoreName == dataStore
         assert filter.databaseName == databaseName
+        assert filter.tableName == tableName
     }
 
     /**

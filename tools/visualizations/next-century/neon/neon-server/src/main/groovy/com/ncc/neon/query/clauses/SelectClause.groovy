@@ -31,8 +31,8 @@ class SelectClause {
     /** indicator to select all fields */
     static final ALL_FIELDS = ["*"]
 
-    String dataStoreName
     String databaseName
+    String tableName
 
     def fields = ALL_FIELDS
 

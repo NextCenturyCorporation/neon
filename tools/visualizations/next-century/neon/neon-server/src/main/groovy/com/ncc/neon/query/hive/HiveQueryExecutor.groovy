@@ -68,8 +68,8 @@ class HiveQueryExecutor implements QueryExecutor {
     }
 
     @Override
-    Collection<String> getFieldNames(String dataStoreName, String databaseName) {
-        return jdbcClient.getColumnNames(dataStoreName, databaseName)
+    Collection<String> getFieldNames(String databaseName, String tableName) {
+        return jdbcClient.getColumnNames(databaseName, tableName)
     }
 
     @Override

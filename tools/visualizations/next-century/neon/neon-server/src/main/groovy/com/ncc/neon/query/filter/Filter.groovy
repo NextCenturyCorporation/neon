@@ -36,8 +36,8 @@ class Filter implements Serializable {
 
     private static final long serialVersionUID = 7238913369114626126L
 
-    String dataStoreName
     String databaseName
+    String tableName
 
     WhereClause whereClause
 

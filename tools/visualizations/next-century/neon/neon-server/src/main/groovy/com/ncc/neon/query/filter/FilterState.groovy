@@ -82,13 +82,13 @@ class FilterState implements Serializable {
 
     /**
      * Gets any filters that are applied to the specified dataset
-     * @param dataStoreName The name of the data store containing the data
-     * @param databaseName The name of the database from which the filters are being returned.
+     * @param databaseName The name of the data store containing the data
+     * @param tableName The name of the database from which the filters are being returned.
      * @return
      */
-    def getFiltersForDataset(dataStoreName, databaseName) {
+    def getFiltersForDataset(databaseName, tableName) {
         def filters = []
-        DataSet dataSet = new DataSet(dataStoreName: dataStoreName, databaseName: databaseName)
+        DataSet dataSet = new DataSet(databaseName: databaseName, tableName: tableName)
         if (dataSetToFilters.containsKey(dataSet)) {
             def ids = dataSetToFilters.get(dataSet)
             ids.each {
@@ -99,7 +99,7 @@ class FilterState implements Serializable {
     }
 
     private static def dataSetFromFilter(filter) {
-        return new DataSet(dataStoreName: filter.dataStoreName, databaseName: filter.databaseName)
+        return new DataSet(databaseName: filter.databaseName, tableName: filter.tableName)
     }
 
 }
