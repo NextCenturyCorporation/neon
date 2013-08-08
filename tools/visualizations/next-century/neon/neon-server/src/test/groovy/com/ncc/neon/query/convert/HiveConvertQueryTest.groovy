@@ -1,8 +1,6 @@
-package com.ncc.neon.query.mongo
+package com.ncc.neon.query.convert
 
-import com.mongodb.BasicDBObject
-import com.ncc.neon.query.convert.AbstractConversionTest
-
+import com.ncc.neon.query.hive.HiveConversionStrategy
 /*
  * ************************************************************************
  * Copyright (c), 2013 Next Century Corporation. All Rights Reserved.
@@ -29,26 +27,25 @@ import com.ncc.neon.query.convert.AbstractConversionTest
  * @author tbrooks
  */
 
-class MongoConvertQueryWithFiltersTest extends AbstractConversionTest {
+class HiveConvertQueryTest extends AbstractConversionTest {
 
     @Override
     def whenExecutingConvertQuery(query) {
-        MongoConversionStrategy conversionStrategy = new MongoConversionStrategy(filterState)
-        conversionStrategy.convertQueryWithFilters(query)
+        HiveConversionStrategy conversionStrategy = new HiveConversionStrategy(filterState)
+        conversionStrategy.convertQuery(query)
     }
 
     @Override
     void assertSimplestConvertQuery(query) {
-        assert query.query == simpleQuery
-        assert query.whereClauseParams == new BasicDBObject()
-        assert query.selectParams == null
+        assert query == "select * from ${DATABASE_NAME}.${TABLE_NAME}"
     }
 
+    /**
+     * convertQuery does not care about the filter state, so this is the same as the SimplestConvertQuery
+     */
     @Override
     void assertQueryWithOneFilterInFilterState(query) {
-        assert query.query == simpleQuery
-        assert query.whereClauseParams == new BasicDBObject(COLUMN_NAME, COLUMN_VALUE)
-        assert query.selectParams == null
+        assert query == "select * from ${DATABASE_NAME}.${TABLE_NAME}"
     }
 
 }

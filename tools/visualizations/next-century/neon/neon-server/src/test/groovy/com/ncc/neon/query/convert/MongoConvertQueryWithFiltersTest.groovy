@@ -1,6 +1,8 @@
-package com.ncc.neon.query.hive
+package com.ncc.neon.query.convert
 
+import com.mongodb.BasicDBObject
 import com.ncc.neon.query.convert.AbstractConversionTest
+import com.ncc.neon.query.mongo.MongoConversionStrategy
 
 /*
  * ************************************************************************
@@ -28,22 +30,26 @@ import com.ncc.neon.query.convert.AbstractConversionTest
  * @author tbrooks
  */
 
-class HiveConvertQueryWithFiltersTest extends AbstractConversionTest {
+class MongoConvertQueryWithFiltersTest extends AbstractConversionTest {
 
     @Override
     def whenExecutingConvertQuery(query) {
-        HiveConversionStrategy conversionStrategy = new HiveConversionStrategy(filterState)
+        MongoConversionStrategy conversionStrategy = new MongoConversionStrategy(filterState)
         conversionStrategy.convertQueryWithFilters(query)
     }
 
     @Override
     void assertSimplestConvertQuery(query) {
-        assert query == "select * from ${DATABASE_NAME}.${TABLE_NAME}"
+        assert query.query == simpleQuery
+        assert query.whereClauseParams == new BasicDBObject()
+        assert query.selectParams == null
     }
 
     @Override
     void assertQueryWithOneFilterInFilterState(query) {
-        assert query == "select * from ${DATABASE_NAME}.${TABLE_NAME} where ${COLUMN_NAME} = '${COLUMN_VALUE}'"
+        assert query.query == simpleQuery
+        assert query.whereClauseParams == new BasicDBObject(COLUMN_NAME, COLUMN_VALUE)
+        assert query.selectParams == null
     }
 
 }

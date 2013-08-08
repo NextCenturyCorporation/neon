@@ -1,6 +1,7 @@
-package com.ncc.neon.query.hive
+package com.ncc.neon.query.convert
 
 import com.ncc.neon.query.convert.AbstractConversionTest
+import com.ncc.neon.query.hive.HiveConversionStrategy
 
 /*
  * ************************************************************************
@@ -28,12 +29,12 @@ import com.ncc.neon.query.convert.AbstractConversionTest
  * @author tbrooks
  */
 
-class HiveConvertQueryTest extends AbstractConversionTest {
+class HiveConvertQueryWithFiltersTest extends AbstractConversionTest {
 
     @Override
     def whenExecutingConvertQuery(query) {
         HiveConversionStrategy conversionStrategy = new HiveConversionStrategy(filterState)
-        conversionStrategy.convertQuery(query)
+        conversionStrategy.convertQueryWithFilters(query)
     }
 
     @Override
@@ -41,12 +42,9 @@ class HiveConvertQueryTest extends AbstractConversionTest {
         assert query == "select * from ${DATABASE_NAME}.${TABLE_NAME}"
     }
 
-    /**
-     * convertQuery does not care about the filter state, so this is the same as the SimplestConvertQuery
-     */
     @Override
     void assertQueryWithOneFilterInFilterState(query) {
-        assert query == "select * from ${DATABASE_NAME}.${TABLE_NAME}"
+        assert query == "select * from ${DATABASE_NAME}.${TABLE_NAME} where ${COLUMN_NAME} = '${COLUMN_VALUE}'"
     }
 
 }
