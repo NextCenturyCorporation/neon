@@ -1,6 +1,5 @@
 package com.ncc.neon.query.convert
 
-import com.ncc.neon.query.convert.AbstractConversionTest
 import com.ncc.neon.query.hive.HiveConversionStrategy
 
 /*

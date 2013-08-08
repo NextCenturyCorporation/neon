@@ -84,9 +84,9 @@ abstract class AbstractConversionTest {
         filterState.addFilter(filterWithWhere)
     }
 
-    abstract def whenExecutingConvertQuery(query)
+    protected abstract def whenExecutingConvertQuery(query)
 
-    abstract void assertSimplestConvertQuery(query)
+    protected abstract void assertSimplestConvertQuery(query)
 
-    abstract void assertQueryWithOneFilterInFilterState(query)
+    protected abstract void assertQueryWithOneFilterInFilterState(query)
 }

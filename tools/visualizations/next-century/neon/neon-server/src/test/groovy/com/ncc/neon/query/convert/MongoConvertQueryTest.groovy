@@ -1,7 +1,6 @@
 package com.ncc.neon.query.convert
 
 import com.mongodb.BasicDBObject
-import com.ncc.neon.query.convert.AbstractConversionTest
 import com.ncc.neon.query.mongo.MongoConversionStrategy
 
 /*
