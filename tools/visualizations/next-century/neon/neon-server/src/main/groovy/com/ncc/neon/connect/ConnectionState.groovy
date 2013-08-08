@@ -1,4 +1,5 @@
 package com.ncc.neon.connect
+
 import com.ncc.neon.query.QueryExecutor
 import org.springframework.context.annotation.Scope
 import org.springframework.context.annotation.ScopedProxyMode
@@ -49,11 +50,9 @@ class ConnectionState implements Serializable {
 
         this.info = info
         closeConnection()
-
         setupConnection(info)
-        def client = connection?.connect(info)
 
-        queryExecutor = QueryExecutorFactory.create(client)
+        queryExecutor = QueryExecutorFactory.create(connection, info)
         init = true
     }
 

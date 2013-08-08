@@ -1,10 +1,10 @@
 package com.ncc.neon.query.hive
 
 import com.ncc.neon.query.Query
-import com.ncc.neon.query.QueryConversionStrategy
 import com.ncc.neon.query.clauses.AndWhereClause
 import com.ncc.neon.query.clauses.SortOrder
 import com.ncc.neon.query.filter.FilterState
+
 /*
  * ************************************************************************
  * Copyright (c), 2013 Next Century Corporation. All Rights Reserved.
@@ -35,7 +35,7 @@ import com.ncc.neon.query.filter.FilterState
  * Converts a Query object into a hive based query.
  */
 
-class HiveConversionStrategy implements QueryConversionStrategy{
+class HiveConversionStrategy {
 
     private final FilterState filterState
 

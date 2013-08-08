@@ -1,6 +1,7 @@
 package com.ncc.neon.query.jdbc
 
 import java.sql.*
+
 /*
  *
  *  ************************************************************************
@@ -46,20 +47,18 @@ class JdbcClient {
     }
 
     public List executeQuery(String query) {
-        //Synchonzied due to https://issues.apache.org/jira/browse/HIVE-1482
-        synchronized(connection){
-            Statement statement
-            ResultSet resultSet
-            try{
-                statement = connection.createStatement()
-                resultSet = statement.executeQuery(query)
-                return createMappedValuesFromResultSet(resultSet)
-            }
-            finally{
-                resultSet?.close()
-                statement?.close()
-            }
+        Statement statement
+        ResultSet resultSet
+        try {
+            statement = connection.createStatement()
+            resultSet = statement.executeQuery(query)
+            return createMappedValuesFromResultSet(resultSet)
         }
+        finally {
+            resultSet?.close()
+            statement?.close()
+        }
+
         return []
     }
 
@@ -79,11 +78,11 @@ class JdbcClient {
 
     public void execute(String query) {
         Statement statement
-        try{
+        try {
             statement = connection.createStatement()
             statement.execute(query)
         }
-        finally{
+        finally {
             statement?.close()
         }
     }
@@ -92,13 +91,13 @@ class JdbcClient {
         String query = "select * from ${dataStoreName}.${databaseName}"
 
         List list = executeQuery(query)
-        if(!list){
+        if (!list) {
             return []
         }
         list[0].keySet().asList()
     }
 
-    public void close(){
+    public void close() {
         connection.close()
     }
 }

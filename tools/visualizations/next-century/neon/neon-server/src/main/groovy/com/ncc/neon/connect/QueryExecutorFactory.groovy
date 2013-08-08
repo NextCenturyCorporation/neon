@@ -1,10 +1,6 @@
 package com.ncc.neon.connect
 
-import com.mongodb.MongoClient
 import com.ncc.neon.query.QueryExecutor
-import com.ncc.neon.query.hive.HiveQueryExecutor
-import com.ncc.neon.query.jdbc.JdbcClient
-import com.ncc.neon.query.mongo.MongoQueryExecutor
 
 /*
  * ************************************************************************
@@ -34,12 +30,12 @@ import com.ncc.neon.query.mongo.MongoQueryExecutor
 
 class QueryExecutorFactory {
 
-    static QueryExecutor create(def client) {
-        if (client instanceof MongoClient) {
-            return new MongoQueryExecutor(client)
+    static QueryExecutor create(Connection connection, ConnectionInfo info) {
+        if (connection instanceof MongoConnection) {
+            return new MongoQueryExecutor(connection.connect(info))
         }
-        if (client instanceof JdbcClient) {
-            return new HiveQueryExecutor(client)
+        if (connection instanceof HiveConnection) {
+            return new HiveQueryExecutor(connection, info)
         }
 
         throw new IllegalArgumentException("Unable to create database connection.")

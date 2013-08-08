@@ -23,7 +23,6 @@
 package com.ncc.neon.query
 
 import com.ncc.neon.query.filter.Filter
-
 /**
  * Executes a query against a datastore
  */

@@ -2,7 +2,6 @@ package com.ncc.neon.query.mongo
 import com.mongodb.BasicDBObject
 import com.mongodb.DBObject
 import com.ncc.neon.query.Query
-import com.ncc.neon.query.QueryConversionStrategy
 import com.ncc.neon.query.clauses.AndWhereClause
 import com.ncc.neon.query.clauses.SelectClause
 import com.ncc.neon.query.filter.FilterState
@@ -36,7 +35,7 @@ import com.ncc.neon.query.filter.FilterState
  * Converts a Query object into a BasicDbObject
  */
 
-class MongoConversionStrategy implements QueryConversionStrategy {
+class MongoConversionStrategy {
 
     private final FilterState filterState
 

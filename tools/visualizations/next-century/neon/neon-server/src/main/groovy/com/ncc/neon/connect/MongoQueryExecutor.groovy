@@ -1,4 +1,4 @@
-package com.ncc.neon.query.mongo
+package com.ncc.neon.connect
 
 import com.mongodb.DB
 import com.mongodb.MongoClient
@@ -11,6 +11,13 @@ import com.ncc.neon.query.QueryUtils
 import com.ncc.neon.query.clauses.SingularWhereClause
 import com.ncc.neon.query.filter.Filter
 import com.ncc.neon.query.filter.FilterState
+import com.ncc.neon.query.mongo.AbstractMongoQueryWorker
+import com.ncc.neon.query.mongo.AggregateMongoQueryWorker
+import com.ncc.neon.query.mongo.DistinctMongoQueryQueryWorker
+import com.ncc.neon.query.mongo.MongoConversionStrategy
+import com.ncc.neon.query.mongo.MongoQuery
+import com.ncc.neon.query.mongo.MongoUtils
+import com.ncc.neon.query.mongo.SimpleMongoQueryQueryWorker
 import com.ncc.neon.selection.SelectionManager
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory

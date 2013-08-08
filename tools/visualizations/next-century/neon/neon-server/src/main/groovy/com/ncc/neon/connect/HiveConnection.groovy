@@ -1,7 +1,6 @@
 package com.ncc.neon.connect
 
 import com.ncc.neon.query.jdbc.JdbcClient
-
 /*
  * ************************************************************************
  * Copyright (c), 2013 Next Century Corporation. All Rights Reserved.
