@@ -1,12 +1,8 @@
 package com.ncc.neon.query.mongo
+
 import com.mongodb.BasicDBObject
-import com.ncc.neon.query.Query
-import com.ncc.neon.query.clauses.SingularWhereClause
-import com.ncc.neon.query.filter.Filter
-import com.ncc.neon.query.filter.FilterState
-import org.junit.After
-import org.junit.Before
-import org.junit.Test
+import com.ncc.neon.query.convert.AbstractConversionTest
+
 /*
  * ************************************************************************
  * Copyright (c), 2013 Next Century Corporation. All Rights Reserved.
@@ -33,59 +29,26 @@ import org.junit.Test
  * @author tbrooks
  */
 
-class MongoConvertQueryWithFiltersTest {
+class MongoConvertQueryWithFiltersTest extends AbstractConversionTest {
 
-    private Filter simpleFilter
-    private Query simpleQuery
-    private FilterState filterState
-
-    @Before
-    void setup() {
-        simpleFilter = new Filter(databaseName: "database", tableName: "test")
-        simpleQuery = new Query(filter: simpleFilter)
-        filterState = new FilterState()
-    }
-
-    @After
-    void teardown(){
-        simpleFilter = new Filter(databaseName: "database", tableName: "test")
-        simpleQuery = new Query(filter: simpleFilter)
-        filterState = new FilterState()
-    }
-
-    @Test(expected = NullPointerException)
-    void "a query to be converted must have a filter"() {
-        Query query = new Query()
-        whenExecutingConvertQueryWithFilters(query)
-    }
-
-    @Test
-    void testSimplestConvertQueryWithFilters() {
-        MongoQuery mongoQuery = whenExecutingConvertQueryWithFilters(simpleQuery)
-
-        assert mongoQuery.query == simpleQuery
-        assert mongoQuery.whereClauseParams == new BasicDBObject()
-        assert mongoQuery.selectParams == null
-    }
-
-    @Test
-    void "test covertQueryWithFilters respects the FilterState"() {
-        givenFilterStateHasOneFilter()
-        MongoQuery mongoQuery = whenExecutingConvertQueryWithFilters(simpleQuery)
-
-        assert mongoQuery.query == simpleQuery
-        assert mongoQuery.whereClauseParams == new BasicDBObject("column", "test")
-        assert mongoQuery.selectParams == null
-    }
-
-    private void givenFilterStateHasOneFilter() {
-        SingularWhereClause whereClause = new SingularWhereClause(lhs: "column", operator: "=", rhs: "test")
-        Filter filterWithWhere = new Filter(databaseName: simpleFilter.databaseName, tableName: simpleFilter.tableName, whereClause: whereClause)
-        filterState.addFilter(filterWithWhere)
-    }
-
-    private MongoQuery whenExecutingConvertQueryWithFilters(Query query) {
+    @Override
+    def whenExecutingConvertQuery(query) {
         MongoConversionStrategy conversionStrategy = new MongoConversionStrategy(filterState)
         conversionStrategy.convertQueryWithFilters(query)
     }
+
+    @Override
+    void assertSimplestConvertQuery(query) {
+        assert query.query == simpleQuery
+        assert query.whereClauseParams == new BasicDBObject()
+        assert query.selectParams == null
+    }
+
+    @Override
+    void assertQueryWithOneFilterInFilterState(query) {
+        assert query.query == simpleQuery
+        assert query.whereClauseParams == new BasicDBObject(COLUMN_NAME, COLUMN_VALUE)
+        assert query.selectParams == null
+    }
+
 }

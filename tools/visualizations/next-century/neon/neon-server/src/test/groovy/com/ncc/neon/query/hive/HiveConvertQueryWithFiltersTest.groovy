@@ -1,11 +1,7 @@
 package com.ncc.neon.query.hive
-import com.ncc.neon.query.Query
-import com.ncc.neon.query.clauses.SingularWhereClause
-import com.ncc.neon.query.filter.Filter
-import com.ncc.neon.query.filter.FilterState
-import org.junit.After
-import org.junit.Before
-import org.junit.Test
+
+import com.ncc.neon.query.convert.AbstractConversionTest
+
 /*
  * ************************************************************************
  * Copyright (c), 2013 Next Century Corporation. All Rights Reserved.
@@ -32,54 +28,22 @@ import org.junit.Test
  * @author tbrooks
  */
 
-class HiveConvertQueryWithFiltersTest {
+class HiveConvertQueryWithFiltersTest extends AbstractConversionTest {
 
-    private Filter simpleFilter
-    private Query simpleQuery
-    private FilterState filterState
-
-    @Before
-    void setup() {
-        simpleFilter = new Filter(databaseName: "database", tableName: "test")
-        simpleQuery = new Query(filter: simpleFilter)
-        filterState = new FilterState()
-    }
-
-    @After
-    void teardown(){
-        simpleFilter = new Filter(databaseName: "database", tableName: "test")
-        simpleQuery = new Query(filter: simpleFilter)
-        filterState = new FilterState()
-    }
-
-    @Test(expected = NullPointerException)
-    void "a query to be converted must have a filter"() {
-        Query query = new Query()
-        whenExecutingConvertQueryWithFilters(query)
-    }
-
-    @Test
-    void testSimplestConvertQueryWithFilters() {
-        String hiveQuery = whenExecutingConvertQueryWithFilters(simpleQuery)
-        assert hiveQuery == "select * from database.test"
-    }
-
-    @Test
-    void "test covertQueryWithFilters respects the FilterState"() {
-        givenFilterStateHasOneFilter()
-        String hiveQuery = whenExecutingConvertQueryWithFilters(simpleQuery)
-        assert hiveQuery == "select * from database.test where column = 'test'"
-    }
-
-    private void givenFilterStateHasOneFilter() {
-        SingularWhereClause whereClause = new SingularWhereClause(lhs: "column", operator: "=", rhs: "test")
-        Filter filterWithWhere = new Filter(databaseName: simpleFilter.databaseName, tableName: simpleFilter.tableName, whereClause: whereClause)
-        filterState.addFilter(filterWithWhere)
-    }
-
-    private String whenExecutingConvertQueryWithFilters(Query query) {
+    @Override
+    def whenExecutingConvertQuery(query) {
         HiveConversionStrategy conversionStrategy = new HiveConversionStrategy(filterState)
         conversionStrategy.convertQueryWithFilters(query)
+    }
+
+    @Override
+    void assertSimplestConvertQuery(query) {
+        assert query == "select * from ${DATABASE_NAME}.${TABLE_NAME}"
+    }
+
+    @Override
+    void assertQueryWithOneFilterInFilterState(query) {
+        assert query == "select * from ${DATABASE_NAME}.${TABLE_NAME} where ${COLUMN_NAME} = '${COLUMN_VALUE}'"
     }
 
 }
