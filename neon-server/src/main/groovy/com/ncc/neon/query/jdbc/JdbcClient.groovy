@@ -1,5 +1,10 @@
 package com.ncc.neon.query.jdbc
 
+import com.ncc.neon.util.DateUtils
+import org.joda.time.DateTime
+import org.joda.time.DateTimeZone
+import org.slf4j.LoggerFactory
+
 import java.sql.*
 
 /*
@@ -69,11 +74,21 @@ class JdbcClient {
         while (resultSet.next()) {
             def result = [:]
             for (ii in 1..columnCount) {
-                result[metadata.getColumnName(ii)] = resultSet.getObject(ii)
+                result[metadata.getColumnName(ii)] = getValue(metadata, resultSet, ii)
             }
             resultList.add(result)
         }
         return resultList
+    }
+
+    private def getValue(ResultSetMetaData metadata, ResultSet resultSet, int index) {
+        def val = resultSet.getObject(index)
+        // timestamps are time-zone less, but we assume UTC
+        if (metadata.getColumnType(index) == Types.TIMESTAMP) {
+            // use joda time because not all jdbc drivers (e.g. hive) support timezones - they return in local time
+            val = new DateTime(val.time).withZoneRetainFields(DateTimeZone.UTC).toDate()
+        }
+        return val
     }
 
     public void execute(String query) {
@@ -100,4 +115,5 @@ class JdbcClient {
     public void close() {
         connection.close()
     }
+
 }

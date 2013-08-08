@@ -1,4 +1,5 @@
 package com.ncc.neon.connect
+
 import com.ncc.neon.query.*
 import com.ncc.neon.query.filter.Filter
 import com.ncc.neon.query.filter.FilterState
@@ -7,6 +8,7 @@ import com.ncc.neon.query.jdbc.JdbcQueryResult
 import com.ncc.neon.selection.SelectionManager
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
+
 /*
  * ************************************************************************
  * Copyright (c), 2013 Next Century Corporation. All Rights Reserved.
@@ -93,39 +95,42 @@ class HiveQueryExecutor implements QueryExecutor {
 
     @Override
     void setSelectionWhere(Filter filter) {
-        throw new UnsupportedOperationException("We can't set a selection through hive, since there is no ID field.")
+        throw new UnsupportedOperationException("We can't set a selection through hive because we have not yet implemented the ID field")
     }
 
     @Override
     void setSelectedIds(Collection<Object> ids) {
+        LOGGER.warn("setting selected Ids will not have an effect because we have not yet implemented the ID field")
         selectionManager.replaceSelectionWith(ids)
     }
 
     @Override
     void addSelectedIds(Collection<Object> ids) {
+        LOGGER.warn("adding selected Ids will not have an effect because we have not yet implemented the ID field")
         selectionManager.addIds(ids)
     }
 
     @Override
     void removeSelectedIds(Collection<Object> ids) {
+        LOGGER.warn("removing selected Ids will not have an effect because we have not yet implemented the ID field")
         selectionManager.removeIds(ids)
     }
 
     @Override
     void clearSelection() {
+        LOGGER.warn("removing selected Ids will not have an effect because we have not yet implemented the ID field")
         selectionManager.clear()
     }
 
     @Override
     QueryResult getSelectionWhere(Filter filter) {
-        Query query = QueryUtils.queryFromFilter(filter)
-        execute(query, true)
+        throw new UnsupportedOperationException("We can't set a selection through hive because we have not yet implemented the ID field")
     }
 
     @Override
     List<String> showDatabases() {
         def jdbcClient = hiveConnection.connect(connectionInfo)
-        def dbs = jdbcClient.executeQuery("SHOW DATABASES").collect{ Map<String,String> map ->
+        def dbs = jdbcClient.executeQuery("SHOW DATABASES").collect { Map<String, String> map ->
             map.get("database_name")
         }
         jdbcClient.close()
@@ -135,21 +140,21 @@ class HiveQueryExecutor implements QueryExecutor {
     @Override
     List<String> showTables(String dbName) {
         def jdbcClient
-        try{
+        try {
             jdbcClient = hiveConnection.connect(connectionInfo)
             jdbcClient.execute("USE " + dbName)
-            return jdbcClient.executeQuery("SHOW TABLES").collect{ Map<String,String> map ->
+            return jdbcClient.executeQuery("SHOW TABLES").collect { Map<String, String> map ->
                 map.get("tab_name")
             }
         }
-        finally{
+        finally {
             jdbcClient?.close()
         }
     }
 
-    private String createHiveQuery(Query query, boolean includeFiltered){
+    private String createHiveQuery(Query query, boolean includeFiltered) {
         HiveConversionStrategy conversionStrategy = new HiveConversionStrategy(filterState)
-        if(includeFiltered){
+        if (includeFiltered) {
             return conversionStrategy.convertQuery(query)
         }
         return conversionStrategy.convertQueryWithFilterState(query)

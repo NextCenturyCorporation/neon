@@ -43,7 +43,6 @@ class MongoAggregationClauseBuilder {
 
         applyGroupByClauses(groupFields, groupByClauses, projFields)
         applyAggregationClauses(aggregationClauses, groupFields, projFields)
-        projectOnlySelectedFields(selectClause, projFields)
 
         def group = new BasicDBObject('$group', groupFields)
         def proj = new BasicDBObject('$project', projFields)
@@ -76,22 +75,6 @@ class MongoAggregationClauseBuilder {
             groupFields.put(it.name, createFunctionDBObject(it.operation, it.field))
             // ensure all of the fields from the aggregation operations are shown in the result
             projFields.put(it.name, 1)
-        }
-    }
-
-    private static void projectOnlySelectedFields(selectClause, projFields) {
-        if (!selectClause.selectAllFields) {
-            // create a new map of projected fields that is the intersection between
-            // this specified fields and the available projected fields
-            // don't use groovy's submap here since we will clear the backing list and replace its contents
-            def selectedFields = [:]
-            selectClause.fields.each {
-                if (projFields.containsKey(it)) {
-                    selectedFields[it] = projFields[it]
-                }
-            }
-            projFields.clear()
-            projFields.putAll(selectedFields)
         }
     }
 

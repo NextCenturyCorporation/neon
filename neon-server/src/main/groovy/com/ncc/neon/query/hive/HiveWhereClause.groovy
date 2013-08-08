@@ -51,8 +51,29 @@ class HiveWhereClause {
 
     private String renderClause(SingularWhereClause clause) {
         stringBuilder << clause.lhs
-        stringBuilder << " " << clause.operator << " "
-        stringBuilder << ((clause.rhs instanceof String) ? "'" + clause.rhs + "'" : clause.rhs)
+        stringBuilder << " " << formatOperator(clause.operator) << " "
+        stringBuilder << formatRhs(clause.rhs)
+    }
+
+    private String formatOperator(operator) {
+        // all operators translate directly from standard symbols except for notin
+        return operator == "notin" ? "not in" : operator
+    }
+
+    private String formatRhs(val) {
+        if (val instanceof String) {
+            return "'${val}'"
+        }
+
+        if (val instanceof Collection) {
+            def valuesList = []
+            val.each {
+                valuesList << formatRhs(it)
+            }
+            return "(${valuesList.join(',')})"
+        }
+
+        return val
     }
 
     private String renderClause(BooleanWhereClause clause, String operator) {

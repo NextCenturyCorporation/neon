@@ -1,9 +1,12 @@
-package com.ncc.neon.query
+package com.ncc.neon.hive
 
-import com.ncc.neon.query.clauses.*
-import com.ncc.neon.query.filter.Filter
-import groovy.transform.ToString
-import org.codehaus.jackson.annotate.JsonIgnoreProperties
+import com.ncc.neon.connect.ConnectionInfo
+import com.ncc.neon.connect.ConnectionState
+import com.ncc.neon.connect.DataSource
+import org.springframework.context.annotation.Bean
+import org.springframework.context.annotation.ComponentScan
+import org.springframework.context.annotation.Configuration
+import org.springframework.context.annotation.Profile
 
 /*
  * ************************************************************************
@@ -28,28 +31,19 @@ import org.codehaus.jackson.annotate.JsonIgnoreProperties
  * RECIPIENT IS UNDER OBLIGATION TO MAINTAIN SECRECY.
  */
 
-/**
- * A query stores a filter for selecting data and optional aggregation methods for grouping the data.
- * The query is translated to a datastore specific operation which returns the appropriate data.
- */
-@ToString(includeNames = true)
-@JsonIgnoreProperties(value = ['includeFiltered_'])
-class Query {
+@Configuration
+@ComponentScan(basePackages = ['com.ncc.neon'])
+@Profile('hive-integrationtest')
+class HiveIntegrationTestContext {
 
-    Filter filter
-    List<AggregateClause> aggregates = []
-    List<GroupByClause> groupByClauses = []
-    boolean isDistinct = false
-    List<SortClause> sortClauses
-    LimitClause limitClause
-    List<String> fields = SelectClause.ALL_FIELDS
+    static final String HOST_STRING = System.getProperty("hive.host", "localhost:10000")
 
-    def getDatabaseName() {
-        filter.databaseName
-    }
-
-    def getTableName() {
-        filter.tableName
+    @Bean
+    ConnectionState connectionState() {
+        ConnectionState connectionState = new ConnectionState()
+        ConnectionInfo info = new ConnectionInfo(dataStoreName: DataSource.HIVE, connectionUrl: HOST_STRING)
+        connectionState.createConnection(info)
+        return connectionState
     }
 
 }

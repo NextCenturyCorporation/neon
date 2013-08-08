@@ -10,6 +10,7 @@ module.exports = function (grunt) {
     function createTestOptions(specs) {
         return {
             specs: specs,
+            timeout: 60000,
             vendor: '../js-test-support/lib/**/*.js',
             helpers: ['../js-test-support/helpers/**/*.js',
                 'src/js-test-support/mockNamespaces.js', 'src/js-test-support/ajaxMockUtils.js',

@@ -68,7 +68,7 @@ class MongoQueryExecutor implements QueryExecutor {
     }
 
     private AbstractMongoQueryWorker createMongoQueryWorker(Query query) {
-        if (query.distinctClause) {
+        if (query.isDistinct) {
             LOGGER.debug("Using distinct mongo query worker")
             return new DistinctMongoQueryWorker(mongo)
         }

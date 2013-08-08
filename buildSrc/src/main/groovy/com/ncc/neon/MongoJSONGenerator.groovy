@@ -29,36 +29,11 @@ import org.json.JSONObject
 /**
  * Generates json that can be inserted into a mongodb, specifically converting ids and dates to their mongo representations
  */
-class MongoJSONGenerator {
+class MongoJSONGenerator extends AbstractJSONGenerator {
 
-    /** the number of spaces to use for indentation in the output json */
-    private static final def INDENT_FACTOR = 4
 
-    /**
-     * Reads all json files (non-recursively) from the input directory, converts them to a form suitable for upload
-     * to mongo and writes them to the output directory. The output directory will be created if needed.
-     * @param inputDirPath
-     * @param outputDirPath
-     */
-    static void generateMongoJson(inputDirPath, outputDirPath) {
-        new File(inputDirPath).eachFileMatch(~/.*\.json/) { file ->
-            def text = file.text
-            def json
-            if (text.startsWith("[")) {
-                json = new JSONArray(text)
-                rewriteMongoSpecificFields(json)
-            } else {
-                json = new JSONObject(text)
-                json.keys().each { key ->
-                    def jsonArray = json.getJSONArray(key)
-                    rewriteMongoSpecificFields(jsonArray)
-                }
-            }
-            writeOutputFile(json, new File(outputDirPath), file.name)
-        }
-    }
-
-    private static def rewriteMongoSpecificFields(jsonArray) {
+    @Override
+    protected void modifyJson(jsonArray) {
         jsonArray.length().times { index ->
             def row = jsonArray.get(index)
             rewriteIdField(row)
@@ -87,14 +62,5 @@ class MongoJSONGenerator {
             }
         }
     }
-
-    private static writeOutputFile(json, outDir, fileName) {
-        outDir.mkdirs()
-        def outfile = new File(outDir, fileName)
-        outfile.withWriter { w ->
-            w << json.toString(INDENT_FACTOR)
-        }
-    }
-
 
 }

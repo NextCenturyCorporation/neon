@@ -2,7 +2,9 @@ package com.ncc.neon.query.jdbc
 
 import com.ncc.neon.query.QueryResult
 import com.ncc.neon.query.Row
+import com.ncc.neon.util.DateUtils
 import groovy.json.JsonBuilder
+import groovy.json.JsonOutput
 
 /*
  *
@@ -43,10 +45,10 @@ class JdbcQueryResult implements QueryResult {
     Iterator<Row> iterator() {
         Iterator<Map> listIterator = resultList.iterator()
         def rowIterator = [
-            hasNext: { listIterator.hasNext() },
-            next: {
-                return new JdbcRow(jdbcRow: listIterator.next())
-            }
+                hasNext: { listIterator.hasNext() },
+                next: {
+                    return new JdbcRow(jdbcRow: listIterator.next())
+                }
         ] as Iterator
 
         return rowIterator
