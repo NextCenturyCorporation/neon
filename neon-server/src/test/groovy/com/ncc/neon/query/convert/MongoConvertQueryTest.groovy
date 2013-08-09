@@ -38,20 +38,67 @@ class MongoConvertQueryTest extends AbstractConversionTest {
     }
 
     @Override
+    protected def whenExecutingConvertQueryWithFiltersFromFilterState(query) {
+        MongoConversionStrategy conversionStrategy = new MongoConversionStrategy(filterState)
+        conversionStrategy.convertQueryWithFilters(query)
+    }
+
+    @Override
     void assertSimplestConvertQuery(query) {
+        standardQueryAsserts(query)
+    }
+
+    @Override
+    void assertQueryWithOneFilterInFilterState(query) {
+        standardQueryAsserts(query)
+    }
+
+    @Override
+    protected void assertQueryWithFiltersAndOneFilterInFilterState(query) {
         assert query.query == simpleQuery
-        assert query.whereClauseParams == new BasicDBObject()
+        assert query.whereClauseParams == new BasicDBObject(COLUMN_NAME, COLUMN_VALUE)
         assert query.selectParams == null
     }
 
-    /**
-     * convertQuery does not care about the filter state, so this is the same as the SimplestConvertQuery
-     */
     @Override
-    void assertQueryWithOneFilterInFilterState(query) {
+    protected void assertQueryWithSortClause(query) {
+        standardQueryAsserts(query)
+    }
+
+    @Override
+    protected void assertQueryWithLimitClause(query) {
+        standardQueryAsserts(query)
+    }
+
+    @Override
+    protected void assertQueryWithDistinctClause(query) {
+        standardQueryAsserts(query)
+    }
+
+    @Override
+    protected void assertQueryWithAggregateClause(query) {
+        standardQueryAsserts(query)
+    }
+
+    @Override
+    protected void assertQueryWithGroupByClauses(query) {
+        standardQueryAsserts(query)
+    }
+
+    @Override
+    protected void assertSelectClausePopulated(query) {
+        assert query.query == simpleQuery
+        assert query.whereClauseParams == new BasicDBObject()
+
+        def selectParams = new BasicDBObject().append(FIELD_NAME, 1).append(FIELD_NAME_2, 1)
+        assert query.selectParams == selectParams
+    }
+
+    private void standardQueryAsserts(query){
         assert query.query == simpleQuery
         assert query.whereClauseParams == new BasicDBObject()
         assert query.selectParams == null
+
     }
 
 }

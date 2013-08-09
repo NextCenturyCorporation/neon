@@ -1,7 +1,7 @@
 package com.ncc.neon.query.convert
 
 import com.ncc.neon.query.Query
-import com.ncc.neon.query.clauses.SingularWhereClause
+import com.ncc.neon.query.clauses.*
 import com.ncc.neon.query.filter.Filter
 import com.ncc.neon.query.filter.FilterState
 import org.junit.After
@@ -40,6 +40,9 @@ abstract class AbstractConversionTest {
     protected static final String TABLE_NAME = "table"
     protected static final String COLUMN_NAME = "column"
     protected static final String COLUMN_VALUE = "value"
+    protected static final String FIELD_NAME = "field"
+    protected static final String FIELD_NAME_2 = "field2"
+    protected static final int LIMIT_AMOUNT = 5
 
     protected FilterState filterState
     private Filter simpleFilter
@@ -53,30 +56,102 @@ abstract class AbstractConversionTest {
     }
 
     @After
-    void teardown(){
+    void tearDown(){
         simpleFilter = new Filter(databaseName: DATABASE_NAME, tableName: TABLE_NAME)
         simpleQuery = new Query(filter: simpleFilter)
         filterState = new FilterState()
     }
 
     @Test(expected = NullPointerException)
-    void "a query to be converted must have a filter"() {
+    void "test converting a query requires a filter"() {
         Query query = new Query()
         whenExecutingConvertQuery(query)
     }
 
     @Test
-    void testSimplestConvertQuery() {
+    void "test converting a query with just a dataset populated"() {
         def query = whenExecutingConvertQuery(simpleQuery)
         assertSimplestConvertQuery(query)
     }
 
     @Test
-    void "test convertQuery does not care about the FilterState"() {
+    void "test converting a query with a filter in the FilterState"() {
         givenFilterStateHasOneFilter()
         def query = whenExecutingConvertQuery(simpleQuery)
         assertQueryWithOneFilterInFilterState(query)
     }
+
+    @Test
+    void "test converting a query with filters with a filter in the FilterState"() {
+        givenFilterStateHasOneFilter()
+        def query = whenExecutingConvertQueryWithFiltersFromFilterState(simpleQuery)
+        assertQueryWithFiltersAndOneFilterInFilterState(query)
+    }
+
+    @Test
+    void "test select clause populated"(){
+        givenQueryHasFields()
+        def query = whenExecutingConvertQuery(simpleQuery)
+        assertSelectClausePopulated(query)
+    }
+
+    @Test
+    void "test sort clause populated"(){
+        givenQueryHasSortClause()
+        def query = whenExecutingConvertQuery(simpleQuery)
+        assertQueryWithSortClause(query)
+    }
+
+    @Test
+    void "test limit clause populated"(){
+        givenQueryHasLimitClause()
+        def query = whenExecutingConvertQuery(simpleQuery)
+        assertQueryWithLimitClause(query)
+    }
+
+    @Test
+    void "test distinct clause populated"(){
+        givenQueryHasDistinctClause()
+        def query = whenExecutingConvertQuery(simpleQuery)
+        assertQueryWithDistinctClause(query)
+    }
+
+    @Test
+    void "test aggregate clause populated"(){
+        givenQueryHasAggregateClause()
+        def query = whenExecutingConvertQuery(simpleQuery)
+        assertQueryWithAggregateClause(query)
+    }
+
+    @Test
+    void "test group by clause populated"(){
+        givenQueryHasGroupByPopulated()
+        def query = whenExecutingConvertQuery(simpleQuery)
+        assertQueryWithGroupByClauses(query)
+    }
+
+
+    protected abstract def whenExecutingConvertQuery(query)
+
+    protected abstract def whenExecutingConvertQueryWithFiltersFromFilterState(query)
+
+    protected abstract void assertSelectClausePopulated(query)
+
+    protected abstract void assertSimplestConvertQuery(query)
+
+    protected abstract void assertQueryWithOneFilterInFilterState(query)
+
+    protected abstract void assertQueryWithFiltersAndOneFilterInFilterState(query)
+
+    protected abstract void assertQueryWithSortClause(query)
+
+    protected abstract void assertQueryWithLimitClause(query)
+
+    protected abstract void assertQueryWithDistinctClause(query)
+
+    protected abstract void assertQueryWithAggregateClause(query)
+
+    protected abstract void assertQueryWithGroupByClauses(query)
 
     private void givenFilterStateHasOneFilter() {
         SingularWhereClause whereClause = new SingularWhereClause(lhs: COLUMN_NAME, operator: "=", rhs: COLUMN_VALUE)
@@ -84,9 +159,29 @@ abstract class AbstractConversionTest {
         filterState.addFilter(filterWithWhere)
     }
 
-    protected abstract def whenExecutingConvertQuery(query)
+    private void givenQueryHasFields() {
+        simpleQuery.fields = [FIELD_NAME, FIELD_NAME_2]
+    }
 
-    protected abstract void assertSimplestConvertQuery(query)
+    private void givenQueryHasSortClause() {
+        simpleQuery.sortClauses = [new SortClause(fieldName: FIELD_NAME, sortOrder: SortOrder.ASCENDING)]
+    }
 
-    protected abstract void assertQueryWithOneFilterInFilterState(query)
+    private void givenQueryHasLimitClause() {
+        simpleQuery.limitClause = new LimitClause(limit: LIMIT_AMOUNT)
+    }
+
+    private void givenQueryHasDistinctClause() {
+        simpleQuery.distinctClause = new DistinctClause(fieldName: FIELD_NAME)
+    }
+
+    private void givenQueryHasAggregateClause() {
+        simpleQuery.aggregates = [new AggregateClause(name: "${FIELD_NAME}_sum", operation: "sum", field: FIELD_NAME)]
+    }
+
+    private void givenQueryHasGroupByPopulated() {
+        simpleQuery.groupByClauses = [new GroupByFieldClause(field: "${FIELD_NAME_2}"),
+                new GroupByFunctionClause(name: "${FIELD_NAME}_sum", operation: "sum", field: FIELD_NAME)]
+    }
+
 }

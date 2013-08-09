@@ -30,21 +30,67 @@ import com.ncc.neon.query.hive.HiveConversionStrategy
 class HiveConvertQueryTest extends AbstractConversionTest {
 
     @Override
-    def whenExecutingConvertQuery(query) {
+    protected def whenExecutingConvertQuery(query) {
         HiveConversionStrategy conversionStrategy = new HiveConversionStrategy(filterState)
         conversionStrategy.convertQuery(query)
     }
 
     @Override
-    void assertSimplestConvertQuery(query) {
-        assert query == "select * from ${DATABASE_NAME}.${TABLE_NAME}"
+    protected def whenExecutingConvertQueryWithFiltersFromFilterState(query) {
+        HiveConversionStrategy conversionStrategy = new HiveConversionStrategy(filterState)
+        conversionStrategy.convertQueryWithFilters(query)
     }
 
-    /**
-     * convertQuery does not care about the filter state, so this is the same as the SimplestConvertQuery
-     */
+    @Override
+    void assertSimplestConvertQuery(query) {
+        assertStandardHiveQLStatement(query)
+    }
+
     @Override
     void assertQueryWithOneFilterInFilterState(query) {
+        assertStandardHiveQLStatement(query)
+    }
+
+    @Override
+    protected void assertQueryWithFiltersAndOneFilterInFilterState(query) {
+        assert query == "select * from ${DATABASE_NAME}.${TABLE_NAME} where ${COLUMN_NAME} = '${COLUMN_VALUE}'"
+    }
+
+    @Override
+    protected void assertQueryWithSortClause(query) {
+        assert query == "select * from ${DATABASE_NAME}.${TABLE_NAME} order by ${FIELD_NAME} ASC"
+    }
+
+    @Override
+    protected void assertQueryWithLimitClause(query) {
+        assert query == "select * from ${DATABASE_NAME}.${TABLE_NAME} limit $LIMIT_AMOUNT"
+    }
+
+    @Override
+    protected void assertQueryWithDistinctClause(query) {
+        //Distinct has no effect on the query! NEON-535
+        assertStandardHiveQLStatement(query)
+    }
+
+    @Override
+    protected void assertQueryWithAggregateClause(query) {
+        //This should include the aggregate function: sum. NEON-177
+        assert query == "select * from ${DATABASE_NAME}.${TABLE_NAME} group by ${FIELD_NAME}"
+    }
+
+    @Override
+    protected void assertQueryWithGroupByClauses(query) {
+        //This should include the aggregate function: sum. NEON-177
+        assert query == "select * from ${DATABASE_NAME}.${TABLE_NAME} group by ${FIELD_NAME_2},${FIELD_NAME}"
+    }
+
+    @Override
+    protected void assertSelectClausePopulated(query) {
+        assert query == "select $FIELD_NAME,$FIELD_NAME_2 from ${DATABASE_NAME}.${TABLE_NAME}"
+    }
+
+
+    private void assertStandardHiveQLStatement(query){
         assert query == "select * from ${DATABASE_NAME}.${TABLE_NAME}"
     }
 
