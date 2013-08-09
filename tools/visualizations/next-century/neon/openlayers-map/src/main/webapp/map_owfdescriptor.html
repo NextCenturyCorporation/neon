@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html>
+<head>
+
+    <script>
+        widgetData = {
+            "universalName":"openlayers.map",
+            "displayName":"OpenLayers Map Widget",
+            "description": "Displays a map using the OpenLayers map component",
+            "widgetVersion":"1.0.0",
+            "widgetUrl":"https://localhost:9443/olmap/map.jsp",
+            "imageUrlSmall":"https://localhost:9443/olmap/img/globe.png",
+            "imageUrlLarge":"https://localhost:9443/olmap/img/globe.png",
+            "width":800,
+            "height":600,
+            "visible":true,
+            "singleton":false,
+            "background":false,
+            "widgetTypes":[
+                "standard"
+            ],
+            "defaultTags":[
+            ],
+            "intents":{
+                "send": [],
+                "receive": [
+                    {
+                        "action": "map",
+                        "dataTypes": [
+                            "application/vnd.neon.geospatial"
+                        ]
+                    }
+                ]
+            }
+        };
+        var jsonData = JSON.stringify({
+            status:200,
+            data:widgetData
+        });
+        window.name = jsonData;
+
+    </script>
+
+</head>
+<body>
+
+</body>
+</html>

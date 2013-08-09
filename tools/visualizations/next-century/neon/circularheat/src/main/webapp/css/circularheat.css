@@ -1,0 +1,13 @@
+#circularheatchart {
+    width: 800px;
+    height: 400px;
+}
+
+.container {
+    padding: 10px;
+}
+
+.control-group {
+    display: inline-block;
+    vertical-align: top;
+}

@@ -1,0 +1,7 @@
+archivesBaseName = 'olmap'
+
+war {
+    from(jsOutputFile) {
+        into 'js'
+    }
+}

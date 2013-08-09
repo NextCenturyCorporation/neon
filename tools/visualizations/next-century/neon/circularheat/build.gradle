@@ -1,0 +1,7 @@
+archivesBaseName = 'circularheat'
+
+war {
+    from(jsOutputFile) {
+        into 'js'
+    }
+}

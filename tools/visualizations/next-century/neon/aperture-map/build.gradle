@@ -1,0 +1,7 @@
+archivesBaseName = 'aperturemap'
+
+war {
+    from(jsOutputFile) {
+        into 'js'
+    }
+}

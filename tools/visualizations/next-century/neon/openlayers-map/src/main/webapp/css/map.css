@@ -1,0 +1,21 @@
+#map {
+    width: 800px;
+    height: 400px;
+}
+
+.container {
+    padding: 10px;
+}
+
+.control-group {
+    display: inline-block;
+    vertical-align: top;
+}
+
+/* override image properties here so openlayers renders properly */
+img {
+    width: auto;
+    height: auto;
+    max-width: none;
+    vertical-align: baseline;
+}
