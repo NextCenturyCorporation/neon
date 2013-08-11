@@ -85,26 +85,11 @@ abstract class AbstractConversionTest {
     }
 
     @Test
-    void "test converting a query with filters with a filter in the FilterState"() {
-        givenFilterStateHasOneFilter()
-        def query = whenExecutingConvertQueryWithFiltersFromFilterState(simpleQuery)
-        assertQueryWithFiltersAndOneFilterInFilterState(query)
-    }
-
-    @Test
     void "test converting a compound query with a filter in the FilterState"() {
         givenFilterStateHasOneFilter()
         givenQueyHasOrWhereClause()
         def query = whenExecutingConvertQuery(simpleQuery)
         assertQueryWithOrWhereClause(query)
-    }
-
-    @Test
-    void "test converting a compound query with filters with a filter in the FilterState"() {
-        givenFilterStateHasOneFilter()
-        givenQueyHasOrWhereClause()
-        def query = whenExecutingConvertQueryWithFiltersFromFilterState(simpleQuery)
-        assertQueryWithOrWhereClauseAndAFilter(query)
     }
 
     @Test
@@ -151,15 +136,11 @@ abstract class AbstractConversionTest {
 
     protected abstract def whenExecutingConvertQuery(query)
 
-    protected abstract def whenExecutingConvertQueryWithFiltersFromFilterState(query)
-
     protected abstract void assertSelectClausePopulated(query)
 
     protected abstract void assertSimplestConvertQuery(query)
 
     protected abstract void assertQueryWithOneFilterInFilterState(query)
-
-    protected abstract void assertQueryWithFiltersAndOneFilterInFilterState(query)
 
     protected abstract void assertQueryWithSortClause(query)
 
@@ -172,8 +153,6 @@ abstract class AbstractConversionTest {
     protected abstract void assertQueryWithGroupByClauses(query)
 
     protected abstract void assertQueryWithOrWhereClause(query)
-
-    protected abstract void assertQueryWithOrWhereClauseAndAFilter(query)
 
     private void givenFilterStateHasOneFilter() {
         SingularWhereClause whereClause = new SingularWhereClause(lhs: COLUMN_NAME, operator: "=", rhs: COLUMN_VALUE)

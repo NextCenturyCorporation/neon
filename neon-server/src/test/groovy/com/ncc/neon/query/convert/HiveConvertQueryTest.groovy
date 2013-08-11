@@ -40,12 +40,6 @@ class HiveConvertQueryTest extends AbstractConversionTest {
     }
 
     @Override
-    protected def whenExecutingConvertQueryWithFiltersFromFilterState(query) {
-        HiveConversionStrategy conversionStrategy = new HiveConversionStrategy(filterState)
-        conversionStrategy.convertQueryWithFilters(query)
-    }
-
-    @Override
     void assertSimplestConvertQuery(query) {
         assertStandardHiveQLStatement(query)
     }
@@ -53,11 +47,6 @@ class HiveConvertQueryTest extends AbstractConversionTest {
     @Override
     void assertQueryWithOneFilterInFilterState(query) {
         assertStandardHiveQLStatement(query)
-    }
-
-    @Override
-    protected void assertQueryWithFiltersAndOneFilterInFilterState(query) {
-        assert query == "select * from ${DATABASE_NAME}.${TABLE_NAME} where ${COLUMN_NAME} = '${COLUMN_VALUE}'"
     }
 
     @Override
@@ -94,15 +83,9 @@ class HiveConvertQueryTest extends AbstractConversionTest {
     }
 
     @Override
-    protected void assertQueryWithOrWhereClauseAndAFilter(query) {
-        assert query == "select * from ${DATABASE_NAME}.${TABLE_NAME} where ((${FIELD_NAME} = '${COLUMN_VALUE}' or ${FIELD_NAME_2} = '${COLUMN_VALUE}') and ${COLUMN_NAME} = '${COLUMN_VALUE}')"
-    }
-
-    @Override
     protected void assertSelectClausePopulated(query) {
         assert query == "select $FIELD_NAME,$FIELD_NAME_2 from ${DATABASE_NAME}.${TABLE_NAME}"
     }
-
 
     private void assertStandardHiveQLStatement(query){
         assert query == "select * from ${DATABASE_NAME}.${TABLE_NAME}"

@@ -35,15 +35,9 @@ import com.ncc.neon.query.mongo.MongoConversionStrategy
 class MongoConvertQueryTest extends AbstractConversionTest {
 
     @Override
-    def whenExecutingConvertQuery(query) {
+    protected def whenExecutingConvertQuery(query) {
         MongoConversionStrategy conversionStrategy = new MongoConversionStrategy(filterState)
         conversionStrategy.convertQuery(query)
-    }
-
-    @Override
-    protected def whenExecutingConvertQueryWithFiltersFromFilterState(query) {
-        MongoConversionStrategy conversionStrategy = new MongoConversionStrategy(filterState)
-        conversionStrategy.convertQueryWithFilters(query)
     }
 
     @Override
@@ -54,13 +48,6 @@ class MongoConvertQueryTest extends AbstractConversionTest {
     @Override
     void assertQueryWithOneFilterInFilterState(query) {
         standardQueryAsserts(query)
-    }
-
-    @Override
-    protected void assertQueryWithFiltersAndOneFilterInFilterState(query) {
-        assert query.query == simpleQuery
-        assert query.whereClauseParams == new BasicDBObject(COLUMN_NAME, COLUMN_VALUE)
-        assert query.selectParams == null
     }
 
     @Override
@@ -97,25 +84,10 @@ class MongoConvertQueryTest extends AbstractConversionTest {
         assert query.selectParams == null
     }
 
-    private BasicDBObject createOrClause() {
+    protected BasicDBObject createOrClause() {
         BasicDBObject simpleClause1 = new BasicDBObject(FIELD_NAME, COLUMN_VALUE)
         BasicDBObject simpleClause2 = new BasicDBObject(FIELD_NAME_2, COLUMN_VALUE)
         return new BasicDBObject('$or', [simpleClause1, simpleClause2])
-    }
-
-    @Override
-    protected void assertQueryWithOrWhereClauseAndAFilter(query) {
-        assert query.query == simpleQuery
-        BasicDBObject andClause = createAndClause()
-
-        assert query.whereClauseParams == andClause
-        assert query.selectParams == null
-    }
-
-    private BasicDBObject createAndClause() {
-        BasicDBObject orClause = createOrClause()
-        BasicDBObject simpleClause = new BasicDBObject(COLUMN_NAME, COLUMN_VALUE)
-        return new BasicDBObject('$and', [orClause, simpleClause])
     }
 
     @Override
@@ -135,4 +107,3 @@ class MongoConvertQueryTest extends AbstractConversionTest {
     }
 
 }
-
