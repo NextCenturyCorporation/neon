@@ -27,6 +27,10 @@ import com.ncc.neon.query.hive.HiveConversionStrategy
  * @author tbrooks
  */
 
+/*
+ Tests the HiveConversionStrategy correctly converts Query objects into hive queries
+*/
+
 class HiveConvertQueryTest extends AbstractConversionTest {
 
     @Override
@@ -82,6 +86,16 @@ class HiveConvertQueryTest extends AbstractConversionTest {
     protected void assertQueryWithGroupByClauses(query) {
         //This should include the aggregate function: sum. NEON-177
         assert query == "select * from ${DATABASE_NAME}.${TABLE_NAME} group by ${FIELD_NAME_2},${FIELD_NAME}"
+    }
+
+    @Override
+    protected void assertQueryWithOrWhereClause(query) {
+        assert query == "select * from ${DATABASE_NAME}.${TABLE_NAME} where (${FIELD_NAME} = '${COLUMN_VALUE}' or ${FIELD_NAME_2} = '${COLUMN_VALUE}')"
+    }
+
+    @Override
+    protected void assertQueryWithOrWhereClauseAndAFilter(query) {
+        assert query == "select * from ${DATABASE_NAME}.${TABLE_NAME} where ((${FIELD_NAME} = '${COLUMN_VALUE}' or ${FIELD_NAME_2} = '${COLUMN_VALUE}') and ${COLUMN_NAME} = '${COLUMN_VALUE}')"
     }
 
     @Override

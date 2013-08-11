@@ -29,6 +29,9 @@ import com.ncc.neon.query.mongo.MongoConversionStrategy
  * @author tbrooks
  */
 
+/*
+ Tests the MongoConversionStrategy correctly converts Query objects into MongoQuery objects
+*/
 class MongoConvertQueryTest extends AbstractConversionTest {
 
     @Override
@@ -83,6 +86,36 @@ class MongoConvertQueryTest extends AbstractConversionTest {
     @Override
     protected void assertQueryWithGroupByClauses(query) {
         standardQueryAsserts(query)
+    }
+
+    @Override
+    protected void assertQueryWithOrWhereClause(query) {
+        assert query.query == simpleQuery
+        BasicDBObject orClause = createOrClause()
+
+        assert query.whereClauseParams == orClause
+        assert query.selectParams == null
+    }
+
+    private BasicDBObject createOrClause() {
+        BasicDBObject simpleClause1 = new BasicDBObject(FIELD_NAME, COLUMN_VALUE)
+        BasicDBObject simpleClause2 = new BasicDBObject(FIELD_NAME_2, COLUMN_VALUE)
+        return new BasicDBObject('$or', [simpleClause1, simpleClause2])
+    }
+
+    @Override
+    protected void assertQueryWithOrWhereClauseAndAFilter(query) {
+        assert query.query == simpleQuery
+        BasicDBObject andClause = createAndClause()
+
+        assert query.whereClauseParams == andClause
+        assert query.selectParams == null
+    }
+
+    private BasicDBObject createAndClause() {
+        BasicDBObject orClause = createOrClause()
+        BasicDBObject simpleClause = new BasicDBObject(COLUMN_NAME, COLUMN_VALUE)
+        return new BasicDBObject('$and', [orClause, simpleClause])
     }
 
     @Override

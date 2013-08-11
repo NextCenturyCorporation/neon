@@ -34,6 +34,9 @@ import org.junit.Test
  * @author tbrooks
  */
 
+/*
+ Sets up unit tests to be run against both hive and mongo conversion strategies
+*/
 abstract class AbstractConversionTest {
 
     protected static final String DATABASE_NAME = "database"
@@ -89,6 +92,22 @@ abstract class AbstractConversionTest {
     }
 
     @Test
+    void "test converting a compound query with a filter in the FilterState"() {
+        givenFilterStateHasOneFilter()
+        givenQueyHasOrWhereClause()
+        def query = whenExecutingConvertQuery(simpleQuery)
+        assertQueryWithOrWhereClause(query)
+    }
+
+    @Test
+    void "test converting a compound query with filters with a filter in the FilterState"() {
+        givenFilterStateHasOneFilter()
+        givenQueyHasOrWhereClause()
+        def query = whenExecutingConvertQueryWithFiltersFromFilterState(simpleQuery)
+        assertQueryWithOrWhereClauseAndAFilter(query)
+    }
+
+    @Test
     void "test select clause populated"(){
         givenQueryHasFields()
         def query = whenExecutingConvertQuery(simpleQuery)
@@ -130,7 +149,6 @@ abstract class AbstractConversionTest {
         assertQueryWithGroupByClauses(query)
     }
 
-
     protected abstract def whenExecutingConvertQuery(query)
 
     protected abstract def whenExecutingConvertQueryWithFiltersFromFilterState(query)
@@ -153,6 +171,10 @@ abstract class AbstractConversionTest {
 
     protected abstract void assertQueryWithGroupByClauses(query)
 
+    protected abstract void assertQueryWithOrWhereClause(query)
+
+    protected abstract void assertQueryWithOrWhereClauseAndAFilter(query)
+
     private void givenFilterStateHasOneFilter() {
         SingularWhereClause whereClause = new SingularWhereClause(lhs: COLUMN_NAME, operator: "=", rhs: COLUMN_VALUE)
         Filter filterWithWhere = new Filter(databaseName: simpleFilter.databaseName, tableName: simpleFilter.tableName, whereClause: whereClause)
@@ -161,6 +183,14 @@ abstract class AbstractConversionTest {
 
     private void givenQueryHasFields() {
         simpleQuery.fields = [FIELD_NAME, FIELD_NAME_2]
+    }
+
+    private void givenQueyHasOrWhereClause() {
+        SingularWhereClause clause1 = new SingularWhereClause(lhs: FIELD_NAME, operator: "=", rhs: COLUMN_VALUE)
+        SingularWhereClause clause2 = new SingularWhereClause(lhs: FIELD_NAME_2, operator: "=", rhs: COLUMN_VALUE)
+        OrWhereClause orWhereClause = new OrWhereClause(whereClauses: [clause1, clause2])
+
+        simpleQuery.filter.whereClause = orWhereClause
     }
 
     private void givenQueryHasSortClause() {
