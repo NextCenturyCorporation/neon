@@ -28,6 +28,10 @@ import com.ncc.neon.query.hive.HiveConversionStrategy
  * @author tbrooks
  */
 
+/*
+ Tests the HiveConversionStrategy.convertQueryWithFilters()
+  correctly converts Query objects into hive queries
+*/
 class HiveConvertQueryWithFiltersTest extends HiveConvertQueryTest{
 
     @Override

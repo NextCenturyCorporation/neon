@@ -28,7 +28,8 @@ import com.ncc.neon.query.hive.HiveConversionStrategy
  */
 
 /*
- Tests the HiveConversionStrategy correctly converts Query objects into hive queries
+ Tests the HiveConversionStrategy.convertQuery()
+ correctly converts Query objects into hive queries
 */
 
 class HiveConvertQueryTest extends AbstractConversionTest {

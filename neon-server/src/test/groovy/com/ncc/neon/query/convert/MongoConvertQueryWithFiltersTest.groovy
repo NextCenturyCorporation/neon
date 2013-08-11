@@ -28,6 +28,11 @@ import com.ncc.neon.query.mongo.MongoConversionStrategy
  * @author tbrooks
  */
 
+/*
+ Tests the MongoConversionStrategy.convertQueryWithFilters()
+ correctly converts Query objects into MongoQuery objects
+*/
+
 class MongoConvertQueryWithFiltersTest extends MongoConvertQueryTest{
 
     @Override

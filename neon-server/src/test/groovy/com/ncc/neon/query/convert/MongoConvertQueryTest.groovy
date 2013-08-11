@@ -30,7 +30,8 @@ import com.ncc.neon.query.mongo.MongoConversionStrategy
  */
 
 /*
- Tests the MongoConversionStrategy correctly converts Query objects into MongoQuery objects
+ Tests the MongoConversionStrategy.convertQuery()
+ correctly converts Query objects into MongoQuery objects
 */
 class MongoConvertQueryTest extends AbstractConversionTest {
 
