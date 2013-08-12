@@ -37,7 +37,7 @@ class MongoAggregationClauseBuilder {
         // utility class, no public constructor needed
     }
 
-    static def buildAggregateClauses(selectClause, aggregationClauses, groupByClauses) {
+    static def buildAggregateClauses(aggregationClauses, groupByClauses) {
         def groupFields = new BasicDBObject()
         def projFields = new BasicDBObject()
 

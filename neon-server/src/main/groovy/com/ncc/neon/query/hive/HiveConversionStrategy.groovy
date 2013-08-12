@@ -72,7 +72,6 @@ class HiveConversionStrategy {
     private static def buildFieldList(Query query) {
         def fields = []
         query.aggregates.each { aggregate ->
-            println "aggregate ${aggregate}, type: ${aggregate.getClass()}, aggregateField: ${aggregate.field}, type: ${aggregate.field.getClass()}"
             fields << functionToString(aggregate)
         }
         query.groupByClauses.each { groupBy ->

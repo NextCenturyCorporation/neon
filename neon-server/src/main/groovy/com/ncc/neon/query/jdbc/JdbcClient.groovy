@@ -1,9 +1,7 @@
 package com.ncc.neon.query.jdbc
 
-import com.ncc.neon.util.DateUtils
 import org.joda.time.DateTime
 import org.joda.time.DateTimeZone
-import org.slf4j.LoggerFactory
 
 import java.sql.*
 

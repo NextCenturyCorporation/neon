@@ -2,9 +2,7 @@ package com.ncc.neon.query.jdbc
 
 import com.ncc.neon.query.QueryResult
 import com.ncc.neon.query.Row
-import com.ncc.neon.util.DateUtils
 import groovy.json.JsonBuilder
-import groovy.json.JsonOutput
 
 /*
  *
