@@ -88,7 +88,7 @@ class JdbcClient {
     }
 
     public List<String> getColumnNames(String dataStoreName, String databaseName) {
-        String query = "select * from ${dataStoreName}.${databaseName}"
+        String query = "select * from ${dataStoreName}.${databaseName} limit 1"
 
         List list = executeQuery(query)
         if (!list) {
