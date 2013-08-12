@@ -72,6 +72,7 @@ class HiveConversionStrategy {
     private static def buildFieldList(Query query) {
         def fields = []
         query.aggregates.each { aggregate ->
+            println "aggregate ${aggregate}, type: ${aggregate.getClass()}, aggregateField: ${aggregate.field}, type: ${aggregate.field.getClass()}"
             fields << functionToString(aggregate)
         }
         query.groupByClauses.each { groupBy ->
@@ -99,7 +100,7 @@ class HiveConversionStrategy {
 
 
     private static String functionToString(FieldFunction func) {
-        return "${func.operation}(${escapeFieldName(func.field)}) AS ${func.name}"
+        return "${func.operation}(${escapeFieldName(func.field)}) as ${func.name}"
     }
 
     private void applyWhereStatement(StringBuilder builder, Query query, boolean includeFiltersFromFilterState, Closure additionalWhereClauseGenerator) {

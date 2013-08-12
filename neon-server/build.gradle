@@ -109,8 +109,8 @@ dependencies {
     integrationTestCompile 'org.apache.hadoop:hadoop-common:2.0.0-cdh4.3.0'
     integrationTestCompile 'org.apache.hadoop:hadoop-hdfs:2.0.0-cdh4.3.0'
 
-    integrationTestCompile files(sourceSets.main.output.classesDir)
-    integrationTestCompile files(sourceSets.test.output.classesDir)
+    integrationTestCompile sourceSets.main.output
+    integrationTestCompile sourceSets.test.output
 }
 
 war {
@@ -125,8 +125,6 @@ test {
     props['unit.test'] = true
     systemProperties props
 }
-
-integrationTestClasses.dependsOn 'classes', 'testClasses'
 
 task integrationTests(type: Test) {
     dependsOn 'integrationTestClasses', 'generateMongoJson', 'generateHiveCSV', 'generateHiveJson'
@@ -189,7 +187,7 @@ def getHiveHost() {
 }
 
 def getHdfsUrl() {
-    return project.hasProperty("hdfs.url") ? getProperty("hdfs.url") : "localhost:8020"
+    return project.hasProperty("hdfs.url") ? getProperty("hdfs.url") : "hdfs://localhost:8020"
 }
 
 
