@@ -4,7 +4,6 @@ import com.mongodb.BasicDBObject
 import com.mongodb.DBObject
 import com.mongodb.MongoClient
 import com.ncc.neon.query.QueryResult
-import com.ncc.neon.query.clauses.SelectClause
 
 /*
  * ************************************************************************
