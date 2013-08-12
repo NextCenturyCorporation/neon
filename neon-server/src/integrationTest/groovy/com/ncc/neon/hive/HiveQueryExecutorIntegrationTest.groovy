@@ -10,6 +10,7 @@ import org.apache.hadoop.fs.FileSystem
 import org.apache.hadoop.fs.Path
 import org.junit.AfterClass
 import org.junit.BeforeClass
+import org.junit.Ignore
 import org.junit.runner.RunWith
 import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.context.ContextConfiguration
@@ -45,6 +46,7 @@ import java.sql.Timestamp
 @RunWith(SpringJUnit4ClassRunner)
 @ContextConfiguration(classes = HiveIntegrationTestContext)
 @ActiveProfiles("hive-integrationtest")
+@Ignore("Ignored until NEON-570 allows splitting the build into hive/mongo tests")
 class HiveQueryExecutorIntegrationTest extends AbstractQueryExecutorIntegrationTest {
 
     private static final def FIELD_TYPES = [_id: "string", firstname: "string", lastname: "string", city: "string", state: "string", salary: "int", hiredate: "timestamp"]
