@@ -1,7 +1,5 @@
 package com.ncc.neon.connect
-
 import com.ncc.neon.query.*
-import com.ncc.neon.query.QueryExecutor
 import com.ncc.neon.query.filter.Filter
 import com.ncc.neon.query.filter.FilterState
 import com.ncc.neon.query.hive.HiveConversionStrategy
@@ -9,8 +7,6 @@ import com.ncc.neon.query.jdbc.JdbcQueryResult
 import com.ncc.neon.selection.SelectionManager
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
-
-import java.sql.SQLException
 /*
  * ************************************************************************
  * Copyright (c), 2013 Next Century Corporation. All Rights Reserved.
@@ -142,12 +138,9 @@ class HiveQueryExecutor implements QueryExecutor {
         try{
             jdbcClient = hiveConnection.connect(connectionInfo)
             jdbcClient.execute("USE " + dbName)
-            jdbcClient.executeQuery("SHOW TABLES").collect{ Map<String,String> map ->
+            return jdbcClient.executeQuery("SHOW TABLES").collect{ Map<String,String> map ->
                 map.get("tab_name")
             }
-        }
-        catch (SQLException ex){
-            return []
         }
         finally{
             jdbcClient?.close()
@@ -159,6 +152,6 @@ class HiveQueryExecutor implements QueryExecutor {
         if(includeFiltered){
             return conversionStrategy.convertQuery(query)
         }
-        return conversionStrategy.convertQueryWithFilters(query)
+        return conversionStrategy.convertQueryWithFilterState(query)
     }
 }

@@ -29,7 +29,7 @@ import com.ncc.neon.query.hive.HiveConversionStrategy
  */
 
 /*
- Tests the HiveConversionStrategy.convertQueryWithFilters()
+ Tests the HiveConversionStrategy.convertQueryWithFilterState()
   correctly converts Query objects into hive queries
 */
 class HiveConvertQueryWithFiltersTest extends HiveConvertQueryTest{
@@ -37,7 +37,7 @@ class HiveConvertQueryWithFiltersTest extends HiveConvertQueryTest{
     @Override
     protected def whenExecutingConvertQuery(query) {
         HiveConversionStrategy conversionStrategy = new HiveConversionStrategy(filterState)
-        conversionStrategy.convertQueryWithFilters(query)
+        conversionStrategy.convertQueryWithFilterState(query)
     }
 
     @Override

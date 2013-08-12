@@ -29,7 +29,7 @@ import com.ncc.neon.query.mongo.MongoConversionStrategy
  */
 
 /*
- Tests the MongoConversionStrategy.convertQueryWithFilters()
+ Tests the MongoConversionStrategy.convertQueryWithFilterState()
  correctly converts Query objects into MongoQuery objects
 */
 
@@ -38,7 +38,7 @@ class MongoConvertQueryWithFiltersTest extends MongoConvertQueryTest{
     @Override
     protected def whenExecutingConvertQuery(query) {
         MongoConversionStrategy conversionStrategy = new MongoConversionStrategy(filterState)
-        conversionStrategy.convertQueryWithFilters(query)
+        conversionStrategy.convertQueryWithFilterState(query)
     }
 
     @Override

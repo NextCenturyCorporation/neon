@@ -13,11 +13,11 @@ import com.ncc.neon.query.filter.Filter
 import com.ncc.neon.query.filter.FilterState
 import com.ncc.neon.query.mongo.AbstractMongoQueryWorker
 import com.ncc.neon.query.mongo.AggregateMongoQueryWorker
-import com.ncc.neon.query.mongo.DistinctMongoQueryQueryWorker
+import com.ncc.neon.query.mongo.DistinctMongoQueryWorker
 import com.ncc.neon.query.mongo.MongoConversionStrategy
 import com.ncc.neon.query.mongo.MongoQuery
 import com.ncc.neon.query.mongo.MongoUtils
-import com.ncc.neon.query.mongo.SimpleMongoQueryQueryWorker
+import com.ncc.neon.query.mongo.SimpleMongoQueryWorker
 import com.ncc.neon.selection.SelectionManager
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -50,6 +50,7 @@ import org.slf4j.LoggerFactory
 class MongoQueryExecutor implements QueryExecutor {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(MongoQueryExecutor)
+    private static final String ID_FIELD = "_id"
 
     private final SelectionManager selectionManager = new SelectionManager()
     private final FilterState filterState = new FilterState()
@@ -69,14 +70,14 @@ class MongoQueryExecutor implements QueryExecutor {
     private AbstractMongoQueryWorker createMongoQueryWorker(Query query) {
         if (query.distinctClause) {
             LOGGER.debug("Using distinct mongo query worker")
-            return new DistinctMongoQueryQueryWorker(mongo)
+            return new DistinctMongoQueryWorker(mongo)
         }
         else if (query.aggregates || query.groupByClauses) {
             LOGGER.debug("Using aggregate mongo query worker")
             return new AggregateMongoQueryWorker(mongo)
         }
         LOGGER.debug("Using simple mongo query worker")
-        return new SimpleMongoQueryQueryWorker(mongo)
+        return new SimpleMongoQueryWorker(mongo)
     }
 
     @Override
@@ -115,8 +116,7 @@ class MongoQueryExecutor implements QueryExecutor {
     @Override
     void setSelectionWhere(Filter filter) {
         def res = execute(QueryUtils.queryFromFilter(filter), false)
-        def idField = this.idFieldName
-        def ids = res.collect { it.getFieldValue(idField) }
+        def ids = res.collect { it.getFieldValue(ID_FIELD) }
         selectionManager.replaceSelectionWith(ids)
     }
 
@@ -144,7 +144,7 @@ class MongoQueryExecutor implements QueryExecutor {
     QueryResult getSelectionWhere(Filter filter) {
         MongoConversionStrategy mongoConversionStrategy = new MongoConversionStrategy(filterState)
         Query query = QueryUtils.queryFromFilter(filter)
-        MongoQuery mongoQuery = mongoConversionStrategy.convertQuery(query, createWhereClauseFromSelection.curry(getIdFieldName()))
+        MongoQuery mongoQuery = mongoConversionStrategy.convertQuery(query, createWhereClauseFromSelection.curry(ID_FIELD))
         AbstractMongoQueryWorker worker = createMongoQueryWorker(query)
         worker.executeQuery(mongoQuery)
     }
@@ -160,11 +160,7 @@ class MongoQueryExecutor implements QueryExecutor {
         database.getCollectionNames().collect { it }
     }
 
-    private String getIdFieldName() {
-        return "_id"
-    }
-
-    private def transformIdFields(Collection<Object> ids) {
+    private static def transformIdFields(Collection<Object> ids) {
         return MongoUtils.oidsToObjectIds(ids)
     }
 
@@ -173,7 +169,7 @@ class MongoQueryExecutor implements QueryExecutor {
         if(includedFiltered){
             return mongoConversionStrategy.convertQuery(query)
         }
-        return mongoConversionStrategy.convertQueryWithFilters(query)
+        return mongoConversionStrategy.convertQueryWithFilterState(query)
     }
 
     private final def createWhereClauseFromSelection = { String idFieldName ->

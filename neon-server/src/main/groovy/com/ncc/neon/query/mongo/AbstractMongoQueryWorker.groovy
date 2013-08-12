@@ -53,7 +53,7 @@ abstract class AbstractMongoQueryWorker {
         return db.getCollection(mongoQuery.query.tableName)
     }
 
-    protected def createSortDBObject(sortClauses) {
+    protected static def createSortDBObject(sortClauses) {
         def sortDBObject = new BasicDBObject()
         sortClauses.each {
             sortDBObject.append(it.fieldName, it.sortDirection)

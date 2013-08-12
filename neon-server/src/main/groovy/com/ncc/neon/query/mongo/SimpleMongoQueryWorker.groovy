@@ -1,9 +1,8 @@
 package com.ncc.neon.query.mongo
 
+import com.mongodb.DBCursor
 import com.mongodb.MongoClient
 import com.ncc.neon.query.QueryResult
-import com.ncc.neon.query.clauses.SortClause
-import com.ncc.neon.query.clauses.SortOrder
 
 /*
  * ************************************************************************
@@ -31,40 +30,29 @@ import com.ncc.neon.query.clauses.SortOrder
  * @author tbrooks
  */
 
-class DistinctMongoQueryQueryWorker extends AbstractMongoQueryWorker {
+class SimpleMongoQueryWorker extends AbstractMongoQueryWorker {
 
-    DistinctMongoQueryQueryWorker(MongoClient mongo) {
+    SimpleMongoQueryWorker(MongoClient mongo) {
         super(mongo)
     }
 
     @Override
     QueryResult executeQuery(MongoQuery mongoQuery) {
-        def distinctClause = mongoQuery.query.distinctClause
-        def distinct = getCollection(mongoQuery).distinct(distinctClause.fieldName, mongoQuery.whereClauseParams)
+        DBCursor results = queryDB(mongoQuery)
 
-        sortDistinctResults(mongoQuery, distinct)
-        distinct = limitDistinctResults(mongoQuery, distinct)
-
-        return new MongoQueryResult(mongoIterable: distinct)
-    }
-
-    private List limitDistinctResults(MongoQuery mongoQuery, List distinct) {
+        if (mongoQuery.query.sortClauses) {
+            results = results.sort(createSortDBObject(mongoQuery.query.sortClauses))
+        }
         if (mongoQuery.query.limitClause) {
-            return distinct[0..<mongoQuery.query.limitClause.limit]
+            results = results.limit(mongoQuery.query.limitClause.limit)
         }
-        return distinct
+        return new MongoQueryResult(mongoIterable: results)
     }
 
-    private void sortDistinctResults(MongoQuery mongoQuery, List distinct) {
-        def distinctFieldName = mongoQuery.query.distinctClause.fieldName
-        List<SortClause> sortClauses = mongoQuery.query.sortClauses
-        if (sortClauses) {
-            // for now we only have one value in the distinct clause, so just see if that was provided as a sort field
-            def sortClause = sortClauses.find { it.fieldName == distinctFieldName }
-            if (sortClause) {
-                def comparator = sortClause.sortOrder == SortOrder.ASCENDING ? ASCENDING_STRING_COMPARATOR : DESCENDING_STRING_COMPARATOR
-                distinct.sort comparator
-            }
+    private DBCursor queryDB(MongoQuery query) {
+        if (!query.selectParams) {
+            return getCollection(query).find(query.whereClauseParams)
         }
+        return getCollection(query).find(query.whereClauseParams, query.selectParams)
     }
 }

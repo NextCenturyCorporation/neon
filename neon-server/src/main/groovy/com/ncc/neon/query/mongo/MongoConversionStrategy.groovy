@@ -44,19 +44,19 @@ class MongoConversionStrategy {
     }
 
     MongoQuery convertQuery(Query query, Closure additionalWhereClauseGenerator = null) {
-        convertQueryRegardingFilters(query, false, additionalWhereClauseGenerator)
+        helpConvertQuery(query, false, additionalWhereClauseGenerator)
     }
 
-    MongoQuery convertQueryWithFilters(Query query, Closure additionalWhereClauseGenerator = null) {
-        convertQueryRegardingFilters(query, true, additionalWhereClauseGenerator)
+    MongoQuery convertQueryWithFilterState(Query query, Closure additionalWhereClauseGenerator = null) {
+        helpConvertQuery(query, true, additionalWhereClauseGenerator)
     }
 
-    private MongoQuery convertQueryRegardingFilters(Query query, boolean includeFilters, Closure additionalWhereClauseGenerator) {
+    private MongoQuery helpConvertQuery(Query query, boolean includeFiltersFromFilterState, Closure additionalWhereClauseGenerator) {
         MongoQuery mongoQuery = new MongoQuery(query: query)
         mongoQuery.selectParams = createSelectParams(query)
         List whereClauses = assembleWhereClauses(query, additionalWhereClauseGenerator)
 
-        if (includeFilters) {
+        if (includeFiltersFromFilterState) {
             whereClauses.addAll(createWhereClausesForFilters(query))
         }
 
@@ -64,7 +64,7 @@ class MongoConversionStrategy {
         return mongoQuery
     }
 
-    private DBObject createWhereClauseParams(List whereClauses) {
+    private static DBObject createWhereClauseParams(List whereClauses) {
         if (!whereClauses) {
             return new BasicDBObject()
         }
@@ -74,7 +74,7 @@ class MongoConversionStrategy {
         return MongoWhereClauseBuilder.build(new AndWhereClause(whereClauses: whereClauses))
     }
 
-    private List assembleWhereClauses(Query query, Closure additionalWhereClauseGenerator) {
+    private static List assembleWhereClauses(Query query, Closure additionalWhereClauseGenerator) {
         def whereClauses = []
 
         if (additionalWhereClauseGenerator) {
@@ -97,7 +97,7 @@ class MongoConversionStrategy {
         return whereClauses
     }
 
-    private DBObject createSelectParams(Query query) {
+    private static DBObject createSelectParams(Query query) {
         BasicDBObject params = new BasicDBObject()
 
         if (query.fields == SelectClause.ALL_FIELDS) {

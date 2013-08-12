@@ -44,30 +44,30 @@ class HiveConversionStrategy {
     }
 
     String convertQuery(Query query, Closure additionalWhereClauseGenerator = null) {
-        convertQueryRegardingFilters(query, false, additionalWhereClauseGenerator)
+        helpConvertQuery(query, false, additionalWhereClauseGenerator)
     }
 
-    String convertQueryWithFilters(Query query, Closure additionalWhereClauseGenerator = null) {
-        convertQueryRegardingFilters(query, true, additionalWhereClauseGenerator)
+    String convertQueryWithFilterState(Query query, Closure additionalWhereClauseGenerator = null) {
+        helpConvertQuery(query, true, additionalWhereClauseGenerator)
     }
 
-    private String convertQueryRegardingFilters(Query query, boolean includeFilters, Closure additionalWhereClauseGenerator) {
+    private String helpConvertQuery(Query query, boolean includeFiltersFromFilterState, Closure additionalWhereClauseGenerator) {
         StringBuilder builder = new StringBuilder()
         applySelectFromStatement(builder, query)
-        applyWhereStatement(builder, query, includeFilters, additionalWhereClauseGenerator)
+        applyWhereStatement(builder, query, includeFiltersFromFilterState, additionalWhereClauseGenerator)
         applyGroupByStatement(builder, query)
         applySortByStatement(builder, query)
         applyLimitStatement(builder, query)
         return builder.toString()
     }
 
-    private void applySelectFromStatement(StringBuilder builder, Query query) {
+    private static void applySelectFromStatement(StringBuilder builder, Query query) {
         builder << "select " << query.fields.join(",") << " from " << query.filter.databaseName << "." << query.filter.tableName
     }
 
-    private void applyWhereStatement(StringBuilder builder, Query query, boolean includeFilters, Closure additionalWhereClauseGenerator){
+    private void applyWhereStatement(StringBuilder builder, Query query, boolean includeFiltersFromFilterState, Closure additionalWhereClauseGenerator){
         List whereClauses = assembleWhereClauses(query, additionalWhereClauseGenerator)
-        if (includeFilters) {
+        if (includeFiltersFromFilterState) {
             whereClauses.addAll(createWhereClausesForFilters(query))
         }
         HiveWhereClause clause = createWhereClauseParams(whereClauses)
@@ -77,7 +77,7 @@ class HiveConversionStrategy {
 
     }
 
-    private void applyGroupByStatement(StringBuilder builder, Query query){
+    private static void applyGroupByStatement(StringBuilder builder, Query query){
         def groupByClauses = []
         groupByClauses.addAll(query.groupByClauses)
         groupByClauses.addAll(query.aggregates)
@@ -88,20 +88,20 @@ class HiveConversionStrategy {
 
     }
 
-    private void applySortByStatement(StringBuilder builder, Query query){
+    private static void applySortByStatement(StringBuilder builder, Query query){
         List sortClauses = query.sortClauses
         if (sortClauses) {
             builder << " order by " << sortClauses.collect { it.fieldName + ((it.sortOrder == SortOrder.ASCENDING) ? " ASC" : " DESC") }.join(",")
         }
     }
 
-    private void applyLimitStatement(StringBuilder builder, Query query){
+    private static void applyLimitStatement(StringBuilder builder, Query query){
         if (query.limitClause != null) {
             builder << " limit " << query.limitClause.limit
         }
     }
 
-    private List assembleWhereClauses(Query query, Closure additionalWhereClauseGenerator) {
+    private static List assembleWhereClauses(Query query, Closure additionalWhereClauseGenerator) {
         def whereClauses = []
 
         if (additionalWhereClauseGenerator) {
@@ -124,7 +124,7 @@ class HiveConversionStrategy {
         return whereClauses
     }
 
-    private HiveWhereClause createWhereClauseParams(List whereClauses) {
+    private static HiveWhereClause createWhereClauseParams(List whereClauses) {
         if (!whereClauses) {
             return null
         }
