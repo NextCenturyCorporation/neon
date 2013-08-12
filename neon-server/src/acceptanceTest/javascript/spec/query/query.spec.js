@@ -75,7 +75,7 @@ describe('query mapping', function () {
         allData.forEach(function (row) {
             var expectedRow = {};
             // the _id field is always included
-            // TODO: NEON-84 id field issues. this field may not always be named _id
+            // TODO: NEON-75 id field issues. this field may not always be named _id
             expectedRow._id = row._id;
             fields.forEach(function (field) {
                 expectedRow[field] = row[field];
@@ -88,7 +88,7 @@ describe('query mapping', function () {
     it('select derived field', function () {
         var groupedByMonthData = getJSONFixture('groupByMonth.json');
         // the results should be the data grouped by month but only include _id and hire_month
-        // TODO: NEON-84 id field issues. this field may not always be named _id
+        // TODO: NEON-75 id field issues. this field may not always be named _id
         var expectedData = [];
         groupedByMonthData.forEach(function(row) {
             var expectedRow = {};
