@@ -52,10 +52,11 @@ class HiveQueryExecutorIntegrationTest extends AbstractQueryExecutorIntegrationT
     private static final def FIELD_TYPES = [_id: "string", firstname: "string", lastname: "string", city: "string", state: "string", salary: "int", hiredate: "timestamp"]
 
     /** a separate connection used for inserting/deleting test data */
-    private static final JdbcClient JDBC_CLIENT = new HiveConnection().connect(new ConnectionInfo(connectionUrl: HiveIntegrationTestContext.HOST_STRING, dataStoreName: DataSource.HIVE))
+    private static JdbcClient jdbcClient
 
     @BeforeClass
     static void beforeClass() {
+        jdbcClient = new HiveConnection().connect(new ConnectionInfo(connectionUrl: HiveIntegrationTestContext.HOST_STRING, dataStoreName: DataSource.HIVE))
         // make sure we clean up just in case something was left over
         deleteData()
         insertData()
@@ -86,8 +87,8 @@ class HiveQueryExecutorIntegrationTest extends AbstractQueryExecutorIntegrationT
         fileSystem.deleteOnExit(destFolderPath)
         copyTestDataFile(fileSystem, testDataFile, destFolder)
         def tableScript = createTableScript(fieldsFile, destFolder)
-        JDBC_CLIENT.execute("create database ${DATABASE_NAME}")
-        JDBC_CLIENT.execute(tableScript)
+        jdbcClient.execute("create database ${DATABASE_NAME}")
+        jdbcClient.execute(tableScript)
     }
 
     private static def createTableScript(fieldsFile, destFolder) {
@@ -118,8 +119,8 @@ class HiveQueryExecutorIntegrationTest extends AbstractQueryExecutorIntegrationT
     }
 
     private static void deleteData() {
-        JDBC_CLIENT.execute("drop table if exists ${DATABASE_NAME}.${TABLE_NAME}")
-        JDBC_CLIENT.execute("drop database if exists ${DATABASE_NAME}")
+        jdbcClient.execute("drop table if exists ${DATABASE_NAME}.${TABLE_NAME}")
+        jdbcClient.execute("drop database if exists ${DATABASE_NAME}")
     }
 
 
