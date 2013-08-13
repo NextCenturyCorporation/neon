@@ -64,7 +64,6 @@ class HiveQueryExecutorIntegrationTest extends AbstractQueryExecutorIntegrationT
 
     @AfterClass
     static void afterClass() {
-        AbstractQueryExecutorIntegrationTest.metaClass = null
         deleteData()
     }
 
