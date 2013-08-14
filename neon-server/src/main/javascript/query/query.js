@@ -50,7 +50,7 @@ neon.query.Query = function () {
     this.includeFiltered_ = false;
 
     this.groupByClauses = [];
-    this.distinctClause;
+    this.isDistinct = false;
     this.aggregates = [];
     this.sortClauses = [];
     this.limitClause;
@@ -271,13 +271,12 @@ neon.query.Query.prototype.aggregate = function (aggregationOperation, aggregati
 };
 
 /**
- * Specifies a DISTINCT clause that returns only the distinct values of the specified field
+ * Specifies the query return distinct results
  * @method distinct
- * @param {String} fieldName The name of the field to return distinct values for
  * @return {neon.query.Query} This query object
  */
-neon.query.Query.prototype.distinct = function (fieldName) {
-    this.distinctClause = new neon.query.DistinctClause(fieldName);
+neon.query.Query.prototype.distinct = function () {
+    this.isDistinct = true;
     return this;
 };
 
@@ -851,10 +850,6 @@ neon.query.WhereClause = function (lhs, operator, rhs) {
 
 };
 
-neon.query.DistinctClause = function (fieldName) {
-    this.fieldName = fieldName;
-};
-
 neon.query.SortClause = function (fieldName, sortOrder) {
     this.fieldName = fieldName;
     this.sortOrder = sortOrder;
@@ -921,7 +916,7 @@ neon.query.QueryGroup.prototype.addQuery = function (name, query) {
     return this;
 };
 
-// TODO: When NEON-170 is complete, update documentation indicating that individual query settings of trasnform are ignored
+// TODO: When NEON-170 is complete, update documentation indicating that individual query settings of transform are ignored
 /**
  * Sets the transform to execute on the results of the query group (individual query settings of transform are
  * ignored, and all queries in the group will use this value).

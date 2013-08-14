@@ -37,8 +37,6 @@ import com.ncc.neon.query.QueryResult
  */
 
 abstract class AbstractMongoQueryWorker {
-    protected static final ASCENDING_STRING_COMPARATOR = { a, b -> a <=> b }
-    protected static final DESCENDING_STRING_COMPARATOR = { a, b -> b <=> a }
 
     private final MongoClient mongo
 

@@ -1,8 +1,12 @@
-package com.ncc.neon.query.mongo
+package com.ncc.neon.hive
 
-import com.mongodb.DBCursor
-import com.mongodb.MongoClient
-import com.ncc.neon.query.QueryResult
+import com.ncc.neon.connect.ConnectionInfo
+import com.ncc.neon.connect.ConnectionState
+import com.ncc.neon.connect.DataSource
+import org.springframework.context.annotation.Bean
+import org.springframework.context.annotation.ComponentScan
+import org.springframework.context.annotation.Configuration
+import org.springframework.context.annotation.Profile
 
 /*
  * ************************************************************************
@@ -25,31 +29,21 @@ import com.ncc.neon.query.QueryResult
  * PROPRIETARY AND CONFIDENTIAL TRADE SECRET MATERIAL NOT FOR DISCLOSURE OUTSIDE
  * OF NEXT CENTURY CORPORATION EXCEPT BY PRIOR WRITTEN PERMISSION AND WHEN
  * RECIPIENT IS UNDER OBLIGATION TO MAINTAIN SECRECY.
- *
- * 
- * @author tbrooks
  */
 
-class SimpleMongoQueryWorker extends AbstractMongoQueryWorker {
+@Configuration
+@ComponentScan(basePackages = ['com.ncc.neon'])
+@Profile('hive-integrationtest')
+class HiveIntegrationTestContext {
 
-    SimpleMongoQueryWorker(MongoClient mongo) {
-        super(mongo)
+    static final String HOST_STRING = System.getProperty("hive.host", "localhost:10000")
+
+    @Bean
+    ConnectionState connectionState() {
+        ConnectionState connectionState = new ConnectionState()
+        ConnectionInfo info = new ConnectionInfo(dataStoreName: DataSource.HIVE, connectionUrl: HOST_STRING)
+        connectionState.createConnection(info)
+        return connectionState
     }
 
-    @Override
-    QueryResult executeQuery(MongoQuery mongoQuery) {
-        DBCursor results = queryDB(mongoQuery)
-
-        if (mongoQuery.query.sortClauses) {
-            results = results.sort(createSortDBObject(mongoQuery.query.sortClauses))
-        }
-        if (mongoQuery.query.limitClause) {
-            results = results.limit(mongoQuery.query.limitClause.limit)
-        }
-        return new MongoQueryResult(mongoIterable: results)
-    }
-
-    private DBCursor queryDB(MongoQuery query) {
-        return getCollection(query).find(query.whereClauseParams, query.selectParams)
-    }
 }

@@ -1,6 +1,7 @@
 package com.ncc.neon.query.mongo
 
 import com.ncc.neon.query.Row
+import groovy.transform.ToString
 
 /*
  * ************************************************************************
@@ -24,6 +25,7 @@ import com.ncc.neon.query.Row
  * OF NEXT CENTURY CORPORATION EXCEPT BY PRIOR WRITTEN PERMISSION AND WHEN
  * RECIPIENT IS UNDER OBLIGATION TO MAINTAIN SECRECY.
  */
+@ToString
 class MongoRow implements Row {
 
     private def mongoRow

@@ -2,6 +2,9 @@ package com.ncc.neon.query.hive
 
 import com.ncc.neon.query.Query
 import com.ncc.neon.query.clauses.AndWhereClause
+import com.ncc.neon.query.clauses.FieldFunction
+import com.ncc.neon.query.clauses.GroupByClause
+import com.ncc.neon.query.clauses.GroupByFieldClause
 import com.ncc.neon.query.clauses.SortOrder
 import com.ncc.neon.query.filter.FilterState
 
@@ -39,7 +42,7 @@ class HiveConversionStrategy {
 
     private final FilterState filterState
 
-    HiveConversionStrategy(FilterState filterState){
+    HiveConversionStrategy(FilterState filterState) {
         this.filterState = filterState
     }
 
@@ -62,10 +65,44 @@ class HiveConversionStrategy {
     }
 
     private static void applySelectFromStatement(StringBuilder builder, Query query) {
-        builder << "select " << query.fields.join(",") << " from " << query.filter.databaseName << "." << query.filter.tableName
+        def modifier = query.isDistinct ? "DISTINCT " : ""
+        builder << "select ${modifier}" << buildFieldList(query) << " from " << query.filter.databaseName << "." << query.filter.tableName
     }
 
-    private void applyWhereStatement(StringBuilder builder, Query query, boolean includeFiltersFromFilterState, Closure additionalWhereClauseGenerator){
+    private static def buildFieldList(Query query) {
+        def fields = []
+        query.aggregates.each { aggregate ->
+            fields << functionToString(aggregate)
+        }
+        query.groupByClauses.each { groupBy ->
+            fields << groupByClauseToString(groupBy)
+        }
+        // if there are aggregates in the field, those and the group by fields are the only valid values to return
+        // and the hive - jdbc drivers can return some strange results
+        // https://issues.apache.org/jira/browse/HIVE-4392,
+        // https://issues.apache.org/jira/browse/HIVE-4522
+        // so don't allow fields not grouped on
+        if (!fields) {
+            fields.addAll(query.fields.collect { escapeFieldName(it) })
+        }
+        return fields.join(", ")
+    }
+
+    private static String escapeFieldName(String fieldName) {
+        // TODO: NEON-151 field may be null when doing a count operation
+        return fieldName?.startsWith("_") ? "`${fieldName}`" : fieldName
+    }
+
+    private static String groupByClauseToString(GroupByClause groupBy) {
+        groupBy instanceof GroupByFieldClause ? escapeFieldName(groupBy.field) : functionToString(groupBy)
+    }
+
+
+    private static String functionToString(FieldFunction func) {
+        return "${func.operation}(${escapeFieldName(func.field)}) as ${func.name}"
+    }
+
+    private void applyWhereStatement(StringBuilder builder, Query query, boolean includeFiltersFromFilterState, Closure additionalWhereClauseGenerator) {
         List whereClauses = assembleWhereClauses(query, additionalWhereClauseGenerator)
         if (includeFiltersFromFilterState) {
             whereClauses.addAll(createWhereClausesForFilters(query))
@@ -77,25 +114,25 @@ class HiveConversionStrategy {
 
     }
 
-    private static void applyGroupByStatement(StringBuilder builder, Query query){
+    private static void applyGroupByStatement(StringBuilder builder, Query query) {
         def groupByClauses = []
         groupByClauses.addAll(query.groupByClauses)
-        groupByClauses.addAll(query.aggregates)
 
         if (groupByClauses) {
-            builder << " group by " << groupByClauses.collect { it.field }.join(",")
+            // hive doesn't support grouping by the field alias so we actually need to provide the field function again
+            builder << " group by " << groupByClauses.collect { groupByClauseToString(it).split(" ")[0] }.join(", ")
         }
 
     }
 
-    private static void applySortByStatement(StringBuilder builder, Query query){
+    private static void applySortByStatement(StringBuilder builder, Query query) {
         List sortClauses = query.sortClauses
         if (sortClauses) {
-            builder << " order by " << sortClauses.collect { it.fieldName + ((it.sortOrder == SortOrder.ASCENDING) ? " ASC" : " DESC") }.join(",")
+            builder << " order by " << sortClauses.collect { escapeFieldName(it.fieldName) + ((it.sortOrder == SortOrder.ASCENDING) ? " ASC" : " DESC") }.join(", ")
         }
     }
 
-    private static void applyLimitStatement(StringBuilder builder, Query query){
+    private static void applyLimitStatement(StringBuilder builder, Query query) {
         if (query.limitClause != null) {
             builder << " limit " << query.limitClause.limit
         }

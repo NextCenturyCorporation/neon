@@ -2,6 +2,7 @@ package com.ncc.neon.query.mongo
 
 import com.mongodb.MongoClient
 import com.ncc.neon.query.QueryResult
+import com.ncc.neon.query.clauses.SelectClause
 import com.ncc.neon.query.clauses.SortClause
 import com.ncc.neon.query.clauses.SortOrder
 
@@ -33,19 +34,29 @@ import com.ncc.neon.query.clauses.SortOrder
 
 class DistinctMongoQueryWorker extends AbstractMongoQueryWorker {
 
+    private static final ASCENDING_STRING_COMPARATOR = { a, b -> a <=> b }
+    private static final DESCENDING_STRING_COMPARATOR = { a, b -> b <=> a }
+
+
     DistinctMongoQueryWorker(MongoClient mongo) {
         super(mongo)
     }
 
     @Override
     QueryResult executeQuery(MongoQuery mongoQuery) {
-        def distinctClause = mongoQuery.query.distinctClause
-        def distinct = getCollection(mongoQuery).distinct(distinctClause.fieldName, mongoQuery.whereClauseParams)
+        if (mongoQuery.query.fields.size() > 1 || mongoQuery.query.fields == SelectClause.ALL_FIELDS) {
+            throw new UnsupportedOperationException("mongo only supports distinct clauses on a single field")
+        }
+        def field = mongoQuery.query.fields[0]
+        def distinct = getCollection(mongoQuery).distinct(field, mongoQuery.whereClauseParams)
 
-        sortDistinctResults(mongoQuery, distinct)
+        sortDistinctResults(mongoQuery, distinct, field)
         distinct = limitDistinctResults(mongoQuery, distinct)
+        // create a mapping of field to distinct values
+        def distinctRows = distinct.collect { [(field): it] }
 
-        return new MongoQueryResult(mongoIterable: distinct)
+
+        return new MongoQueryResult(mongoIterable: distinctRows)
     }
 
     private List limitDistinctResults(MongoQuery mongoQuery, List distinct) {
@@ -55,8 +66,7 @@ class DistinctMongoQueryWorker extends AbstractMongoQueryWorker {
         return distinct
     }
 
-    private void sortDistinctResults(MongoQuery mongoQuery, List distinct) {
-        def distinctFieldName = mongoQuery.query.distinctClause.fieldName
+    private void sortDistinctResults(MongoQuery mongoQuery, List distinct, String distinctFieldName) {
         List<SortClause> sortClauses = mongoQuery.query.sortClauses
         if (sortClauses) {
             // for now we only have one value in the distinct clause, so just see if that was provided as a sort field

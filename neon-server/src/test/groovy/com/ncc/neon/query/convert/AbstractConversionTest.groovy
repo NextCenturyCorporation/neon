@@ -181,7 +181,7 @@ abstract class AbstractConversionTest {
     }
 
     private void givenQueryHasDistinctClause() {
-        simpleQuery.distinctClause = new DistinctClause(fieldName: FIELD_NAME)
+        simpleQuery.isDistinct = true
     }
 
     private void givenQueryHasAggregateClause() {

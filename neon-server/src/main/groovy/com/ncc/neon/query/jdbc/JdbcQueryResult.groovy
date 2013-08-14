@@ -43,10 +43,10 @@ class JdbcQueryResult implements QueryResult {
     Iterator<Row> iterator() {
         Iterator<Map> listIterator = resultList.iterator()
         def rowIterator = [
-            hasNext: { listIterator.hasNext() },
-            next: {
-                return new JdbcRow(jdbcRow: listIterator.next())
-            }
+                hasNext: { listIterator.hasNext() },
+                next: {
+                    return new JdbcRow(jdbcRow: listIterator.next())
+                }
         ] as Iterator
 
         return rowIterator

@@ -86,17 +86,9 @@ describe('query mapping', function () {
     });
 
     it('select derived field', function () {
-        var groupedByMonthData = getJSONFixture('groupByMonth.json');
-        // the results should be the data grouped by month but only include _id and hire_month
-        // TODO: NEON-75 id field issues. this field may not always be named _id
-        var expectedData = [];
-        groupedByMonthData.forEach(function(row) {
-            var expectedRow = {};
-            expectedRow._id = row._id;
-            expectedRow.hire_month = row.hire_month;
-            expectedData.push(expectedRow);
-        });
+        var expectedData = getJSONFixture('groupByMonth.json');
         var groupByMonthClause = new neon.query.GroupByFunctionClause(neon.query.MONTH, 'hiredate', 'hire_month');
+        // aggregate fields are automatically included in the select even though withFields is specified
         var query = baseQuery().groupBy(groupByMonthClause).aggregate(neon.query.SUM, 'salary', 'salary_sum').sortBy('hire_month', neon.query.ASCENDING).withFields('hire_month');
         assertQueryResults(query, expectedData);
     });
@@ -154,16 +146,15 @@ describe('query mapping', function () {
         assertQueryResults(query, expectedData);
     });
 
-
     it('distinct fields', function () {
-        var query = baseQuery().distinct('state');
-        var expectedData = ["DC", "MD", "VA"];
-        executeAndWait(neon.query.executeQuery, query);
-        runs(function () {
-            // distinct fields are in no particular order
-            expect(currentResult.data).toBeArrayWithSameElements(expectedData);
-        });
+        var query = baseQuery().distinct().withFields('state').limit(2).sortBy('state',neon.query.ASCENDING);
+        var expectedData = [
+            {state: "DC"},
+            {state: "MD"}
+        ];
+        assertQueryResults(query, expectedData);
     });
+
 
     it('set selection WHERE', function () {
         var filter = baseFilter().where('state', '=', 'DC');
@@ -299,7 +290,7 @@ describe('query mapping', function () {
         var groupByMonthClause = new neon.query.GroupByFunctionClause(neon.query.MONTH, 'hiredate', 'hire_month');
         var query = baseQuery().groupBy(groupByMonthClause).aggregate(neon.query.SUM, 'salary', 'salary_sum').sortBy('hire_month', neon.query.ASCENDING).limit(1);
         // we should only get the first element since we're limiting the query to 1 result
-        var expectedData = getJSONFixture('groupByMonth.json').slice(0,1);
+        var expectedData = getJSONFixture('groupByMonth.json').slice(0, 1);
         assertQueryResults(query, expectedData);
     });
 

@@ -4,7 +4,6 @@ import com.mongodb.BasicDBObject
 import com.mongodb.DBObject
 import com.mongodb.MongoClient
 import com.ncc.neon.query.QueryResult
-import com.ncc.neon.query.clauses.SelectClause
 
 /*
  * ************************************************************************
@@ -32,7 +31,7 @@ import com.ncc.neon.query.clauses.SelectClause
  * @author tbrooks
  */
 
-class AggregateMongoQueryWorker extends AbstractMongoQueryWorker{
+class AggregateMongoQueryWorker extends AbstractMongoQueryWorker {
 
     AggregateMongoQueryWorker(MongoClient mongo) {
         super(mongo)
@@ -41,7 +40,7 @@ class AggregateMongoQueryWorker extends AbstractMongoQueryWorker{
     @Override
     QueryResult executeQuery(MongoQuery mongoQuery) {
         def match = new BasicDBObject('$match', mongoQuery.whereClauseParams)
-        def additionalClauses = MongoAggregationClauseBuilder.buildAggregateClauses(createSelectClause(mongoQuery), mongoQuery.query.aggregates, mongoQuery.query.groupByClauses)
+        def additionalClauses = MongoAggregationClauseBuilder.buildAggregateClauses(mongoQuery.query.aggregates, mongoQuery.query.groupByClauses)
         if (mongoQuery.query.sortClauses) {
             additionalClauses << new BasicDBObject('$sort', createSortDBObject(mongoQuery.query.sortClauses))
         }
@@ -50,14 +49,6 @@ class AggregateMongoQueryWorker extends AbstractMongoQueryWorker{
         }
         def results = getCollection(mongoQuery).aggregate(match, additionalClauses as DBObject[]).results()
         return new MongoQueryResult(mongoIterable: results)
-    }
-
-    private def createSelectClause(MongoQuery mongoQuery){
-        def selectClause = new SelectClause(databaseName: mongoQuery.query.databaseName, tableName: mongoQuery.query.tableName)
-        if (mongoQuery.query.fields) {
-            selectClause.fields = mongoQuery.query.fields
-        }
-        return selectClause
     }
 
 }

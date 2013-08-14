@@ -52,7 +52,7 @@ class DateUtils {
      * @param iso8601DateString
      */
     @SuppressWarnings('CatchException')
-    private static Date parseDate(String dateString) {
+    static Date parseDate(String dateString) {
         try {
             return DATE_PARSER.parseDateTime(dateString).toDate()
         }

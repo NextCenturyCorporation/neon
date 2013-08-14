@@ -1,11 +1,6 @@
 package com.ncc.neon.query
 
-import com.ncc.neon.query.clauses.AggregateClause
-import com.ncc.neon.query.clauses.DistinctClause
-import com.ncc.neon.query.clauses.GroupByClause
-import com.ncc.neon.query.clauses.LimitClause
-import com.ncc.neon.query.clauses.SelectClause
-import com.ncc.neon.query.clauses.SortClause
+import com.ncc.neon.query.clauses.*
 import com.ncc.neon.query.filter.Filter
 import groovy.transform.ToString
 import org.codehaus.jackson.annotate.JsonIgnoreProperties
@@ -44,7 +39,7 @@ class Query {
     Filter filter
     List<AggregateClause> aggregates = []
     List<GroupByClause> groupByClauses = []
-    DistinctClause distinctClause
+    boolean isDistinct = false
     List<SortClause> sortClauses
     LimitClause limitClause
     List<String> fields = SelectClause.ALL_FIELDS

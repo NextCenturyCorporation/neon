@@ -1,9 +1,12 @@
 import com.mongodb.BasicDBObject
 import com.mongodb.MongoClient
 import com.mongodb.util.JSON
+import com.ncc.neon.HiveJSONGenerator
 import com.ncc.neon.MongoJSONGenerator
+import com.ncc.neon.JSONToCSVConverter
 import com.ncc.common.GruntTask
 import org.apache.tools.ant.filters.ReplaceTokens
+import org.json.JSONArray
 
 // define source sets first so tasks that act dynamically on sourcesets have a list of all of them
 sourceSets {
@@ -41,8 +44,6 @@ buildscript {
 
 repositories {
     maven {
-        // the maven central versions of hadoop/hive don't have all of the necessary dependencies (presumably not
-        // on purpose), so include this repo to find any missing dependencies
         url 'https://repository.cloudera.com/artifactory/public'
     }
 }
@@ -53,6 +54,9 @@ project.ext {
 
     // a mongo instance for inserting/deleting test data (will be lazy initialized)
     mongoInstance = null
+
+    // used for determining when test data json needs to be generated
+    testDataInputFileTree = fileTree('src/test-data').include('*.json')
 }
 
 
@@ -85,18 +89,11 @@ dependencies {
     }
     compile 'commons-lang:commons-lang:2.6'
     compile 'org.json:json:20090211'
-
-    // remove any of the jetty/tomcat dependencies. we don't use them and they conflict with app server libraries
-    compile('org.apache.hadoop:hadoop-core:1.2.1') {
-        exclude group: 'org.mortbay.jetty'
-        exclude group: 'tomcat'
-    }
     compile('org.apache.hive:hive-jdbc:0.11.0') {
         exclude group: 'org.mortbay.jetty'
         // we already include slf4j
         exclude module: 'slf4j-log4j12'
     }
-
 
     providedCompile 'javax.servlet:javax.servlet-api:3.0.1'
 
@@ -107,8 +104,13 @@ dependencies {
     testCompile 'commons-io:commons-io:2.4'
     testCompile "org.springframework:spring-test:$springVersion"
 
-    integrationTestCompile files(sourceSets.main.output.classesDir)
-    integrationTestCompile files(sourceSets.test.output.classesDir)
+    // commons-daemon 1.0.3 throws a bad organisation error (directory structure and pom don't match), so use a different version
+    integrationTestCompile 'commons-daemon:commons-daemon:1.0.5'
+    integrationTestCompile 'org.apache.hadoop:hadoop-common:2.0.0-cdh4.3.0'
+    integrationTestCompile 'org.apache.hadoop:hadoop-hdfs:2.0.0-cdh4.3.0'
+
+    integrationTestCompile sourceSets.main.output
+    integrationTestCompile sourceSets.test.output
 }
 
 war {
@@ -125,22 +127,22 @@ test {
 }
 
 task integrationTests(type: Test) {
-    dependsOn 'assemble', 'integrationTestClasses', 'generateMongoJson'
+    dependsOn 'integrationTestClasses', 'generateMongoJson', 'generateHiveCSV', 'generateHiveJson'
 
     testClassesDir = sourceSets.integrationTest.output.classesDir
     classpath = sourceSets.integrationTest.runtimeClasspath
 
+    // allow project properties and just pass them through to the system properties
     def props = [:]
-    def mongoHostProperty = getMongoHosts()
-    if (mongoHostProperty) {
-        props["mongo.hosts"] = mongoHostProperty
-    }
+    props["mongo.hosts"] = getMongoHosts()
+    props["hive.host"] = getHiveHost()
+    props["hdfs.url"] = getHdfsUrl()
 
     props['integration.test'] = true
     systemProperties props
 }
 
-task jacocoFullTestReport(type: JacocoReport){
+task jacocoFullTestReport(type: JacocoReport) {
     dependsOn integrationTests
     executionData = files("$buildDir/jacoco/integrationTests.exec", "$buildDir/jacoco/test.exec")
     classDirectories = files(sourceSets.main.output.classesDir)
@@ -174,9 +176,20 @@ processAcceptanceTestResources {
     }
 }
 
+// if the hosts are not specified just use an empty string and neon will choose defaults
+
 def getMongoHosts() {
     return project.hasProperty("mongo.hosts") ? getProperty("mongo.hosts") : "localhost"
 }
+
+def getHiveHost() {
+    return project.hasProperty("hive.host") ? getProperty("hive.host") : "localhost:10000"
+}
+
+def getHdfsUrl() {
+    return project.hasProperty("hdfs.url") ? getProperty("hdfs.url") : "hdfs://localhost:8020"
+}
+
 
 task acceptanceTest(type: GruntTask) {
     dependsOn 'assemble', 'acceptanceTestWar', 'generateMongoJson', 'transformTestWebService'
@@ -198,9 +211,28 @@ gradle.taskGraph.afterTask { task ->
 }
 
 task generateMongoJson {
-    MongoJSONGenerator.generateMongoJson(testDataDir, "${testDataDir}/mongo-json")
+    def outputDir = "${testDataDir}/mongo-json"
+    inputs.files { testDataInputFileTree }
+    outputs.dir { outputDir }
+    // mongo only needs the data file for input. it uses the rest of the standard json files for test verification
+    new MongoJSONGenerator().generateJson(testDataDir, outputDir, ~/data.json/)
 }
 
+task generateHiveJson {
+    def outputDir = "${testDataDir}/hive-json"
+    inputs.files { testDataInputFileTree }
+    outputs.dir { outputDir }
+    new HiveJSONGenerator().generateJson(testDataDir, outputDir)
+}
+
+
+task generateHiveCSV {
+    JSONToCSVConverter.convertToCSV(new JSONArray(
+            new File(testDataDir, 'data.json').text).toString(),
+            new File(testDataDir, 'hive-csv/data.csv'),
+            new File(testDataDir, 'hive-csv/fields.csv'),
+            ['location'] as Set)
+}
 
 def insertAcceptanceTestData() {
     def db = getMongo().getDB("acceptanceTest")

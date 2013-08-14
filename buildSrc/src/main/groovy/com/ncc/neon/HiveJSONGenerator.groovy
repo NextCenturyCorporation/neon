@@ -1,6 +1,7 @@
-package com.ncc.neon.query.clauses
+package com.ncc.neon
 
-import groovy.transform.ToString
+import org.json.JSONArray
+import org.json.JSONObject
 
 /*
  * ************************************************************************
@@ -24,9 +25,32 @@ import groovy.transform.ToString
  * OF NEXT CENTURY CORPORATION EXCEPT BY PRIOR WRITTEN PERMISSION AND WHEN
  * RECIPIENT IS UNDER OBLIGATION TO MAINTAIN SECRECY.
  */
-@ToString(includeNames = true)
-class DistinctClause {
 
-    def fieldName
+/**
+ * Generates json that can be used for hive database tests, specifically removing nested data
+ */
+class HiveJSONGenerator extends AbstractJSONGenerator {
+
+
+    @Override
+    protected void modifyJson(jsonArray) {
+        jsonArray.length().times { index ->
+            def row = jsonArray.get(index)
+            removeNestedData(row)
+        }
+    }
+
+    private static removeNestedData(row) {
+        def keysToRemove = []
+        row.keys().each { key ->
+            def val = row.get(key)
+            if (val instanceof JSONObject) {
+                keysToRemove << key
+            }
+        }
+        keysToRemove.each {
+            row.remove(it)
+        }
+    }
 
 }

@@ -62,20 +62,17 @@ class HiveConvertQueryTest extends AbstractConversionTest {
 
     @Override
     protected void assertQueryWithDistinctClause(query) {
-        //Distinct has no effect on the query! NEON-535
-        assertStandardHiveQLStatement(query)
+        assert query == "select DISTINCT * from ${DATABASE_NAME}.${TABLE_NAME}"
     }
 
     @Override
     protected void assertQueryWithAggregateClause(query) {
-        //This should include the aggregate function: sum. NEON-177
-        assert query == "select * from ${DATABASE_NAME}.${TABLE_NAME} group by ${FIELD_NAME}"
+        assert query == "select sum(${FIELD_NAME}) as ${FIELD_NAME}_sum from ${DATABASE_NAME}.${TABLE_NAME}"
     }
 
     @Override
     protected void assertQueryWithGroupByClauses(query) {
-        //This should include the aggregate function: sum. NEON-177
-        assert query == "select * from ${DATABASE_NAME}.${TABLE_NAME} group by ${FIELD_NAME_2},${FIELD_NAME}"
+        assert query == "select ${FIELD_NAME_2}, sum(${FIELD_NAME}) as ${FIELD_NAME}_sum from ${DATABASE_NAME}.${TABLE_NAME} group by ${FIELD_NAME_2}, sum(${FIELD_NAME})"
     }
 
     @Override
@@ -85,7 +82,7 @@ class HiveConvertQueryTest extends AbstractConversionTest {
 
     @Override
     protected void assertSelectClausePopulated(query) {
-        assert query == "select $FIELD_NAME,$FIELD_NAME_2 from ${DATABASE_NAME}.${TABLE_NAME}"
+        assert query == "select $FIELD_NAME, $FIELD_NAME_2 from ${DATABASE_NAME}.${TABLE_NAME}"
     }
 
     private void assertStandardHiveQLStatement(query){
