@@ -3,8 +3,15 @@
     height: 400px;
 }
 
+#date {
+    background-color: silver;
+    color: black;
+}
+
 .container {
     padding: 10px;
+    background-color: black;
+    color: white;
 }
 
 .control-group {

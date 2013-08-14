@@ -41,7 +41,7 @@
 
             <div class="control-group">
                 <div class="controls">
-                    <select id="column-select-{{@index}}">
+                    <select id="column-select-{{@index}}" class="dropdown">
                         <option value="">Select Column...</option>
                         {{#select columnValue}}
                         {{#columnOptions}}
@@ -54,7 +54,7 @@
 
             <div class="control-group">
                 <div class="controls">
-                    <select id="operator-select-{{@index}}" class="input-small">
+                    <select id="operator-dropdown" id="operator-select-{{@index}}" class="dropdown" class="input-small">
                         {{#select operatorValue}}
                         {{#operatorOptions}}
                         <option value="{{.}}">{{.}}</option>
@@ -67,7 +67,7 @@
             <div class="control-group">
                 <div class="controls">
                     {{#escapeQuotes value}}
-                    <input type="text" id="value-input-{{@index}}" value="{{value}}"/>
+                    <input type="text" id="value-input-{{@index}}" value="{{value}}" class="textfield"/>
                     {{/escapeQuotes}}
                 </div>
             </div>
@@ -75,19 +75,21 @@
             <div class="control-group">
                 {{#unless submittable}}
                 <div class="btn-group">
-                    <button class="btn btn-primary" id="add-filter-button" onclick="neon.filter.addFilter({{@index}})">
+                    <button class="btn" id="add-filter-button" onclick="neon.filter.addFilter({{@index}})">
                         Add
                     </button>
+
                 </div>
                 {{/unless}}
                 {{#if submittable}}
                 <div class="btn-group">
-                    <button class="btn btn-primary" id="add-filter-button" onclick="neon.filter.addFilter({{@index}})">
+                    <button class="btn" id="add-filter-button" onclick="neon.filter.addFilter({{@index}})">
                         Update
                     </button>
                 </div>
+
                 <div class="btn-group">
-                    <button class="btn btn-danger" id="remove-filter-button"
+                    <button class="btn" id="remove-filter-button"
                             onclick="neon.filter.removeFilter({{@index}})">Remove
                     </button>
                 </div>
@@ -101,16 +103,15 @@
 
 </head>
 <body>
-
 <div class="container">
-    <div id="datastore">
+    <div id="datastore-container">
         <div class="controls-row">
 
             <div class="control-group">
                 <label class="control-label" for="datastore-select">Datastore Type</label>
 
                 <div class="controls">
-                    <select id="datastore-select">
+                    <select id="datastore-select" class="dropdown">
                         <option value="mongo">Mongo</option>
                         <option value="hive">Hive</option>
                     </select>
@@ -120,15 +121,12 @@
             <div class="control-group">
                 <label class="control-label" for="hostname-input">Datastore Host Name</label>
 
-                <div class="controls">
+                <div class="controls" class="textfield">
                     <input type="text" id="hostname-input" value="localhost"/>
                 </div>
             </div>
 
             <div class="control-group">
-                <!-- spacer label to align the button -->
-                <label class="control-label" for="datastore-button">&nbsp;</label>
-
                 <div class="controls">
                     <button class="btn" id="datastore-button">Continue</button>
                 </div>
@@ -138,12 +136,11 @@
 
     <div id="db-table">
         <div class="controls controls-row">
-
             <div class="control-group">
                 <label class="control-label" for="database-select">Database Name</label>
 
                 <div class="controls">
-                    <select id="database-select">
+                    <select id="database-select" class="dropdown">
                         <option value="">Select Database...</option>
                     </select>
                 </div>
@@ -153,52 +150,50 @@
                 <label class="control-label" for="table-select">Table Name</label>
 
                 <div class="controls">
-                    <select id="table-select"></select>
+                    <select id="table-select" class="dropdown"></select>
                 </div>
             </div>
 
             <div class="control-group">
-                <!-- spacer label to align the button -->
-                <label class="control-label" for="database-table-button">&nbsp;</label>
-
                 <div class="controls">
                     <button class="btn" id="database-table-button">Continue</button>
                 </div>
             </div>
         </div>
-
     </div>
 
-    <fieldset id="filter-container">
-        <legend>Filters</legend>
-        <div class="controls controls-row">
-            <button class="btn btn-danger" id="clear-filters-button">Clear All Filters</button>
-        </div>
+    <div id="filter-container">
+        <h4>Filters</h4>
+
+        <!-- OLD LOCATION OF RADIO-INLINE -->
+
 
         <div class="controls controls-row">
             <div class="control-group">
-                <label class="group-label">Column Name</label>
+                <label id="column-name-label">Column Name</label>
             </div>
             <div class="control-group">
-                <label class="group-label-small">Operator</label>
+                <label id="operator-label">Operator</label>
             </div>
             <div class="control-group">
-                <label class="group-label">Value</label>
+                <label id="value-label">Value</label>
             </div>
             <div class="control-group">
-                <label class="radio inline">
+                <label class="radio-inline">
                     <input type="radio" name="boolean" value="AND" checked/>
                     AND
                 </label>
-                <label class="radio inline">
+                <label class="radio-inline">
                     <input type="radio" name="boolean" value="OR"/>
                     OR
                 </label>
             </div>
         </div>
         <div id="filter-content"/>
-
-    </fieldset>
+    </div>
+    <div class="controls controls-row">
+        <button class="btn" id="clear-filters-button">Clear All Filters</button>
+    </div>
 
 
 </div>

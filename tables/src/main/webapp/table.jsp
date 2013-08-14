@@ -43,44 +43,46 @@
 
 </head>
 <body>
+<div class="container">
 
-<div id="controls">
+    <div id="controls">
 
-    <div class="controls-row">
-        <div class="control-group">
-            <label class="control-label" for="limit">Limit</label>
+        <div class="controls-row">
+            <div class="control-group">
+                <label class="control-label" for="limit">Limit</label>
 
-            <div class="controls">
-                <input id="limit" type="number" min="1" value="500">
-            </div>
-        </div>
-    </div>
-
-
-    <div class="controls-row">
-        <div class="control-group">
-
-            <label class="control-label" for="sort-field">Sort</label>
-
-            <div id="sort-controls" class="controls-row input-append">
-
-                <select id="sort-field"></select>
-
-                <div class="btn-group" data-toggle="buttons-radio">
-                    <button id="sort-ascending" type="button" data-toggle="button" class="btn btn-primary">Ascending
-                    </button>
-                    <button id="sort-descending" type="button" data-toggle="button" class="btn btn-primary">Descending
-                    </button>
+                <div class="controls">
+                    <input id="limit" type="number" min="1" value="500">
                 </div>
-
-                <input id="sort-direction" type="hidden"/>
             </div>
         </div>
+
+
+        <div class="controls-row">
+            <div class="control-group">
+
+                <label class="control-label" for="sort-field">Sort</label>
+
+                <div id="sort-controls" class="controls-row input-append">
+
+                    <select id="sort-field"></select>
+
+                    <div class="btn-group" data-toggle="buttons-radio">
+                        <button id="sort-ascending" type="button" data-toggle="button" class="btn">Ascending
+                        </button>
+                        <button id="sort-descending" type="button" data-toggle="button" class="btn">Descending
+                        </button>
+                    </div>
+
+                    <input id="sort-direction" type="hidden"/>
+                </div>
+            </div>
+        </div>
+
     </div>
 
+    <div id="table"></div>
 </div>
-
-<div id="table"></div>
 
 </body>
 </html>
