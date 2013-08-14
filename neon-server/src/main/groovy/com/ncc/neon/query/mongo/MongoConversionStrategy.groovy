@@ -1,10 +1,12 @@
 package com.ncc.neon.query.mongo
+
 import com.mongodb.BasicDBObject
 import com.mongodb.DBObject
 import com.ncc.neon.query.Query
 import com.ncc.neon.query.clauses.AndWhereClause
 import com.ncc.neon.query.clauses.SelectClause
 import com.ncc.neon.query.filter.FilterState
+
 /*
  * ************************************************************************
  * Copyright (c), 2013 Next Century Corporation. All Rights Reserved.
@@ -39,7 +41,7 @@ class MongoConversionStrategy {
 
     private final FilterState filterState
 
-    MongoConversionStrategy(FilterState filterState){
+    MongoConversionStrategy(FilterState filterState) {
         this.filterState = filterState
     }
 
@@ -100,12 +102,12 @@ class MongoConversionStrategy {
     private static DBObject createSelectParams(Query query) {
         BasicDBObject params = new BasicDBObject()
 
-        if (query.fields == SelectClause.ALL_FIELDS) {
-            return null
+        if (query.fields != SelectClause.ALL_FIELDS) {
+            query.fields.each {
+                params[it] = 1
+            }
         }
-        query.fields.each {
-            params[it] = 1
-        }
+
         return params
     }
 

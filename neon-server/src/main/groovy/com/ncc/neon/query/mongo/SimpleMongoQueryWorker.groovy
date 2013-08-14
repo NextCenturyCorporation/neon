@@ -50,9 +50,6 @@ class SimpleMongoQueryWorker extends AbstractMongoQueryWorker {
     }
 
     private DBCursor queryDB(MongoQuery query) {
-        if (!query.selectParams) {
-            return getCollection(query).find(query.whereClauseParams)
-        }
         return getCollection(query).find(query.whereClauseParams, query.selectParams)
     }
 }
