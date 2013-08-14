@@ -4,31 +4,27 @@
 
     <script>
         widgetData = {
-            "universalName":"neon.filterbuilder",
-            "displayName":"Filter Builder Widget",
+            "universalName": "neon.filterbuilder",
+            "displayName": "Filter Builder Widget",
             "description": "Displays the data source importer and filter builder",
-            "widgetVersion":"1.0.0",
-            "widgetUrl":"https://localhost:9443/filter-builder/filter.jsp",
-            "imageUrlSmall":"https://localhost:9443/filter-builder/img/filter.jpg",
-            "imageUrlLarge":"https://localhost:9443/filter-builder/img/filter.jpg",
-            "width":800,
-            "height":600,
-            "visible":true,
-            "singleton":false,
-            "background":false,
-            "widgetTypes":[
+            "widgetVersion": "1.0.0",
+            "widgetUrl": "https://localhost:9443/filter-builder/filter.jsp",
+            "imageUrlSmall": "https://localhost:9443/filter-builder/img/filter.jpg",
+            "imageUrlLarge": "https://localhost:9443/filter-builder/img/filter.jpg",
+            "width": 800,
+            "height": 600,
+            "visible": true,
+            "singleton": false,
+            "background": false,
+            "widgetTypes": [
                 "standard"
             ],
-            "defaultTags":[
-            ],
-            "intents":{
-                "send": [],
-                "receive": []
-            }
+            "defaultTags": [
+            ]
         };
         var jsonData = JSON.stringify({
-            status:200,
-            data:widgetData
+            status: 200,
+            data: widgetData
         });
         window.name = jsonData;
 
