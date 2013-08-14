@@ -47,7 +47,7 @@
             <label class="control-label" for="x">x-axis (Date)</label>
 
             <div class="controls">
-                <select id="x"></select>
+                <select id="x" class="dropdown"></select>
             </div>
         </div>
 
@@ -55,7 +55,7 @@
             <label class="control-label" for="y">y-axis</label>
 
             <div class="controls">
-                <select id="y"></select>
+                <select id="y" class="dropdown"></select>
             </div>
         </div>
     </div>
@@ -65,7 +65,7 @@
             <label class="control-label" for="time-granularity">Time Granularity</label>
 
             <div class="controls">
-                <select id="time-granularity">
+                <select id="time-granularity" class="dropdown">
                 </select>
             </div>
         </div>
