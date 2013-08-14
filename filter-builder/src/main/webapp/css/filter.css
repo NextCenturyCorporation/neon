@@ -23,8 +23,6 @@
 html, body {
     height: 100%;
     width: 100%;
-    padding: 0;
-    margin: 0;
     background-color: black;
     color: white;
 }
@@ -33,9 +31,7 @@ html, body {
     display: inline-block;
     vertical-align: top;
 }
-.container {
-    padding: 10px;
-}
+
 .dropdown {
     background-color: silver;
     color: black;
@@ -44,10 +40,7 @@ html, body {
 .textfield {
     width: 100px;
 }
-.radio-inline {
-    display: inline;
-}
-.btn-group {
+.radio-inline, .btn-group {
     display: inline;
 }
 
@@ -55,34 +48,22 @@ html, body {
     width: 125px;
 }
 
-#filter-title {
-    color: white;
-    margin-bottom: 20px;
-}
-
-#clear-filters-button {
-    margin-bottom: 20px;
-}
-
-#datastore-container, #db-table {
+#datastore-container, #db-table, #filter-container {
     border: 1px solid #DDD;
     border-radius: 10px;
-    padding: 0 0 1em 1em;
-    margin: 1.5em 0 1.5em 0;
-    width: 450px;
+    padding: 0 0 .5em .5em;
+    margin: .25em 0 .25em 0;
+    width: 380px;;
     height: 100px;
 }
 
 #filter-container {
-    border: 1px solid #DDD;
-    border-radius: 10px;
-    padding: 0 1.4em 1.4em 1.4em;
-    margin: 1.5em 0 1.5em 0;
-    width: 450px;
+    height: auto;
+    width: 465px;
 }
 
 #operator-dropdown {
-    width: 35px;
+    width: 45px;
 }
 
 #database-table-button, #datastore-button {
@@ -96,5 +77,5 @@ html, body {
     width: 60px;
 }
 #value-label {
-    width: 75px;
+    width: 100px;
 }

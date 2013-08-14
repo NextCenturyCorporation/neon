@@ -191,7 +191,7 @@
         <div id="filter-content"/>
     </div>
     <div class="controls controls-row">
-        <button class="btn" id="clear-filters-button">Clear All Filters</button>
+        <button class="btn">Clear All Filters</button>
     </div>
 
 
