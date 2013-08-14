@@ -63,8 +63,7 @@ class MongoQueryExecutor implements QueryExecutor {
         if (query.isDistinct) {
             LOGGER.debug("Using distinct mongo query worker")
             return new DistinctMongoQueryWorker(mongo)
-        }
-        else if (query.aggregates || query.groupByClauses) {
+        } else if (query.aggregates || query.groupByClauses) {
             LOGGER.debug("Using aggregate mongo query worker")
             return new AggregateMongoQueryWorker(mongo)
         }
@@ -141,7 +140,7 @@ class MongoQueryExecutor implements QueryExecutor {
     QueryResult getSelectionWhere(Filter filter) {
         MongoConversionStrategy mongoConversionStrategy = new MongoConversionStrategy(filterState)
         Query query = QueryUtils.queryFromFilter(filter)
-        MongoQuery mongoQuery = mongoConversionStrategy.convertQuery(query, createWhereClauseFromSelection.curry(ID_FIELD))
+        MongoQuery mongoQuery = mongoConversionStrategy.convertQuery(query, createWhereClauseFromSelection)
         AbstractMongoQueryWorker worker = createMongoQueryWorker(query)
         worker.executeQuery(mongoQuery)
     }
@@ -161,16 +160,16 @@ class MongoQueryExecutor implements QueryExecutor {
         return MongoUtils.oidsToObjectIds(ids)
     }
 
-    private MongoQuery convertQueryIntoMongoQuery(Query query, boolean includedFiltered){
+    private MongoQuery convertQueryIntoMongoQuery(Query query, boolean includedFiltered) {
         MongoConversionStrategy mongoConversionStrategy = new MongoConversionStrategy(filterState)
-        if(includedFiltered){
+        if (includedFiltered) {
             return mongoConversionStrategy.convertQuery(query)
         }
         return mongoConversionStrategy.convertQueryWithFilterState(query)
     }
 
-    private final def createWhereClauseFromSelection = { String idFieldName ->
+    private final def createWhereClauseFromSelection = {
         def selectedIds = selectionManager.selectedIds
-        return new SingularWhereClause(lhs: idFieldName, operator: 'in', rhs: selectedIds)
+        return new SingularWhereClause(lhs: ID_FIELD, operator: 'in', rhs: selectedIds)
     }
 }

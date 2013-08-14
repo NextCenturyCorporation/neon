@@ -20,38 +20,62 @@
  * OF NEXT CENTURY CORPORATION EXCEPT BY PRIOR WRITTEN PERMISSION AND WHEN
  * RECIPIENT IS UNDER OBLIGATION TO MAINTAIN SECRECY.
  */
+html, body {
+    height: 100%;
+    width: 100%;
+    background-color: black;
+    color: white;
+}
+
 .control-group {
     display: inline-block;
     vertical-align: top;
 }
 
-.group-label {
-    width: 220px;
+.dropdown {
+    background-color: silver;
+    color: black;
+    width: 130px;
+}
+.textfield {
+    width: 100px;
+}
+.radio-inline, .btn-group {
+    display: inline;
 }
 
-.group-label-small {
-    width: 90px;
+#hostname-input {
+    width: 125px;
 }
 
-.container {
-    padding: 10px;
-}
-
-#clear-filters-button {
-    margin-bottom: 20px;
+#datastore-container, #db-table, #filter-container {
+    border: 1px solid #DDD;
+    border-radius: 10px;
+    padding: 0 0 .5em .5em;
+    margin: .25em 0 .25em 0;
+    width: 380px;;
+    height: 100px;
 }
 
 #filter-container {
-    width: 760px;
+    height: auto;
+    width: 465px;
 }
 
-fieldset {
-    border: 1px solid #DDD;
-    border-radius: 10px;
-    padding: 0 1.4em 1.4em 1.4em;
-    margin: 1.5em 0 1.5em 0;
+#operator-dropdown {
+    width: 45px;
 }
 
-legend {
-    line-height: 0
+#database-table-button, #datastore-button {
+    margin-right: 20px;
+    margin-top: 25px;
+}
+#column-name-label {
+    width: 125px;
+}
+#operator-label {
+    width: 60px;
+}
+#value-label {
+    width: 100px;
 }

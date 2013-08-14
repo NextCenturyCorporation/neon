@@ -3,6 +3,11 @@
     height: 400px;
 }
 
+#date {
+    background-color: silver;
+    color: black;
+}
+
 .container {
     padding: 10px;
 }
@@ -10,4 +15,13 @@
 .control-group {
     display: inline-block;
     vertical-align: top;
+}
+
+html, body {
+    height: 100%;
+    width: 100%;
+    padding: 0;
+    margin: 0;
+    background-color: black;
+    color: white;
 }

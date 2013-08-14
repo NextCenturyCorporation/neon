@@ -45,7 +45,7 @@ class MongoConvertQueryWithFiltersTest extends MongoConvertQueryTest{
     void assertQueryWithOneFilterInFilterState(query) {
         assert query.query == simpleQuery
         assert query.whereClauseParams == new BasicDBObject(COLUMN_NAME, COLUMN_VALUE)
-        assert query.selectParams == null
+        assert query.selectParams == new BasicDBObject()
     }
 
     @Override
@@ -54,7 +54,7 @@ class MongoConvertQueryWithFiltersTest extends MongoConvertQueryTest{
         BasicDBObject andClause = createAndClause()
 
         assert query.whereClauseParams == andClause
-        assert query.selectParams == null
+        assert query.selectParams == new BasicDBObject()
     }
 
     private BasicDBObject createAndClause() {

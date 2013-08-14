@@ -82,7 +82,7 @@ class MongoConvertQueryTest extends AbstractConversionTest {
         BasicDBObject orClause = createOrClause()
 
         assert query.whereClauseParams == orClause
-        assert query.selectParams == null
+        assert query.selectParams == new BasicDBObject()
     }
 
     protected BasicDBObject createOrClause() {
@@ -103,7 +103,7 @@ class MongoConvertQueryTest extends AbstractConversionTest {
     private void standardQueryAsserts(query){
         assert query.query == simpleQuery
         assert query.whereClauseParams == new BasicDBObject()
-        assert query.selectParams == null
+        assert query.selectParams == new BasicDBObject()
 
     }
 
