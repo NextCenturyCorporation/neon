@@ -89,8 +89,8 @@
                 </div>
 
                 <div class="btn-group">
-                    <button class="btn" id="remove-filter-button"
-                            onclick="neon.filter.removeFilter({{@index}})">Remove
+                    <button class="btn" id="remove-filter-button" onclick="neon.filter.removeFilter({{@index}})">
+                        Remove
                     </button>
                 </div>
                 {{/if}}
@@ -105,6 +105,7 @@
 <body>
 <div class="container">
     <div id="datastore-container">
+        <h4>Connection</h4>
         <div class="controls-row">
 
             <div class="control-group">
@@ -135,6 +136,7 @@
     </div>
 
     <div id="db-table">
+        <h4>Database</h4>
         <div class="controls controls-row">
             <div class="control-group">
                 <label class="control-label" for="database-select">Database Name</label>
@@ -164,9 +166,6 @@
 
     <div id="filter-container">
         <h4>Filters</h4>
-
-        <!-- OLD LOCATION OF RADIO-INLINE -->
-
 
         <div class="controls controls-row">
             <div class="control-group">

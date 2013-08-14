@@ -20,6 +20,14 @@
  * OF NEXT CENTURY CORPORATION EXCEPT BY PRIOR WRITTEN PERMISSION AND WHEN
  * RECIPIENT IS UNDER OBLIGATION TO MAINTAIN SECRECY.
  */
+html, body {
+    height: 100%;
+    width: 100%;
+    padding: 0;
+    margin: 0;
+    background-color: black;
+    color: white;
+}
 
 .control-group {
     display: inline-block;
@@ -27,23 +35,24 @@
 }
 .container {
     padding: 10px;
-    background-color: black;
-    color: white;
-    width: 100%;
-    height: 100%;
 }
 .dropdown {
     background-color: silver;
     color: black;
+    width: 130px;
 }
 .textfield {
-    width: 150px;
+    width: 100px;
 }
 .radio-inline {
     display: inline;
 }
 .btn-group {
     display: inline;
+}
+
+#hostname-input {
+    width: 125px;
 }
 
 #filter-title {
@@ -55,19 +64,10 @@
     margin-bottom: 20px;
 }
 
-#datastore-container {
+#datastore-container, #db-table {
     border: 1px solid #DDD;
     border-radius: 10px;
-    padding: 0 1.4em 2.5em 1.4em;
-    margin: 1.5em 0 1.5em 0;
-    width: 450px;
-    height: 100px;
-}
-
-#db-table {
-    border: 1px solid #DDD;
-    border-radius: 10px;
-    padding: 0 1.4em 2.5em 1.4em;
+    padding: 0 0 1em 1em;
     margin: 1.5em 0 1.5em 0;
     width: 450px;
     height: 100px;
@@ -82,27 +82,19 @@
 }
 
 #operator-dropdown {
-    width: auto;
+    width: 35px;
 }
 
 #database-table-button, #datastore-button {
-    margin-left: 350px;
-    margin-bottom: 50px;
+    margin-right: 20px;
+    margin-top: 25px;
 }
 #column-name-label {
-    width: 215px;
+    width: 125px;
 }
 #operator-label {
     width: 60px;
 }
 #value-label {
     width: 75px;
-}
-
-#add-filter-button {
-    margin-left: 275px;
-}
-
-#remove-filter-button {
-    margin-left: 10px;
 }
