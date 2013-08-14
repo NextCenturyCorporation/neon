@@ -35,7 +35,7 @@ import com.ncc.neon.query.hive.HiveConversionStrategy
 class HiveConvertQueryTest extends AbstractConversionTest {
 
     @Override
-    protected def whenExecutingConvertQuery(query) {
+    protected def convertQuery(query) {
         HiveConversionStrategy conversionStrategy = new HiveConversionStrategy(filterState)
         conversionStrategy.convertQuery(query)
     }
@@ -52,41 +52,41 @@ class HiveConvertQueryTest extends AbstractConversionTest {
 
     @Override
     protected void assertQueryWithSortClause(query) {
-        assert query == "select * from ${DATABASE_NAME}.${TABLE_NAME} order by ${FIELD_NAME} ASC"
+        assert query.toLowerCase() == "select * from ${DATABASE_NAME}.${TABLE_NAME} order by ${FIELD_NAME} ASC".toLowerCase()
     }
 
     @Override
     protected void assertQueryWithLimitClause(query) {
-        assert query == "select * from ${DATABASE_NAME}.${TABLE_NAME} limit $LIMIT_AMOUNT"
+        assert query.toLowerCase() == "select * from ${DATABASE_NAME}.${TABLE_NAME} limit $LIMIT_AMOUNT".toLowerCase()
     }
 
     @Override
     protected void assertQueryWithDistinctClause(query) {
-        assert query == "select DISTINCT * from ${DATABASE_NAME}.${TABLE_NAME}"
+        assert query.toLowerCase() == "select DISTINCT * from ${DATABASE_NAME}.${TABLE_NAME}".toLowerCase()
     }
 
     @Override
     protected void assertQueryWithAggregateClause(query) {
-        assert query == "select sum(${FIELD_NAME}) as ${FIELD_NAME}_sum from ${DATABASE_NAME}.${TABLE_NAME}"
+        assert query.toLowerCase() == "select sum(${FIELD_NAME}) as ${FIELD_NAME}_sum from ${DATABASE_NAME}.${TABLE_NAME}".toLowerCase()
     }
 
     @Override
     protected void assertQueryWithGroupByClauses(query) {
-        assert query == "select ${FIELD_NAME_2}, sum(${FIELD_NAME}) as ${FIELD_NAME}_sum from ${DATABASE_NAME}.${TABLE_NAME} group by ${FIELD_NAME_2}, sum(${FIELD_NAME})"
+        assert query.toLowerCase() == "select ${FIELD_NAME_2}, sum(${FIELD_NAME}) as ${FIELD_NAME}_sum from ${DATABASE_NAME}.${TABLE_NAME} group by ${FIELD_NAME_2}, sum(${FIELD_NAME})".toLowerCase()
     }
 
     @Override
     protected void assertQueryWithOrWhereClause(query) {
-        assert query == "select * from ${DATABASE_NAME}.${TABLE_NAME} where (${FIELD_NAME} = '${COLUMN_VALUE}' or ${FIELD_NAME_2} = '${COLUMN_VALUE}')"
+        assert query.toLowerCase() == "select * from ${DATABASE_NAME}.${TABLE_NAME} where (${FIELD_NAME} = '${COLUMN_VALUE}' or ${FIELD_NAME_2} = '${COLUMN_VALUE}')".toLowerCase()
     }
 
     @Override
     protected void assertSelectClausePopulated(query) {
-        assert query == "select $FIELD_NAME, $FIELD_NAME_2 from ${DATABASE_NAME}.${TABLE_NAME}"
+        assert query.toLowerCase() == "select $FIELD_NAME, $FIELD_NAME_2 from ${DATABASE_NAME}.${TABLE_NAME}".toLowerCase()
     }
 
     private void assertStandardHiveQLStatement(query){
-        assert query == "select * from ${DATABASE_NAME}.${TABLE_NAME}"
+        assert query.toLowerCase() == "select * from ${DATABASE_NAME}.${TABLE_NAME}".toLowerCase()
     }
 
 }

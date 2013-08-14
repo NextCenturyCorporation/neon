@@ -2,7 +2,7 @@ package com.ncc.neon.hive
 
 import com.ncc.neon.AbstractQueryExecutorIntegrationTest
 import com.ncc.neon.connect.ConnectionInfo
-import com.ncc.neon.connect.DataSource
+import com.ncc.neon.connect.DataSources
 import com.ncc.neon.connect.HiveConnection
 import com.ncc.neon.query.jdbc.JdbcClient
 import org.apache.hadoop.conf.Configuration
@@ -56,7 +56,7 @@ class HiveQueryExecutorIntegrationTest extends AbstractQueryExecutorIntegrationT
 
     @BeforeClass
     static void beforeClass() {
-        jdbcClient = new HiveConnection().connect(new ConnectionInfo(connectionUrl: HiveIntegrationTestContext.HOST_STRING, dataStoreName: DataSource.HIVE))
+        jdbcClient = new HiveConnection().connect(new ConnectionInfo(connectionUrl: HiveIntegrationTestContext.HOST_STRING, dataStoreName: DataSources.HIVE))
         // make sure we clean up just in case something was left over
         deleteData()
         insertData()

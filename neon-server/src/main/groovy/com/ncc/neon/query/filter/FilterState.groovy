@@ -1,5 +1,6 @@
 package com.ncc.neon.query.filter
 
+import com.ncc.neon.query.clauses.AndWhereClause
 import org.springframework.context.annotation.Scope
 import org.springframework.context.annotation.ScopedProxyMode
 import org.springframework.stereotype.Component
@@ -37,31 +38,31 @@ class FilterState implements Serializable {
 
     private static final long serialVersionUID = 5897358582328819569L
 
-    private final def idsToFilters = [:]
-    private final def dataSetToFilters = [:]
+    private final Map<FilterKey, Filter> filters = [:]
 
     /**
-     * Clears any existing filters
+     * Clears all existing filters
      */
-    def clearFilters() {
-        idsToFilters.clear()
-        dataSetToFilters.clear()
+    def clearAllFilters() {
+        filters.clear()
     }
 
     /**
-     * Adds a new filter
+     * Adds a filter to the filter state
+     * @param filterKey
      * @param filter
-     * @return The id of the newly added filter
+     * @return
      */
-    def addFilter(filter) {
-        def id = UUID.randomUUID()
-        def dataSet = dataSetFromFilter(filter)
-        idsToFilters.put(id, filter)
-        if (!dataSetToFilters.containsKey(dataSet)) {
-            dataSetToFilters.put(dataSet, [] as Set)
+    def addFilter(FilterKey filterKey, Filter filter) {
+        if(filters.containsKey(filterKey)){
+            Filter oldFilter = filters.get(filterKey)
+            if(oldFilter.whereClause){
+                AndWhereClause andWhereClause = new AndWhereClause(whereClauses: [oldFilter.whereClause, filter.whereClause])
+                filter.whereClause = andWhereClause
+            }
         }
-        dataSetToFilters[dataSet] << id
-        return id
+
+        filters.put(filterKey, filter)
     }
 
     /**
@@ -69,37 +70,22 @@ class FilterState implements Serializable {
      * @param id The id of the filter generated when adding it
      * @return
      */
-    def removeFilter(id) {
-        def filter = idsToFilters.remove(id)
-        def dataSet = dataSetFromFilter(filter)
-        def dataSetFilters = dataSetToFilters[dataSet]
-        dataSetFilters.remove(id)
-        if (dataSetFilters.isEmpty()) {
-            dataSetToFilters.remove(dataSet)
-        }
-
+    def removeFilter(FilterKey filterKey) {
+        filters.remove(filterKey)
     }
 
     /**
      * Gets any filters that are applied to the specified dataset
-     * @param databaseName The name of the data store containing the data
-     * @param tableName The name of the database from which the filters are being returned.
-     * @return
+     * @param dataset The current dataset
+     * @return A list of filters applied to that dataset
      */
-    def getFiltersForDataset(databaseName, tableName) {
-        def filters = []
-        DataSet dataSet = new DataSet(databaseName: databaseName, tableName: tableName)
-        if (dataSetToFilters.containsKey(dataSet)) {
-            def ids = dataSetToFilters.get(dataSet)
-            ids.each {
-                filters << idsToFilters[it]
+    List<Filter> getFiltersForDataset(DataSet dataSet) {
+        def datasetFilters = []
+        filters.each {k,v ->
+            if(k.dataSet == dataSet){
+                datasetFilters << v
             }
         }
-        return filters
+        return datasetFilters
     }
-
-    private static def dataSetFromFilter(filter) {
-        return new DataSet(databaseName: filter.databaseName, tableName: filter.tableName)
-    }
-
 }

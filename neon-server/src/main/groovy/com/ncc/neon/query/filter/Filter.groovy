@@ -28,7 +28,7 @@ import org.codehaus.jackson.annotate.JsonIgnoreProperties
  */
 
 /**
- * A filter specifies which data to select from a datastore
+ * A filter is applied to a DataSet and can contain a whereClause
  */
 @ToString(includeNames = true)
 @JsonIgnoreProperties(value = ['transform_'])

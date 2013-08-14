@@ -26,10 +26,10 @@ import com.ncc.neon.connect.ConnectionState
 import com.ncc.neon.query.Query
 import com.ncc.neon.query.QueryExecutor
 import com.ncc.neon.query.QueryGroup
+import com.ncc.neon.query.filter.DataSet
 import com.ncc.neon.query.filter.Filter
 import com.ncc.neon.query.filter.FilterEvent
-import com.ncc.neon.query.filter.providers.FilterProvider
-import com.ncc.neon.query.filter.providers.QueryBased
+import com.ncc.neon.query.filter.FilterKey
 import org.apache.commons.lang.math.NumberUtils
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
@@ -58,8 +58,7 @@ class QueryService {
     String executeQuery(Query query,
                         @DefaultValue("false") @QueryParam("includefiltered") boolean includeFiltered,
                         @QueryParam("transform") String transformClassName,
-                        @QueryParam("param") List<String> transformParams
-    ) {
+                        @QueryParam("param") List<String> transformParams) {
         return wrapInDataJson(queryExecutor.execute(query, includeFiltered), transformClassName, transformParams)
     }
 
@@ -70,42 +69,35 @@ class QueryService {
     String executeQueryGroup(QueryGroup query,
                              @DefaultValue("false") @QueryParam("includefiltered") boolean includeFiltered,
                              @QueryParam("transform") String transformClassName,
-                             @QueryParam("param") List<String> transformParams
-    ) {
+                             @QueryParam("param") List<String> transformParams) {
         return wrapInDataJson(queryExecutor.execute(query, includeFiltered), transformClassName, transformParams)
     }
 
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
+    @Path("registerfilter")
+    FilterEvent registerFilter(DataSet dataSet) {
+        FilterKey filterKey = queryExecutor.registerForFilterKey(dataSet)
+        FilterEvent.fromFilterKey(filterKey)
+    }
+
+    @POST
     @Path("addfilter")
-    FilterEvent addFilter(FilterProvider filterProvider) {
-        if (filterProvider instanceof QueryBased) {
-            filterProvider.queryExecutor = queryExecutor
-        }
-        def filter = filterProvider.provideFilter()
-        def addedId = queryExecutor.addFilter(filter).toString()
-        return new FilterEvent(addedIds: [addedId])
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    FilterEvent addFilter(FilterKey filterKey, Filter filter) {
+        queryExecutor.addFilter(filterKey, filter)
+        FilterEvent.fromFilterKey(filterKey)
     }
 
     @POST
     @Consumes(MediaType.TEXT_PLAIN)
     @Produces(MediaType.APPLICATION_JSON)
-    @Path("removefilter/{id}")
-    FilterEvent removeFilter(@PathParam("id") String filterId) {
-        UUID uuid = UUID.fromString(filterId)
-        queryExecutor.removeFilter(uuid)
-        return new FilterEvent(removedIds: [filterId])
-    }
-
-    @POST
-    @Path("replacefilter/{id}")
-    @Consumes(MediaType.APPLICATION_JSON)
-    @Produces(MediaType.APPLICATION_JSON)
-    FilterEvent replaceFilter(@PathParam("id") String replaceId, FilterProvider replaceWith) {
-        queryExecutor.removeFilter(UUID.fromString(replaceId))
-        def addEvent = addFilter(replaceWith)
-        return new FilterEvent(addedIds: addEvent.addedIds, removedIds: [replaceId])
+    @Path("removefilter")
+    FilterEvent removeFilter(FilterKey filterKey) {
+        queryExecutor.removeFilter(filterKey)
+        FilterEvent.fromFilterKey(filterKey)
     }
 
     @POST

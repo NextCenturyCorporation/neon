@@ -1,18 +1,17 @@
 package com.ncc.neon.services
-
 import com.ncc.neon.connect.ConnectionState
 import com.ncc.neon.query.Query
 import com.ncc.neon.query.QueryExecutor
 import com.ncc.neon.query.QueryResult
+import com.ncc.neon.query.filter.DataSet
 import com.ncc.neon.query.filter.Filter
-import com.ncc.neon.query.filter.providers.FilterProvider
+import com.ncc.neon.query.filter.FilterEvent
+import com.ncc.neon.query.filter.FilterKey
 import com.ncc.neon.query.transform.ValueStringReplaceTransform
-import com.ncc.neon.util.AssertUtils
 import groovy.mock.interceptor.MockFor
 import org.json.JSONObject
 import org.junit.Before
 import org.junit.Test
-
 /*
  * ************************************************************************
  * Copyright (c), 2013 Next Century Corporation. All Rights Reserved.
@@ -37,11 +36,17 @@ import org.junit.Test
  */
 class QueryServiceTest {
 
+    private static final String UUID_STRING = "1af29529-86bb-4f2c-9928-7f4484b9cc49"
     private def queryService
+    private FilterKey filterKey
+    private DataSet dataSet
 
     @Before
     void before() {
         queryService = new QueryService()
+        dataSet = new DataSet(databaseName: "testDB", tableName: "testTable")
+        filterKey = new FilterKey(uuid: UUID.fromString(UUID_STRING),
+                dataSet: dataSet)
     }
 
     @Test
@@ -76,54 +81,30 @@ class QueryServiceTest {
     @Test
     void "add filter"() {
         // arbitrary string (but constant for each test run)
-        def filterId = UUID.fromString("1af29529-86bb-4f2c-9928-7f4484b9cc49")
         def filter = [] as Filter
-        def filterProvider = [provideFilter: { filter }] as FilterProvider
-        def queryExecutor = [addFilter: { f -> assert f.is(filter); filterId }] as QueryExecutor
+        def queryExecutor = [addFilter: { key, f -> assert f.is(filter);  }] as QueryExecutor
         setQueryServiceConnection(queryExecutor)
 
-        def filterEvent = queryService.addFilter(filterProvider)
-        AssertUtils.assertEqualCollections([filterId.toString()], filterEvent.addedIds)
-        assert filterEvent.removedIds.isEmpty()
+        FilterEvent event = queryService.addFilter(filterKey, filter)
+
+        assert event.dataSet == dataSet
+        assert event.uuid == UUID_STRING
     }
 
     @Test
     void "remove filter"() {
         // arbitrary string (but constant for each test run)
-        def filterId = UUID.fromString("1af29529-86bb-4f2c-9928-7f4484b9cc49")
         def queryExecutorMock = new MockFor(QueryExecutor)
-        queryExecutorMock.demand.removeFilter { id -> assert id == filterId }
+        queryExecutorMock.demand.removeFilter { id -> assert id == filterKey }
         def queryExecutor = queryExecutorMock.proxyInstance()
         setQueryServiceConnection(queryExecutor)
 
-        def event = queryService.removeFilter(filterId.toString())
+        FilterEvent event = queryService.removeFilter(filterKey)
         queryExecutorMock.verify(queryExecutor)
 
-        assert event.addedIds.isEmpty()
-        AssertUtils.assertEqualCollections([filterId.toString()], event.removedIds)
+        assert event.dataSet == dataSet
+        assert event.uuid == UUID_STRING
     }
-
-    @Test
-    void "replace filter"() {
-        // arbitrary strings (but constant for each test run)
-        def addId = UUID.fromString("1af29529-86bb-4f2c-9928-7f4484b9cc48")
-        def removeId = UUID.fromString("1af29529-86bb-4f2c-9928-7f4484b9cc49")
-        def filter = [] as Filter
-        def filterProvider = [provideFilter: { filter }] as FilterProvider
-
-        def queryExecutorMock = new MockFor(QueryExecutor)
-        queryExecutorMock.demand.removeFilter { id -> assert id == removeId }
-        queryExecutorMock.demand.addFilter { f -> assert f.is(filter); addId }
-
-        def queryExecutor = queryExecutorMock.proxyInstance()
-        setQueryServiceConnection(queryExecutor)
-
-        def event = queryService.replaceFilter(removeId.toString(), filterProvider)
-        queryExecutorMock.verify(queryExecutor)
-        AssertUtils.assertEqualCollections([addId.toString()], event.addedIds)
-        AssertUtils.assertEqualCollections([removeId.toString()], event.removedIds)
-    }
-
 
     @Test
     void "get selection WHERE"() {

@@ -1,12 +1,9 @@
 package com.ncc.neon.query.hive
 
 import com.ncc.neon.query.Query
-import com.ncc.neon.query.clauses.AndWhereClause
-import com.ncc.neon.query.clauses.FieldFunction
-import com.ncc.neon.query.clauses.GroupByClause
-import com.ncc.neon.query.clauses.GroupByFieldClause
-import com.ncc.neon.query.clauses.SortOrder
+import com.ncc.neon.query.clauses.*
 import com.ncc.neon.query.filter.FilterState
+import com.ncc.neon.query.filter.DataSet
 
 /*
  * ************************************************************************
@@ -152,7 +149,7 @@ class HiveConversionStrategy {
 
     private def createWhereClausesForFilters(query) {
         def whereClauses = []
-        def filters = filterState.getFiltersForDataset(query.databaseName, query.tableName)
+        def filters = filterState.getFiltersForDataset(DataSet.fromNames(query.databaseName, query.tableName))
         if (!filters.isEmpty()) {
             filters.each {
                 whereClauses << it.whereClause

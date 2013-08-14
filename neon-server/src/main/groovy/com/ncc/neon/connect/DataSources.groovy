@@ -1,6 +1,4 @@
-package com.ncc.neon.query.filter.providers
-
-import com.ncc.neon.query.filter.Filter
+package com.ncc.neon.connect
 
 /*
  * ************************************************************************
@@ -23,14 +21,13 @@ import com.ncc.neon.query.filter.Filter
  * PROPRIETARY AND CONFIDENTIAL TRADE SECRET MATERIAL NOT FOR DISCLOSURE OUTSIDE
  * OF NEXT CENTURY CORPORATION EXCEPT BY PRIOR WRITTEN PERMISSION AND WHEN
  * RECIPIENT IS UNDER OBLIGATION TO MAINTAIN SECRECY.
+ *
+ * 
+ * @author tbrooks
  */
 
-class SimpleFilterProvider implements FilterProvider {
+class DataSources {
+    static final String MONGO = "mongo"
+    static final String HIVE = "hive"
 
-    Filter filter
-
-    @Override
-    def provideFilter() {
-        return filter
-    }
 }

@@ -1,5 +1,4 @@
 package com.ncc.neon.query.filter
-
 /*
  * ************************************************************************
  * Copyright (c), 2013 Next Century Corporation. All Rights Reserved.
@@ -22,9 +21,14 @@ package com.ncc.neon.query.filter
  * OF NEXT CENTURY CORPORATION EXCEPT BY PRIOR WRITTEN PERMISSION AND WHEN
  * RECIPIENT IS UNDER OBLIGATION TO MAINTAIN SECRECY.
  */
+
 class FilterEvent {
 
-    def addedIds = []
-    def removedIds = []
+    String uuid
+    DataSet dataSet
+
+    static FilterEvent fromFilterKey(FilterKey filterKey){
+        new FilterEvent(uuid: filterKey.uuid.toString(), dataSet: filterKey.dataSet)
+    }
 
 }

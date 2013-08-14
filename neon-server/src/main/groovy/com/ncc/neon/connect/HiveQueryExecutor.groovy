@@ -1,7 +1,9 @@
 package com.ncc.neon.connect
 
 import com.ncc.neon.query.*
+import com.ncc.neon.query.filter.DataSet
 import com.ncc.neon.query.filter.Filter
+import com.ncc.neon.query.filter.FilterKey
 import com.ncc.neon.query.filter.FilterState
 import com.ncc.neon.query.hive.HiveConversionStrategy
 import com.ncc.neon.query.jdbc.JdbcQueryResult
@@ -79,18 +81,23 @@ class HiveQueryExecutor implements QueryExecutor {
     }
 
     @Override
-    UUID addFilter(Filter filter) {
-        return filterState.addFilter(filter)
+    FilterKey registerForFilterKey(DataSet dataSet) {
+        new FilterKey(UUID.randomUUID(), dataSet)
     }
 
     @Override
-    void removeFilter(UUID id) {
-        filterState.removeFilter(id)
+    void addFilter(FilterKey filterKey, Filter filter) {
+        filterState.addFilter(filterKey, filter)
+    }
+
+    @Override
+    void removeFilter(FilterKey filterKey) {
+        filterState.removeFilter(filterKey)
     }
 
     @Override
     void clearFilters() {
-        filterState.clearFilters()
+        filterState.clearAllFilters()
     }
 
     @Override

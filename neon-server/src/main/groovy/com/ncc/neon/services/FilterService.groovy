@@ -83,7 +83,7 @@ class FilterService{
     @Path("updatefilter")
     FilterEvent updateFilter(Filter filter) {
         String uuid = connectionState.queryExecutor.addFilter(filter).toString()
-        return new FilterEvent(addedIds: [uuid])
+        return new FilterEvent(addedId: uuid)
     }
 
     @POST
@@ -94,7 +94,7 @@ class FilterService{
         connectionState.queryExecutor.removeFilter(UUID.fromString(replaceId))
         if(filter.whereClause){
             String uuid = connectionState.queryExecutor.addFilter(filter).toString()
-            return new FilterEvent(addedIds: [uuid])
+            return new FilterEvent(addedId: uuid)
         }
 
         return new FilterEvent(addedIds: [])

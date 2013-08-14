@@ -1,8 +1,5 @@
 package com.ncc.neon.query.filter
-
-import groovy.transform.EqualsAndHashCode
-import groovy.transform.ToString
-
+import groovy.transform.Canonical
 /*
  * ************************************************************************
  * Copyright (c), 2013 Next Century Corporation. All Rights Reserved.
@@ -27,16 +24,17 @@ import groovy.transform.ToString
  */
 
 /**
- * A DataSet is a dataStore, like hive or mongo and a database name.
- *
- * The database name is optional for some DataSets.
+ * A DataSet is a database name and table name pair.
  */
-@EqualsAndHashCode
-@ToString(includeNames = true)
+@Canonical
 class DataSet implements Serializable {
 
     private static final long serialVersionUID = 1300981992049008425L
     String databaseName
     String tableName
+
+    static DataSet fromNames(String databaseName, String tableName){
+        new DataSet(databaseName: databaseName, tableName: tableName)
+    }
 
 }

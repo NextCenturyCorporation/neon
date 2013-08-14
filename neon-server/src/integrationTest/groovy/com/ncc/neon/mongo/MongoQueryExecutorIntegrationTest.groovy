@@ -171,7 +171,6 @@ class MongoQueryExecutorIntegrationTest extends AbstractQueryExecutorIntegration
 
     }
 
-
     @Test
     void "set selection by id"() {
         def expected = rows(1, 2)

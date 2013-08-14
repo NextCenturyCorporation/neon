@@ -5,7 +5,9 @@ import com.ncc.neon.query.NamedQuery
 import com.ncc.neon.query.Query
 import com.ncc.neon.query.QueryGroup
 import com.ncc.neon.query.clauses.*
+import com.ncc.neon.query.filter.DataSet
 import com.ncc.neon.query.filter.Filter
+import com.ncc.neon.query.filter.FilterKey
 import com.ncc.neon.util.AssertUtils
 import org.json.JSONArray
 import org.json.JSONObject
@@ -257,10 +259,12 @@ abstract class AbstractQueryExecutorIntegrationTest {
     @Test
     @SuppressWarnings('MethodSize') // In this case, allow the long method because it is necessary to add a filter before removing the filter and having this all in one method maeks the test read more smoothly
     void "apply and remove filter"() {
+        UUID uuid = UUID.randomUUID()
+        def filterId = new FilterKey(uuid, DataSet.fromNames(DATABASE_NAME, TABLE_NAME))
         def dcStateFilter = new Filter(databaseName: DATABASE_NAME, tableName: TABLE_NAME, whereClause: new SingularWhereClause(lhs: 'state', operator: '=', rhs: 'DC'))
 
         // apply a filter and make sure only that data is returned
-        def dcFilterId = queryExecutor.addFilter(dcStateFilter)
+        queryExecutor.addFilter(filterId, dcStateFilter)
         def dcStateResult = queryExecutor.execute(ALL_DATA_QUERY, false)
         def dcStateRecords = rows(1, 2, 5)
         assertUnorderedQueryResult(dcStateRecords, dcStateResult)
@@ -270,29 +274,26 @@ abstract class AbstractQueryExecutorIntegrationTest {
         assertUnorderedQueryResult(getAllData(), allDataResult)
 
         // apply another filter and make sure both are applied
+        def salaryId = new FilterKey(uuid, DataSet.fromNames(DATABASE_NAME, TABLE_NAME))
         def salaryFilter = new Filter(databaseName: DATABASE_NAME, tableName: TABLE_NAME, whereClause: new SingularWhereClause(lhs: 'salary', operator: '>', rhs: 85000))
-        def salaryFilterId = queryExecutor.addFilter(salaryFilter)
+        queryExecutor.addFilter(salaryId, salaryFilter)
 
         def dcStateWithSalaryFilterRecords = rows(2, 5)
         def dcStateWithSalaryResult = queryExecutor.execute(ALL_DATA_QUERY, false)
         assertUnorderedQueryResult(dcStateWithSalaryFilterRecords, dcStateWithSalaryResult)
 
-        // remove each filter and re-execute the queries
-        queryExecutor.removeFilter(salaryFilterId)
-        dcStateResult = queryExecutor.execute(ALL_DATA_QUERY, false)
-        assertUnorderedQueryResult(dcStateRecords, dcStateResult)
-
-        queryExecutor.removeFilter(dcFilterId)
+        queryExecutor.removeFilter(filterId)
         allDataResult = queryExecutor.execute(ALL_DATA_QUERY, false)
         assertUnorderedQueryResult(getAllData(), allDataResult)
     }
 
     @Test
     void "clear filters"() {
+        def filterId = new FilterKey(UUID.randomUUID(), DataSet.fromNames(DATABASE_NAME, TABLE_NAME))
         def dcStateFilter = new Filter(databaseName: DATABASE_NAME, tableName: TABLE_NAME, whereClause: new SingularWhereClause(lhs: 'state', operator: '=', rhs: 'DC'))
 
         // addFilter is tested separately, so we can be confident the filter is added properly
-        queryExecutor.addFilter(dcStateFilter)
+        queryExecutor.addFilter(filterId, dcStateFilter)
 
         // clear the filters, and there should be no filters applied
         queryExecutor.clearFilters()

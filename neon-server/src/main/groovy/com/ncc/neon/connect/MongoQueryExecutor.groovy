@@ -2,25 +2,17 @@ package com.ncc.neon.connect
 
 import com.mongodb.DB
 import com.mongodb.MongoClient
-import com.ncc.neon.query.Query
-import com.ncc.neon.query.QueryExecutor
-import com.ncc.neon.query.QueryGroup
-import com.ncc.neon.query.QueryGroupResult
-import com.ncc.neon.query.QueryResult
-import com.ncc.neon.query.QueryUtils
+import com.ncc.neon.query.*
 import com.ncc.neon.query.clauses.SingularWhereClause
+import com.ncc.neon.query.filter.DataSet
 import com.ncc.neon.query.filter.Filter
+import com.ncc.neon.query.filter.FilterKey
 import com.ncc.neon.query.filter.FilterState
-import com.ncc.neon.query.mongo.AbstractMongoQueryWorker
-import com.ncc.neon.query.mongo.AggregateMongoQueryWorker
-import com.ncc.neon.query.mongo.DistinctMongoQueryWorker
-import com.ncc.neon.query.mongo.MongoConversionStrategy
-import com.ncc.neon.query.mongo.MongoQuery
-import com.ncc.neon.query.mongo.MongoUtils
-import com.ncc.neon.query.mongo.SimpleMongoQueryWorker
+import com.ncc.neon.query.mongo.*
 import com.ncc.neon.selection.SelectionManager
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
+
 /*
  * ************************************************************************
  * Copyright (c), 2013 Next Century Corporation. All Rights Reserved.
@@ -99,18 +91,23 @@ class MongoQueryExecutor implements QueryExecutor {
     }
 
     @Override
-    UUID addFilter(Filter filter) {
-        return filterState.addFilter(filter)
+    FilterKey registerForFilterKey(DataSet dataSet) {
+        new FilterKey(UUID.randomUUID(), dataSet)
     }
 
     @Override
-    void removeFilter(UUID id) {
-        filterState.removeFilter(id)
+    void addFilter(FilterKey filterKey, Filter filter) {
+        filterState.addFilter(filterKey, filter)
+    }
+
+    @Override
+    void removeFilter(FilterKey filterKey) {
+        filterState.removeFilter(filterKey)
     }
 
     @Override
     void clearFilters() {
-        filterState.clearFilters()
+        filterState.clearAllFilters()
     }
 
     @Override

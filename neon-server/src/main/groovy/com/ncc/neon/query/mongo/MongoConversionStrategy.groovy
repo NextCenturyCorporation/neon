@@ -4,6 +4,7 @@ import com.mongodb.DBObject
 import com.ncc.neon.query.Query
 import com.ncc.neon.query.clauses.AndWhereClause
 import com.ncc.neon.query.clauses.SelectClause
+import com.ncc.neon.query.filter.DataSet
 import com.ncc.neon.query.filter.FilterState
 /*
  * ************************************************************************
@@ -88,7 +89,7 @@ class MongoConversionStrategy {
 
     private def createWhereClausesForFilters(query) {
         def whereClauses = []
-        def filters = filterState.getFiltersForDataset(query.databaseName, query.tableName)
+        def filters = filterState.getFiltersForDataset(DataSet.fromNames(query.databaseName, query.tableName))
         if (!filters.isEmpty()) {
             filters.each {
                 whereClauses << it.whereClause

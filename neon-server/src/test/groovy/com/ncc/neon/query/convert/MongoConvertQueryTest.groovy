@@ -36,7 +36,7 @@ import com.ncc.neon.query.mongo.MongoConversionStrategy
 class MongoConvertQueryTest extends AbstractConversionTest {
 
     @Override
-    protected def whenExecutingConvertQuery(query) {
+    protected def convertQuery(query) {
         MongoConversionStrategy conversionStrategy = new MongoConversionStrategy(filterState)
         conversionStrategy.convertQuery(query)
     }

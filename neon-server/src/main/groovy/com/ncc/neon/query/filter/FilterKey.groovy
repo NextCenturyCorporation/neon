@@ -1,8 +1,5 @@
-package com.ncc.neon.query.filter.providers
-
-import org.codehaus.jackson.annotate.JsonSubTypes
-import org.codehaus.jackson.annotate.JsonTypeInfo
-
+package com.ncc.neon.query.filter
+import groovy.transform.Canonical
 /*
  * ************************************************************************
  * Copyright (c), 2013 Next Century Corporation. All Rights Reserved.
@@ -24,14 +21,15 @@ import org.codehaus.jackson.annotate.JsonTypeInfo
  * PROPRIETARY AND CONFIDENTIAL TRADE SECRET MATERIAL NOT FOR DISCLOSURE OUTSIDE
  * OF NEXT CENTURY CORPORATION EXCEPT BY PRIOR WRITTEN PERMISSION AND WHEN
  * RECIPIENT IS UNDER OBLIGATION TO MAINTAIN SECRECY.
+ *
+ * 
+ * @author tbrooks
  */
-@JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.PROPERTY, property = "type")
-@JsonSubTypes([
-@JsonSubTypes.Type(value = SimpleFilterProvider, name = 'simple'),
-@JsonSubTypes.Type(value =  SubfilterQueryProvider, name =  'subfilter'),
-])
-public interface FilterProvider {
 
-    def provideFilter()
+@Canonical
+class FilterKey implements Serializable{
 
+    private static final long serialVersionUID = -5783657018410727352L
+    UUID uuid
+    DataSet dataSet
 }

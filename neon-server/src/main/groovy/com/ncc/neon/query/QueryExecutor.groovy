@@ -22,7 +22,10 @@
  */
 package com.ncc.neon.query
 
+import com.ncc.neon.query.filter.DataSet
 import com.ncc.neon.query.filter.Filter
+import com.ncc.neon.query.filter.FilterKey
+
 /**
  * Executes a query against a datastore
  */
@@ -53,17 +56,24 @@ public interface QueryExecutor {
     Collection<String> getFieldNames(String databaseName, String tableName)
 
     /**
-     * Applies a filter so only data within this filter is returned by a query
-     * @param filter
-     * @return The id of the filter
+     * Clients must register in order to get a FilterKey
+     * @oaram dataSet The DataSet to which this filter is applied
+     * @return A new filter key
      */
-    UUID addFilter(Filter filter)
+    FilterKey registerForFilterKey(DataSet dataSet)
 
     /**
-     * Removes a filter with the specified id
-     * @param id
+     * Adds a filter. There may be only one Filter with a given FilterKey
+     * @param filterKey The identifier for a Filter
+     * @param filter The Filter to be added or replaced
      */
-    void removeFilter(UUID id)
+    void addFilter(FilterKey filterKey, Filter filter)
+
+    /**
+     * Removes a filter with the specified FilterKey
+     * @param FilterKey
+     */
+    void removeFilter(FilterKey filterKey)
 
     /**
      * Clears all filters

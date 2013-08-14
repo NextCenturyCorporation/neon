@@ -2,7 +2,7 @@ package com.ncc.neon.hive
 
 import com.ncc.neon.connect.ConnectionInfo
 import com.ncc.neon.connect.ConnectionState
-import com.ncc.neon.connect.DataSource
+import com.ncc.neon.connect.DataSources
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.ComponentScan
 import org.springframework.context.annotation.Configuration
@@ -41,7 +41,7 @@ class HiveIntegrationTestContext {
     @Bean
     ConnectionState connectionState() {
         ConnectionState connectionState = new ConnectionState()
-        ConnectionInfo info = new ConnectionInfo(dataStoreName: DataSource.HIVE, connectionUrl: HOST_STRING)
+        ConnectionInfo info = new ConnectionInfo(dataStoreName: DataSources.HIVE, connectionUrl: HOST_STRING)
         connectionState.createConnection(info)
         return connectionState
     }

@@ -79,7 +79,7 @@ neon.eventing.OWFEventPublisher.prototype.replaceFilter = function (filterId, fi
 
 /**
  * Clears all filter and sends a message to the {{#crossLink "neon.eventing.Channels/FILTERS_CHANGED:property"}}{{/crossLink}} channel
- * @method clearFilters
+ * @method clearAllFilters
  * @param {Function} [errorCallback] The optional callback when an error occurs. This is a 3 parameter function that contains the xhr, a short error status and the full error message.
  */
 neon.eventing.OWFEventPublisher.prototype.clearFilters = function (errorCallback) {
