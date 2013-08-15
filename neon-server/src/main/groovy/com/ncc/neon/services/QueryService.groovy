@@ -74,8 +74,8 @@ class QueryService {
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-    @Path("registerfilter")
-    FilterEvent registerFilter(DataSet dataSet) {
+    @Path("registerforfilterkey")
+    FilterEvent registerForFilterKey(DataSet dataSet) {
         FilterKey filterKey = queryExecutor.registerForFilterKey(dataSet)
         FilterEvent.fromFilterKey(filterKey)
     }

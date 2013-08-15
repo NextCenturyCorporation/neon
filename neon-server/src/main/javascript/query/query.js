@@ -480,19 +480,50 @@ neon.query.buildQueryParamsString_ = function (query, transform) {
     return queryParams;
 };
 
+/**
+ * Registers for a filter key and fires the callback when complete
+ * @method registerForFilterKey
+ * @param databaseName The database name against which the filter is registered
+ * @param tableName The table name against which the filter is registered
+ * @param {Function} successCallback The callback to fire when registration succeeds
+ * @param {Function} [errorCallback] The optional callback when an error occurs. This is a 3 parameter function that contains the xhr, a short error status and the full error message.
+ * @returns {neon.util.AjaxRequest} The xhr request object
+ */
+
+neon.query.registerForFilterKey = function(databaseName, tableName, successCallback, errorCallback) {
+    var dataSet = {
+        databseName: databaseName,
+        tableName: tableName
+    };
+
+    return neon.util.AjaxUtils.doPostJSON(
+        dataSet,
+        neon.query.queryUrl_('/services/queryservice/registerforfilterkey'),
+        {
+            success: successCallback,
+            error: errorCallback
+        }
+    );
+};
+
 
 /**
  * Adds a filter to the data and fires the callback when complete
  * @method addFilter
- * @param {neon.query.Filter || neon.query.FilterProvider} filter The filter (or filter provider) to add. A filter provider can be useful
- * for dynamically creating more complex filters on the server based on subquery results
+ * @param filterKey The object returned when registering the filter must be used here
+ * @param filter The filter to be added
  * @param {Function} successCallback The callback to fire when the filter is added
  * @param {Function} [errorCallback] The optional callback when an error occurs. This is a 3 parameter function that contains the xhr, a short error status and the full error message.
  * @return {neon.util.AjaxRequest} The xhr request object
  */
-neon.query.addFilter = function (filter, successCallback, errorCallback) {
+neon.query.addFilter = function (filterKey, filter, successCallback, errorCallback) {
+    var filterContainer = {
+        filterKey: filterKey,
+        filter: filter
+    };
+
     return neon.util.AjaxUtils.doPostJSON(
-        filter,
+        filterContainer,
         neon.query.queryUrl_('/services/queryservice/addfilter'),
         {
             success: successCallback,
@@ -504,36 +535,40 @@ neon.query.addFilter = function (filter, successCallback, errorCallback) {
 /**
  * Removes a filter from the data and fires the callback when complete
  * @method removeFilter
- * @param {String} filterId The id of the filter to remove
+ * @param filterKey The object returned when registering the filter must be used here
  * @param {Function} successCallback The callback to fire when the filter is removed
  * @param {Function} [errorCallback] The optional callback when an error occurs. This is a 3 parameter function that contains the xhr, a short error status and the full error message.
  * @return {neon.util.AjaxRequest} The xhr request object
  */
-neon.query.removeFilter = function (filterId, successCallback, errorCallback) {
-    var opts = {
-        contentType: 'text/plain',
-        responseType: 'json',
-        success: successCallback,
-        error: errorCallback
-    };
-
-    return neon.util.AjaxUtils.doPost(neon.query.queryUrl_('/services/queryservice/removefilter/' + filterId), opts);
+neon.query.removeFilter = function (filterKey, successCallback, errorCallback) {
+    return neon.util.AjaxUtils.doPostJSON(
+        filterKey,
+        neon.query.queryUrl_('/services/queryservice/removefilter'),
+        {
+            success: successCallback,
+            error: errorCallback
+        }
+    );
 };
 
 /**
  * Replaces a filter and fires the callback when complete
  * @method replaceFilter
- * @param {String} filterId The id of the filter to replace
- * @param {neon.query.Filter || neon.query.FilterProvider} filter The filter (or filter provider) to add. A filter provider can be useful
- * for dynamically creating more complex filters on the server based on subquery results
+ * @param filterKey The object returned when registering the filter must be used here
+ * @param filter The filter that is a replacement for the previous filter
  * @param {Function} successCallback The callback to fire when the replacement is complete
  * @param {Function} [errorCallback] The optional callback when an error occurs. This is a 3 parameter function that contains the xhr, a short error status and the full error message.
  * @return {neon.util.AjaxRequest} The xhr request object
  */
-neon.query.replaceFilter = function (filterId, filter, successCallback, errorCallback) {
+neon.query.replaceFilter = function (filterKey, filter, successCallback, errorCallback) {
+    var filterContainer = {
+        filterKey: filterKey,
+        filter: filter
+    };
+
     return neon.util.AjaxUtils.doPostJSON(
-        filter,
-        neon.query.queryUrl_('/services/queryservice/replacefilter/' + filterId),
+        filterContainer,
+        neon.query.queryUrl_('/services/queryservice/replacefilter'),
         {
             success: successCallback,
             error: errorCallback
