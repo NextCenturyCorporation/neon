@@ -1,6 +1,6 @@
 package com.ncc.neon.query.filter
 
-import groovy.transform.Immutable
+import groovy.transform.Canonical
 
 /*
  * ************************************************************************
@@ -25,7 +25,7 @@ import groovy.transform.Immutable
  * RECIPIENT IS UNDER OBLIGATION TO MAINTAIN SECRECY.
  */
 
-@Immutable
+@Canonical
 class FilterEvent {
 
     String uuid

@@ -91,7 +91,7 @@ class MongoQueryExecutor implements QueryExecutor {
 
     @Override
     FilterKey registerForFilterKey(DataSet dataSet) {
-        new FilterKey(UUID.randomUUID(), dataSet)
+        new FilterKey(uuid: UUID.randomUUID(), dataSet: dataSet)
     }
 
     @Override

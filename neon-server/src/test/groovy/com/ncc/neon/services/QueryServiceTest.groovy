@@ -5,6 +5,7 @@ import com.ncc.neon.query.QueryExecutor
 import com.ncc.neon.query.QueryResult
 import com.ncc.neon.query.filter.DataSet
 import com.ncc.neon.query.filter.Filter
+import com.ncc.neon.query.filter.FilterContainer
 import com.ncc.neon.query.filter.FilterEvent
 import com.ncc.neon.query.filter.FilterKey
 import com.ncc.neon.query.transform.ValueStringReplaceTransform
@@ -80,12 +81,11 @@ class QueryServiceTest {
 
     @Test
     void "add filter"() {
-        // arbitrary string (but constant for each test run)
-        def filter = [] as Filter
-        def queryExecutor = [addFilter: { key, f -> assert f.is(filter);  }] as QueryExecutor
+        def filter = new Filter(databaseName: dataSet.databaseName, tableName: dataSet.tableName)
+        def queryExecutor = [addFilter: { k, f -> assert f.is(filter) }] as QueryExecutor
         setQueryServiceConnection(queryExecutor)
-
-        FilterEvent event = queryService.addFilter(filterKey, filter)
+        FilterContainer container = new FilterContainer(filterKey: filterKey, filter: filter)
+        FilterEvent event = queryService.addFilter(container)
 
         assert event.dataSet == dataSet
         assert event.uuid == UUID_STRING

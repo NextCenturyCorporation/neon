@@ -1,6 +1,6 @@
 package com.ncc.neon.query.filter
 
-import groovy.transform.Immutable
+import groovy.transform.Canonical
 
 /*
  * ************************************************************************
@@ -28,7 +28,7 @@ import groovy.transform.Immutable
  * @author tbrooks
  */
 
-@Immutable
+@Canonical
 class FilterContainer {
 
     FilterKey filterKey
