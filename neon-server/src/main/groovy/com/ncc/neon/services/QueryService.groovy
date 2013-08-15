@@ -1,3 +1,20 @@
+package com.ncc.neon.services
+
+import com.ncc.neon.connect.ConnectionState
+import com.ncc.neon.query.Query
+import com.ncc.neon.query.QueryExecutor
+import com.ncc.neon.query.QueryGroup
+import com.ncc.neon.query.filter.DataSet
+import com.ncc.neon.query.filter.Filter
+import com.ncc.neon.query.filter.FilterEvent
+import com.ncc.neon.query.filter.FilterKey
+import org.apache.commons.lang.math.NumberUtils
+import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.stereotype.Component
+
+import javax.ws.rs.*
+import javax.ws.rs.core.MediaType
+
 /*
  * ************************************************************************
  * Copyright (c), 2013 Next Century Corporation. All Rights Reserved.
@@ -20,22 +37,6 @@
  * OF NEXT CENTURY CORPORATION EXCEPT BY PRIOR WRITTEN PERMISSION AND WHEN
  * RECIPIENT IS UNDER OBLIGATION TO MAINTAIN SECRECY.
  */
-package com.ncc.neon.services
-
-import com.ncc.neon.connect.ConnectionState
-import com.ncc.neon.query.Query
-import com.ncc.neon.query.QueryExecutor
-import com.ncc.neon.query.QueryGroup
-import com.ncc.neon.query.filter.DataSet
-import com.ncc.neon.query.filter.Filter
-import com.ncc.neon.query.filter.FilterEvent
-import com.ncc.neon.query.filter.FilterKey
-import org.apache.commons.lang.math.NumberUtils
-import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.stereotype.Component
-
-import javax.ws.rs.*
-import javax.ws.rs.core.MediaType
 
 @Component
 @Path("/queryservice")

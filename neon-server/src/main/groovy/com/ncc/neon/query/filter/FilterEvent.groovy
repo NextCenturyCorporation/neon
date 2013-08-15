@@ -1,4 +1,7 @@
 package com.ncc.neon.query.filter
+
+import groovy.transform.Immutable
+
 /*
  * ************************************************************************
  * Copyright (c), 2013 Next Century Corporation. All Rights Reserved.
@@ -22,6 +25,7 @@ package com.ncc.neon.query.filter
  * RECIPIENT IS UNDER OBLIGATION TO MAINTAIN SECRECY.
  */
 
+@Immutable
 class FilterEvent {
 
     String uuid

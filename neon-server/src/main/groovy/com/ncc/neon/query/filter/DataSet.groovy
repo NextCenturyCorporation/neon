@@ -1,5 +1,7 @@
 package com.ncc.neon.query.filter
-import groovy.transform.Canonical
+
+import groovy.transform.Immutable
+
 /*
  * ************************************************************************
  * Copyright (c), 2013 Next Century Corporation. All Rights Reserved.
@@ -26,7 +28,7 @@ import groovy.transform.Canonical
 /**
  * A DataSet is a database name and table name pair.
  */
-@Canonical
+@Immutable
 class DataSet implements Serializable {
 
     private static final long serialVersionUID = 1300981992049008425L

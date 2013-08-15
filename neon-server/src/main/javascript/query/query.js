@@ -491,9 +491,8 @@ neon.query.buildQueryParamsString_ = function (query, transform) {
  * @return {neon.util.AjaxRequest} The xhr request object
  */
 neon.query.addFilter = function (filter, successCallback, errorCallback) {
-    var filterProvider = neon.query.wrapFilterInProvider_(filter);
     return neon.util.AjaxUtils.doPostJSON(
-        filterProvider,
+        filter,
         neon.query.queryUrl_('/services/queryservice/addfilter'),
         {
             success: successCallback,
@@ -532,19 +531,14 @@ neon.query.removeFilter = function (filterId, successCallback, errorCallback) {
  * @return {neon.util.AjaxRequest} The xhr request object
  */
 neon.query.replaceFilter = function (filterId, filter, successCallback, errorCallback) {
-    var filterProvider = neon.query.wrapFilterInProvider_(filter);
     return neon.util.AjaxUtils.doPostJSON(
-        filterProvider,
+        filter,
         neon.query.queryUrl_('/services/queryservice/replacefilter/' + filterId),
         {
             success: successCallback,
             error: errorCallback
         }
     );
-};
-
-neon.query.wrapFilterInProvider_ = function (filter) {
-    return filter instanceof neon.query.FilterProvider ? filter : new neon.query.SimpleFilterProvider(filter);
 };
 
 /**
@@ -755,45 +749,6 @@ neon.query.Filter.prototype.transform = function (transformName, transformParams
     return this;
 };
 
-
-/**
- * This is the parent class of objects used to create filters to be applied to the data. A filter provider
- * is passed to the server rather than a filter directly because some filter providers may dynamically create
- * filters on the server side.
- * @namespace neon.query
- * @class FilterProvider
- * @constructor
- * @param {neon.query.Filter} filter
- */
-neon.query.FilterProvider = function (filter) {
-    this.filter = filter;
-};
-
-/**
- * A filter provider that dynamically creates a filter on the server based on the
- * results matched by the subfilter. The newly generated filter will be structured as
- * follows:<br>
- *     &lt;fieldName&gt; &lt;operator&gt; &lt;subfilter-results&gt;
- *
- * For example, this can be used to generate a filter that matches any rows whose field X appears
- * in the results of the subfilter
- * @namespace neon.query
- * @class SubfilterFieldProvider
- * @param {neon.query.Filter} subfilter The subfilter whose results will be used as the basis for the newly generated filter
- * @param {String} fieldName The field used as the key of the generated filter
- * @param {String} operator The operator to use to compare the field to the results of the subfilter
- * @constructor
- */
-neon.query.SubfilterFieldProvider = function (subfilter, fieldName, operator) {
-    this.type = 'subfilter';
-    this.operator = operator;
-    this.fieldName = fieldName;
-    neon.query.FilterProvider.call(this, subfilter);
-};
-// TODO: NEON-73 (Javascript inheritance library)
-neon.query.SubfilterFieldProvider.prototype = new neon.query.FilterProvider();
-
-
 /**
  * A generic function that can be applied to a field (on the server side). For example, this could be an aggregation
  * function such as an average or it could be a function to manipulate a field value such as extracting the month
@@ -831,7 +786,6 @@ neon.query.GroupByFunctionClause.prototype = new neon.query.FieldFunction();
 
 
 // These are not meant to be instantiated directly but rather by helper methods
-
 neon.query.GroupBySingleFieldClause = function (field) {
     this.type = 'single';
     this.field = field;
@@ -871,22 +825,6 @@ neon.query.Transform = function (transformName, transformParams) {
     this.transformName = transformName;
     this.transformParams = transformParams;
 };
-
-/**
- * A filter provider that wraps a simple filter
- * @private
- * @namespace neon.query
- * @class SimpleFilterProvider
- * @param {neon.query.Filter} filter The filter being wrapped
- * @constructor
- */
-neon.query.SimpleFilterProvider = function (filter) {
-    this.type = 'simple';
-    neon.query.FilterProvider.call(this, filter);
-};
-// TODO: NEON-73 (Javascript inheritance library)
-neon.query.SimpleFilterProvider.prototype = new neon.query.FilterProvider();
-
 
 /**
  * A query group is one that encompasses multiple queries. The results of all queries in the group are

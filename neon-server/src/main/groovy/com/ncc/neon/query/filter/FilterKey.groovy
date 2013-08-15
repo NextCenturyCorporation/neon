@@ -1,5 +1,6 @@
 package com.ncc.neon.query.filter
-import groovy.transform.Canonical
+
+import groovy.transform.Immutable
 /*
  * ************************************************************************
  * Copyright (c), 2013 Next Century Corporation. All Rights Reserved.
@@ -26,7 +27,7 @@ import groovy.transform.Canonical
  * @author tbrooks
  */
 
-@Canonical
+@Immutable
 class FilterKey implements Serializable{
 
     private static final long serialVersionUID = -5783657018410727352L

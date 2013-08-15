@@ -24,24 +24,6 @@
 // some of this class is tested in the integration query.spec.js. This covers the unit tests.
 describe('query', function() {
 
-    // test the filter wrapping private methods since they are only accessed through methods in the
-    // integration test (much of which is mocked)
-
-    it('should wrap a filter in a filter provider', function() {
-        var filter = new neon.query.Filter();
-        var wrapped = neon.query.wrapFilterInProvider_(filter);
-        expect(wrapped).toBeInstanceOf(neon.query.FilterProvider);
-        expect(wrapped.filter).toBe(filter);
-    });
-
-    it('should pass the filter provider through directly', function() {
-        var providerClass = function() {};
-        providerClass.prototype = new neon.query.FilterProvider();
-        var provider = new providerClass();
-        var wrapped = neon.query.wrapFilterInProvider_(provider);
-        expect(wrapped).toBe(provider);
-    });
-
     it('should wrap a string group by clause in a single field clause', function() {
         var fieldName = 'test_field';
         var query = new neon.query.Query();
