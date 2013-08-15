@@ -49,11 +49,11 @@ html, body {
 }
 
 #datastore-container, #db-table, #filter-container {
-    border: 1px solid #DDD;
+    border: 1px solid white;
     border-radius: 10px;
-    padding: 0 0 .5em .5em;
-    margin: .25em 0 .25em 0;
-    width: 380px;;
+    padding: 0 0 10px 10px;
+    margin: 5px 0 5px 0;
+    width: 380px;
     height: 100px;
 }
 
@@ -78,4 +78,7 @@ html, body {
 }
 #value-label {
     width: 100px;
+}
+#clear-filters-button {
+    margin-left: 275px;
 }
