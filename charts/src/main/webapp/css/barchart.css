@@ -21,10 +21,23 @@
  * RECIPIENT IS UNDER OBLIGATION TO MAINTAIN SECRECY.
  */
 
+
+html, body {
+ height: 100%;
+ width: 100%;
+ background-color: black;
+ color: white;
+}
+
 #plot {
     font: 10px sans-serif;
     text-align: right;
     background-color: white;
+}
+
+.dropdown {
+ background-color: silver;
+ color: black;
 }
 
 .bar {
