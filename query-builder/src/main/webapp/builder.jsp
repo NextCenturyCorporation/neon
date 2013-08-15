@@ -12,6 +12,7 @@
         String owfServerUrl = getServletContext().getInitParameter("owf.url");
     %>
 
+    <link rel="stylesheet" type="text/css" href="css/bootstrap/bootstrap.min.css">
     <link rel="stylesheet" type="text/css" href="css/builder.css"/>
     <link rel="stylesheet" type="text/css" href="css/slickgrid/slick.grid.css"/>
     <link rel="stylesheet" type="text/css" href="css/smoothness/jquery-ui-1.8.16.custom.css"/>
@@ -55,7 +56,7 @@
     </h4>
     <textarea id="queryText" cols="80" rows="3"></textarea>
     <br/><br/>
-    <button id="submit" onclick="submitter();">Submit</button>
+    <button id="submit" class="btn" onclick="submitter();">Submit</button>
     <br/><br/>
 </div>
 

@@ -30,7 +30,7 @@
     vertical-align: top;
 }
 
-#x, #y, #time-granularity {
+.dropdown {
     background-color: silver;
     color; black;
 }
