@@ -4,10 +4,7 @@ import com.ncc.neon.connect.ConnectionState
 import com.ncc.neon.query.Query
 import com.ncc.neon.query.QueryExecutor
 import com.ncc.neon.query.QueryGroup
-import com.ncc.neon.query.filter.DataSet
-import com.ncc.neon.query.filter.Filter
-import com.ncc.neon.query.filter.FilterEvent
-import com.ncc.neon.query.filter.FilterKey
+import com.ncc.neon.query.filter.*
 import org.apache.commons.lang.math.NumberUtils
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
@@ -87,9 +84,9 @@ class QueryService {
     @Path("addfilter")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-    FilterEvent addFilter(FilterKey filterKey, Filter filter) {
-        queryExecutor.addFilter(filterKey, filter)
-        FilterEvent.fromFilterKey(filterKey)
+    FilterEvent addFilter(FilterContainer container) {
+        queryExecutor.addFilter(container.filterKey, container.filter)
+        FilterEvent.fromFilterKey(container.filterKey)
     }
 
     @POST
@@ -99,6 +96,15 @@ class QueryService {
     FilterEvent removeFilter(FilterKey filterKey) {
         queryExecutor.removeFilter(filterKey)
         FilterEvent.fromFilterKey(filterKey)
+    }
+
+    @POST
+    @Path("replacefilter")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    FilterEvent replaceFilter(FilterContainer container) {
+        removeFilter(container.filterKey)
+        addFilter(container)
     }
 
     @POST
