@@ -92,10 +92,11 @@
     function selectDatabaseAndTable(){
         var dataSet = neon.wizard.dataset();
 
+
+        neon.query.clearFilters(function() {});
         neon.query.registerForFilterKey(dataSet.database, dataSet.table, function(filterResponse){
             neon.filter.setFilterKey(filterResponse);
         });
-
 
         neon.query.getFieldNames(dataSet.database, dataSet.table, function(data){
             columns = data.fieldNames;

@@ -492,7 +492,7 @@ neon.query.buildQueryParamsString_ = function (query, transform) {
 
 neon.query.registerForFilterKey = function(databaseName, tableName, successCallback, errorCallback) {
     var dataSet = {
-        databseName: databaseName,
+        databaseName: databaseName,
         tableName: tableName
     };
 
