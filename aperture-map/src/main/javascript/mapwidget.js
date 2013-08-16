@@ -116,6 +116,7 @@ $(document).ready(function () {
                     locationsLayer.all([]);
                     map.all().redraw();
                 }
+
             });
         }
 

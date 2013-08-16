@@ -54,7 +54,7 @@
 
             <div class="control-group">
                 <div class="controls">
-                    <select id="operator-dropdown" id="operator-select-{{@index}}" class="dropdown span1">
+                    <select id="operator-select-{{@index}}" class="dropdown span1">
                         {{#select operatorValue}}
                         {{#operatorOptions}}
                         <option value="{{.}}">{{.}}</option>
