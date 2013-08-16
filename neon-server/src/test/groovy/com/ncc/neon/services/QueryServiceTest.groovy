@@ -6,7 +6,6 @@ import com.ncc.neon.query.QueryResult
 import com.ncc.neon.query.filter.DataSet
 import com.ncc.neon.query.filter.Filter
 import com.ncc.neon.query.filter.FilterContainer
-import com.ncc.neon.query.filter.FilterEvent
 import com.ncc.neon.query.filter.FilterKey
 import com.ncc.neon.query.transform.ValueStringReplaceTransform
 import groovy.mock.interceptor.MockFor
@@ -85,10 +84,7 @@ class QueryServiceTest {
         def queryExecutor = [addFilter: { k, f -> assert f.is(filter) }] as QueryExecutor
         setQueryServiceConnection(queryExecutor)
         FilterContainer container = new FilterContainer(filterKey: filterKey, filter: filter)
-        FilterEvent event = queryService.addFilter(container)
-
-        assert event.dataSet == dataSet
-        assert event.uuid == UUID_STRING
+        queryService.addFilter(container)
     }
 
     @Test
@@ -99,11 +95,8 @@ class QueryServiceTest {
         def queryExecutor = queryExecutorMock.proxyInstance()
         setQueryServiceConnection(queryExecutor)
 
-        FilterEvent event = queryService.removeFilter(filterKey)
+        queryService.removeFilter(filterKey)
         queryExecutorMock.verify(queryExecutor)
-
-        assert event.dataSet == dataSet
-        assert event.uuid == UUID_STRING
     }
 
     @Test

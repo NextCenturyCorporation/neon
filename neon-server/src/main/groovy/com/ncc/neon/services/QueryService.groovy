@@ -83,28 +83,22 @@ class QueryService {
     @POST
     @Path("addfilter")
     @Consumes(MediaType.APPLICATION_JSON)
-    @Produces(MediaType.APPLICATION_JSON)
-    FilterEvent addFilter(FilterContainer container) {
+    void addFilter(FilterContainer container) {
         queryExecutor.addFilter(container.filterKey, container.filter)
-        FilterEvent.fromFilterKey(container.filterKey)
     }
 
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
-    @Produces(MediaType.APPLICATION_JSON)
     @Path("removefilter")
-    FilterEvent removeFilter(FilterKey filterKey) {
+    void removeFilter(FilterKey filterKey) {
         queryExecutor.removeFilter(filterKey)
-        FilterEvent.fromFilterKey(filterKey)
     }
 
     @POST
     @Path("replacefilter")
     @Consumes(MediaType.APPLICATION_JSON)
-    @Produces(MediaType.APPLICATION_JSON)
-    FilterEvent replaceFilter(FilterContainer container) {
+    void replaceFilter(FilterContainer container) {
         removeFilter(container.filterKey)
-        addFilter(container)
     }
 
     @POST
