@@ -42,7 +42,7 @@ html, body {
     min-height: 200px;
 }
 
-#limit, #sort-field {
+.dropdown, #limit {
     background-color: silver;
     color: black;
 }

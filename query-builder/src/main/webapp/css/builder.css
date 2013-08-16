@@ -42,7 +42,7 @@ html, body {
     min-height: 200px;
 }
 
-#datastoreSelect {
+.dropdown {
     background-color: silver;
     color: black;
 }

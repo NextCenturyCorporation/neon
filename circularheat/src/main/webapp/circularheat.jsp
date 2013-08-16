@@ -37,7 +37,7 @@
             <label class="control-label" for="date">Date</label>
 
             <div class="controls">
-                <select id="date"></select>
+                <select class="dropdown"></select>
             </div>
         </div>
     </div>

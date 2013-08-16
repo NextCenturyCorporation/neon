@@ -65,7 +65,7 @@
 
                 <div id="sort-controls" class="controls-row input-append">
 
-                    <select id="sort-field"></select>
+                    <select class="dropdown"></select>
 
                     <div class="btn-group" data-toggle="buttons-radio">
                         <button id="sort-ascending" type="button" data-toggle="button" class="btn">Ascending

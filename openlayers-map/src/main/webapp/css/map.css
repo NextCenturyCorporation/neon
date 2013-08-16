@@ -2,7 +2,7 @@
     width: 800px;
     height: 400px;
 }
-#latitude, #longitude, #size-by, #color-by {
+.dropdown {
     background-color: silver;
     color: black;
 }

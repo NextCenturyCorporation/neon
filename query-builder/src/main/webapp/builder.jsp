@@ -49,7 +49,7 @@
 <body>
 <div id="query">
     <h4>Select a Datastore</h4>
-    <select id="datastoreSelect">
+    <select class="dropdown">
     </select>
     <h4>
         Enter a Query
