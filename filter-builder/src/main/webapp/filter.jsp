@@ -165,7 +165,9 @@
     </div>
 
     <div id="filter-container">
-        <h4>Filters</h4>
+        <h4>Filters
+           <button id="clear-filters-button" class="btn">Clear All Filters</button>
+        </h4>
 
         <div class="controls controls-row">
             <div class="control-group">
@@ -190,10 +192,6 @@
         </div>
         <div id="filter-content"/>
     </div>
-    <div class="controls controls-row">
-        <button class="btn">Clear All Filters</button>
-    </div>
-
 
 </div>
 
