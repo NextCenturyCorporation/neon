@@ -64,10 +64,9 @@ $(document).ready(function () {
             // TODO: Add support for dayOfWeek to query API
             var groupByDayClause = new neon.query.GroupByFunctionClause('dayOfWeek', dateField, 'day');
             var groupByHourClause = new neon.query.GroupByFunctionClause(neon.query.HOUR, dateField, 'hour');
-//            var sumClause = new neon.query.GroupByFunctionClause(neon.query.SUM, dateField, 'count');
 
             var query = new neon.query.Query()
-                .selectFrom(datasource, datasetId)
+                .selectFrom(databaseName, tableName)
                 .groupBy(groupByDayClause, groupByHourClause)
                 .aggregate(neon.query.COUNT, null, 'count');
 
