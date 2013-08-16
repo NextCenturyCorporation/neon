@@ -11,7 +11,7 @@ neon.filter = (function () {
         });
     }
 
-    var filterId;
+    var filterKey;
     var columnOptions;
 
     var operatorOptions = ["=","!=",">","<",">=","<="];
@@ -34,34 +34,23 @@ neon.filter = (function () {
         updateDataFromForm(id);
         var filter = buildFilterFromData();
 
-        var filterString = filterId ? "/" + filterId : "";
-
-        neon.util.AjaxUtils.doPostJSON(filter, neon.query.SERVER_URL + "/services/filterservice/updatefilter" + filterString,
-            {
-                success: function (uuid) {
-                    filterId = uuid.addedIds[0];
-                    if(!updatingExisting){
-                        filterState.data.push(new FilterRow());
-                    }
-                    messageHandler.publishMessage(neon.eventing.Channels.FILTERS_CHANGED, {});
-                    redrawTemplateFromData();
-                }
-            });
+        neon.query.replaceFilter(filterKey, filter, function(){
+            if(!updatingExisting){
+                filterState.data.push(new FilterRow());
+            }
+            messageHandler.publishMessage(neon.eventing.Channels.FILTERS_CHANGED, {});
+            redrawTemplateFromData();
+        });
     };
 
     var removeFilter = function (id) {
         filterState.data.splice(id, 1);
         var filter = buildFilterFromData();
 
-        var filterString = filterId ? "/" + filterId : "";
-        neon.util.AjaxUtils.doPostJSON(filter, neon.query.SERVER_URL + "/services/filterservice/updatefilter" + filterString,
-            {
-                success: function (uuid) {
-                    filterId = uuid.addedIds[0];
-                    messageHandler.publishMessage(neon.eventing.Channels.FILTERS_CHANGED, {});
-                    redrawTemplateFromData();
-                }
-            });
+        neon.query.replaceFilter(filterKey, filter, function(){
+            messageHandler.publishMessage(neon.eventing.Channels.FILTERS_CHANGED, {});
+            redrawTemplateFromData();
+        });
     };
 
     function buildCompoundWhereClause(data) {
@@ -150,10 +139,15 @@ neon.filter = (function () {
         filterId = undefined;
     };
 
+    var setFilterKey = function(key){
+        filterKey = key;
+    };
+
     return {
         addFilter: addFilter,
         removeFilter: removeFilter,
         clearFilter: clearFilter,
+        setFilterKey: setFilterKey,
         grid: grid
     };
 })();

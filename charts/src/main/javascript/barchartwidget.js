@@ -31,7 +31,7 @@ $(document).ready(function () {
         // just creating the message handler will receive messages
         var messageHandler = new neon.eventing.MessageHandler({
             activeDatasetChanged: function (message) {
-                populateAttributeDropdowns(message, drawChart);
+                onActiveDatasetChanged(message, drawChart);
             },
             filtersChanged: drawChart
         });

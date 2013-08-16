@@ -1,7 +1,5 @@
 package com.ncc.neon.services
 import com.ncc.neon.connect.ConnectionState
-import com.ncc.neon.query.filter.Filter
-import com.ncc.neon.query.filter.FilterEvent
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
 
@@ -66,38 +64,5 @@ class FilterService{
     @Path("tablenames")
     List<String> getTableNames(@FormParam("database") String database) {
         connectionState.queryExecutor.showTables(database)
-    }
-
-
-    @POST
-    @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
-    @Produces(MediaType.APPLICATION_JSON)
-    @Path("columnnames")
-    List<String> getColumnNames(@FormParam("database") String database, @FormParam("table") String table) {
-        connectionState.queryExecutor.getFieldNames(database, table).collect{ it }
-    }
-
-    @POST
-    @Consumes(MediaType.APPLICATION_JSON)
-    @Produces(MediaType.APPLICATION_JSON)
-    @Path("updatefilter")
-    FilterEvent updateFilter(Filter filter) {
-        String uuid = connectionState.queryExecutor.addFilter(filter).toString()
-        return new FilterEvent(addedId: uuid)
-    }
-
-    @POST
-    @Consumes(MediaType.APPLICATION_JSON)
-    @Produces(MediaType.APPLICATION_JSON)
-    @Path("updatefilter/{filterId}")
-    FilterEvent updateFilter(Filter filter, @PathParam("filterId") String replaceId) {
-        connectionState.queryExecutor.removeFilter(UUID.fromString(replaceId))
-        if(filter.whereClause){
-            String uuid = connectionState.queryExecutor.addFilter(filter).toString()
-            return new FilterEvent(addedId: uuid)
-        }
-
-        return new FilterEvent(addedIds: [])
-
     }
 }

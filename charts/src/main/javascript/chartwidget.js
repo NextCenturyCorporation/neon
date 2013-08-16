@@ -24,16 +24,22 @@
 // this file contains some javascript functions that are useful for the chart based widgets
 var databaseName;
 var tableName;
+var filterKey;
 
-function populateAttributeDropdowns(message, changeHandler) {
+function onActiveDatasetChanged(message, changeHandler) {
     databaseName = message.database;
     tableName = message.table;
+
+    neon.query.registerForFilterKey(databaseName, tableName, function(filterResponse){
+        filterKey = filterResponse;
+    });
+
     neon.query.getFieldNames(databaseName, tableName, function(data){
-        doPopulateAttributeDropdowns(data,changeHandler);
+        populateAttributeDropdowns(data,changeHandler);
     });
 }
 
-function doPopulateAttributeDropdowns(data, changeHandler) {
+function populateAttributeDropdowns(data, changeHandler) {
     ['x', 'y'].forEach(function (selectId) {
         var select = $('#' + selectId);
         select.empty();

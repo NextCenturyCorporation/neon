@@ -90,16 +90,20 @@
     }
 
     function selectDatabaseAndTable(){
-        neon.util.AjaxUtils.doPost(neon.query.SERVER_URL + "/services/filterservice/columnnames",
-            {
-                data: neon.wizard.dataset(),
-                success: function (columnNames) {
-                    columns = columnNames;
-                    neon.filter.grid(columns);
-                    $("#filter-container").show();
-                    $("#clear-filters-button").show();
-                }
-            });
+        var dataSet = neon.wizard.dataset();
+
+        neon.query.registerForFilterKey(dataSet.database, dataSet.table, function(filterResponse){
+            neon.filter.setFilterKey(filterResponse);
+        });
+
+
+        neon.query.getFieldNames(dataSet.database, dataSet.table, function(data){
+            columns = data.fieldNames;
+            neon.filter.grid(columns);
+            $("#filter-container").show();
+            $("#clear-filters-button").show();
+        });
+
         broadcastActiveDataset();
     }
 

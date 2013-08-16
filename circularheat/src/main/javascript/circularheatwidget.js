@@ -1,55 +1,37 @@
 $(document).ready(function () {
 
     OWF.ready(function () {
-        var filterId;
+        var databaseName;
+        var tableName;
+        var filterKey;
+
         var dateField;
-        var filterUpdating = false;
         var chart;
 
         var HOURS_IN_WEEK = 168;
         var HOURS_IN_DAY = 24;
 
-        var NUMERIC_TYPES = [
-            'areacode',
-            'asnum',
-            'bw',
-            'bytes',
-            'hits',
-            'lat',
-            'lon',
-            'zip_code'
-        ];
-
-        function isNumeric(field) {
-            return $.inArray(field, NUMERIC_TYPES) >= 0;
-        }
-
-        // a counter of how many items are in each location group used to size the dots if no other size-by attribute is provided
-        var COUNT_FIELD_NAME = 'count_';
-
         // instantiating the message handler adds it as a listener
         var messageHandler = new neon.eventing.MessageHandler({
-            activeDatasetChanged: populateAttributeDropdowns,
+            activeDatasetChanged: onDatasetChanged,
             filtersChanged: onFiltersChanged
         });
-        var eventPublisher = new neon.eventing.OWFEventPublisher(messageHandler);
 
         function onFiltersChanged(message) {
-            // keep track of own filter so we can just replace it rather than keep adding new ones
-            if (message._source === messageHandler.id) {
-                filterId = message.addedIds[0];
-                filterUpdating = false;
-            }
             redrawChart();
         }
 
-        function populateAttributeDropdowns(message) {
-            datasource = message.database;
-            datasetId = message.table;
-            neon.query.getFieldNames(datasource, datasetId, doPopulateAttributeDropdowns);
+        function onDatasetChanged(message) {
+            databaseName = message.database;
+            tableName = message.table;
+            neon.query.registerForFilterKey(databaseName, tableName, function(filterResponse){
+                filterKey = filterResponse;
+            });
+
+            neon.query.getFieldNames(databaseName, tableName, populateAttributeDropdowns);
         }
 
-        function doPopulateAttributeDropdowns(data) {
+        function populateAttributeDropdowns(data) {
             ['date'].forEach(function (selectId) {
                 var select = $('#' + selectId);
                 select.empty();

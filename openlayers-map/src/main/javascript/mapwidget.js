@@ -1,10 +1,13 @@
 $(document).ready(function () {
 
     OWF.ready(function () {
-        var filterId;
+
+        var databaseName;
+        var tableName;
+        var filterKey;
+
         var latField;
         var lonField;
-        var filterUpdating = false;
         var heatmap;
 
         var currentData;
@@ -16,32 +19,30 @@ $(document).ready(function () {
         // a counter of how many items are in each location group used to size the dots if no other size-by attribute is provided
         var COUNT_FIELD_NAME = 'count_';
 
-        var map, locationsLayer, pointsLayer;
-
+        var map;
 
         // instantiating the message handler adds it as a listener
         var messageHandler = new neon.eventing.MessageHandler({
-            activeDatasetChanged: populateAttributeDropdowns,
+            activeDatasetChanged: onDatasetChanged,
             filtersChanged: onFiltersChanged
         });
         var eventPublisher = new neon.eventing.OWFEventPublisher(messageHandler);
 
         function onFiltersChanged(message) {
-            // keep track of own filter so we can just replace it rather than keep adding new ones
-            if (message._source === messageHandler.id) {
-                filterId = message.addedIds[0];
-                filterUpdating = false;
-            }
             redrawMap();
         }
 
-        function populateAttributeDropdowns(message) {
-            datasource = message.database;
-            datasetId = message.table;
-            neon.query.getFieldNames(datasource, datasetId, doPopuplateAttributeDropdowns);
+        function onDatasetChanged(message) {
+            databaseName = message.database;
+            tableName = message.table;
+            neon.query.registerForFilterKey(databaseName, tableName, function(filterResponse){
+                filterKey = filterResponse;
+            });
+
+            neon.query.getFieldNames(databaseName, tableName, populateAttributeDropdowns);
         }
 
-        function doPopuplateAttributeDropdowns(data) {
+        function populateAttributeDropdowns(data) {
             ['latitude', 'longitude', 'color-by', 'size-by'].forEach(function (selectId) {
                 var select = $('#' + selectId);
                 select.empty();
@@ -62,42 +63,32 @@ $(document).ready(function () {
             map.addLayers([layer, heatmap]);
 
             map.zoomToMaxExtent();
-//            map.zoomIn();
 
             map.events.register("moveend", map, onExtentChanged);
         }
 
         function onExtentChanged() {
-            if (!filterUpdating) {
-                var extent = map.getExtent();
-                var llPoint = new OpenLayers.LonLat(extent.left, extent.bottom);
-                var urPoint = new OpenLayers.LonLat(extent.right, extent.top);
-                var proj_1 = new OpenLayers.Projection("EPSG:4326");
-                var proj_2 = new OpenLayers.Projection("EPSG:900913");
-                llPoint.transform(proj_2, proj_1);
-                urPoint.transform(proj_2, proj_1);
-                var minLon = Math.min(llPoint.lon,urPoint.lon);
-                var maxLon = Math.max(llPoint.lon,urPoint.lon);
+            var extent = map.map_.getExtent();
+            var llPoint = new OpenLayers.LonLat(extent.left, extent.bottom);
+            var urPoint = new OpenLayers.LonLat(extent.right, extent.top);
+            var proj_1 = new OpenLayers.Projection("EPSG:4326");
+            var proj_2 = new OpenLayers.Projection("EPSG:900913");
+            llPoint.transform(proj_2, proj_1);
+            urPoint.transform(proj_2, proj_1);
+            var minLon = Math.min(llPoint.lon,urPoint.lon);
+            var maxLon = Math.max(llPoint.lon,urPoint.lon);
 
-                var minLat = Math.min(llPoint.lat,urPoint.lat);
-                var maxLat = Math.max(llPoint.lat,urPoint.lat);
+            var minLat = Math.min(llPoint.lat,urPoint.lat);
+            var maxLat = Math.max(llPoint.lat,urPoint.lat);
 
-                var leftClause = neon.query.where(lonField, ">=", minLon);
-                var rightClause = neon.query.where(lonField, "<=", maxLon);
-                var bottomClause = neon.query.where(latField, ">=", minLat);
-                var topClause = neon.query.where(latField, "<=", maxLat);
+            var leftClause = neon.query.where(lonField, ">=", minLon);
+            var rightClause = neon.query.where(lonField, "<=", maxLon);
+            var bottomClause = neon.query.where(latField, ">=", minLat);
+            var topClause = neon.query.where(latField, "<=", maxLat);
+            var filterClause = neon.query.and(leftClause, rightClause, bottomClause, topClause);
+            var filter = new neon.query.Filter().selectFrom(databaseName, tableName).where(filterClause);
 
-                var filterClause = neon.query.and(leftClause, rightClause, bottomClause, topClause);
-                var filter = new neon.query.Filter().selectFrom(datasource, datasetId).where(filterClause);
-
-                filterUpdating = true;
-                if (filterId) {
-                    eventPublisher.replaceFilter(filterId, filter);
-                }
-                else {
-                    eventPublisher.addFilter(filter);
-                }
-            }
+            eventPublisher.replaceFilter(filterKey, filter);
         }
 
         function redrawMap() {
@@ -115,13 +106,8 @@ $(document).ready(function () {
                     var query = buildQuery(latField, lonField, sizeByField, colorByField);
                     neon.query.executeQuery(query, doRedrawMap);
                 }
-                else {
-//                locationsLayer.all([]);
-//                map.all().redraw();
-                }
 
             });
-
 
         }
 

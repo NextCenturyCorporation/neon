@@ -1,9 +1,4 @@
 $(document).ready(function () {
-
-
-
-
-
     // TODO: Map legend for ordinal color values
     // TODO: Extract out OWF code from generic map widget code (in this case we may not bother since we may develop our own map)
     // TODO: Make the default attributes configurable (again may not want to bother since we may develop our own map)
@@ -121,10 +116,7 @@ $(document).ready(function () {
                     locationsLayer.all([]);
                     map.all().redraw();
                 }
-
             });
-
-
         }
 
         function buildQuery(latField, lonField, sizeByField, colorByField) {

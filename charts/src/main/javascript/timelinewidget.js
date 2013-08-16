@@ -26,14 +26,13 @@ $(document).ready(function () {
 
     OWF.ready(function () {
 
-        var filterId;
         var COUNT_FIELD_NAME = 'Count';
 
         var messageHandler = new neon.eventing.MessageHandler({
             activeDatasetChanged: function (message) {
-                populateAttributeDropdowns(message, drawChart);
+                onActiveDatasetChanged(message, drawChart);
             },
-            filtersChanged: updateFilterId
+            filtersChanged: onFiltersChanged
 
         });
         var eventPublisher = new neon.eventing.OWFEventPublisher(messageHandler);
@@ -65,23 +64,16 @@ $(document).ready(function () {
             // initially disabled until filter added
             disableResetFilterButton();
             getResetFilterButton().click(function () {
-                eventPublisher.removeFilter(filterId);
+                eventPublisher.removeFilter(filterKey);
             });
         }
 
-        function updateFilterId(message) {
-
+        function onFiltersChanged(message) {
             if (message._source === messageHandler.id) {
-                if (message.addedIds.length) {
-                    // keep track of own filter so we can just replace it rather than keep adding new ones
-                    filterId = message.addedIds[0];
-                    getResetFilterButton().removeAttr('disabled');
-                }
-                else if (message.removedIds.length) {
-                    filterId = undefined;
-                    drawChart();
-                    disableResetFilterButton();
-                }
+                getResetFilterButton().removeAttr('disabled');
+            }
+            else{
+                drawChart();
             }
         }
 
