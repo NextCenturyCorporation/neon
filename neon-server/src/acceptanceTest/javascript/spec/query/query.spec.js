@@ -33,12 +33,12 @@ describe('query mapping', function () {
     var or = neon.query.or;
     var and = neon.query.and;
 
-
     var databaseName = 'acceptanceTest';
     var tableName = 'records';
     var allData;
 
     var dcStateFilter = baseFilter().where('state', '=', 'DC');
+    var filterKey = createFilterKey();
     jasmine.getJSONFixtures().fixturesPath = 'src/test-data';
 
 
@@ -224,9 +224,8 @@ describe('query mapping', function () {
     });
 
     it('apply and remove filter', function () {
-        executeAndWait(neon.query.addFilter, dcStateFilter);
+        executeAndWait(neon.query.addFilter, filterKey, dcStateFilter);
         runs(function () {
-            var dcFilterId = currentResult.addedIds[0];
             var expectedData = rows(1, 2, 5);
             assertQueryResults(baseQuery(), expectedData);
 
@@ -236,24 +235,15 @@ describe('query mapping', function () {
                 runs(function () {
                     // apply another filter and make sure both are applied
                     var salaryFilter = baseFilter().where('salary', '>', 85000);
-                    executeAndWait(neon.query.addFilter, salaryFilter);
+                    executeAndWait(neon.query.addFilter, filterKey, salaryFilter);
                     runs(function () {
-                        var salaryFilterId = currentResult.addedIds[0];
                         expectedData = rows(2, 5);
                         assertQueryResults(baseQuery(), expectedData);
-
-                        // remove each filter and re-execute the queries
                         runs(function () {
-                            executeAndWait(neon.query.removeFilter, salaryFilterId);
+                            // remove each filter and re-execute the queries
+                            executeAndWait(neon.query.removeFilter, filterKey);
                             runs(function () {
-                                expectedData = rows(1, 2, 5);
-                                assertQueryResults(baseQuery(), expectedData);
-                                runs(function () {
-                                    executeAndWait(neon.query.removeFilter, dcFilterId);
-                                    runs(function () {
-                                        assertQueryResults(baseQuery(), allData);
-                                    });
-                                });
+                                assertQueryResults(baseQuery(), allData);
                             });
                         });
                     });
@@ -263,7 +253,7 @@ describe('query mapping', function () {
     });
 
     it('clear filters', function () {
-        executeAndWait(neon.query.addFilter, dcStateFilter);
+        executeAndWait(neon.query.addFilter, filterKey, dcStateFilter);
         runs(function () {
             executeAndWait(neon.query.clearFilters);
             runs(function () {
@@ -530,6 +520,16 @@ describe('query mapping', function () {
      */
     function baseFilter() {
         return new neon.query.Filter().selectFrom(databaseName, tableName);
+    }
+
+    function createFilterKey(){
+        return {
+            uuid: "84bc5064-c837-483b-8454-c8c72abe45f8",
+            dataSet: {
+                databaseName: databaseName,
+                tableName: tableName
+            }
+        };
     }
 
 });

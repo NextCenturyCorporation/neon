@@ -74,12 +74,12 @@ describe('publishing events to OWF channels', function () {
 
     it('should publish add filter results', function () {
         var filterKey = {
-            uuid: "1234567890-0987654321",
+            uuid: "84bc5064-c837-483b-8454-c8c72abe45f8",
             dataSet: {
                 databaseName: databaseName,
                 tableName: tableName
             }
-        }
+        };
         var filter = new neon.query.Filter().selectFrom(databaseName, tableName);
         testResultsPublishedToChannel_(
             neon.eventing.Channels.FILTERS_CHANGED,

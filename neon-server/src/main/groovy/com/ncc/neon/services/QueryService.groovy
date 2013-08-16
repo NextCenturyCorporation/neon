@@ -90,7 +90,7 @@ class QueryService {
     }
 
     @POST
-    @Consumes(MediaType.TEXT_PLAIN)
+    @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     @Path("removefilter")
     FilterEvent removeFilter(FilterKey filterKey) {
