@@ -99,6 +99,7 @@ class QueryService {
     @Consumes(MediaType.APPLICATION_JSON)
     void replaceFilter(FilterContainer container) {
         removeFilter(container.filterKey)
+        addFilter(container)
     }
 
     @POST

@@ -150,13 +150,7 @@ $(document).ready(function () {
                 var filterClause = neon.query.and(startFilterClause, endFilterClause);
                 var filter = new neon.query.Filter().selectFrom(databaseName, tableName).where(filterClause);
 
-
-                if (filterId) {
-                    eventPublisher.replaceFilter(filterId, filter);
-                }
-                else {
-                    eventPublisher.addFilter(filter);
-                }
+                eventPublisher.replaceFilter(filterKey, filter);
             });
         }
 
