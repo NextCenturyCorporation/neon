@@ -78,9 +78,9 @@
     <div class="controls-row">
         <div id="button-row" class="control-group">
             <div class="controls">
-                <button type="button" type="button" id="redraw-bounds" class="btn">Redraw Bounds</button>
+                <button type="button" id="redraw-bounds" class="btn">Redraw Bounds</button>
 
-                <button type="button" type="button" id="reset-filter" class="btn">Reset Time Period</button>
+                <button type="button" id="reset-filter" class="btn">Reset Time Period</button>
             </div>
         </div>
     </div>

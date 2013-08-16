@@ -64,7 +64,11 @@ $(document).ready(function () {
             // initially disabled until filter added
             disableResetFilterButton();
             getResetFilterButton().click(function () {
-                eventPublisher.removeFilter(filterKey);
+                neon.query.removeFilter(filterKey, function(){
+                    messageHandler.publishMessage(neon.eventing.Channels.FILTERS_CHANGED, {});
+                    drawChart();
+                });
+
             });
         }
 
