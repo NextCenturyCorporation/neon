@@ -35,17 +35,10 @@ html, body {
 .dropdown {
     background-color: silver;
     color: black;
-    width: 130px;
-}
-.textfield {
-    width: 100px;
-}
-.radio-inline, .btn-group {
-    display: inline;
 }
 
-#hostname-input {
-    width: 125px;
+.radio-inline, .btn-group {
+    display: inline;
 }
 
 #datastore-container, #db-table, #filter-container {
@@ -53,32 +46,23 @@ html, body {
     border-radius: 10px;
     padding: 0 0 10px 10px;
     margin: 5px 0 5px 0;
-    width: 380px;
+    width: 395px;
     height: 100px;
 }
 
 #filter-container {
     height: auto;
-    width: 465px;
 }
 
-#operator-dropdown {
-    width: 45px;
+#update-filter-button, #remove-filter-button {
+    margin-top: 5px;
 }
 
 #database-table-button, #datastore-button {
     margin-right: 20px;
     margin-top: 25px;
 }
-#column-name-label {
-    width: 125px;
-}
-#operator-label {
-    width: 60px;
-}
-#value-label {
-    width: 100px;
-}
-#clear-filters-button {
-    margin-left: 275px;
+
+#radio-buttons {
+    margin-left: 160px;
 }
