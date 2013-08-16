@@ -34,7 +34,7 @@
             <label class="control-label" for="latitude">Latitude Field</label>
 
             <div class="controls">
-                <select id="latitude"></select>
+                <select class="dropdown"></select>
             </div>
         </div>
 
@@ -42,14 +42,14 @@
             <label class="control-label" for="longitude">Longitude Field</label>
 
             <div class="controls">
-                <select id="longitude"></select>
+                <select class="dropdown"></select>
             </div>
         </div>
         <div class="control-group">
             <label class="control-label" for="size-by">Size By</label>
 
             <div class="controls">
-                <select id="size-by"></select>
+                <select class="dropdown"></select>
             </div>
         </div>
 
@@ -58,7 +58,7 @@
             <label class="control-label" for="color-by">Color By</label>
 
             <div class="controls">
-                <select id="color-by"></select>
+                <select class="dropdown"></select>
             </div>
         </div>
     </div>
