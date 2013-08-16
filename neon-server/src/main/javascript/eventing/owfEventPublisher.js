@@ -44,36 +44,35 @@ neon.eventing.OWFEventPublisher = function (messageHandler) {
 /**
  * Adds a filter and sends a message to the {{#crossLink "neon.eventing.Channels/FILTERS_CHANGED:property"}}{{/crossLink}} channel
  * @method addFilter
- * @param {neon.query.Filter || neon.query.FilterProvider} filter The filter (or filter provider) to add. A filter provider can be useful
- * for dynamically creating more complex filters on the server based on subquery results
+ * @param filterKey The object returned when registering the filter must be used here
+ * @param filter The filter to be added
  * @param {Function} [errorCallback] The optional callback when an error occurs. This is a 3 parameter function that contains the xhr, a short error status and the full error message.
  */
-neon.eventing.OWFEventPublisher.prototype.addFilter = function (filter, errorCallback) {
-    neon.query.addFilter(filter, this.createChannelCallback_(neon.eventing.Channels.FILTERS_CHANGED), errorCallback);
+neon.eventing.OWFEventPublisher.prototype.addFilter = function (filterKey, filter, errorCallback) {
+    neon.query.addFilter(filterKey, filter, this.createChannelCallback_(neon.eventing.Channels.FILTERS_CHANGED), errorCallback);
 };
 
 
 /**
  * Removes a filter and sends a message to the {{#crossLink "neon.eventing.Channels/FILTERS_CHANGED:property"}}{{/crossLink}} channel
  * @method removeFilter
- * @param {String} filterId The id of the filter to remove
+ * @param filterKey The object returned when registering the filter must be used here
  * @param {Function} [errorCallback] The optional callback when an error occurs. This is a 3 parameter function that contains the xhr, a short error status and the full error message.
  */
-neon.eventing.OWFEventPublisher.prototype.removeFilter = function (filterId, errorCallback) {
-    neon.query.removeFilter(filterId, this.createChannelCallback_(neon.eventing.Channels.FILTERS_CHANGED), errorCallback);
+neon.eventing.OWFEventPublisher.prototype.removeFilter = function (filterKey, errorCallback) {
+    neon.query.removeFilter(filterKey, this.createChannelCallback_(neon.eventing.Channels.FILTERS_CHANGED), errorCallback);
 };
 
 
 /**
  * Replaces a filter and sends a message to the {{#crossLink "neon.eventing.Channels/FILTERS_CHANGED:property"}}{{/crossLink}} channel
  * @method replaceFilter
- * @param {String} filterId The id of the filter to replace
- * @param {neon.query.Filter || neon.query.FilterProvider} filter The filter (or filter provider) to add. A filter provider can be useful
- * for dynamically creating more complex filters on the server based on subquery results
+ * @param filterKey The object returned when registering the filter must be used here
+ * @param filter The filter that is a replacement for the previous filter
  * @param {Function} [errorCallback] The optional callback when an error occurs. This is a 3 parameter function that contains the xhr, a short error status and the full error message.
  */
-neon.eventing.OWFEventPublisher.prototype.replaceFilter = function (filterId, filter, errorCallback) {
-    neon.query.replaceFilter(filterId, filter, this.createChannelCallback_(neon.eventing.Channels.FILTERS_CHANGED), errorCallback);
+neon.eventing.OWFEventPublisher.prototype.replaceFilter = function (filterKey, filter, errorCallback) {
+    neon.query.replaceFilter(filterKey, filter, this.createChannelCallback_(neon.eventing.Channels.FILTERS_CHANGED), errorCallback);
 };
 
 
