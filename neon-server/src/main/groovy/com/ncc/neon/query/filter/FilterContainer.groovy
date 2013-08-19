@@ -1,7 +1,6 @@
 package com.ncc.neon.query.filter
 
-import groovy.transform.Canonical
-
+import groovy.transform.ToString
 /*
  * ************************************************************************
  * Copyright (c), 2013 Next Century Corporation. All Rights Reserved.
@@ -28,7 +27,7 @@ import groovy.transform.Canonical
  * @author tbrooks
  */
 
-@Canonical
+@ToString
 class FilterContainer {
 
     FilterKey filterKey

@@ -1,17 +1,16 @@
 package com.ncc.neon.services
+
 import com.ncc.neon.connect.ConnectionState
 import com.ncc.neon.query.Query
 import com.ncc.neon.query.QueryExecutor
 import com.ncc.neon.query.QueryResult
-import com.ncc.neon.query.filter.DataSet
-import com.ncc.neon.query.filter.Filter
-import com.ncc.neon.query.filter.FilterContainer
-import com.ncc.neon.query.filter.FilterKey
+import com.ncc.neon.query.filter.*
 import com.ncc.neon.query.transform.ValueStringReplaceTransform
 import groovy.mock.interceptor.MockFor
 import org.json.JSONObject
 import org.junit.Before
 import org.junit.Test
+
 /*
  * ************************************************************************
  * Copyright (c), 2013 Next Century Corporation. All Rights Reserved.
@@ -37,7 +36,7 @@ import org.junit.Test
 class QueryServiceTest {
 
     private static final String UUID_STRING = "1af29529-86bb-4f2c-9928-7f4484b9cc49"
-    private def queryService
+    private QueryService queryService
     private FilterKey filterKey
     private DataSet dataSet
 
@@ -77,6 +76,18 @@ class QueryServiceTest {
         assertKeyValue(array, 1, "notReplaced", "abc")
     }
 
+    @Test
+    void "register for filter key"() {
+        def queryExecutor = [registerForFilterKey: { ds ->
+            assert ds.is(dataSet)
+            return filterKey
+        }] as QueryExecutor
+        setQueryServiceConnection(queryExecutor)
+
+        FilterEvent event = queryService.registerForFilterKey(dataSet)
+        assert event.dataSet == dataSet
+        assert event.uuid == filterKey.uuid.toString()
+    }
 
     @Test
     void "add filter"() {

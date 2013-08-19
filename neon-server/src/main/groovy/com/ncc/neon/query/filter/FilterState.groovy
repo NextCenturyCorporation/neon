@@ -43,7 +43,7 @@ class FilterState implements Serializable {
     /**
      * Clears all existing filters
      */
-    def clearAllFilters() {
+    void clearAllFilters() {
         filters.clear()
     }
 
@@ -53,7 +53,7 @@ class FilterState implements Serializable {
      * @param filter
      * @return
      */
-    def addFilter(FilterKey filterKey, Filter filter) {
+    void addFilter(FilterKey filterKey, Filter filter) {
         if(filters.containsKey(filterKey)){
             Filter oldFilter = filters.get(filterKey)
             if(oldFilter.whereClause){
@@ -70,7 +70,7 @@ class FilterState implements Serializable {
      * @param id The id of the filter generated when adding it
      * @return
      */
-    def removeFilter(FilterKey filterKey) {
+    void removeFilter(FilterKey filterKey) {
         filters.remove(filterKey)
     }
 
