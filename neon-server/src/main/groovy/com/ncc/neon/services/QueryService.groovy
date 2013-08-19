@@ -43,13 +43,6 @@ class QueryService {
     ConnectionState connectionState
 
     @POST
-    @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
-    @Path("connect")
-    String connect(@FormParam("datastore") String datastore, @FormParam("hostname") String hostname) {
-        return connectionState.createConnection(datastore, hostname)
-    }
-
-    @POST
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     @Path("query")

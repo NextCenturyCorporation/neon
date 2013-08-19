@@ -1,13 +1,10 @@
-package com.ncc.neon.services
+package com.ncc.neon.language
 
-import com.ncc.neon.connect.ConnectionState
-import com.ncc.neon.language.QueryParser
 import com.ncc.neon.query.Query
-import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.stereotype.Component
+import com.ncc.neon.query.filter.Filter
+import org.junit.Test
 
-import javax.ws.rs.*
-import javax.ws.rs.core.MediaType
+
 /*
  * ************************************************************************
  * Copyright (c), 2013 Next Century Corporation. All Rights Reserved.
@@ -34,29 +31,25 @@ import javax.ws.rs.core.MediaType
  * @author tbrooks
  */
 
-@Component
-@Path("/languageservice")
-class LanguageService{
+class AntlrQueryParserTest {
 
-    @Autowired
-    QueryParser queryParser
-
-    @Autowired
-    ConnectionState connectionState
-
-    @POST
-    @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
-    @Produces(MediaType.APPLICATION_JSON)
-    @Path("query")
-    String executeQuery(@FormParam("text") String text){
-        Query query = queryParser.parse(text)
-        return wrapInDataJson(connectionState.queryExecutor.execute(query, false))
+    @Test(expected = NullPointerException)
+    void "parsing null is going to throw a NPE"() {
+        AntlrQueryParser parser = new AntlrQueryParser()
+        parser.parse(null)
     }
 
-    private String wrapInDataJson(queryResult) {
-        def json = queryResult.toJson()
-        '{"data":' + json + '}'
+    @Test
+    void "test simplest query"() {
+        AntlrQueryParser parser = new AntlrQueryParser()
+        Query actual = parser.parse("use db; select * from table")
+        Query expected = new Query(filter: new Filter(databaseName: "db", tableName: "table"))
+
+        assert actual.filter.databaseName == expected.filter.databaseName
+        assert actual.filter.tableName == expected.filter.tableName
+        assert actual.filter.whereClause == expected.filter.whereClause
+
+        assert actual.fields == expected.fields
     }
+
 }
-
-

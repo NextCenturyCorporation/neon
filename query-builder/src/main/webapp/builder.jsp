@@ -32,25 +32,11 @@
         OWF.relayFile = 'js/eventing/rpc_relay.uncompressed.html';
         neon.query.SERVER_URL = '<%=neonServerUrl%>';
         neon.util.AjaxUtils.useDefaultStartStopCallbacks();
-
-        neon.util.AjaxUtils.doGet(neon.query.SERVER_URL + "/services/languageservice/datastores", {
-            success: function (data) {
-                data.forEach(function (datastoreName) {
-                    var datastoreOption = document.createElement("option");
-                    datastoreOption.text = datastoreName;
-                    datastoreOption.setAttribute("value", datastoreName);
-                    $("#datastoreSelect").append(datastoreOption);
-                })
-            }
-        });
     </script>
 
 </head>
 <body>
 <div id="query">
-    <h4>Select a Datastore</h4>
-    <select id="datastoreSelect" class="dropdown">
-    </select>
     <h4>
         Enter a Query
     </h4>
@@ -66,11 +52,10 @@
     var table = new tables.Table('#results', {data: []});
     function submitter() {
         var query = $('#queryText').val();
-        var datastore = $('#datastoreSelect').val();
 
         neon.util.AjaxUtils.doPost(neon.query.SERVER_URL + "/services/languageservice/query",
                 {
-                    data: { text: query, datastore: datastore },
+                    data: { text: query },
                     success: function (data) {
                         $('#results').empty();
                         table = new tables.Table('#results', {data: data.data}).draw();

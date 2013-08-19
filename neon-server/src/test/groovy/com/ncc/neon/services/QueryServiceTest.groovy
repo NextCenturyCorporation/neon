@@ -168,20 +168,6 @@ class QueryServiceTest {
         assertKeyValue(array, 1, "notReplaced", "abc")
     }
 
-    @Test
-    void "set connection state"() {
-        def connectionStateMock = new MockFor(ConnectionState)
-        def expectedDatastore = "mockdatastore"
-        def expectedHostName = "mockhostname"
-        connectionStateMock.demand.createConnection { datastore, hostname ->
-            assert datastore == expectedDatastore; assert hostname == expectedHostName
-        }
-        def connectionState = connectionStateMock.proxyInstance()
-        queryService.connectionState = connectionState
-        queryService.connect(expectedDatastore,expectedHostName)
-        connectionStateMock.verify(connectionState)
-    }
-
     /**
      * Creates a mock query executor that simulates a getSelectionWhere and returns this json
      * @param filter
