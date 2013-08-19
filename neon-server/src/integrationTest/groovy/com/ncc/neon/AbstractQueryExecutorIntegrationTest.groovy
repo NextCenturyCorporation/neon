@@ -11,6 +11,7 @@ import com.ncc.neon.query.filter.FilterKey
 import com.ncc.neon.util.AssertUtils
 import org.json.JSONArray
 import org.json.JSONObject
+import org.junit.After
 import org.junit.Test
 import org.springframework.beans.factory.annotation.Autowired
 
@@ -139,6 +140,11 @@ abstract class AbstractQueryExecutorIntegrationTest {
         return list
     }
 
+    @After
+    void after() {
+        queryExecutor.clearFilters()
+    }
+
     @Test
     void "field names"() {
         def fieldNames = queryExecutor.getFieldNames(DATABASE_NAME, TABLE_NAME)
@@ -157,10 +163,9 @@ abstract class AbstractQueryExecutorIntegrationTest {
     void "query WHERE"() {
         def whereStateClause = new OrWhereClause(whereClauses: [new SingularWhereClause(lhs: 'state', operator: '=', rhs: 'VA'), new SingularWhereClause(lhs: 'state', operator: '=', rhs: 'DC')])
         def salaryAndStateClause = new AndWhereClause(whereClauses: [new SingularWhereClause(lhs: 'salary', operator: '>=', rhs: 100000), whereStateClause])
-
-        def filter = new Filter(databaseName: DATABASE_NAME, tableName: TABLE_NAME, whereClause: salaryAndStateClause)
         def expected = rows(0, 2, 4)
-        def result = queryExecutor.execute(new Query(filter: filter), false)
+        def query = createQueryWithWhereClause(salaryAndStateClause)
+        def result = queryExecutor.execute(query, false)
         assertUnorderedQueryResult(expected, result)
     }
 
@@ -257,11 +262,10 @@ abstract class AbstractQueryExecutorIntegrationTest {
     }
 
     @Test
-    @SuppressWarnings('MethodSize') // In this case, allow the long method because it is necessary to add a filter before removing the filter and having this all in one method maeks the test read more smoothly
-    void "apply and remove filter"() {
+    void "add filter"() {
         UUID uuid = UUID.randomUUID()
         def filterId = new FilterKey(uuid, DataSet.fromNames(DATABASE_NAME, TABLE_NAME))
-        def dcStateFilter = new Filter(databaseName: DATABASE_NAME, tableName: TABLE_NAME, whereClause: new SingularWhereClause(lhs: 'state', operator: '=', rhs: 'DC'))
+        def dcStateFilter = createFilterWithWhereClause(new SingularWhereClause(lhs: 'state', operator: '=', rhs: 'DC'))
 
         // apply a filter and make sure only that data is returned
         queryExecutor.addFilter(filterId, dcStateFilter)
@@ -269,28 +273,50 @@ abstract class AbstractQueryExecutorIntegrationTest {
         def dcStateRecords = rows(1, 2, 5)
         assertUnorderedQueryResult(dcStateRecords, dcStateResult)
 
-        // verify that if the query is supposed to include the filtered data, all data is returned
-        def allDataResult = queryExecutor.execute(ALL_DATA_QUERY, true)
-        assertUnorderedQueryResult(getAllData(), allDataResult)
-
         // apply another filter and make sure both are applied
-        def salaryId = new FilterKey(uuid, DataSet.fromNames(DATABASE_NAME, TABLE_NAME))
-        def salaryFilter = new Filter(databaseName: DATABASE_NAME, tableName: TABLE_NAME, whereClause: new SingularWhereClause(lhs: 'salary', operator: '>', rhs: 85000))
-        queryExecutor.addFilter(salaryId, salaryFilter)
+        def salaryFilter = createFilterWithWhereClause(new SingularWhereClause(lhs: 'salary', operator: '>', rhs: 85000))
+        queryExecutor.addFilter(filterId, salaryFilter)
 
         def dcStateWithSalaryFilterRecords = rows(2, 5)
         def dcStateWithSalaryResult = queryExecutor.execute(ALL_DATA_QUERY, false)
         assertUnorderedQueryResult(dcStateWithSalaryFilterRecords, dcStateWithSalaryResult)
+    }
+
+    @Test
+    void "remove filter"() {
+        // add some filters that can be removed (the add filters are tested separately)
+        UUID uuid = UUID.randomUUID()
+        def filterId = new FilterKey(uuid, DataSet.fromNames(DATABASE_NAME, TABLE_NAME))
+
+        def dcStateFilter = createFilterWithWhereClause(new SingularWhereClause(lhs: 'state', operator: '=', rhs: 'DC'))
+        queryExecutor.addFilter(filterId, dcStateFilter)
+
+        def salaryFilter = createFilterWithWhereClause(new SingularWhereClause(lhs: 'salary', operator: '>', rhs: 85000))
+        queryExecutor.addFilter(filterId, salaryFilter)
 
         queryExecutor.removeFilter(filterId)
-        allDataResult = queryExecutor.execute(ALL_DATA_QUERY, false)
+        def allDataResult = queryExecutor.execute(ALL_DATA_QUERY, false)
         assertUnorderedQueryResult(getAllData(), allDataResult)
     }
 
     @Test
+    void "ignore filters"() {
+        UUID uuid = UUID.randomUUID()
+        def filterId = new FilterKey(uuid, DataSet.fromNames(DATABASE_NAME, TABLE_NAME))
+        def dcStateFilter = createFilterWithWhereClause(new SingularWhereClause(lhs: 'state', operator: '=', rhs: 'DC'))
+
+        // apply a filter, but execute the query that bypasses the filters, so all data should be returned
+        queryExecutor.addFilter(filterId, dcStateFilter)
+        def allDataResult = queryExecutor.execute(ALL_DATA_QUERY, true)
+        assertUnorderedQueryResult(getAllData(), allDataResult)
+    }
+
+
+
+    @Test
     void "clear filters"() {
         def filterId = new FilterKey(UUID.randomUUID(), DataSet.fromNames(DATABASE_NAME, TABLE_NAME))
-        def dcStateFilter = new Filter(databaseName: DATABASE_NAME, tableName: TABLE_NAME, whereClause: new SingularWhereClause(lhs: 'state', operator: '=', rhs: 'DC'))
+        def dcStateFilter = createFilterWithWhereClause(new SingularWhereClause(lhs: 'state', operator: '=', rhs: 'DC'))
 
         // addFilter is tested separately, so we can be confident the filter is added properly
         queryExecutor.addFilter(filterId, dcStateFilter)
@@ -321,7 +347,7 @@ abstract class AbstractQueryExecutorIntegrationTest {
     @Test
     void "query WHERE less than"() {
         def whereLessThan = new SingularWhereClause(lhs: 'salary', operator: '<', rhs: 61000)
-        def query = new Query(filter: new Filter(databaseName: DATABASE_NAME, tableName: TABLE_NAME, whereClause: whereLessThan))
+        def query = createQueryWithWhereClause(whereLessThan)
 
         def expected = rows(3, 7)
         def result = queryExecutor.execute(query, false)
@@ -331,7 +357,7 @@ abstract class AbstractQueryExecutorIntegrationTest {
     @Test
     void "query WHERE less than or equal"() {
         def whereLessThanOrEqual = new SingularWhereClause(lhs: 'salary', operator: '<=', rhs: 60000)
-        def query = new Query(filter: new Filter(databaseName: DATABASE_NAME, tableName: TABLE_NAME, whereClause: whereLessThanOrEqual))
+        def query = createQueryWithWhereClause(whereLessThanOrEqual)
         def expected = rows(3, 7)
         def result = queryExecutor.execute(query, false)
         assertUnorderedQueryResult(expected, result)
@@ -340,7 +366,7 @@ abstract class AbstractQueryExecutorIntegrationTest {
     @Test
     void "query WHERE greater than"() {
         def whereGreaterThan = new SingularWhereClause(lhs: 'salary', operator: '>', rhs: 118000)
-        def query = new Query(filter: new Filter(databaseName: DATABASE_NAME, tableName: TABLE_NAME, whereClause: whereGreaterThan))
+        def query = createQueryWithWhereClause(whereGreaterThan)
         def expected = rows(2)
 
         def result = queryExecutor.execute(query, false)
@@ -350,7 +376,7 @@ abstract class AbstractQueryExecutorIntegrationTest {
     @Test
     void "query WHERE greater than or equal"() {
         def whereGreaterThanOrEqual = new SingularWhereClause(lhs: 'salary', operator: '>=', rhs: 118000)
-        def query = new Query(filter: new Filter(databaseName: DATABASE_NAME, tableName: TABLE_NAME, whereClause: whereGreaterThanOrEqual))
+        def query = createQueryWithWhereClause(whereGreaterThanOrEqual)
         def expected = rows(2, 4)
         def result = queryExecutor.execute(query, false)
         assertUnorderedQueryResult(expected, result)
@@ -359,7 +385,7 @@ abstract class AbstractQueryExecutorIntegrationTest {
     @Test
     void "query WHERE not equal"() {
         def whereNotEqual = new SingularWhereClause(lhs: 'state', operator: '!=', rhs: 'VA')
-        def query = new Query(filter: new Filter(databaseName: DATABASE_NAME, tableName: TABLE_NAME, whereClause: whereNotEqual))
+        def query = createQueryWithWhereClause(whereNotEqual)
         def expected = rows(1, 2, 5, 6)
         def result = queryExecutor.execute(query, false)
         assertUnorderedQueryResult(expected, result)
@@ -368,7 +394,7 @@ abstract class AbstractQueryExecutorIntegrationTest {
     @Test
     void "query WHERE IN"() {
         def whereIn = new SingularWhereClause(lhs: 'state', operator: 'in', rhs: ['MD', 'DC'])
-        def query = new Query(filter: new Filter(databaseName: DATABASE_NAME, tableName: TABLE_NAME, whereClause: whereIn))
+        def query = createQueryWithWhereClause(whereIn)
         def expected = rows(1, 2, 5, 6)
         def result = queryExecutor.execute(query, false)
         assertUnorderedQueryResult(expected, result)
@@ -376,8 +402,8 @@ abstract class AbstractQueryExecutorIntegrationTest {
 
     @Test
     void "query WHERE not IN"() {
-        def whereIn = new SingularWhereClause(lhs: 'state', operator: 'notin', rhs: ['VA', 'DC'])
-        def query = new Query(filter: new Filter(databaseName: DATABASE_NAME, tableName: TABLE_NAME, whereClause: whereIn))
+        def whereNotIn = new SingularWhereClause(lhs: 'state', operator: 'notin', rhs: ['VA', 'DC'])
+        def query = createQueryWithWhereClause(whereNotIn)
         def expected = rows(6)
         def result = queryExecutor.execute(query, false)
         assertUnorderedQueryResult(expected, result)
@@ -402,13 +428,13 @@ abstract class AbstractQueryExecutorIntegrationTest {
     @SuppressWarnings('MethodSize') // there is a lot of setup in this method but it is pretty straightforward and would be harder to read if extracted
     void "query group aggregates results"() {
         def whereClause1 = new SingularWhereClause(lhs: 'state', operator: '=', rhs: 'VA')
-        def query1 = new Query(filter: new Filter(databaseName: DATABASE_NAME, tableName: TABLE_NAME, whereClause: whereClause1))
+        def query1 = createQueryWithWhereClause(whereClause1)
 
         def whereClause2 = new SingularWhereClause(lhs: 'state', operator: '=', rhs: 'MD')
-        def query2 = new Query(filter: new Filter(databaseName: DATABASE_NAME, tableName: TABLE_NAME, whereClause: whereClause2))
+        def query2 = createQueryWithWhereClause(whereClause2)
 
         def whereClause3 = new SingularWhereClause(lhs: 'state', operator: '=', rhs: 'DC')
-        def query3 = new Query(filter: new Filter(databaseName: DATABASE_NAME, tableName: TABLE_NAME, whereClause: whereClause3))
+        def query3 = createQueryWithWhereClause(whereClause3)
 
         def queryGroup = new QueryGroup()
         queryGroup.namedQueries << new NamedQuery(name: 'Virginia', query: query1)
@@ -447,7 +473,6 @@ abstract class AbstractQueryExecutorIntegrationTest {
         def expected = readJson('groupByMonth.json')
         assertOrderedQueryResult(expected, result)
     }
-
 
     protected def assertOrderedQueryResult(expected, actual) {
         assertQueryResult(expected, actual, true)
@@ -518,6 +543,26 @@ abstract class AbstractQueryExecutorIntegrationTest {
         }
         data
     }
+
+    /**
+     * Utility method for creating a simple query that uses a filter that just sets up the database, table and where
+     * clause
+     * @param whereClause
+     * @return
+     */
+    private static def createQueryWithWhereClause(whereClause) {
+        return new Query(filter: createFilterWithWhereClause(whereClause))
+    }
+
+    /**
+     * Utility method for creating a simple filter that uses a filter that uses the specified where clasue
+     * @param whereClause
+     * @return
+     */
+    private static def createFilterWithWhereClause(whereClause) {
+        return new Filter(databaseName: DATABASE_NAME, tableName: TABLE_NAME, whereClause: whereClause)
+    }
+
 
     protected def getQueryExecutor() {
         return connectionState.queryExecutor

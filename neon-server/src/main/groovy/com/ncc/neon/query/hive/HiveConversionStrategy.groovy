@@ -95,8 +95,8 @@ class HiveConversionStrategy {
     }
 
 
-    private static String functionToString(FieldFunction func) {
-        return "${func.operation}(${escapeFieldName(func.field)}) as ${func.name}"
+    private static String functionToString(FieldFunction fieldFunction) {
+        return "${fieldFunction.operation}(${escapeFieldName(fieldFunction.field)}) as ${fieldFunction.name}"
     }
 
     private void applyWhereStatement(StringBuilder builder, Query query, boolean includeFiltersFromFilterState, Closure additionalWhereClauseGenerator) {

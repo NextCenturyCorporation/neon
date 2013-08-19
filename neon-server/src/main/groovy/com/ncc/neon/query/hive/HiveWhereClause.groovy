@@ -55,6 +55,27 @@ class HiveWhereClause {
         stringBuilder << formatRhs(clause.rhs)
     }
 
+    private String renderClause(BooleanWhereClause clause, String operator) {
+        stringBuilder << "("
+
+        clause.whereClauses.eachWithIndex { subClause, index ->
+            if (index > 0) {
+                stringBuilder << " " << operator << " "
+            }
+            renderClause(subClause)
+        }
+
+        stringBuilder << ")"
+    }
+
+    private String renderClause(AndWhereClause clause) {
+        renderClause(clause, "and")
+    }
+
+    private String renderClause(OrWhereClause clause) {
+        renderClause(clause, "or")
+    }
+
     private String formatOperator(operator) {
         // all operators translate directly from standard symbols except for notin
         return operator == "notin" ? "not in" : operator
@@ -76,24 +97,4 @@ class HiveWhereClause {
         return val
     }
 
-    private String renderClause(BooleanWhereClause clause, String operator) {
-        stringBuilder << "("
-
-        clause.whereClauses.eachWithIndex { subClause, index ->
-            if (index > 0) {
-                stringBuilder << " " << operator << " "
-            }
-            renderClause(subClause)
-        }
-
-        stringBuilder << ")"
-    }
-
-    private String renderClause(AndWhereClause clause) {
-        renderClause(clause, "and")
-    }
-
-    private String renderClause(OrWhereClause clause) {
-        renderClause(clause, "or")
-    }
 }

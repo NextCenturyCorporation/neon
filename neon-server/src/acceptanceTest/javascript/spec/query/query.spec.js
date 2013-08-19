@@ -148,10 +148,7 @@ describe('query mapping', function () {
 
     it('distinct fields', function () {
         var query = baseQuery().distinct().withFields('state').limit(2).sortBy('state',neon.query.ASCENDING);
-        var expectedData = [
-            {state: "DC"},
-            {state: "MD"}
-        ];
+        var expectedData = getJSONFixture('distinct_limit.json');
         assertQueryResults(query, expectedData);
     });
 
