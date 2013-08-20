@@ -39,7 +39,7 @@
 </head>
 <body>
 
-<div class="container">
+<div class="container chart-container">
 
 
     <div class="controls-row">
@@ -71,8 +71,8 @@
         </div>
     </div>
 
-    <div id="timeline">
-        <div id="chart"></div>
+    <div id="timeline" class="timeline-div">
+        <div id="chart" class="chart-div"></div>
     </div>
 
     <div class="controls-row">

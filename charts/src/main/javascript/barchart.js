@@ -85,8 +85,10 @@
 charts.BarChart = function (chartSelector, opts) {
     opts = opts || {};
     this.chartSelector_ = chartSelector;
-    this.height = opts.height || charts.BarChart.DEFAULT_HEIGHT_;
-    this.width = opts.width || charts.BarChart.DEFAULT_WIDTH_;
+
+    this.width = determineWidth(chartSelector, opts);
+    this.height = determineHeight(chartSelector, opts);
+
     this.xAttribute_ = opts.x;
     this.xLabel_ = opts.xLabel || this.determineXLabel_();
     this.yAttribute_ = opts.y;
@@ -114,6 +116,25 @@ charts.BarChart = function (chartSelector, opts) {
     this.xAxis_ = this.createXAxis_();
     this.yAxis_ = this.createYAxis_();
     this.style_ = $.extend({}, charts.BarChart.DEFAULT_STYLE_, opts.style);
+
+    function determineWidth(chartSelector, opts){
+        if(opts.width) {
+            return opts.width;
+        }
+        else if ($(chartSelector).width() !== 0){
+            return $(chartSelector).width();
+        }
+        return charts.BarChart.DEFAULT_WIDTH_;
+    }
+    function determineHeight(chartSelector, opts){
+        if(opts.height) {
+            return opts.height;
+        }
+        else if ($(chartSelector).height() !== 0){
+            return $(chartSelector).height();
+        }
+        return charts.BarChart.DEFAULT_HEIGHT_;
+    }
 };
 
 charts.BarChart.DEFAULT_HEIGHT_ = 400;
@@ -280,6 +301,7 @@ charts.BarChart.createYAxisTickFormat_ = function () {
  * @return {charts.BarChart} This bar chart
  */
 charts.BarChart.prototype.draw = function () {
+    $(this.chartSelector_).empty();
     var chart = this.drawChartSVG_();
     this.bindData_(chart);
     this.drawXAxis_(chart);
@@ -288,6 +310,9 @@ charts.BarChart.prototype.draw = function () {
 };
 
 charts.BarChart.prototype.drawChartSVG_ = function () {
+    console.log("Width " + (this.plotWidth + this.hMargin_));
+    console.log("Height " + (this.height));
+
     var chart = d3.select(this.chartSelector_)
         .append('svg')
         .attr('id', 'plot')

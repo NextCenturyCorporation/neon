@@ -36,7 +36,7 @@
 </head>
 <body>
 
-<div class="container">
+<div class="container chart-container">
 
 
     <div class="controls-row">
@@ -58,7 +58,7 @@
     </div>
 
 
-    <div id="chart"></div>
+    <div id="chart" class="chart-div"></div>
 
 
 </div>
