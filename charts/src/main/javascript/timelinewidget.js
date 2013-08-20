@@ -137,14 +137,14 @@ $(document).ready(function () {
 
             var granularity = $('#time-granularity option:selected').val();
             var opts = { "data": dataByDate, "x": xAttr, "y": yAttr,
-                "interval": granularity, width: 600, height: 400};
+                "interval": granularity};
 
 
             var timeline = new charts.Timeline('#chart', opts);
             configureFiltering(timeline, xAttr);
             timeline.draw();
             // make sure the reset button is aligned with the chart and has some spacing between it and the chart
-            $('#button-row').css({'margin-left': timeline.margin.left + 'px', 'margin-top': '20px'});
+            $('#button-row').css({'margin-left': timeline.margin.left + 'px', 'margin-top': '30px'});
         }
 
         function configureFiltering(timeline, xAttr) {
