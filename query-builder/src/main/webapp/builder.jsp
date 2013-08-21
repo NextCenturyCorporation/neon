@@ -25,6 +25,7 @@
     <script src="tables.js"></script>
     <script src="jquery/jquery-1.10.1.min.js"></script>
     <script src="jquery-resize/jquery.ba-resize-1.1.min.js"></script>
+    <script src="jquery-resize/jquery.autosize-min.js"></script>
     <script src="builder.js"></script>
     <!-- endbuild -->
 
@@ -41,6 +42,10 @@
         Enter a Query
     </h4>
     <textarea id="queryText" cols="80" rows="3"></textarea>
+    <script type="text/javascript">
+        $('#queryText').autosize();
+        $('#queryText').val('').trigger('autosize.resize');
+    </script>
     <br/><br/>
     <button id="submit" class="btn" onclick="submitter();">Submit</button>
     <br/><br/>

@@ -42,6 +42,9 @@ html, body {
     min-height: 200px;
 }
 
+#queryText {
+}
+
 .dropdown {
     background-color: silver;
     color: black;
