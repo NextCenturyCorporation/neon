@@ -39,7 +39,7 @@
         {{#data}}
         <div class="controls controls-row">
 
-            <div class="asdf">
+            <div class="filter-dropdown">
                 <div class="controls">
                     <select id="column-select-{{@index}}" class="dropdown" style="width:100%">
                         <option value="">Select Column...</option>
@@ -64,7 +64,7 @@
                 </div>
             </div>
 
-            <div class="asdf">
+            <div class="filter-dropdown">
                 <div class="controls">
                     {{#escapeQuotes value}}
                     <input type="text" id="value-input-{{@index}}" value="{{value}}" class="textfield" style="width:90%"/>
