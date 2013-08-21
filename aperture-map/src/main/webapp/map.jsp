@@ -16,7 +16,6 @@
     <script src="<%=neonServerUrl%>/js/neon.js"></script>
 
     <script src="js/aperture-map.js"></script>
-    <script src="jquery/jquery-tabs.js"></script>
 
     <script>
         OWF.relayFile = 'js/eventing/rpc_relay.uncompressed.html';
@@ -24,59 +23,43 @@
         neon.util.AjaxUtils.useDefaultStartStopCallbacks();
     </script>
 
-    <script type=text/javascript>
-        $(function() {
-            $('#tabs').tabs({collapsible: true});
-        });
-    </script>
-
-
 </head>
 <body>
 
 
-    <div id="tabs">
-            <div class="controls-row">
+    <div class="controls-row">
 
-                <div class="control-group">
-                    <ul>
-                        <li><a href="#tabs-1" class="btn btn-mini" id="options">Options</a></li>
-                    </ul>
+        <div id="tabs-1">
+            <div class="control-group">
+                <label class="control-label" for="latitude">Latitude Field</label>
+
+                <div class="controls">
+                    <select id="latitude" class="dropdown"></select>
                 </div>
-
-                <div id="tabs-1">
-                    <div class="control-group">
-                        <label class="control-label" for="latitude">Latitude Field</label>
-
-                        <div class="controls">
-                            <select id="latitude" class="dropdown"></select>
-                        </div>
-                    </div>
-
-                    <div class="control-group">
-                        <label class="control-label" for="longitude">Longitude Field</label>
-
-                        <div class="controls">
-                            <select id="longitude" class="dropdown"></select>
-                        </div>
-                    </div>
-                    <div class="control-group">
-                        <label class="control-label" for="size-by">Size By</label>
-
-                        <div class="controls">
-                            <select id="size-by" class="dropdown"></select>
-                        </div>
-                    </div>
-
-                    <div class="control-group">
-                        <label class="control-label" for="color-by">Color By</label>
-
-                        <div class="controls">
-                            <select id="color-by" class="dropdown"></select>
-                        </div>
-                    </div>
             </div>
-        </div>
+
+            <div class="control-group">
+                <label class="control-label" for="longitude">Longitude Field</label>
+
+                <div class="controls">
+                    <select id="longitude" class="dropdown"></select>
+                </div>
+            </div>
+            <div class="control-group">
+                <label class="control-label" for="size-by">Size By</label>
+
+                <div class="controls">
+                    <select id="size-by" class="dropdown"></select>
+                </div>
+            </div>
+
+            <div class="control-group">
+                <label class="control-label" for="color-by">Color By</label>
+
+                <div class="controls">
+                    <select id="color-by" class="dropdown"></select>
+                </div>
+            </div>
     </div>
 
     <div id="map"></div>

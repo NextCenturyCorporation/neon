@@ -28,30 +28,8 @@ img {
 html, body {
     height: 100%;
     width: 100%;
-    padding: 0;
+    padding: 10px;
     margin: 0;
     background-color: black;
     color: white;
-}
-
-ul {
-    list-style-type: none;
-}
-
-#tabs-1 {
-    position: fixed;
-    top: 10px;
-    left: 75px;
-}
-
-#options {
-    position: fixed;
-    top: 39px;
-    left: 10px;
-}
-
-#map {
-    position: fixed;
-    top: 80px;
-    left: 80px;
 }
