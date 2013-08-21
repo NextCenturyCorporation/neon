@@ -5,6 +5,7 @@
 .dropdown {
     background-color: silver;
     color: black;
+    width: 200px;
 }
 
 .container {
@@ -35,4 +36,22 @@ html, body {
 
 ul {
     list-style-type: none;
+}
+
+#tabs-1 {
+    position: fixed;
+    top: 10px;
+    left: 75px;
+}
+
+#options {
+    position: fixed;
+    top: 39px;
+    left: 10px;
+}
+
+#map {
+    position: fixed;
+    top: 80px;
+    left: 80px;
 }

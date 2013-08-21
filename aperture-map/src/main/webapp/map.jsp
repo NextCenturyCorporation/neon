@@ -34,51 +34,53 @@
 </head>
 <body>
 
-<div class="container">
 
     <div id="tabs">
-        <ul>
-            <li><a href="#tabs-1" class="btn">Options</a></li>
-        </ul>
-        <div id="tabs-1">
-            <div class="controls-row" id=>
-                <div class="control-group">
-                    <label class="control-label" for="latitude">Latitude Field</label>
-
-                    <div class="controls">
-                        <select id="latitude" class="dropdown"></select>
-                    </div>
-                </div>
+            <div class="controls-row">
 
                 <div class="control-group">
-                    <label class="control-label" for="longitude">Longitude Field</label>
-
-                    <div class="controls">
-                        <select id="longitude" class="dropdown"></select>
-                    </div>
-                </div>
-                <div class="control-group">
-                    <label class="control-label" for="size-by">Size By</label>
-
-                    <div class="controls">
-                        <select id="size-by" class="dropdown"></select>
-                    </div>
+                    <ul>
+                        <li><a href="#tabs-1" class="btn btn-mini" id="options">Options</a></li>
+                    </ul>
                 </div>
 
-                <div class="control-group">
-                    <label class="control-label" for="color-by">Color By</label>
+                <div id="tabs-1">
+                    <div class="control-group">
+                        <label class="control-label" for="latitude">Latitude Field</label>
 
-                    <div class="controls">
-                        <select id="color-by" class="dropdown"></select>
+                        <div class="controls">
+                            <select id="latitude" class="dropdown"></select>
+                        </div>
                     </div>
-                </div>
+
+                    <div class="control-group">
+                        <label class="control-label" for="longitude">Longitude Field</label>
+
+                        <div class="controls">
+                            <select id="longitude" class="dropdown"></select>
+                        </div>
+                    </div>
+                    <div class="control-group">
+                        <label class="control-label" for="size-by">Size By</label>
+
+                        <div class="controls">
+                            <select id="size-by" class="dropdown"></select>
+                        </div>
+                    </div>
+
+                    <div class="control-group">
+                        <label class="control-label" for="color-by">Color By</label>
+
+                        <div class="controls">
+                            <select id="color-by" class="dropdown"></select>
+                        </div>
+                    </div>
             </div>
         </div>
     </div>
 
     <div id="map"></div>
 
-</div>
 
 </body>
 </html>
