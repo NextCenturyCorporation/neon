@@ -39,9 +39,9 @@
         {{#data}}
         <div class="controls controls-row">
 
-            <div class="control-group">
+            <div class="asdf">
                 <div class="controls">
-                    <select id="column-select-{{@index}}" class="dropdown span2">
+                    <select id="column-select-{{@index}}" class="dropdown" style="width:100%">
                         <option value="">Select Column...</option>
                         {{#select columnValue}}
                         {{#columnOptions}}
@@ -64,10 +64,10 @@
                 </div>
             </div>
 
-            <div class="control-group">
+            <div class="asdf">
                 <div class="controls">
                     {{#escapeQuotes value}}
-                    <input type="text" id="value-input-{{@index}}" value="{{value}}" class="textfield span1"/>
+                    <input type="text" id="value-input-{{@index}}" value="{{value}}" class="textfield" style="width:90%"/>
                     {{/escapeQuotes}}
                 </div>
             </div>
@@ -103,7 +103,7 @@
 
 </head>
 <body>
-<div class="container">
+
     <div id="datastore-container">
         <h4>Connection</h4>
         <div class="controls-row">
@@ -184,7 +184,7 @@
             </label>
         </div>
     </div>
-</div>
+
 
 </body>
 </html>

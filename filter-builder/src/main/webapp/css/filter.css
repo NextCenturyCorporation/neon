@@ -27,6 +27,12 @@ html, body {
     color: white;
 }
 
+.asdf{
+    display: inline-block;
+    vertical-align: top;
+    width:30%;
+}
+
 .control-group {
     display: inline-block;
     vertical-align: top;
@@ -41,7 +47,7 @@ html, body {
     display: inline;
 }
 
-#datastore-container, #db-table, #filter-container {
+#datastore-container, #db-table{
     border: 1px solid white;
     border-radius: 10px;
     padding: 0 0 10px 10px;
@@ -51,6 +57,11 @@ html, body {
 }
 
 #filter-container {
+    border: 1px solid white;
+    border-radius: 10px;
+    padding: 0 0 10px 10px;
+    margin: 5px 0 5px 0;
+    width: 70%;
     height: auto;
 }
 
