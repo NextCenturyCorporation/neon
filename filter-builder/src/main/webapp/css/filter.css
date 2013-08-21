@@ -63,6 +63,7 @@ html, body {
     margin: 5px 0 5px 0;
     width: 70%;
     height: auto;
+    min-width: 395px;
 }
 
 #update-filter-button, #remove-filter-button {
