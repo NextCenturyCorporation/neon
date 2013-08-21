@@ -41,10 +41,12 @@
     <h4>
         Enter a Query
     </h4>
-    <textarea id="queryText" cols="80" rows="3"></textarea>
+    <textarea id="queryText" rows="3"></textarea>
     <script type="text/javascript">
+        $(function() {
         $('#queryText').autosize();
         $('#queryText').val('').trigger('autosize.resize');
+        });
     </script>
     <br/><br/>
     <button id="submit" class="btn" onclick="submitter();">Submit</button>

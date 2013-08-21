@@ -43,6 +43,7 @@ html, body {
 }
 
 #queryText {
+    width: 95%;
 }
 
 .dropdown {
