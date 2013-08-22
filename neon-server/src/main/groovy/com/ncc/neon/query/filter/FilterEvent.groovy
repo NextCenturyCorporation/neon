@@ -25,7 +25,10 @@ import groovy.transform.ToString
  * RECIPIENT IS UNDER OBLIGATION TO MAINTAIN SECRECY.
  */
 
-@ToString
+/**
+ * This class is sent to the client as JSON and so uses the raw String uuid,
+ */
+@ToString(includeNames = true)
 class FilterEvent {
 
     String uuid

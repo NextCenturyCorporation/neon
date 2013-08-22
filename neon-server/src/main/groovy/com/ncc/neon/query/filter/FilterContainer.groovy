@@ -27,7 +27,7 @@ import groovy.transform.ToString
  * @author tbrooks
  */
 
-@ToString
+@ToString(includeNames = true)
 class FilterContainer {
 
     FilterKey filterKey
