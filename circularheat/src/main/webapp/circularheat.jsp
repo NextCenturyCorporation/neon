@@ -27,17 +27,45 @@
         neon.util.AjaxUtils.useDefaultStartStopCallbacks();
     </script>
 
+    <script>
+        $(document).ready(function() {
+            $("#toggle").click(function () {
+                $("#options").slideToggle("slow");
+
+                if ($("#toggle-image").attr('src') == "img/arrow_down.png") {
+                    $("#toggle-image").attr(
+                            'src',
+                            $("#toggle-image").attr('src').replace('_down', '_right')
+                    );
+                } else {
+                    $("#toggle-image").attr(
+                            'src',
+                            $("#toggle-image").attr('src').replace('_right', '_down')
+                    );
+                }
+            });
+        });
+    </script>
+
 </head>
 <body>
 
 <div class="container">
 
-    <div class="controls-row">
-        <div class="control-group">
-            <label class="control-label" for="date">Date</label>
+    <div id="options-bar">
+        <div id="toggle">
+            <img id="toggle-image" src="img/arrow_down.png" />
+        </div>
 
-            <div class="controls">
-                <select id="date" class="dropdown"></select>
+        <div id="options">
+            <div class="controls-row">
+                <div class="control-group">
+                    <label class="control-label" for="date">Date</label>
+
+                    <div class="controls">
+                        <select id="date" class="dropdown"></select>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
@@ -45,7 +73,6 @@
     <div id="circularheatchart"></div>
 
 </div>
-
 
 </body>
 </html>

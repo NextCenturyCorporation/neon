@@ -25,3 +25,32 @@ html, body {
     background-color: black;
     color: white;
 }
+
+#toggle {
+    background-color: #f0f0f0;
+    width: 30px;
+    height: 30px;
+    border-radius: 5px;
+}
+
+#options {
+    background-color:#f0f0f0;
+    color: black;
+    padding-left: 5px;
+    padding-top: 5px;
+    border-radius: 15px;
+    width: 225px;
+}
+
+#toggle-image {
+    height: 30px;
+    width: 30px;
+}
+
+#options-bar {
+    position: absolute;
+    top: 20px;
+    left: 20px;
+    z-index: 2000;
+    opacity: .9;
+}

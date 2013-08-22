@@ -40,49 +40,67 @@
         neon.util.AjaxUtils.useDefaultStartStopCallbacks();
     </script>
 
+    <script>
+        $(document).ready(function() {
+            $("#toggle").click(function () {
+                $("#options").slideToggle("slow");
+
+                if ($("#toggle-image").attr('src') == "img/arrow_down.png") {
+                    $("#toggle-image").attr(
+                            'src',
+                            $("#toggle-image").attr('src').replace('_down', '_right')
+                    );
+                } else {
+                    $("#toggle-image").attr(
+                            'src',
+                            $("#toggle-image").attr('src').replace('_right', '_down')
+                    );
+                }
+            });
+        });
+    </script>
+
 
 </head>
 <body>
-<div class="container">
 
-    <div id="controls">
-
-        <div class="controls-row">
-            <div class="control-group">
-                <label class="control-label" for="limit">Limit</label>
-
-                <div class="controls">
-                    <input id="limit" type="number" min="1" value="500">
-                </div>
-            </div>
+    <div id="options-bar">
+        <div id="toggle">
+            <img id="toggle-image" src="img/arrow_down.png" />
         </div>
 
+        <div id="options">
+            <div class="controls-row">
+                <div class="control-group">
+                    <label class="control-label" for="limit">Limit</label>
 
-        <div class="controls-row">
-            <div class="control-group">
-
-                <label class="control-label" for="sort-field">Sort</label>
-
-                <div id="sort-controls" class="controls-row input-append">
-
-                    <select id="sort-field" class="dropdown"></select>
-
-                    <div class="btn-group" data-toggle="buttons-radio">
-                        <button id="sort-ascending" type="button" data-toggle="button" class="btn">Ascending
-                        </button>
-                        <button id="sort-descending" type="button" data-toggle="button" class="btn">Descending
-                        </button>
+                    <div class="controls">
+                        <input id="limit" type="number" min="1" value="500">
                     </div>
+                </div>
 
-                    <input id="sort-direction" type="hidden"/>
+                <div class="control-group">
+                    <label class="control-label" for="sort-field">Sort</label>
+
+                    <div id="sort-controls" class="controls-row input-append">
+
+                        <select id="sort-field" class="dropdown"></select>
+
+                        <div class="btn-group" data-toggle="buttons-radio">
+                            <button id="sort-ascending" type="button" data-toggle="button" class="btn">Ascending
+                            </button>
+                            <button id="sort-descending" type="button" data-toggle="button" class="btn">Descending
+                            </button>
+                        </div>
+
+                        <input id="sort-direction" type="hidden"/>
+                    </div>
                 </div>
             </div>
         </div>
-
     </div>
 
     <div id="table"></div>
-</div>
 
 </body>
 </html>
