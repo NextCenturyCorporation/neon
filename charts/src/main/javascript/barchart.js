@@ -310,9 +310,6 @@ charts.BarChart.prototype.draw = function () {
 };
 
 charts.BarChart.prototype.drawChartSVG_ = function () {
-    console.log("Width " + (this.plotWidth + this.hMargin_));
-    console.log("Height " + (this.height));
-
     var chart = d3.select(this.chartSelector_)
         .append('svg')
         .attr('id', 'plot')

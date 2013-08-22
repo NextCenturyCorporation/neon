@@ -113,7 +113,6 @@
             var database = $('#database-select').val();
             var table = $('#table-select').val();
             var message = { "database" : database, "table" : table };
-            neon.filter.clearFilter();
             neon.filter.grid(columns);
             messageHandler.publishMessage(neon.eventing.Channels.FILTERS_CHANGED, message);
         });

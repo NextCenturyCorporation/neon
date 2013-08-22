@@ -135,10 +135,6 @@ neon.filter = (function () {
         redrawTemplateFromData();
     };
 
-    var clearFilter = function(){
-        filterId = undefined;
-    };
-
     var setFilterKey = function(key){
         filterKey = key;
     };
@@ -146,7 +142,6 @@ neon.filter = (function () {
     return {
         addFilter: addFilter,
         removeFilter: removeFilter,
-        clearFilter: clearFilter,
         setFilterKey: setFilterKey,
         grid: grid
     };
