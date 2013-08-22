@@ -111,6 +111,20 @@ class QueryServiceTest {
     }
 
     @Test
+    void "replace filter"() {
+        // arbitrary string (but constant for each test run)
+        def filter = new Filter(databaseName: dataSet.databaseName, tableName: dataSet.tableName)
+        def queryExecutorMock = new MockFor(QueryExecutor)
+        queryExecutorMock.demand.removeFilter { key -> assert key == filterKey }
+        queryExecutorMock.demand.addFilter { key, f -> assert key == filterKey; f.is(filter)}
+        def queryExecutor = queryExecutorMock.proxyInstance()
+        setQueryServiceConnection(queryExecutor)
+
+        queryService.replaceFilter(new FilterContainer(filterKey: filterKey, filter: filter))
+        queryExecutorMock.verify(queryExecutor)
+    }
+
+    @Test
     void "get selection WHERE"() {
         def inputJson = /[ { "key1" : "val1" }, { "key2": "val2" }]/
 

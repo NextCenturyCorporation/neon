@@ -149,7 +149,7 @@ class HiveConversionStrategy {
 
     private def createWhereClausesForFilters(query) {
         def whereClauses = []
-        def filters = filterState.getFiltersForDataset(DataSet.fromNames(query.databaseName, query.tableName))
+        def filters = filterState.getFiltersForDataset(new DataSet(databaseName: query.databaseName, tableName: query.tableName))
         if (!filters.isEmpty()) {
             filters.each {
                 whereClauses << it.whereClause

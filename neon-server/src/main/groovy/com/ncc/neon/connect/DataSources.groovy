@@ -26,8 +26,7 @@ package com.ncc.neon.connect
  * @author tbrooks
  */
 
-class DataSources {
-    static final String MONGO = "mongo"
-    static final String HIVE = "hive"
+enum DataSources {
+    mongo, hive
 
 }

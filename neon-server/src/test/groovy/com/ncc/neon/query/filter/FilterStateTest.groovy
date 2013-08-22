@@ -31,7 +31,7 @@ import org.junit.Test
 class FilterStateTest {
 
     private static final String UUID_STRING = "84bc5064-c837-483b-8454-c8c72abe45f8"
-    FilterState filterState
+    private FilterState filterState
     private FilterKey filterKey
     private DataSet dataSet
 

@@ -56,7 +56,7 @@ class HiveQueryExecutorIntegrationTest extends AbstractQueryExecutorIntegrationT
 
     @BeforeClass
     static void beforeClass() {
-        jdbcClient = new HiveConnection().connect(new ConnectionInfo(connectionUrl: HiveIntegrationTestContext.HOST_STRING, dataStoreName: DataSources.HIVE))
+        jdbcClient = new HiveConnection().connect(new ConnectionInfo(connectionUrl: HiveIntegrationTestContext.HOST_STRING, dataStoreName: DataSources.hive.name()))
         // make sure we clean up just in case something was left over
         deleteData()
         insertData()

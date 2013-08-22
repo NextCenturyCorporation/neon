@@ -2,10 +2,11 @@ var neon = neon || {};
 neon.filter = (function () {
 
     var messageHandler = {
-        publishMessage: function(){}
+        publishMessage: function () {
+        }
     };
 
-    if(typeof (OWF) !== "undefined"){
+    if (typeof (OWF) !== "undefined") {
         OWF.ready(function () {
             messageHandler = new neon.eventing.MessageHandler();
         });
@@ -14,7 +15,7 @@ neon.filter = (function () {
     var filterKey;
     var columnOptions;
 
-    var operatorOptions = ["=","!=",">","<",">=","<="];
+    var operatorOptions = ["=", "!=", ">", "<", ">=", "<="];
 
     var FilterRow = function (columnValue, operatorValue, value) {
         this.columnOptions = columnOptions;
@@ -34,8 +35,8 @@ neon.filter = (function () {
         updateDataFromForm(id);
         var filter = buildFilterFromData();
 
-        neon.query.replaceFilter(filterKey, filter, function(){
-            if(!updatingExisting){
+        neon.query.replaceFilter(filterKey, filter, function () {
+            if (!updatingExisting) {
                 filterState.data.push(new FilterRow());
             }
             messageHandler.publishMessage(neon.eventing.Channels.FILTERS_CHANGED, {});
@@ -47,7 +48,7 @@ neon.filter = (function () {
         filterState.data.splice(id, 1);
         var filter = buildFilterFromData();
 
-        neon.query.replaceFilter(filterKey, filter, function(){
+        neon.query.replaceFilter(filterKey, filter, function () {
             messageHandler.publishMessage(neon.eventing.Channels.FILTERS_CHANGED, {});
             redrawTemplateFromData();
         });
@@ -79,7 +80,7 @@ neon.filter = (function () {
         var data = getSubmittableData();
 
         var whereClause;
-        if(data.length === 0){
+        if (data.length === 0) {
             return baseFilter;
         }
         if (data.length === 1) {
@@ -135,7 +136,7 @@ neon.filter = (function () {
         redrawTemplateFromData();
     };
 
-    var setFilterKey = function(key){
+    var setFilterKey = function (key) {
         filterKey = key;
     };
 
@@ -157,8 +158,8 @@ $(function () {
     });
     Handlebars.registerHelper('escapeQuotes', function (context, options) {
         var el = $('<div/>').html(options.fn(this));
-        if(context === ""){
-            el.find('input').attr('value','""');
+        if (context === "") {
+            el.find('input').attr('value', '""');
         }
         return el.html();
     });

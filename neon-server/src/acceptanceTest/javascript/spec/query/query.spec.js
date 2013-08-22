@@ -147,7 +147,7 @@ describe('query mapping', function () {
     });
 
     it('distinct fields', function () {
-        var query = baseQuery().distinct().withFields('state').limit(2).sortBy('state',neon.query.ASCENDING);
+        var query = baseQuery().distinct().withFields('state').limit(2).sortBy('state', neon.query.ASCENDING);
         var expectedData = getJSONFixture('distinct_limit.json');
         assertQueryResults(query, expectedData);
     });
@@ -237,7 +237,7 @@ describe('query mapping', function () {
                         expectedData = rows(2, 5);
                         assertQueryResults(baseQuery(), expectedData);
                         runs(function () {
-                            // remove each filter and re-execute the queries
+                            // remove the filter key and re-execute the query
                             executeAndWait(neon.query.removeFilter, filterKey);
                             runs(function () {
                                 assertQueryResults(baseQuery(), allData);
@@ -255,6 +255,32 @@ describe('query mapping', function () {
             executeAndWait(neon.query.clearFilters);
             runs(function () {
                 assertQueryResults(baseQuery(), allData);
+            });
+        });
+    });
+
+    it('replace filter', function () {
+        executeAndWait(neon.query.replaceFilter, filterKey, dcStateFilter);
+        runs(function () {
+            var expectedData = rows(1, 2, 5);
+            assertQueryResults(baseQuery(), expectedData);
+
+            runs(function () {
+                // replace filter and make sure new one is applied.
+                var salaryFilter = baseFilter().where('salary', '>', 85000);
+                executeAndWait(neon.query.replaceFilter, filterKey, salaryFilter);
+                runs(function () {
+                    expectedData = rows(0, 2, 4, 5, 6);
+                    assertQueryResults(baseQuery(), expectedData);
+                    runs(function () {
+                        // remove the filter key and re-execute the query
+                        executeAndWait(neon.query.removeFilter, filterKey);
+                        runs(function () {
+                            assertQueryResults(baseQuery(), allData);
+                        });
+                    });
+                });
+
             });
         });
     });
@@ -519,7 +545,7 @@ describe('query mapping', function () {
         return new neon.query.Filter().selectFrom(databaseName, tableName);
     }
 
-    function createFilterKey(){
+    function createFilterKey() {
         return {
             uuid: "84bc5064-c837-483b-8454-c8c72abe45f8",
             dataSet: {

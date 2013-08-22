@@ -32,7 +32,7 @@ $(document).ready(function () {
 
         // instantiating the message handler adds it as a listener
         var messageHandler = new neon.eventing.MessageHandler({
-            activeDatasetChanged: onDatasetChanged,
+            activeDatasetChanged: onActiveDatasetChanged,
             filtersChanged: onFiltersChanged
         });
         var eventPublisher = new neon.eventing.OWFEventPublisher(messageHandler);
@@ -41,7 +41,7 @@ $(document).ready(function () {
             redrawMap();
         }
 
-        function onDatasetChanged(message) {
+        function onActiveDatasetChanged(message) {
             databaseName = message.database;
             tableName = message.table;
             neon.query.registerForFilterKey(databaseName, tableName, function(filterResponse){

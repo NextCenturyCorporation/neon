@@ -71,10 +71,10 @@ class ConnectionState implements Serializable {
 
     private void setupConnection(ConnectionInfo info) {
         switch (info.dataStoreName) {
-            case DataSources.MONGO:
+            case DataSources.mongo.name():
                 connection = new MongoConnection()
                 break
-            case DataSources.HIVE:
+            case DataSources.hive.name():
                 connection = new HiveConnection()
                 break
             default:

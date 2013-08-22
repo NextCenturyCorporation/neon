@@ -483,8 +483,8 @@ neon.query.buildQueryParamsString_ = function (query, transform) {
 /**
  * Registers for a filter key and fires the callback when complete
  * @method registerForFilterKey
- * @param databaseName The database name against which the filter is registered
- * @param tableName The table name against which the filter is registered
+ * @param {String} databaseName The database name against which the filter is registered
+ * @param {String} tableName The table name against which the filter is registered
  * @param {Function} successCallback The callback to fire when registration succeeds
  * @param {Function} [errorCallback] The optional callback when an error occurs. This is a 3 parameter function that contains the xhr, a short error status and the full error message.
  * @returns {neon.util.AjaxRequest} The xhr request object
@@ -510,8 +510,8 @@ neon.query.registerForFilterKey = function(databaseName, tableName, successCallb
 /**
  * Adds a filter to the data and fires the callback when complete
  * @method addFilter
- * @param filterKey The object returned when registering the filter must be used here
- * @param filter The filter to be added
+ * @param {Object} filterKey The object returned when registering the filter must be used here
+ * @param {neon.query.Filter} filter The filter to be added
  * @param {Function} successCallback The callback to fire when the filter is added
  * @param {Function} [errorCallback] The optional callback when an error occurs. This is a 3 parameter function that contains the xhr, a short error status and the full error message.
  * @return {neon.util.AjaxRequest} The xhr request object
@@ -535,7 +535,7 @@ neon.query.addFilter = function (filterKey, filter, successCallback, errorCallba
 /**
  * Removes a filter from the data and fires the callback when complete
  * @method removeFilter
- * @param filterKey The object returned when registering the filter must be used here
+ * @param {Object} filterKey The object returned when registering the filter must be used here
  * @param {Function} successCallback The callback to fire when the filter is removed
  * @param {Function} [errorCallback] The optional callback when an error occurs. This is a 3 parameter function that contains the xhr, a short error status and the full error message.
  * @return {neon.util.AjaxRequest} The xhr request object
@@ -554,8 +554,8 @@ neon.query.removeFilter = function (filterKey, successCallback, errorCallback) {
 /**
  * Replaces a filter and fires the callback when complete
  * @method replaceFilter
- * @param filterKey The object returned when registering the filter must be used here
- * @param filter The filter that is a replacement for the previous filter
+ * @param {Object} filterKey The object returned when registering the filter must be used here
+ * @param {neon.query.Filter} filter The filter that is a replacement for the previous filter
  * @param {Function} successCallback The callback to fire when the replacement is complete
  * @param {Function} [errorCallback] The optional callback when an error occurs. This is a 3 parameter function that contains the xhr, a short error status and the full error message.
  * @return {neon.util.AjaxRequest} The xhr request object

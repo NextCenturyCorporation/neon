@@ -264,7 +264,7 @@ abstract class AbstractQueryExecutorIntegrationTest {
     @Test
     void "add filter"() {
         UUID uuid = UUID.randomUUID()
-        def filterId = new FilterKey(uuid, DataSet.fromNames(DATABASE_NAME, TABLE_NAME))
+        def filterId = new FilterKey(uuid, new DataSet(databaseName: DATABASE_NAME, tableName:  TABLE_NAME))
         def dcStateFilter = createFilterWithWhereClause(new SingularWhereClause(lhs: 'state', operator: '=', rhs: 'DC'))
 
         // apply a filter and make sure only that data is returned
@@ -286,7 +286,7 @@ abstract class AbstractQueryExecutorIntegrationTest {
     void "remove filter"() {
         // add some filters that can be removed (the add filters are tested separately)
         UUID uuid = UUID.randomUUID()
-        def filterId = new FilterKey(uuid, DataSet.fromNames(DATABASE_NAME, TABLE_NAME))
+        def filterId = new FilterKey(uuid, new DataSet(databaseName: DATABASE_NAME, tableName:  TABLE_NAME))
 
         def dcStateFilter = createFilterWithWhereClause(new SingularWhereClause(lhs: 'state', operator: '=', rhs: 'DC'))
         queryExecutor.addFilter(filterId, dcStateFilter)
@@ -302,7 +302,7 @@ abstract class AbstractQueryExecutorIntegrationTest {
     @Test
     void "ignore filters"() {
         UUID uuid = UUID.randomUUID()
-        def filterId = new FilterKey(uuid, DataSet.fromNames(DATABASE_NAME, TABLE_NAME))
+        def filterId = new FilterKey(uuid, new DataSet(databaseName: DATABASE_NAME, tableName:  TABLE_NAME))
         def dcStateFilter = createFilterWithWhereClause(new SingularWhereClause(lhs: 'state', operator: '=', rhs: 'DC'))
 
         // apply a filter, but execute the query that bypasses the filters, so all data should be returned
@@ -315,7 +315,7 @@ abstract class AbstractQueryExecutorIntegrationTest {
 
     @Test
     void "clear filters"() {
-        def filterId = new FilterKey(UUID.randomUUID(), DataSet.fromNames(DATABASE_NAME, TABLE_NAME))
+        def filterId = new FilterKey(UUID.randomUUID(), new DataSet(databaseName: DATABASE_NAME, tableName:  TABLE_NAME))
         def dcStateFilter = createFilterWithWhereClause(new SingularWhereClause(lhs: 'state', operator: '=', rhs: 'DC'))
 
         // addFilter is tested separately, so we can be confident the filter is added properly

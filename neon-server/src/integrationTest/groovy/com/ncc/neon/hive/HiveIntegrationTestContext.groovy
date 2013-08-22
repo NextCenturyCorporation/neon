@@ -41,7 +41,7 @@ class HiveIntegrationTestContext {
     @Bean
     ConnectionState connectionState() {
         ConnectionState connectionState = new ConnectionState()
-        ConnectionInfo info = new ConnectionInfo(dataStoreName: DataSources.HIVE, connectionUrl: HOST_STRING)
+        ConnectionInfo info = new ConnectionInfo(dataStoreName: DataSources.hive.name(), connectionUrl: HOST_STRING)
         connectionState.createConnection(info)
         return connectionState
     }

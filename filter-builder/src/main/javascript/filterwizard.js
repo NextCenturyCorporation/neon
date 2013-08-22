@@ -11,7 +11,7 @@
             // right now the message handler only receives messages (which happens just by creating it),
             // but in the future we might want to send messages based on actions performed on the table
             messageHandler = new neon.eventing.MessageHandler({
-                activeDatasetChaged: broadcastActiveDataset
+                activeDatasetChanged: broadcastActiveDataset
             });
         });
     }

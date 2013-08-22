@@ -64,6 +64,7 @@ $(document).ready(function () {
             // initially disabled until filter added
             disableResetFilterButton();
             getResetFilterButton().click(function () {
+                //TODO: NEON-64 Once a callback is added, we can use the owfEventPublisher code.
                 neon.query.removeFilter(filterKey, function(){
                     messageHandler.publishMessage(neon.eventing.Channels.FILTERS_CHANGED, {});
                     drawChart();
@@ -78,6 +79,7 @@ $(document).ready(function () {
             }
             else{
                 drawChart();
+                disableResetFilterButton();
             }
         }
 

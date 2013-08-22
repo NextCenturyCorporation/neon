@@ -61,7 +61,7 @@ $(document).ready(function () {
                 return;
             }
 
-            // TODO: Add support for dayOfWeek to query API
+            //TODO: NEON-603 Add support for dayOfWeek to query API
             var groupByDayClause = new neon.query.GroupByFunctionClause('dayOfWeek', dateField, 'day');
             var groupByHourClause = new neon.query.GroupByFunctionClause(neon.query.HOUR, dateField, 'hour');
 
