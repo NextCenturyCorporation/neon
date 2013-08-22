@@ -1,7 +1,7 @@
 package com.ncc.neon.query.filter
 
-import groovy.transform.EqualsAndHashCode
-import groovy.transform.ToString
+import groovy.transform.Canonical
+
 /*
  * ************************************************************************
  * Copyright (c), 2013 Next Century Corporation. All Rights Reserved.
@@ -28,8 +28,7 @@ import groovy.transform.ToString
  * @author tbrooks
  */
 
-@ToString(includeNames = true)
-@EqualsAndHashCode
+@Canonical
 class FilterKey implements Serializable{
 
     private static final long serialVersionUID = -5783657018410727352L
