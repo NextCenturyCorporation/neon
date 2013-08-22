@@ -23,47 +23,72 @@
         neon.util.AjaxUtils.useDefaultStartStopCallbacks();
     </script>
 
+    <script>
+        $(document).ready(function() {
+            $("#toggle").click(function () {
+                $("#options").slideToggle("slow");
+
+                if ($("#toggle-image").attr('src') == "img/arrow_down.png") {
+                    $("#toggle-image").attr(
+                            'src',
+                            $("#toggle-image").attr('src').replace('_down', '_right')
+                    );
+                } else {
+                    $("#toggle-image").attr(
+                            'src',
+                            $("#toggle-image").attr('src').replace('_right', '_down')
+                    );
+                }
+            });
+        });
+    </script>
+
 </head>
 <body>
 
+    <div id="options-bar">
+        <div id="toggle">
+            <img id="toggle-image" src="img/arrow_down.png" />
+        </div>
 
-    <div class="controls-row">
+        <div id="options">
+            <div class="controls-row">
+                <div class="control-group">
+                    <label class="control-label" for="latitude">Latitude Field</label>
 
-        <div id="tabs-1">
-            <div class="control-group">
-                <label class="control-label" for="latitude">Latitude Field</label>
+                    <div class="controls">
+                        <select id="latitude" class="dropdown"></select>
+                    </div>
+                </div>
 
-                <div class="controls">
-                    <select id="latitude" class="dropdown"></select>
+                <div class="control-group">
+                    <label class="control-label" for="longitude">Longitude Field</label>
+
+                    <div class="controls">
+                        <select id="longitude" class="dropdown"></select>
+                    </div>
+                </div>
+
+                <div class="control-group">
+                    <label class="control-label" for="size-by">Size By</label>
+
+                    <div class="controls">
+                        <select id="size-by" class="dropdown"></select>
+                    </div>
+                </div>
+
+                <div class="control-group">
+                    <label class="control-label" for="color-by">Color By</label>
+
+                    <div class="controls">
+                        <select id="color-by" class="dropdown"></select>
+                    </div>
                 </div>
             </div>
-
-            <div class="control-group">
-                <label class="control-label" for="longitude">Longitude Field</label>
-
-                <div class="controls">
-                    <select id="longitude" class="dropdown"></select>
-                </div>
-            </div>
-            <div class="control-group">
-                <label class="control-label" for="size-by">Size By</label>
-
-                <div class="controls">
-                    <select id="size-by" class="dropdown"></select>
-                </div>
-            </div>
-
-            <div class="control-group">
-                <label class="control-label" for="color-by">Color By</label>
-
-                <div class="controls">
-                    <select id="color-by" class="dropdown"></select>
-                </div>
-            </div>
+        </div>
     </div>
 
     <div id="map"></div>
-
 
 </body>
 </html>
