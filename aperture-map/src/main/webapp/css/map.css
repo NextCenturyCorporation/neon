@@ -5,7 +5,7 @@
 .dropdown {
     background-color: silver;
     color: black;
-    width: 200px;
+    width: 190px;
 }
 
 .container {
@@ -46,7 +46,7 @@ html, body {
     color: black;
     padding-left: 5px;
     padding-top: 5px;
-    width: 820px;
+    width: 795px;
     border-radius: 15px;
 }
 
