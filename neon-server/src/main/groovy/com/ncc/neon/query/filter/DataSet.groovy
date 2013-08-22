@@ -37,8 +37,4 @@ class DataSet implements Serializable {
     String databaseName
     String tableName
 
-    static DataSet fromNames(String databaseName, String tableName){
-        new DataSet(databaseName: databaseName, tableName: tableName)
-    }
-
 }

@@ -1,6 +1,7 @@
 package com.ncc.neon.query.filter
 
 import com.ncc.neon.query.clauses.AndWhereClause
+import com.ncc.neon.query.clauses.WhereClause
 import org.springframework.context.annotation.Scope
 import org.springframework.context.annotation.ScopedProxyMode
 import org.springframework.stereotype.Component
@@ -56,13 +57,18 @@ class FilterState implements Serializable {
     void addFilter(FilterKey filterKey, Filter filter) {
         if(filters.containsKey(filterKey)){
             Filter oldFilter = filters.get(filterKey)
-            if(oldFilter.whereClause){
-                AndWhereClause andWhereClause = new AndWhereClause(whereClauses: [oldFilter.whereClause, filter.whereClause])
-                filter.whereClause = andWhereClause
-            }
+            filter.whereClause = determineFilterWhereClause(oldFilter, filter)
         }
 
         filters.put(filterKey, filter)
+    }
+
+    private WhereClause determineFilterWhereClause(Filter oldFilter, Filter filter) {
+        if (oldFilter.whereClause) {
+            AndWhereClause andWhereClause = new AndWhereClause(whereClauses: [oldFilter.whereClause, filter.whereClause])
+            return andWhereClause
+        }
+        return filter.whereClause
     }
 
     /**
