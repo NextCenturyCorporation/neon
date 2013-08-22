@@ -36,57 +36,75 @@
         neon.util.AjaxUtils.useDefaultStartStopCallbacks();
     </script>
 
+    <script>
+        $(document).ready(function() {
+            $("#toggle").click(function () {
+                $("#options").slideToggle("slow");
+
+                if ($("#toggle-image").attr('src') == "img/arrow_down.png") {
+                    $("#toggle-image").attr(
+                            'src',
+                            $("#toggle-image").attr('src').replace('_down', '_right')
+                    );
+                } else {
+                    $("#toggle-image").attr(
+                            'src',
+                            $("#toggle-image").attr('src').replace('_right', '_down')
+                    );
+                }
+            });
+        });
+    </script>
+
 </head>
 <body>
+    <div class="chart-container">
+        <div id="options-bar">
+            <div id="toggle">
+                <img id="toggle-image" src="img/arrow_down.png" />
+            </div>
 
-<div class="container chart-container">
+            <div id="options">
+                <div class="controls-row">
+                    <div class="control-group">
+                        <label class="control-label" for="x">x-axis (Date)</label>
 
+                        <div class="controls">
+                            <select id="x" class="dropdown"></select>
+                        </div>
+                    </div>
 
-    <div class="controls-row">
-        <div class="control-group">
-            <label class="control-label" for="x">x-axis (Date)</label>
+                    <div class="control-group">
+                        <label class="control-label" for="y">y-axis</label>
 
-            <div class="controls">
-                <select id="x" class="dropdown"></select>
+                        <div class="controls">
+                            <select id="y" class="dropdown"></select>
+                        </div>
+                    </div>
+
+                    <div class="control-group">
+                        <label class="control-label" for="time-granularity">Time Granularity</label>
+
+                        <div class="controls">
+                            <select id="time-granularity" class="dropdown">
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="control-group">
+                        <div class="controls">
+                            <button type="button" id="redraw-bounds" class="btn">Redraw Bounds</button>
+
+                            <button type="button" id="reset-filter" class="btn">Reset Time Period</button>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
 
-        <div class="control-group">
-            <label class="control-label" for="y">y-axis</label>
-
-            <div class="controls">
-                <select id="y" class="dropdown"></select>
-            </div>
+        <div id="timeline" class="timeline-div">
+            <div id="chart" class="chart-div"></div>
         </div>
     </div>
-
-    <div class="controls-row">
-        <div class="control-group">
-            <label class="control-label" for="time-granularity">Time Granularity</label>
-
-            <div class="controls">
-                <select id="time-granularity" class="dropdown">
-                </select>
-            </div>
-        </div>
-    </div>
-
-    <div id="timeline" class="timeline-div">
-        <div id="chart" class="chart-div"></div>
-    </div>
-
-    <div class="controls-row">
-        <div id="button-row" class="control-group">
-            <div class="controls">
-                <button type="button" id="redraw-bounds" class="btn">Redraw Bounds</button>
-
-                <button type="button" id="reset-filter" class="btn">Reset Time Period</button>
-            </div>
-        </div>
-    </div>
-
-
-</div>
-
 </body>
 </html>
