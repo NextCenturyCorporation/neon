@@ -26,11 +26,6 @@
     background-color: white;
 }
 
-.dropdown {
- background-color: silver;
- color: black;
-}
-
 .bar {
     /** provides a slight separation for adjacent bars. the barchart javascript sets the color based on the svg color */
     stroke-width: 1;

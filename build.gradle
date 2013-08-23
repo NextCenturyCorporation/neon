@@ -131,8 +131,12 @@ task jettyRunAll(type: com.ncc.common.JettyRunAll) {
     keystorePassword = "neon"
     port = ssl ? jettyHttpsPort : jettyHttpPort
 
-    // look up the project using the project function to ensure we're using a valid project name
-    def serverProjectName = project(":neon-server").name
+    def serverProject = project(":neon-server")
+    def serverProjectName = serverProject.name
+    doFirst {
+        System.setProperty("log.dir", "${serverProject.buildDir}/jettyRunAllLogs")
+    }
+
     // add the concatenated server javascript so the widgets can access it
     directoriesClosure = { proj ->
         def dirs = getJettyRunRootDirectories.call(proj)
