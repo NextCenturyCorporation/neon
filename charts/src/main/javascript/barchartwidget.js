@@ -74,7 +74,7 @@ $(document).ready(function () {
                 yAttr = COUNT_FIELD_NAME;
             }
 
-            var opts = { "data": data.data, "x": xAttr, "y": yAttr, width: 600, height: 400};
+            var opts = { "data": data.data, "x": xAttr, "y": yAttr, responsive: true};
             var chart = new charts.BarChart('#chart', opts);
             chart.draw();
         }

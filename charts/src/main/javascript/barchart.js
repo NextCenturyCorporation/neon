@@ -86,8 +86,8 @@ charts.BarChart = function (chartSelector, opts) {
     opts = opts || {};
     this.chartSelector_ = chartSelector;
 
-    this.width = determineWidth(chartSelector, opts);
-    this.height = determineHeight(chartSelector, opts);
+    this.width = this.determineWidth_(chartSelector, opts);
+    this.height = this.determineHeight_(chartSelector, opts);
 
     this.xAttribute_ = opts.x;
     this.xLabel_ = opts.xLabel || this.determineXLabel_();
@@ -99,6 +99,10 @@ charts.BarChart = function (chartSelector, opts) {
 
     if (opts.init) {
         opts.init.call(this, opts);
+    }
+
+    if(opts.responsive) {
+        charts.BarChart.handleResponsive_(this);
     }
 
     // tick formatting/values may be undefined in which case d3's default will be used
@@ -117,24 +121,6 @@ charts.BarChart = function (chartSelector, opts) {
     this.yAxis_ = this.createYAxis_();
     this.style_ = $.extend({}, charts.BarChart.DEFAULT_STYLE_, opts.style);
 
-    function determineWidth(chartSelector, opts){
-        if(opts.width) {
-            return opts.width;
-        }
-        else if ($(chartSelector).width() !== 0){
-            return $(chartSelector).width();
-        }
-        return charts.BarChart.DEFAULT_WIDTH_;
-    }
-    function determineHeight(chartSelector, opts){
-        if(opts.height) {
-            return opts.height;
-        }
-        else if ($(chartSelector).height() !== 0){
-            return $(chartSelector).height();
-        }
-        return charts.BarChart.DEFAULT_HEIGHT_;
-    }
 };
 
 charts.BarChart.DEFAULT_HEIGHT_ = 400;
@@ -301,6 +287,14 @@ charts.BarChart.createYAxisTickFormat_ = function () {
  * @return {charts.BarChart} This bar chart
  */
 charts.BarChart.prototype.draw = function () {
+    this.width = this.determineWidth_(this.chartSelector_, {});
+    this.height = this.determineHeight_(this.chartSelector_, {});
+    this.plotWidth = this.width;
+    this.x.rangeRoundBands([0, this.plotWidth]);
+    this.y = this.createYScale_();
+    this.xAxis_ = this.createXAxis_();
+    this.yAxis_ = this.createYAxis_();
+
     $(this.chartSelector_).empty();
     var chart = this.drawChartSVG_();
     this.bindData_(chart);
@@ -596,4 +590,43 @@ charts.BarChart.prototype.removeDataWithNoMatchingCategory_ = function (aggregat
             return category === key;
         }));
     });
+};
+
+charts.BarChart.prototype.determineWidth_ = function (chartSelector, opts) {
+    if(opts.width) {
+        return opts.width;
+    }
+    else if ($(chartSelector).width() !== 0){
+        return $(chartSelector).width();
+    }
+    return charts.BarChart.DEFAULT_WIDTH_;
+};
+
+charts.BarChart.prototype.determineHeight_ = function (chartSelector, opts) {
+    if(opts.height) {
+        return opts.height;
+    }
+    else if ($(chartSelector).height() !== 0){
+        return $(chartSelector).height();
+    }
+    return charts.BarChart.DEFAULT_HEIGHT_;
+};
+
+charts.BarChart.handleResponsive_ = function(me){
+    var debounce = function(fn, timeout)
+    {
+        var timeoutID = -1;
+        return function() {
+            if (timeoutID > -1) {
+                window.clearTimeout(timeoutID);
+            }
+            timeoutID = window.setTimeout(fn, timeout);
+        };
+    };
+
+    var debounced_draw = debounce(function() {
+        me.draw();
+    }, 100);
+
+    $(window).resize(debounced_draw);
 };

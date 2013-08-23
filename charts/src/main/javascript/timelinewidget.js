@@ -139,7 +139,7 @@ $(document).ready(function () {
 
             var granularity = $('#time-granularity option:selected').val();
             var opts = { "data": dataByDate, "x": xAttr, "y": yAttr,
-                "interval": granularity};
+                "interval": granularity, responsive: true};
 
 
             var timeline = new charts.Timeline('#chart', opts);
