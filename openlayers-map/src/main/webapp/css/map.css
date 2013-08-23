@@ -58,7 +58,7 @@ html, body {
 #options-bar {
     position: absolute;
     top: 30px;
-    left: 50px;
+    left: 30px;
     z-index: 2000;
     opacity: .9;
 }
