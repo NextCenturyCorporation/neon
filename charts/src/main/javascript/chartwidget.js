@@ -21,6 +21,8 @@
  * RECIPIENT IS UNDER OBLIGATION TO MAINTAIN SECRECY.
  */
 
+
+//TODO: NEON-604 Remove these from globabl scope and move more common functions from barchartwidget.js and timelinewidget.js
 // this file contains some javascript functions that are useful for the chart based widgets
 var databaseName;
 var tableName;
