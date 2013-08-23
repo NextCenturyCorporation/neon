@@ -45,7 +45,7 @@
 
 </head>
 <body>
-
+    <div class="container">
     <div id="options-bar">
         <div id="toggle">
             <img id="toggle-image" src="img/arrow_down.png" />
@@ -89,6 +89,8 @@
     </div>
 
     <div id="map"></div>
+
+    </div>
 
 </body>
 </html>
