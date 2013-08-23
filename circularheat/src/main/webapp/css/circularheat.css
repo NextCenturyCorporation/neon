@@ -1,6 +1,7 @@
 #circularheatchart {
     width: 800px;
     height: 400px;
+    color: white; /*text around the chart is not showing up*/
 }
 
 .dropdown {
