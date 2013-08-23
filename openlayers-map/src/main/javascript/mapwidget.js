@@ -92,7 +92,7 @@ $(document).ready(function () {
         }
 
         function redrawMap() {
-            var query = new neon.query.Query().selectFrom(datasource, datasetId).limit(1);
+            var query = new neon.query.Query().selectFrom(databaseName, tableName).limit(1);
             neon.query.executeQuery(query, function(results) {
                 if(results.data[0] !== undefined) {
                     currentData = results.data[0];
@@ -112,7 +112,7 @@ $(document).ready(function () {
         }
 
         function buildQuery(latField, lonField, sizeByField, colorByField) {
-            var query = new neon.query.Query().selectFrom(datasource, datasetId);
+            var query = new neon.query.Query().selectFrom(databaseName, tableName);
             appendGroupByClause(query, latField, lonField, colorByField);
             appendSizeByFieldClause(query, sizeByField);
             return query;
