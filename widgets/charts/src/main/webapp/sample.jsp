@@ -4,18 +4,22 @@
     <title>Timeline sandbox</title>
 
     <link rel="stylesheet" type="text/css" href="css/bootstrap/bootstrap.min.css">
-    <link rel="stylesheet" type="text/css" href="css/timelinewidget.css">
+    <link rel="stylesheet" type="text/css" href="css/widgetbase.css">
     <link rel="stylesheet" type="text/css" href="css/barchart.css">
     <link rel="stylesheet" type="text/css" href="css/timeline.css">
     <link rel="stylesheet" type="text/css" href="css/jqueryui/smoothness/jquery-ui-1.10.3.custom.min.css">
 
-    <script src="d3/d3.v3.min.js"></script>
-    <script src="jquery/jquery-1.10.1.min.js"></script>
-    <script src="jqueryui/jquery-ui-1.10.3.custom.min.js"></script>
-    <script src="lodash/1.3.1/lodash.min.js"></script>
-    <script src="namespaces.js"></script>
-    <script src="barchart.js"></script>
-    <script src="timeline.js"></script>
+    <!-- build:js js/charts.js -->
+    <script src="js-lib/d3/d3.v3.min.js"></script>
+    <script src="js-lib/jquery/jquery-1.10.1.min.js"></script>
+    <script src="js-lib/jqueryui/jquery-ui-1.10.3.custom.min.js"></script>
+    <script src="js-lib/lodash/1.3.1/lodash.min.js"></script>
+    <script src="js/toggle.js"></script>
+    <script src="javascript/namespaces.js"></script>
+    <script src="javascript/barchart.js"></script>
+    <script src="javascript/timeline.js"></script>
+    <!-- endbuild -->
+
 
 </head>
 <body>
