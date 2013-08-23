@@ -56,7 +56,7 @@
                 <div class="control-group">
                     <label class="control-label" for="limit">Limit</label>
 
-                    <div class="controls">
+                    <div id="controls" class="controls">
                         <input id="limit" type="number" min="1" value="500">
                     </div>
                 </div>
@@ -68,7 +68,7 @@
 
                         <select id="sort-field" class="dropdown"></select>
 
-                        <div class="btn-group" data-toggle="buttons-radio">
+                        <div class="btn-group" id="sort-buttons" data-toggle="buttons-radio">
                             <button id="sort-ascending" type="button" data-toggle="button" class="btn">Ascending
                             </button>
                             <button id="sort-descending" type="button" data-toggle="button" class="btn">Descending

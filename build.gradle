@@ -26,7 +26,9 @@ project(":neon-server").ext.outfile = 'neon'
  */
 def getJettyRunRootDirectories = { project ->
     return [
-            project.file(project.webAppDirName).toString(),
+            // we modify the project's webAppDir to use a generated-web for javascript resource filtering,
+            // so hardcode the src/main/webapp instead of using the project.webAppDir
+            "${project.projectDir}/src/main/webapp".toString(),
             // src/main is for javascript and js-lib
             "${project.projectDir}/src/main".toString(),
             project.dependenciesDir.toString(),
@@ -62,7 +64,7 @@ subprojects {
             into 'css'
         }
 
-        from (imgDependenciesOuputDir) {
+        from(imgDependenciesOutputDir) {
             into 'img'
         }
     }
@@ -138,6 +140,7 @@ task jettyRunAll(type: com.ncc.common.JettyRunAll) {
             dirs << proj.buildDir.absolutePath
         }
         return dirs
+
     }
 
 }
