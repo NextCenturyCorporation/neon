@@ -1,5 +1,7 @@
-apply plugin:'eclipse'
+apply plugin: 'eclipse'
+
 import static com.ncc.common.JSScriptReplacer.*
+import com.ncc.common.JettyTaskUtils
 
 defaultTasks 'clean', 'build'
 
@@ -12,9 +14,25 @@ def DEPLOY_GROUP = 'deploy'
 
 def owfTomcat = (hasProperty('OWF_TOMCAT') ? OWF_TOMCAT : System.env.OWF_TOMCAT) ?: '/opt/owf/apache-tomcat-7.0.21'
 def owfTomcatWebapps = owfTomcat + '/webapps'
+def jettyHttpPort = 9000
+def jettyHttpsPort = 9443
 
 // the neon-server is just output as neon.js for simpler referencing
 project(":neon-server").ext.outfile = 'neon'
+
+/**
+ * Gets any directories that are webapp roots for jetty run
+ * @param project
+ */
+def getJettyRunRootDirectories = { project ->
+    return [
+            project.file(project.webAppDirName).toString(),
+            // src/main is for javascript and js-lib
+            "${project.projectDir}/src/main".toString(),
+            project.dependenciesDir.toString(),
+            new File(project.projectDir.parentFile, "common").absolutePath
+    ]
+}
 
 subprojects {
 
@@ -33,13 +51,33 @@ subprojects {
         description = 'Creates a war file for the project'
         // strip out the version from the war
         version ""
+
+        // not all projects will have all of these directories, so it will just copy the needed ones
+        from(jsOutputFile) {
+            into 'js'
+        }
+
+        // note the common js does not need to be copied here because it is concatenated in to the jsoutputfile
+        from(cssDependenciesOutputDir) {
+            into 'css'
+        }
+
+        from (imgDependenciesOuputDir) {
+            into 'img'
+        }
     }
 
     enableJSResourceFiltering(project, project.war)
 
-    // add an explicit dependency on concatenation so if you're doing a quick deploy using gradle deployToTomcat the
-    // javascript files are still created
-    war.dependsOn 'concatjs'
+    // concat can be run either standalone or through gruntjs ,so add the dependency to both
+    project.getTasksByName('concatjs', false).each { task ->
+        task.dependsOn 'copyCommon'
+    }
+
+    project.getTasksByName('gruntjs', false).each { task ->
+        task.dependsOn 'copyCommon'
+    }
+
 
     task('deployToTomcat', type: Copy) {
         dependsOn war
@@ -57,16 +95,49 @@ subprojects {
             println "Copying $war.archivePath into $owfTomcatWebapps"
         }
     }
-    // if you want to use jettyrun for testing, this allows you to just include the individual js files and not the
-    // concatenated one
+    jettyRun.httpPort = jettyHttpPort
+    jettyRunWar.httpPort = jettyHttpPort
     jettyRun.doFirst {
-        // since css and js are both in the jsDependenciesDir include both the jsDependenciesDir and the jsDependenciesOutputDir
-        // so we can references js files without the js/ prefix in development, but the css/ prefix stays consistent in development
-        // and production
-        def dirs = [file(webAppDirName).toString(), "${projectDir}/${jsSrcDir}", "${projectDir}/${jsLibDir}", jsDependenciesDir, jsDependenciesOutputDir.toString()].findResults { new File(it).exists() ? it : null } as String[]
+        jettyRun.webAppConfig = JettyTaskUtils.createJettyRunContext(getJettyRunRootDirectories.call(project))
+    }
 
-        jettyRun.webAppConfig = new org.gradle.api.plugins.jetty.internal.JettyPluginWebAppContext()
-        jettyRun.webAppConfig.baseResource = org.gradle.api.plugins.jetty.internal.JettyPluginWebAppContext.class.classLoader.loadClass("org.mortbay.resource.ResourceCollection").newInstance(dirs)
+    task copyCommon {
+        dependsOn 'copyCommonJs', 'copyCommonCss', 'copyCommonImages'
+    }
+
+    task copyCommonJs(type: Copy) {
+        from(new File(projectDir.parentFile, "common/js").absolutePath)
+        into jsDependenciesOutputDir
+    }
+
+    task copyCommonCss(type: Copy) {
+        from(new File(projectDir.parentFile, "common/css").absolutePath)
+        into cssDependenciesOutputDir
+    }
+
+    task copyCommonImages(type: Copy) {
+        from(new File(projectDir.parentFile, "common/img").absolutePath)
+        into imgDependenciesOutputDir
+    }
+
+}
+
+task jettyRunAll(type: com.ncc.common.JettyRunAll) {
+    dependsOn ':neon-server:concatjs'
+    ssl = true
+    keystorePath = this.class.getResource("/keystore").file
+    keystorePassword = "neon"
+    port = ssl ? jettyHttpsPort : jettyHttpPort
+
+    // look up the project using the project function to ensure we're using a valid project name
+    def serverProjectName = project(":neon-server").name
+    // add the concatenated server javascript so the widgets can access it
+    directoriesClosure = { proj ->
+        def dirs = getJettyRunRootDirectories.call(proj)
+        if (proj.name == serverProjectName) {
+            dirs << proj.buildDir.absolutePath
+        }
+        return dirs
     }
 
 }

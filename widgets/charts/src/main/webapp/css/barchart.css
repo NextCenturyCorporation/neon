@@ -1,0 +1,108 @@
+/*
+ * ************************************************************************
+ * Copyright (c), 2013 Next Century Corporation. All Rights Reserved.
+ *
+ * This software code is the exclusive property of Next Century Corporation and is
+ * protected by United States and International laws relating to the protection
+ * of intellectual property.  Distribution of this software code by or to an
+ * unauthorized party, or removal of any of these notices, is strictly
+ * prohibited and punishable by law.
+ *
+ * UNLESS PROVIDED OTHERWISE IN A LICENSE AGREEMENT GOVERNING THE USE OF THIS
+ * SOFTWARE, TO WHICH YOU ARE AN AUTHORIZED PARTY, THIS SOFTWARE CODE HAS BEEN
+ * ACQUIRED BY YOU "AS IS" AND WITHOUT WARRANTY OF ANY KIND.  ANY USE BY YOU OF
+ * THIS SOFTWARE CODE IS AT YOUR OWN RISK.  ALL WARRANTIES OF ANY KIND, EITHER
+ * EXPRESSED OR IMPLIED, INCLUDING, WITHOUT LIMITATION, IMPLIED WARRANTIES OF
+ * MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE, ARE HEREBY EXPRESSLY
+ * DISCLAIMED.
+ *
+ * PROPRIETARY AND CONFIDENTIAL TRADE SECRET MATERIAL NOT FOR DISCLOSURE OUTSIDE
+ * OF NEXT CENTURY CORPORATION EXCEPT BY PRIOR WRITTEN PERMISSION AND WHEN
+ * RECIPIENT IS UNDER OBLIGATION TO MAINTAIN SECRECY.
+ */
+#plot {
+    font: 10px sans-serif;
+    text-align: right;
+    background-color: white;
+}
+
+.dropdown {
+ background-color: silver;
+ color: black;
+}
+
+.bar {
+    /** provides a slight separation for adjacent bars. the barchart javascript sets the color based on the svg color */
+    stroke-width: 1;
+    stroke-opacity: .5;
+}
+
+.axis {
+    shape-rendering: crispEdges;
+}
+
+.axis line, .axis path {
+    stroke: darkgrey;
+    stroke-width: 1px;
+    fill: none;
+}
+
+/* do not use .tooltip to avoid conflict with bootstrap */
+.charttooltip {
+
+    /* just use a big number to ensure the tooltip is on top */
+    z-index: 10000;
+    position: absolute;
+    padding: 10px;
+    background-color: white;
+    border: 2px solid black;
+    border-radius: 15px;
+    font-family: sans-serif;
+    text-align: center;
+    pointer-events: none;
+    color: black;
+}
+
+.chart-container {
+    width: 90%;
+    height: 100%;
+}
+
+.timeline-div{
+    width:90%;
+    height:100%;
+}
+
+.chart-div{
+    width:100%;
+    height:90%;
+}
+
+#toggle {
+    background-color: #f0f0f0;
+    width: 30px;
+    height: 30px;
+    border-radius: 5px;
+}
+
+#options {
+    background-color:#f0f0f0;
+    color: black;
+    padding-left: 5px;
+    padding-top: 5px;
+    border-radius: 15px;
+    width: 450px;
+}
+
+#toggle-image {
+    height: 30px;
+    width: 30px;
+}
+
+#options-bar {
+    position: absolute;
+    top: 20px;
+    left: 70px;
+    z-index: 2000;
+    opacity: .9;
+}

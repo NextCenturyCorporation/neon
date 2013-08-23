@@ -1,0 +1,10 @@
+archivesBaseName = 'charts'
+
+war {
+    from(jsSrcDir) {
+        include 'timelinewidget.js'
+        include 'barchartwidget.js'
+        include 'chartwidget.js'
+        into 'js'
+    }
+}

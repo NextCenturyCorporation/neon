@@ -1,7 +1,0 @@
-archivesBaseName = 'filter-builder'
-
-war {
-    from(jsOutputFile) {
-        into 'js'
-    }
-}

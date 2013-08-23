@@ -203,7 +203,6 @@ task acceptanceTest(type: GruntTask) {
     }
 }
 
-
 gradle.taskGraph.afterTask { task ->
     if (task == acceptanceTest) {
         deleteAcceptanceTestData()

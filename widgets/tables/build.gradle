@@ -1,0 +1,7 @@
+archivesBaseName = 'tables'
+
+war {
+    from("${jsSrcDir}/tablewidget.js") {
+        into 'js'
+    }
+}

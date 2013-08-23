@@ -7,23 +7,9 @@ module.exports = function (grunt) {
         return 'src/main/javascript/' + file;
     }
 
-    function createTestOptions(specs) {
-        return {
-            specs: specs,
-            timeout: 60000,
-            vendor: '../js-test-support/lib/**/*.js',
-            helpers: ['../js-test-support/helpers/**/*.js',
-                'src/js-test-support/mockNamespaces.js', 'src/js-test-support/ajaxMockUtils.js',
-                'src/js-test-support/owfEventingMock.js'],
-            '--web-security': false,
-            '--local-to-remote-url-access': true,
-            '--ignore-ssl-errors': true
-        };
+    function lib(file) {
+        return 'src/main/js-lib/' + file;
     }
-
-    // order dependent files, so exclude them from the concatenation. they will be included in the correct order
-    var concatExcludes = ['intro.js', 'util/loggerUtils.js'];
-
 
     grunt.initConfig({
             // Metadata.
@@ -36,19 +22,27 @@ module.exports = function (grunt) {
                     stripBanners: true
                 },
                 nodeps: {
-                    src: [].concat([src('intro.js'), src('util/loggerUtils.js')]).concat(grunt.file.expand(src('**/*.js'), concatExcludes.map(function (file) {
-                        return '!' + src(file);
-                    }))),
+                    src: src('table.js'),
                     dest: 'build/js-temp/<%= pkg.name %>.js'
                 },
                 dist: {
-                    src: ['src/main/js-lib/**/*.js', 'build/dependencies/**/*.js', '<%= concat.nodeps.dest %>'],
+                    src: [lib('jquery/jquery-1.7.min.js'),
+                        lib('jquery/jquery.event.drag-2.2.js'),
+                        lib('jquery/jquery-ui-1.8.16.custom.min.js'),
+                        lib('slickgrid/slick.core.js'),
+                        lib('slickgrid/slick.grid.js'),
+                        lib('slickgrid/slick.dataview.js'),
+                        lib('slickgrid/plugins/slick.autotooltips.js'),
+                        lib('mergesort/merge-sort.js'),
+                        lib('bootstrap/bootstrap.min.js'),
+                        'build/dependencies/**/*.js',
+                        '<%= concat.nodeps.dest %>'],
                     dest: outputFile
                 }
             },
             jshint: {
                 options: {
-                    'jshintrc': '../.jshintrc'
+                    'jshintrc': '../../.jshintrc'
                 },
                 // check both the preconcat and concatenated files
                 files: [].concat('<%= concat.nodeps.src %>').concat(['<%= concat.nodeps.dest %>'])
@@ -56,16 +50,19 @@ module.exports = function (grunt) {
             jasmine: {
                 unit: {
                     src: outputFile,
-                    options: createTestOptions('src/test/javascript/spec/**/*.spec.js')
-                },
-                acceptance: {
-                    src: outputFile,
-                    options: createTestOptions('src/acceptanceTest/javascript/spec/**/*.spec.js')
+                    options: {
+                        specs: 'src/test/javascript/spec/**/*.spec.js',
+                        vendor: '../../js-test-support/lib/**/*.js',
+                        helpers: '../../js-test-support/helpers/**/*.js',
+                        '--web-security': false,
+                        '--local-to-remote-url-access': true,
+                        '--ignore-ssl-errors': true
+                    }
                 }
-
             }
         }
-    );
+    )
+    ;
 
     grunt.loadNpmTasks('grunt-contrib-concat');
     grunt.loadNpmTasks('grunt-contrib-jshint');
@@ -74,7 +71,5 @@ module.exports = function (grunt) {
     // hint after concatenation since the concatenated version is also hinted
     grunt.registerTask('default', ['concat', 'jshint', 'jasmine:unit']);
 
-
-
-
-};
+}
+;

@@ -9,12 +9,13 @@ project.ext {
     jsLibDir = 'src/main/js-lib'
     def filePrefix = project.hasProperty('outfile') ? project.outfile : project.name
     combinedJsFileName = "${filePrefix}.js"
-    jsOutputFile = "${buildDir}/${combinedJsFileName}"
+    jsOutputFile = "${buildDir}/js/${combinedJsFileName}"
 
     // where javascript/css dependencies from other projects are copied
-    jsDependenciesDir = "${buildDir}/jsdependencies"
-    jsDependenciesOutputDir = file("${jsDependenciesDir}/js")
-    cssDependenciesOutputDir = file("${jsDependenciesDir}/css")
+    dependenciesDir = "${buildDir}/dependencies"
+    jsDependenciesOutputDir = file("${dependenciesDir}/js")
+    cssDependenciesOutputDir = file("${dependenciesDir}/css")
+    imgDependenciesOutputDir = file("${dependenciesDir}/img")
 }
 
 task gruntjs(type: GruntTask) {
@@ -100,7 +101,7 @@ task zipJsDocs(type: Zip) {
     project.file(jsSrcDir).exists()
 }
 
-project.assemble.dependsOn 'gruntjs'
+project.war.dependsOn 'gruntjs'
 
 project.tasks.withType(GruntTask) { task ->
     // use the locally installed grunt

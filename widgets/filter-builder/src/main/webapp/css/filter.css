@@ -1,0 +1,59 @@
+/*
+ * ************************************************************************
+ * Copyright (c), 2013 Next Century Corporation. All Rights Reserved.
+ *
+ * This software code is the exclusive property of Next Century Corporation and is
+ * protected by United States and International laws relating to the protection
+ * of intellectual property.  Distribution of this software code by or to an
+ * unauthorized party, or removal of any of these notices, is strictly
+ * prohibited and punishable by law.
+ *
+ * UNLESS PROVIDED OTHERWISE IN A LICENSE AGREEMENT GOVERNING THE USE OF THIS
+ * SOFTWARE, TO WHICH YOU ARE AN AUTHORIZED PARTY, THIS SOFTWARE CODE HAS BEEN
+ * ACQUIRED BY YOU "AS IS" AND WITHOUT WARRANTY OF ANY KIND.  ANY USE BY YOU OF
+ * THIS SOFTWARE CODE IS AT YOUR OWN RISK.  ALL WARRANTIES OF ANY KIND, EITHER
+ * EXPRESSED OR IMPLIED, INCLUDING, WITHOUT LIMITATION, IMPLIED WARRANTIES OF
+ * MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE, ARE HEREBY EXPRESSLY
+ * DISCLAIMED.
+ *
+ * PROPRIETARY AND CONFIDENTIAL TRADE SECRET MATERIAL NOT FOR DISCLOSURE OUTSIDE
+ * OF NEXT CENTURY CORPORATION EXCEPT BY PRIOR WRITTEN PERMISSION AND WHEN
+ * RECIPIENT IS UNDER OBLIGATION TO MAINTAIN SECRECY.
+ */
+.filter-dropdown{
+    display: inline-block;
+    vertical-align: top;
+    width:30%;
+}
+
+#datastore-container, #db-table{
+    border: 1px solid white;
+    border-radius: 10px;
+    padding: 0 0 10px 10px;
+    margin: 5px 0 5px 0;
+    width: 395px;
+    height: 100px;
+}
+
+#filter-container {
+    border: 1px solid white;
+    border-radius: 10px;
+    padding: 0 0 10px 10px;
+    margin: 5px 0 5px 0;
+    width: 70%;
+    height: auto;
+    min-width: 465px;
+}
+
+#update-filter-button, #remove-filter-button {
+    margin-top: 5px;
+}
+
+#database-table-button, #datastore-button {
+    margin-right: 20px;
+    margin-top: 25px;
+}
+
+#radio-buttons {
+    margin-left: 160px;
+}

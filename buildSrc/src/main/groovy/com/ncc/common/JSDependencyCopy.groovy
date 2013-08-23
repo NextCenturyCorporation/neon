@@ -5,7 +5,7 @@ package com.ncc.common
  */
 class JSDependencyCopy {
 
-    // for each project in the list, copies the output of that project
+    // for the specified project, copies the output of that project
     // and makes it a dependency of this project
     static void copyDependencies(project, jsDependencies) {
         jsDependencies.each { dep ->
@@ -16,8 +16,8 @@ class JSDependencyCopy {
             def copyJsTaskName = "copy${dep}JsDependencies"
             project.task([type: org.gradle.api.tasks.Copy], copyJsTaskName) {
                 dependsOn warTask
-                from(depProj.buildDir) {
-                    include "*.js"
+                from("${depProj.buildDir}/js") {
+                    include "**/*"
                 }
                 into project.jsDependenciesOutputDir
             }

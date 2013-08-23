@@ -1,1 +1,12 @@
 include 'neon-server', 'filter-builder', 'query-builder', 'charts', 'tables', 'aperture-map', 'openlayers-map', 'circularheat'
+
+
+def widgetsDir = file('widgets')
+widgetsDir.eachDir {
+    // there could be common directories that are not projects
+    def project = findProject(":${it.name}")
+    if (project) {
+        project.projectDir = new File(settingsDir, "widgets/${project.name}")
+    }
+
+}

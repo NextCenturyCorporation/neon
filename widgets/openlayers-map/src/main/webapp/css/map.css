@@ -1,0 +1,15 @@
+#map {
+    position: absolute;
+    top: 20px;
+    left: 20px;
+    height: 90%;
+    width: 90%;
+}
+
+/* override image properties here so openlayers renders properly */
+img {
+    width: auto;
+    height: auto;
+    max-width: none;
+    vertical-align: baseline;
+}
