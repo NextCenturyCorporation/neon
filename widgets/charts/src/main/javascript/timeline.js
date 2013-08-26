@@ -258,7 +258,7 @@ charts.Timeline.prototype.notifyFilterListeners_ = function (filterStartDate, fi
 
 
 charts.Timeline.prototype.getDate_ = function (pixelValue) {
-    if (pixelValue === this.plotWidth) {
+    if (pixelValue >= this.plotWidth - 5) {
         return this.maxDate_;
     }
     var index = pixelValue / this.x.rangeBand();
