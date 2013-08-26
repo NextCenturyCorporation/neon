@@ -31,6 +31,8 @@ task concatjs(type: GruntTask) {
 
 task installGruntDeps(type: Exec) {
     dependsOn 'createPackageJson'
+    inputs.file "${projectDir}/package.json"
+    outputs.dir "${projectDir}/node_modules"
     commandLine "npm", "install"
 }
 
@@ -109,5 +111,5 @@ project.tasks.withType(GruntTask) { task ->
         task.executable = "${projectDir}/node_modules/.bin/${GruntTask.GRUNT_EXECUTABLE}"
     }
 
-    task.dependsOn 'createPackageJson'
+    task.dependsOn 'installGruntDeps'
 }
