@@ -289,8 +289,8 @@ charts.BarChart.createYAxisTickFormat_ = function () {
 charts.BarChart.prototype.draw = function () {
     this.width = this.determineWidth_(this.chartSelector_, {});
     this.height = this.determineHeight_(this.chartSelector_, {});
-    this.plotWidth = this.width;
-    this.x.rangeRoundBands([0, this.plotWidth]);
+    this.x.rangeRoundBands([0, this.width]);
+    this.plotWidth = this.computePlotWidth_();
     this.y = this.createYScale_();
     this.xAxis_ = this.createXAxis_();
     this.yAxis_ = this.createYAxis_();
