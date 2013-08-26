@@ -33,3 +33,9 @@ Several tasks exist for running tests:
 
 
 note: all projects share a common javascript configuration, so the package.json file is dynamically generated from the package.json.template in the top level neon folder
+
+## Project structure
+
+The neon project is broken down into several sub projects. The neon-server subproject includes the neon server and its client API.
+
+Each widget is a separate subproject which is stored in the widgets folder.
