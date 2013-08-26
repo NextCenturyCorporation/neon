@@ -19,8 +19,6 @@ Neon contains a mix of groovy and javascript code and uses different build tools
 
 * install nodejs - [https://github.com/joyent/node/wiki/Installing-Node.js-via-package-manager](https://github.com/joyent/node/wiki/Installing-Node.js-via-package-manager) and npm [https://github.com/isaacs/npm](https://github.com/isaacs/npm)
 * update npm to the latest version by running `sudo npm -g update npm`
-* from the top level neon directory, run the `gradle installGruntDeps`. this will install the necessary javascript
-build tools. this only needs to be re-run when the package.json file changes.
 
 ### Test tasks
 
