@@ -36,3 +36,7 @@
 #sort-buttons {
     padding-left: 8px;
 }
+
+#table.slick_viewport {
+    height: 90%;
+}
