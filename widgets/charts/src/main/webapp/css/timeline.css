@@ -27,22 +27,10 @@
 }
 
 #options {
-    width: 825px;
+    width: 90%;
 }
 
 .control-group {
     display: inline-block;
     vertical-align: top;
-}
-
-#redraw-bounds {
-    position: absolute;
-    top: 35px;
-    left: 678px;
-}
-
-#reset-filter {
-    position: absolute;
-    top: 75px;
-    left: 678px;
 }

@@ -44,7 +44,6 @@
 
 /* do not use .tooltip to avoid conflict with bootstrap */
 .charttooltip {
-
     /* just use a big number to ensure the tooltip is on top */
     z-index: 10000;
     position: absolute;
@@ -61,6 +60,9 @@
 .chart-container {
     width: 90%;
     height: 100%;
+    position: absolute;
+    top: 20px;
+    left: 20px;
 }
 
 .timeline-div{
@@ -73,31 +75,11 @@
     height:90%;
 }
 
-#toggle {
-    background-color: #f0f0f0;
-    width: 30px;
-    height: 30px;
-    border-radius: 5px;
-}
-
 #options {
-    background-color:#f0f0f0;
-    color: black;
-    padding-left: 5px;
-    padding-top: 5px;
-    border-radius: 15px;
     width: 450px;
 }
 
-#toggle-image {
-    height: 30px;
-    width: 30px;
-}
-
 #options-bar {
-    position: absolute;
-    top: 20px;
-    left: 70px;
-    z-index: 2000;
-    opacity: .9;
+    top: 0;
+    left: 0;
 }
