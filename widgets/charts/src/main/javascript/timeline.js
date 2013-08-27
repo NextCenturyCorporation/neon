@@ -213,9 +213,9 @@ charts.Timeline.prototype.createSlider_ = function () {
     $('#' + charts.Timeline.SLIDER_DIV_NAME_).slider({
         range: true,
         min: 0,
-        max: this.plotWidth,
-        step: this.x.rangeBand(),
-        values: [ 0, this.plotWidth ],
+        max: me.plotWidth,
+        step: me.x.rangeBand(),
+        values: [ 0, me.plotWidth ],
         change: $.proxy(charts.Timeline.prototype.doSliderChange_, me)
     });
     $('#' + charts.Timeline.SLIDER_DIV_NAME_).width(me.plotWidth).css({
