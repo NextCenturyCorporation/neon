@@ -45,7 +45,6 @@
 
 </head>
 <body>
-
     <div id="options-bar">
         <div id="toggle">
             <img id="toggle-image" />
