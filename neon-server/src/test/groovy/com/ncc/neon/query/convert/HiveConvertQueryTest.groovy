@@ -81,6 +81,11 @@ class HiveConvertQueryTest extends AbstractConversionTest {
     }
 
     @Override
+    protected void assertQueryWithEmptyFilter(query) {
+        assertStandardHiveQLStatement(query)
+    }
+
+    @Override
     protected void assertSelectClausePopulated(query) {
         assert query.toLowerCase() == "select $FIELD_NAME, $FIELD_NAME_2 from ${DATABASE_NAME}.${TABLE_NAME}".toLowerCase()
     }

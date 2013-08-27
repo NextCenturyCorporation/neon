@@ -126,6 +126,13 @@ abstract class AbstractConversionTest {
         assertQueryWithGroupByClauses(query)
     }
 
+    @Test
+    void "test a filter with no where clause"(){
+        givenFilterStateHasAnEmptyFilter()
+        def query = convertQuery(simpleQuery)
+        assertQueryWithEmptyFilter(query)
+    }
+
     protected abstract def convertQuery(query)
 
     protected abstract void assertSelectClausePopulated(query)
@@ -145,6 +152,14 @@ abstract class AbstractConversionTest {
     protected abstract void assertQueryWithGroupByClauses(query)
 
     protected abstract void assertQueryWithOrWhereClause(query)
+
+    protected abstract void assertQueryWithEmptyFilter(query)
+
+    private void givenFilterStateHasAnEmptyFilter(){
+        FilterKey filterKey = new FilterKey(uuid: UUID.randomUUID(), dataSet: new DataSet(databaseName: simpleFilter.databaseName, tableName: simpleFilter.tableName))
+        Filter filter = new Filter(databaseName: simpleFilter.databaseName, tableName: simpleFilter.tableName)
+        filterState.addFilter(filterKey, filter)
+    }
 
     private void givenFilterStateHasOneFilter() {
         FilterKey filterKey = new FilterKey(uuid: UUID.randomUUID(), dataSet: new DataSet(databaseName: simpleFilter.databaseName, tableName: simpleFilter.tableName))

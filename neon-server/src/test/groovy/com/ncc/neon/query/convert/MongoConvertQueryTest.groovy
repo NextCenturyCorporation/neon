@@ -85,6 +85,11 @@ class MongoConvertQueryTest extends AbstractConversionTest {
         assert query.selectParams == new BasicDBObject()
     }
 
+    @Override
+    protected void assertQueryWithEmptyFilter(query) {
+        standardQueryAsserts(query)
+    }
+
     protected BasicDBObject createOrClause() {
         BasicDBObject simpleClause1 = new BasicDBObject(FIELD_NAME, COLUMN_VALUE)
         BasicDBObject simpleClause2 = new BasicDBObject(FIELD_NAME_2, COLUMN_VALUE)
