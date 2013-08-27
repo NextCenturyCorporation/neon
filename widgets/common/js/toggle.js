@@ -27,12 +27,10 @@ $(document).ready(function () {
             if ($("#toggle-image").attr('src') === "img/arrow_down.png") {
                 $("#toggle-image").attr('src', $("#toggle-image").attr('src').replace('_down', '_right'));
                 $("#toggle").addClass("toggle-corners");
-                $("#options").addClass("toggle-corners");
 
             } else {
                 $("#toggle-image").attr('src', $("#toggle-image").attr('src').replace('_right', '_down'));
                 $("#toggle").removeClass("toggle-corners");
-                $("#options").removeClass("toggle-corners");
             }
         });
 

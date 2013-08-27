@@ -49,9 +49,8 @@ html, body {
 
 #toggle {
     background-color: #f0f0f0;
-    width: 30px;
     height: 30px;
-    border-radius: 5px;
+    border-radius: 15px;
     border-bottom-left-radius: 0;
     border-bottom-right-radius: 0;
 }
@@ -63,11 +62,11 @@ html, body {
     padding-top: 5px;
     border-radius: 15px;
     border-top-left-radius: 0;
+    border-top-right-radius: 0;
 }
 
 #toggle-image {
     height: 30px;
-    width: 30px;
 }
 
 #options-bar {
@@ -78,10 +77,11 @@ html, body {
     opacity: .9;
 }
 
-#toggle.toggle-corners {
-    border-radius: 5px;
+#options-label {
+    color: black;
+    display: inline;
 }
 
-#options.toggle-corners {
-    border-radius: 15px;
+#toggle.toggle-corners {
+    border-radius: 5px;
 }

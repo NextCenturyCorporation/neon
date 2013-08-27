@@ -4,6 +4,10 @@
     color: white; /*text around the chart is not showing up*/
 }
 
-#options {
-    width: 225px;
+#options-bar {
+    width: 230px;
+}
+
+#toggle {
+    width: 230px;
 }

@@ -49,6 +49,7 @@
         <div id="options-bar">
             <div id="toggle">
                 <img id="toggle-image" />
+                <label id=options-label>Options</label>
             </div>
 
             <div id="options">

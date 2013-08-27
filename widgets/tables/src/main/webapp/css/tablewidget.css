@@ -29,8 +29,12 @@
     min-height: 200px;
 }
 
-#options {
-    width: 650px;
+#options-bar {
+    width: 655px;
+}
+
+#toggle {
+    width: 655px;
 }
 
 #sort-buttons {

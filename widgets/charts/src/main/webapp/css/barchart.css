@@ -75,11 +75,12 @@
     height:90%;
 }
 
-#options {
-    width: 450px;
-}
-
 #options-bar {
     top: 0;
     left: 0;
+    width: 455px;
+}
+
+#toggle {
+    width: 455px;
 }
