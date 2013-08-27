@@ -86,23 +86,14 @@ charts.BarChart = function (chartSelector, opts) {
     opts = opts || {};
     this.chartSelector_ = chartSelector;
 
-    this.width = this.determineWidth_(chartSelector, opts);
-    this.height = this.determineHeight_(chartSelector, opts);
-
     this.xAttribute_ = opts.x;
     this.xLabel_ = opts.xLabel || this.determineXLabel_();
     this.yAttribute_ = opts.y;
     this.yLabel_ = opts.yLabel || this.determineYLabel_();
     this.margin = $.extend({}, charts.BarChart.DEFAULT_MARGIN_, opts.margin || {});
-    this.hMargin_ = this.margin.left + this.margin.right;
-    this.vMargin_ = this.margin.top + this.margin.bottom;
 
     if (opts.init) {
         opts.init.call(this, opts);
-    }
-
-    if(opts.responsive) {
-        charts.BarChart.handleResponsive_(this);
     }
 
     // tick formatting/values may be undefined in which case d3's default will be used
@@ -111,16 +102,12 @@ charts.BarChart = function (chartSelector, opts) {
     this.categories = this.createCategories_(opts.categories ? opts.categories : this.createCategoriesFromUniqueValues_, opts.data);
     this.data_ = this.aggregateData_(opts.data);
 
-    this.x = this.createXScale_();
-    // set the width to be as close to the user specified size (but not larger) so the bars divide evenly into
-    // the plot area
-    this.plotWidth = this.computePlotWidth_();
-    this.x.rangeRoundBands([0, this.plotWidth]);
-    this.y = this.createYScale_();
-    this.xAxis_ = this.createXAxis_();
-    this.yAxis_ = this.createYAxis_();
+    this.preparePropertiesForDrawing_(opts);
     this.style_ = $.extend({}, charts.BarChart.DEFAULT_STYLE_, opts.style);
 
+    if(opts.responsive) {
+        this.handleResponsive_();
+    }
 };
 
 charts.BarChart.DEFAULT_HEIGHT_ = 400;
@@ -287,23 +274,29 @@ charts.BarChart.createYAxisTickFormat_ = function () {
  * @return {charts.BarChart} This bar chart
  */
 charts.BarChart.prototype.draw = function () {
-    this.width = this.determineWidth_(this.chartSelector_, {});
-    this.height = this.determineHeight_(this.chartSelector_, {});
 
-    this.x = this.createXScale_();
-    this.plotWidth = this.computePlotWidth_();
-    this.x.rangeRoundBands([0, this.plotWidth]);
-    this.y = this.createYScale_();
-
-    this.xAxis_ = this.createXAxis_();
-    this.yAxis_ = this.createYAxis_();
-
+    this.preparePropertiesForDrawing_({});
     $(this.chartSelector_).empty();
     var chart = this.drawChartSVG_();
     this.bindData_(chart);
     this.drawXAxis_(chart);
     this.drawYAxis_(chart);
     return this;
+};
+
+charts.BarChart.prototype.preparePropertiesForDrawing_ = function(opts){
+
+    this.width = this.determineWidth_(this.chartSelector_, opts);
+    this.height = this.determineHeight_(this.chartSelector_, opts);
+    this.setMarginsBasedOnTicks_();
+    this.x = this.createXScale_();
+    // set the width to be as close to the user specified size (but not larger) so the bars divide evenly into
+    // the plot area
+    this.plotWidth = this.computePlotWidth_();
+    this.x.rangeRoundBands([0, this.plotWidth]);
+    this.y = this.createYScale_();
+    this.xAxis_ = this.createXAxis_();
+    this.yAxis_ = this.createYAxis_();
 };
 
 charts.BarChart.prototype.drawChartSVG_ = function () {
@@ -440,12 +433,12 @@ charts.BarChart.prototype.hideTooltip_ = function () {
     $('#' + charts.BarChart.TOOLTIP_ID_).remove();
 };
 
-
 charts.BarChart.prototype.drawXAxis_ = function (chart) {
-    chart.append('g')
+    var axis = chart.append('g')
         .attr('class', 'x axis')
         .attr('transform', 'translate(0,' + (this.height - this.vMargin_) + ')')
         .call(this.xAxis_);
+    return axis;
 };
 
 charts.BarChart.prototype.drawYAxis_ = function (chart) {
@@ -572,6 +565,10 @@ charts.BarChart.mapKeysToBooleans_ = function (aggregatedData) {
     });
 };
 
+charts.BarChart.prototype.setMarginsBasedOnTicks_ = function(){
+    this.hMargin_ = this.margin.left + this.margin.right;
+    this.vMargin_ = this.margin.top + this.margin.bottom;
+}
 
 /**
  * Removes any data from the aggregate for which there is a key that has no corresponding category. This can
@@ -615,21 +612,13 @@ charts.BarChart.prototype.determineHeight_ = function (chartSelector, opts) {
     return charts.BarChart.DEFAULT_HEIGHT_;
 };
 
-charts.BarChart.handleResponsive_ = function(me){
-    var debounce = function(fn, timeout)
-    {
-        var timeoutID = -1;
-        return function() {
-            if (timeoutID > -1) {
-                window.clearTimeout(timeoutID);
-            }
-            timeoutID = window.setTimeout(fn, timeout);
-        };
-    };
-
-    var debounced_draw = debounce(function() {
+charts.BarChart.prototype.handleResponsive_ = function(){
+    var me = this;
+    function drawChart(){
+        $(me.chartSelector_).empty();
         me.draw();
-    }, 100);
+    }
 
-    $(window).resize(debounced_draw);
+    $(window).resize(_.debounce(drawChart, 50));
+
 };

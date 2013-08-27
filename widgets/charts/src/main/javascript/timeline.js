@@ -52,11 +52,11 @@
  */
 charts.Timeline = function (chartSelector, opts) {
     opts = opts || {};
-    var interval = opts.interval || charts.Timeline.DEFAULT_INTERVAL_;
-    this.timeInterval_ = charts.Timeline.TIME_INTERVALS_[interval].interval;
-    this.tickStep_ = opts.step || charts.Timeline.TIME_INTERVALS_[interval].step;
-    var tickFormat = d3.time.format.utc(opts.tickFormat || charts.Timeline.TIME_INTERVALS_[interval].tickFormat);
-
+    this.interval = opts.interval || charts.Timeline.DEFAULT_INTERVAL_;
+    this.timeInterval_ = charts.Timeline.TIME_INTERVALS_[this.interval].interval;
+    this.tickStep_ = opts.step || charts.Timeline.TIME_INTERVALS_[this.interval].step;
+    this.rotatedTickValues_ = false;
+    var tickFormat = d3.time.format.utc(opts.tickFormat || charts.Timeline.TIME_INTERVALS_[this.interval].tickFormat);
 
     charts.BarChart.call(this, chartSelector,
         $.extend({}, opts, {
@@ -88,6 +88,21 @@ charts.Timeline.prototype.dateForItem_ = charts.Timeline.prototype.categoryForIt
         this.drawSlider_();
         return this;
     };
+
+    var oldDrawXAxisMethod = charts.Timeline.prototype.drawXAxis_;
+    charts.Timeline.prototype.drawXAxis_ = function(chart) {
+        var axis = oldDrawXAxisMethod.call(this, chart);
+        if(this.rotatedTickValues_){
+            axis.selectAll("text")
+                .style("text-anchor", "end")
+                .attr("dx", "-.8em")
+                .attr("dy", ".15em")
+                .attr("transform", function(d) {
+                    return "rotate(-60)"
+                });
+        }
+    };
+
 })();
 
 /**
@@ -122,6 +137,7 @@ charts.Timeline.YEAR = 'year';
 
 charts.Timeline.DEFAULT_INTERVAL_ = charts.Timeline.MONTH;
 charts.Timeline.TIME_INTERVALS_ = {};
+charts.Timeline.TIME_HORIZONTAL_PIXEL_WIDTHS_ = {};
 charts.Timeline.SLIDER_DIV_NAME_ = 'slider';
 charts.Timeline.ZERO_DATE_ = new Date(0);
 charts.Timeline.FILTER_EVENT_TYPE_ = 'filter';
@@ -167,7 +183,6 @@ charts.Timeline.prototype.computeMaxDate_ = function (data) {
     return maxDate ? new Date(maxDate.getTime() + 1) : charts.Timeline.ZERO_DATE_;
 };
 
-
 /**
  * Computes the start dates for each of the time periods in the chart
  * @method timePeriods_
@@ -198,6 +213,7 @@ charts.Timeline.prototype.timeIntervalTicks_ = function () {
         tickValues.push(currentTick);
         currentTick = this.timeInterval_.offset(this.timeInterval_(currentTick), this.tickStep_);
     }
+
     return tickValues;
 };
 
@@ -235,7 +251,6 @@ charts.Timeline.prototype.doSliderChange_ = function (event, slider) {
     this.styleInactiveData_(filterStartDate, filterEndDate);
     this.notifyFilterListeners_(filterStartDate, filterEndDate);
 };
-
 
 /**
  * Removes the listener for filters
@@ -275,6 +290,24 @@ charts.Timeline.prototype.timePeriodStart_ = function (date) {
     return timePeriodStart;
 };
 
+charts.Timeline.prototype.setMarginsBasedOnTicks_ = function(){
+    this.hMargin_ = this.margin.left + this.margin.right;
+
+    var tickSizeInPixels = 0;
+    if(this.tickValues_){
+        tickSizeInPixels = this.tickValues_.length * charts.Timeline.TIME_HORIZONTAL_PIXEL_WIDTHS_[this.interval];
+    }
+
+    if(tickSizeInPixels > this.width){
+        this.rotatedTickValues_ = true;
+        this.vMargin_ = this.margin.top + charts.Timeline.TIME_HORIZONTAL_PIXEL_WIDTHS_[this.interval] + 5;
+    }
+    else{
+        this.rotatedTickValues_ = false;
+        this.vMargin_ = this.margin.top + this.margin.bottom;
+    }
+}
+
 /**
  *
  * Creates the information necessary to properly format time for the given interval
@@ -297,3 +330,10 @@ charts.Timeline.TIME_INTERVALS_[charts.Timeline.HOUR] = charts.Timeline.createTi
 charts.Timeline.TIME_INTERVALS_[charts.Timeline.DAY] = charts.Timeline.createTimeIntervalMethods_(d3.time.day.utc, '%d-%b-%Y', 7);
 charts.Timeline.TIME_INTERVALS_[charts.Timeline.MONTH] = charts.Timeline.createTimeIntervalMethods_(d3.time.month.utc, '%b-%Y');
 charts.Timeline.TIME_INTERVALS_[charts.Timeline.YEAR] = charts.Timeline.createTimeIntervalMethods_(d3.time.year.utc, '%Y');
+
+//Hardcoded label widths until we can calculate them NEON-230
+charts.Timeline.TIME_HORIZONTAL_PIXEL_WIDTHS_[charts.Timeline.HOUR] = 80;
+charts.Timeline.TIME_HORIZONTAL_PIXEL_WIDTHS_[charts.Timeline.DAY] = 70;
+charts.Timeline.TIME_HORIZONTAL_PIXEL_WIDTHS_[charts.Timeline.MONTH] = 55;
+charts.Timeline.TIME_HORIZONTAL_PIXEL_WIDTHS_[charts.Timeline.YEAR] = 40;
+
