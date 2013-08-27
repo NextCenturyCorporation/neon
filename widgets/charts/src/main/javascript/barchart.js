@@ -568,7 +568,7 @@ charts.BarChart.mapKeysToBooleans_ = function (aggregatedData) {
 charts.BarChart.prototype.setMarginsBasedOnTicks_ = function(){
     this.hMargin_ = this.margin.left + this.margin.right;
     this.vMargin_ = this.margin.top + this.margin.bottom;
-}
+};
 
 /**
  * Removes any data from the aggregate for which there is a key that has no corresponding category. This can

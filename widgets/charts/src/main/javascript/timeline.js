@@ -98,7 +98,7 @@ charts.Timeline.prototype.dateForItem_ = charts.Timeline.prototype.categoryForIt
                 .attr("dx", "-.8em")
                 .attr("dy", ".15em")
                 .attr("transform", function(d) {
-                    return "rotate(-60)"
+                    return "rotate(-60)";
                 });
         }
     };
@@ -111,7 +111,6 @@ charts.Timeline.prototype.dateForItem_ = charts.Timeline.prototype.categoryForIt
  * @type {String}
  */
 charts.Timeline.HOUR = 'hour';
-
 
 /**
  * The time interval for charting by day
@@ -306,7 +305,7 @@ charts.Timeline.prototype.setMarginsBasedOnTicks_ = function(){
         this.rotatedTickValues_ = false;
         this.vMargin_ = this.margin.top + this.margin.bottom;
     }
-}
+};
 
 /**
  *
