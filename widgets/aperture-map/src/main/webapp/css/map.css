@@ -2,8 +2,11 @@
     position: absolute;
     top: 20px;
     left: 20px;
+    /**next two lines make map reactive, temporarily disabled until a better solution is found
     width: 90%;
-    height: 90%;
+    height: 90%;**/
+    width: 924px;
+    height: 394px;
 }
 
 /* override image properties here so openlayers renders properly */
@@ -15,5 +18,5 @@ img {
 }
 
 #options-bar {
-    width: 90%;
+    width: 900px;
 }
