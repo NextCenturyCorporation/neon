@@ -20,6 +20,11 @@
  * OF NEXT CENTURY CORPORATION EXCEPT BY PRIOR WRITTEN PERMISSION AND WHEN
  * RECIPIENT IS UNDER OBLIGATION TO MAINTAIN SECRECY.
  */
+
+.container {
+    margin-left: 0px;
+    width: auto;
+}
 .filter-dropdown{
     display: inline-block;
     vertical-align: top;

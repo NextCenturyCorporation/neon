@@ -105,88 +105,88 @@
 
 </head>
 <body>
+    <div class="container">
+        <div id="datastore-container">
+            <h4>Connection</h4>
+            <div class="controls-row">
 
-    <div id="datastore-container">
-        <h4>Connection</h4>
-        <div class="controls-row">
+                <div class="control-group">
+                    <label class="control-label" for="datastore-select">Type</label>
 
-            <div class="control-group">
-                <label class="control-label" for="datastore-select">Type</label>
-
-                <div class="controls" >
-                    <select id="datastore-select" class="dropdown span2">
-                        <option value="mongo">Mongo</option>
-                        <option value="hive">Hive</option>
-                    </select>
+                    <div class="controls" >
+                        <select id="datastore-select" class="dropdown span2">
+                            <option value="mongo">Mongo</option>
+                            <option value="hive">Hive</option>
+                        </select>
+                    </div>
                 </div>
-            </div>
 
-            <div class="control-group">
-                <label class="control-label" for="hostname-input">Host</label>
+                <div class="control-group">
+                    <label class="control-label" for="hostname-input">Host</label>
 
-                <div class="controls" class="textfield">
-                    <input class="span2" type="text" id="hostname-input" value="localhost"/>
+                    <div class="controls" class="textfield">
+                        <input class="span2" type="text" id="hostname-input" value="localhost"/>
+                    </div>
                 </div>
-            </div>
 
-            <div class="control-group">
-                <div class="controls">
-                    <button class="btn" id="datastore-button">Continue</button>
+                <div class="control-group">
+                    <div class="controls">
+                        <button class="btn" id="datastore-button">Continue</button>
+                    </div>
                 </div>
             </div>
         </div>
-    </div>
 
-    <div id="db-table">
-        <h4>Database</h4>
+        <div id="db-table">
+            <h4>Database</h4>
+            <div class="controls controls-row">
+                <div class="control-group">
+                    <label class="control-label" for="database-select">Database</label>
+
+                    <div class="controls">
+                        <select id="database-select" class="dropdown span2">
+                            <option value="">Select Database...</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="control-group">
+                    <label class="control-label" for="table-select">Table</label>
+
+                    <div class="controls">
+                        <select id="table-select" class="dropdown span2"></select>
+                    </div>
+                </div>
+
+                <div class="control-group">
+                    <div class="controls">
+                        <button class="btn" id="database-table-button">Continue</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="filter-container">
+            <h4>Filters</h4>
+
+            <div id="filter-content"/>
+
+        </div>
         <div class="controls controls-row">
-            <div class="control-group">
-                <label class="control-label" for="database-select">Database</label>
+            <button id="clear-filters-button" class="btn">Clear All Filters</button>
 
-                <div class="controls">
-                    <select id="database-select" class="dropdown span2">
-                        <option value="">Select Database...</option>
-                    </select>
-                </div>
-            </div>
-
-            <div class="control-group">
-                <label class="control-label" for="table-select">Table</label>
-
-                <div class="controls">
-                    <select id="table-select" class="dropdown span2"></select>
-                </div>
-            </div>
-
-            <div class="control-group">
-                <div class="controls">
-                    <button class="btn" id="database-table-button">Continue</button>
-                </div>
+            <div class="control-group" id="radio-buttons">
+                <label class="radio-inline">
+                    <input type="radio" name="boolean" value="AND" checked/>
+                    AND
+                </label>
+                <label class="radio-inline">
+                    <input type="radio" name="boolean" value="OR"/>
+                    OR
+                </label>
             </div>
         </div>
     </div>
-
-    <div id="filter-container">
-        <h4>Filters</h4>
-
-        <div id="filter-content"/>
-
-    </div>
-    <div class="controls controls-row">
-        <button id="clear-filters-button" class="btn">Clear All Filters</button>
-
-        <div class="control-group" id="radio-buttons">
-            <label class="radio-inline">
-                <input type="radio" name="boolean" value="AND" checked/>
-                AND
-            </label>
-            <label class="radio-inline">
-                <input type="radio" name="boolean" value="OR"/>
-                OR
-            </label>
-        </div>
-    </div>
-
 
 </body>
 </html>
