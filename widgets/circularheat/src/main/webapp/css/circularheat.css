@@ -1,6 +1,7 @@
 #circularheatchart {
-    width: 800px;
-    height: 400px;
+    width: 360px;
+    height: 360px;
+    margin: auto;
     color: white; /*text around the chart is not showing up*/
 }
 
@@ -10,4 +11,11 @@
 
 #toggle {
     width: 230px;
+}
+
+svg {
+    width: 360px;
+    height: 360px;
+    display: block;
+    margin: auto;
 }
