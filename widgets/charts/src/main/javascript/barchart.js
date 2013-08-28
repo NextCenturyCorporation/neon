@@ -40,6 +40,7 @@
  *     <li>yLabel (optional) - The label to show for the y-attribute (e.g. on tooltips). If not specified, this will
  *     default to using the name of the attribute specified in y (if no y value is specified, then the value "Count" will be used).
  *     This is useful if the y-attribute name is not the same as how it should be displayed to users.</li>
+ *     <li>responsive (optional) - If true, the chart will size to the width and height of the parent html element containing the chart</li>
  *     <li>height (optional) - The height of the chart in pixels. If not specified, a preconfigured default value will be used.</li>
  *     <li>width (optional) - The width of the chart in pixels. This will be honored as closely as possible, while still allowing bar widths to be evenly drawn. If not specified, a preconfigured default value will be used.</li>
  *     <li>margin (optional) - An object with any of the elements `top`, `left`, `bottom` or `right`. These are pixel values to override the default margin. If not specified, a preconfigured default value will be used.</li>
@@ -280,7 +281,7 @@ charts.BarChart.createYAxisTickFormat_ = function () {
  */
 charts.BarChart.prototype.draw = function () {
 
-    this.preparePropertiesForDrawing_({});
+    this.preparePropertiesForDrawing_();
     $(this.chartSelector_).empty();
     var chart = this.drawChartSVG_();
     this.bindData_(chart);

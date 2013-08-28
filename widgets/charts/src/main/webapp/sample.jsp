@@ -45,7 +45,7 @@
         width: 600,
         height: 300,
         interval: charts.Timeline.MONTH,
-        responsive: true
+        responsive: false
     };
 
     var timeline = new charts.Timeline('#chart', opts).draw();
