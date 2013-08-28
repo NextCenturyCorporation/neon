@@ -42,6 +42,8 @@
     var opts = { "data": data,
         x: "date",
         y: "count",
+        width: 600,
+        height: 300,
         interval: charts.Timeline.MONTH,
         responsive: true
     };
