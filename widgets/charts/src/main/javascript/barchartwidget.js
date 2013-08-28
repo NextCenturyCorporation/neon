@@ -37,7 +37,6 @@ $(document).ready(function () {
             filtersChanged: drawChart
         });
 
-
         /**
          * Redraws the chart based on the user selected attribtues
          * @method drawChart
@@ -82,6 +81,5 @@ $(document).ready(function () {
         drawChart();
 
     });
-
 
 });
