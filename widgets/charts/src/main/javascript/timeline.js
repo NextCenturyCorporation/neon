@@ -306,6 +306,7 @@ charts.Timeline.prototype.setMarginsBasedOnTicks_ = function(){
 
     if(tickSizeInPixels > this.width){
         this.rotatedTickValues_ = true;
+        //Add 5 pixel padding to the margin such that the vertical label fits in the chart bounds.
         this.vMargin_ = this.margin.top + charts.Timeline.TIME_HORIZONTAL_PIXEL_WIDTHS_[this.interval] + 5;
     }
     else{
