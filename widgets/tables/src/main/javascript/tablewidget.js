@@ -122,11 +122,15 @@ $(document).ready(function () {
 
         function populateTable(data) {
             table = new tables.Table('#table', {data: data.data}).draw();
+            sizeTableToRemainingSpace();
         }
 
         function sizeTableToRemainingSpace() {
-            $('#table').css('top', $('#controls').position().top + $('#controls').outerHeight());
-            table.refreshLayout();
+            $('#table').css('top', $('#options-bar').position().top + $('#options-bar').outerHeight());
+            // table may not be drawn yet
+            if (table) {
+                table.refreshLayout();
+            }
         }
 
         function addLimitListener() {
@@ -135,9 +139,6 @@ $(document).ready(function () {
 
         populateSortDirection();
         addLimitListener();
-
-        // show table initially empty
-        populateTable({data: []});
 
         $(window).resize(sizeTableToRemainingSpace);
         sizeTableToRemainingSpace();

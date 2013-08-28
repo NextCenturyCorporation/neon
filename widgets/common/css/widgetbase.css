@@ -85,3 +85,8 @@ html, body {
 #toggle.toggle-corners {
     border-radius: 5px;
 }
+
+.grid-canvas {
+    /* in case there are empty rows widgets that use the table, color it the same as cell color */
+    background-color: #FFFFFF;
+}
