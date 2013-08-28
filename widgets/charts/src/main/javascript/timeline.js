@@ -108,7 +108,7 @@ charts.Timeline.prototype.dateForItem_ = charts.Timeline.prototype.categoryForIt
     charts.Timeline.prototype.determineHeight_ = function(){
         var height = oldDetermineHeightMethod.call(this, this.chartSelector_);
         return height - 30;
-    }
+    };
 
 })();
 
