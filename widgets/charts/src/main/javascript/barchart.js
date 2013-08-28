@@ -86,6 +86,11 @@ charts.BarChart = function (chartSelector, opts) {
     opts = opts || {};
     this.chartSelector_ = chartSelector;
 
+    if(!opts.responsive) {
+        this.userSetWidth_ = opts.width;
+        this.userSetHeight_ = opts.height;
+    }
+
     this.xAttribute_ = opts.x;
     this.xLabel_ = opts.xLabel || this.determineXLabel_();
     this.yAttribute_ = opts.y;
@@ -102,7 +107,7 @@ charts.BarChart = function (chartSelector, opts) {
     this.categories = this.createCategories_(opts.categories ? opts.categories : this.createCategoriesFromUniqueValues_, opts.data);
     this.data_ = this.aggregateData_(opts.data);
 
-    this.preparePropertiesForDrawing_(opts);
+    this.preparePropertiesForDrawing_();
     this.style_ = $.extend({}, charts.BarChart.DEFAULT_STYLE_, opts.style);
 
     if(opts.responsive) {
@@ -284,10 +289,10 @@ charts.BarChart.prototype.draw = function () {
     return this;
 };
 
-charts.BarChart.prototype.preparePropertiesForDrawing_ = function(opts){
+charts.BarChart.prototype.preparePropertiesForDrawing_ = function(){
 
-    this.width = this.determineWidth_(this.chartSelector_, opts);
-    this.height = this.determineHeight_(this.chartSelector_, opts);
+    this.width = this.determineWidth_(this.chartSelector_);
+    this.height = this.determineHeight_(this.chartSelector_);
     this.setMarginsBasedOnTicks_();
     this.x = this.createXScale_();
     // set the width to be as close to the user specified size (but not larger) so the bars divide evenly into
@@ -592,9 +597,9 @@ charts.BarChart.prototype.removeDataWithNoMatchingCategory_ = function (aggregat
     });
 };
 
-charts.BarChart.prototype.determineWidth_ = function (chartSelector, opts) {
-    if(opts.width) {
-        return opts.width;
+charts.BarChart.prototype.determineWidth_ = function (chartSelector) {
+    if(this.userSetWidth_) {
+        return this.userSetWidth_;
     }
     else if ($(chartSelector).width() !== 0){
         return $(chartSelector).width();
@@ -602,9 +607,9 @@ charts.BarChart.prototype.determineWidth_ = function (chartSelector, opts) {
     return charts.BarChart.DEFAULT_WIDTH_;
 };
 
-charts.BarChart.prototype.determineHeight_ = function (chartSelector, opts) {
-    if(opts.height) {
-        return opts.height;
+charts.BarChart.prototype.determineHeight_ = function (chartSelector) {
+    if(this.userSetHeight_) {
+        return this.userSetHeight_;
     }
     else if ($(chartSelector).height() !== 0){
         return $(chartSelector).height();
