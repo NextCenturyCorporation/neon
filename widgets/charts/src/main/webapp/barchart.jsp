@@ -42,34 +42,34 @@
 
 </head>
 <body>
-    <div class="chart-container">
-        <div id="options-bar">
-            <div id="toggle">
-                <img id="toggle-image"/>
-                <label id=options-label>Options</label>
+
+<div id="options-bar">
+    <div id="toggle">
+        <img id="toggle-image"/>
+        <label id=options-label>Options</label>
+    </div>
+    <div id="options">
+        <div class="controls-row">
+            <div class="control-group">
+                <label class="control-label" for="x">x-axis</label>
+
+                <div class="controls">
+                    <select id="x" class="dropdown"></select>
+                </div>
             </div>
-            <div id="options">
-                <div class="controls-row">
-                    <div class="control-group">
-                        <label class="control-label" for="x">x-axis</label>
 
-                        <div class="controls">
-                            <select id="x" class="dropdown"></select>
-                        </div>
-                    </div>
+            <div class="control-group">
+                <label class="control-label" for="y">y-axis</label>
 
-                    <div class="control-group">
-                        <label class="control-label" for="y">y-axis</label>
-
-                        <div class="controls">
-                            <select id="y" class="dropdown"></select>
-                        </div>
-                    </div>
+                <div class="controls">
+                    <select id="y" class="dropdown"></select>
                 </div>
             </div>
         </div>
-
-        <div id="chart" class="chart-div"></div>
     </div>
+</div>
+
+<div id="chart" class="chart-div"></div>
+
 </body>
 </html>

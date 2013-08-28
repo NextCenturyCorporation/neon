@@ -45,54 +45,53 @@
 
 </head>
 <body>
-    <div class="chart-container">
-        <div id="options-bar">
-            <div id="toggle">
-                <img id="toggle-image" />
-                <label id=options-label>Options</label>
+<div id="options-bar">
+    <div id="toggle">
+        <img id="toggle-image"/>
+        <label id=options-label>Options</label>
+    </div>
+
+    <div id="options">
+        <div class="controls-row">
+            <div class="control-group">
+                <label class="control-label" for="x">x-axis (Date)</label>
+
+                <div class="controls">
+                    <select id="x" class="dropdown"></select>
+                </div>
             </div>
 
-            <div id="options">
-                <div class="controls-row">
-                    <div class="control-group">
-                        <label class="control-label" for="x">x-axis (Date)</label>
+            <div class="control-group">
+                <label class="control-label" for="y">y-axis</label>
 
-                        <div class="controls">
-                            <select id="x" class="dropdown"></select>
-                        </div>
-                    </div>
+                <div class="controls">
+                    <select id="y" class="dropdown"></select>
+                </div>
+            </div>
 
-                    <div class="control-group">
-                        <label class="control-label" for="y">y-axis</label>
+            <div class="control-group">
+                <label class="control-label" for="time-granularity">Time Granularity</label>
 
-                        <div class="controls">
-                            <select id="y" class="dropdown"></select>
-                        </div>
-                    </div>
+                <div class="controls">
+                    <select id="time-granularity" class="dropdown">
+                    </select>
+                </div>
+            </div>
 
-                    <div class="control-group">
-                        <label class="control-label" for="time-granularity">Time Granularity</label>
+            <div class="control-group">
+                <div class="controls">
+                    <button type="button" id="redraw-bounds" class="btn">Redraw Bounds</button>
 
-                        <div class="controls">
-                            <select id="time-granularity" class="dropdown">
-                            </select>
-                        </div>
-                    </div>
-
-                    <div class="control-group">
-                        <div class="controls">
-                            <button type="button" id="redraw-bounds" class="btn">Redraw Bounds</button>
-
-                            <button type="button" id="reset-filter" class="btn">Reset Time Period</button>
-                        </div>
-                    </div>
+                    <button type="button" id="reset-filter" class="btn">Reset Time Period</button>
                 </div>
             </div>
         </div>
-
-        <div id="timeline" class="timeline-div">
-            <div id="chart" class="chart-div"></div>
-        </div>
     </div>
+</div>
+
+<div id="timeline" class="timeline-div">
+    <div id="chart" class="chart-div"></div>
+</div>
+
 </body>
 </html>
