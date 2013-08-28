@@ -5,17 +5,13 @@
     color: white; /*text around the chart is not showing up*/
 }
 
-#options-bar {
-    width: 230px;
-}
-
-#toggle {
-    width: 230px;
-}
-
 svg {
     width: 360px;
     height: 360px;
     display: block;
     margin: auto;
+}
+
+#options-bar {
+    width: 230px;
 }

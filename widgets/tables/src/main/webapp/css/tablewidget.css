@@ -29,18 +29,14 @@
     min-height: 200px;
 }
 
-#options-bar {
-    width: 655px;
-}
-
-#toggle {
-    width: 655px;
-}
-
 #sort-buttons {
     padding-left: 8px;
 }
 
 #table.slick-viewport {
     height: 90%;
+}
+
+#options-bar {
+    width: 655px;
 }
