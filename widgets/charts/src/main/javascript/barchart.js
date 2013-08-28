@@ -621,10 +621,11 @@ charts.BarChart.prototype.determineHeight_ = function (chartSelector) {
 charts.BarChart.prototype.handleResponsive_ = function(){
     var me = this;
     function drawChart(){
-        $(me.chartSelector_).empty();
         me.draw();
     }
-
-    $(window).resize(_.debounce(drawChart, 50));
+    $(window).resize(function(){
+        $(me.chartSelector_).empty();
+    });
+    $(window).resize(_.debounce(drawChart, 100));
 
 };
