@@ -574,6 +574,7 @@ charts.BarChart.mapKeysToBooleans_ = function (aggregatedData) {
 charts.BarChart.prototype.setMarginsBasedOnTicks_ = function(){
     this.hMargin_ = this.margin.left + this.margin.right;
     this.vMargin_ = this.margin.top + this.margin.bottom;
+
 };
 
 /**
@@ -603,7 +604,7 @@ charts.BarChart.prototype.determineWidth_ = function (chartSelector) {
         return this.userSetWidth_;
     }
     else if ($(chartSelector).width() !== 0){
-        return $(chartSelector).width();
+        return $(chartSelector).width() - this.hMargin_;
     }
     return charts.BarChart.DEFAULT_WIDTH_;
 };
@@ -613,7 +614,7 @@ charts.BarChart.prototype.determineHeight_ = function (chartSelector) {
         return this.userSetHeight_;
     }
     else if ($(chartSelector).height() !== 0){
-        return $(chartSelector).height();
+        return $(chartSelector).height() - 5;
     }
     return charts.BarChart.DEFAULT_HEIGHT_;
 };

@@ -103,6 +103,13 @@ charts.Timeline.prototype.dateForItem_ = charts.Timeline.prototype.categoryForIt
         }
     };
 
+    //We need to offset the height of the chart.
+    var oldDetermineHeightMethod = charts.BarChart.prototype.determineHeight_;
+    charts.Timeline.prototype.determineHeight_ = function(){
+        var height = oldDetermineHeightMethod.call(this, this.chartSelector_);
+        return height - 30;
+    }
+
 })();
 
 /**
