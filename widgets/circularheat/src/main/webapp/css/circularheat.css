@@ -2,7 +2,6 @@
     width: 360px;
     height: 360px;
     margin: auto;
-    color: white; /*text around the chart is not showing up*/
 }
 
 svg {
@@ -12,6 +11,13 @@ svg {
     margin: auto;
 }
 
+<<<<<<< HEAD
 #options-bar {
     width: 230px;
 }
+=======
+svg .segment {
+    fill: white;
+}
+
+>>>>>>> Fixed coloring of labels in circular heat chart so they are visible.
