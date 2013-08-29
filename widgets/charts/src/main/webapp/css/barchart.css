@@ -76,7 +76,7 @@ svg .tick {
     height: 100%;
 }
 
-#options-bar {
+.options-bar {
     top: 0px;
     left: 60px;
     width: 455px;
