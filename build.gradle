@@ -14,8 +14,6 @@ def DEPLOY_GROUP = 'deploy'
 
 def owfTomcat = (hasProperty('OWF_TOMCAT') ? OWF_TOMCAT : System.env.OWF_TOMCAT) ?: '/opt/owf/apache-tomcat-7.0.21'
 def owfTomcatWebapps = owfTomcat + '/webapps'
-def jettyHttpPort = 9000
-def jettyHttpsPort = 9443
 
 // the neon-server is just output as neon.js for simpler referencing
 project(":neon-server").ext.outfile = 'neon'
@@ -108,7 +106,7 @@ task jettyRunAll(type: com.ncc.common.JettyRunAll) {
     ssl = true
     keystorePath = this.class.getResource("/keystore").file
     keystorePassword = "neon"
-    port = ssl ? jettyHttpsPort : jettyHttpPort
+    port = ssl ? 9443 : 9000
 
     def serverProject = project(":neon-server")
     def serverProjectName = serverProject.name
