@@ -17,6 +17,6 @@ img {
     vertical-align: baseline;
 }
 
-#toggle {
-    width: 30px;
+.options-bar {
+    width: 905px;
 }

@@ -21,18 +21,18 @@
  * RECIPIENT IS UNDER OBLIGATION TO MAINTAIN SECRECY.
  */
 $(document).ready(function () {
-        $("#toggle").click(function () {
-            $("#options").slideToggle("slow");
+        $(".toggle").click(function () {
+            $(".options").slideToggle("slow");
 
-            if ($("#toggle-image").attr('src') === "img/arrow_down.png") {
-                $("#toggle-image").attr('src', $("#toggle-image").attr('src').replace('_down', '_right'));
-                $("#toggle").addClass("toggle-corners");
+            if ($(".toggle-image").attr('src') === "img/arrow_down.png") {
+                $(".toggle-image").attr('src', $(".toggle-image").attr('src').replace('_down', '_right'));
+                $(".toggle").addClass("toggle-corners");
 
             } else {
-                $("#toggle-image").attr('src', $("#toggle-image").attr('src').replace('_right', '_down'));
-                $("#toggle").removeClass("toggle-corners");
+                $(".toggle-image").attr('src', $(".toggle-image").attr('src').replace('_right', '_down'));
+                $(".toggle").removeClass("toggle-corners");
             }
         });
 
-        $("#toggle-image").attr("src", "img/arrow_down.png");
+        $(".toggle-image").attr("src", "img/arrow_down.png");
 });

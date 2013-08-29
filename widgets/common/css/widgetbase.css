@@ -47,7 +47,7 @@ html, body {
     display: inline;
 }
 
-#toggle {
+.toggle {
     background-color: #f0f0f0;
     height: 30px;
     width: 100%;
@@ -56,7 +56,7 @@ html, body {
     border-bottom-right-radius: 0;
 }
 
-#options {
+.options {
     background-color:#f0f0f0;
     color: black;
     padding: 5px;
@@ -65,11 +65,11 @@ html, body {
     border-top-right-radius: 0;
 }
 
-#toggle-image {
+.toggle-image {
     height: 30px;
 }
 
-#options-bar {
+.options-bar {
     position: absolute;
     top: 20px;
     left: 20px;
@@ -77,12 +77,12 @@ html, body {
     opacity: .9;
 }
 
-#options-label {
+.options-label {
     color: black;
     display: inline;
 }
 
-#toggle.toggle-corners {
+.toggle.toggle-corners {
     border-radius: 5px;
 }
 
