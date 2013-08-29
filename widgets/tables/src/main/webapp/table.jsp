@@ -45,7 +45,7 @@
 
 </head>
 <body>
-    <div class="options-bar">
+    <div id="table-options" class="options-bar">
         <div class="toggle">
             <img class="toggle-image" />
             <label class=options-label>Options</label>

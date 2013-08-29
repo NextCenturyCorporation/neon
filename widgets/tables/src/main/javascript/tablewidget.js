@@ -126,7 +126,7 @@ $(document).ready(function () {
         }
 
         function sizeTableToRemainingSpace() {
-            $('#table').css('top', $('.options-bar').position().top + $('.options-bar').outerHeight());
+            $('#table').css('top', $('#table-options').position().top + $('#table-options').outerHeight());
             // table may not be drawn yet
             if (table) {
                 table.refreshLayout();
