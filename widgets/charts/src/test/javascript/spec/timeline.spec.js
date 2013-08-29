@@ -145,6 +145,51 @@ describe('timeline', function () {
         expect(timeline.computeMaxDate_(data)).toEqual(new Date(Date.UTC(2013, 3, 1) + 1));
     });
 
+    it('should compute the default margins', function () {
+        var data = [
+            {"date": new Date(Date.UTC(2013, 1, 7)), "count": 2},
+            {"date": new Date(Date.UTC(2013, 3, 1)), "count": 4},
+            {"date": new Date(Date.UTC(2013, 0, 8)), "count": 7}
+        ];
+        var opts = {  "data": data, "x": "date", "y": "count", "interval": charts.Timeline.MONTH};
+        var timeline = new charts.Timeline('#chart', opts);
+
+        expect(timeline.vMargin_).toEqual(40);
+        expect(timeline.hMargin_).toEqual(70);
+    });
+
+    it('should compute the default rotated margins', function () {
+        var data = [
+            {"date": new Date(Date.UTC(2013, 1, 7)), "count": 2},
+            {"date": new Date(Date.UTC(2013, 3, 1)), "count": 4},
+            {"date": new Date(Date.UTC(2013, 0, 8)), "count": 7}
+        ];
+        var opts = {  "data": data, "x": "date", "y": "count", "interval": charts.Timeline.YEAR, width:100};
+        var timeline = new charts.Timeline('#chart', opts);
+
+        expect(timeline.vMargin_).toEqual(40);
+        expect(timeline.hMargin_).toEqual(70);
+
+        opts = {  "data": data, "x": "date", "y": "count", "interval": charts.Timeline.MONTH, width:100};
+        timeline = new charts.Timeline('#chart', opts);
+
+        expect(timeline.vMargin_).toEqual(80);
+        expect(timeline.hMargin_).toEqual(70);
+
+        opts = {  "data": data, "x": "date", "y": "count", "interval": charts.Timeline.DAY, width:100};
+        timeline = new charts.Timeline('#chart', opts);
+
+        expect(timeline.vMargin_).toEqual(95);
+        expect(timeline.hMargin_).toEqual(70);
+
+        opts = {  "data": data, "x": "date", "y": "count", "interval": charts.Timeline.HOUR, width:100};
+        timeline = new charts.Timeline('#chart', opts);
+
+        expect(timeline.vMargin_).toEqual(105);
+        expect(timeline.hMargin_).toEqual(70);
+    });
+
+
     it('should notify listeners of filter events', function () {
 
         var data = [

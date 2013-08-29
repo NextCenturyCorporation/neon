@@ -52,11 +52,11 @@
  */
 charts.Timeline = function (chartSelector, opts) {
     opts = opts || {};
-    this.interval = opts.interval || charts.Timeline.DEFAULT_INTERVAL_;
-    this.timeInterval_ = charts.Timeline.TIME_INTERVALS_[this.interval].interval;
-    this.tickStep_ = opts.step || charts.Timeline.TIME_INTERVALS_[this.interval].step;
+    this.interval_ = opts.interval || charts.Timeline.DEFAULT_INTERVAL_;
+    this.propertiesOfInterval_ = charts.Timeline.PROPERTIES_OF_INTERVAL[this.interval_].interval;
+    this.tickStep_ = opts.step || charts.Timeline.PROPERTIES_OF_INTERVAL[this.interval_].step;
     this.rotatedTickValues_ = false;
-    var tickFormat = d3.time.format.utc(opts.tickFormat || charts.Timeline.TIME_INTERVALS_[this.interval].tickFormat);
+    var tickFormat = d3.time.format.utc(opts.tickFormat || charts.Timeline.PROPERTIES_OF_INTERVAL[this.interval_].tickFormat);
 
     charts.BarChart.call(this, chartSelector,
         $.extend({}, opts, {
@@ -142,7 +142,7 @@ charts.Timeline.YEAR = 'year';
 
 
 charts.Timeline.DEFAULT_INTERVAL_ = charts.Timeline.MONTH;
-charts.Timeline.TIME_INTERVALS_ = {};
+charts.Timeline.PROPERTIES_OF_INTERVAL = {};
 charts.Timeline.LABEL_HORIZONTAL_PIXEL_WIDTHS_ = {};
 charts.Timeline.SLIDER_DIV_NAME_ = 'slider';
 charts.Timeline.ZERO_DATE_ = new Date(0);
@@ -199,9 +199,9 @@ charts.Timeline.prototype.computeMaxDate_ = function (data) {
 charts.Timeline.prototype.timePeriods_ = function (data) {
     var timePeriods = [];
     if (charts.Timeline.isValidDate_(this.minDate_) && charts.Timeline.isValidDate_(this.maxDate_)) {
-        Array.prototype.push.apply(timePeriods, this.timeInterval_.range(this.timeInterval_(this.minDate_), this.maxDate_));
+        Array.prototype.push.apply(timePeriods, this.propertiesOfInterval_.range(this.propertiesOfInterval_(this.minDate_), this.maxDate_));
         // set the start time period to the true start. do this after the time periods are computed, otherwise the
-        // timeInterval_.range method above will return the first time period after the start if the time period
+        // propertiesOfInterval_.range method above will return the first time period after the start if the time period
         // does not start exactly at an even interval
         timePeriods[0] = this.timePeriodStart_(timePeriods[0]);
     }
@@ -217,7 +217,7 @@ charts.Timeline.prototype.timeIntervalTicks_ = function () {
     var currentTick = this.minDate_;
     while (currentTick < this.maxDate_) {
         tickValues.push(currentTick);
-        currentTick = this.timeInterval_.offset(this.timeInterval_(currentTick), this.tickStep_);
+        currentTick = this.propertiesOfInterval_.offset(this.propertiesOfInterval_(currentTick), this.tickStep_);
     }
 
     return tickValues;
@@ -287,7 +287,7 @@ charts.Timeline.prototype.getDate_ = function (pixelValue) {
 };
 
 charts.Timeline.prototype.timePeriodStart_ = function (date) {
-    var timePeriodStart = this.timeInterval_(date);
+    var timePeriodStart = this.propertiesOfInterval_(date);
     // if the date is in the first time period, taking the floor to get the time period start
     // may result in a date before the true start. check for that case.
     if (timePeriodStart < this.minDate_) {
@@ -301,13 +301,13 @@ charts.Timeline.prototype.setMargins_ = function(){
 
     var tickSizeInPixels = 0;
     if(this.tickValues_){
-        tickSizeInPixels = this.tickValues_.length * charts.Timeline.LABEL_HORIZONTAL_PIXEL_WIDTHS_[this.interval];
+        tickSizeInPixels = this.tickValues_.length * charts.Timeline.LABEL_HORIZONTAL_PIXEL_WIDTHS_[this.interval_];
     }
 
     if(tickSizeInPixels > this.width){
         this.rotatedTickValues_ = true;
         //Add 5 pixel padding to the margin such that the vertical label fits in the chart bounds.
-        this.vMargin_ = this.margin.top + charts.Timeline.LABEL_HORIZONTAL_PIXEL_WIDTHS_[this.interval] + 5;
+        this.vMargin_ = this.margin.top + charts.Timeline.LABEL_HORIZONTAL_PIXEL_WIDTHS_[this.interval_] + 5;
     }
     else{
         this.rotatedTickValues_ = false;
@@ -322,10 +322,10 @@ charts.Timeline.prototype.setMargins_ = function(){
  * @param {String} tickFormat The format used to show the tick labels
  * @param {int} step The number of the particular interval units to place the ticks
  * @return {Object}
- * @method createTimeIntervalMethods_
+ * @method createPropertiesOfIntervalObject
  * @private
  */
-charts.Timeline.createTimeIntervalMethods_ = function (interval, tickFormat, step) {
+charts.Timeline.createPropertiesOfIntervalObject = function (interval, tickFormat, step) {
     return {
         'interval': interval,
         'tickFormat': tickFormat,
@@ -333,10 +333,10 @@ charts.Timeline.createTimeIntervalMethods_ = function (interval, tickFormat, ste
     };
 };
 
-charts.Timeline.TIME_INTERVALS_[charts.Timeline.HOUR] = charts.Timeline.createTimeIntervalMethods_(d3.time.hour.utc, '%d-%b %H:%M', 12);
-charts.Timeline.TIME_INTERVALS_[charts.Timeline.DAY] = charts.Timeline.createTimeIntervalMethods_(d3.time.day.utc, '%d-%b-%Y', 7);
-charts.Timeline.TIME_INTERVALS_[charts.Timeline.MONTH] = charts.Timeline.createTimeIntervalMethods_(d3.time.month.utc, '%b-%Y');
-charts.Timeline.TIME_INTERVALS_[charts.Timeline.YEAR] = charts.Timeline.createTimeIntervalMethods_(d3.time.year.utc, '%Y');
+charts.Timeline.PROPERTIES_OF_INTERVAL[charts.Timeline.HOUR] = charts.Timeline.createPropertiesOfIntervalObject(d3.time.hour.utc, '%d-%b %H:%M', 12);
+charts.Timeline.PROPERTIES_OF_INTERVAL[charts.Timeline.DAY] = charts.Timeline.createPropertiesOfIntervalObject(d3.time.day.utc, '%d-%b-%Y', 7);
+charts.Timeline.PROPERTIES_OF_INTERVAL[charts.Timeline.MONTH] = charts.Timeline.createPropertiesOfIntervalObject(d3.time.month.utc, '%b-%Y');
+charts.Timeline.PROPERTIES_OF_INTERVAL[charts.Timeline.YEAR] = charts.Timeline.createPropertiesOfIntervalObject(d3.time.year.utc, '%Y');
 
 //TODO: Hardcoded label widths until we can calculate them NEON-474
 charts.Timeline.LABEL_HORIZONTAL_PIXEL_WIDTHS_[charts.Timeline.HOUR] = 80;
