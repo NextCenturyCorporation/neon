@@ -112,7 +112,7 @@ charts.BarChart = function (chartSelector, opts) {
     this.style_ = $.extend({}, charts.BarChart.DEFAULT_STYLE_, opts.style);
 
     if (opts.responsive) {
-        this.handleResponsive_();
+        this.redrawOnResize();
     }
 };
 
@@ -294,7 +294,7 @@ charts.BarChart.prototype.preparePropertiesForDrawing_ = function () {
 
     this.width = this.determineWidth_(this.chartSelector_);
     this.height = this.determineHeight_(this.chartSelector_);
-    this.setMarginsBasedOnTicks_();
+    this.setMargins_();
     this.x = this.createXScale_();
     // set the width to be as close to the user specified size (but not larger) so the bars divide evenly into
     // the plot area
@@ -571,7 +571,7 @@ charts.BarChart.mapKeysToBooleans_ = function (aggregatedData) {
     });
 };
 
-charts.BarChart.prototype.setMarginsBasedOnTicks_ = function () {
+charts.BarChart.prototype.setMargins_ = function () {
     this.hMargin_ = this.margin.left + this.margin.right;
     this.vMargin_ = this.margin.top + this.margin.bottom;
 
@@ -619,13 +619,13 @@ charts.BarChart.prototype.determineHeight_ = function (chartSelector) {
     return charts.BarChart.DEFAULT_HEIGHT_;
 };
 
-charts.BarChart.prototype.handleResponsive_ = function () {
+charts.BarChart.prototype.redrawOnResize = function () {
     var me = this;
 
     function drawChart() {
         me.draw();
     }
-
+    //Debounce is needed because browser resizes fire this resize even multiple times.
     $(window).resize(function () {
         $(me.chartSelector_).empty();
     });

@@ -143,7 +143,7 @@ charts.Timeline.YEAR = 'year';
 
 charts.Timeline.DEFAULT_INTERVAL_ = charts.Timeline.MONTH;
 charts.Timeline.TIME_INTERVALS_ = {};
-charts.Timeline.TIME_HORIZONTAL_PIXEL_WIDTHS_ = {};
+charts.Timeline.LABEL_HORIZONTAL_PIXEL_WIDTHS_ = {};
 charts.Timeline.SLIDER_DIV_NAME_ = 'slider';
 charts.Timeline.ZERO_DATE_ = new Date(0);
 charts.Timeline.FILTER_EVENT_TYPE_ = 'filter';
@@ -296,18 +296,18 @@ charts.Timeline.prototype.timePeriodStart_ = function (date) {
     return timePeriodStart;
 };
 
-charts.Timeline.prototype.setMarginsBasedOnTicks_ = function(){
+charts.Timeline.prototype.setMargins_ = function(){
     this.hMargin_ = this.margin.left + this.margin.right;
 
     var tickSizeInPixels = 0;
     if(this.tickValues_){
-        tickSizeInPixels = this.tickValues_.length * charts.Timeline.TIME_HORIZONTAL_PIXEL_WIDTHS_[this.interval];
+        tickSizeInPixels = this.tickValues_.length * charts.Timeline.LABEL_HORIZONTAL_PIXEL_WIDTHS_[this.interval];
     }
 
     if(tickSizeInPixels > this.width){
         this.rotatedTickValues_ = true;
         //Add 5 pixel padding to the margin such that the vertical label fits in the chart bounds.
-        this.vMargin_ = this.margin.top + charts.Timeline.TIME_HORIZONTAL_PIXEL_WIDTHS_[this.interval] + 5;
+        this.vMargin_ = this.margin.top + charts.Timeline.LABEL_HORIZONTAL_PIXEL_WIDTHS_[this.interval] + 5;
     }
     else{
         this.rotatedTickValues_ = false;
@@ -338,9 +338,9 @@ charts.Timeline.TIME_INTERVALS_[charts.Timeline.DAY] = charts.Timeline.createTim
 charts.Timeline.TIME_INTERVALS_[charts.Timeline.MONTH] = charts.Timeline.createTimeIntervalMethods_(d3.time.month.utc, '%b-%Y');
 charts.Timeline.TIME_INTERVALS_[charts.Timeline.YEAR] = charts.Timeline.createTimeIntervalMethods_(d3.time.year.utc, '%Y');
 
-//Hardcoded label widths until we can calculate them NEON-230
-charts.Timeline.TIME_HORIZONTAL_PIXEL_WIDTHS_[charts.Timeline.HOUR] = 80;
-charts.Timeline.TIME_HORIZONTAL_PIXEL_WIDTHS_[charts.Timeline.DAY] = 70;
-charts.Timeline.TIME_HORIZONTAL_PIXEL_WIDTHS_[charts.Timeline.MONTH] = 55;
-charts.Timeline.TIME_HORIZONTAL_PIXEL_WIDTHS_[charts.Timeline.YEAR] = 40;
+//TODO: Hardcoded label widths until we can calculate them NEON-474
+charts.Timeline.LABEL_HORIZONTAL_PIXEL_WIDTHS_[charts.Timeline.HOUR] = 80;
+charts.Timeline.LABEL_HORIZONTAL_PIXEL_WIDTHS_[charts.Timeline.DAY] = 70;
+charts.Timeline.LABEL_HORIZONTAL_PIXEL_WIDTHS_[charts.Timeline.MONTH] = 55;
+charts.Timeline.LABEL_HORIZONTAL_PIXEL_WIDTHS_[charts.Timeline.YEAR] = 40;
 
