@@ -41,30 +41,18 @@ class JettyRunAll extends DefaultTask {
     void run() {
         def server = new Jetty6PluginServer()
         ClassLoader originalClassloader = Thread.currentThread().getContextClassLoader()
-        URLClassLoader serverClassLoader = server.proxiedObject.class.getClassLoader()
-        def logger = getProgressLogger()
-        boolean loggerStarted = false
+        // use the jetty class loader for loading jetty related classes
+        Thread.currentThread().setContextClassLoader(server.proxiedObject.class.getClassLoader())
         try {
-            // use the jetty class loader for loading jetty related classes
-            Thread.currentThread().setContextClassLoader(serverClassLoader)
-            def contexts = configureServer(server)
-            logServerRunning(logger, contexts, server.connectors[0])
-            loggerStarted = true
             runServer(server)
         }
         catch (Exception e) {
-            throw new org.gradle.api.GradleException("Failed to wait for the Jetty server to stop.", e);
+            throw new org.gradle.api.GradleException("Error running Jetty server.", e);
         }
 
         finally {
-            // logger.completed() will throw an exception that masks an underlying exception in cases where
-            // that exception caused the logger not to start
-            if (loggerStarted) {
-                logger.completed()
-            }
             Thread.currentThread().setContextClassLoader(originalClassloader)
         }
-
     }
 
     // note: methods in these classes are not private because of http://issues.gradle.org/browse/GRADLE-1439
@@ -73,7 +61,7 @@ class JettyRunAll extends DefaultTask {
         return progressLoggerFactory.newOperation(JettyRunAll)
     }
 
-    def logServerRunning(logger, contexts, connector) {
+    void logServerRunning(logger, contexts, connector) {
         def protocol = "http${ssl ? "s" : ""}"
         def message = "Running Jetty on ${protocol}://localhost:${connector.port}"
         logger.description = "${message} with contexts ${contexts}"
@@ -118,9 +106,17 @@ class JettyRunAll extends DefaultTask {
         return context
     }
 
-    def runServer(server) {
+    void runServer(server) {
+        def contexts = configureServer(server)
+        def logger = getProgressLogger()
         server.start()
-        server.join()
+        logServerRunning(logger, contexts, server.connectors[0])
+        try {
+            server.join()
+        }
+        finally {
+            logger.completed()
+        }
     }
 
     def findWarProjects() {

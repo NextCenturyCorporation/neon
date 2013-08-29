@@ -20,21 +20,6 @@ def jettyHttpsPort = 9443
 // the neon-server is just output as neon.js for simpler referencing
 project(":neon-server").ext.outfile = 'neon'
 
-/**
- * Gets any directories that are webapp roots for jetty run
- * @param project
- */
-def getJettyRunRootDirectories = { project ->
-    return [
-            // we modify the project's webAppDir to use a generated-web for javascript resource filtering,
-            // so hardcode the src/main/webapp instead of using the project.webAppDir
-            "${project.projectDir}/src/main/webapp".toString(),
-            // src/main is for javascript and js-lib
-            "${project.projectDir}/src/main".toString(),
-            project.dependenciesDir.toString(),
-            new File(project.projectDir.parentFile, "common").absolutePath
-    ]
-}
 
 subprojects {
 
@@ -46,7 +31,6 @@ subprojects {
 
     apply plugin: 'war'
     apply plugin: 'idea'
-    apply plugin: 'jetty'
     apply from: "${rootDir}/gradle/js.gradle"
 
     war {
@@ -97,11 +81,6 @@ subprojects {
             println "Copying $war.archivePath into $owfTomcatWebapps"
         }
     }
-    jettyRun.httpPort = jettyHttpPort
-    jettyRunWar.httpPort = jettyHttpPort
-    jettyRun.doFirst {
-        jettyRun.webAppConfig = JettyTaskUtils.createJettyRunContext(getJettyRunRootDirectories.call(project))
-    }
 
     task copyCommon {
         dependsOn 'copyCommonJs', 'copyCommonCss', 'copyCommonImages'
@@ -137,14 +116,21 @@ task jettyRunAll(type: com.ncc.common.JettyRunAll) {
         System.setProperty("log.dir", "${serverProject.buildDir}/jettyRunAllLogs")
     }
 
-    // add the concatenated server javascript so the widgets can access it
     directoriesClosure = { proj ->
-        def dirs = getJettyRunRootDirectories.call(proj)
+        def dirs = [
+                // we modify the project's webAppDir to use a generated-web for javascript resource filtering,
+                // so hardcode the src/main/webapp instead of using the project.webAppDir
+                "${proj.projectDir}/src/main/webapp".toString(),
+                // src/main is for javascript and js-lib
+                "${proj.projectDir}/src/main".toString(),
+                proj.dependenciesDir.toString(),
+                new File(proj.projectDir.parentFile, "common").absolutePath
+        ]
+        // add the concatenated server javascript so the widgets can access it
         if (proj.name == serverProjectName) {
             dirs << proj.buildDir.absolutePath
         }
         return dirs
-
     }
 
 }

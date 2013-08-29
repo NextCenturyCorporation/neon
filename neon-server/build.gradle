@@ -22,6 +22,7 @@ sourceSets {
 
 
 apply from: 'gradle/groovy.gradle'
+apply plugin: 'jetty'
 
 archivesBaseName = 'neon'
 sourceCompatibility = 1.7
