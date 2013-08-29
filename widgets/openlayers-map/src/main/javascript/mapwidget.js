@@ -68,7 +68,7 @@ $(document).ready(function () {
         }
 
         function onExtentChanged() {
-            var extent = map.map_.getExtent();
+            var extent = map.getExtent();
             var llPoint = new OpenLayers.LonLat(extent.left, extent.bottom);
             var urPoint = new OpenLayers.LonLat(extent.right, extent.top);
             var proj_1 = new OpenLayers.Projection("EPSG:4326");

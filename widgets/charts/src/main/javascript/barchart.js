@@ -195,11 +195,16 @@ charts.BarChart.prototype.computeTickValues_ = function (tickValues) {
 
 charts.BarChart.prototype.createCategoriesFromUniqueValues_ = function (data) {
     var me = this;
-    return _.chain(data).map(function (item) {
-        return me.categoryForItem(item);
-    }).unique().filter(function (item) {
+    return _.chain(data)
+        .map(function (item) {
+            return me.categoryForItem(item);
+        })
+        .unique()
+        .filter(function (item) {
             return !_.isNull(item) && !_.isUndefined(item);
-        }).sort(charts.BarChart.sortComparator_).value();
+        })
+        .sort(charts.BarChart.sortComparator_)
+        .value();
 };
 
 charts.BarChart.sortComparator_ = function (a, b) {
