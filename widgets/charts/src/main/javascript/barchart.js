@@ -333,7 +333,7 @@ charts.BarChart.prototype.bindData_ = function (chart) {
             return me.height - me.vMargin_ - me.y(d.values);
         })
         // using the same color for the border of the bars as the svg background gives separation for adjacent bars
-        .attr('stroke', $('#plot').css('background-color'))
+        .attr('stroke', $('#chart').css('background-color'))
         .on('mouseover', function (d) {
             me.toggleHoverStyle_(d3.select(this), true);
             me.showTooltip_(d);

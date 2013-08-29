@@ -28,7 +28,11 @@
 }
 
 #chart {
-    background: white;
+    background-color: black;
+}
+
+svg .tick {
+    fill: white;
 }
 
 .bar {
