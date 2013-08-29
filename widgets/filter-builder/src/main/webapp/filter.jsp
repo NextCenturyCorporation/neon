@@ -176,13 +176,11 @@
             <button id="clear-filters-button" class="btn">Clear All Filters</button>
 
             <div class="control-group" id="radio-buttons">
-                <label class="radio-inline">
-                    <input type="radio" name="boolean" value="AND" checked/>
-                    AND
+                <label class="radio inline control-label">
+                    <input type="radio" name="boolean" value="AND" checked/>AND
                 </label>
-                <label class="radio-inline">
-                    <input type="radio" name="boolean" value="OR"/>
-                    OR
+                <label class="radio inline control-label">
+                    <input type="radio" name="boolean" value="OR"/>OR
                 </label>
             </div>
         </div>
