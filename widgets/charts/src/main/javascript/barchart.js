@@ -87,7 +87,7 @@ charts.BarChart = function (chartSelector, opts) {
     opts = opts || {};
     this.chartSelector_ = chartSelector;
 
-    if(!opts.responsive) {
+    if (!opts.responsive) {
         this.userSetWidth_ = opts.width;
         this.userSetHeight_ = opts.height;
     }
@@ -111,7 +111,7 @@ charts.BarChart = function (chartSelector, opts) {
     this.preparePropertiesForDrawing_();
     this.style_ = $.extend({}, charts.BarChart.DEFAULT_STYLE_, opts.style);
 
-    if(opts.responsive) {
+    if (opts.responsive) {
         this.handleResponsive_();
     }
 };
@@ -290,7 +290,7 @@ charts.BarChart.prototype.draw = function () {
     return this;
 };
 
-charts.BarChart.prototype.preparePropertiesForDrawing_ = function(){
+charts.BarChart.prototype.preparePropertiesForDrawing_ = function () {
 
     this.width = this.determineWidth_(this.chartSelector_);
     this.height = this.determineHeight_(this.chartSelector_);
@@ -571,7 +571,7 @@ charts.BarChart.mapKeysToBooleans_ = function (aggregatedData) {
     });
 };
 
-charts.BarChart.prototype.setMarginsBasedOnTicks_ = function(){
+charts.BarChart.prototype.setMarginsBasedOnTicks_ = function () {
     this.hMargin_ = this.margin.left + this.margin.right;
     this.vMargin_ = this.margin.top + this.margin.bottom;
 
@@ -600,31 +600,33 @@ charts.BarChart.prototype.removeDataWithNoMatchingCategory_ = function (aggregat
 };
 
 charts.BarChart.prototype.determineWidth_ = function (chartSelector) {
-    if(this.userSetWidth_) {
+    if (this.userSetWidth_) {
         return this.userSetWidth_;
     }
-    else if ($(chartSelector).width() !== 0){
+    else if ($(chartSelector).width() !== 0) {
         return $(chartSelector).width() - this.hMargin_;
     }
     return charts.BarChart.DEFAULT_WIDTH_;
 };
 
 charts.BarChart.prototype.determineHeight_ = function (chartSelector) {
-    if(this.userSetHeight_) {
+    if (this.userSetHeight_) {
         return this.userSetHeight_;
     }
-    else if ($(chartSelector).height() !== 0){
-        return $(chartSelector).height() - 5;
+    else if ($(chartSelector).height() !== 0) {
+        return $(chartSelector).height();
     }
     return charts.BarChart.DEFAULT_HEIGHT_;
 };
 
-charts.BarChart.prototype.handleResponsive_ = function(){
+charts.BarChart.prototype.handleResponsive_ = function () {
     var me = this;
-    function drawChart(){
+
+    function drawChart() {
         me.draw();
     }
-    $(window).resize(function(){
+
+    $(window).resize(function () {
         $(me.chartSelector_).empty();
     });
     $(window).resize(_.debounce(drawChart, 100));
