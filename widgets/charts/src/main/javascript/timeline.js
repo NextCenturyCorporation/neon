@@ -56,6 +56,7 @@ charts.Timeline = function (chartSelector, opts) {
     this.propertiesOfInterval_ = charts.Timeline.PROPERTIES_OF_INTERVAL[this.interval_].interval;
     this.tickStep_ = opts.step || charts.Timeline.PROPERTIES_OF_INTERVAL[this.interval_].step;
     this.rotatedTickValues_ = false;
+
     var tickFormat = d3.time.format.utc(opts.tickFormat || charts.Timeline.PROPERTIES_OF_INTERVAL[this.interval_].tickFormat);
 
     charts.BarChart.call(this, chartSelector,
@@ -86,6 +87,10 @@ charts.Timeline.prototype.dateForItem_ = charts.Timeline.prototype.categoryForIt
     charts.Timeline.prototype.draw = function () {
         oldDrawMethod.call(this);
         this.drawSlider_();
+        if(this.storedFilterDates_){
+            this.styleInactiveData_(this.storedFilterDates_[0], this.storedFilterDates_[1]);
+        }
+
         return this;
     };
 
@@ -231,16 +236,19 @@ charts.Timeline.prototype.drawSlider_ = function () {
 
 charts.Timeline.prototype.createSlider_ = function () {
     var me = this;
+    var sliderSelector = $('#' + charts.Timeline.SLIDER_DIV_NAME_);
+    var values = charts.Timeline.prototype.computeValues_(me);
+
     // note the slider uses pixel values since it can then use the d3 scales to map to the dates
-    $('#' + charts.Timeline.SLIDER_DIV_NAME_).slider({
+    sliderSelector.slider({
         range: true,
         min: 0,
         max: me.plotWidth,
         step: me.x.rangeBand(),
-        values: [ 0, me.plotWidth ],
+        values: values,
         change: $.proxy(charts.Timeline.prototype.doSliderChange_, me)
     });
-    $('#' + charts.Timeline.SLIDER_DIV_NAME_).width(me.plotWidth).css({
+    sliderSelector.width(me.plotWidth).css({
         'margin-left': me.margin.left + 'px',
         'margin-right': me.margin.right + 'px'
     });
@@ -249,11 +257,24 @@ charts.Timeline.prototype.createSlider_ = function () {
     }
 };
 
+charts.Timeline.prototype.computeValues_ = function (me) {
+    var values = [0, me.plotWidth];
+    if (me.storedFilterDates_) {
+        var maxValue = me.x(me.storedFilterDates_[1]);
+        if (!maxValue) {
+            maxValue = me.plotWidth;
+        }
+        values = [me.x(me.storedFilterDates_[0]), maxValue];
+    }
+    return values;
+};
+
 charts.Timeline.prototype.doSliderChange_ = function (event, slider) {
     // ordinal scales to not support inverting, so figure out the time period that was selected
     // Note: If we turn off snapping, we'll have to first find the nearest period boundary and use that value
     var filterStartDate = this.getDate_(slider.values[0]);
     var filterEndDate = this.getDate_(slider.values[1]);
+    this.storedFilterDates_ = [filterStartDate, filterEndDate];
     this.styleInactiveData_(filterStartDate, filterEndDate);
     this.notifyFilterListeners_(filterStartDate, filterEndDate);
 };

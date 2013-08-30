@@ -112,7 +112,7 @@ charts.BarChart = function (chartSelector, opts) {
     this.style_ = $.extend({}, charts.BarChart.DEFAULT_STYLE_, opts.style);
 
     if (opts.responsive) {
-        this.redrawOnResize();
+        this.redrawOnResize_();
     }
 };
 
@@ -624,7 +624,7 @@ charts.BarChart.prototype.determineHeight_ = function (chartSelector) {
     return charts.BarChart.DEFAULT_HEIGHT_;
 };
 
-charts.BarChart.prototype.redrawOnResize = function () {
+charts.BarChart.prototype.redrawOnResize_ = function () {
     var me = this;
 
     function drawChart() {
