@@ -69,6 +69,7 @@ $(document).ready(function () {
             var query = new neon.query.Query()
                 .selectFrom(databaseName, tableName)
                 .groupBy(groupByDayClause, groupByHourClause)
+                .where(dateField, '!=', null)
                 .aggregate(neon.query.COUNT, null, 'count');
 
             neon.query.executeQuery(query, doRedrawChart);
