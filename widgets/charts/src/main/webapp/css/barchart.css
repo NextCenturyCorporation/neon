@@ -81,3 +81,10 @@ svg .tick {
     left: 60px;
     width: 455px;
 }
+
+.error-text {
+    position:absolute;
+    color: red;
+    top: 170px;
+    left: 20px;
+}

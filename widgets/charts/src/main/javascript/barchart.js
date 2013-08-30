@@ -282,17 +282,19 @@ charts.BarChart.createYAxisTickFormat_ = function () {
 /**
  * Draws the bar chart in the component specified in the constructor
  * @method draw
- * @return {charts.BarChart} This bar chart
  */
 charts.BarChart.prototype.draw = function () {
-
     this.preparePropertiesForDrawing_();
     $(this.chartSelector_).empty();
+    if(this.plotWidth === 0){
+        this.displayError();
+        return;
+    }
+
     var chart = this.drawChartSVG_();
     this.bindData_(chart);
     this.drawXAxis_(chart);
     this.drawYAxis_(chart);
-    return this;
 };
 
 charts.BarChart.prototype.preparePropertiesForDrawing_ = function () {
@@ -308,6 +310,14 @@ charts.BarChart.prototype.preparePropertiesForDrawing_ = function () {
     this.y = this.createYScale_();
     this.xAxis_ = this.createXAxis_();
     this.yAxis_ = this.createYAxis_();
+};
+
+charts.BarChart.prototype.displayError = function () {
+    console.log();
+    $(this.chartSelector_).append("<div class='error-text'>" +
+    "You've attempted to draw a chart with too many categories.<br/>" +
+    "Reduce the number of categories or increase the width of the chart to " +
+    this.categories.length + " pixels.</div>");
 };
 
 charts.BarChart.prototype.drawChartSVG_ = function () {

@@ -86,12 +86,12 @@ charts.Timeline.prototype.dateForItem_ = charts.Timeline.prototype.categoryForIt
     var oldDrawMethod = charts.Timeline.prototype.draw;
     charts.Timeline.prototype.draw = function () {
         oldDrawMethod.call(this);
-        this.drawSlider_();
-        if(this.storedFilterDates_){
-            this.styleInactiveData_(this.storedFilterDates_[0], this.storedFilterDates_[1]);
+        if(this.plotWidth !== 0){
+            this.drawSlider_();
+            if(this.storedFilterDates_){
+                this.styleInactiveData_(this.storedFilterDates_[0], this.storedFilterDates_[1]);
+            }
         }
-
-        return this;
     };
 
     var oldDrawXAxisMethod = charts.Timeline.prototype.drawXAxis_;
