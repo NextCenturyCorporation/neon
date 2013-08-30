@@ -68,6 +68,11 @@ $(document).ready(function () {
         }
 
         function onExtentChanged() {
+            if(!(latField && lonField))
+            {
+                return;
+            }
+
             var extent = map.getExtent();
             var llPoint = new OpenLayers.LonLat(extent.left, extent.bottom);
             var urPoint = new OpenLayers.LonLat(extent.right, extent.top);
