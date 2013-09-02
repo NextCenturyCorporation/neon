@@ -25,7 +25,6 @@ var neon = neon || {};
 
 neon.queryBuilder = (function(){
     var table = new tables.Table('#results', {data: []});
-
     var numberOfRows = 0;
 
     function resizeHeightOfResultDivAndRefreshGridLayout(){
@@ -41,7 +40,7 @@ neon.queryBuilder = (function(){
             }
             return rowsHeight;
         });
-        neon.queryBuilder.getTable().refreshLayout();
+        table.refreshLayout();
     }
 
     function submitQueryToServer() {
@@ -60,12 +59,6 @@ neon.queryBuilder = (function(){
     }
 
     return {
-        getTable : function(){
-            return table;
-        },
-        getNumberOfRows : function(){
-            return numberOfRows;
-        },
         displayError: function(text){
             $("#errorText").append(text);
         },
