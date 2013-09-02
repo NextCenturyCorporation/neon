@@ -26,45 +26,25 @@
     <script src="js/tables.js"></script>
     <script src="js-lib/jquery/jquery-1.10.1.min.js"></script>
     <script src="js-lib/jquery-resize/jquery.ba-resize-1.1.min.js"></script>
+    <script src="js-lib/lodash/1.3.1/lodash.min.js"></script>
+    <script src="javascript/init.js"></script>
     <script src="javascript/builder.js"></script>
     <!-- endbuild -->
 
-    <script>
-        OWF.relayFile = 'js/eventing/rpc_relay.uncompressed.html';
-        neon.query.SERVER_URL = '<%=neonServerUrl%>';
-        neon.util.AjaxUtils.useDefaultStartStopCallbacks();
-    </script>
-
 </head>
 <body>
-<div id="query">
-    <h4>
-        Enter a Query
-    </h4>
-    <textarea id="queryText" rows="3"></textarea>
-    <br/><br/>
-    <button id="submit" class="btn" onclick="submitter();">Submit</button>
-    <br/><br/>
+
+<input type="hidden" id="neon-server" value="<%=neonServerUrl%>"/>
+
+<div id="queryForm">
+    <h4> Enter a Query </h4>
+    <textarea id="queryText" class="space-below" rows="3"></textarea>
+
+    <div id="errorText" class="error-text space-below"></div>
+    <button id="submit" class="btn" onclick="neon.queryBuilder.submit();">Submit</button>
 </div>
 
 <div id="results"></div>
-
-<script>
-    var table = new tables.Table('#results', {data: []});
-    function submitter() {
-        var query = $('#queryText').val();
-
-        neon.util.AjaxUtils.doPost(neon.query.SERVER_URL + "/services/languageservice/query",
-                {
-                    data: { text: query },
-                    success: function (data) {
-                        $('#results').empty();
-                        table = new tables.Table('#results', {data: data.data}).draw();
-                    }
-                });
-    }
-</script>
-
 
 </body>
 </html>

@@ -21,23 +21,15 @@
  * RECIPIENT IS UNDER OBLIGATION TO MAINTAIN SECRECY.
  */
 
-#results{
-    margin-top: 20px;
-}
+$(function() {
+    OWF.relayFile = 'js/eventing/rpc_relay.uncompressed.html';
+    neon.query.SERVER_URL = $("#neon-server").val();
+    neon.util.AjaxUtils.useDefaultStartStopCallbacks();
 
-#queryText {
-    width: 100%;
-}
+    function layout(){
+        neon.queryBuilder.layoutResults();
+    }
 
-#queryForm {
-    width: 90%;
-    padding: 8px;
-}
-
-.error-text{
-    color: red;
-}
-
-.space-below{
-    margin-bottom: 10px;
-}
+    $(window).resize(_.debounce(layout, 100));
+    layout();
+});

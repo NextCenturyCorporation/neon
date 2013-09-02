@@ -26,7 +26,7 @@ module.exports = function (grunt) {
                 dest: 'build/js-temp/<%= pkg.name %>.js'
             },
             dist: {
-                src: [lib('jquery'), lib('jquery-resize'), 'build/dependencies/**/*.js', '<%= concat.nodeps.dest %>'],
+                src: [lib('jquery'), lib('lodash'), lib('jquery-resize'), 'build/dependencies/**/*.js', '<%= concat.nodeps.dest %>'],
                 dest: outputFile
             }
         },

@@ -20,13 +20,57 @@
  * OF NEXT CENTURY CORPORATION EXCEPT BY PRIOR WRITTEN PERMISSION AND WHEN
  * RECIPIENT IS UNDER OBLIGATION TO MAINTAIN SECRECY.
  */
-$(function() {
-    var sizeTableToRemainingSpace = function() {
-        $('#results').css('top',  $('#query').position().top + $('#query').outerHeight() );
-        table.refreshLayout();
-    };
 
-    $(window).resize(sizeTableToRemainingSpace);
-    $('#query').resize(sizeTableToRemainingSpace);
-    sizeTableToRemainingSpace();
-});
+var neon = neon || {};
+
+neon.queryBuilder = (function(){
+    var table = new tables.Table('#results', {data: []});
+
+    var numberOfRows = 0;
+
+    function resizeHeightOfResultDivAndRefreshGridLayout(){
+        $("#results").height(function(){
+            var windowHeight = $(window).height();
+            var formHeight = $("#queryForm").height();
+            //36 == margin-top(20) + (2 * padding (8)).
+            var containerHeight = windowHeight - formHeight - 36;
+            var rowsHeight = (numberOfRows + 1) * 28;
+
+            if(rowsHeight > containerHeight){
+                return containerHeight;
+            }
+            return rowsHeight;
+        });
+        neon.queryBuilder.getTable().refreshLayout();
+    }
+
+    function submitQueryToServer() {
+        $("#errorText").empty();
+        var query = $('#queryText').val();
+        neon.util.AjaxUtils.doPost(neon.query.SERVER_URL + "/services/languageservice/query",
+            {
+                data: { text: query },
+                success: function (data) {
+                    $('#results').empty();
+                    numberOfRows = data.data.length;
+                    neon.queryBuilder.layoutResults();
+                    table = new tables.Table('#results', {data: data.data, gridOptions: {fullWidthRows: true}}).draw();
+                }
+            });
+    }
+
+    return {
+        getTable : function(){
+            return table;
+        },
+        getNumberOfRows : function(){
+            return numberOfRows;
+        },
+        displayError: function(text){
+            $("#errorText").append(text);
+        },
+        layoutResults: resizeHeightOfResultDivAndRefreshGridLayout,
+        submit: submitQueryToServer
+    };
+})();
+
