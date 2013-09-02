@@ -33,8 +33,8 @@ neon.queryBuilder = (function(){
             var formHeight = $("#queryForm").height();
             //36 == margin-top(20) + (2 * padding (8)).
             var containerHeight = windowHeight - formHeight - 36;
-            var rowsHeight = (numberOfRows + 1) * 28;
-
+            //Header row (25), data rows (25 each), and 16 for padding
+            var rowsHeight = (numberOfRows + 1) * 25 + 16;
             if(rowsHeight > containerHeight){
                 return containerHeight;
             }
