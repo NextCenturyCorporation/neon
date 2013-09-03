@@ -6,7 +6,7 @@
         String owfServerUrl = getServletContext().getInitParameter("owf.url");
     %>
 
-    <title>Circular Heat Chart Display</title>
+    <title>Circular Heat Chart</title>
 
     <link rel="stylesheet" type="text/css" href="css/bootstrap/bootstrap.min.css">
     <link rel="stylesheet" type="text/css" href="css/widgetbase.css">
@@ -23,18 +23,15 @@
     <script src="javascript/circularheatwidget.js"></script>
     <!-- endbuild -->
 
-    <script>
-        OWF.relayFile = 'js/eventing/rpc_relay.uncompressed.html';
-        neon.query.SERVER_URL = '<%=neonServerUrl%>';
-        neon.util.AjaxUtils.useDefaultStartStopCallbacks();
-    </script>
-
 </head>
 <body>
 
+<input type="hidden" id="neon-server" value="<%=neonServerUrl%>"/>
+
 <div class="options-bar">
+
     <div class="toggle">
-        <img class="toggle-image" />
+        <img class="toggle-image"/>
         <label class=options-label>Options</label>
     </div>
 

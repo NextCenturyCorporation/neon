@@ -29,14 +29,11 @@
     <script src="javascript/mapwidget.js"></script>
     <!-- endbuild -->
 
-    <script>
-        OWF.relayFile = 'js/eventing/rpc_relay.uncompressed.html';
-        neon.query.SERVER_URL = '<%=neonServerUrl%>';
-        neon.util.AjaxUtils.useDefaultStartStopCallbacks();
-    </script>
-
 </head>
 <body>
+
+<input type="hidden" id="neon-server" value="<%=neonServerUrl%>"/>
+
 <div class="container">
     <div class="options-bar">
         <div class="toggle">
