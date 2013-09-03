@@ -5,6 +5,8 @@ import com.ncc.neon.query.QueryResult
 import com.ncc.neon.query.clauses.SelectClause
 import com.ncc.neon.query.clauses.SortClause
 import com.ncc.neon.query.clauses.SortOrder
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
 
 /*
  * ************************************************************************
@@ -34,6 +36,7 @@ import com.ncc.neon.query.clauses.SortOrder
 
 class DistinctMongoQueryWorker extends AbstractMongoQueryWorker {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(DistinctMongoQueryWorker)
     private static final ASCENDING_STRING_COMPARATOR = { a, b -> a <=> b }
     private static final DESCENDING_STRING_COMPARATOR = { a, b -> b <=> a }
 
@@ -48,6 +51,7 @@ class DistinctMongoQueryWorker extends AbstractMongoQueryWorker {
             throw new UnsupportedOperationException("mongo only supports distinct clauses on a single field")
         }
         def field = mongoQuery.query.fields[0]
+        LOGGER.debug("Executing distinct query: {}", mongoQuery)
         def distinct = getCollection(mongoQuery).distinct(field, mongoQuery.whereClauseParams)
 
         sortDistinctResults(mongoQuery, distinct, field)

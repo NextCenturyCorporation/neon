@@ -1,12 +1,10 @@
-import ch.qos.logback.core.FileAppender
+import ch.qos.logback.classic.encoder.PatternLayoutEncoder
+import ch.qos.logback.core.ConsoleAppender
 import ch.qos.logback.core.rolling.FixedWindowRollingPolicy
 import ch.qos.logback.core.rolling.RollingFileAppender
 import ch.qos.logback.core.rolling.SizeBasedTriggeringPolicy
 
-import static ch.qos.logback.classic.Level.*
-import ch.qos.logback.classic.encoder.PatternLayoutEncoder
-import ch.qos.logback.core.ConsoleAppender
-
+import static ch.qos.logback.classic.Level.WARN
 /*
  * ************************************************************************
  * Copyright (c), 2013 Next Century Corporation. All Rights Reserved.
@@ -69,8 +67,7 @@ if (!test) {
     }
 }
 
-logger("com.ncc.neon", WARN)
-logger("com.ncc.neon.query", WARN)  // set to debug to turn on query logging
+logger("com.ncc.neon", WARN)  // set to INFO to turn on query logging
 
 if (test) {
     root(WARN, ["CONSOLE"])

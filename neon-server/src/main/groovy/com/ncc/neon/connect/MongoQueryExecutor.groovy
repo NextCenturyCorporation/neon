@@ -147,12 +147,14 @@ class MongoQueryExecutor implements QueryExecutor {
 
     @Override
     List<String> showDatabases() {
+        LOGGER.debug("Executing Mongo SHOW DATABASES")
         mongo.databaseNames
     }
 
     @Override
     List<String> showTables(String dbName) {
         DB database = mongo.getDB(dbName)
+        LOGGER.info("Executing Mongo SHOW COLLECTIONS on database {}", dbName)
         database.getCollectionNames().collect { it }
     }
 

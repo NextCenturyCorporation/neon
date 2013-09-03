@@ -1,5 +1,7 @@
 package com.ncc.neon.query.clauses
 
+import groovy.transform.ToString
+
 /*
  * ************************************************************************
  * Copyright (c), 2013 Next Century Corporation. All Rights Reserved.
@@ -25,7 +27,9 @@ package com.ncc.neon.query.clauses
 /**
  * A query clause to limit the number of results returned by the query
  */
+@ToString(includeNames = true)
 class LimitClause {
 
     int limit
+
 }

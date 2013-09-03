@@ -4,6 +4,8 @@ import com.mongodb.BasicDBObject
 import com.mongodb.DBObject
 import com.mongodb.MongoClient
 import com.ncc.neon.query.QueryResult
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
 
 /*
  * ************************************************************************
@@ -33,6 +35,7 @@ import com.ncc.neon.query.QueryResult
 
 class AggregateMongoQueryWorker extends AbstractMongoQueryWorker {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(AggregateMongoQueryWorker)
     AggregateMongoQueryWorker(MongoClient mongo) {
         super(mongo)
     }
@@ -47,6 +50,7 @@ class AggregateMongoQueryWorker extends AbstractMongoQueryWorker {
         if (mongoQuery.query.limitClause) {
             additionalClauses << new BasicDBObject('$limit', mongoQuery.query.limitClause.limit)
         }
+        LOGGER.debug("Executing aggregate query: {} -- {}", match, additionalClauses)
         def results = getCollection(mongoQuery).aggregate(match, additionalClauses as DBObject[]).results()
         return new MongoQueryResult(mongoIterable: results)
     }

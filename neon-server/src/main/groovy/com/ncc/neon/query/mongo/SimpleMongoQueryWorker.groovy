@@ -3,6 +3,8 @@ package com.ncc.neon.query.mongo
 import com.mongodb.DBCursor
 import com.mongodb.MongoClient
 import com.ncc.neon.query.QueryResult
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
 
 /*
  * ************************************************************************
@@ -32,12 +34,14 @@ import com.ncc.neon.query.QueryResult
 
 class SimpleMongoQueryWorker extends AbstractMongoQueryWorker {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(SimpleMongoQueryWorker)
     SimpleMongoQueryWorker(MongoClient mongo) {
         super(mongo)
     }
 
     @Override
     QueryResult executeQuery(MongoQuery mongoQuery) {
+        LOGGER.debug("Executing query: {}", mongoQuery)
         DBCursor results = queryDB(mongoQuery)
 
         if (mongoQuery.query.sortClauses) {

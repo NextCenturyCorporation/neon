@@ -137,6 +137,7 @@ class HiveQueryExecutor implements QueryExecutor {
     @Override
     List<String> showDatabases() {
         def jdbcClient = hiveConnection.connect(connectionInfo)
+        LOGGER.debug("Executing Hive SHOW DATABASES")
         def dbs = jdbcClient.executeQuery("SHOW DATABASES").collect { Map<String, String> map ->
             map.get("database_name")
         }
@@ -149,6 +150,7 @@ class HiveQueryExecutor implements QueryExecutor {
         def jdbcClient
         try {
             jdbcClient = hiveConnection.connect(connectionInfo)
+            LOGGER.debug("Executing Hive SHOW TABLES on database {}", dbName)
             jdbcClient.execute("USE " + dbName)
             return jdbcClient.executeQuery("SHOW TABLES").collect { Map<String, String> map ->
                 map.get("tab_name")
