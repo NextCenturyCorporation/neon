@@ -109,6 +109,7 @@ $(document).ready(function () {
         }
 
         initChart();
+        neon.toggle.createOptionsPanel("#options-panel");
 
     });
 

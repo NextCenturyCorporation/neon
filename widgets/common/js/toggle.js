@@ -20,9 +20,20 @@
  * OF NEXT CENTURY CORPORATION EXCEPT BY PRIOR WRITTEN PERMISSION AND WHEN
  * RECIPIENT IS UNDER OBLIGATION TO MAINTAIN SECRECY.
  */
-$(document).ready(function () {
+
+var neon = neon || {};
+
+neon.toggle = (function () {
+
+    function decorateOptionsPanel(selector) {
+        $(selector).replaceWith(function () {
+            return '<div class="options-bar"><div class="toggle"><img class="toggle-image"/><label class=options-label>Options</label></div>' + $(this)[0].outerHTML + '</div>';
+        });
+    }
+
+    function configureToggle(selector) {
         $(".toggle").click(function () {
-            $(".options").slideToggle("slow");
+            $(selector).slideToggle("slow");
 
             if ($(".toggle-image").attr('src') === "img/arrow_down.png") {
                 $(".toggle-image").attr('src', $(".toggle-image").attr('src').replace('_down', '_right'));
@@ -33,6 +44,21 @@ $(document).ready(function () {
                 $(".toggle").removeClass("toggle-corners");
             }
         });
+    }
 
+    function initToggleImage() {
         $(".toggle-image").attr("src", "img/arrow_down.png");
-});
+    }
+
+    return {
+        createOptionsPanel: function (selector) {
+            $(document).ready(function () {
+                decorateOptionsPanel(selector);
+                configureToggle(selector);
+                initToggleImage();
+            });
+        }
+    }
+
+})();
+

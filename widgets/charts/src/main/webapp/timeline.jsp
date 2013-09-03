@@ -41,45 +41,38 @@
 
 <input type="hidden" id="neon-server" value="<%=neonServerUrl%>"/>
 
-<div class="options-bar">
-    <div class="toggle">
-        <img class="toggle-image"/>
-        <label class=options-label>Options</label>
-    </div>
+<div id="options-panel" class="options">
+    <div class="controls-row">
+        <div class="control-group">
+            <label class="control-label" for="x">x-axis (Date)</label>
 
-    <div class="options">
-        <div class="controls-row">
-            <div class="control-group">
-                <label class="control-label" for="x">x-axis (Date)</label>
-
-                <div class="controls">
-                    <select id="x" class="dropdown"></select>
-                </div>
+            <div class="controls">
+                <select id="x" class="dropdown"></select>
             </div>
+        </div>
 
-            <div class="control-group">
-                <label class="control-label" for="y">y-axis</label>
+        <div class="control-group">
+            <label class="control-label" for="y">y-axis</label>
 
-                <div class="controls">
-                    <select id="y" class="dropdown"></select>
-                </div>
+            <div class="controls">
+                <select id="y" class="dropdown"></select>
             </div>
+        </div>
 
-            <div class="control-group">
-                <label class="control-label" for="time-granularity">Time Granularity</label>
+        <div class="control-group">
+            <label class="control-label" for="time-granularity">Time Granularity</label>
 
-                <div class="controls">
-                    <select id="time-granularity" class="dropdown">
-                    </select>
-                </div>
+            <div class="controls">
+                <select id="time-granularity" class="dropdown">
+                </select>
             </div>
+        </div>
 
-            <div class="control-group">
-                <div class="controls">
-                    <button type="button" id="redraw-bounds" class="btn">Redraw Bounds</button>
+        <div class="control-group">
+            <div class="controls">
+                <button type="button" id="redraw-bounds" class="btn">Redraw Bounds</button>
 
-                    <button type="button" id="reset-filter" class="btn">Reset Time Period</button>
-                </div>
+                <button type="button" id="reset-filter" class="btn">Reset Time Period</button>
             </div>
         </div>
     </div>

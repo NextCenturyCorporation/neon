@@ -40,13 +40,9 @@
 <body>
 <input type="hidden" id="neon-server" value="<%=neonServerUrl%>"/>
 
-<div id="table-options" class="options-bar">
-    <div class="toggle">
-        <img class="toggle-image"/>
-        <label class=options-label>Options</label>
-    </div>
+<div id="table-options">
 
-    <div class="options">
+    <div id="options-panel" class="options">
         <div class="controls-row">
             <div class="control-group">
                 <label class="control-label" for="limit">Limit</label>

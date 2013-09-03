@@ -148,5 +148,5 @@ $(document).ready(function () {
 
     });
 
-
+    neon.toggle.createOptionsPanel("#options-panel");
 });
