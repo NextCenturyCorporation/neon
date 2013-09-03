@@ -52,4 +52,10 @@ class AntlrQueryParserTest {
         assert actual.fields == expected.fields
     }
 
+    @Test(expected = NeonParsingException)
+    void "test syntax error query"() {
+        AntlrQueryParser parser = new AntlrQueryParser()
+        parser.parse("use db; select from table")
+    }
+
 }
