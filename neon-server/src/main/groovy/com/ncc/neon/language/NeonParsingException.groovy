@@ -1,12 +1,5 @@
 package com.ncc.neon.language
 
-import com.ncc.neon.language.parse.NeonLexer
-import com.ncc.neon.language.parse.NeonParser
-import com.ncc.neon.query.Query
-import org.antlr.v4.runtime.ANTLRInputStream
-import org.antlr.v4.runtime.CommonTokenStream
-import org.springframework.stereotype.Component
-
 /*
  * ************************************************************************
  * Copyright (c), 2013 Next Century Corporation. All Rights Reserved.
@@ -33,25 +26,9 @@ import org.springframework.stereotype.Component
  * @author tbrooks
  */
 
-@Component
-class AntlrQueryParser implements QueryParser {
+class NeonParsingException extends RuntimeException{
 
-    @Override
-    Query parse(String text) {
-        QueryCreator queryCreator = new QueryCreator()
-        NeonLexer lexer = new NeonLexer(new ANTLRInputStream(text))
-        NeonParser parser = new NeonParser(new CommonTokenStream(lexer))
-
-        parseInput(parser, queryCreator)
-
-        return queryCreator.createQuery()
+    NeonParsingException(String message){
+        super(message)
     }
-
-    private void parseInput(NeonParser parser, QueryCreator queryCreator) {
-        parser.setBuildParseTree(true)
-        parser.addParseListener(queryCreator)
-        parser.addErrorListener(new NeonParsingErrorListener())
-        parser.statement()
-    }
-
 }
