@@ -146,21 +146,6 @@ neon.filter = (function () {
         setFilterKey: setFilterKey,
         grid: grid
     };
+
 })();
 
-$(function () {
-    Handlebars.registerHelper('select', function (context, options) {
-        var el = $('<select />').html(options.fn(this));
-        el.find('option').filter(function () {
-            return this.value === context;
-        }).attr('selected', 'selected');
-        return el.html();
-    });
-    Handlebars.registerHelper('escapeQuotes', function (context, options) {
-        var el = $('<div/>').html(options.fn(this));
-        if (context === "") {
-            el.find('input').attr('value', '""');
-        }
-        return el.html();
-    });
-});

@@ -21,21 +21,14 @@
     <script src="<%=owfServerUrl%>/js/owf-widget.js"></script>
     <script src="<%=neonServerUrl%>/js/neon.js"></script>
 
-
     <!-- build:js js/filter-builder.js -->
     <script src="js-lib/jquery/jquery-1.10.1.min.js"></script>
     <script src="js-lib/jqueryui/jquery-ui-1.10.3.custom.min.js"></script>
     <script src="js-lib/handlebars/handlebars.js"></script>
+    <script src="javascript/initialize.js"></script>
     <script src="javascript/filterwizard.js"></script>
     <script src="javascript/filtertable.js"></script>
     <!-- endbuild -->
-
-    <script>
-        OWF.relayFile = 'js/eventing/rpc_relay.uncompressed.html';
-        neon.query.SERVER_URL = '<%=neonServerUrl%>';
-        neon.util.AjaxUtils.useDefaultStartStopCallbacks();
-    </script>
-
 
     <script id="filters" type="text/x-handlebars-template">
         {{#data}}
@@ -105,86 +98,91 @@
 
 </head>
 <body>
-    <div class="container">
-        <div id="datastore-container">
-            <h4>Connection</h4>
-            <div class="controls-row">
 
-                <div class="control-group">
-                    <label class="control-label" for="datastore-select">Type</label>
+<input type="hidden" id="neon-server" value="<%=neonServerUrl%>"/>
 
-                    <div class="controls" >
-                        <select id="datastore-select" class="dropdown span2">
-                            <option value="mongo">Mongo</option>
-                            <option value="hive">Hive</option>
-                        </select>
-                    </div>
-                </div>
+<div class="container">
+    <div id="datastore-container">
+        <h4>Connection</h4>
 
-                <div class="control-group">
-                    <label class="control-label" for="hostname-input">Host</label>
+        <div class="controls-row">
 
-                    <div class="controls" class="textfield">
-                        <input class="span2" type="text" id="hostname-input" value="localhost"/>
-                    </div>
-                </div>
+            <div class="control-group">
+                <label class="control-label" for="datastore-select">Type</label>
 
-                <div class="control-group">
-                    <div class="controls">
-                        <button class="btn" id="datastore-button">Continue</button>
-                    </div>
+                <div class="controls">
+                    <select id="datastore-select" class="dropdown span2">
+                        <option value="mongo">Mongo</option>
+                        <option value="hive">Hive</option>
+                    </select>
                 </div>
             </div>
-        </div>
 
-        <div id="db-table">
-            <h4>Database</h4>
-            <div class="controls controls-row">
-                <div class="control-group">
-                    <label class="control-label" for="database-select">Database</label>
+            <div class="control-group">
+                <label class="control-label" for="hostname-input">Host</label>
 
-                    <div class="controls">
-                        <select id="database-select" class="dropdown span2">
-                            <option value="">Select Database...</option>
-                        </select>
-                    </div>
-                </div>
-
-                <div class="control-group">
-                    <label class="control-label" for="table-select">Table</label>
-
-                    <div class="controls">
-                        <select id="table-select" class="dropdown span2"></select>
-                    </div>
-                </div>
-
-                <div class="control-group">
-                    <div class="controls">
-                        <button class="btn" id="database-table-button">Continue</button>
-                    </div>
+                <div class="controls" class="textfield">
+                    <input class="span2" type="text" id="hostname-input" value="localhost"/>
                 </div>
             </div>
-        </div>
 
-        <div id="filter-container">
-            <h4>Filters</h4>
-
-            <div id="filter-content"/>
-
-        </div>
-        <div class="controls controls-row">
-            <button id="clear-filters-button" class="btn">Clear All Filters</button>
-
-            <div class="control-group" id="radio-buttons">
-                <label class="radio inline control-label">
-                    <input type="radio" name="boolean" value="AND" checked/>AND
-                </label>
-                <label class="radio inline control-label">
-                    <input type="radio" name="boolean" value="OR"/>OR
-                </label>
+            <div class="control-group">
+                <div class="controls">
+                    <button class="btn" id="datastore-button">Continue</button>
+                </div>
             </div>
         </div>
     </div>
+
+    <div id="db-table">
+        <h4>Database</h4>
+
+        <div class="controls controls-row">
+            <div class="control-group">
+                <label class="control-label" for="database-select">Database</label>
+
+                <div class="controls">
+                    <select id="database-select" class="dropdown span2">
+                        <option value="">Select Database...</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="control-group">
+                <label class="control-label" for="table-select">Table</label>
+
+                <div class="controls">
+                    <select id="table-select" class="dropdown span2"></select>
+                </div>
+            </div>
+
+            <div class="control-group">
+                <div class="controls">
+                    <button class="btn" id="database-table-button">Continue</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="filter-container">
+        <h4>Filters</h4>
+
+        <div id="filter-content"/>
+
+    </div>
+    <div class="controls controls-row">
+        <button id="clear-filters-button" class="btn">Clear All Filters</button>
+
+        <div class="control-group" id="radio-buttons">
+            <label class="radio inline control-label">
+                <input type="radio" name="boolean" value="AND" checked/>AND
+            </label>
+            <label class="radio inline control-label">
+                <input type="radio" name="boolean" value="OR"/>OR
+            </label>
+        </div>
+    </div>
+</div>
 
 </body>
 </html>
