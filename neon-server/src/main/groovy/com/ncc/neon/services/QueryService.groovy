@@ -4,8 +4,8 @@ import com.ncc.neon.connect.ConnectionState
 import com.ncc.neon.query.Query
 import com.ncc.neon.query.QueryExecutor
 import com.ncc.neon.query.QueryGroup
+import com.ncc.neon.query.QueryUtils
 import com.ncc.neon.query.filter.*
-import org.apache.commons.lang.math.NumberUtils
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
 
@@ -50,7 +50,7 @@ class QueryService {
                         @DefaultValue("false") @QueryParam("includefiltered") boolean includeFiltered,
                         @QueryParam("transform") String transformClassName,
                         @QueryParam("param") List<String> transformParams) {
-        return wrapInDataJson(queryExecutor.execute(query, includeFiltered), transformClassName, transformParams)
+        return QueryUtils.wrapInDataJson(queryExecutor.execute(query, includeFiltered), transformClassName, transformParams)
     }
 
     @POST
@@ -61,7 +61,7 @@ class QueryService {
                              @DefaultValue("false") @QueryParam("includefiltered") boolean includeFiltered,
                              @QueryParam("transform") String transformClassName,
                              @QueryParam("param") List<String> transformParams) {
-        return wrapInDataJson(queryExecutor.execute(query, includeFiltered), transformClassName, transformParams)
+        return QueryUtils.wrapInDataJson(queryExecutor.execute(query, includeFiltered), transformClassName, transformParams)
     }
 
     @POST
@@ -122,7 +122,7 @@ class QueryService {
     String getSelectionWhere(Filter filter,
                              @QueryParam("transform") String transformClassName,
                              @QueryParam("param") List<String> transformParams) {
-        return wrapInDataJson(queryExecutor.getSelectionWhere(filter), transformClassName, transformParams)
+        return QueryUtils.wrapInDataJson(queryExecutor.getSelectionWhere(filter), transformClassName, transformParams)
     }
 
     @POST
@@ -151,28 +151,6 @@ class QueryService {
     FieldNames getFieldNames(@QueryParam("databaseName") String databaseName, @QueryParam("tableName") String tableName) {
         def fieldNames = queryExecutor.getFieldNames(databaseName, tableName)
         return new FieldNames(fieldNames: fieldNames)
-    }
-
-    private def wrapInDataJson(queryResult, transformClassName = null, transformParams = []) {
-        def json = queryResult.toJson()
-        if (transformClassName) {
-            json = applyTransform(transformClassName, transformParams, json)
-        }
-        def output = '{"data":' + json + '}'
-        return output
-    }
-
-    private static def applyTransform(transformClassName, transformParams, json) {
-        def transform = instantiateTransform(transformClassName, transformParams)
-        return transform.apply(json)
-    }
-
-    private static instantiateTransform(transformClassName, transformParams) {
-        def typedParams = transformParams.collect { NumberUtils.isNumber(it) ? NumberUtils.createNumber(it) : it }
-        def transformParamTypes = typedParams.collect { it.class }
-        def transformClass = QueryService.classLoader.loadClass(transformClassName)
-        def constructor = transformClass.getConstructor(transformParamTypes as Class[])
-        return constructor.newInstance(typedParams as Object[])
     }
 
     private QueryExecutor getQueryExecutor() {

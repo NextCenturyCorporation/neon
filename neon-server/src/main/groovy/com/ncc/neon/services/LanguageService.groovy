@@ -3,11 +3,13 @@ package com.ncc.neon.services
 import com.ncc.neon.connect.ConnectionState
 import com.ncc.neon.language.QueryParser
 import com.ncc.neon.query.Query
+import com.ncc.neon.query.QueryUtils
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
 
 import javax.ws.rs.*
 import javax.ws.rs.core.MediaType
+
 /*
  * ************************************************************************
  * Copyright (c), 2013 Next Century Corporation. All Rights Reserved.
@@ -36,7 +38,7 @@ import javax.ws.rs.core.MediaType
 
 @Component
 @Path("/languageservice")
-class LanguageService{
+class LanguageService {
 
     @Autowired
     QueryParser queryParser
@@ -48,15 +50,11 @@ class LanguageService{
     @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
     @Produces(MediaType.APPLICATION_JSON)
     @Path("query")
-    String executeQuery(@FormParam("text") String text){
+    String executeQuery(@FormParam("text") String text) {
         Query query = queryParser.parse(text)
-        return wrapInDataJson(connectionState.queryExecutor.execute(query, false))
+        return QueryUtils.wrapInDataJson(connectionState.queryExecutor.execute(query, false))
     }
 
-    private String wrapInDataJson(queryResult) {
-        def json = queryResult.toJson()
-        '{"data":' + json + '}'
-    }
 }
 
 

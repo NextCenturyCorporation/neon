@@ -1,6 +1,7 @@
 package com.ncc.neon.query
 
 import com.ncc.neon.query.filter.Filter
+import com.ncc.neon.query.transform.JsonTransform
 import groovy.mock.interceptor.StubFor
 import org.junit.Test
 
@@ -30,10 +31,35 @@ class QueryUtilsTest {
 
     @Test
     void "create query from filter"() {
-
         def filter = new StubFor(Filter).proxyInstance()
         def query = QueryUtils.queryFromFilter(filter)
         assert query.filter == filter
+    }
+
+    @Test
+    void "wrap query result in json"() {
+        String testJson = '{"test": "json data"}'
+        def queryResult = [toJson: {testJson}] as QueryResult
+        String actual = QueryUtils.wrapInDataJson(queryResult)
+        String expected = '{"data":' + testJson + '}'
+        assert actual == expected
+    }
+
+    @Test
+    void "wrap query result in json with transform"() {
+        String testJson = '{"test": "json data"}'
+        def queryResult = [toJson: {testJson}] as QueryResult
+
+        String actual = QueryUtils.wrapInDataJson(queryResult, AllCapsTransform.name, [])
+        String expected = '{"data":' + testJson.toUpperCase() + '}'
+        assert actual == expected
+    }
+
+    static final class AllCapsTransform implements JsonTransform{
+        @Override
+        String apply(inputJsonArray) {
+            return inputJsonArray.toUpperCase()
+        }
     }
 
 }
