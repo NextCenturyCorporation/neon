@@ -28,27 +28,20 @@
 
 <input type="hidden" id="neon-server" value="<%=neonServerUrl%>"/>
 
-<div class="options-bar">
+<div id="options-panel" class="options">
+    <div class="controls-row">
+        <div class="control-group">
+            <label class="control-label" for="date">Date</label>
 
-    <div class="toggle">
-        <img class="toggle-image"/>
-        <label class=options-label>Options</label>
-    </div>
-
-    <div class="options">
-        <div class="controls-row">
-            <div class="control-group">
-                <label class="control-label" for="date">Date</label>
-
-                <div class="controls">
-                    <select id="date" class="dropdown"></select>
-                </div>
+            <div class="controls">
+                <select id="date" class="dropdown"></select>
             </div>
         </div>
     </div>
 </div>
 
 <div id="circularheatchart"></div>
+
 
 </body>
 </html>

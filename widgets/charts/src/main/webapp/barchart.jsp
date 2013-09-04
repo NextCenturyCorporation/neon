@@ -38,27 +38,21 @@
 
 <input type="hidden" id="neon-server" value="<%=neonServerUrl%>"/>
 
-<div class="options-bar">
-    <div class="toggle">
-        <img class="toggle-image"/>
-        <label class=options-label>Options</label>
-    </div>
-    <div class="options">
-        <div class="controls-row">
-            <div class="control-group">
-                <label class="control-label" for="x">x-axis</label>
+<div id="options-panel" class="options">
+    <div class="controls-row">
+        <div class="control-group">
+            <label class="control-label" for="x">x-axis</label>
 
-                <div class="controls">
-                    <select id="x" class="dropdown"></select>
-                </div>
+            <div class="controls">
+                <select id="x" class="dropdown"></select>
             </div>
+        </div>
 
-            <div class="control-group">
-                <label class="control-label" for="y">y-axis</label>
+        <div class="control-group">
+            <label class="control-label" for="y">y-axis</label>
 
-                <div class="controls">
-                    <select id="y" class="dropdown"></select>
-                </div>
+            <div class="controls">
+                <select id="y" class="dropdown"></select>
             </div>
         </div>
     </div>
