@@ -40,34 +40,31 @@
 <body>
 <input type="hidden" id="neon-server" value="<%=neonServerUrl%>"/>
 
-<div id="table-options">
+<div id="options-panel" class="options">
+    <div class="controls-row">
+        <div class="control-group">
+            <label class="control-label" for="limit">Limit</label>
 
-    <div id="options-panel" class="options">
-        <div class="controls-row">
-            <div class="control-group">
-                <label class="control-label" for="limit">Limit</label>
-
-                <div id="controls" class="controls">
-                    <input id="limit" type="number" min="1" value="500">
-                </div>
+            <div id="controls" class="controls">
+                <input id="limit" type="number" min="1" value="500">
             </div>
+        </div>
 
-            <div class="control-group">
-                <label class="control-label" for="sort-field">Sort</label>
+        <div class="control-group">
+            <label class="control-label" for="sort-field">Sort</label>
 
-                <div id="sort-controls" class="controls-row input-append">
+            <div id="sort-controls" class="controls-row input-append">
 
-                    <select id="sort-field" class="dropdown"></select>
+                <select id="sort-field" class="dropdown"></select>
 
-                    <div class="btn-group" id="sort-buttons" data-toggle="buttons-radio">
-                        <button id="sort-ascending" type="button" data-toggle="button" class="btn">Ascending
-                        </button>
-                        <button id="sort-descending" type="button" data-toggle="button" class="btn">Descending
-                        </button>
-                    </div>
-
-                    <input id="sort-direction" type="hidden"/>
+                <div class="btn-group" id="sort-buttons" data-toggle="buttons-radio">
+                    <button id="sort-ascending" type="button" data-toggle="button" class="btn">Ascending
+                    </button>
+                    <button id="sort-descending" type="button" data-toggle="button" class="btn">Descending
+                    </button>
                 </div>
+
+                <input id="sort-direction" type="hidden"/>
             </div>
         </div>
     </div>

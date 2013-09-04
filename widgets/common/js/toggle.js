@@ -25,9 +25,13 @@ var neon = neon || {};
 
 neon.toggle = (function () {
 
-    function decorateOptionsPanel(selector) {
+    function decorateOptionsPanel(selector, id) {
+        var idString = '';
+        if (arguments.length === 2) {
+            idString = 'id="' + id + '" ';
+        }
         $(selector).replaceWith(function () {
-            return '<div class="options-bar"><div class="toggle"><img class="toggle-image"/><label class=options-label>Options</label></div>' + $(this)[0].outerHTML + '</div>';
+            return '<div ' + idString + 'class="options-bar"><div class="toggle"><img class="toggle-image"/><label class=options-label>Options</label></div>' + $(this)[0].outerHTML + '</div>';
         });
     }
 
@@ -51,9 +55,9 @@ neon.toggle = (function () {
     }
 
     return {
-        createOptionsPanel: function (selector) {
+        createOptionsPanel: function (selector, id) {
             $(document).ready(function () {
-                decorateOptionsPanel(selector);
+                decorateOptionsPanel(selector, id);
                 configureToggle(selector);
                 initToggleImage();
             });

@@ -140,7 +140,7 @@ $(document).ready(function () {
             $('#limit').change(updateTable);
         }
 
-        neon.toggle.createOptionsPanel("#options-panel");
+        neon.toggle.createOptionsPanel("#options-panel", "table-options");
         populateSortDirection();
         addLimitListener();
 
