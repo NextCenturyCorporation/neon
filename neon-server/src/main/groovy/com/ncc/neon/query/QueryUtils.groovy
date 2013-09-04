@@ -1,5 +1,7 @@
 package com.ncc.neon.query
 
+import org.apache.commons.lang.math.NumberUtils
+
 /*
  * ************************************************************************
  * Copyright (c), 2013 Next Century Corporation. All Rights Reserved.
@@ -30,6 +32,35 @@ class QueryUtils {
 
     static def queryFromFilter(def filter) {
         return new Query(filter: filter)
+    }
+
+    /**
+     * Wraps a query in a data block
+     * @param queryResult The query result to be wrapped
+     * @param transformClassName A transform on the data. Defaults to null
+     * @param transformParams Parameters needed by the transform
+     * @return a data json object with an element.
+     */
+
+    static def wrapJsonInDataElement(queryResult, transformClassName = null, transformParams = []) {
+        def json = queryResult.toJson()
+        if (transformClassName) {
+            json = applyTransform(transformClassName, transformParams, json)
+        }
+        return '{"data":' + json + '}'
+    }
+
+    private static def applyTransform(transformClassName, transformParams, json) {
+        def transform = instantiateTransform(transformClassName, transformParams)
+        return transform.apply(json)
+    }
+
+    private static instantiateTransform(transformClassName, transformParams) {
+        def typedParams = transformParams.collect { NumberUtils.isNumber(it) ? NumberUtils.createNumber(it) : it }
+        def transformParamTypes = typedParams.collect { it.class }
+        def transformClass = QueryUtils.classLoader.loadClass(transformClassName)
+        def constructor = transformClass.getConstructor(transformParamTypes as Class[])
+        return constructor.newInstance(typedParams as Object[])
     }
 
 }
