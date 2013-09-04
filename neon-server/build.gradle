@@ -127,7 +127,7 @@ test {
     systemProperties props
 }
 
-task integrationTests(type: Test) {
+task integrationTest(type: Test) {
     dependsOn 'integrationTestClasses', 'generateMongoJson', 'generateHiveCSV', 'generateHiveJson'
 
     testClassesDir = sourceSets.integrationTest.output.classesDir
@@ -144,8 +144,8 @@ task integrationTests(type: Test) {
 }
 
 task jacocoFullTestReport(type: JacocoReport) {
-    dependsOn integrationTests
-    executionData = files("$buildDir/jacoco/integrationTests.exec", "$buildDir/jacoco/test.exec")
+    dependsOn integrationTest
+    executionData = files("$buildDir/jacoco/integrationTest.exec", "$buildDir/jacoco/test.exec")
     classDirectories = files(sourceSets.main.output.classesDir)
     sourceDirectories = files(sourceSets.main.output.classesDir)
 }
