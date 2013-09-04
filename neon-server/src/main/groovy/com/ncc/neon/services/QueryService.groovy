@@ -50,7 +50,7 @@ class QueryService {
                         @DefaultValue("false") @QueryParam("includefiltered") boolean includeFiltered,
                         @QueryParam("transform") String transformClassName,
                         @QueryParam("param") List<String> transformParams) {
-        return QueryUtils.wrapInDataJson(queryExecutor.execute(query, includeFiltered), transformClassName, transformParams)
+        return QueryUtils.wrapJsonInDataElement(queryExecutor.execute(query, includeFiltered), transformClassName, transformParams)
     }
 
     @POST
@@ -61,7 +61,7 @@ class QueryService {
                              @DefaultValue("false") @QueryParam("includefiltered") boolean includeFiltered,
                              @QueryParam("transform") String transformClassName,
                              @QueryParam("param") List<String> transformParams) {
-        return QueryUtils.wrapInDataJson(queryExecutor.execute(query, includeFiltered), transformClassName, transformParams)
+        return QueryUtils.wrapJsonInDataElement(queryExecutor.execute(query, includeFiltered), transformClassName, transformParams)
     }
 
     @POST
@@ -122,7 +122,7 @@ class QueryService {
     String getSelectionWhere(Filter filter,
                              @QueryParam("transform") String transformClassName,
                              @QueryParam("param") List<String> transformParams) {
-        return QueryUtils.wrapInDataJson(queryExecutor.getSelectionWhere(filter), transformClassName, transformParams)
+        return QueryUtils.wrapJsonInDataElement(queryExecutor.getSelectionWhere(filter), transformClassName, transformParams)
     }
 
     @POST

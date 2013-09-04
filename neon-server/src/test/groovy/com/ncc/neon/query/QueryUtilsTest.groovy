@@ -40,7 +40,7 @@ class QueryUtilsTest {
     void "wrap query result in json"() {
         String testJson = '{"test": "json data"}'
         def queryResult = [toJson: {testJson}] as QueryResult
-        String actual = QueryUtils.wrapInDataJson(queryResult)
+        String actual = QueryUtils.wrapJsonInDataElement(queryResult)
         String expected = '{"data":' + testJson + '}'
         assert actual == expected
     }
@@ -50,7 +50,7 @@ class QueryUtilsTest {
         String testJson = '{"test": "json data"}'
         def queryResult = [toJson: {testJson}] as QueryResult
 
-        String actual = QueryUtils.wrapInDataJson(queryResult, AllCapsTransform.name, [])
+        String actual = QueryUtils.wrapJsonInDataElement(queryResult, AllCapsTransform.name, [])
         String expected = '{"data":' + testJson.toUpperCase() + '}'
         assert actual == expected
     }

@@ -52,7 +52,7 @@ class LanguageService {
     @Path("query")
     String executeQuery(@FormParam("text") String text) {
         Query query = queryParser.parse(text)
-        return QueryUtils.wrapInDataJson(connectionState.queryExecutor.execute(query, false))
+        return QueryUtils.wrapJsonInDataElement(connectionState.queryExecutor.execute(query, false))
     }
 
 }

@@ -42,7 +42,7 @@ class QueryUtils {
      * @return a data json object with an element.
      */
 
-    static def wrapInDataJson(queryResult, transformClassName = null, transformParams = []) {
+    static def wrapJsonInDataElement(queryResult, transformClassName = null, transformParams = []) {
         def json = queryResult.toJson()
         if (transformClassName) {
             json = applyTransform(transformClassName, transformParams, json)
