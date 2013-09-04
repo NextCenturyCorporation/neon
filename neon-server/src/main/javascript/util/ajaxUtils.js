@@ -88,9 +88,9 @@ neon.util.AjaxUtils.setStartStopCallbacks = function (requestStart, requestEnd) 
 
 /**
  * Uses a default spinner when ajax queries are made. If this method is used, the neon.css file needs to be included.
- * @method useDefaultStartStopCallbacks
+ * @method useDefaultStartStopCallbacks_
  */
-neon.util.AjaxUtils.useDefaultStartStopCallbacks = function () {
+neon.util.AjaxUtils.useDefaultStartStopCallbacks_ = function () {
     neon.util.AjaxUtils.setStartStopCallbacks(
         neon.util.AjaxUtils.showDefaultSpinner_,
         neon.util.AjaxUtils.hideDefaultSpinner_);
@@ -172,4 +172,8 @@ neon.util.AjaxRequest.prototype.cancel = function () {
 
 (function () {
     neon.util.LoggerUtils.useBrowserConsoleAppender(neon.util.AjaxUtils.errorLogger_, true);
+    //document ready is used here so that this call is not overwritten by other jquery includes
+    $(document).ready(function () {
+        neon.util.AjaxUtils.useDefaultStartStopCallbacks_();
+    });
 })();

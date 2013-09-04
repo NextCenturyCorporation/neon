@@ -30,7 +30,6 @@ $(function () {
         OWF.relayFile = 'js/eventing/rpc_relay.uncompressed.html';
     }
     neon.query.SERVER_URL = $("#neon-server").val();
-    neon.util.AjaxUtils.useDefaultStartStopCallbacks();
 
     function init() {
         hideWizardSteps();
