@@ -1,9 +1,8 @@
-package com.ncc.neon.query
+package com.ncc.neon.language
 
-import com.ncc.neon.query.clauses.*
-import com.ncc.neon.query.filter.Filter
-import groovy.transform.ToString
-import org.codehaus.jackson.annotate.JsonIgnoreProperties
+import com.ncc.neon.query.Query
+import org.junit.Test
+
 
 /*
  * ************************************************************************
@@ -26,30 +25,23 @@ import org.codehaus.jackson.annotate.JsonIgnoreProperties
  * PROPRIETARY AND CONFIDENTIAL TRADE SECRET MATERIAL NOT FOR DISCLOSURE OUTSIDE
  * OF NEXT CENTURY CORPORATION EXCEPT BY PRIOR WRITTEN PERMISSION AND WHEN
  * RECIPIENT IS UNDER OBLIGATION TO MAINTAIN SECRECY.
+ *
+ * 
+ * @author tbrooks
  */
 
-/**
- * A query stores a filter for selecting data and optional aggregation methods for grouping the data.
- * The query is translated to a datastore specific operation which returns the appropriate data.
- */
-@ToString(includeNames = true)
-@JsonIgnoreProperties(value = ['includeFiltered_'])
-class Query {
+class QueryCreatorTest {
 
-    Filter filter
-    boolean isDistinct = false
-    List<String> fields = SelectClause.ALL_FIELDS
-    List<AggregateClause> aggregates = []
-    List<GroupByClause> groupByClauses = []
-    List<SortClause> sortClauses = []
-    LimitClause limitClause
+    @Test
+    void "one instance of query creator creates two different queries"(){
+        //The query creator has one instance in the Antlr Parser,
+        // which has one instance in the Language service.
+        // We need to be able to create multiple Query Objects from the same QueryCreator.
+        QueryCreator creator = new QueryCreator()
+        Query query1 = creator.createQuery()
+        Query query2 = creator.createQuery()
 
-    def getDatabaseName() {
-        filter.databaseName
-    }
-
-    def getTableName() {
-        filter.tableName
+        assert query1 != query2
     }
 
 }
