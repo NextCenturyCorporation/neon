@@ -76,6 +76,9 @@ $(document).ready(function () {
                 yAttr = COUNT_FIELD_NAME;
             }
 
+            //We need this because we set a window listener which holds a reference to old barchart objects.
+            //We should really only use one barchart object, but that will be fixed as part of NEON-294
+            $(window).off("resize");
             var opts = { "data": data.data, "x": xAttr, "y": yAttr, responsive: true};
             var chart = new charts.BarChart('#chart', opts);
             chart.draw();

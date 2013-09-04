@@ -635,14 +635,10 @@ charts.BarChart.prototype.determineHeight_ = function (chartSelector) {
 
 charts.BarChart.prototype.redrawOnResize_ = function () {
     var me = this;
-
     function drawChart() {
         me.draw();
     }
     //Debounce is needed because browser resizes fire this resize even multiple times.
-    $(window).resize(function () {
-        $(me.chartSelector_).empty();
-    });
     $(window).resize(_.debounce(drawChart, 100));
 
 };

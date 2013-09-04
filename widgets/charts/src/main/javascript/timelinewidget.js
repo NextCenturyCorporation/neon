@@ -25,6 +25,7 @@
 $(document).ready(function () {
 
     OWF.ready(function () {
+        var timeline;
         OWF.relayFile = 'js/eventing/rpc_relay.uncompressed.html';
         neon.query.SERVER_URL = $("#neon-server").val();
         neon.util.AjaxUtils.useDefaultStartStopCallbacks();
@@ -144,8 +145,10 @@ $(document).ready(function () {
             var opts = { "data": dataByDate, "x": xAttr, "y": yAttr,
                 "interval": granularity, responsive: true};
 
-
-            var timeline = new charts.Timeline('#chart', opts);
+            //We need this because we set a window listener which holds a reference to old timeline objects.
+            //We should really only use one timeline object, but that will be fixed as part of NEON-294
+            $(window).off("resize");
+            timeline = new charts.Timeline('#chart', opts);
             configureFiltering(timeline, xAttr);
             timeline.draw();
             // make sure the reset button is aligned with the chart and has some spacing between it and the chart
