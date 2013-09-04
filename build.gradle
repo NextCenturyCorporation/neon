@@ -12,8 +12,8 @@ repositories {
 // task groupings we add
 def DEPLOY_GROUP = 'deploy'
 
-def owfTomcat = (hasProperty('OWF_TOMCAT') ? OWF_TOMCAT : System.env.OWF_TOMCAT) ?: '/opt/owf/apache-tomcat-7.0.21'
-def owfTomcatWebapps = owfTomcat + '/webapps'
+def neonServer = (hasProperty('NEON_SERVER') ? NEON_SERVER : System.env.NEON_SERVER) ?: '/opt/owf/apache-tomcat-7.0.21'
+def neonServerWebapps = neonServer + '/webapps'
 
 // the neon-server is just output as neon.js for simpler referencing
 project(":neon-server").ext.outfile = 'neon'
@@ -69,14 +69,14 @@ subprojects {
         group = DEPLOY_GROUP
 
         doFirst {
-            delete "${owfTomcatWebapps}/${war.baseName}", "${owfTomcatWebapps}/${war.baseName}.war"
+            delete "${neonServerWebapps}/${war.baseName}", "${neonServerWebapps}/${war.baseName}.war"
         }
 
         from war.destinationDir
-        into owfTomcatWebapps
+        into neonServerWebapps
 
         doLast {
-            println "Copying $war.archivePath into $owfTomcatWebapps"
+            println "Copying $war.archivePath into $neonServerWebapps"
         }
     }
 
