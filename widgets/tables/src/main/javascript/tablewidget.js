@@ -140,6 +140,7 @@ $(document).ready(function () {
             $('#limit').change(updateTable);
         }
 
+        neon.toggle.createOptionsPanel("#options-panel");
         populateSortDirection();
         addLimitListener();
 
@@ -148,5 +149,5 @@ $(document).ready(function () {
 
     });
 
-    neon.toggle.createOptionsPanel("#options-panel");
+
 });

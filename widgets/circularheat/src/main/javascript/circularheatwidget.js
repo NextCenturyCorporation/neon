@@ -108,8 +108,8 @@ $(document).ready(function () {
             return $('#date option:selected').val();
         }
 
-        initChart();
         neon.toggle.createOptionsPanel("#options-panel");
+        initChart();
 
     });
 

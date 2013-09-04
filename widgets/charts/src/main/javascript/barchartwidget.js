@@ -84,8 +84,8 @@ $(document).ready(function () {
             chart.draw();
         }
 
-        drawChart();
         neon.toggle.createOptionsPanel("#options-panel");
+        drawChart();
 
     });
 

@@ -242,8 +242,8 @@ $(document).ready(function () {
         }
 
 
-        initMap();
         neon.toggle.createOptionsPanel("#options-panel");
+        initMap();
 
     });
 

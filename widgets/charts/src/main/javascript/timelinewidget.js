@@ -179,10 +179,10 @@ $(document).ready(function () {
             dropdown.change(drawChart);
         }
 
+        neon.toggle.createOptionsPanel("#options-panel");
         populateTimeGranularityDropdown();
         configureButtons();
         drawChart();
-        neon.toggle.createOptionsPanel("#options-panel");
 
     });
 

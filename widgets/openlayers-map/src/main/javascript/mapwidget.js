@@ -189,8 +189,9 @@ $(document).ready(function () {
             return $('#color-by option:selected').val();
         }
 
-        initMap();
         neon.toggle.createOptionsPanel("#options-panel");
+        initMap();
+
     });
 
 });
