@@ -103,7 +103,6 @@ class QueryCreator extends NeonBaseListener {
         String text = whereContext.STRING()[1].text
         singularWhereClause.rhs = handleRhsTypes(text)
 
-
         return singularWhereClause
     }
 
@@ -118,7 +117,6 @@ class QueryCreator extends NeonBaseListener {
             return ""
         }
         return DateUtils.tryToParseDate(text)
-
     }
 
     private void createBooleanWhereClause(NeonParser.WhereClauseContext ctx, BooleanWhereClause booleanWhereClause) {
@@ -141,22 +139,17 @@ class QueryCreator extends NeonBaseListener {
     public void exitSortClause(NeonParser.SortClauseContext ctx) {
         SortClause sortClause = new SortClause(sortOrder: SortOrder.ASCENDING)
         sortClause.fieldName = ctx.STRING().text
-        if (ctx.SORT_DIRECTION()) {
-            if (ctx.SORT_DIRECTION().text.toLowerCase() == "desc") {
-                sortClause.sortOrder = SortOrder.DESCENDING
-            }
+        if (ctx.SORT_DIRECTION()?.text.toLowerCase() == "desc") {
+            sortClause.sortOrder = SortOrder.DESCENDING
         }
         sortClauses << sortClause
     }
 
     @Override
     void exitGroupClause(NeonParser.GroupClauseContext ctx) {
-        if (!ctx.STRING()) {
-            return
-        }
-
         GroupByFieldClause fieldClause = new GroupByFieldClause()
         fieldClause.field = ctx.STRING().text
+
         groupByClauses << fieldClause
     }
 
@@ -174,6 +167,7 @@ class QueryCreator extends NeonBaseListener {
     public void exitLimit(NeonParser.LimitContext ctx) {
         LimitClause clause = new LimitClause()
         clause.limit = Integer.valueOf(ctx.STRING().text)
+
         limitClause = clause
     }
 }

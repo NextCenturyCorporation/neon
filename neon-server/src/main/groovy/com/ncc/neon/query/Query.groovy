@@ -37,12 +37,12 @@ import org.codehaus.jackson.annotate.JsonIgnoreProperties
 class Query {
 
     Filter filter
+    boolean isDistinct = false
+    List<String> fields = SelectClause.ALL_FIELDS
     List<AggregateClause> aggregates = []
     List<GroupByClause> groupByClauses = []
-    boolean isDistinct = false
-    List<SortClause> sortClauses
+    List<SortClause> sortClauses = []
     LimitClause limitClause
-    List<String> fields = SelectClause.ALL_FIELDS
 
     def getDatabaseName() {
         filter.databaseName
