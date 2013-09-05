@@ -228,6 +228,31 @@ describe('bar chart', function () {
         expect(chart.data_).toBeEqualArray(expected);
     });
 
+    it('should calculate a plot width of 0 when the chart is not wide enough', function(){
+        var HORIZONTAL_MARGINS = 70;
+        var CHART_WIDTH = 50;
+        var CATEGORIES = 50;
+
+        var data = [];
+        for(var i = 0 ; i < CATEGORIES; i++){
+            data[i] = { category: i, count: 5};
+        }
+        //The chart width (50) + horizontal margins(70) fits the number of categories (50)
+        var opts = { "data": data, "x": "category", "y": "count", "width": HORIZONTAL_MARGINS + CHART_WIDTH};
+        var chart = new charts.BarChart('#chart', opts);
+
+        expect(chart.categories.length).toEqual(CATEGORIES);
+        expect(chart.x.rangeBand()).toEqual(1);
+        expect(chart.plotWidth).toEqual(CATEGORIES);
+
+        //The chart width(49) + horizontal margins(70) does not fit the number of categories(50)
+        opts = { "data": data, "x": "category", "y": "count", "width": HORIZONTAL_MARGINS + CHART_WIDTH - 1};
+        chart = new charts.BarChart('#chart', opts);
+
+        expect(chart.categories.length).toEqual(CATEGORIES);
+        expect(chart.x.rangeBand()).toEqual(0);
+        expect(chart.plotWidth).toEqual(0);
+    });
 
     /**
      * Takes an object whose key value pairs represent the expected output and transforms it into an array of

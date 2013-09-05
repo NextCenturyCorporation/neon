@@ -83,8 +83,7 @@ svg .tick {
 }
 
 .error-text {
-    position:absolute;
     color: red;
-    top: 170px;
-    left: 20px;
+    margin-top: 170px;
+    margin-left: 20px;
 }

@@ -80,7 +80,8 @@
  *    { "country": "Canada", "events": 7}
  *    ];
  *    var opts = { "data": data, "x": "country", "y" : "events"};
- *    var barchart = new charts.BarChart('#chart', opts).draw();
+ *    var barchart = new charts.BarChart('#chart', opts);
+ *    barchart.draw();
  *
  */
 charts.BarChart = function (chartSelector, opts) {
@@ -312,6 +313,10 @@ charts.BarChart.prototype.preparePropertiesForDrawing_ = function () {
     this.yAxis_ = this.createYAxis_();
 };
 
+/**
+ * Displays an error to the user describing why the chart could not be drawn.
+ * @method displayError
+ */
 charts.BarChart.prototype.displayError = function () {
     $(this.chartSelector_).append("<div class='error-text'>" +
     "You've attempted to draw a chart with too many categories.<br/>" +

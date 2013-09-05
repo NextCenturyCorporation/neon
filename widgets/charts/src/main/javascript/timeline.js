@@ -47,7 +47,8 @@
  *                 {"date": new Date(2013,1,7), "count": 1}
  *                ];
  *     var opts = { "data" : data, "x": "date", "y": "count", "interval" : charts.Timeline.MONTH};
- *     var timeline = new charts.Timeline('#chart', opts).draw();
+ *     var timeline = new charts.Timeline('#chart', opts);
+ *     timeline.draw();
  *
  */
 charts.Timeline = function (chartSelector, opts) {
