@@ -47,8 +47,7 @@
  *                 {"date": new Date(2013,1,7), "count": 1}
  *                ];
  *     var opts = { "data" : data, "x": "date", "y": "count", "interval" : charts.Timeline.MONTH};
- *     var timeline = new charts.Timeline('#chart', opts);
- *     timeline.draw();
+ *     var timeline = new charts.Timeline('#chart', opts).draw();
  *
  */
 charts.Timeline = function (chartSelector, opts) {
@@ -86,13 +85,14 @@ charts.Timeline.prototype.dateForItem_ = charts.Timeline.prototype.categoryForIt
     // override the draw method to also draw the slider
     var oldDrawMethod = charts.Timeline.prototype.draw;
     charts.Timeline.prototype.draw = function () {
-        oldDrawMethod.call(this);
+        var chart = oldDrawMethod.call(this);
         if(this.plotWidth !== 0){
             this.drawSlider_();
             if(this.storedFilterDates_){
                 this.styleInactiveData_(this.storedFilterDates_[0], this.storedFilterDates_[1]);
             }
         }
+        return chart;
     };
 
     var oldDrawXAxisMethod = charts.Timeline.prototype.drawXAxis_;

@@ -143,8 +143,8 @@ $(document).ready(function () {
             var opts = { "data": dataByDate, "x": xAttr, "y": yAttr,
                 "interval": granularity, responsive: true};
 
-            //We need this because we set a window listener which holds a reference to old timeline objects.
-            //We should really only use one timeline object, but that will be fixed as part of NEON-294
+            // TODO: We need this because we set a window listener which holds a reference to old timeline objects.
+            // We should really only use one timeline object, but that will be fixed as part of NEON-294
             $(window).off("resize");
             timeline = new charts.Timeline('#chart', opts);
             configureFiltering(timeline, xAttr);

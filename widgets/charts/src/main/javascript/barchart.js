@@ -80,8 +80,7 @@
  *    { "country": "Canada", "events": 7}
  *    ];
  *    var opts = { "data": data, "x": "country", "y" : "events"};
- *    var barchart = new charts.BarChart('#chart', opts);
- *    barchart.draw();
+ *    var barchart = new charts.BarChart('#chart', opts).draw();
  *
  */
 charts.BarChart = function (chartSelector, opts) {
@@ -283,19 +282,21 @@ charts.BarChart.createYAxisTickFormat_ = function () {
 /**
  * Draws the bar chart in the component specified in the constructor
  * @method draw
+ * @return {charts.BarChart} This bar chart
  */
 charts.BarChart.prototype.draw = function () {
     this.preparePropertiesForDrawing_();
     $(this.chartSelector_).empty();
-    if(this.plotWidth === 0){
+    if (this.plotWidth === 0) {
         this.displayError();
-        return;
     }
-
-    var chart = this.drawChartSVG_();
-    this.bindData_(chart);
-    this.drawXAxis_(chart);
-    this.drawYAxis_(chart);
+    else {
+        var chart = this.drawChartSVG_();
+        this.bindData_(chart);
+        this.drawXAxis_(chart);
+        this.drawYAxis_(chart);
+    }
+    return this;
 };
 
 charts.BarChart.prototype.preparePropertiesForDrawing_ = function () {
@@ -319,9 +320,9 @@ charts.BarChart.prototype.preparePropertiesForDrawing_ = function () {
  */
 charts.BarChart.prototype.displayError = function () {
     $(this.chartSelector_).append("<div class='error-text'>" +
-    "You've attempted to draw a chart with too many categories.<br/>" +
-    "Reduce the number of categories or increase the width of the chart to " +
-    this.categories.length + " pixels.</div>");
+        "You've attempted to draw a chart with too many categories.<br/>" +
+        "Reduce the number of categories or increase the width of the chart to " +
+        this.categories.length + " pixels.</div>");
 };
 
 charts.BarChart.prototype.drawChartSVG_ = function () {
@@ -640,9 +641,11 @@ charts.BarChart.prototype.determineHeight_ = function (chartSelector) {
 
 charts.BarChart.prototype.redrawOnResize_ = function () {
     var me = this;
+
     function drawChart() {
         me.draw();
     }
+
     //Debounce is needed because browser resizes fire this resize even multiple times.
     $(window).resize(_.debounce(drawChart, 100));
 

@@ -79,8 +79,7 @@ $(document).ready(function () {
             //We should really only use one barchart object, but that will be fixed as part of NEON-294
             $(window).off("resize");
             var opts = { "data": data.data, "x": xAttr, "y": yAttr, responsive: true};
-            var chart = new charts.BarChart('#chart', opts);
-            chart.draw();
+            var chart = new charts.BarChart('#chart', opts).draw();
         }
 
         neon.toggle.createOptionsPanel("#options-panel");
