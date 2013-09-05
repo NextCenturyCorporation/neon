@@ -65,7 +65,7 @@ subprojects {
 
     task('deployToTomcat', type: Copy) {
         dependsOn war
-        description = "Copies the project's war file to the owf tomcat webapps dir"
+        description = "Copies the project's war file to the neon server tomcat webapps dir"
         group = DEPLOY_GROUP
 
         doFirst {
