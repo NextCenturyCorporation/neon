@@ -32,6 +32,11 @@ import org.apache.commons.lang.math.NumberUtils
  * @author tbrooks
  */
 
+/**
+ * This listens to the grammar being parsed. Invoke createQuery()
+ * after kicking off the antrl parsing to create a new Query object from the parsed text.
+ */
+
 class QueryCreator extends NeonBaseListener {
     private final Map<String, WhereClause> parsedWhereClauses = [:]
 

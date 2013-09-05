@@ -55,17 +55,14 @@ neon.queryBuilder = (function () {
         table = new tables.Table('#results', {data: data.data, gridOptions: {fullWidthRows: true}}).draw();
     }
 
+    function onQueryError(xhr, status, msg) {
+        neon.queryBuilder.displayError(msg);
+    }
+
     function submitQueryToServer() {
         $("#errorText").empty();
-        var query = $('#queryText').val();
-        neon.util.AjaxUtils.doPost(neon.query.SERVER_URL + "/services/languageservice/query",
-            {
-                data: { text: query },
-                success: onSuccessfulQuery,
-                error: function (xhr, status, msg) {
-                    neon.queryBuilder.displayError(msg);
-                }
-            });
+        var queryText = $('#queryText').val();
+        neon.query.submitTextQuery(queryText, onSuccessfulQuery, onQueryError);
     }
 
     return {

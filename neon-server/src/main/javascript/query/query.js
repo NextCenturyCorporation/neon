@@ -711,6 +711,25 @@ neon.query.clearSelection = function (successCallback, errorCallback) {
     );
 };
 
+/**
+ * Submits a text based query to the server.
+ * @method submitTextQuery\
+ * @param {String} queryText The query text to be submitted
+ * @param {Function} successCallback The callback to execute when the query is parsed, which contains the query result
+ * @param {Function} [errorCallback] The optional callback when an error occurs. This is a 3 parameter function that contains the xhr, a short error status and the full error message.
+ * @return {neon.util.AjaxRequest} The xhr request object
+ */
+neon.query.submitTextQuery = function(queryText, successCallback, errorCallback) {
+    return neon.util.AjaxUtils.doPost(
+        neon.query.queryUrl_('/services/languageservice/query'),
+        {
+            data: { text: queryText },
+            success: successCallback,
+            error: errorCallback
+        }
+    );
+};
+
 neon.query.queryUrl_ = function (path) {
     return neon.query.SERVER_URL + path;
 };
