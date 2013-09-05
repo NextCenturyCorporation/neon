@@ -31,19 +31,11 @@ $(document).ready(function () {
                 filterKey = filterResponse;
             });
 
-            neon.query.getFieldNames(databaseName, tableName, populateAttributeDropdowns);
+            neon.query.getFieldNames(databaseName, tableName, populateFromColumns);
         }
 
-        function populateAttributeDropdowns(data) {
-            ['date'].forEach(function (selectId) {
-                var select = $('#' + selectId);
-                select.empty();
-                select.append($('<option></option>').attr('value', '').text('(Select Field)'));
-                data.fieldNames.forEach(function (field) {
-                    select.append($('<option></option>').attr('value', field).text(field));
-                });
-                select.change(redrawChart);
-            });
+        function populateFromColumns(data) {
+            neon.populate.populateAttributeDropdowns(data, ["date"], redrawChart);
         }
 
         function initChart() {

@@ -21,35 +21,17 @@
  * RECIPIENT IS UNDER OBLIGATION TO MAINTAIN SECRECY.
  */
 
+var neon = neon || {};
+neon.populate = neon.populate || {};
 
-//TODO: NEON-604 Remove these from globabl scope and move more common functions from barchartwidget.js and timelinewidget.js
-// this file contains some javascript functions that are useful for the chart based widgets
-var databaseName;
-var tableName;
-var filterKey;
-var onChange;
-
-function onActiveDatasetChanged(message, changeHandler) {
-    databaseName = message.database;
-    tableName = message.table;
-    onChange = changeHandler;
-
-    neon.query.registerForFilterKey(databaseName, tableName, function(filterResponse){
-        filterKey = filterResponse;
+neon.populate.populateAttributeDropdowns = function (data, attributes, onChange) {
+    attributes.forEach(function (selectId) {
+        var select = $('#' + selectId);
+        select.empty();
+        select.append($('<option></option>').attr('value', '').text('(Select Field)'));
+        data.fieldNames.forEach(function (field) {
+            select.append($('<option></option>').attr('value', field).text(field));
+        });
+        select.change(onChange);
     });
-
-    neon.query.getFieldNames(databaseName, tableName, populateFromColumns);
-}
-
-
-function populateFromColumns(data) {
-    neon.populate.populateAttributeDropdowns(data, ['x', 'y'], onChange);
-}
-
-function getXAttribute() {
-    return $('#x option:selected').val();
-}
-
-function getYAttribute() {
-    return $('#y option:selected').val();
-}
+};

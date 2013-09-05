@@ -41,19 +41,11 @@ $(document).ready(function () {
                 filterKey = filterResponse;
             });
 
-            neon.query.getFieldNames(databaseName, tableName, populateAttributeDropdowns);
+            neon.query.getFieldNames(databaseName, tableName, populateFromColumns);
         }
 
-        function populateAttributeDropdowns(data) {
-            ['latitude', 'longitude', 'color-by', 'size-by'].forEach(function (selectId) {
-                var select = $('#' + selectId);
-                select.empty();
-                select.append($('<option></option>').attr('value', '').text('(Select Field)'));
-                data.fieldNames.forEach(function (field) {
-                    select.append($('<option></option>').attr('value', field).text(field));
-                });
-                select.change(redrawMap);
-            });
+        function populateFromColumns(data) {
+            neon.populate.populateAttributeDropdowns(data, ['latitude', 'longitude', 'color-by', 'size-by'], redrawMap);
         }
 
         function initMap() {

@@ -21,7 +21,6 @@
  * RECIPIENT IS UNDER OBLIGATION TO MAINTAIN SECRECY.
  */
 
-
 $(document).ready(function () {
 
     OWF.ready(function () {

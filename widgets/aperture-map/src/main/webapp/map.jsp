@@ -25,6 +25,7 @@
     <script src="js-lib/aperture/1.0/lib/OpenLayers-textures.js"></script>
     <script src="js-lib/aperture/1.0/aperture.js"></script>
     <script src="js/toggle.js"></script>
+    <script src="js/populate.js"></script>
     <script src="javascript/aperturemapconfig.js"></script>
     <script src="javascript/mapwidget.js"></script>
     <!-- endbuild -->

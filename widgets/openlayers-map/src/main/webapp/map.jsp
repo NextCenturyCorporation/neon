@@ -21,6 +21,7 @@
     <script src="js-lib/heatmap/heatmap.js"></script>
     <script src="js-lib/heatmap/heatmap-openlayers.js"></script>
     <script src="js/toggle.js"></script>
+    <script src="js/populate.js"></script>
     <script src="javascript/mapwidget.js"></script>
     <!-- endbuild -->
 

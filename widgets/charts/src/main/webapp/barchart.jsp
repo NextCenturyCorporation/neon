@@ -21,6 +21,7 @@
     <script src="js-lib/jqueryui/jquery-ui-1.10.3.custom.min.js"></script>
     <script src="js-lib/lodash/1.3.1/lodash.min.js"></script>
     <script src="js/toggle.js"></script>
+    <script src="js/populate.js"></script>
     <script src="javascript/namespaces.js"></script>
     <script src="javascript/barchart.js"></script>
     <!-- endbuild -->
