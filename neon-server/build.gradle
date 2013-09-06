@@ -173,11 +173,8 @@ task acceptanceTestWar(type: org.gradle.api.plugins.jetty.JettyRunWar) {
 task generateAcceptanceTestHelpers {
     // since the properties may change in the build file, always regenerate this file
     outputs.upToDateWhen { false }
-    doFirst {
-        def outputDir = new File(buildDir, "acceptanceTestSupport")
-        outputDir.mkdirs()
-    }
     doLast {
+        def outputDir = new File(buildDir, "acceptanceTestSupport")
         generateJavascriptHelper("http://localhost:${getAcceptanceTestPort()}/neon", "http://localhost:${getAcceptanceTestServicePort()}", new File(outputDir, "ports.js"))
     }
 }

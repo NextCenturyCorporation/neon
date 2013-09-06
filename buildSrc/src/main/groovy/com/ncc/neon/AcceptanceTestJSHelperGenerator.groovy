@@ -32,6 +32,7 @@ import org.json.JSONObject
 class AcceptanceTestJSHelperGenerator {
 
     static void generateJavascriptHelper(neonServerUrl, transformServiceUrl, outfile) {
+        outfile.parentFile.mkdirs()
         outfile.withWriter { w ->
             w.println "var neonServerUrl = '${neonServerUrl}';"
             w.println "var transformServiceUrl = '${transformServiceUrl}';"
