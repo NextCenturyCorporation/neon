@@ -76,7 +76,7 @@ $(function () {
 
     function populateDatabaseDropdown() {
         var databaseSelectSelector = $('#database-select');
-        neon.util.AjaxUtils.doPost(neon.query.SERVER_URL + "/services/filterservice/databasenames",
+        neon.util.AjaxUtils.doGet(neon.query.SERVER_URL + "/services/filterservice/databasenames",
             {
                 success: function (databaseNames) {
                     databaseSelectSelector.find('option').remove();

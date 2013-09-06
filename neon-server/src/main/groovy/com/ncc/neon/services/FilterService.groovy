@@ -52,7 +52,7 @@ class FilterService{
         connectionState.createConnection(datastore,hostname)
     }
 
-    @POST
+    @GET
     @Produces(MediaType.APPLICATION_JSON)
     @Path("databasenames")
     List<String> getDatabaseNames() {
