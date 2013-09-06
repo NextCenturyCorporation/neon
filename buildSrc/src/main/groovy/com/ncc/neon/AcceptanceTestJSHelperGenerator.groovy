@@ -1,3 +1,8 @@
+package com.ncc.neon
+
+import org.json.JSONArray
+import org.json.JSONObject
+
 /*
  * ************************************************************************
  * Copyright (c), 2013 Next Century Corporation. All Rights Reserved.
@@ -22,27 +27,15 @@
  */
 
 /**
- * This is an end to end acceptance test to verify that queries can be executed against a mongo instance.
- * These tests parallel those in the MongoQueryExecutorIntegrationTest.
+ * Used to generate a javascript file that configures the ports for javascript acceptance tests
  */
-// neonServerUrl is generated dynamically during the build and included in the acceptance test helper file
-neon.query.SERVER_URL = neonServerUrl;
+class AcceptanceTestJSHelperGenerator {
 
-describe('ajax utils', function () {
+    static void generateJavascriptHelper(neonServerUrl, transformServiceUrl, outfile) {
+        outfile.withWriter { w ->
+            w.println "var neonServerUrl = '${neonServerUrl}';"
+            w.println "var transformServiceUrl = '${transformServiceUrl}';"
+        }
+    }
 
-    it('cancels ajax request', function () {
-        var statusText = "";
-        // transformServiceUrl is generated dynamically during the build and included in the acceptance test helper file
-        var request = neon.util.AjaxUtils.doGet(transformServiceUrl + '/neon/timeouttest', {
-            // we should get an error with an "abort" status
-            error: function (xhr, status, msg) {
-                statusText = xhr.statusText;
-            }
-        });
-        request.cancel();
-        waitsFor(function () {
-            return statusText === 'abort';
-        });
-    });
-
-});
+}

@@ -25,7 +25,8 @@
  * This is an end to end acceptance test to verify that queries can be executed against a mongo instance.
  * These tests parallel those in the MongoQueryExecutorIntegrationTest.
  */
-neon.query.SERVER_URL = 'http://localhost:10002/neon';
+// neonServerUrl is generated dynamically during the build and included in the acceptance test helper file
+neon.query.SERVER_URL = neonServerUrl;
 
 describe('query mapping', function () {
     // aliases for easier test writing
@@ -391,11 +392,10 @@ describe('query mapping', function () {
     });
 
     it('transforms query results with a RESTful service', function () {
-        // the port comes from build.gradle
-        var host = 'http://localhost:10008';
         var path = '/neon/transformtest?replacethis=VA&replacewith=Virginia';
         var transformClassName = 'com.ncc.neon.query.transform.RestServiceTransform';
-        var transformParams = [host, path];
+        // transformServiceUrl is generated dynamically during the build and included in the acceptance test helper file
+        var transformParams = [transformServiceUrl, path];
 
         var query = baseQuery().where('state', '=', 'VA').transform(transformClassName, transformParams);
         executeAndWait(neon.query.executeQuery, query);
@@ -430,11 +430,10 @@ describe('query mapping', function () {
     });
 
     it('transforms query group results with a RESTful service', function () {
-        // the port comes from build.gradle
-        var host = 'http://localhost:10008';
         var path = '/neon/transformtest?replacethis=Virginia&replacewith=VirginiaState';
         var transformClassName = 'com.ncc.neon.query.transform.RestServiceTransform';
-        var transformParams = [host, path];
+        // transformServiceUrl is generated dynamically during the build and included in the acceptance test helper file
+        var transformParams = [transformServiceUrl, path];
 
         var query1 = baseQuery().where('state', '=', 'VA');
         var query2 = baseQuery().where('state', '=', 'MD');

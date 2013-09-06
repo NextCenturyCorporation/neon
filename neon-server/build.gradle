@@ -1,6 +1,7 @@
 import com.mongodb.BasicDBObject
 import com.mongodb.MongoClient
 import com.mongodb.util.JSON
+import static com.ncc.neon.AcceptanceTestJSHelperGenerator.*
 import com.ncc.neon.HiveJSONGenerator
 import com.ncc.neon.MongoJSONGenerator
 import com.ncc.neon.JSONToCSVConverter
@@ -151,9 +152,9 @@ task jacocoFullTestReport(type: JacocoReport) {
 }
 
 task transformTestWebService(type: org.gradle.api.plugins.jetty.JettyRun) {
-    dependsOn 'acceptanceTestClasses'
+    dependsOn 'acceptanceTestClasses', 'generateAcceptanceTestHelpers'
     daemon = true
-    httpPort = 10008
+    httpPort = getAcceptanceTestServicePort()
     stopPort = httpPort + 2
     stopKey = 'stop'
     classpath = sourceSets.acceptanceTest.runtimeClasspath
@@ -161,12 +162,22 @@ task transformTestWebService(type: org.gradle.api.plugins.jetty.JettyRun) {
 }
 
 task acceptanceTestWar(type: org.gradle.api.plugins.jetty.JettyRunWar) {
-    dependsOn 'acceptanceTestClasses'
+    dependsOn 'acceptanceTestClasses', 'generateAcceptanceTestHelpers'
     daemon = true
-    httpPort = 10002
+    httpPort = getAcceptanceTestPort()
     stopPort = httpPort + 2
     stopKey = 'stop'
     jettyConfig = new File(sourceSets.acceptanceTest.output.resourcesDir, 'jetty-config.xml')
+}
+
+task generateAcceptanceTestHelpers {
+    // since the properties may change in the build file, always regenerate this file
+    def outputDir = new File(buildDir, "acceptanceTestSupport")
+    outputDir.mkdirs()
+    outputs.upToDateWhen { false }
+    doLast {
+        generateJavascriptHelper("http://localhost:${getAcceptanceTestPort()}/neon", "http://localhost:${getAcceptanceTestServicePort()}", new File(outputDir, "ports.js"))
+    }
 }
 
 processAcceptanceTestResources {
@@ -189,6 +200,16 @@ def getHiveHost() {
 
 def getHdfsUrl() {
     return project.hasProperty("hdfs.url") ? getProperty("hdfs.url") : "hdfs://localhost:8020"
+}
+
+def getAcceptanceTestPort() {
+    return project.hasProperty("acceptanceTest.port") ? getProperty("acceptanceTest.port").toInteger() : 10002
+}
+
+// used for the transform service that runs as part of the acceptance test
+def getAcceptanceTestServicePort() {
+    // the test war runs on the acceptanceTestPort and the stop port is +2, so run the service on +4
+    return getAcceptanceTestPort() + 4
 }
 
 

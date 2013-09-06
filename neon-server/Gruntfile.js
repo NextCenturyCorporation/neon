@@ -12,9 +12,12 @@ module.exports = function (grunt) {
             specs: specs,
             timeout: 60000,
             vendor: '../js-test-support/lib/**/*.js',
-            helpers: ['../js-test-support/helpers/**/*.js',
-                'src/js-test-support/mockNamespaces.js', 'src/js-test-support/ajaxMockUtils.js',
-                'src/js-test-support/owfEventingMock.js'],
+            helpers: [
+                '../js-test-support/helpers/**/*.js',
+                'src/js-test-support/mockNamespaces.js',
+                'src/js-test-support/ajaxMockUtils.js',
+                'src/js-test-support/owfEventingMock.js',
+                'build/acceptanceTestSupport/ports.js'],
             '--web-security': false,
             '--local-to-remote-url-access': true,
             '--ignore-ssl-errors': true
