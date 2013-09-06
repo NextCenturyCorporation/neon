@@ -1,10 +1,8 @@
-package com.ncc.neon.services
-import com.ncc.neon.connect.ConnectionState
-import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.stereotype.Component
+package com.ncc.setup.model
 
-import javax.ws.rs.*
-import javax.ws.rs.core.MediaType
+import groovy.beans.Bindable
+import groovy.transform.ToString
+
 /*
  * ************************************************************************
  * Copyright (c), 2013 Next Century Corporation. All Rights Reserved.
@@ -31,38 +29,17 @@ import javax.ws.rs.core.MediaType
  * @author tbrooks
  */
 
-@Component
-@Path("/filterservice")
-class FilterService{
+@ToString
+class Project {
 
-    @Autowired
-    ConnectionState connectionState
+    @Bindable
+    String projectName
+    @Bindable
+    String rootPackageName
 
-    @GET
-    @Produces(MediaType.APPLICATION_JSON)
-    @Path("hostnames")
-    List<String> getHostnames() {
-        return ["localhost"]
-    }
+    @Bindable
+    boolean javaCode = false
+    @Bindable
+    boolean groovyCode = false
 
-    @POST
-    @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
-    @Path("connect")
-    void connect(@FormParam("datastore") String datastore, @FormParam("hostname") String hostname){
-        connectionState.createConnection(datastore,hostname)
-    }
-
-    @POST
-    @Produces(MediaType.APPLICATION_JSON)
-    @Path("databasenames")
-    List<String> getDatabaseNames() {
-        connectionState.queryExecutor.showDatabases()
-    }
-
-    @POST
-    @Produces(MediaType.APPLICATION_JSON)
-    @Path("tablenames")
-    List<String> getTableNames(@FormParam("database") String database) {
-        connectionState.queryExecutor.showTables(database)
-    }
 }

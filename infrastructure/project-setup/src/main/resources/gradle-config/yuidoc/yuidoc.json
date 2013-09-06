@@ -1,0 +1,9 @@
+{
+    "name": "@libraryName@ Javascript API Documentation",
+    "version": "@libraryName@",
+    "logo":"images/logo.png",
+    "options": {
+        "outdir":"@outDir@",
+        "paths":[ "src/main/javascript" ]
+    }
+}

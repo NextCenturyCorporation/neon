@@ -1,0 +1,4 @@
+The project-setup project will generate a new project for you.
+
+There is a command line version: com.ncc.setup.command.CommandLine
+and a gui version: com.ncc.setup.gui.SwingApp

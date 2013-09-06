@@ -1,0 +1,14 @@
+apply plugin: 'groovy'
+apply plugin: 'application'
+
+repositories{
+    mavenCentral()
+}
+
+dependencies{
+    compile 'org.codehaus.groovy:groovy-all:2.1.6'
+    testCompile 'junit:junit:4.11'
+}
+
+version = 1.0
+mainClassName = "com.ncc.setup.command.CommandLine"

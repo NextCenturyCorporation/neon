@@ -1,0 +1,37 @@
+apply plugin: 'java'
+apply plugin: 'checkstyle'
+apply plugin: 'findbugs'
+apply plugin: 'jacoco'
+apply from: 'gradle/jdepend.gradle'
+apply from: 'gradle/docs.gradle'
+
+repositories{
+    mavenCentral()
+}
+
+dependencies{
+    testCompile 'junit:junit:4.11'
+}
+
+project.ext {
+    javadocDir = "${project.docsDir}/javadocs"
+    javadocTitle = "${libraryName} Javadocs"
+}
+
+javadoc {
+    destinationDir = file(javadocDir)
+    title = javadocTitle
+}
+
+task copyJavadocs(type: org.gradle.api.tasks.Copy) {
+    description = 'Copies the javadocs to a directory to be zipped'
+    dependsOn 'javadoc'
+    copyDocsIntoZipDir('javadocs', libraryName, copyJavadocs, javadocDir)
+}
+
+task zipJavadocs(type: Zip) {
+    description = 'Creates a zip file containing the javadocs'
+    group = JavaBasePlugin.DOCUMENTATION_GROUP
+    dependsOn 'copyJavadocs'
+    zipDocs(copyJavadocs, zipJavadocs, project.buildDir)
+}

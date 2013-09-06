@@ -1,10 +1,5 @@
-package com.ncc.neon.services
-import com.ncc.neon.connect.ConnectionState
-import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.stereotype.Component
 
-import javax.ws.rs.*
-import javax.ws.rs.core.MediaType
+
 /*
  * ************************************************************************
  * Copyright (c), 2013 Next Century Corporation. All Rights Reserved.
@@ -27,42 +22,12 @@ import javax.ws.rs.core.MediaType
  * OF NEXT CENTURY CORPORATION EXCEPT BY PRIOR WRITTEN PERMISSION AND WHEN
  * RECIPIENT IS UNDER OBLIGATION TO MAINTAIN SECRECY.
  *
- * 
- * @author tbrooks
+ *
  */
 
-@Component
-@Path("/filterservice")
-class FilterService{
+class HelloGroovy {
 
-    @Autowired
-    ConnectionState connectionState
-
-    @GET
-    @Produces(MediaType.APPLICATION_JSON)
-    @Path("hostnames")
-    List<String> getHostnames() {
-        return ["localhost"]
-    }
-
-    @POST
-    @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
-    @Path("connect")
-    void connect(@FormParam("datastore") String datastore, @FormParam("hostname") String hostname){
-        connectionState.createConnection(datastore,hostname)
-    }
-
-    @POST
-    @Produces(MediaType.APPLICATION_JSON)
-    @Path("databasenames")
-    List<String> getDatabaseNames() {
-        connectionState.queryExecutor.showDatabases()
-    }
-
-    @POST
-    @Produces(MediaType.APPLICATION_JSON)
-    @Path("tablenames")
-    List<String> getTableNames(@FormParam("database") String database) {
-        connectionState.queryExecutor.showTables(database)
+    String helloWorld(){
+        return "hello world"
     }
 }

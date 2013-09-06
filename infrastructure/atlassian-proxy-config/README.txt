@@ -1,0 +1,1 @@
+The files in here are for configuring the apache server used as a proxy for our Atlassian tools (detailed on the wiki). Note that if apache is reinstalled, configurations may be in slightly different places, but this directory contains all relevant configuration information.

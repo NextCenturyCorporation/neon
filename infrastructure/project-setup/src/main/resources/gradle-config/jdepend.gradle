@@ -1,0 +1,15 @@
+// applies the jdepend plugin to a build and will fail the build if there are any package cycles
+apply plugin: 'jdepend'
+
+jdepend {
+    sourceSets = [sourceSets.main]
+}
+
+jdependMain.doLast {
+    File file = new File(jdepend.reportsDir, "main.xml");
+    def cycleCount = new XmlSlurper().parse(file).Cycles.Package.size()
+    if (cycleCount > 0) {
+        throw new GradleException("Package cycles exist. See JDepend report at ${file}")
+    }
+}
+
