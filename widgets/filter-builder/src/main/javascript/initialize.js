@@ -44,7 +44,7 @@ $(function () {
     }
 
     function setupHostnames() {
-        neon.util.AjaxUtils.doPost(neon.query.SERVER_URL + "/services/filterservice/hostnames",
+        neon.util.AjaxUtils.doGet(neon.query.SERVER_URL + "/services/filterservice/hostnames",
             {
                 success: function (data) {
                     $("#hostname-input").autocomplete({
