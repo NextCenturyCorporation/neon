@@ -123,7 +123,7 @@ class HiveQueryExecutorIntegrationTest extends AbstractQueryExecutorIntegrationT
 
     @Override
     protected def rowToMap(row) {
-        return row.jdbcRow
+        return row.defaultRow
     }
 
     @Override

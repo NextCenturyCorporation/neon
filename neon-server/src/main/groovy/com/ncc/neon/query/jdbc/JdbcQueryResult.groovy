@@ -2,6 +2,7 @@ package com.ncc.neon.query.jdbc
 
 import com.ncc.neon.query.QueryResult
 import com.ncc.neon.query.Row
+import com.ncc.neon.query.DefaultRow
 import groovy.json.JsonBuilder
 
 /*
@@ -45,7 +46,7 @@ class JdbcQueryResult implements QueryResult {
         def rowIterator = [
                 hasNext: { listIterator.hasNext() },
                 next: {
-                    return new JdbcRow(jdbcRow: listIterator.next())
+                    return new DefaultRow(defaultRow: listIterator.next())
                 }
         ] as Iterator
 

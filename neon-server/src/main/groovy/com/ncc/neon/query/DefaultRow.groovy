@@ -1,9 +1,3 @@
-package com.ncc.neon.query.mongo
-
-import com.ncc.neon.query.QueryResult
-import com.ncc.neon.query.Row
-import com.ncc.neon.query.DefaultRow
-
 /*
  * ************************************************************************
  * Copyright (c), 2013 Next Century Corporation. All Rights Reserved.
@@ -26,45 +20,16 @@ import com.ncc.neon.query.DefaultRow
  * OF NEXT CENTURY CORPORATION EXCEPT BY PRIOR WRITTEN PERMISSION AND WHEN
  * RECIPIENT IS UNDER OBLIGATION TO MAINTAIN SECRECY.
  */
+package com.ncc.neon.query
 
-class MongoQueryResult implements QueryResult {
+import groovy.transform.ToString
 
-    /** the underlying iterable wrapped by the this result */
-    private def mongoIterable
-
-    @Override
-    Iterator<Row> iterator() {
-        // wrap the result in a Row and set the current row
-        def delegate = mongoIterable.iterator()
-        return new MongoQueryIterator(delegate)
-    }
+@ToString
+class DefaultRow implements Row{
+    private def defaultRow
 
     @Override
-    String toJson() {
-        return MongoUtils.serialize(mongoIterable)
-    }
-
-    private static class MongoQueryIterator implements Iterator<Row>{
-
-        private final Iterator delegate
-
-        public MongoQueryIterator(Iterator delegate){
-            this.delegate = delegate
-        }
-
-        @Override
-        boolean hasNext() {
-            return delegate.hasNext()
-        }
-
-        @Override
-        Row next() {
-            return new DefaultRow(defaultRow: delegate.next())
-        }
-
-        @Override
-        void remove() {
-            delegate.remove()
-        }
+    def getFieldValue(field) {
+        return defaultRow[field]
     }
 }
