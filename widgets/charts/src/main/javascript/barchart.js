@@ -444,14 +444,21 @@ charts.BarChart.prototype.createTooltip_ = function (item) {
 };
 
 charts.BarChart.prototype.centerTooltip_ = function (tooltip, data, periodStartPixels) {
-    var centerPointX = periodStartPixels + this.x.rangeBand() / 2;
-    var centerPointY = this.y(data.values);
-    // center the tooltip on the selected bar
+    // set the tooltip to appear where the mouse pointer is
+
+    // if there is not enough space below the pointer to display the tooltip, put it above
+    if((window.innerHeight - window.event.clientY) < $(".charttooltip").width()) {
+        tooltip.css({
+            'top': (window.event.clientY - ($(".charttooltip").width()/2)) + 'px'
+        });
+    }
+    else {
+        tooltip.css({
+            'top': window.event.clientY + 'px',
+        });
+    }
     tooltip.css({
-        'margin-left': this.margin.left + $(this.chartSelector_).position().left + 'px',
-        'margin-top': this.margin.top + $(this.chartSelector_).position().top + 'px',
-        'top': (centerPointY - $('#' + charts.BarChart.TOOLTIP_ID_).outerHeight() / 2) + 'px',
-        'left': (centerPointX - $('#' + charts.BarChart.TOOLTIP_ID_).outerWidth() / 2) + 'px'
+        'left': window.event.clientX + 'px'
     });
 };
 
