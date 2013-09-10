@@ -124,7 +124,7 @@ abstract class AbstractQueryExecutorIntegrationTest {
         jsonObject.keys().each { key ->
             def value = jsonObject.get(key)
             if (key =~ DATE_FIELD_REGEX) {
-                map[key] = com.ncc.neon.util.DateUtils.parseDate(value)
+                map[key] = DateUtils.parseDate(value)
             } else if (value instanceof JSONArray) {
                 map[key] = jsonArrayToList(value)
             } else if (value instanceof JSONObject) {
