@@ -46,7 +46,7 @@ import org.springframework.beans.factory.annotation.Autowired
  * Subclasses implement database specific translations
  */
 
-@SuppressWarnings("AbstractClassWithoutAbstractMethod")
+@SuppressWarnings("AbstractClassWithoutAbstractMethod") // test fragment - non abstract would cause this to be run as its own test
 abstract class AbstractQueryExecutorIntegrationTest {
 
     static final DATE_FIELD_REGEX = ~/.*date.*/
