@@ -33,7 +33,7 @@ neon.dropdown = (function () {
 
     function getFieldValues (attributeValues, dropDownIds, onChange) {
         var dropDownIdsArray = Array.isArray(dropDownIds) ? dropDownIds:[dropDownIds];
-        dropDownIds.forEach(function (selectId) {
+        dropDownIdsArray.forEach(function (selectId) {
             var select = $('#' + selectId);
             select.empty();
             select.append($('<option></option>').attr('value', '').text('(Select Field)'));

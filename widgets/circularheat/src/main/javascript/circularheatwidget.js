@@ -35,7 +35,7 @@ $(document).ready(function () {
         }
 
         function populateFromColumns(data) {
-            neon.dropdown.populateAttributeDropdowns(data, ["date"], redrawChart);
+            neon.dropdown.populateAttributeDropdowns(data, 'date', redrawChart);
         }
 
         function initChart() {
