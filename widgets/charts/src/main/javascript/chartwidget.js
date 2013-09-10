@@ -43,7 +43,7 @@ function onActiveDatasetChanged(message, changeHandler) {
 
 
 function populateFromColumns(data) {
-    neon.populate.populateAttributeDropdowns(data, ['x', 'y'], onChange);
+    neon.dropdown.populateAttributeDropdowns(data, ['x', 'y'], onChange);
 }
 
 function getXAttribute() {

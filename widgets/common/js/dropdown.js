@@ -22,9 +22,9 @@
  */
 
 var neon = neon || {};
-neon.populate = neon.populate || {};
+neon.dropdown = neon.dropdown || {};
 
-neon.populate.populateAttributeDropdowns = function (data, attributes, onChange) {
+neon.dropdown.populateAttributeDropdowns = function (data, attributes, onChange) {
     attributes.forEach(function (selectId) {
         var select = $('#' + selectId);
         select.empty();

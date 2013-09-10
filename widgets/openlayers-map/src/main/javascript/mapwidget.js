@@ -45,7 +45,7 @@ $(document).ready(function () {
         }
 
         function populateFromColumns(data) {
-            neon.populate.populateAttributeDropdowns(data, ['latitude', 'longitude', 'color-by', 'size-by'], redrawMap);
+            neon.dropdown.populateAttributeDropdowns(data, ['latitude', 'longitude', 'color-by', 'size-by'], redrawMap);
         }
 
         function initMap() {

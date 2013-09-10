@@ -20,7 +20,7 @@
     <script src="js-lib/d3/d3.v3.min.js"></script>
     <script src="js-lib/circularHeatChart/circularHeatChart.js"></script>
     <script src="js/toggle.js"></script>
-    <script src="js/populate.js"></script>
+    <script src="js/dropdown.js"></script>
     <script src="javascript/circularheatwidget.js"></script>
     <!-- endbuild -->
 
