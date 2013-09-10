@@ -30,6 +30,10 @@ import com.ncc.neon.query.clauses.BooleanWhereClause
 import com.ncc.neon.query.clauses.OrWhereClause
 import com.ncc.neon.query.clauses.SingularWhereClause
 import com.ncc.neon.query.clauses.WhereClause
+import org.joda.time.DateTime
+import org.joda.time.DateTimeZone
+import org.joda.time.format.DateTimeFormatter
+import org.joda.time.format.DateTimeFormatterBuilder
 
 /**
  * Utility class for rendering Hive WHERE clauses
@@ -39,6 +43,19 @@ class HiveWhereClause {
     private WhereClause whereClause
 
     private StringBuilder stringBuilder
+
+    private static final DateTimeFormatter HIVE_DATETIME_FORMATTER = createHiveDateTimeFormat()
+
+    private static DateTimeFormatter createHiveDateTimeFormat() {
+        new DateTimeFormatterBuilder()
+                .appendYear(4, 4).appendLiteral('-')
+                .appendMonthOfYear(2).appendLiteral('-')
+                .appendDayOfMonth(2).appendLiteral(' ')
+                .appendHourOfDay(2).appendLiteral(':')
+                .appendMinuteOfHour(2).appendLiteral(':')
+                .appendSecondOfMinute(2)
+                .toFormatter().withZoneUTC()
+    }
 
     @Override
     public String toString() {
@@ -50,7 +67,7 @@ class HiveWhereClause {
     }
 
     private String renderClause(SingularWhereClause clause) {
-        stringBuilder << clause.lhs
+        stringBuilder << formatLhs(clause.lhs, clause.rhs)
         stringBuilder << " " << formatOperator(clause.operator) << " "
         stringBuilder << formatRhs(clause.rhs)
     }
@@ -76,25 +93,38 @@ class HiveWhereClause {
         renderClause(clause, "or")
     }
 
-    private String formatOperator(operator) {
+    private static String formatLhs(lhs, rhs) {
+        return rhs instanceof Date ? "unix_timestamp(${lhs})" : lhs
+    }
+
+    private static String formatOperator(operator) {
         // all operators translate directly from standard symbols except for notin
         return operator == "notin" ? "not in" : operator
     }
 
-    private String formatRhs(val) {
+    private static String formatRhs(val) {
         if (val instanceof String) {
             return "'${val}'"
         }
 
         if (val instanceof Collection) {
-            def valuesList = []
-            val.each {
-                valuesList << formatRhs(it)
-            }
-            return "(${valuesList.join(',')})"
+            return createValuesListString(val)
+        }
+
+        if (val instanceof Date) {
+            return "unix_timestamp('${return HIVE_DATETIME_FORMATTER.print(new DateTime(val).withZone(DateTimeZone.UTC))}')"
         }
 
         return val
     }
+
+    private static def createValuesListString(collection) {
+        def valuesList = []
+        collection.each {
+            valuesList << formatRhs(it)
+        }
+        return "(${valuesList.join(',')})"
+    }
+
 
 }

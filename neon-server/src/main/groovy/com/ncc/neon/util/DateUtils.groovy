@@ -28,7 +28,7 @@ import org.joda.time.format.ISODateTimeFormat
  */
 class DateUtils {
 
-    private static final def DATE_PARSER = ISODateTimeFormat.dateTimeParser().withZone(DateTimeZone.UTC)
+    private static final def DATE_PARSER = ISODateTimeFormat.dateTimeParser().withZoneUTC()
     private static final def DATE_FORMATTER = ISODateTimeFormat.dateTimeNoMillis()
 
 

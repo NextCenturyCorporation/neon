@@ -235,23 +235,34 @@ task generateMongoJson {
     inputs.files { testDataInputFileTree }
     outputs.dir { outputDir }
     // mongo only needs the data file for input. it uses the rest of the standard json files for test verification
-    new MongoJSONGenerator().generateJson(testDataDir, outputDir, ~/data.json/)
+    doLast {
+        new MongoJSONGenerator().generateJson(testDataDir, outputDir, ~/data.json/)
+    }
 }
 
 task generateHiveJson {
     def outputDir = "${testDataDir}/hive-json"
     inputs.files { testDataInputFileTree }
     outputs.dir { outputDir }
-    new HiveJSONGenerator().generateJson(testDataDir, outputDir)
+    doLast {
+        new HiveJSONGenerator().generateJson(testDataDir, outputDir)
+    }
 }
 
 
 task generateHiveCSV {
-    JSONToCSVConverter.convertToCSV(new JSONArray(
-            new File(testDataDir, 'data.json').text).toString(),
-            new File(testDataDir, 'hive-csv/data.csv'),
-            new File(testDataDir, 'hive-csv/fields.csv'),
-            ['location'] as Set)
+    def outputDir = "${testDataDir}/hive-csv"
+    def inputFile = new File(testDataDir, 'data.json')
+    inputs.file { inputFile }
+    outputs.dir { outputDir }
+
+    doLast {
+        JSONToCSVConverter.convertToCSV(
+                new JSONArray(inputFile.text).toString(),
+                new File("${outputDir}/data.csv"),
+                new File("${outputDir}/fields.csv"),
+                ['location'] as Set)
+    }
 }
 
 def insertAcceptanceTestData() {

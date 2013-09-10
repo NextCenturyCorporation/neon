@@ -3,6 +3,7 @@ package com.ncc.neon.query.hive
 import com.ncc.neon.query.clauses.AndWhereClause
 import com.ncc.neon.query.clauses.OrWhereClause
 import com.ncc.neon.query.clauses.SingularWhereClause
+import com.ncc.neon.util.DateUtils
 import org.junit.Test
 
 /*
@@ -73,6 +74,16 @@ class HiveWhereClauseTest {
     }
 
     @Test
+    void "where clause with date value"() {
+        def lhs = "afield"
+        def operator = "<"
+        def rhs = DateUtils.tryToParseDate('2013-09-15')
+        def whereClause = createSimpleWhereClause(lhs, operator, rhs)
+        def expected = "unix_timestamp(${lhs}) ${operator} unix_timestamp('2013-09-15 00:00:00')"
+        assertSameClause(expected, new HiveWhereClause(whereClause: whereClause))
+    }
+
+    @Test
     @SuppressWarnings('MethodSize') // setup is a little long for this test, but pretty straightforward. Explicitly declaring each variable makes it easy to reuse in the expected clause.
     void "nested boolean clause"() {
         def lhs1 = "afield"
@@ -104,7 +115,7 @@ class HiveWhereClauseTest {
     }
 
     private static assertSameClause(expected, hiveWhereClause) {
-        assert expected.toLowerCase() == hiveWhereClause.toString().toLowerCase()
+        assert expected.equalsIgnoreCase(hiveWhereClause.toString())
     }
 
 }
