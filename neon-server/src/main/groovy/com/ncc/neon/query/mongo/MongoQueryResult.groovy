@@ -59,7 +59,7 @@ class MongoQueryResult implements QueryResult {
 
         @Override
         Row next() {
-            return new DefaultRow(defaultRow: delegate.next())
+            return new DefaultRow(row: delegate.next())
         }
 
         @Override

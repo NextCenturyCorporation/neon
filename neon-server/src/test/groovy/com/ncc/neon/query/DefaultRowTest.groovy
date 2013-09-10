@@ -28,7 +28,7 @@ class DefaultRowTest {
 
     @Test
     void "row value matches expected value"() {
-        def expected = new DefaultRow(defaultRow: [a:1, b:"the"])
+        def expected = new DefaultRow(row: [a:1, b:"the"])
 
         assert expected.getFieldValue("a") == 1
         assert expected.getFieldValue("b") == "the"

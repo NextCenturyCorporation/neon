@@ -26,10 +26,10 @@ import groovy.transform.ToString
 
 @ToString
 class DefaultRow implements Row{
-    private def defaultRow
+    private def row
 
     @Override
     def getFieldValue(field) {
-        return defaultRow[field]
+        return row[field]
     }
 }

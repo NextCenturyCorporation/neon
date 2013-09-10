@@ -46,7 +46,7 @@ class JdbcQueryResult implements QueryResult {
         def rowIterator = [
                 hasNext: { listIterator.hasNext() },
                 next: {
-                    return new DefaultRow(defaultRow: listIterator.next())
+                    return new DefaultRow(row: listIterator.next())
                 }
         ] as Iterator
 
