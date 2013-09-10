@@ -22,16 +22,24 @@
  */
 
 var neon = neon || {};
-neon.dropdown = neon.dropdown || {};
 
-neon.dropdown.populateAttributeDropdowns = function (data, attributes, onChange) {
-    attributes.forEach(function (selectId) {
-        var select = $('#' + selectId);
-        select.empty();
-        select.append($('<option></option>').attr('value', '').text('(Select Field)'));
-        data.fieldNames.forEach(function (field) {
-            select.append($('<option></option>').attr('value', field).text(field));
+neon.dropdown = (function () {
+    function getFieldValues (attributeValues, dropDownIds, onChange) {
+        dropDownIds.forEach(function (selectId) {
+            var select = $('#' + selectId);
+            select.empty();
+            select.append($('<option></option>').attr('value', '').text('(Select Field)'));
+            attributeValues.fieldNames.forEach(function (field) {
+                select.append($('<option></option>').attr('value', field).text(field));
+            });
+            select.change(onChange);
         });
-        select.change(onChange);
-    });
-};
+    }
+
+    return {
+        populateAttributeDropdowns: function (attributeValues, dropDownIds, onChange) {
+            getFieldValues(attributeValues, dropDownIds, onChange);
+        }
+    }
+
+})();
