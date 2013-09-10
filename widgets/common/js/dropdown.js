@@ -24,14 +24,20 @@
 var neon = neon || {};
 
 neon.dropdown = (function () {
+
+    function populateFieldValues(attributeValues, select) {
+        attributeValues.fieldNames.forEach(function (field) {
+            select.append($('<option></option>').attr('value', field).text(field));
+        });
+    }
+
     function getFieldValues (attributeValues, dropDownIds, onChange) {
+        var dropDownIdsArray = Array.isArray(dropDownIds) ? dropDownIds:[dropDownIds];
         dropDownIds.forEach(function (selectId) {
             var select = $('#' + selectId);
             select.empty();
             select.append($('<option></option>').attr('value', '').text('(Select Field)'));
-            attributeValues.fieldNames.forEach(function (field) {
-                select.append($('<option></option>').attr('value', field).text(field));
-            });
+            populateFieldValues(attributeValues, select);
             select.change(onChange);
         });
     }
