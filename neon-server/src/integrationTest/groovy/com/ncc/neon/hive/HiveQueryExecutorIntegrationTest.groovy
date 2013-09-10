@@ -120,12 +120,6 @@ class HiveQueryExecutorIntegrationTest extends AbstractQueryExecutorIntegrationT
         jdbcClient.execute("drop database if exists ${DATABASE_NAME}")
     }
 
-
-    @Override
-    protected def rowToMap(row) {
-        return row.row
-    }
-
     @Override
     protected def convertRowValueToBasicJavaType(def val) {
         if (val instanceof Timestamp) {

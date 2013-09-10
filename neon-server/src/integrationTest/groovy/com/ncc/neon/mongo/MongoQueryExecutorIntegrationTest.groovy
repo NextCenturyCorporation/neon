@@ -62,11 +62,6 @@ class MongoQueryExecutorIntegrationTest extends AbstractQueryExecutorIntegration
     }
 
     @Override
-    protected def rowToMap(row) {
-        return row.row
-    }
-
-    @Override
     protected def convertRowValueToBasicJavaType(def val) {
         if (val instanceof ObjectId) {
             return val.toString()

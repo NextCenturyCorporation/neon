@@ -44,6 +44,8 @@ import org.springframework.beans.factory.annotation.Autowired
  *
  * Subclasses implement database specific translations
  */
+
+@SuppressWarnings("AbstractClassWithoutAbstractMethod")
 abstract class AbstractQueryExecutorIntegrationTest {
 
     static final DATE_FIELD_REGEX = ~/.*date.*/
@@ -73,7 +75,9 @@ abstract class AbstractQueryExecutorIntegrationTest {
      * @param row
      * @return
      */
-    protected abstract def rowToMap(row)
+    protected def rowToMap(row) {
+        return row.row
+    }
 
     /**
      * Gets the folder that the input json files are stored in. By defalut, the test-data
