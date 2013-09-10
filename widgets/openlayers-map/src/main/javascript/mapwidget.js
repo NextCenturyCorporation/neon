@@ -37,7 +37,7 @@ $(document).ready(function () {
         function onDatasetChanged(message) {
             databaseName = message.database;
             tableName = message.table;
-            neon.query.registerForFilterKey(databaseName, tableName, function(filterResponse){
+            neon.query.registerForFilterKey(databaseName, tableName, function (filterResponse) {
                 filterKey = filterResponse;
             });
 
@@ -49,11 +49,11 @@ $(document).ready(function () {
         }
 
         function initMap() {
-            map = new OpenLayers.Map( 'map');
+            map = new OpenLayers.Map('map');
             layer = new OpenLayers.Layer.OSM();
 
             // create our heatmap layer
-            heatmap = new OpenLayers.Layer.Heatmap( "Heatmap Layer", map, layer, {visible: true, radius:10}, {isBaseLayer: false, opacity: 0.3, projection: new OpenLayers.Projection("EPSG:4326")});
+            heatmap = new OpenLayers.Layer.Heatmap("Heatmap Layer", map, layer, {visible: true, radius: 10}, {isBaseLayer: false, opacity: 0.3, projection: new OpenLayers.Projection("EPSG:4326")});
             map.addLayers([layer, heatmap]);
 
             map.zoomToMaxExtent();
@@ -62,8 +62,7 @@ $(document).ready(function () {
         }
 
         function onExtentChanged() {
-            if(!(latField && lonField))
-            {
+            if (!(latField && lonField)) {
                 return;
             }
 
@@ -74,11 +73,11 @@ $(document).ready(function () {
             var proj_2 = new OpenLayers.Projection("EPSG:900913");
             llPoint.transform(proj_2, proj_1);
             urPoint.transform(proj_2, proj_1);
-            var minLon = Math.min(llPoint.lon,urPoint.lon);
-            var maxLon = Math.max(llPoint.lon,urPoint.lon);
+            var minLon = Math.min(llPoint.lon, urPoint.lon);
+            var maxLon = Math.max(llPoint.lon, urPoint.lon);
 
-            var minLat = Math.min(llPoint.lat,urPoint.lat);
-            var maxLat = Math.max(llPoint.lat,urPoint.lat);
+            var minLat = Math.min(llPoint.lat, urPoint.lat);
+            var maxLat = Math.max(llPoint.lat, urPoint.lat);
 
             var leftClause = neon.query.where(lonField, ">=", minLon);
             var rightClause = neon.query.where(lonField, "<=", maxLon);
@@ -91,22 +90,22 @@ $(document).ready(function () {
         }
 
         function redrawMap() {
-            var query = new neon.query.Query().selectFrom(databaseName, tableName).limit(1);
-            neon.query.executeQuery(query, function(results) {
-                if(results.data[0] !== undefined) {
-                    currentData = results.data[0];
-                }
-                latField = getLatField();
-                lonField = getLonField();
-                var sizeByField = getSizeByField();
-                var colorByField = getColorByField();
+            latField = getLatField();
+            lonField = getLonField();
+            if (latField && lonField) {
+                var query = new neon.query.Query().selectFrom(databaseName, tableName).limit(1);
+                neon.query.executeQuery(query, function (results) {
+                    if (results.data[0] !== undefined) {
+                        currentData = results.data[0];
+                    }
+                    var sizeByField = getSizeByField();
+                    var colorByField = getColorByField();
 
-                if (latField && lonField) {
+
                     var query = buildQuery(latField, lonField, sizeByField, colorByField);
                     neon.query.executeQuery(query, doRedrawMap);
-                }
-
-            });
+                });
+            }
 
         }
 
@@ -148,11 +147,11 @@ $(document).ready(function () {
             var latField = getLatField();
             var lonField = getLonField();
 
-            var transformedTestData = { max: 1 , data: [] },
+            var transformedTestData = { max: 1, data: [] },
                 datalen = data.length,
                 nudata = [];
 
-            while(datalen--){
+            while (datalen--) {
                 nudata.push({
                     lonlat: new OpenLayers.LonLat(data[datalen][lonField], data[datalen][latField]),
                     count: data[datalen].count_

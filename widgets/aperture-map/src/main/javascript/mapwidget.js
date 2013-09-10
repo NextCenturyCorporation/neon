@@ -47,7 +47,7 @@ $(document).ready(function () {
         function onActiveDatasetChanged(message) {
             databaseName = message.database;
             tableName = message.table;
-            neon.query.registerForFilterKey(databaseName, tableName, function(filterResponse){
+            neon.query.registerForFilterKey(databaseName, tableName, function (filterResponse) {
                 filterKey = filterResponse;
             });
 
@@ -69,8 +69,7 @@ $(document).ready(function () {
         }
 
         function onExtentChanged() {
-            if(!(latField && lonField))
-            {
+            if (!(latField && lonField)) {
                 return;
             }
 
@@ -81,11 +80,11 @@ $(document).ready(function () {
             var proj_2 = new OpenLayers.Projection("EPSG:900913");
             llPoint.transform(proj_2, proj_1);
             urPoint.transform(proj_2, proj_1);
-            var minLon = Math.min(llPoint.lon,urPoint.lon);
-            var maxLon = Math.max(llPoint.lon,urPoint.lon);
+            var minLon = Math.min(llPoint.lon, urPoint.lon);
+            var maxLon = Math.max(llPoint.lon, urPoint.lon);
 
-            var minLat = Math.min(llPoint.lat,urPoint.lat);
-            var maxLat = Math.max(llPoint.lat,urPoint.lat);
+            var minLat = Math.min(llPoint.lat, urPoint.lat);
+            var maxLat = Math.max(llPoint.lat, urPoint.lat);
 
             var leftClause = neon.query.where(lonField, ">=", minLon);
             var rightClause = neon.query.where(lonField, "<=", maxLon);
@@ -98,26 +97,25 @@ $(document).ready(function () {
         }
 
         function redrawMap() {
-            var query = new neon.query.Query().selectFrom(databaseName, tableName).limit(1);
-            neon.query.executeQuery(query, function(results){
-                if(results.data[0] !== undefined){
-                    currentData = results.data[0];
-                }
-                latField = getLatField();
-                lonField = getLonField();
-                var sizeByField = getSizeByField();
-                var colorByField = getColorByField();
+            latField = getLatField();
+            lonField = getLonField();
 
-                if (latField && lonField) {
+            if (latField && lonField) {
+                var query = new neon.query.Query().selectFrom(databaseName, tableName).limit(1);
+                neon.query.executeQuery(query, function (results) {
+                    if (results.data[0] !== undefined) {
+                        currentData = results.data[0];
+                    }
+                    var sizeByField = getSizeByField();
+                    var colorByField = getColorByField();
                     var query = buildQuery(latField, lonField, sizeByField, colorByField);
                     neon.query.executeQuery(query, doRedrawMap);
-                }
-                else {
-                    locationsLayer.all([]);
-                    map.all().redraw();
-                }
-
-            });
+                });
+            }
+            else {
+                locationsLayer.all([]);
+                map.all().redraw();
+            }
         }
 
         function buildQuery(latField, lonField, sizeByField, colorByField) {
