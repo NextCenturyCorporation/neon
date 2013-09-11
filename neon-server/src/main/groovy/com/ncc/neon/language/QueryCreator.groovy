@@ -1,6 +1,4 @@
 package com.ncc.neon.language
-import com.ncc.neon.language.parse.NeonBaseListener
-import com.ncc.neon.language.parse.NeonParser
 import com.ncc.neon.query.Query
 import com.ncc.neon.query.clauses.*
 import com.ncc.neon.query.filter.Filter
@@ -34,7 +32,7 @@ import org.apache.commons.lang.math.NumberUtils
 
 /**
  * This listens to the grammar being parsed. Invoke createQuery()
- * after kicking off the antrl parsing to create a new Query object from the parsed text.
+ * after kicking off the antlr parsing to create a new Query object from the parsed text.
  */
 
 class QueryCreator extends NeonBaseListener {

@@ -1,10 +1,5 @@
 grammar Neon;
 
-@header
-{
-package com.ncc.neon.language.parse;
-}
-
 options {
     language = Java;
 }

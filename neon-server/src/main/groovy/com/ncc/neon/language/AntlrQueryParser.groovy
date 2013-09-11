@@ -1,7 +1,5 @@
 package com.ncc.neon.language
 
-import com.ncc.neon.language.parse.NeonLexer
-import com.ncc.neon.language.parse.NeonParser
 import com.ncc.neon.query.Query
 import org.antlr.v4.runtime.ANTLRInputStream
 import org.antlr.v4.runtime.CommonTokenStream

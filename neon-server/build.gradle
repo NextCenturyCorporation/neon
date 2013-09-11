@@ -1,13 +1,14 @@
 import com.mongodb.BasicDBObject
 import com.mongodb.MongoClient
 import com.mongodb.util.JSON
+import org.json.JSONArray
+
 import static com.ncc.neon.AcceptanceTestJSHelperGenerator.*
 import com.ncc.neon.HiveJSONGenerator
 import com.ncc.neon.MongoJSONGenerator
 import com.ncc.neon.JSONToCSVConverter
 import com.ncc.common.GruntTask
 import org.apache.tools.ant.filters.ReplaceTokens
-import org.json.JSONArray
 
 // define source sets first so tasks that act dynamically on sourcesets have a list of all of them
 sourceSets {
@@ -25,6 +26,9 @@ sourceSets {
 apply from: 'gradle/groovy.gradle'
 apply plugin: 'jetty'
 
+// antlr plugin and configuration take from https://github.com/fraoch/antlr4-plugin/
+apply plugin: 'antlr4'
+
 archivesBaseName = 'neon'
 sourceCompatibility = 1.7
 
@@ -38,9 +42,15 @@ buildscript {
         maven {
             url 'http://repository.codehaus.org/'
         }
+        flatDir {
+            dirs 'gradle/plugins'
+        }
     }
     dependencies {
         classpath 'org.mongodb:mongo-java-driver:2.10.1'
+        classpath ':antlr4-plugin:0.1'
+        classpath files("$projectDir/../build/classes/main")
+        classpath files("$projectDir/../build/resources/main")
     }
 }
 
@@ -59,6 +69,10 @@ project.ext {
 
     // used for determining when test data json needs to be generated
     testDataInputFileTree = fileTree('src/test-data').include('*.json')
+
+    // because of this issue with the plugin https://github.com/fraoch/antlr4-plugin/issues/1, the
+    // package using the antlr generated code must be the same as the package it is generated to
+    antlrPackage = "com.ncc.neon.language"
 }
 
 
@@ -84,7 +98,7 @@ dependencies {
     compile "ch.qos.logback:logback-core:$logbackVersion"
     compile "ch.qos.logback:logback-classic:$logbackVersion"
     compile "com.google.guava:guava:14.0.1"
-    compile 'org.antlr:antlr4-runtime:4.0'
+    compile 'org.antlr:antlr4:4.0'
     compile('org.codehaus.groovy.modules.http-builder:http-builder:0.6') {
         // we already include groovy-all
         exclude module: 'groovy'
@@ -113,6 +127,11 @@ dependencies {
 
     integrationTestCompile sourceSets.main.output
     integrationTestCompile sourceSets.test.output
+
+    antlr4 'org.antlr:antlr4:4.0'
+    antlr4 'org.antlr:antlr4-runtime:4.0'
+    antlr4 'org.antlr:antlr-runtime:3.5'
+    antlr4 'org.antlr:ST4:4.0.7'
 }
 
 war {
@@ -121,6 +140,36 @@ war {
     }
 
 }
+
+antlr4 {
+    tool {
+        antlrPackage {
+            listener = true
+        }
+    }
+}
+
+// moves the antlr generated files from build/antlr4-gen to src/main/groovy so we can commit them and IDEs can easily
+// pick them up
+task moveAntlrFilesToSrc(type: Copy) {
+    dependsOn 'generate'
+    def antlrPackageFilePath = antlrPackage.replaceAll("\\.", "/")
+    from("${buildDir}/${generate.buildGenDir}/main/${antlrPackageFilePath}") {
+        include '*.java'
+    }
+    into "${projectDir}/src/main/groovy/${antlrPackageFilePath}"
+
+    // delete the old files to simulate a move
+    def copied = []
+    eachFile {
+        copied << it.file
+    }
+    doLast {
+        copied.each { it.delete() }
+    }
+}
+
+compileGroovy.dependsOn moveAntlrFilesToSrc
 
 test {
     def props = [:]
