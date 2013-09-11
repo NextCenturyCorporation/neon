@@ -1,4 +1,4 @@
-// Generated from /home/HQ/jstorey/workspace/neon/neon-server/src/main/antlr4/com/ncc/neon/language/Neon.g4 by ANTLR 4.0
+// Generated from Neon.g4 by ANTLR 4.0
 package com.ncc.neon.language;
 import org.antlr.v4.runtime.Lexer;
 import org.antlr.v4.runtime.CharStream;
