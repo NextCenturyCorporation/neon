@@ -356,7 +356,7 @@ charts.BarChart.prototype.bindData_ = function (chart) {
         .attr('stroke', $('#chart').css('background-color'))
         .on('mouseover', function (d) {
             me.toggleHoverStyle_(d3.select(this), true);
-            me.showTooltip_(d);
+            me.showTooltip_(d, d3.mouse(this));
         })
         .on('mouseout', function () {
             me.toggleHoverStyle_(d3.select(this), false);
@@ -416,16 +416,14 @@ charts.BarChart.prototype.setInactive = function (predicate) {
     this.applyStyle_(d3.selectAll('.' + charts.BarChart.INACTIVE_BAR_CLASS_), charts.BarChart.INACTIVE_STYLE_KEY_);
 };
 
-charts.BarChart.prototype.showTooltip_ = function (item) {
-    var periodStartPixels = this.x(item.key);
+charts.BarChart.prototype.showTooltip_ = function (item, mouseLocation) {
     var tooltip = this.createTooltip_(item);
     // initially hidden because it will fade in
     tooltip.hide();
     $(this.chartSelector_).append(tooltip);
-    // must center after appending so its width can be properly computed
-    this.centerTooltip_(tooltip, item, periodStartPixels);
+    // must position after appending so its width can be properly computed
+    this.positionTooltip_(tooltip, mouseLocation);
     tooltip.fadeIn(500);
-
 };
 
 charts.BarChart.prototype.createTooltip_ = function (item) {
@@ -443,22 +441,20 @@ charts.BarChart.prototype.createTooltip_ = function (item) {
     return tooltip;
 };
 
-charts.BarChart.prototype.centerTooltip_ = function (tooltip, data, periodStartPixels) {
+charts.BarChart.prototype.positionTooltip_ = function (tooltip, mouseLocation) {
     // set the tooltip to appear where the mouse pointer is
+    var top = window.event.clientY;
+    // the extra 20px in the next two variables is needed to account for the padding of .charttooltip
+    var chartHeight = $(this.chartSelector_).height() - 20;
+    var spaceNeeded = $(".charttooltip").height() + 20;
 
     // if there is not enough space below the pointer to display the tooltip, put it above
-    if((window.innerHeight - window.event.clientY) < $(".charttooltip").width()) {
-        tooltip.css({
-            'top': (window.event.clientY - ($(".charttooltip").width()/2)) + 'px'
-        });
-    }
-    else {
-        tooltip.css({
-            'top': window.event.clientY + 'px',
-        });
+    if((chartHeight - mouseLocation[1]) < spaceNeeded) {
+        top = mouseLocation[1] - spaceNeeded;
     }
     tooltip.css({
-        'left': window.event.clientX + 'px'
+        'top': top + 'px',
+        'left': mouseLocation[0] + 'px'
     });
 };
 
