@@ -50,8 +50,6 @@ buildscript {
     dependencies {
         classpath 'org.mongodb:mongo-java-driver:2.10.1'
         classpath ':antlr4-plugin:0.1'
-        classpath files("$projectDir/../build/classes/main")
-        classpath files("$projectDir/../build/resources/main")
     }
 }
 
