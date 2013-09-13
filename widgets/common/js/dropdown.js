@@ -31,21 +31,16 @@ neon.dropdown = (function () {
         });
     }
 
-    function getFieldValues (attributeValues, dropDownIds, onChange) {
-        var dropDownIdsArray = Array.isArray(dropDownIds) ? dropDownIds:[dropDownIds];
-        dropDownIdsArray.forEach(function (selectId) {
-            var select = $('#' + selectId);
-            select.empty();
-            select.append($('<option></option>').attr('value', '').text('(Select Field)'));
-            populateFieldValues(attributeValues, select);
-            select.change(onChange);
-        });
-    }
-
     return {
         populateAttributeDropdowns: function (attributeValues, dropDownIds, onChange) {
-            getFieldValues(attributeValues, dropDownIds, onChange);
+            var dropDownIdsArray = Array.isArray(dropDownIds) ? dropDownIds:[dropDownIds];
+            dropDownIdsArray.forEach(function (selectId) {
+                var select = $('#' + selectId);
+                select.empty();
+                select.append($('<option></option>').attr('value', '').text('(Select Field)'));
+                populateFieldValues(attributeValues, select);
+                select.change(onChange);
+            });
         }
     }
-
 })();
