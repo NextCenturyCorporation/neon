@@ -39,7 +39,7 @@ html, body {
     font-size: 10px;
 }
 
-.dropdown-label {
+.dropdown-label, #sort-field {
     font-size: 10px;
 }
 
