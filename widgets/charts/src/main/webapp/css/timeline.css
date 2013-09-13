@@ -26,6 +26,10 @@
     outline: 1px solid rgba(0,0,0,0);
 }
 
-.options-bar {
-    width: 680px;
+#redraw-bounds {
+    margin: 0px 19px 10px 19px;
+}
+
+#reset-filter {
+    margin: 0px 12px 0px 12px;
 }

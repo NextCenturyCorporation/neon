@@ -48,7 +48,7 @@
             <label class="control-label" for="x">x-axis (Date)</label>
 
             <div class="controls">
-                <select id="x" class="dropdown"></select>
+                <select id="x" class="dropdown dropdown-options"></select>
             </div>
         </div>
 
@@ -56,7 +56,7 @@
             <label class="control-label" for="y">y-axis</label>
 
             <div class="controls">
-                <select id="y" class="dropdown"></select>
+                <select id="y" class="dropdown dropdown-options"></select>
             </div>
         </div>
 
@@ -64,16 +64,16 @@
             <label class="control-label" for="time-granularity">Time Granularity</label>
 
             <div class="controls">
-                <select id="time-granularity" class="dropdown">
+                <select id="time-granularity" class="dropdown dropdown-options">
                 </select>
             </div>
         </div>
 
         <div class="control-group">
             <div class="controls">
-                <button type="button" id="redraw-bounds" class="btn">Redraw Bounds</button>
+                <button type="button" id="redraw-bounds" class="btn-small">Redraw Bounds</button>
 
-                <button type="button" id="reset-filter" class="btn">Reset Time Period</button>
+                <button type="button" id="reset-filter" class="btn-small">Reset Time Period</button>
             </div>
         </div>
     </div>

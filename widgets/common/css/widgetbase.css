@@ -34,6 +34,17 @@ html, body {
     color: black;
 }
 
+.dropdown-options {
+    width: 150px;
+    font-size: 10px;
+}
+
+/*limit dropdown in table widget has to have a slightly smaller width due to arrows on its right-hand-side*/
+#limit {
+    width: 135px;
+    font-size: 10px;
+}
+
 .container {
     padding: 10px;
 }
@@ -48,45 +59,55 @@ html, body {
 }
 
 .toggle {
-    background-color: #f0f0f0;
+    /*background-color: #f0f0f0;*/
     height: 30px;
-    width: 100%;
-    border-radius: 5px;
-    border-bottom-left-radius: 0;
-    border-bottom-right-radius: 0;
+    /*width: 100%;*/
+    /*border-radius: 5px;*/
+    /*border-bottom-left-radius: 0;*/
+    /*border-bottom-right-radius: 0;*/
 }
 
 .options {
-    background-color:#f0f0f0;
-    color: black;
+    /*background-color:#f0f0f0;*/
+    /*color: black;*/
     padding: 5px;
-    border-radius: 5px;
-    border-top-left-radius: 0;
-    border-top-right-radius: 0;
+    /*border-radius: 5px;*/
+    /*border-top-left-radius: 0;*/
+    /*border-top-right-radius: 0;*/
 }
 
 .toggle-image {
     height: 30px;
+    float: right;
 }
 
 .options-bar {
     position: absolute;
     top: 20px;
     left: 20px;
+    height: auto;
+    width: 160px;
     z-index: 2000;
-    opacity: .9;
+    color: white;
+    background-color: black;
+    border: 1px solid #f0f0f0;
 }
 
 .options-label {
-    color: black;
+    /*color: black;*/
     display: inline;
+    margin-left: 5px;
 }
 
-.toggle.toggle-corners {
-    border-radius: 5px;
-}
+/*.toggle.toggle-corners {*/
+    /*border-radius: 5px;*/
+/*}*/
 
 .grid-canvas {
     /* in case there are empty rows widgets that use the table, color it the same as cell color */
     background-color: #FFFFFF;
+}
+
+label {
+    font-size: 10px;
 }

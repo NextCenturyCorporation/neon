@@ -25,44 +25,56 @@ var neon = neon || {};
 
 neon.toggle = (function () {
 
+
+    return {
+        createOptionsPanel: function (selector, id) {
+            $(document).ready(function() {
+                decorateOptionsPanel(selector, id);
+                $(".toggle").click(function() {
+                    $(selector).slideToggle("slow");
+                });
+            });
+        }
+    }
+
     function decorateOptionsPanel(selector, id) {
         var idString = '';
         if (arguments.length === 2) {
             idString = 'id="' + id + '" ';
         }
         $(selector).replaceWith(function () {
-            return '<div ' + idString + 'class="options-bar"><div class="toggle"><img class="toggle-image"/><label class=options-label>Options</label></div>' + $(this)[0].outerHTML + '</div>';
+            return '<div ' + idString + 'class="options-bar"><div class="toggle"><label class=options-label>Options</label><img src="img/arrow.png" class="toggle-image"/></div>' + $(this)[0].outerHTML + '</div>';
         });
     }
-
-    function configureToggle(selector) {
-        $(".toggle").click(function () {
-            $(selector).slideToggle("slow");
-
-            if ($(".toggle-image").attr('src') === "img/arrow_down.png") {
-                $(".toggle-image").attr('src', $(".toggle-image").attr('src').replace('_down', '_right'));
-                $(".toggle").addClass("toggle-corners");
-
-            } else {
-                $(".toggle-image").attr('src', $(".toggle-image").attr('src').replace('_right', '_down'));
-                $(".toggle").removeClass("toggle-corners");
-            }
-        });
-    }
-
-    function initToggleImage() {
-        $(".toggle-image").attr("src", "img/arrow_down.png");
-    }
-
-    return {
-        createOptionsPanel: function (selector, id) {
-            $(document).ready(function () {
-                decorateOptionsPanel(selector, id);
-                configureToggle(selector);
-                initToggleImage();
-            });
-        }
-    }
+//
+//    function configureToggle(selector) {
+//        $(".toggle").click(function () {
+//            $(selector).slideToggle("slow");
+//
+//            if ($(".toggle-image").attr('src') === "img/arrow_down.png") {
+//                $(".toggle-image").attr('src', $(".toggle-image").attr('src').replace('_down', '_right'));
+//                $(".toggle").addClass("toggle-corners");
+//
+//            } else {
+//                $(".toggle-image").attr('src', $(".toggle-image").attr('src').replace('_right', '_down'));
+//                $(".toggle").removeClass("toggle-corners");
+//            }
+//        });
+//    }
+//
+//    function initToggleImage() {
+//        $(".toggle-image").attr("src", "img/arrow_down.png");
+//    }
+//
+//    return {
+//        createOptionsPanel: function (selector, id) {
+//            $(document).ready(function () {
+//                decorateOptionsPanel(selector, id);
+//                configureToggle(selector);
+//                initToggleImage();
+//            });
+//        }
+//    }
 
 })();
 

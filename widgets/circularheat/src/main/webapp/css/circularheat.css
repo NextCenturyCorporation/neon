@@ -11,10 +11,6 @@
     margin: auto;
 }
 
-.options-bar {
-    width: 230px;
-}
-
 #circularheatchart svg .segment {
     fill: white;
 }
