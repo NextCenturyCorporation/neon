@@ -42,7 +42,7 @@
 <div id="options-panel" class="options">
     <div class="controls-row">
         <div class="control-group">
-            <label class="control-label" for="x">x-axis</label>
+            <label class="control-label dropdown-label" for="x">x-axis</label>
 
             <div class="controls">
                 <select id="x" class="dropdown dropdown-options"></select>
@@ -50,7 +50,7 @@
         </div>
 
         <div class="control-group">
-            <label class="control-label" for="y">y-axis</label>
+            <label class="control-label dropdown-label" for="y">y-axis</label>
 
             <div class="controls">
                 <select id="y" class="dropdown dropdown-options"></select>

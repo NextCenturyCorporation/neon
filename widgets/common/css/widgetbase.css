@@ -39,6 +39,10 @@ html, body {
     font-size: 10px;
 }
 
+.dropdown-label {
+    font-size: 10px;
+}
+
 /*limit dropdown in table widget has to have a slightly smaller width due to arrows on its right-hand-side*/
 #limit {
     width: 135px;
@@ -59,26 +63,18 @@ html, body {
 }
 
 .toggle {
-    /*background-color: #f0f0f0;*/
     height: 30px;
-    /*width: 100%;*/
-    /*border-radius: 5px;*/
-    /*border-bottom-left-radius: 0;*/
-    /*border-bottom-right-radius: 0;*/
 }
 
 .options {
-    /*background-color:#f0f0f0;*/
-    /*color: black;*/
     padding: 5px;
-    /*border-radius: 5px;*/
-    /*border-top-left-radius: 0;*/
-    /*border-top-right-radius: 0;*/
 }
 
 .toggle-image {
-    height: 30px;
+    height: 20px;
+    width: 20px;
     float: right;
+    margin-top: 5px;
 }
 
 .options-bar {
@@ -94,20 +90,12 @@ html, body {
 }
 
 .options-label {
-    /*color: black;*/
-    display: inline;
     margin-left: 5px;
+    margin-top: 5px;
+    float: left;
 }
-
-/*.toggle.toggle-corners {*/
-    /*border-radius: 5px;*/
-/*}*/
 
 .grid-canvas {
     /* in case there are empty rows widgets that use the table, color it the same as cell color */
     background-color: #FFFFFF;
-}
-
-label {
-    font-size: 10px;
 }

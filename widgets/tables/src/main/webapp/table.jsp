@@ -43,7 +43,7 @@
 <div id="options-panel" class="options">
     <div class="controls-row">
         <div class="control-group">
-            <label class="control-label" for="limit">Limit</label>
+            <label class="control-label dropdown-label" for="limit">Limit</label>
 
             <div id="controls" class="controls">
                 <input id="limit" class="dropdown-options" type="number" min="1" value="500">
@@ -51,7 +51,7 @@
         </div>
 
         <div class="control-group">
-            <label class="control-label" for="sort-field">Sort</label>
+            <label class="control-label dropdown-label" for="sort-field">Sort</label>
 
             <div id="sort-controls" class="controls-row input-append">
 

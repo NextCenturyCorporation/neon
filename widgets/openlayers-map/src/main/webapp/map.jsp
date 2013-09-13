@@ -34,7 +34,7 @@
     <div id="options-panel" class="options">
         <div class="controls-row">
             <div class="control-group">
-                <label class="control-label" for="latitude">Latitude Field</label>
+                <label class="control-label dropdown-label" for="latitude">Latitude Field</label>
 
                 <div class="controls">
                     <select id="latitude" class="dropdown dropdown-options"></select>
@@ -42,7 +42,7 @@
             </div>
 
             <div class="control-group">
-                <label class="control-label" for="longitude">Longitude Field</label>
+                <label class="control-label dropdown-label" for="longitude">Longitude Field</label>
 
                 <div class="controls">
                     <select id="longitude" class="dropdown dropdown-options"></select>
@@ -50,7 +50,7 @@
             </div>
 
             <div class="control-group">
-                <label class="control-label" for="size-by">Size By</label>
+                <label class="control-label dropdown-label" for="size-by">Size By</label>
 
                 <div class="controls">
                     <select id="size-by" class="dropdown dropdown-options"></select>
@@ -58,7 +58,7 @@
             </div>
 
             <div class="control-group">
-                <label class="control-label" for="color-by">Color By</label>
+                <label class="control-label dropdown-label" for="color-by">Color By</label>
 
                 <div class="controls">
                     <select id="color-by" class="dropdown dropdown-options"></select>
