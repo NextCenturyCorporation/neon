@@ -23,6 +23,7 @@
 #table {
     position: absolute;
     bottom: 0;
+    top: 40px;
     padding: 8px;
     box-sizing: border-box;
     width: 100%;

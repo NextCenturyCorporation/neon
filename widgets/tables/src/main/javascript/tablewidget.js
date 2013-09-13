@@ -128,7 +128,6 @@ $(document).ready(function () {
         }
 
         function sizeTableToRemainingSpace() {
-            $('#table').css('top', '40px');
             // table may not be drawn yet
             if (table) {
                 table.refreshLayout();
