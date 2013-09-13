@@ -58,9 +58,9 @@
                 <select id="sort-field" class="dropdown dropdown-options"></select>
 
                 <div class="btn-group" id="sort-buttons" data-toggle="buttons-radio">
-                    <button id="sort-ascending" type="button" data-toggle="button" class="btn">Ascending
+                    <button id="sort-ascending" type="button" data-toggle="button" class="btn btn-small">Ascending
                     </button>
-                    <button id="sort-descending" type="button" data-toggle="button" class="btn">Descending
+                    <button id="sort-descending" type="button" data-toggle="button" class="btn btn-small">Descending
                     </button>
                 </div>
 

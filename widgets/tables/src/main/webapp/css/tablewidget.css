@@ -22,17 +22,22 @@
  */
 #table {
     position: absolute;
+    bottom: 0;
     padding: 8px;
     box-sizing: border-box;
-    bottom: 0;
     width: 100%;
     min-height: 200px;
 }
 
 #sort-buttons {
-    padding-left: 8px;
+    display: block;
+    margin-top: 20px;
 }
 
-.options-bar {
-    left: 8px;
+#table-options {
+    width: 175px;
+}
+
+#sort-field {
+    border-radius: 4px;
 }
