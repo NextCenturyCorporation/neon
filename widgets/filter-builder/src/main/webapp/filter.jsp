@@ -108,7 +108,7 @@
         <div class="controls-row">
 
             <div class="control-group">
-                <label class="control-label" for="datastore-select">Type</label>
+                <label class="control-label dropdown-label" for="datastore-select">Type</label>
 
                 <div class="controls">
                     <select id="datastore-select" class="dropdown span2">
@@ -119,7 +119,7 @@
             </div>
 
             <div class="control-group">
-                <label class="control-label" for="hostname-input">Host</label>
+                <label class="control-label dropdown-label" for="hostname-input">Host</label>
 
                 <div class="controls" class="textfield">
                     <input class="span2" type="text" id="hostname-input" value="localhost"/>
@@ -139,7 +139,7 @@
 
         <div class="controls controls-row">
             <div class="control-group">
-                <label class="control-label" for="database-select">Database</label>
+                <label class="control-label dropdown-label" for="database-select">Database</label>
 
                 <div class="controls">
                     <select id="database-select" class="dropdown span2">
@@ -149,7 +149,7 @@
             </div>
 
             <div class="control-group">
-                <label class="control-label" for="table-select">Table</label>
+                <label class="control-label dropdown-label" for="table-select">Table</label>
 
                 <div class="controls">
                     <select id="table-select" class="dropdown span2"></select>

@@ -30,23 +30,18 @@ html, body {
 }
 
 .dropdown, input[type="number"] {
-    background-color: silver;
-    color: black;
+    background-color: gray;
+    color: white;
+    font-style: italic;
 }
 
 .dropdown-options {
     width: 150px;
-    font-size: 10px;
 }
 
-.dropdown-label, #sort-field {
+.dropdown-label {
     font-size: 10px;
-}
-
-/*limit dropdown in table widget has to have a slightly smaller width due to arrows on its right-hand-side*/
-#limit {
-    width: 135px;
-    font-size: 10px;
+    text-transform: uppercase;
 }
 
 .container {

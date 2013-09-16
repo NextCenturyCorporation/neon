@@ -27,9 +27,10 @@
 }
 
 #redraw-bounds {
-    margin: 0px 19px 10px 19px;
+    width: 150px;
+    margin-bottom: 10px;
 }
 
 #reset-filter {
-    margin: 0px 12px 0px 12px;
+    width: 150px;
 }

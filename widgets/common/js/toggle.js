@@ -31,7 +31,7 @@ neon.toggle = (function () {
             idString = 'id="' + id + '" ';
         }
         $(selector).replaceWith(function () {
-            return '<div ' + idString + 'class="options-bar"><div class="toggle"><label class="options-label dropdown-label">Options</label><img src="img/arrow.png" class="toggle-image"/></div>' + $(this)[0].outerHTML + '</div>';
+            return '<div ' + idString + 'class="options-bar"><div class="toggle"><label class="options-label">Options</label><img src="img/arrow.png" class="toggle-image"/></div>' + $(this)[0].outerHTML + '</div>';
         });
     }
 
