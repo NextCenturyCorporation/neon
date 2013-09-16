@@ -13,10 +13,10 @@
     %>
 
     <link rel="stylesheet" type="text/css" href="css/bootstrap/bootstrap.min.css">
-    <link rel="stylesheet" type="text/css" href="css/widgetbase.css">
     <link rel="stylesheet" type="text/css" href="css/builder.css"/>
     <link rel="stylesheet" type="text/css" href="css/slickgrid/slick.grid.css"/>
     <link rel="stylesheet" type="text/css" href="css/smoothness/jquery-ui-1.8.16.custom.css"/>
+    <link rel="stylesheet" type="text/css" href="css/widgetbase.css">
     <link rel="stylesheet" type="text/css" href="<%=neonServerUrl%>/css/neon.css"/>
 
     <script src="<%=owfServerUrl%>/js/owf-widget.js"></script>

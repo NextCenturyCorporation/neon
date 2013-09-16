@@ -30,9 +30,8 @@ html, body {
 }
 
 .dropdown, input[type="number"] {
-    background-color: gray;
-    color: white;
-    font-style: italic;
+    background-color: #666666;
+    color: #cccccc;
 }
 
 .dropdown-options {
@@ -79,9 +78,9 @@ html, body {
     height: auto;
     width: 160px;
     z-index: 2000;
-    color: white;
+    color: #cccccc;
     background-color: black;
-    border: 1px solid #f0f0f0;
+    border: 1px solid #cccccc;
 }
 
 .options-label {
@@ -92,5 +91,21 @@ html, body {
 
 .grid-canvas {
     /* in case there are empty rows widgets that use the table, color it the same as cell color */
-    background-color: #FFFFFF;
+    /*background-color: #FFFFFF;*/
+    background-color: black;
+}
+
+.even .slick-cell {
+    background-color: #333333;
+    color: #cccccc;
+}
+
+.odd .slick-cell {
+    background-color: #414141;
+    color: #cccccc;
+}
+
+.slick-header-column {
+    color: #cccccc;
+    background: black;
 }
