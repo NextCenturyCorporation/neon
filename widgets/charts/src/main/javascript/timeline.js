@@ -273,11 +273,22 @@ charts.Timeline.prototype.computeValues_ = function (me) {
 charts.Timeline.prototype.doSliderChange_ = function (event, slider) {
     // ordinal scales to not support inverting, so figure out the time period that was selected
     // Note: If we turn off snapping, we'll have to first find the nearest period boundary and use that value
+
     var filterStartDate = this.getDate_(slider.values[0]);
     var filterEndDate = this.getDate_(slider.values[1]);
-    this.storedFilterDates_ = [filterStartDate, filterEndDate];
-    this.styleInactiveData_(filterStartDate, filterEndDate);
-    this.notifyFilterListeners_(filterStartDate, filterEndDate);
+
+    if(!this.storedFilterDates_) {
+        this.storedFilterDates_ = [filterStartDate, filterEndDate];
+        if(slider.values[0] !== 0 && slider.values[1] !== this.plotWidth) {
+            this.styleInactiveData_(filterStartDate, filterEndDate);
+            this.notifyFilterListeners_(filterStartDate, filterEndDate);
+        }
+    }
+    if(this.storedFilterDates_ && (this.storedFilterDates_[0] !== filterStartDate || this.storedFilterDates_[1] !== filterEndDate)) {
+        this.storedFilterDates_ = [filterStartDate, filterEndDate];
+        this.styleInactiveData_(filterStartDate, filterEndDate);
+        this.notifyFilterListeners_(filterStartDate, filterEndDate);
+    }
 };
 
 /**
