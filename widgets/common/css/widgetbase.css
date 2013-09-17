@@ -34,11 +34,11 @@ select, select option, input[type="number"] {
     color: #cccccc;
 }
 
-.dropdown-options {
+.configuration-dropdown {
     width: 150px;
 }
 
-.dropdown-label {
+label[for] {
     font-size: 10px;
     text-transform: uppercase;
 }

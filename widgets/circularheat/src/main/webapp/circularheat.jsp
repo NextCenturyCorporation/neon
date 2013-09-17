@@ -32,10 +32,10 @@
 <div id="options-panel" class="options">
     <div class="controls-row">
         <div class="control-group">
-            <label class="control-label dropdown-label" for="date">Date</label>
+            <label class="control-label" for="date">Date</label>
 
             <div class="controls">
-                <select id="date" class="dropdown-options"></select>
+                <select id="date" class="configuration-dropdown"></select>
             </div>
         </div>
     </div>
