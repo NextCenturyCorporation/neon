@@ -1,3 +1,10 @@
+# note that have tests take a long time so -DintegrationTest.single=Mongo can be added to the jvmargs to run only mongo tests
 org.gradle.jvmargs=-Xmx1024m -XX:MaxPermSize=256m
 org.gradle.daemon=true
 NEON_SERVER=/my/tomcat/path/apache-tomcat-7.0.39
+
+# configuration for mongo and hive/hdfs
+mongo.hosts=localhost
+hdfs.url=hdfs://localhost:8020
+hive.host=localhost:10000
+acceptanceTest.port=10102
