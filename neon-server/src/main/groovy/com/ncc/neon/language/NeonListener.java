@@ -16,20 +16,23 @@ public interface NeonListener extends ParseTreeListener {
 	void enterFieldList(NeonParser.FieldListContext ctx);
 	void exitFieldList(NeonParser.FieldListContext ctx);
 
+	void enterSortClause(NeonParser.SortClauseContext ctx);
+	void exitSortClause(NeonParser.SortClauseContext ctx);
+
 	void enterQuery(NeonParser.QueryContext ctx);
 	void exitQuery(NeonParser.QueryContext ctx);
 
 	void enterSelect(NeonParser.SelectContext ctx);
 	void exitSelect(NeonParser.SelectContext ctx);
 
-	void enterSortClause(NeonParser.SortClauseContext ctx);
-	void exitSortClause(NeonParser.SortClauseContext ctx);
-
 	void enterWhere(NeonParser.WhereContext ctx);
 	void exitWhere(NeonParser.WhereContext ctx);
 
 	void enterDatabase(NeonParser.DatabaseContext ctx);
 	void exitDatabase(NeonParser.DatabaseContext ctx);
+
+	void enterAdditionalClauses(NeonParser.AdditionalClausesContext ctx);
+	void exitAdditionalClauses(NeonParser.AdditionalClausesContext ctx);
 
 	void enterOperator(NeonParser.OperatorContext ctx);
 	void exitOperator(NeonParser.OperatorContext ctx);

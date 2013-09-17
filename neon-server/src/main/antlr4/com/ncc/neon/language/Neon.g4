@@ -5,9 +5,9 @@ options {
 }
 
 // parser rules
-statement : ((query|database) (';'?))+;
+statement : database (';')? query (';')?;
 database : USE STRING;
-query: select FROM STRING (where)? (sort)? (group)? (limit)?;
+query: select FROM STRING (where)? (additionalClauses)*;
 
 select: SELECT selectFields;
 
@@ -28,6 +28,11 @@ whereClause
      | simpleWhereClause;
 
 simpleWhereClause : STRING operator STRING;
+
+additionalClauses
+     : sort
+     | group
+     | limit;
 
 operator  : GT
           | GTE
@@ -57,7 +62,7 @@ functionName: 'first'
             | 'avg'
             | 'sum';
 
-limit: LIMIT STRING;
+limit: LIMIT WHOLE_NUMBER;
 
 // lexer rules
 GT: '>';
@@ -71,16 +76,19 @@ USE: 'USE' | 'use';
 SELECT: 'SELECT' | 'select';
 FROM: 'FROM' | 'from';
 WHERE: 'WHERE' | 'where';
-GROUP: 'GROUP' | 'group';
+GROUP: 'GROUP BY' | 'group by';
 LIMIT: 'LIMIT' | 'limit';
-SORT: 'SORT' | 'sort';
+SORT: 'SORT BY' | 'sort by';
 SORT_DIRECTION : 'ASC'
                | 'asc'
                | 'DESC'
                | 'desc';
 
+WHOLE_NUMBER: [1-9] (DIGIT)*;
+NUMBER: ('-')? DIGIT+ ('.' DIGIT+)?;
 STRING: CHAR+;
 
+fragment DIGIT : [0-9];
 fragment CHAR : 'a'..'z'
               | 'A'..'Z'
               | '0'..'9'
