@@ -164,7 +164,7 @@ class QueryCreator extends NeonBaseListener {
     void exitFunction(NeonParser.FunctionContext ctx) {
         AggregateClause aggregateClause = new AggregateClause()
         aggregateClause.operation = ctx.functionName().text
-        aggregateClause.field = ctx.STRING()
+        aggregateClause.field = ctx.STRING().text
         aggregateClause.name = "${ctx.functionName().text}Of${ctx.STRING()}"
 
         aggregates << aggregateClause

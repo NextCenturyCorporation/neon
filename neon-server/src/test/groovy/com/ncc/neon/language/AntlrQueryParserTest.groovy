@@ -68,11 +68,15 @@ class AntlrQueryParserTest {
         AntlrQueryParser parser = new AntlrQueryParser()
         Query actual = parser.parse("use db; select * from table sort by field limit 5;")
 
+        assertSortClauseSetProperly(actual)
+        assert actual.limitClause.limit == 5
+    }
+
+    private void assertSortClauseSetProperly(Query actual) {
         assert actual.sortClauses
         assert actual.sortClauses.size() == 1
         assert actual.sortClauses[0].fieldName == "field"
         assert actual.sortClauses[0].sortOrder == SortOrder.ASCENDING
-        assert actual.limitClause.limit == 5
     }
 
     @Test
@@ -80,26 +84,25 @@ class AntlrQueryParserTest {
         AntlrQueryParser parser = new AntlrQueryParser()
         Query actual = parser.parse("use db; select * from table limit 5 sort by field;")
 
-        assert actual.sortClauses
-        assert actual.sortClauses.size() == 1
-        assert actual.sortClauses[0].fieldName == "field"
-        assert actual.sortClauses[0].sortOrder == SortOrder.ASCENDING
+        assertSortClauseSetProperly(actual)
         assert actual.limitClause.limit == 5
     }
 
     @Test
-    void "test group by query"() {
+    void "test group by and sort by query"() {
         AntlrQueryParser parser = new AntlrQueryParser()
         Query actual = parser.parse("use db; select * from table group by field, sum(field2) sort by field;")
 
-        assert actual.sortClauses
-        assert actual.sortClauses.size() == 1
-        assert actual.sortClauses[0].fieldName == "field"
-        assert actual.sortClauses[0].sortOrder == SortOrder.ASCENDING
+        assertSortClauseSetProperly(actual)
         assert actual.groupByClauses
         assert actual.groupByClauses.size() == 1
+        assert actual.groupByClauses[0].field == "field"
+
         assert actual.aggregates
         assert actual.aggregates.size() == 1
+        assert actual.aggregates[0].name == "sumOffield2"
+        assert actual.aggregates[0].operation == "sum"
+        assert actual.aggregates[0].field == "field2"
     }
 
     @Test(expected = NeonParsingException)
