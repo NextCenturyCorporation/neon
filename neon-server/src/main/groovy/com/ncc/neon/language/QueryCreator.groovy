@@ -150,9 +150,13 @@ class QueryCreator extends NeonBaseListener {
 
     @Override
     void exitGroupClause(NeonParser.GroupClauseContext ctx) {
+        if (!ctx.STRING()) {
+            // If there is a group by function, ctx.STRING() is null and is handled in exitFunction.
+            return
+        }
+
         GroupByFieldClause fieldClause = new GroupByFieldClause()
         fieldClause.field = ctx.STRING().text
-
         groupByClauses << fieldClause
     }
 

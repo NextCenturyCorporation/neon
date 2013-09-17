@@ -87,6 +87,20 @@ class AntlrQueryParserTest {
         assert actual.limitClause.limit == 5
     }
 
+    @Test
+    void "test group by query"() {
+        AntlrQueryParser parser = new AntlrQueryParser()
+        Query actual = parser.parse("use db; select * from table group by field, sum(field2) sort by field;")
+
+        assert actual.sortClauses
+        assert actual.sortClauses.size() == 1
+        assert actual.sortClauses[0].fieldName == "field"
+        assert actual.sortClauses[0].sortOrder == SortOrder.ASCENDING
+        assert actual.groupByClauses
+        assert actual.groupByClauses.size() == 1
+        assert actual.aggregates
+        assert actual.aggregates.size() == 1
+    }
 
     @Test(expected = NeonParsingException)
     void "test syntax error query"() {
