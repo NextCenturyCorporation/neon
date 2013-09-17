@@ -29,7 +29,7 @@ html, body {
     color: white;
 }
 
-.dropdown, input[type="number"] {
+.dropdown, .dropdown option, input[type="number"] {
     background-color: #666666;
     color: #cccccc;
 }
