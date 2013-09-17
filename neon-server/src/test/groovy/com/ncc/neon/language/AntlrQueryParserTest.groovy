@@ -1,10 +1,8 @@
 package com.ncc.neon.language
-
 import com.ncc.neon.query.Query
+import com.ncc.neon.query.clauses.SortOrder
 import com.ncc.neon.query.filter.Filter
 import org.junit.Test
-
-
 /*
  * ************************************************************************
  * Copyright (c), 2013 Next Century Corporation. All Rights Reserved.
@@ -50,6 +48,58 @@ class AntlrQueryParserTest {
         assert actual.filter.whereClause == expected.filter.whereClause
 
         assert actual.fields == expected.fields
+    }
+
+    @Test
+    void "test limit query"() {
+        AntlrQueryParser parser = new AntlrQueryParser()
+        Query actual = parser.parse("use db; select * from table limit 5;")
+        assert actual.limitClause.limit == 5
+    }
+
+    @Test(expected = NeonParsingException)
+    void "test invalid limit query"() {
+        AntlrQueryParser parser = new AntlrQueryParser()
+        parser.parse("use db; select * from table limit 0")
+    }
+
+    @Test
+    void "test sort then limit query"() {
+        AntlrQueryParser parser = new AntlrQueryParser()
+        Query actual = parser.parse("use db; select * from table sort by field limit 5;")
+
+        assert actual.sortClauses
+        assert actual.sortClauses.size() == 1
+        assert actual.sortClauses[0].fieldName == "field"
+        assert actual.sortClauses[0].sortOrder == SortOrder.ASCENDING
+        assert actual.limitClause.limit == 5
+    }
+
+    @Test
+    void "test limit then sort query"() {
+        AntlrQueryParser parser = new AntlrQueryParser()
+        Query actual = parser.parse("use db; select * from table limit 5 sort by field;")
+
+        assert actual.sortClauses
+        assert actual.sortClauses.size() == 1
+        assert actual.sortClauses[0].fieldName == "field"
+        assert actual.sortClauses[0].sortOrder == SortOrder.ASCENDING
+        assert actual.limitClause.limit == 5
+    }
+
+    @Test
+    void "test group by query"() {
+        AntlrQueryParser parser = new AntlrQueryParser()
+        Query actual = parser.parse("use db; select * from table group by field, sum(field2) sort by field;")
+
+        assert actual.sortClauses
+        assert actual.sortClauses.size() == 1
+        assert actual.sortClauses[0].fieldName == "field"
+        assert actual.sortClauses[0].sortOrder == SortOrder.ASCENDING
+        assert actual.groupByClauses
+        assert actual.groupByClauses.size() == 1
+        assert actual.aggregates
+        assert actual.aggregates.size() == 1
     }
 
     @Test(expected = NeonParsingException)

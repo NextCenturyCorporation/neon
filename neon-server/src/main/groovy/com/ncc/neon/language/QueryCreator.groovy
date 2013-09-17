@@ -142,7 +142,7 @@ class QueryCreator extends NeonBaseListener {
     public void exitSortClause(NeonParser.SortClauseContext ctx) {
         SortClause sortClause = new SortClause(sortOrder: SortOrder.ASCENDING)
         sortClause.fieldName = ctx.STRING().text
-        if (ctx.SORT_DIRECTION()?.text.toLowerCase() == "desc") {
+        if (ctx.SORT_DIRECTION()?.text?.toLowerCase() == "desc") {
             sortClause.sortOrder = SortOrder.DESCENDING
         }
         sortClauses << sortClause
@@ -150,9 +150,13 @@ class QueryCreator extends NeonBaseListener {
 
     @Override
     void exitGroupClause(NeonParser.GroupClauseContext ctx) {
+        if (!ctx.STRING()) {
+            // If there is a group by function, ctx.STRING() is null and is handled in exitFunction.
+            return
+        }
+
         GroupByFieldClause fieldClause = new GroupByFieldClause()
         fieldClause.field = ctx.STRING().text
-
         groupByClauses << fieldClause
     }
 
@@ -169,8 +173,9 @@ class QueryCreator extends NeonBaseListener {
     @Override
     public void exitLimit(NeonParser.LimitContext ctx) {
         LimitClause clause = new LimitClause()
-        clause.limit = Integer.valueOf(ctx.STRING().text)
-
+        if(ctx.WHOLE_NUMBER()){
+            clause.limit = Integer.valueOf(ctx.WHOLE_NUMBER().text)
+        }
         limitClause = clause
     }
 }

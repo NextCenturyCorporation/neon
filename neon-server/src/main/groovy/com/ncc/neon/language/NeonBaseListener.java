@@ -19,20 +19,23 @@ public class NeonBaseListener implements NeonListener {
 	@Override public void enterFieldList(NeonParser.FieldListContext ctx) { }
 	@Override public void exitFieldList(NeonParser.FieldListContext ctx) { }
 
+	@Override public void enterSortClause(NeonParser.SortClauseContext ctx) { }
+	@Override public void exitSortClause(NeonParser.SortClauseContext ctx) { }
+
 	@Override public void enterQuery(NeonParser.QueryContext ctx) { }
 	@Override public void exitQuery(NeonParser.QueryContext ctx) { }
 
 	@Override public void enterSelect(NeonParser.SelectContext ctx) { }
 	@Override public void exitSelect(NeonParser.SelectContext ctx) { }
 
-	@Override public void enterSortClause(NeonParser.SortClauseContext ctx) { }
-	@Override public void exitSortClause(NeonParser.SortClauseContext ctx) { }
-
 	@Override public void enterWhere(NeonParser.WhereContext ctx) { }
 	@Override public void exitWhere(NeonParser.WhereContext ctx) { }
 
 	@Override public void enterDatabase(NeonParser.DatabaseContext ctx) { }
 	@Override public void exitDatabase(NeonParser.DatabaseContext ctx) { }
+
+	@Override public void enterAdditionalClauses(NeonParser.AdditionalClausesContext ctx) { }
+	@Override public void exitAdditionalClauses(NeonParser.AdditionalClausesContext ctx) { }
 
 	@Override public void enterOperator(NeonParser.OperatorContext ctx) { }
 	@Override public void exitOperator(NeonParser.OperatorContext ctx) { }
