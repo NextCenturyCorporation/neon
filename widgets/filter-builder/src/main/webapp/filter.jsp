@@ -36,7 +36,7 @@
 
             <div class="filter-dropdown">
                 <div class="controls">
-                    <select id="column-select-{{@index}}" class="dropdown" style="width:100%">
+                    <select id="column-select-{{@index}}" style="width:100%">
                         <option value="">Select Column...</option>
                         {{#select columnValue}}
                         {{#columnOptions}}
@@ -49,7 +49,7 @@
 
             <div class="control-group">
                 <div class="controls">
-                    <select id="operator-select-{{@index}}" class="dropdown span1">
+                    <select id="operator-select-{{@index}}" class="span1">
                         {{#select operatorValue}}
                         {{#operatorOptions}}
                         <option value="{{.}}">{{.}}</option>
@@ -111,7 +111,7 @@
                 <label class="control-label dropdown-label" for="datastore-select">Type</label>
 
                 <div class="controls">
-                    <select id="datastore-select" class="dropdown span2">
+                    <select id="datastore-select" class="span2">
                         <option value="mongo">Mongo</option>
                         <option value="hive">Hive</option>
                     </select>
@@ -142,7 +142,7 @@
                 <label class="control-label dropdown-label" for="database-select">Database</label>
 
                 <div class="controls">
-                    <select id="database-select" class="dropdown span2">
+                    <select id="database-select" class="span2">
                         <option value="">Select Database...</option>
                     </select>
                 </div>
@@ -152,7 +152,7 @@
                 <label class="control-label dropdown-label" for="table-select">Table</label>
 
                 <div class="controls">
-                    <select id="table-select" class="dropdown span2"></select>
+                    <select id="table-select" class="span2"></select>
                 </div>
             </div>
 
