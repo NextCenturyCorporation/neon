@@ -108,7 +108,7 @@ abstract class AbstractQueryExecutorIntegrationTest {
         return allData
     }
 
-    @SuppressWarnings('CoupledTestCase') // this method incorrectly throws this codenarc error - it was fixed in 0.19
+    @SuppressWarnings('CoupledTestCase') // this method incorrectly throws this codenarc error
     protected def readJson(def fileName) {
         def jsonArray = new JSONArray(AbstractQueryExecutorIntegrationTest.getResourceAsStream("/${resultsJsonFolder}${fileName}").text)
         def data = []
@@ -449,7 +449,7 @@ abstract class AbstractQueryExecutorIntegrationTest {
     }
 
     @Test
-    @SuppressWarnings('CoupledTestCase') // this method incorrectly throws this codenarc error - it was fixed in 0.19
+    @SuppressWarnings('CoupledTestCase') // this method incorrectly throws this codenarc error
     @SuppressWarnings('MethodSize') // there is a lot of setup in this method but it is pretty straightforward and would be harder to read if extracted
     void "query group aggregates results"() {
         def whereClause1 = new SingularWhereClause(lhs: 'state', operator: '=', rhs: 'VA')
