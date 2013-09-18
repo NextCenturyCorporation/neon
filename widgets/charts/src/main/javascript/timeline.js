@@ -279,7 +279,7 @@ charts.Timeline.prototype.doSliderChange_ = function (event, slider) {
 
     if(!this.storedFilterDates_) {
         this.storedFilterDates_ = [filterStartDate, filterEndDate];
-        if(slider.values[0] !== 0 && slider.values[1] !== this.plotWidth) {
+        if(slider.values[0] !== 0 || slider.values[1] !== this.plotWidth) {
             this.styleInactiveData_(filterStartDate, filterEndDate);
             this.notifyFilterListeners_(filterStartDate, filterEndDate);
         }
