@@ -67,7 +67,7 @@ class HiveQueryExecutorIntegrationTest extends AbstractQueryExecutorIntegrationT
     }
 
     @Override
-    ConnectionState createConnectionState() {
+    protected ConnectionState createConnectionState() {
         ConnectionState connectionState = new ConnectionState()
         ConnectionInfo info = new ConnectionInfo(dataStoreName: DataSources.hive.name(), connectionUrl: HiveIntegrationTestContext.HOST_STRING)
         connectionState.createConnection(info)

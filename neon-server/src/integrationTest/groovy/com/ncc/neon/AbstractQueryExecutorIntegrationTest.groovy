@@ -63,13 +63,13 @@ abstract class AbstractQueryExecutorIntegrationTest {
     /** a simple query that returns all of the data */
     static final ALL_DATA_QUERY = new Query(filter: ALL_DATA_FILTER)
 
-    private ConnectionState connectionState
+    private final ConnectionState connectionState
 
-    AbstractQueryExecutorIntegrationTest(){
+    protected AbstractQueryExecutorIntegrationTest(){
         connectionState = createConnectionState()
     }
 
-    abstract ConnectionState createConnectionState();
+    protected abstract ConnectionState createConnectionState()
 
     /**
      * Converts the database specific row to a map

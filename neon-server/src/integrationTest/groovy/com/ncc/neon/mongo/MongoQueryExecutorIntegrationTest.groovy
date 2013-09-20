@@ -63,7 +63,7 @@ class MongoQueryExecutorIntegrationTest extends AbstractQueryExecutorIntegration
     }
 
     @Override
-    ConnectionState createConnectionState() {
+    protected ConnectionState createConnectionState() {
         def hostsString = System.getProperty("mongo.hosts", "localhost")
         ConnectionState connectionState = new ConnectionState()
         ConnectionInfo info = new ConnectionInfo(dataStoreName: DataSources.mongo.name(), connectionUrl: hostsString)
