@@ -1,5 +1,4 @@
 package com.ncc.neon
-
 import com.ncc.neon.connect.ConnectionState
 import com.ncc.neon.query.NamedQuery
 import com.ncc.neon.query.Query
@@ -14,8 +13,6 @@ import org.json.JSONArray
 import org.json.JSONObject
 import org.junit.After
 import org.junit.Test
-import org.springframework.beans.factory.annotation.Autowired
-
 /*
  * ************************************************************************
  * Copyright (c), 2013 Next Century Corporation. All Rights Reserved.
@@ -46,7 +43,6 @@ import org.springframework.beans.factory.annotation.Autowired
  * Subclasses implement database specific translations
  */
 
-@SuppressWarnings("AbstractClassWithoutAbstractMethod") // test fragment - non abstract would cause this to be run as its own test
 abstract class AbstractQueryExecutorIntegrationTest {
 
     static final DATE_FIELD_REGEX = ~/.*date.*/
@@ -67,9 +63,13 @@ abstract class AbstractQueryExecutorIntegrationTest {
     /** a simple query that returns all of the data */
     static final ALL_DATA_QUERY = new Query(filter: ALL_DATA_FILTER)
 
-
-    @Autowired
     private ConnectionState connectionState
+
+    AbstractQueryExecutorIntegrationTest(){
+        connectionState = createConnectionState()
+    }
+
+    abstract ConnectionState createConnectionState();
 
     /**
      * Converts the database specific row to a map

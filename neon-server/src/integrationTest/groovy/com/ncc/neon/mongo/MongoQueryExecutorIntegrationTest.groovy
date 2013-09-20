@@ -1,8 +1,10 @@
 package com.ncc.neon.mongo
-
 import com.mongodb.BasicDBObject
 import com.mongodb.util.JSON
 import com.ncc.neon.AbstractQueryExecutorIntegrationTest
+import com.ncc.neon.connect.ConnectionInfo
+import com.ncc.neon.connect.ConnectionState
+import com.ncc.neon.connect.DataSources
 import com.ncc.neon.query.Query
 import com.ncc.neon.query.clauses.AndWhereClause
 import com.ncc.neon.query.clauses.DistanceUnit
@@ -18,7 +20,6 @@ import org.junit.runner.RunWith
 import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.context.ContextConfiguration
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner
-
 /*
  * ************************************************************************
  * Copyright (c), 2013 Next Century Corporation. All Rights Reserved.
@@ -59,6 +60,15 @@ class MongoQueryExecutorIntegrationTest extends AbstractQueryExecutorIntegration
     @AfterClass
     static void afterClass() {
         deleteData()
+    }
+
+    @Override
+    ConnectionState createConnectionState() {
+        def hostsString = System.getProperty("mongo.hosts", "localhost")
+        ConnectionState connectionState = new ConnectionState()
+        ConnectionInfo info = new ConnectionInfo(dataStoreName: DataSources.mongo.name(), connectionUrl: hostsString)
+        connectionState.createConnection(info)
+        return connectionState
     }
 
     @Override

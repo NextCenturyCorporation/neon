@@ -2,6 +2,7 @@ package com.ncc.neon.hive
 
 import com.ncc.neon.AbstractQueryExecutorIntegrationTest
 import com.ncc.neon.connect.ConnectionInfo
+import com.ncc.neon.connect.ConnectionState
 import com.ncc.neon.connect.DataSources
 import com.ncc.neon.connect.HiveConnection
 import com.ncc.neon.query.jdbc.JdbcClient
@@ -63,6 +64,14 @@ class HiveQueryExecutorIntegrationTest extends AbstractQueryExecutorIntegrationT
     @AfterClass
     static void afterClass() {
         deleteData()
+    }
+
+    @Override
+    ConnectionState createConnectionState() {
+        ConnectionState connectionState = new ConnectionState()
+        ConnectionInfo info = new ConnectionInfo(dataStoreName: DataSources.hive.name(), connectionUrl: HiveIntegrationTestContext.HOST_STRING)
+        connectionState.createConnection(info)
+        return connectionState
     }
 
     protected String getResultsJsonFolder() {

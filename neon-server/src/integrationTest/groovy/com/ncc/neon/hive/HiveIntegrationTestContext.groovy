@@ -1,13 +1,8 @@
 package com.ncc.neon.hive
 
-import com.ncc.neon.connect.ConnectionInfo
-import com.ncc.neon.connect.ConnectionState
-import com.ncc.neon.connect.DataSources
-import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.ComponentScan
 import org.springframework.context.annotation.Configuration
 import org.springframework.context.annotation.Profile
-
 /*
  * ************************************************************************
  * Copyright (c), 2013 Next Century Corporation. All Rights Reserved.
@@ -38,12 +33,6 @@ class HiveIntegrationTestContext {
 
     static final String HOST_STRING = System.getProperty("hive.host", "localhost:10000")
 
-    @Bean
-    ConnectionState connectionState() {
-        ConnectionState connectionState = new ConnectionState()
-        ConnectionInfo info = new ConnectionInfo(dataStoreName: DataSources.hive.name(), connectionUrl: HOST_STRING)
-        connectionState.createConnection(info)
-        return connectionState
-    }
+
 
 }
