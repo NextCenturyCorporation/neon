@@ -1,5 +1,4 @@
 package com.ncc.neon.services
-
 import com.ncc.neon.connect.ConnectionState
 import com.ncc.neon.language.QueryParser
 import com.ncc.neon.query.Query
@@ -9,7 +8,6 @@ import org.springframework.stereotype.Component
 
 import javax.ws.rs.*
 import javax.ws.rs.core.MediaType
-
 /*
  * ************************************************************************
  * Copyright (c), 2013 Next Century Corporation. All Rights Reserved.

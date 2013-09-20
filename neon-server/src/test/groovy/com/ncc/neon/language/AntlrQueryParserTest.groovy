@@ -2,6 +2,7 @@ package com.ncc.neon.language
 import com.ncc.neon.query.Query
 import com.ncc.neon.query.clauses.SortOrder
 import com.ncc.neon.query.filter.Filter
+import org.junit.Before
 import org.junit.Test
 /*
  * ************************************************************************
@@ -31,15 +32,26 @@ import org.junit.Test
 
 class AntlrQueryParserTest {
 
+    private AntlrQueryParser parser
+
+    @Before
+    void before(){
+        parser = new AntlrQueryParser()
+    }
+
     @Test(expected = NullPointerException)
     void "parsing null is going to throw a NPE"() {
-        AntlrQueryParser parser = new AntlrQueryParser()
         parser.parse(null)
     }
 
+    @Test(expected = NeonParsingException)
+    void "syntax error query"() {
+        //No select fields present so its an error.
+        parser.parse("use db; select from table")
+    }
+
     @Test
-    void "test simplest query"() {
-        AntlrQueryParser parser = new AntlrQueryParser()
+    void "simplest query"() {
         Query actual = parser.parse("use db; select * from table")
         Query expected = new Query(filter: new Filter(databaseName: "db", tableName: "table"))
 
@@ -51,37 +63,26 @@ class AntlrQueryParserTest {
     }
 
     @Test
-    void "test limit query"() {
-        AntlrQueryParser parser = new AntlrQueryParser()
+    void "limit query"() {
         Query actual = parser.parse("use db; select * from table limit 5;")
         assert actual.limitClause.limit == 5
     }
 
     @Test(expected = NeonParsingException)
     void "test invalid limit query"() {
-        AntlrQueryParser parser = new AntlrQueryParser()
         parser.parse("use db; select * from table limit 0")
     }
 
     @Test
-    void "test sort then limit query"() {
-        AntlrQueryParser parser = new AntlrQueryParser()
+    void "sort then limit query"() {
         Query actual = parser.parse("use db; select * from table sort by field limit 5;")
 
         assertSortClauseSetProperly(actual)
         assert actual.limitClause.limit == 5
     }
 
-    private void assertSortClauseSetProperly(Query actual) {
-        assert actual.sortClauses
-        assert actual.sortClauses.size() == 1
-        assert actual.sortClauses[0].fieldName == "field"
-        assert actual.sortClauses[0].sortOrder == SortOrder.ASCENDING
-    }
-
     @Test
-    void "test limit then sort query"() {
-        AntlrQueryParser parser = new AntlrQueryParser()
+    void "limit then sort query"() {
         Query actual = parser.parse("use db; select * from table limit 5 sort by field;")
 
         assertSortClauseSetProperly(actual)
@@ -89,8 +90,7 @@ class AntlrQueryParserTest {
     }
 
     @Test
-    void "test group by and sort by query"() {
-        AntlrQueryParser parser = new AntlrQueryParser()
+    void "group by and sort by query"() {
         Query actual = parser.parse("use db; select * from table group by field, sum(field2) sort by field;")
 
         assertSortClauseSetProperly(actual)
@@ -105,10 +105,11 @@ class AntlrQueryParserTest {
         assert actual.aggregates[0].field == "field2"
     }
 
-    @Test(expected = NeonParsingException)
-    void "test syntax error query"() {
-        AntlrQueryParser parser = new AntlrQueryParser()
-        parser.parse("use db; select from table")
+    private void assertSortClauseSetProperly(Query actual) {
+        assert actual.sortClauses
+        assert actual.sortClauses.size() == 1
+        assert actual.sortClauses[0].fieldName == "field"
+        assert actual.sortClauses[0].sortOrder == SortOrder.ASCENDING
     }
 
 }
