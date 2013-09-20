@@ -4,6 +4,8 @@ import org.springframework.context.annotation.Scope
 import org.springframework.context.annotation.ScopedProxyMode
 import org.springframework.stereotype.Component
 import org.springframework.web.context.WebApplicationContext
+
+import javax.annotation.PostConstruct
 /*
  * ************************************************************************
  * Copyright (c), 2013 Next Century Corporation. All Rights Reserved.
@@ -42,6 +44,13 @@ class ConnectionState implements Serializable {
     private transient QueryExecutor queryExecutor
     private transient boolean init = false
     private ConnectionInfo info
+
+    @PostConstruct
+    void initialize(){
+        def hostsString = System.getProperty("mongo.hosts", "localhost")
+        ConnectionInfo info = new ConnectionInfo(dataStoreName: DataSources.mongo.name(), connectionUrl: hostsString)
+        createConnection(info)
+    }
 
     void createConnection(ConnectionInfo info) {
         // the init check ensures the connection is re-established after deserialization
