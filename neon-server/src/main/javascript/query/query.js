@@ -724,6 +724,8 @@ neon.query.submitTextQuery = function(queryText, successCallback, errorCallback)
         neon.query.queryUrl_('/services/languageservice/query'),
         {
             data: { text: queryText },
+            contentType: 'application/x-www-form-urlencoded; charset=UTF-8',
+            responseType: 'json',
             success: successCallback,
             error: errorCallback
         }
