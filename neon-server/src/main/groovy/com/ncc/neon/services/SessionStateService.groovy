@@ -44,8 +44,6 @@ class SessionStateService {
     @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
     @Path("savestate")
     void saveState(@FormParam("clientId") String clientId, @FormParam("state") String state) {
-        println("STATE " + state)
-
         widgetStates.addWidgetState(clientId, state)
     }
 
@@ -54,8 +52,6 @@ class SessionStateService {
     @Produces(MediaType.APPLICATION_JSON)
     @Path("restoreState")
     String restoreState(@QueryParam("clientId") String clientId) {
-        String data = widgetStates.getWidgetState(clientId).state
-        println("data " + data)
-        return data
+        widgetStates.getWidgetState(clientId).state
     }
 }
