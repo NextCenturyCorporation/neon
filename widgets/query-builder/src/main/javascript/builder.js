@@ -27,6 +27,19 @@ neon.queryBuilder = (function () {
     var table = new tables.Table('#results', {data: []});
     var numberOfRows = 0;
 
+    var clientId;
+    OWF.ready(function(){
+       clientId = OWF.getInstanceId();
+       restoreState();
+    });
+
+    function restoreState(){
+        neon.query.getSavedState(clientId, function(data){
+            $('#queryText').val(data);
+            submitQueryToServer();
+        });
+    }
+
     function resizeHeightOfResultDivAndRefreshGridLayout() {
         $("#results").height(function () {
             var windowHeight = $(window).height();
@@ -53,6 +66,9 @@ neon.queryBuilder = (function () {
 
         neon.queryBuilder.layoutResults();
         table = new tables.Table('#results', {data: data.data, gridOptions: {fullWidthRows: true}}).draw();
+
+        var queryText = $('#queryText').val();
+        neon.query.saveState(clientId, queryText);
     }
 
     function onQueryError(xhr, status, msg) {
