@@ -1,11 +1,12 @@
-package com.ncc.neon.connect
+package com.ncc.neon.query.hive
 
+import com.ncc.neon.connect.ConnectionInfo
+import com.ncc.neon.connect.HiveConnection
 import com.ncc.neon.query.*
 import com.ncc.neon.query.filter.DataSet
 import com.ncc.neon.query.filter.Filter
 import com.ncc.neon.query.filter.FilterKey
 import com.ncc.neon.query.filter.FilterState
-import com.ncc.neon.query.hive.HiveConversionStrategy
 import com.ncc.neon.query.jdbc.JdbcQueryResult
 import com.ncc.neon.selection.SelectionManager
 import org.slf4j.Logger

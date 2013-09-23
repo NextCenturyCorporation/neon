@@ -2,8 +2,8 @@ package com.ncc.neon.hive
 
 import com.ncc.neon.AbstractQueryExecutorIntegrationTest
 import com.ncc.neon.connect.ConnectionInfo
-import com.ncc.neon.connect.ConnectionState
-import com.ncc.neon.connect.DataSources
+import com.ncc.neon.session.ConnectionState
+import com.ncc.neon.session.DataSources
 import com.ncc.neon.connect.HiveConnection
 import com.ncc.neon.query.jdbc.JdbcClient
 import org.apache.hadoop.conf.Configuration

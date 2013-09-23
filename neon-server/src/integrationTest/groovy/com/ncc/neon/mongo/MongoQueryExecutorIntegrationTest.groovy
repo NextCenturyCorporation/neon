@@ -3,8 +3,8 @@ import com.mongodb.BasicDBObject
 import com.mongodb.util.JSON
 import com.ncc.neon.AbstractQueryExecutorIntegrationTest
 import com.ncc.neon.connect.ConnectionInfo
-import com.ncc.neon.connect.ConnectionState
-import com.ncc.neon.connect.DataSources
+import com.ncc.neon.session.ConnectionState
+import com.ncc.neon.session.DataSources
 import com.ncc.neon.query.Query
 import com.ncc.neon.query.clauses.AndWhereClause
 import com.ncc.neon.query.clauses.DistanceUnit

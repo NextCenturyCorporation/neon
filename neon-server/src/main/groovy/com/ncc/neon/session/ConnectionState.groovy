@@ -1,4 +1,10 @@
-package com.ncc.neon.connect
+package com.ncc.neon.session
+
+import com.ncc.neon.connect.Connection
+import com.ncc.neon.connect.ConnectionInfo
+import com.ncc.neon.connect.HiveConnection
+import com.ncc.neon.connect.MongoConnection
+import com.ncc.neon.connect.UnsupportedDataStoreTypeException
 import com.ncc.neon.query.QueryExecutor
 import org.springframework.context.annotation.Scope
 import org.springframework.context.annotation.ScopedProxyMode

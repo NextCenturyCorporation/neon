@@ -1,5 +1,5 @@
 package com.ncc.neon.services
-import com.ncc.neon.connect.ConnectionState
+import com.ncc.neon.session.ConnectionState
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
 

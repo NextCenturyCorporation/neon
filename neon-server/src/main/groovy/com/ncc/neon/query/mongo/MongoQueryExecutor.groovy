@@ -1,4 +1,4 @@
-package com.ncc.neon.connect
+package com.ncc.neon.query.mongo
 
 import com.mongodb.DB
 import com.mongodb.MongoClient
@@ -8,7 +8,6 @@ import com.ncc.neon.query.filter.DataSet
 import com.ncc.neon.query.filter.Filter
 import com.ncc.neon.query.filter.FilterKey
 import com.ncc.neon.query.filter.FilterState
-import com.ncc.neon.query.mongo.*
 import com.ncc.neon.selection.SelectionManager
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory

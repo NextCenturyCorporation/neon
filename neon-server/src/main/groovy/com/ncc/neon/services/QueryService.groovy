@@ -1,5 +1,5 @@
 package com.ncc.neon.services
-import com.ncc.neon.connect.ConnectionState
+import com.ncc.neon.session.ConnectionState
 import com.ncc.neon.query.Query
 import com.ncc.neon.query.QueryExecutor
 import com.ncc.neon.query.QueryGroup
