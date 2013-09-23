@@ -38,18 +38,22 @@ class WidgetStates implements Serializable {
     private static final long serialVersionUID = -7000907707532351308L
     private final Set<WidgetState> states = [] as Set
 
-    public addWidgetState(String clientId, String json){
-        WidgetState widgetState = new WidgetState(clientId, json)
+    public addWidgetState(String clientId, String json) {
+        WidgetState widgetState = getWidgetState(clientId)
+        if (widgetState) {
+            states.remove(widgetState)
+        }
+        widgetState = new WidgetState(clientId, json)
         states.add(widgetState)
     }
 
-    public WidgetState getWidgetState(String clientId){
-        states.find{
+    public WidgetState getWidgetState(String clientId) {
+        states.find {
             clientId == it.clientId
         }
     }
 
-    public clearWidgetStates(){
+    public clearWidgetStates() {
         states.clear()
     }
 }
