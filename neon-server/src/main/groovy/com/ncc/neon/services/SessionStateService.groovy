@@ -1,7 +1,11 @@
-package com.ncc.neon.session
+package com.ncc.neon.services
 
-import groovy.transform.EqualsAndHashCode
-import groovy.transform.Immutable
+import com.ncc.neon.session.WidgetStates
+import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.stereotype.Component
+
+import javax.ws.rs.*
+import javax.ws.rs.core.MediaType
 
 /*
  * ************************************************************************
@@ -29,12 +33,29 @@ import groovy.transform.Immutable
  * @author tbrooks
  */
 
-@EqualsAndHashCode(includes = "clientId")
-@Immutable
-class WidgetState implements Serializable {
+@Component
+@Path("/sessionstateservice")
+class SessionStateService {
 
-    private static final long serialVersionUID = -3375118230923963912L
-    String clientId
-    String state
+    @Autowired
+    WidgetStates widgetStates
 
+    @POST
+    @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
+    @Path("savestate")
+    void saveState(@FormParam("clientId") String clientId, @FormParam("state") String state) {
+        println("STATE " + state)
+
+        widgetStates.addWidgetState(clientId, state)
+    }
+
+    @GET
+    @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
+    @Produces(MediaType.APPLICATION_JSON)
+    @Path("restoreState")
+    String restoreState(@QueryParam("clientId") String clientId) {
+        String data = widgetStates.getWidgetState(clientId).state
+        println("data " + data)
+        return data
+    }
 }

@@ -1,7 +1,7 @@
 package com.ncc.neon.session
 
-import groovy.transform.EqualsAndHashCode
-import groovy.transform.Immutable
+import org.junit.Test
+
 
 /*
  * ************************************************************************
@@ -29,12 +29,37 @@ import groovy.transform.Immutable
  * @author tbrooks
  */
 
-@EqualsAndHashCode(includes = "clientId")
-@Immutable
-class WidgetState implements Serializable {
+class WidgetStateTest {
 
-    private static final long serialVersionUID = -3375118230923963912L
-    String clientId
-    String state
+    private static final String ID_1 = "1"
+    private static final String ID_2 = "2"
+    private static final String CONTENT_1 = "content1"
+    private static final String CONTENT_2 = "content2"
+
+    @Test
+    void testEquals(){
+        WidgetState state1 = new WidgetState(ID_1, CONTENT_1)
+        WidgetState state2 = new WidgetState(ID_1, CONTENT_1)
+
+        assert state1 == state2
+
+        state2 = new WidgetState(ID_1, CONTENT_2)
+
+        assert state1 == state2
+    }
+
+    @Test
+    void testNotEquals(){
+
+        WidgetState state1 = new WidgetState(ID_1, CONTENT_1)
+        WidgetState state2 = new WidgetState(ID_2, CONTENT_1)
+
+        assert state1 != state2
+
+        state2 = new WidgetState(ID_2, CONTENT_2)
+
+        assert state1 != state2
+
+    }
 
 }

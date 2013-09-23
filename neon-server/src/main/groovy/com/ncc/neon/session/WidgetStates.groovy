@@ -1,7 +1,9 @@
 package com.ncc.neon.session
 
-import groovy.transform.EqualsAndHashCode
-import groovy.transform.Immutable
+import org.springframework.context.annotation.Scope
+import org.springframework.context.annotation.ScopedProxyMode
+import org.springframework.stereotype.Component
+import org.springframework.web.context.WebApplicationContext
 
 /*
  * ************************************************************************
@@ -29,12 +31,25 @@ import groovy.transform.Immutable
  * @author tbrooks
  */
 
-@EqualsAndHashCode(includes = "clientId")
-@Immutable
-class WidgetState implements Serializable {
+@Component
+@Scope(value = WebApplicationContext.SCOPE_SESSION, proxyMode = ScopedProxyMode.TARGET_CLASS)
+class WidgetStates implements Serializable {
 
-    private static final long serialVersionUID = -3375118230923963912L
-    String clientId
-    String state
+    private static final long serialVersionUID = -7000907707532351308L
+    private final Set<WidgetState> states = [] as Set
 
+    public addWidgetState(String clientId, String json){
+        WidgetState widgetState = new WidgetState(clientId, json)
+        states.add(widgetState)
+    }
+
+    public WidgetState getWidgetState(String clientId){
+        states.find{
+            clientId == it.clientId
+        }
+    }
+
+    public clearWidgetStates(){
+        states.clear()
+    }
 }

@@ -732,6 +732,45 @@ neon.query.submitTextQuery = function(queryText, successCallback, errorCallback)
     );
 };
 
+/**
+ * Save the current state of a widget.
+ * @param {String} id a unique identifier of a client widget
+ * @param {Object} stateObject an object that is to be saved.
+ * @param {Function} successCallback The callback to execute when the state is saved. The callback will have no data.
+ * @param {Function} errorCallback The optional callback when an error occurs. This is a 3 parameter function that contains the xhr, a short error status and the full error message.
+ * @returns {neon.util.AjaxRequest} The xhr request object
+ */
+
+neon.query.saveState = function(id, stateObject, successCallback, errorCallback) {
+    var strObject = JSON.stringify(stateObject);
+    return neon.util.AjaxUtils.doPost(
+        neon.query.queryUrl_('/services/sessionstateservice/savestate'),
+        {
+            data: { clientId: id, state: strObject},
+            success: successCallback,
+            error: errorCallback
+        }
+    );
+};
+
+/**
+ * Gets the current state that has been saved.
+ * @param {String} id a unique identifier of a client widget
+ * @param {Function} successCallback The callback that contains the saved data.
+ * @param {Function} errorCallback The optional callback when an error occurs. This is a 3 parameter function that contains the xhr, a short error status and the full error message.
+ * @returns {neon.util.AjaxRequest} The xhr request object
+ */
+
+neon.query.getSavedState = function(id, successCallback, errorCallback) {
+    return neon.util.AjaxUtils.doGet(
+        neon.query.queryUrl_('/services/sessionstateservice/restoreState?clientId=' + id),
+        {
+            success: successCallback,
+            error: errorCallback
+        }
+    );
+};
+
 neon.query.queryUrl_ = function (path) {
     return neon.query.SERVER_URL + path;
 };
