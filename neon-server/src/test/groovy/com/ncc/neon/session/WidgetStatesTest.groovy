@@ -32,6 +32,20 @@ import org.junit.Test
 class WidgetStatesTest {
 
     @Test
+    void "adding null or empty clientId does nothing"() {
+        WidgetStates widgetStates = new WidgetStates()
+        widgetStates.addWidgetState(null, "state data")
+        widgetStates.addWidgetState("", "state data")
+
+        WidgetState retrievedWidgetState = widgetStates.getWidgetState(null)
+        assert !retrievedWidgetState
+
+        retrievedWidgetState = widgetStates.getWidgetState("")
+        assert !retrievedWidgetState
+    }
+
+
+    @Test
     void "add and retrieve state"() {
         WidgetStates widgetStates = new WidgetStates()
         widgetStates.addWidgetState("client id", "state data")
