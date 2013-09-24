@@ -149,17 +149,22 @@ neon.filter = (function () {
         return filterState;
     };
 
-    var getColumnOptions = function() {
-        return columnOptions;
+    var setFilterState = function (state){
+        filterState = state;
+        columnOptions = state.data[0].columnOptions;
+        var source = $("#filters").html();
+        var template = Handlebars.compile(source);
+        var html = template(filterState);
+        $('#filter-content').html(html);
     };
 
     return {
         addFilter: addFilter,
         removeFilter: removeFilter,
         setFilterKey: setFilterKey,
+        setFilterState: setFilterState,
         getFilterKey: getFilterKey,
         getFilterState: getFilterState,
-        getColumnOptions: getColumnOptions,
         grid: grid
     };
 

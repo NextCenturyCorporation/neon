@@ -58,6 +58,9 @@ $(function () {
         $("#datastore-button").click(connectToDatastore);
         $("#database-table-button").click(selectDatabaseAndTable);
         $("#clear-filters-button").click(clearAllFilters);
+        $('#database-select').change(populateTableDropdown);
+        $('#table-select').change(neon.filterBuilderState.saveState);
+
     }
 
     function connectToDatastore() {
@@ -84,7 +87,6 @@ $(function () {
                         $('<option>').val(value).text(value).appendTo(databaseSelectSelector);
                     });
 
-                    databaseSelectSelector.change(populateTableDropdown);
                     populateTableDropdown();
                 }
             });
@@ -109,10 +111,11 @@ $(function () {
         var dataSet = neon.wizard.dataset();
 
         neon.query.clearFilters(function() {});
-        neon.query.registerForFilterKey(dataSet.database, dataSet.table, function(filterResponse){
-            neon.filter.setFilterKey(filterResponse);
-        });
-
+        if(!neon.filter.getFilterKey()){
+            neon.query.registerForFilterKey(dataSet.database, dataSet.table, function(filterResponse){
+                neon.filter.setFilterKey(filterResponse);
+            });
+        }
         neon.query.getFieldNames(dataSet.database, dataSet.table, function(data){
             columns = data.fieldNames;
             neon.filter.grid(columns);
@@ -141,4 +144,5 @@ $(function () {
     }
 
     init();
+
 });

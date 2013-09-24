@@ -5,13 +5,48 @@ neon.filterBuilderState = (function () {
     if(typeof (OWF) !== "undefined"){
         OWF.ready(function(){
             clientId = OWF.getInstanceId();
-            restoreState();
+            setTimeout(restoreState, 50);
         });
     }
 
     function restoreState(){
-        //Need to implement this.
-        console.log("Restoring state...");
+        neon.query.getSavedState(clientId, function(data){
+            restoreSimpleState(data);
+            if(data.filterKey){
+                restoreComplexState(data);
+            }
+        });
+    }
+
+    function restoreSimpleState(data){
+        $("#db-table").show();
+        $('#hostname-input').val(data.selectedHostname);
+
+        //set database options
+        var databaseSelectSelector = $('#database-select');
+        databaseSelectSelector.find('option').remove();
+        $.each(data.databases, function (index, value) {
+            $('<option>').val(value).text(value).appendTo(databaseSelectSelector);
+        });
+
+        //set table options
+        var tableSelectSelector = $('#table-select');
+        tableSelectSelector.find('option').remove();
+        $.each(data.tables, function (index, value) {
+            $('<option>').val(value).text(value).appendTo(tableSelectSelector);
+        });
+
+        $('#datastore-select option[value="' + data.selectedDatastore + '"]').prop('selected', true);
+        $('#database-select option[value="' + data.selectedDatabase + '"]').prop('selected', true);
+        $('#table-select option[value="' + data.selectedTable + '"]').prop('selected', true);
+    }
+
+    function restoreComplexState(data){
+        $("#filter-container").show();
+        $("#clear-filters-button").show();
+        neon.filter.setFilterKey(data.filterKey);
+        neon.filter.setFilterState(data.filterState);
+        var selectedAndOr = $("input[type='radio'][name='boolean'][value=" + data.andOr + "]").attr('checked', 'checked');
     }
 
     function buildSimpleStateObject(){
@@ -38,8 +73,7 @@ neon.filterBuilderState = (function () {
         $.extend(stateObject, {
             filterKey: neon.filter.getFilterKey(),
             filterState: neon.filter.getFilterState(),
-            andOr: selectedAndOr,
-            columns: neon.filter.getColumnOptions()
+            andOr: selectedAndOr
         });
 
         return stateObject;
