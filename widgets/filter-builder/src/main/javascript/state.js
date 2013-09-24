@@ -48,7 +48,6 @@ neon.filterBuilderState = (function () {
     function saveState(){
         if(neon.filter.getFilterKey()){
             neon.query.saveState(clientId, buildFullStateObject());
-
         }
         else{
             neon.query.saveState(clientId, buildSimpleStateObject());
