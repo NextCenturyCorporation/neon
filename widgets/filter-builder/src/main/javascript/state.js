@@ -57,6 +57,6 @@ neon.filterBuilderState = (function () {
 
     return {
         saveState: saveState
-    }
+    };
 
 })();
