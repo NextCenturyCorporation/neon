@@ -31,11 +31,15 @@ import org.junit.Test
 
 class WidgetStatesTest {
 
+    private static final String CLIENT_ID = "client id"
+    private static final String STATE_DATA = "state data"
+    private static final String DIFFERENT_DATA = "new data"
+
     @Test
     void "adding null or empty clientId does nothing"() {
         WidgetStates widgetStates = new WidgetStates()
-        widgetStates.addWidgetState(null, "state data")
-        widgetStates.addWidgetState("", "state data")
+        widgetStates.addWidgetState(null, STATE_DATA)
+        widgetStates.addWidgetState("", STATE_DATA)
 
         WidgetState retrievedWidgetState = widgetStates.getWidgetState(null)
         assert !retrievedWidgetState
@@ -44,44 +48,42 @@ class WidgetStatesTest {
         assert !retrievedWidgetState
     }
 
-
     @Test
     void "add and retrieve state"() {
         WidgetStates widgetStates = new WidgetStates()
-        widgetStates.addWidgetState("client id", "state data")
-        WidgetState retrievedWidgetState = widgetStates.getWidgetState("client id")
+        widgetStates.addWidgetState(CLIENT_ID, STATE_DATA)
+        WidgetState retrievedWidgetState = widgetStates.getWidgetState(CLIENT_ID)
 
-        assert retrievedWidgetState.clientId == "client id"
-        assert retrievedWidgetState.state == "state data"
+        assert retrievedWidgetState.clientId == CLIENT_ID
+        assert retrievedWidgetState.state == STATE_DATA
     }
 
     @Test
     void "save multiple states and the last one gets used"() {
         WidgetStates widgetStates = new WidgetStates()
-        widgetStates.addWidgetState("client id", "state data")
-        widgetStates.addWidgetState("client id", "new data")
-        WidgetState retrievedWidgetState = widgetStates.getWidgetState("client id")
+        widgetStates.addWidgetState(CLIENT_ID, STATE_DATA)
+        widgetStates.addWidgetState(CLIENT_ID, DIFFERENT_DATA)
+        WidgetState retrievedWidgetState = widgetStates.getWidgetState(CLIENT_ID)
 
-        assert retrievedWidgetState.clientId == "client id"
-        assert retrievedWidgetState.state == "new data"
+        assert retrievedWidgetState.clientId == CLIENT_ID
+        assert retrievedWidgetState.state == DIFFERENT_DATA
     }
 
     @Test
     void "clear data"() {
         WidgetStates widgetStates = new WidgetStates()
-        widgetStates.addWidgetState("client id1", "state data")
-        widgetStates.addWidgetState("client id2", "new data")
+        widgetStates.addWidgetState("$CLIENT_ID 1", STATE_DATA)
+        widgetStates.addWidgetState("$CLIENT_ID 2", DIFFERENT_DATA)
 
-        assert !widgetStates.getWidgetState("client id")
-        assert widgetStates.getWidgetState("client id1")
-        assert widgetStates.getWidgetState("client id2")
+        assert !widgetStates.getWidgetState(CLIENT_ID)
+        assert widgetStates.getWidgetState("$CLIENT_ID 1")
+        assert widgetStates.getWidgetState("$CLIENT_ID 2")
 
         widgetStates.clearWidgetStates()
 
-        assert !widgetStates.getWidgetState("client id")
-        assert !widgetStates.getWidgetState("client id1")
-        assert !widgetStates.getWidgetState("client id2")
-
+        assert !widgetStates.getWidgetState(CLIENT_ID)
+        assert !widgetStates.getWidgetState("$CLIENT_ID 1")
+        assert !widgetStates.getWidgetState("$CLIENT_ID 2")
     }
 
 }
