@@ -34,6 +34,10 @@ import com.ncc.neon.query.hive.HiveQueryExecutor
  * @author tbrooks
  */
 
+/**
+ * Creates the appropriate query executor implementation from the current connection.
+ */
+
 class QueryExecutorFactory {
 
     static QueryExecutor create(Connection connection, ConnectionInfo info) {

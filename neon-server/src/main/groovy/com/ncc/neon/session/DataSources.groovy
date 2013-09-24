@@ -26,6 +26,10 @@ package com.ncc.neon.session
  * @author tbrooks
  */
 
+/**
+ * A datasource is a database type that NEON has an adaptor for.
+ */
+
 enum DataSources {
     mongo, hive
 

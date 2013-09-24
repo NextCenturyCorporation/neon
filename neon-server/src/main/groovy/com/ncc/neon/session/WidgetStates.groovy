@@ -31,6 +31,11 @@ import org.springframework.web.context.WebApplicationContext
  * @author tbrooks
  */
 
+/**
+ * Holds all the widget states in a user's session, and provides
+ * methods to access and update the states.
+ */
+
 @Component
 @Scope(value = WebApplicationContext.SCOPE_SESSION, proxyMode = ScopedProxyMode.TARGET_CLASS)
 class WidgetStates implements Serializable {
@@ -39,6 +44,10 @@ class WidgetStates implements Serializable {
     private final Set<WidgetState> states = [] as Set
 
     void addWidgetState(String clientId, String json) {
+        if(!clientId){
+            return
+        }
+
         WidgetState widgetState = getWidgetState(clientId)
         if (widgetState) {
             states.remove(widgetState)

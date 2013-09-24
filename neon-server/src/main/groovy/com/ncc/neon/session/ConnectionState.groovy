@@ -37,7 +37,8 @@ import javax.annotation.PostConstruct
  */
 
 /**
- * Holds the current connection
+ * Holds the current connection in a user's session.
+ * The current query executor for the user can be accessed from here.
  */
 
 @Component

@@ -33,6 +33,10 @@ import javax.ws.rs.core.MediaType
  * @author tbrooks
  */
 
+/**
+ * Service for saving and restoring widget states from the user's session.
+ */
+
 @Component
 @Path("/sessionstateservice")
 class SessionStateService {
@@ -44,9 +48,7 @@ class SessionStateService {
     @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
     @Path("savestate")
     void saveState(@FormParam("clientId") String clientId, @FormParam("state") String state) {
-        if(clientId){
-            widgetStates.addWidgetState(clientId, state)
-        }
+        widgetStates.addWidgetState(clientId, state)
     }
 
     @GET
@@ -54,9 +56,9 @@ class SessionStateService {
     @Produces(MediaType.APPLICATION_JSON)
     @Path("restoreState")
     String restoreState(@QueryParam("clientId") String clientId) {
-        def state = widgetStates.getWidgetState(clientId)
-        if(state){
-            return state.state
+        def widgetState = widgetStates.getWidgetState(clientId)
+        if(widgetState){
+            return widgetState.state
         }
         throw new WebApplicationException(404)
     }
