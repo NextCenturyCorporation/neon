@@ -28,6 +28,7 @@
     <script src="javascript/initialize.js"></script>
     <script src="javascript/filterwizard.js"></script>
     <script src="javascript/filtertable.js"></script>
+    <script src="javascript/state.js"></script>
     <!-- endbuild -->
 
     <script id="filters" type="text/x-handlebars-template">

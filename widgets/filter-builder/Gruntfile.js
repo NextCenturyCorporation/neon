@@ -22,7 +22,7 @@ module.exports = function (grunt) {
                 stripBanners: true
             },
             nodeps: {
-                src: [src('initialize.js'), src('filtertable.js'), src('filterwizard.js')],
+                src: [src('initialize.js'), src('filtertable.js'), src('filterwizard.js'), src('state.js')],
                 dest: 'build/js-temp/<%= pkg.name %>.js'
             },
             dist: {

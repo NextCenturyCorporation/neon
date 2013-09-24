@@ -127,6 +127,7 @@ neon.filter = (function () {
         var template = Handlebars.compile(source);
         var html = template(filterState);
         $('#filter-content').html(html);
+        neon.filterBuilderState.saveState();
     };
 
     var grid = function (columnNames) {
@@ -140,10 +141,25 @@ neon.filter = (function () {
         filterKey = key;
     };
 
+    var getFilterKey = function () {
+        return filterKey;
+    };
+
+    var getFilterState = function () {
+        return filterState;
+    };
+
+    var getColumnOptions = function() {
+        return columnOptions;
+    };
+
     return {
         addFilter: addFilter,
         removeFilter: removeFilter,
         setFilterKey: setFilterKey,
+        getFilterKey: getFilterKey,
+        getFilterState: getFilterState,
+        getColumnOptions: getColumnOptions,
         grid: grid
     };
 

@@ -100,13 +100,13 @@ $(function () {
                     $.each(tableNames, function (index, value) {
                         $('<option>').val(value).text(value).appendTo('#table-select');
                     });
+                    neon.filterBuilderState.saveState();
                 }
             });
     }
 
     function selectDatabaseAndTable(){
         var dataSet = neon.wizard.dataset();
-
 
         neon.query.clearFilters(function() {});
         neon.query.registerForFilterKey(dataSet.database, dataSet.table, function(filterResponse){
