@@ -32,13 +32,20 @@ neon.dropdown = (function () {
     }
 
     return {
-        getAttributesFromDropdown: function(selectElementSelector){
-            var optionsSelector = $(selectElementSelector + ' option');
-            return $.map(optionsSelector, function(option){ return option.value;})
+        getFieldNamesFromDropdown: function (selectElementId) {
+            var optionsSelector = $('#' + selectElementId + ' option');
+            return {
+                fieldNames: $.map(optionsSelector, function (option) {
+                    if (!option.value) {
+                        return null;
+                    }
+                    return option.value;
+                })
+            };
         },
 
         populateAttributeDropdowns: function (attributeValues, dropDownIds, onChange) {
-            var dropDownIdsArray = Array.isArray(dropDownIds) ? dropDownIds:[dropDownIds];
+            var dropDownIdsArray = Array.isArray(dropDownIds) ? dropDownIds : [dropDownIds];
             dropDownIdsArray.forEach(function (selectId) {
                 var select = $('#' + selectId);
                 select.empty();

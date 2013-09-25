@@ -43,19 +43,16 @@ $(function () {
         function onDatasetChanged(message) {
             databaseName = message.database;
             tableName = message.table;
-            neon.query.registerForFilterKey(databaseName, tableName, function(filterResponse){
-                filterKey = filterResponse;
-            });
-
+            if (!filterKey) {
+                neon.query.registerForFilterKey(databaseName, tableName, function (filterResponse) {
+                    filterKey = filterResponse;
+                });
+            }
             neon.query.getFieldNames(databaseName, tableName, populateFromColumns);
         }
 
         function populateFromColumns(data) {
             neon.dropdown.populateAttributeDropdowns(data, 'date', redrawChart);
-        }
-
-        function restoreState(){
-            //Need to implement
         }
 
         function redrawChart() {
@@ -91,8 +88,8 @@ $(function () {
                 data[ii] = 0;
             }
 
-            rawData.forEach(function(d) {
-                data[(d.day-1)*HOURS_IN_DAY + d.hour] = d.count;
+            rawData.forEach(function (d) {
+                data[(d.day - 1) * HOURS_IN_DAY + d.hour] = d.count;
             });
 
             d3.select('#circularheatchart')
@@ -111,13 +108,24 @@ $(function () {
             return $('#date option:selected').val();
         }
 
-        function buildStateObject(dateField, query){
+        function buildStateObject(dateField, query) {
             return {
                 filterKey: filterKey,
-                columns: neon.dropdown.getAttributesFromDropdown("#date"),
+                columns: neon.dropdown.getFieldNamesFromDropdown("date"),
                 selectedField: dateField,
                 query: query
             };
+        }
+
+        function restoreState() {
+            neon.query.getSavedState(clientId, function (data) {
+                filterKey = data.filterKey;
+                databaseName = data.filterKey.dataSet.databaseName;
+                tableName = data.filterKey.dataSet.tableName;
+                neon.dropdown.populateAttributeDropdowns(data.columns, 'date');
+                $('#date option[value="' + data.selectedField + '"]').prop('selected', true);
+                neon.query.executeQuery(data.query, doRedrawChart);
+            });
         }
 
     });
