@@ -1,40 +1,47 @@
 $(function () {
 
-    Handlebars.registerHelper('select', function (context, options) {
-        var el = $('<select />').html(options.fn(this));
-        el.find('option').filter(function () {
-            return this.value === context;
-        }).attr('selected', 'selected');
-        return el.html();
-    });
-    Handlebars.registerHelper('escapeQuotes', function (context, options) {
-        var el = $('<div/>').html(options.fn(this));
-        if (context === "") {
-            el.find('input').attr('value', '""');
-        }
-        return el.html();
-    });
-
-
     var columns = [];
     var messageHandler = {
-        publishMessage: function(){}
+        publishMessage: function () {
+        }
     };
-
-    if(typeof (OWF) !== "undefined"){
-        OWF.ready(function () {
-            // right now the message handler only receives messages (which happens just by creating it),
-            // but in the future we might want to send messages based on actions performed on the table
-            messageHandler = new neon.eventing.MessageHandler({});
-        });
-        OWF.relayFile = 'js/eventing/rpc_relay.uncompressed.html';
-    }
     neon.query.SERVER_URL = $("#neon-server").val();
 
-    function init() {
+    initializeWidget();
+    neon.filterBuilderState.restoreState();
+
+    function initializeWidget() {
+        setupOWFMessageHandler();
+        createHandlebarsHelpers();
         hideWizardSteps();
         setupHostnames();
         addClickHandlers();
+    }
+
+    function setupOWFMessageHandler() {
+        if (typeof (OWF) !== "undefined") {
+            OWF.ready(function () {
+                messageHandler = new neon.eventing.MessageHandler({});
+            });
+            OWF.relayFile = 'js/eventing/rpc_relay.uncompressed.html';
+        }
+    }
+
+    function createHandlebarsHelpers() {
+        Handlebars.registerHelper('select', function (context, options) {
+            var el = $('<select />').html(options.fn(this));
+            el.find('option').filter(function () {
+                return this.value === context;
+            }).attr('selected', 'selected');
+            return el.html();
+        });
+        Handlebars.registerHelper('escapeQuotes', function (context, options) {
+            var el = $('<div/>').html(options.fn(this));
+            if (context === "") {
+                el.find('input').attr('value', '""');
+            }
+            return el.html();
+        });
     }
 
     function hideWizardSteps() {
@@ -64,8 +71,6 @@ $(function () {
     }
 
     function connectToDatastore() {
-        $("#filter-container").hide();
-        $("#clear-filters-button").hide();
         $("#db-table").show();
         var databaseSelectedOption = $('#datastore-select option:selected');
         var hostnameSelector = $('#hostname-input');
@@ -102,35 +107,35 @@ $(function () {
                     $.each(tableNames, function (index, value) {
                         $('<option>').val(value).text(value).appendTo('#table-select');
                     });
+                    neon.filter.grid([]);
                     neon.filterBuilderState.saveState();
                 }
             });
     }
 
-    function selectDatabaseAndTable(){
+    function selectDatabaseAndTable() {
         var dataSet = neon.wizard.dataset();
 
-        neon.query.clearFilters(function() {});
-        if(!neon.filter.getFilterKey()){
-            neon.query.registerForFilterKey(dataSet.database, dataSet.table, function(filterResponse){
+        neon.query.clearFilters(function () {
+        });
+        if (!neon.filter.getFilterKey()) {
+            neon.query.registerForFilterKey(dataSet.database, dataSet.table, function (filterResponse) {
                 neon.filter.setFilterKey(filterResponse);
             });
         }
-        neon.query.getFieldNames(dataSet.database, dataSet.table, function(data){
+        neon.query.getFieldNames(dataSet.database, dataSet.table, function (data) {
             columns = data.fieldNames;
             neon.filter.grid(columns);
-            $("#filter-container").show();
-            $("#clear-filters-button").show();
         });
 
         broadcastActiveDataset();
     }
 
-    function clearAllFilters(){
-        neon.query.clearFilters(function(){
+    function clearAllFilters() {
+        neon.query.clearFilters(function () {
             var database = $('#database-select').val();
             var table = $('#table-select').val();
-            var message = { "database" : database, "table" : table };
+            var message = { "database": database, "table": table };
             neon.filter.grid(columns);
             messageHandler.publishMessage(neon.eventing.Channels.FILTERS_CHANGED, message);
         });
@@ -139,10 +144,8 @@ $(function () {
     function broadcastActiveDataset() {
         var database = $('#database-select').val();
         var table = $('#table-select').val();
-        var message = { "database" : database, "table" : table };
+        var message = { "database": database, "table": table };
         messageHandler.publishMessage(neon.eventing.Channels.ACTIVE_DATASET_CHANGED, message);
     }
-
-    init();
 
 });

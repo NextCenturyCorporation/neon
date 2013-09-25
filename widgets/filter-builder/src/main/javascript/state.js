@@ -2,20 +2,19 @@ var neon = neon || {};
 neon.filterBuilderState = (function () {
 
     var clientId;
-    if(typeof (OWF) !== "undefined"){
-        OWF.ready(function(){
-            clientId = OWF.getInstanceId();
-            setTimeout(restoreState, 50);
-        });
-    }
 
     function restoreState(){
-        neon.query.getSavedState(clientId, function(data){
-            restoreSimpleState(data);
-            if(data.filterKey){
-                restoreComplexState(data);
-            }
-        });
+        if(typeof (OWF) !== "undefined"){
+            OWF.ready(function(){
+                clientId = OWF.getInstanceId();
+                neon.query.getSavedState(clientId, function(data){
+                    restoreSimpleState(data);
+                    if(data.filterKey){
+                        restoreComplexState(data);
+                    }
+                });
+            });
+        }
     }
 
     function restoreSimpleState(data){
@@ -46,7 +45,7 @@ neon.filterBuilderState = (function () {
         $("#clear-filters-button").show();
         neon.filter.setFilterKey(data.filterKey);
         neon.filter.setFilterState(data.filterState);
-        var selectedAndOr = $("input[type='radio'][name='boolean'][value=" + data.andOr + "]").attr('checked', 'checked');
+        $("input[type='radio'][name='boolean'][value=" + data.andOr + "]").attr('checked', 'checked');
     }
 
     function buildSimpleStateObject(){
@@ -89,6 +88,7 @@ neon.filterBuilderState = (function () {
     }
 
     return {
+        restoreState: restoreState,
         saveState: saveState
     };
 

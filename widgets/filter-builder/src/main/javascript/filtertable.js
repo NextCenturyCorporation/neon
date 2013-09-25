@@ -132,6 +132,14 @@ neon.filter = (function () {
 
     var grid = function (columnNames) {
         columnOptions = columnNames;
+        if(columnOptions.length !== 0){
+            $("#filter-container").show();
+            $("#clear-filters-button").show();
+        }
+        else{
+            $("#filter-container").hide();
+            $("#clear-filters-button").hide();
+        }
         filterState.data = [];
         filterState.data.push(new FilterRow());
         redrawTemplateFromData();
@@ -152,6 +160,14 @@ neon.filter = (function () {
     var setFilterState = function (state){
         filterState = state;
         columnOptions = state.data[0].columnOptions;
+        if(columnOptions.length !== 0){
+            $("#filter-container").show();
+            $("#clear-filters-button").show();
+        }
+        else{
+            $("#filter-container").hide();
+            $("#clear-filters-button").hide();
+        }
         var source = $("#filters").html();
         var template = Handlebars.compile(source);
         var html = template(filterState);
