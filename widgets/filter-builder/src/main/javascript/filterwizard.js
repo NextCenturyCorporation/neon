@@ -6,7 +6,16 @@ neon.wizard = (function () {
         return { database: selectedDatabase.val(), table: selectedTable.val() };
     }
 
+    function populateDropdown(selectorString, dataArray){
+        var selectSelector = $(selectorString);
+        selectSelector.find('option').remove();
+        $.each(dataArray, function (index, value) {
+            $('<option>').val(value).text(value).appendTo(selectSelector);
+        });
+    }
+
     return {
+        populateDropdown: populateDropdown,
         dataset : getBaseDatasetInfo
     };
 })();

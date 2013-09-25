@@ -14,8 +14,10 @@ neon.filter = (function () {
 
     var filterKey;
     var columnOptions;
-
     var operatorOptions = ["=", "!=", ">", "<", ">=", "<="];
+    var filterState = {
+        data: []
+    };
 
     var FilterRow = function (columnValue, operatorValue, value) {
         this.columnOptions = columnOptions;
@@ -24,10 +26,6 @@ neon.filter = (function () {
         this.operatorValue = operatorValue;
         this.value = value;
         this.submittable = false;
-    };
-
-    var filterState = {
-        data: []
     };
 
     var addFilter = function (id) {
@@ -40,7 +38,7 @@ neon.filter = (function () {
                 filterState.data.push(new FilterRow());
             }
             messageHandler.publishMessage(neon.eventing.Channels.FILTERS_CHANGED, {});
-            redrawTemplateFromData();
+            redrawFilterContentAndSaveState();
         });
     };
 
@@ -50,9 +48,37 @@ neon.filter = (function () {
 
         neon.query.replaceFilter(filterKey, filter, function () {
             messageHandler.publishMessage(neon.eventing.Channels.FILTERS_CHANGED, {});
-            redrawTemplateFromData();
+            redrawFilterContentAndSaveState();
         });
     };
+
+    var initializeFilterSection = function (columnNames) {
+        columnOptions = columnNames;
+        filterState.data = [];
+        filterState.data.push(new FilterRow());
+        setFilterDisplay();
+        redrawFilterContentAndSaveState();
+    };
+
+    var setFilterKey = function (key) {
+        filterKey = key;
+    };
+
+    var getFilterKey = function () {
+        return filterKey;
+    };
+
+    var getFilterState = function () {
+        return filterState;
+    };
+
+    var setFilterState = function (state) {
+        filterState = state;
+        columnOptions = state.data[0].columnOptions;
+        setFilterDisplay();
+        setFilterContentFromFilterState();
+    };
+
 
     function buildCompoundWhereClause(data) {
         var whereClause;
@@ -76,7 +102,6 @@ neon.filter = (function () {
     function buildFilterFromData() {
         var dataset = neon.wizard.dataset();
         var baseFilter = new neon.query.Filter().selectFrom(dataset.database, dataset.table);
-
         var data = getSubmittableData();
 
         var whereClause;
@@ -93,7 +118,7 @@ neon.filter = (function () {
         return baseFilter.where(whereClause);
     }
 
-    var getSubmittableData = function () {
+    function getSubmittableData() {
         var data = [];
         $.each(filterState.data, function (index, value) {
             if (value.submittable) {
@@ -102,9 +127,9 @@ neon.filter = (function () {
         });
 
         return data;
-    };
+    }
 
-    var updateDataFromForm = function (id) {
+    function updateDataFromForm(id) {
         var filterData = filterState.data[id];
         filterData.columnValue = $('#column-select-' + id + ' option:selected').val();
         filterData.operatorValue = $('#operator-select-' + id + ' option:selected').val();
@@ -120,59 +145,30 @@ neon.filter = (function () {
         if (filterData.value === '""') {
             filterData.value = "";
         }
-    };
+    }
 
-    var redrawTemplateFromData = function () {
-        var source = $("#filters").html();
-        var template = Handlebars.compile(source);
-        var html = template(filterState);
-        $('#filter-content').html(html);
+    function redrawFilterContentAndSaveState() {
+        setFilterContentFromFilterState();
         neon.filterBuilderState.saveState();
-    };
+    }
 
-    var grid = function (columnNames) {
-        columnOptions = columnNames;
-        if(columnOptions.length !== 0){
-            $("#filter-container").show();
-            $("#clear-filters-button").show();
-        }
-        else{
-            $("#filter-container").hide();
-            $("#clear-filters-button").hide();
-        }
-        filterState.data = [];
-        filterState.data.push(new FilterRow());
-        redrawTemplateFromData();
-    };
-
-    var setFilterKey = function (key) {
-        filterKey = key;
-    };
-
-    var getFilterKey = function () {
-        return filterKey;
-    };
-
-    var getFilterState = function () {
-        return filterState;
-    };
-
-    var setFilterState = function (state){
-        filterState = state;
-        columnOptions = state.data[0].columnOptions;
-        if(columnOptions.length !== 0){
-            $("#filter-container").show();
-            $("#clear-filters-button").show();
-        }
-        else{
-            $("#filter-container").hide();
-            $("#clear-filters-button").hide();
-        }
+    function setFilterContentFromFilterState() {
         var source = $("#filters").html();
         var template = Handlebars.compile(source);
         var html = template(filterState);
         $('#filter-content').html(html);
-    };
+    }
+
+    function setFilterDisplay() {
+        if (columnOptions.length !== 0) {
+            $("#filter-container").show();
+            $("#clear-filters-button").show();
+        }
+        else {
+            $("#filter-container").hide();
+            $("#clear-filters-button").hide();
+        }
+    }
 
     return {
         addFilter: addFilter,
@@ -181,7 +177,7 @@ neon.filter = (function () {
         setFilterState: setFilterState,
         getFilterKey: getFilterKey,
         getFilterState: getFilterState,
-        grid: grid
+        initializeFilterSection: initializeFilterSection
     };
 
 })();

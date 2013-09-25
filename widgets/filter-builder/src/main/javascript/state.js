@@ -22,18 +22,9 @@ neon.filterBuilderState = (function () {
         $('#hostname-input').val(data.selectedHostname);
 
         //set database options
-        var databaseSelectSelector = $('#database-select');
-        databaseSelectSelector.find('option').remove();
-        $.each(data.databases, function (index, value) {
-            $('<option>').val(value).text(value).appendTo(databaseSelectSelector);
-        });
-
+        neon.wizard.populateDropdown('#database-select', data.databases);
         //set table options
-        var tableSelectSelector = $('#table-select');
-        tableSelectSelector.find('option').remove();
-        $.each(data.tables, function (index, value) {
-            $('<option>').val(value).text(value).appendTo(tableSelectSelector);
-        });
+        neon.wizard.populateDropdown('#table-select', data.tables);
 
         $('#datastore-select option[value="' + data.selectedDatastore + '"]').prop('selected', true);
         $('#database-select option[value="' + data.selectedDatabase + '"]').prop('selected', true);

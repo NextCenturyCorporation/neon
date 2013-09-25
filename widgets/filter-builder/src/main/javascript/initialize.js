@@ -1,14 +1,15 @@
 $(function () {
 
+    neon.query.SERVER_URL = $("#neon-server").val();
     var columns = [];
     var messageHandler = {
         publishMessage: function () {
         }
     };
-    neon.query.SERVER_URL = $("#neon-server").val();
 
     initializeWidget();
     neon.filterBuilderState.restoreState();
+
 
     function initializeWidget() {
         setupOWFMessageHandler();
@@ -83,15 +84,10 @@ $(function () {
     }
 
     function populateDatabaseDropdown() {
-        var databaseSelectSelector = $('#database-select');
         neon.util.AjaxUtils.doGet(neon.query.SERVER_URL + "/services/filterservice/databasenames",
             {
                 success: function (databaseNames) {
-                    databaseSelectSelector.find('option').remove();
-                    $.each(databaseNames, function (index, value) {
-                        $('<option>').val(value).text(value).appendTo(databaseSelectSelector);
-                    });
-
+                    neon.wizard.populateDropdown('#database-select', databaseNames);
                     populateTableDropdown();
                 }
             });
@@ -103,11 +99,8 @@ $(function () {
             {
                 data: { database: selectedDatabase.val() },
                 success: function (tableNames) {
-                    $('#table-select').find('option').remove();
-                    $.each(tableNames, function (index, value) {
-                        $('<option>').val(value).text(value).appendTo('#table-select');
-                    });
-                    neon.filter.grid([]);
+                    neon.wizard.populateDropdown('#table-select', tableNames);
+                    neon.filter.initializeFilterSection([]);
                     neon.filterBuilderState.saveState();
                 }
             });
@@ -116,8 +109,7 @@ $(function () {
     function selectDatabaseAndTable() {
         var dataSet = neon.wizard.dataset();
 
-        neon.query.clearFilters(function () {
-        });
+        neon.query.clearFilters();
         if (!neon.filter.getFilterKey()) {
             neon.query.registerForFilterKey(dataSet.database, dataSet.table, function (filterResponse) {
                 neon.filter.setFilterKey(filterResponse);
@@ -125,7 +117,7 @@ $(function () {
         }
         neon.query.getFieldNames(dataSet.database, dataSet.table, function (data) {
             columns = data.fieldNames;
-            neon.filter.grid(columns);
+            neon.filter.initializeFilterSection(columns);
         });
 
         broadcastActiveDataset();
@@ -136,7 +128,7 @@ $(function () {
             var database = $('#database-select').val();
             var table = $('#table-select').val();
             var message = { "database": database, "table": table };
-            neon.filter.grid(columns);
+            neon.filter.initializeFilterSection(columns);
             messageHandler.publishMessage(neon.eventing.Channels.FILTERS_CHANGED, message);
         });
     }
