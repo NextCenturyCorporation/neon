@@ -1,13 +1,15 @@
 // Generated from Neon.g4 by ANTLR 4.0
 package com.ncc.neon.language;
-import org.antlr.v4.runtime.atn.*;
-import org.antlr.v4.runtime.dfa.DFA;
 import org.antlr.v4.runtime.*;
-import org.antlr.v4.runtime.misc.*;
-import org.antlr.v4.runtime.tree.*;
+import org.antlr.v4.runtime.atn.ATN;
+import org.antlr.v4.runtime.atn.ATNSimulator;
+import org.antlr.v4.runtime.atn.ParserATNSimulator;
+import org.antlr.v4.runtime.atn.PredictionContextCache;
+import org.antlr.v4.runtime.dfa.DFA;
+import org.antlr.v4.runtime.tree.ParseTreeListener;
+import org.antlr.v4.runtime.tree.TerminalNode;
+
 import java.util.List;
-import java.util.Iterator;
-import java.util.ArrayList;
 
 @SuppressWarnings({"all", "warnings", "unchecked", "unused", "cast"})
 public class NeonParser extends Parser {
@@ -522,6 +524,7 @@ public class NeonParser extends Parser {
 	}
 
 	public static class SimpleWhereClauseContext extends ParserRuleContext {
+		public TerminalNode WHOLE_NUMBER() { return getToken(NeonParser.WHOLE_NUMBER, 0); }
 		public TerminalNode STRING(int i) {
 			return getToken(NeonParser.STRING, i);
 		}
@@ -529,6 +532,7 @@ public class NeonParser extends Parser {
 			return getRuleContext(OperatorContext.class,0);
 		}
 		public List<TerminalNode> STRING() { return getTokens(NeonParser.STRING); }
+		public TerminalNode NUMBER() { return getToken(NeonParser.NUMBER, 0); }
 		public SimpleWhereClauseContext(ParserRuleContext parent, int invokingState) {
 			super(parent, invokingState);
 		}
@@ -546,12 +550,18 @@ public class NeonParser extends Parser {
 	public final SimpleWhereClauseContext simpleWhereClause() throws RecognitionException {
 		SimpleWhereClauseContext _localctx = new SimpleWhereClauseContext(_ctx, getState());
 		enterRule(_localctx, 16, RULE_simpleWhereClause);
+		int _la;
 		try {
 			enterOuterAlt(_localctx, 1);
 			{
 			setState(96); match(STRING);
 			setState(97); operator();
-			setState(98); match(STRING);
+			setState(98);
+			_la = _input.LA(1);
+			if ( !((((_la) & ~0x3f) == 0 && ((1L << _la) & ((1L << WHOLE_NUMBER) | (1L << NUMBER) | (1L << STRING))) != 0)) ) {
+			_errHandler.recoverInline(this);
+			}
+			consume();
 			}
 		}
 		catch (RecognitionException re) {
@@ -1042,31 +1052,31 @@ public class NeonParser extends Parser {
 		"\3\r\3\r\7\rr\n\r\f\r\16\ru\13\r\3\16\3\16\5\16y\n\16\3\17\3\17\3\17\3"+
 		"\17\7\17\177\n\17\f\17\16\17\u0082\13\17\3\20\3\20\5\20\u0086\n\20\3\21"+
 		"\3\21\3\21\3\21\3\21\3\22\3\22\3\23\3\23\3\23\3\23\2\24\2\4\6\b\n\f\16"+
-		"\20\22\24\26\30\32\34\36 \"$\2\4\3\21\26\6\3\6\t\t\13\13\r\r\u008e\2&"+
-		"\3\2\2\2\4.\3\2\2\2\6\61\3\2\2\2\b=\3\2\2\2\nB\3\2\2\2\fD\3\2\2\2\16L"+
-		"\3\2\2\2\20U\3\2\2\2\22b\3\2\2\2\24i\3\2\2\2\26k\3\2\2\2\30m\3\2\2\2\32"+
-		"v\3\2\2\2\34z\3\2\2\2\36\u0085\3\2\2\2 \u0087\3\2\2\2\"\u008c\3\2\2\2"+
-		"$\u008e\3\2\2\2&(\5\4\3\2\')\7\f\2\2(\'\3\2\2\2()\3\2\2\2)*\3\2\2\2*,"+
-		"\5\6\4\2+-\7\f\2\2,+\3\2\2\2,-\3\2\2\2-\3\3\2\2\2./\7\27\2\2/\60\7!\2"+
-		"\2\60\5\3\2\2\2\61\62\5\b\5\2\62\63\7\31\2\2\63\65\7!\2\2\64\66\5\16\b"+
-		"\2\65\64\3\2\2\2\65\66\3\2\2\2\66:\3\2\2\2\679\5\24\13\28\67\3\2\2\29"+
-		"<\3\2\2\2:8\3\2\2\2:;\3\2\2\2;\7\3\2\2\2<:\3\2\2\2=>\7\30\2\2>?\5\n\6"+
+		"\20\22\24\26\30\32\34\36 \"$\2\5\3\37!\3\21\26\6\3\6\t\t\13\13\r\r\u008e"+
+		"\2&\3\2\2\2\4.\3\2\2\2\6\61\3\2\2\2\b=\3\2\2\2\nB\3\2\2\2\fD\3\2\2\2\16"+
+		"L\3\2\2\2\20U\3\2\2\2\22b\3\2\2\2\24i\3\2\2\2\26k\3\2\2\2\30m\3\2\2\2"+
+		"\32v\3\2\2\2\34z\3\2\2\2\36\u0085\3\2\2\2 \u0087\3\2\2\2\"\u008c\3\2\2"+
+		"\2$\u008e\3\2\2\2&(\5\4\3\2\')\7\f\2\2(\'\3\2\2\2()\3\2\2\2)*\3\2\2\2"+
+		"*,\5\6\4\2+-\7\f\2\2,+\3\2\2\2,-\3\2\2\2-\3\3\2\2\2./\7\27\2\2/\60\7!"+
+		"\2\2\60\5\3\2\2\2\61\62\5\b\5\2\62\63\7\31\2\2\63\65\7!\2\2\64\66\5\16"+
+		"\b\2\65\64\3\2\2\2\65\66\3\2\2\2\66:\3\2\2\2\679\5\24\13\28\67\3\2\2\2"+
+		"9<\3\2\2\2:8\3\2\2\2:;\3\2\2\2;\7\3\2\2\2<:\3\2\2\2=>\7\30\2\2>?\5\n\6"+
 		"\2?\t\3\2\2\2@C\7\16\2\2AC\5\f\7\2B@\3\2\2\2BA\3\2\2\2C\13\3\2\2\2DI\7"+
 		"!\2\2EF\7\b\2\2FH\7!\2\2GE\3\2\2\2HK\3\2\2\2IG\3\2\2\2IJ\3\2\2\2J\r\3"+
 		"\2\2\2KI\3\2\2\2LM\7\32\2\2MN\5\20\t\2N\17\3\2\2\2OP\b\t\1\2PQ\7\n\2\2"+
 		"QR\5\20\t\2RS\7\7\2\2SV\3\2\2\2TV\5\22\n\2UO\3\2\2\2UT\3\2\2\2V_\3\2\2"+
 		"\2WX\6\t\2\3XY\7\17\2\2Y^\5\20\t\2Z[\6\t\3\3[\\\7\20\2\2\\^\5\20\t\2]"+
 		"W\3\2\2\2]Z\3\2\2\2^a\3\2\2\2_]\3\2\2\2_`\3\2\2\2`\21\3\2\2\2a_\3\2\2"+
-		"\2bc\7!\2\2cd\5\26\f\2de\7!\2\2e\23\3\2\2\2fj\5\30\r\2gj\5\34\17\2hj\5"+
-		"$\23\2if\3\2\2\2ig\3\2\2\2ih\3\2\2\2j\25\3\2\2\2kl\t\2\2\2l\27\3\2\2\2"+
-		"mn\7\35\2\2ns\5\32\16\2op\7\b\2\2pr\5\32\16\2qo\3\2\2\2ru\3\2\2\2sq\3"+
-		"\2\2\2st\3\2\2\2t\31\3\2\2\2us\3\2\2\2vx\7!\2\2wy\7\36\2\2xw\3\2\2\2x"+
-		"y\3\2\2\2y\33\3\2\2\2z{\7\33\2\2{\u0080\5\36\20\2|}\7\b\2\2}\177\5\36"+
+		"\2bc\7!\2\2cd\5\26\f\2de\t\2\2\2e\23\3\2\2\2fj\5\30\r\2gj\5\34\17\2hj"+
+		"\5$\23\2if\3\2\2\2ig\3\2\2\2ih\3\2\2\2j\25\3\2\2\2kl\t\3\2\2l\27\3\2\2"+
+		"\2mn\7\35\2\2ns\5\32\16\2op\7\b\2\2pr\5\32\16\2qo\3\2\2\2ru\3\2\2\2sq"+
+		"\3\2\2\2st\3\2\2\2t\31\3\2\2\2us\3\2\2\2vx\7!\2\2wy\7\36\2\2xw\3\2\2\2"+
+		"xy\3\2\2\2y\33\3\2\2\2z{\7\33\2\2{\u0080\5\36\20\2|}\7\b\2\2}\177\5\36"+
 		"\20\2~|\3\2\2\2\177\u0082\3\2\2\2\u0080~\3\2\2\2\u0080\u0081\3\2\2\2\u0081"+
 		"\35\3\2\2\2\u0082\u0080\3\2\2\2\u0083\u0086\7!\2\2\u0084\u0086\5 \21\2"+
 		"\u0085\u0083\3\2\2\2\u0085\u0084\3\2\2\2\u0086\37\3\2\2\2\u0087\u0088"+
 		"\5\"\22\2\u0088\u0089\7\n\2\2\u0089\u008a\7!\2\2\u008a\u008b\7\7\2\2\u008b"+
-		"!\3\2\2\2\u008c\u008d\t\3\2\2\u008d#\3\2\2\2\u008e\u008f\7\34\2\2\u008f"+
+		"!\3\2\2\2\u008c\u008d\t\4\2\2\u008d#\3\2\2\2\u008e\u008f\7\34\2\2\u008f"+
 		"\u0090\7\37\2\2\u0090%\3\2\2\2\20(,\65:BIU]_isx\u0080\u0085";
 	public static final ATN _ATN =
 		ATNSimulator.deserialize(_serializedATN.toCharArray());

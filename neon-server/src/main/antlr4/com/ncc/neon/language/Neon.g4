@@ -27,7 +27,7 @@ whereClause
      | whereClause OR whereClause
      | simpleWhereClause;
 
-simpleWhereClause : STRING operator STRING;
+simpleWhereClause : STRING operator (WHOLE_NUMBER | NUMBER | STRING);
 
 additionalClauses
      : sort

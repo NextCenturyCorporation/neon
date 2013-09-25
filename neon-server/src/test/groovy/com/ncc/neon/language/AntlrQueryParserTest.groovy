@@ -1,5 +1,6 @@
 package com.ncc.neon.language
 import com.ncc.neon.query.Query
+import com.ncc.neon.query.clauses.SingularWhereClause
 import com.ncc.neon.query.clauses.SortOrder
 import com.ncc.neon.query.filter.Filter
 import org.junit.Before
@@ -58,6 +59,21 @@ class AntlrQueryParserTest {
         assert actual.filter.databaseName == expected.filter.databaseName
         assert actual.filter.tableName == expected.filter.tableName
         assert actual.filter.whereClause == expected.filter.whereClause
+
+        assert actual.fields == expected.fields
+    }
+
+    @Test
+    void "where clause query"() {
+        Query actual = parser.parse("use db; select * from table where field = 5")
+        SingularWhereClause whereClause = new SingularWhereClause(lhs: "field", operator: "=", rhs: 5)
+        Query expected = new Query(filter: new Filter(databaseName: "db", tableName: "table", whereClause: whereClause))
+
+        assert actual.filter.databaseName == expected.filter.databaseName
+        assert actual.filter.tableName == expected.filter.tableName
+        assert actual.filter.whereClause.lhs == expected.filter.whereClause.lhs
+        assert actual.filter.whereClause.rhs == expected.filter.whereClause.rhs
+        assert actual.filter.whereClause.operator == expected.filter.whereClause.operator
 
         assert actual.fields == expected.fields
     }

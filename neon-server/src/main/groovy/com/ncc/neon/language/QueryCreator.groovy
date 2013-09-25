@@ -103,8 +103,8 @@ class QueryCreator extends NeonBaseListener {
 
         singularWhereClause.lhs = whereContext.STRING()[0].text
         singularWhereClause.operator = whereContext.operator().text
-        String text = whereContext.STRING()[1].text
-        singularWhereClause.rhs = handleRhsTypes(text)
+        def node =  whereContext.WHOLE_NUMBER() ?: whereContext.NUMBER() ?: whereContext.STRING(1)
+        singularWhereClause.rhs = handleRhsTypes(node.text)
 
         return singularWhereClause
     }
