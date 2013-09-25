@@ -1,4 +1,4 @@
-$(document).ready(function () {
+$(function () {
 
     OWF.ready(function () {
         OWF.relayFile = 'js/eventing/rpc_relay.uncompressed.html';
@@ -7,18 +7,34 @@ $(document).ready(function () {
         var databaseName;
         var tableName;
         var filterKey;
-
-        var dateField;
         var chart;
 
         var HOURS_IN_WEEK = 168;
         var HOURS_IN_DAY = 24;
+
+        var clientId = OWF.getInstanceId();
 
         // instantiating the message handler adds it as a listener
         var messageHandler = new neon.eventing.MessageHandler({
             activeDatasetChanged: onDatasetChanged,
             filtersChanged: onFiltersChanged
         });
+
+        neon.toggle.createOptionsPanel("#options-panel");
+        initChart();
+        restoreState();
+
+
+        function initChart() {
+            chart = circularHeatChart()
+                .segmentHeight(20)
+                .innerRadius(20)
+                .numSegments(24)
+                .radialLabels(["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"])
+                .segmentLabels(["12am", "1am", "2am", "3am", "4am", "5am", "6am", "7am", "8am", "9am", "10am", "11am", "12pm", "1pm", "2pm", "3pm", "4pm", "5pm", "6pm", "7pm", "8pm", "9pm", "10pm", "11pm"])
+                .margin({top: 20, right: 20, bottom: 20, left: 20});
+            redrawChart();
+        }
 
         function onFiltersChanged(message) {
             redrawChart();
@@ -38,19 +54,12 @@ $(document).ready(function () {
             neon.dropdown.populateAttributeDropdowns(data, 'date', redrawChart);
         }
 
-        function initChart() {
-            chart = circularHeatChart()
-                .segmentHeight(20)
-                .innerRadius(20)
-                .numSegments(24)
-                .radialLabels(["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"])
-                .segmentLabels(["12am", "1am", "2am", "3am", "4am", "5am", "6am", "7am", "8am", "9am", "10am", "11am", "12pm", "1pm", "2pm", "3pm", "4pm", "5pm", "6pm", "7pm", "8pm", "9pm", "10pm", "11pm"])
-                .margin({top: 20, right: 20, bottom: 20, left: 20});
-            redrawChart();
+        function restoreState(){
+            //Need to implement
         }
 
         function redrawChart() {
-            dateField = getDateField();
+            var dateField = getDateField();
 
             if (!dateField) {
                 doRedrawChart({data: []});
@@ -67,7 +76,10 @@ $(document).ready(function () {
                 .where(dateField, '!=', null)
                 .aggregate(neon.query.COUNT, null, 'count');
 
+            var stateObject = buildStateObject(dateField, query);
+
             neon.query.executeQuery(query, doRedrawChart);
+            neon.query.saveState(clientId, stateObject);
         }
 
         function doRedrawChart(queryResults) {
@@ -99,8 +111,14 @@ $(document).ready(function () {
             return $('#date option:selected').val();
         }
 
-        neon.toggle.createOptionsPanel("#options-panel");
-        initChart();
+        function buildStateObject(dateField, query){
+            return {
+                filterKey: filterKey,
+                columns: neon.dropdown.getAttributesFromDropdown("#date"),
+                selectedField: dateField,
+                query: query
+            };
+        }
 
     });
 

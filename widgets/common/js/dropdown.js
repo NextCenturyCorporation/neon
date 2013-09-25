@@ -32,6 +32,11 @@ neon.dropdown = (function () {
     }
 
     return {
+        getAttributesFromDropdown: function(selectElementSelector){
+            var optionsSelector = $(selectElementSelector + ' option');
+            return $.map(optionsSelector, function(option){ return option.value;})
+        },
+
         populateAttributeDropdowns: function (attributeValues, dropDownIds, onChange) {
             var dropDownIdsArray = Array.isArray(dropDownIds) ? dropDownIds:[dropDownIds];
             dropDownIdsArray.forEach(function (selectId) {
