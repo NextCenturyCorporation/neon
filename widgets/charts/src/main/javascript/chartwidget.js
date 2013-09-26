@@ -22,34 +22,48 @@
  */
 
 
-//TODO: NEON-604 Remove these from globabl scope and move more common functions from barchartwidget.js and timelinewidget.js
-// this file contains some javascript functions that are useful for the chart based widgets
-var databaseName;
-var tableName;
-var filterKey;
-var onChange;
+var neon = neon || {};
+neon.chartWidget = (function (){
+    var databaseName;
+    var tableName;
+    var filterKey;
+    var onChange;
 
-function onActiveDatasetChanged(message, changeHandler) {
-    databaseName = message.database;
-    tableName = message.table;
-    onChange = changeHandler;
+    function onActiveDatasetChanged(message, changeHandler) {
+        databaseName = message.database;
+        tableName = message.table;
+        onChange = changeHandler;
 
-    neon.query.registerForFilterKey(databaseName, tableName, function(filterResponse){
-        filterKey = filterResponse;
-    });
+        neon.query.registerForFilterKey(databaseName, tableName, function(filterResponse){
+            filterKey = filterResponse;
+        });
 
-    neon.query.getFieldNames(databaseName, tableName, populateFromColumns);
-}
+        neon.query.getFieldNames(databaseName, tableName, populateFromColumns);
+    }
 
+    function populateFromColumns(data) {
+        neon.dropdown.populateAttributeDropdowns(data, ['x', 'y'], onChange);
+    }
 
-function populateFromColumns(data) {
-    neon.dropdown.populateAttributeDropdowns(data, ['x', 'y'], onChange);
-}
+    return {
+        onActiveDatasetChanged: onActiveDatasetChanged,
 
-function getXAttribute() {
-    return $('#x option:selected').val();
-}
+        getXAttribute: function(){
+            return $('#x option:selected').val();
+        },
+        getYAttribute: function(){
+            return $('#y option:selected').val();
+        },
+        getDatabaseName: function(){
+            return databaseName;
+        },
+        getTableName: function(){
+            return tableName;
+        },
+        getFilterKey: function(){
+            return filterKey;
+        }
 
-function getYAttribute() {
-    return $('#y option:selected').val();
-}
+    };
+
+})();

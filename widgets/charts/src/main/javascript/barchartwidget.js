@@ -22,7 +22,7 @@
  */
 
 
-$(document).ready(function () {
+$(function () {
 
     OWF.ready(function () {
         OWF.relayFile = 'js/eventing/rpc_relay.uncompressed.html';
@@ -34,10 +34,13 @@ $(document).ready(function () {
         var messageHandler = new neon.eventing.MessageHandler({
             activeDatasetChanged: function (message) {
                 //defined in chartwidget.js
-                onActiveDatasetChanged(message, drawChart);
+                neon.chartWidget.onActiveDatasetChanged(message, drawChart);
             },
             filtersChanged: drawChart
         });
+
+        neon.toggle.createOptionsPanel("#options-panel");
+        drawChart();
 
         /**
          * Redraws the chart based on the user selected attribtues
@@ -45,8 +48,8 @@ $(document).ready(function () {
          */
         function drawChart() {
 
-            var xAttr = getXAttribute();
-            var yAttr = getYAttribute();
+            var xAttr = neon.chartWidget.getXAttribute();
+            var yAttr = neon.chartWidget.getYAttribute();
 
             if (!xAttr) {
                 doDrawChart({data: []});
@@ -54,7 +57,7 @@ $(document).ready(function () {
             }
 
             var query = new neon.query.Query()
-                .selectFrom(databaseName, tableName)
+                .selectFrom(neon.chartWidget.getDatabaseName(), neon.chartWidget.getTableName())
                 .where(xAttr, '!=', null).groupBy(xAttr);
 
             if (yAttr) {
@@ -68,8 +71,8 @@ $(document).ready(function () {
 
         function doDrawChart(data) {
             $('#chart').empty();
-            var xAttr = getXAttribute();
-            var yAttr = getYAttribute();
+            var xAttr = neon.chartWidget.getXAttribute();
+            var yAttr = neon.chartWidget.getYAttribute();
 
             if (!yAttr) {
                 yAttr = COUNT_FIELD_NAME;
@@ -81,9 +84,6 @@ $(document).ready(function () {
             var opts = { "data": data.data, "x": xAttr, "y": yAttr, responsive: true};
             var chart = new charts.BarChart('#chart', opts).draw();
         }
-
-        neon.toggle.createOptionsPanel("#options-panel");
-        drawChart();
 
     });
 

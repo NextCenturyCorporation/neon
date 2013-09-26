@@ -32,7 +32,7 @@ $(document).ready(function () {
 
         var messageHandler = new neon.eventing.MessageHandler({
             activeDatasetChanged: function (message) {
-                onActiveDatasetChanged(message, drawChart);
+                neon.chartWidget.onActiveDatasetChanged(message, drawChart);
             },
             filtersChanged: onFiltersChanged
 
@@ -67,7 +67,7 @@ $(document).ready(function () {
             disableResetFilterButton();
             getResetFilterButton().click(function () {
                 //TODO: NEON-64 Once a callback is added, we can use the owfEventPublisher code.
-                neon.query.removeFilter(filterKey, function(){
+                neon.query.removeFilter(neon.chartWidget.getFilterKey(), function(){
                     messageHandler.publishMessage(neon.eventing.Channels.FILTERS_CHANGED, {});
                     drawChart();
                 });
@@ -91,8 +91,8 @@ $(document).ready(function () {
          */
         function drawChart() {
 
-            var xAttr = getXAttribute();
-            var yAttr = getYAttribute();
+            var xAttr = neon.chartWidget.getXAttribute();
+            var yAttr = neon.chartWidget.getYAttribute();
 
             if (!xAttr) {
                 doDrawChart({data: []});
@@ -105,7 +105,7 @@ $(document).ready(function () {
             var groupByYearClause = new neon.query.GroupByFunctionClause(neon.query.YEAR, xAttr, 'year');
 
             var query = new neon.query.Query()
-                .selectFrom(databaseName, tableName)
+                .selectFrom(neon.chartWidget.getDatabaseName(), neon.chartWidget.getTableName())
                 .where(xAttr, '!=', null)
                 .groupBy(groupByYearClause, groupByMonthClause, groupByDayClause, groupByHourClause);
 
@@ -122,8 +122,8 @@ $(document).ready(function () {
 
             $('#chart').empty();
 
-            var xAttr = getXAttribute();
-            var yAttr = getYAttribute();
+            var xAttr = neon.chartWidget.getXAttribute();
+            var yAttr = neon.chartWidget.getYAttribute();
 
             if (!yAttr) {
                 yAttr = COUNT_FIELD_NAME;
@@ -158,9 +158,9 @@ $(document).ready(function () {
                 var startFilterClause = neon.query.where(xAttr, '>=', startDate);
                 var endFilterClause = neon.query.where(xAttr, '<', endDate);
                 var filterClause = neon.query.and(startFilterClause, endFilterClause);
-                var filter = new neon.query.Filter().selectFrom(databaseName, tableName).where(filterClause);
+                var filter = new neon.query.Filter().selectFrom(neon.chartWidget.getDatabaseName(), neon.chartWidget.getTableName()).where(filterClause);
 
-                eventPublisher.replaceFilter(filterKey, filter);
+                eventPublisher.replaceFilter(neon.chartWidget.getFilterKey(), filter);
             });
         }
 
