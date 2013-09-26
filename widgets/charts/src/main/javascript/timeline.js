@@ -284,7 +284,7 @@ charts.Timeline.prototype.doSliderChange_ = function (event, slider) {
             this.notifyFilterListeners_(filterStartDate, filterEndDate);
         }
     }
-    if(this.storedFilterDates_ && (this.storedFilterDates_[0] !== filterStartDate || this.storedFilterDates_[1] !== filterEndDate)) {
+    else if(this.storedFilterDates_ && (this.storedFilterDates_[0] !== filterStartDate || this.storedFilterDates_[1] !== filterEndDate)) {
         this.storedFilterDates_ = [filterStartDate, filterEndDate];
         this.styleInactiveData_(filterStartDate, filterEndDate);
         this.notifyFilterListeners_(filterStartDate, filterEndDate);
