@@ -38,9 +38,8 @@ import org.springframework.web.context.WebApplicationContext
 
 @Component
 @Scope(value = WebApplicationContext.SCOPE_SESSION, proxyMode = ScopedProxyMode.TARGET_CLASS)
-class WidgetStates implements Serializable {
+class WidgetStates {
 
-    private static final long serialVersionUID = -7000907707532351308L
     private final Set<WidgetState> states = [] as Set
 
     void addWidgetState(String clientId, String json) {
