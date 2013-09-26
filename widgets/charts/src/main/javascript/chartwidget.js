@@ -34,9 +34,11 @@ neon.chartWidget = (function (){
         tableName = message.table;
         onChange = changeHandler;
 
-        neon.query.registerForFilterKey(databaseName, tableName, function(filterResponse){
-            filterKey = filterResponse;
-        });
+        if(!filterKey){
+            neon.query.registerForFilterKey(databaseName, tableName, function(filterResponse){
+                filterKey = filterResponse;
+            });
+        }
 
         neon.query.getFieldNames(databaseName, tableName, populateFromColumns);
     }
@@ -62,8 +64,16 @@ neon.chartWidget = (function (){
         },
         getFilterKey: function(){
             return filterKey;
+        },
+        setDatabaseName: function(dbName){
+            databaseName = dbName;
+        },
+        setTableName: function(table){
+            tableName = table;
+        },
+        setFilterKey: function(key){
+            filterKey = key;
         }
-
     };
 
 })();

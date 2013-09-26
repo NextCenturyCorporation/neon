@@ -29,11 +29,11 @@ $(function () {
         neon.query.SERVER_URL = $("#neon-server").val();
 
         var COUNT_FIELD_NAME = 'Count';
+        var clientId = OWF.getInstanceId();
 
         // just creating the message handler will receive messages
         var messageHandler = new neon.eventing.MessageHandler({
             activeDatasetChanged: function (message) {
-                //defined in chartwidget.js
                 neon.chartWidget.onActiveDatasetChanged(message, drawChart);
             },
             filtersChanged: drawChart
@@ -41,6 +41,7 @@ $(function () {
 
         neon.toggle.createOptionsPanel("#options-panel");
         drawChart();
+        restoreState();
 
         /**
          * Redraws the chart based on the user selected attribtues
@@ -66,7 +67,9 @@ $(function () {
             else {
                 query.aggregate(neon.query.COUNT, null, COUNT_FIELD_NAME);
             }
+            var stateObject = buildStateObject(query);
             neon.query.executeQuery(query, doDrawChart);
+            neon.query.saveState(clientId, stateObject);
         }
 
         function doDrawChart(data) {
@@ -83,6 +86,28 @@ $(function () {
             $(window).off("resize");
             var opts = { "data": data.data, "x": xAttr, "y": yAttr, responsive: true};
             var chart = new charts.BarChart('#chart', opts).draw();
+        }
+
+        function buildStateObject(query) {
+            return {
+                filterKey: neon.chartWidget.getFilterKey(),
+                columns: neon.dropdown.getFieldNamesFromDropdown("x"),
+                xValue: neon.chartWidget.getXAttribute(),
+                yValue: neon.chartWidget.getYAttribute(),
+                query: query
+            };
+        }
+
+        function restoreState() {
+            neon.query.getSavedState(clientId, function (data) {
+                neon.chartWidget.setFilterKey(data.filterKey);
+                neon.chartWidget.setDatabaseName(data.filterKey.dataSet.databaseName);
+                neon.chartWidget.setTableName(data.filterKey.dataSet.tableName);
+                neon.dropdown.populateAttributeDropdowns(data.columns, ['x','y'], drawChart);
+                $('#x option[value="' + data.xValue + '"]').prop('selected', true);
+                $('#y option[value="' + data.yValue + '"]').prop('selected', true);
+                neon.query.executeQuery(data.query, doDrawChart);
+            });
         }
 
     });
