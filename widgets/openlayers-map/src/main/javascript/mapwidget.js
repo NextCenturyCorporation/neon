@@ -1,4 +1,4 @@
-$(document).ready(function () {
+$(function () {
 
     OWF.ready(function () {
         OWF.relayFile = 'js/eventing/rpc_relay.uncompressed.html';
@@ -13,6 +13,7 @@ $(document).ready(function () {
         var heatmap;
 
         var currentData;
+        var clientId = OWF.getInstanceId();
 
         function isNumeric(field) {
             return $.isNumeric(currentData[field]);
@@ -30,6 +31,10 @@ $(document).ready(function () {
         });
         var eventPublisher = new neon.eventing.OWFEventPublisher(messageHandler);
 
+        neon.toggle.createOptionsPanel("#options-panel");
+        initMap();
+        restoreState();
+
         function onFiltersChanged(message) {
             redrawMap();
         }
@@ -37,10 +42,11 @@ $(document).ready(function () {
         function onDatasetChanged(message) {
             databaseName = message.database;
             tableName = message.table;
-            neon.query.registerForFilterKey(databaseName, tableName, function (filterResponse) {
-                filterKey = filterResponse;
-            });
-
+            if (!filterKey) {
+                neon.query.registerForFilterKey(databaseName, tableName, function (filterResponse) {
+                    filterKey = filterResponse;
+                });
+            }
             neon.query.getFieldNames(databaseName, tableName, populateFromColumns);
         }
 
@@ -92,6 +98,7 @@ $(document).ready(function () {
         function redrawMap() {
             latField = getLatField();
             lonField = getLonField();
+
             if (latField && lonField) {
                 var query = new neon.query.Query().selectFrom(databaseName, tableName).limit(1);
                 neon.query.executeQuery(query, function (results) {
@@ -103,7 +110,9 @@ $(document).ready(function () {
 
 
                     var query = buildQuery(latField, lonField, sizeByField, colorByField);
+                    var stateObject = buildStateObject(query);
                     neon.query.executeQuery(query, doRedrawMap);
+                    neon.query.saveState(clientId, stateObject);
                 });
             }
 
@@ -179,8 +188,34 @@ $(document).ready(function () {
             return $('#color-by option:selected').val();
         }
 
-        neon.toggle.createOptionsPanel("#options-panel");
-        initMap();
+        function buildStateObject(query) {
+            return {
+                filterKey: filterKey,
+                columns: neon.dropdown.getFieldNamesFromDropdown("latitude"),
+                selectedLatitude: getLatField(),
+                selectedLongitude: getLonField(),
+                selectedColorBy: getColorByField(),
+                selectedSizeBy: getSizeByField(),
+                query: query
+            };
+        }
+
+        function restoreState() {
+            neon.query.getSavedState(clientId, function (data) {
+                filterKey = data.filterKey;
+                databaseName = data.filterKey.dataSet.databaseName;
+                tableName = data.filterKey.dataSet.tableName;
+                neon.dropdown.populateAttributeDropdowns(data.columns, ['latitude', 'longitude', 'color-by', 'size-by'], redrawMap);
+                $('#latitude option[value="' + data.selectedLatitude + '"]').prop('selected', true);
+                $('#longitude option[value="' + data.selectedLongitude + '"]').prop('selected', true);
+                $('#color-by option[value="' + data.selectedColorBy + '"]').prop('selected', true);
+                $('#size-by option[value="' + data.selectedSizeBy + '"]').prop('selected', true);
+
+                latField = getLatField();
+                lonField = getLonField();
+                neon.query.executeQuery(data.query, doRedrawMap);
+            });
+        }
 
     });
 

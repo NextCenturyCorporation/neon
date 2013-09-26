@@ -1,4 +1,4 @@
-$(document).ready(function () {
+$(function () {
     // TODO: Map legend for ordinal color values
     // TODO: Extract out OWF code from generic map widget code (in this case we may not bother since we may develop our own map)
     // TODO: Make the default attributes configurable (again may not want to bother since we may develop our own map)
@@ -15,6 +15,7 @@ $(document).ready(function () {
         var lonField;
 
         var currentData;
+        var clientId = OWF.getInstanceId();
 
         function isNumeric(field) {
             return $.isNumeric(currentData[field]);
@@ -40,6 +41,10 @@ $(document).ready(function () {
         });
         var eventPublisher = new neon.eventing.OWFEventPublisher(messageHandler);
 
+        neon.toggle.createOptionsPanel("#options-panel");
+        initMap();
+        restoreState();
+
         function onFiltersChanged(message) {
             redrawMap();
         }
@@ -47,10 +52,11 @@ $(document).ready(function () {
         function onActiveDatasetChanged(message) {
             databaseName = message.database;
             tableName = message.table;
-            neon.query.registerForFilterKey(databaseName, tableName, function (filterResponse) {
-                filterKey = filterResponse;
-            });
-
+            if (!filterKey) {
+                neon.query.registerForFilterKey(databaseName, tableName, function (filterResponse) {
+                    filterKey = filterResponse;
+                });
+            }
             neon.query.getFieldNames(databaseName, tableName, populateFromColumns);
         }
 
@@ -109,7 +115,9 @@ $(document).ready(function () {
                     var sizeByField = getSizeByField();
                     var colorByField = getColorByField();
                     var query = buildQuery(latField, lonField, sizeByField, colorByField);
+                    var stateObject = buildStateObject(query);
                     neon.query.executeQuery(query, doRedrawMap);
+                    neon.query.saveState(clientId, stateObject);
                 });
             }
             else {
@@ -230,9 +238,34 @@ $(document).ready(function () {
             });
         }
 
+        function buildStateObject(query) {
+            return {
+                filterKey: filterKey,
+                columns: neon.dropdown.getFieldNamesFromDropdown("latitude"),
+                selectedLatitude: getLatField(),
+                selectedLongitude: getLonField(),
+                selectedColorBy: getColorByField(),
+                selectedSizeBy: getSizeByField(),
+                query: query
+            };
+        }
 
-        neon.toggle.createOptionsPanel("#options-panel");
-        initMap();
+        function restoreState() {
+            neon.query.getSavedState(clientId, function (data) {
+                filterKey = data.filterKey;
+                databaseName = data.filterKey.dataSet.databaseName;
+                tableName = data.filterKey.dataSet.tableName;
+                neon.dropdown.populateAttributeDropdowns(data.columns, ['latitude', 'longitude', 'color-by', 'size-by'], redrawMap);
+                $('#latitude option[value="' + data.selectedLatitude + '"]').prop('selected', true);
+                $('#longitude option[value="' + data.selectedLongitude + '"]').prop('selected', true);
+                $('#color-by option[value="' + data.selectedColorBy + '"]').prop('selected', true);
+                $('#size-by option[value="' + data.selectedSizeBy + '"]').prop('selected', true);
+
+                latField = getLatField();
+                lonField = getLonField();
+                neon.query.executeQuery(data.query, doRedrawMap);
+            });
+        }
 
     });
 
