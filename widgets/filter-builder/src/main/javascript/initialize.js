@@ -111,7 +111,7 @@ $(function () {
         var times = 1;
 
         var loadFilterSection = function(){
-            neon.filter.initializeFilterSection(columns)
+            neon.filter.initializeFilterSection(columns);
         };
 
         neon.query.clearFilters();
