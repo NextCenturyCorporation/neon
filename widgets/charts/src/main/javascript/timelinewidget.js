@@ -197,6 +197,7 @@ $(function () {
                 $('#y option[value="' + data.yValue + '"]').prop('selected', true);
                 $('#time-granularity option[value="' + data.timeGranularity + '"]').prop('selected', true);
                 neon.query.executeQuery(data.query, doDrawChart);
+                getResetFilterButton().removeAttr('disabled');
             });
         }
     });
