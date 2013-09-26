@@ -21,7 +21,7 @@
  * RECIPIENT IS UNDER OBLIGATION TO MAINTAIN SECRECY.
  */
 
-$(document).ready(function () {
+$(function () {
 
     OWF.ready(function () {
         var timeline;
@@ -29,6 +29,7 @@ $(document).ready(function () {
         neon.query.SERVER_URL = $("#neon-server").val();
 
         var COUNT_FIELD_NAME = 'Count';
+        var clientId = OWF.getInstanceId();
 
         var messageHandler = new neon.eventing.MessageHandler({
             activeDatasetChanged: function (message) {
@@ -38,6 +39,12 @@ $(document).ready(function () {
 
         });
         var eventPublisher = new neon.eventing.OWFEventPublisher(messageHandler);
+
+        neon.toggle.createOptionsPanel("#options-panel");
+        populateTimeGranularityDropdown();
+        configureButtons();
+        drawChart();
+        restoreState();
 
         function configureButtons() {
             configureRedrawBoundsButton();
@@ -115,7 +122,9 @@ $(document).ready(function () {
             else {
                 query.aggregate(neon.query.COUNT, null, COUNT_FIELD_NAME);
             }
+            var stateObject = buildStateObject(query);
             neon.query.executeQuery(query, doDrawChart);
+            neon.query.saveState(clientId, stateObject);
         }
 
         function doDrawChart(data) {
@@ -149,8 +158,6 @@ $(document).ready(function () {
             timeline = new charts.Timeline('#chart', opts);
             configureFiltering(timeline, xAttr);
             timeline.draw();
-            // make sure the reset button is aligned with the chart and has some spacing between it and the chart
-            $('#button-row').css({'margin-left': timeline.margin.left + 'px', 'margin-top': '30px'});
         }
 
         function configureFiltering(timeline, xAttr) {
@@ -165,23 +172,33 @@ $(document).ready(function () {
         }
 
         function populateTimeGranularityDropdown() {
-            var dropdown = $('#time-granularity');
-            charts.Timeline.GRANULARITIES_.forEach(function (el) {
-                var displayText = el.charAt(0).toUpperCase() + el.slice(1);
-                var option = $('<option></option>').attr('value', el).text(displayText);
-                if (el === charts.Timeline.MONTH) {
-                    option.attr('selected', true);
-                }
-                dropdown.append(option);
-            });
-            dropdown.change(drawChart);
+
+            neon.dropdown.populateAttributeDropdowns({fieldNames: charts.Timeline.GRANULARITIES_}, "time-granularity", drawChart);
         }
 
-        neon.toggle.createOptionsPanel("#options-panel");
-        populateTimeGranularityDropdown();
-        configureButtons();
-        drawChart();
+        function buildStateObject(query) {
+            return {
+                filterKey: neon.chartWidget.getFilterKey(),
+                columns: neon.dropdown.getFieldNamesFromDropdown("x"),
+                xValue: neon.chartWidget.getXAttribute(),
+                yValue: neon.chartWidget.getYAttribute(),
+                timeGranularity: $('#time-granularity').val(),
+                query: query
+            };
+        }
 
+        function restoreState() {
+            neon.query.getSavedState(clientId, function (data) {
+                neon.chartWidget.setFilterKey(data.filterKey);
+                neon.chartWidget.setDatabaseName(data.filterKey.dataSet.databaseName);
+                neon.chartWidget.setTableName(data.filterKey.dataSet.tableName);
+                neon.dropdown.populateAttributeDropdowns(data.columns, ['x','y'], drawChart);
+                $('#x option[value="' + data.xValue + '"]').prop('selected', true);
+                $('#y option[value="' + data.yValue + '"]').prop('selected', true);
+                $('#time-granularity option[value="' + data.timeGranularity + '"]').prop('selected', true);
+                neon.query.executeQuery(data.query, doDrawChart);
+            });
+        }
     });
 
 

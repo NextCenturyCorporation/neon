@@ -21,7 +21,6 @@
  * RECIPIENT IS UNDER OBLIGATION TO MAINTAIN SECRECY.
  */
 
-
 var neon = neon || {};
 neon.chartWidget = (function (){
     var databaseName;
