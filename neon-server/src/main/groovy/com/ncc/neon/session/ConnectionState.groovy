@@ -43,13 +43,10 @@ import javax.annotation.PostConstruct
 
 @Component
 @Scope(value = WebApplicationContext.SCOPE_SESSION, proxyMode = ScopedProxyMode.TARGET_CLASS)
-class ConnectionState implements Serializable {
+class ConnectionState {
 
-    private static final long serialVersionUID = -893383755378542295L
-
-    private transient Connection connection
-    private transient QueryExecutor queryExecutor
-    private transient boolean init = false
+    private Connection connection
+    private QueryExecutor queryExecutor
     private ConnectionInfo info
 
     @PostConstruct
@@ -61,7 +58,7 @@ class ConnectionState implements Serializable {
 
     void createConnection(ConnectionInfo info) {
         // the init check ensures the connection is re-established after deserialization
-        if (init && (!info || info == this.info)) {
+        if (!info || info == this.info) {
             return
         }
 
@@ -70,7 +67,6 @@ class ConnectionState implements Serializable {
         setupConnection(info)
 
         queryExecutor = QueryExecutorFactory.create(connection, info)
-        init = true
     }
 
     void createConnection(String dataStoreName, String hostname) {
@@ -98,13 +94,4 @@ class ConnectionState implements Serializable {
                 throw new UnsupportedDataStoreTypeException(info.dataStoreName)
         }
     }
-
-    // allow this method for deserializaiton
-    @SuppressWarnings('UnusedPrivateMethod')
-    private void readObject(ObjectInputStream ois)  {
-        ois.defaultReadObject()
-        init = false
-        createConnection(info)
-    }
-
 }
