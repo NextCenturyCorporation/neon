@@ -21,7 +21,7 @@
  * RECIPIENT IS UNDER OBLIGATION TO MAINTAIN SECRECY.
  */
 
-$(document).ready(function () {
+$(function () {
 
     OWF.ready(function () {
         OWF.relayFile = 'js/eventing/rpc_relay.uncompressed.html';
@@ -31,6 +31,8 @@ $(document).ready(function () {
         var tableName;
         var table;
 
+        var clientId = OWF.getInstanceId();
+
         // just creating the message handler will register the listeners
         var messageHandler = new neon.eventing.MessageHandler({
             activeDatasetChanged: populateInitialData,
@@ -38,35 +40,27 @@ $(document).ready(function () {
 
         });
 
-        function populateInitialData(message) {
-            saveDatasetInfo(message);
-            neon.query.getFieldNames(databaseName, tableName, populateSortFieldDropdown);
-            updateTable();
-        }
+        neon.toggle.createOptionsPanel("#options-panel", "table-options");
+        populateSortDirection();
+        addLimitListener();
+        restoreState();
 
-        function saveDatasetInfo(message) {
+        $(window).resize(sizeTableToRemainingSpace);
+        sizeTableToRemainingSpace();
+
+        function populateInitialData(message) {
             databaseName = message.database;
             tableName = message.table;
+            neon.query.getFieldNames(databaseName, tableName, populateSortFieldDropdown);
         }
 
         function populateSortFieldDropdown(data) {
-            var select = $('#sort-field');
-            select.empty();
-            select.append($('<option></option>').attr('value', '').text('(Select Field)'));
-            data.fieldNames.forEach(function (field) {
-                select.append($('<option></option>').attr('value', field).text(field));
-            });
-            select.change(updateSortField);
+            neon.dropdown.populateAttributeDropdowns(data, 'sort-field', updateTable);
+            updateTable();
         }
 
         function getSortField() {
             return $('#sort-field').val();
-        }
-
-        function updateSortField() {
-            if (getSortField()) {
-                updateTable();
-            }
         }
 
         function populateSortDirection() {
@@ -79,11 +73,23 @@ $(document).ready(function () {
             ascending.click(updateSortDirection);
             descending.click(updateSortDirection);
 
-            var defaultButton = ascending;
-            defaultButton.addClass('active');
-            $('#sort-direction').val(defaultButton.val());
+            styleSortDirectionButtonFromValue(neon.query.ASCENDING);
         }
 
+        function styleSortDirectionButtonFromValue(value){
+            var ascending = $('#sort-ascending');
+            var descending = $('#sort-descending');
+            ascending.removeClass('active');
+            descending.removeClass('active');
+
+            var button = ascending;
+            if(parseInt(value) === neon.query.DESCENDING){
+                button = descending;
+            }
+
+            button.addClass('active');
+            $('#sort-direction').val(button.val());
+        }
 
         function updateSortDirection() {
             var sortVal = $(this).val();
@@ -96,14 +102,12 @@ $(document).ready(function () {
 
         function updateTable() {
             var query = new neon.query.Query().selectFrom(databaseName, tableName);
-            if ($('#limit')[0].validity.valid) {
-                applyLimit(query);
-            }
-            else {
-                return;
-            }
+            applyLimit(query);
             applySort(query);
+
+            var stateObject = buildStateObject(query);
             neon.query.executeQuery(query, populateTable);
+            neon.query.saveState(clientId, stateObject);
         }
 
         function applyLimit(query) {
@@ -138,14 +142,30 @@ $(document).ready(function () {
             $('#limit').change(updateTable);
         }
 
-        neon.toggle.createOptionsPanel("#options-panel", "table-options");
-        populateSortDirection();
-        addLimitListener();
+        function buildStateObject(query) {
+            return {
+                databaseName: databaseName,
+                tableName: tableName,
+                limitValue: $('#limit').val(),
+                sortColumns: neon.dropdown.getFieldNamesFromDropdown("sort-field"),
+                sortValue: getSortField(),
+                sortDirection: $('#sort-direction').val(),
+                query: query
+            };
+        }
 
-        $(window).resize(sizeTableToRemainingSpace);
-        sizeTableToRemainingSpace();
+        function restoreState() {
+            neon.query.getSavedState(clientId, function (data) {
+                databaseName = data.databaseName;
+                tableName = data.tableName;
+                $('#limit').val(data.limitValue);
+                neon.dropdown.populateAttributeDropdowns(data.sortColumns, 'sort-field', updateTable);
+                $('#sort-field option[value="' + data.sortValue + '"]').prop('selected', true);
+                styleSortDirectionButtonFromValue(data.sortDirection);
+                neon.query.executeQuery(data.query, populateTable);
+            });
+        }
 
     });
-
 
 });
