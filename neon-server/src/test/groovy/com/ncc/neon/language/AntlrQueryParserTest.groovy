@@ -40,11 +40,6 @@ class AntlrQueryParserTest {
         parser = new AntlrQueryParser()
     }
 
-    @Test(expected = NullPointerException)
-    void "parsing null is going to throw a NPE"() {
-        parser.parse(null)
-    }
-
     @Test(expected = NeonParsingException)
     void "syntax error query"() {
         //No select fields present so its an error.

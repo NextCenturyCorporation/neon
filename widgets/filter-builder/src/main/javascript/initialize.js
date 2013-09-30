@@ -108,24 +108,22 @@ $(function () {
 
     function selectDatabaseAndTable() {
         var dataSet = neon.wizard.dataset();
-        var times = 1;
-
-        var loadFilterSection = function(){
-            neon.filter.initializeFilterSection(columns);
-        };
 
         neon.query.clearFilters();
         if (!neon.filter.getFilterKey()) {
-            times = 2;
             neon.query.registerForFilterKey(dataSet.database, dataSet.table, function (filterResponse) {
                 neon.filter.setFilterKey(filterResponse);
-                _.after(times, loadFilterSection);
             });
         }
         neon.query.getFieldNames(dataSet.database, dataSet.table, function (data) {
             columns = data.fieldNames;
-            _.after(times, loadFilterSection);
         });
+
+        var initFilterForm = function(){
+            neon.filter.initializeFilterSection(columns);
+        };
+
+        setTimeout(initFilterForm, 150);
 
         broadcastActiveDataset();
     }
