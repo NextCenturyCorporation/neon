@@ -32,6 +32,10 @@ neon.dropdown = (function () {
     }
 
     return {
+        setDropdownInitialValue: function (selectElementId, value) {
+            $('#' + selectElementId + ' option[value="' + value + '"]').prop('selected', true);
+        },
+
         getFieldNamesFromDropdown: function (selectElementId) {
             var optionsSelector = $('#' + selectElementId + ' option');
             return {

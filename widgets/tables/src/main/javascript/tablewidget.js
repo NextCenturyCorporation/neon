@@ -160,7 +160,7 @@ $(function () {
                 tableName = data.tableName;
                 $('#limit').val(data.limitValue);
                 neon.dropdown.populateAttributeDropdowns(data.sortColumns, 'sort-field', updateTable);
-                $('#sort-field option[value="' + data.sortValue + '"]').prop('selected', true);
+                neon.dropdown.setDropdownInitialValue("sort-field", data.sortValue);
                 styleSortDirectionButtonFromValue(data.sortDirection);
                 neon.query.executeQuery(data.query, populateTable);
             });

@@ -26,9 +26,9 @@ neon.filterBuilderState = (function () {
         //set table options
         neon.wizard.populateDropdown('#table-select', data.tables);
 
-        $('#datastore-select option[value="' + data.selectedDatastore + '"]').prop('selected', true);
-        $('#database-select option[value="' + data.selectedDatabase + '"]').prop('selected', true);
-        $('#table-select option[value="' + data.selectedTable + '"]').prop('selected', true);
+        neon.dropdown.setDropdownInitialValue("datastore-select", data.selectedDatastore);
+        neon.dropdown.setDropdownInitialValue("database-select", data.selectedDatabase);
+        neon.dropdown.setDropdownInitialValue("table-select", data.selectedTable);
     }
 
     function restoreComplexState(data){

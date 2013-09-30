@@ -25,6 +25,7 @@
     <script src="js-lib/jquery/jquery-1.10.1.min.js"></script>
     <script src="js-lib/jqueryui/jquery-ui-1.10.3.custom.min.js"></script>
     <script src="js-lib/handlebars/handlebars.js"></script>
+    <script src="js/dropdown.js"></script>
     <script src="javascript/state.js"></script>
     <script src="javascript/initialize.js"></script>
     <script src="javascript/filterwizard.js"></script>

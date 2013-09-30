@@ -256,10 +256,10 @@ $(function () {
                 databaseName = data.filterKey.dataSet.databaseName;
                 tableName = data.filterKey.dataSet.tableName;
                 neon.dropdown.populateAttributeDropdowns(data.columns, ['latitude', 'longitude', 'color-by', 'size-by'], redrawMap);
-                $('#latitude option[value="' + data.selectedLatitude + '"]').prop('selected', true);
-                $('#longitude option[value="' + data.selectedLongitude + '"]').prop('selected', true);
-                $('#color-by option[value="' + data.selectedColorBy + '"]').prop('selected', true);
-                $('#size-by option[value="' + data.selectedSizeBy + '"]').prop('selected', true);
+                neon.dropdown.setDropdownInitialValue("latitude", data.selectedLatitude);
+                neon.dropdown.setDropdownInitialValue("longitude", data.selectedLongitude);
+                neon.dropdown.setDropdownInitialValue("color-by", data.selectedColorBy);
+                neon.dropdown.setDropdownInitialValue("size-by", data.selectedSizeBy);
 
                 latField = getLatField();
                 lonField = getLonField();

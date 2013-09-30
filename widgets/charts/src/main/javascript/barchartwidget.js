@@ -104,8 +104,8 @@ $(function () {
                 neon.chartWidget.setDatabaseName(data.filterKey.dataSet.databaseName);
                 neon.chartWidget.setTableName(data.filterKey.dataSet.tableName);
                 neon.dropdown.populateAttributeDropdowns(data.columns, ['x','y'], drawChart);
-                $('#x option[value="' + data.xValue + '"]').prop('selected', true);
-                $('#y option[value="' + data.yValue + '"]').prop('selected', true);
+                neon.dropdown.setDropdownInitialValue("x", data.xValue);
+                neon.dropdown.setDropdownInitialValue("y", data.yValue);
                 neon.query.executeQuery(data.query, doDrawChart);
             });
         }

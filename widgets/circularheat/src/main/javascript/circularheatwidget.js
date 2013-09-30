@@ -123,7 +123,7 @@ $(function () {
                 databaseName = data.filterKey.dataSet.databaseName;
                 tableName = data.filterKey.dataSet.tableName;
                 neon.dropdown.populateAttributeDropdowns(data.columns, 'date');
-                $('#date option[value="' + data.selectedField + '"]').prop('selected', true);
+                neon.dropdown.setDropdownInitialValue("date", data.selectedField);
                 neon.query.executeQuery(data.query, doRedrawChart);
             });
         }
