@@ -48,7 +48,7 @@ class WidgetStates {
         }
 
         WidgetState widgetState = new WidgetState(clientId, json)
-        states.remove(widgetState);
+        states.remove(widgetState)
         states.add(widgetState)
     }
 

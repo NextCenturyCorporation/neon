@@ -286,6 +286,16 @@ describe('query mapping', function () {
         });
     });
 
+    it('save and restore state', function () {
+        executeAndWait(neon.query.saveState, "clientId", "state");
+        runs(function () {
+            executeAndWait(neon.query.getSavedState, "clientId");
+            runs(function () {
+                expect(currentResult).toEqual("state");
+            });
+        });
+    });
+
     it('group by month', function () {
         var groupByMonthClause = new neon.query.GroupByFunctionClause(neon.query.MONTH, 'hiredate', 'hire_month');
         var query = baseQuery().groupBy(groupByMonthClause).aggregate(neon.query.SUM, 'salary', 'salary_sum').sortBy('hire_month', neon.query.ASCENDING);
