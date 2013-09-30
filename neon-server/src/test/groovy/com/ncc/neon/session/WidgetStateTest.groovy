@@ -37,7 +37,7 @@ class WidgetStateTest {
     private static final String CONTENT_2 = "content2"
 
     @Test
-    void testEquals(){
+    void "ids must be equal for WidgetStates to be equal"(){
         WidgetState state1 = new WidgetState(ID_1, CONTENT_1)
         WidgetState state2 = new WidgetState(ID_1, CONTENT_1)
 
@@ -49,7 +49,7 @@ class WidgetStateTest {
     }
 
     @Test
-    void testNotEquals(){
+    void "if the ids are not equal the widget states are not equal"(){
 
         WidgetState state1 = new WidgetState(ID_1, CONTENT_1)
         WidgetState state2 = new WidgetState(ID_2, CONTENT_1)
