@@ -40,7 +40,7 @@ neon.filterBuilderState = (function () {
     }
 
     function buildSimpleStateObject(){
-        var dataset = neon.wizard.dataset();
+        var dataset = neon.wizard.getDataset();
         var databaseOptions = $('#database-select option');
         var tableOptions = $('#table-select option');
 

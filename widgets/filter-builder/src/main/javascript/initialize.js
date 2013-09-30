@@ -107,7 +107,7 @@ $(function () {
     }
 
     function selectDatabaseAndTable() {
-        var dataSet = neon.wizard.dataset();
+        var dataSet = neon.wizard.getDataset();
 
         neon.query.clearFilters();
         if (!neon.filter.getFilterKey()) {

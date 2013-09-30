@@ -58,7 +58,7 @@ class ConnectionState {
 
     void createConnection(ConnectionInfo info) {
         // the init check ensures the connection is re-established after deserialization
-        if (!info || info == this.info) {
+        if (info == this.info) {
             return
         }
 

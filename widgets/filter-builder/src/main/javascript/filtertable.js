@@ -100,7 +100,7 @@ neon.filter = (function () {
     }
 
     function buildFilterFromData() {
-        var dataset = neon.wizard.dataset();
+        var dataset = neon.wizard.getDataset();
         var baseFilter = new neon.query.Filter().selectFrom(dataset.database, dataset.table);
         var data = getSubmittableData();
 
