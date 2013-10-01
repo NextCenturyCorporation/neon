@@ -444,13 +444,14 @@ charts.BarChart.prototype.createTooltip_ = function (item) {
 charts.BarChart.prototype.positionTooltip_ = function (tooltip, mouseLocation) {
     // set the tooltip to appear where the mouse pointer is
     var top = window.event.clientY;
-    // the extra 20px in the next two variables is needed to account for the padding of .charttooltip
-    var chartHeight = $(this.chartSelector_).height() - 20;
-    var spaceNeeded = $(".charttooltip").height() + 20;
+    // the extra 35px in the next two variables is needed to account for the padding of .charttooltip
+    var chartHeight = $(this.chartSelector_).height()-35;
+    var spaceNeeded = $(".charttooltip").height() + 35;
 
     // if there is not enough space below the pointer to display the tooltip, put it above
-    if((chartHeight - mouseLocation[1]) < spaceNeeded) {
-        top = mouseLocation[1] - spaceNeeded;
+    if(Number(chartHeight - mouseLocation[1]) < spaceNeeded) {
+        // the extra 35px is needed to account for the padding of .charttooltip
+        top = mouseLocation[1] - spaceNeeded + 35;
     }
     tooltip.css({
         'top': top + 'px',
