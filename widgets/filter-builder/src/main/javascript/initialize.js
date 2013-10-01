@@ -108,24 +108,34 @@ $(function () {
 
     function selectDatabaseAndTable() {
         var dataSet = neon.wizard.getDataset();
-
-        neon.query.clearFilters();
-        if (!neon.filter.getFilterKey()) {
-            neon.query.registerForFilterKey(dataSet.database, dataSet.table, function (filterResponse) {
-                neon.filter.setFilterKey(filterResponse);
-            });
+        var numTimes = 2;
+        if(!neon.filter.getFilterKey()) {
+            numTimes = 3;
         }
-        neon.query.getFieldNames(dataSet.database, dataSet.table, function (data) {
-            columns = data.fieldNames;
+
+        var executingInitFilterSection = _.after(numTimes, initFilterForm);
+
+        neon.query.clearFilters(function () {
+            executingInitFilterSection();
         });
 
-        var initFilterForm = function(){
-            neon.filter.initializeFilterSection(columns);
-        };
+        if(!neon.filter.getFilterKey()) {
+            neon.query.registerForFilterKey(dataSet.database, dataSet.table, function (filterResponse) {
+                neon.filter.setFilterKey(filterResponse);
+                executingInitFilterSection();
+            });
+        }
 
-        setTimeout(initFilterForm, 150);
+        neon.query.getFieldNames(dataSet.database, dataSet.table, function (data) {
+            columns = data.fieldNames;
+            executingInitFilterSection();
+        });
 
         broadcastActiveDataset();
+    }
+
+    function initFilterForm() {
+        neon.filter.initializeFilterSection(columns);
     }
 
     function clearAllFilters() {
