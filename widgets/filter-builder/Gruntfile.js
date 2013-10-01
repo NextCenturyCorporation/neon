@@ -54,8 +54,9 @@ module.exports = function (grunt) {
 
     grunt.loadNpmTasks('grunt-contrib-concat');
     grunt.loadNpmTasks('grunt-contrib-jshint');
+    grunt.loadNpmTasks('grunt-contrib-jasmine');
 
     // hint after concatenation since the concatenated version is also hinted
-    grunt.registerTask('default', ['concat', 'jshint']);
+    grunt.registerTask('default', ['concat', 'jshint', 'jasmine:unit']);
 
 };
