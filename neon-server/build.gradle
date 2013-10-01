@@ -155,6 +155,8 @@ antlr4 {
 task copyAntlrFilesToSrc(type: Copy) {
     dependsOn 'generate'
     def antlrPackageFilePath = antlrPackage.replaceAll("\\.", "/")
+    inputs.file { file("${antlrPackage}.${antlrGrammar}") }
+    outputs.files { fileTree("${projectDir}/src/main/groovy/${antlrPackageFilePath}").include('*.java') }
     from("${buildDir}/${generate.buildGenDir}/main/${antlrPackageFilePath}") {
         include '*.java'
     }

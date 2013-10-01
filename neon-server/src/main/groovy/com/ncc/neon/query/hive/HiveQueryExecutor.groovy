@@ -83,7 +83,7 @@ class HiveQueryExecutor implements QueryExecutor {
             return columns
         }
         catch(SQLException ex){
-            LOGGER.error(ex);
+            LOGGER.error("Columns cannot be found ", ex)
             return []
         }finally{
             jdbcClient.close()
