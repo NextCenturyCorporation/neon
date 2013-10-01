@@ -8,16 +8,16 @@ neon.filterBuilderState = (function () {
             OWF.ready(function(){
                 clientId = OWF.getInstanceId();
                 neon.query.getSavedState(clientId, function(data){
-                    restoreSimpleState(data);
+                    restoreConnectionState(data);
                     if(data.filterKey){
-                        restoreComplexState(data);
+                        restoreConnectionAndFilterState(data);
                     }
                 });
             });
         }
     }
 
-    function restoreSimpleState(data){
+    function restoreConnectionState(data){
         $("#db-table").show();
         $('#hostname-input').val(data.selectedHostname);
 
@@ -31,7 +31,7 @@ neon.filterBuilderState = (function () {
         neon.dropdown.setDropdownInitialValue("table-select", data.selectedTable);
     }
 
-    function restoreComplexState(data){
+    function restoreConnectionAndFilterState(data){
         $("#filter-container").show();
         $("#clear-filters-button").show();
         neon.filter.setFilterKey(data.filterKey);
