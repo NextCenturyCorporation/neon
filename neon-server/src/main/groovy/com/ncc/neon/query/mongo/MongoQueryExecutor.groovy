@@ -85,7 +85,7 @@ class MongoQueryExecutor implements QueryExecutor {
         def db = mongo.getDB(databaseName)
         def collection = db.getCollection(tableName)
         def result = collection.findOne()
-        return result.keySet()
+        return result?.keySet() ?: []
     }
 
     @Override
