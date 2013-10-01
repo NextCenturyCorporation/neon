@@ -12,6 +12,8 @@ import com.ncc.neon.selection.SelectionManager
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
+import java.sql.SQLException
+
 /*
  * ************************************************************************
  * Copyright (c), 2013 Next Century Corporation. All Rights Reserved.
@@ -76,9 +78,16 @@ class HiveQueryExecutor implements QueryExecutor {
     @Override
     Collection<String> getFieldNames(String databaseName, String tableName) {
         def jdbcClient = hiveConnection.connect(connectionInfo)
-        def columns = jdbcClient.getColumnNames(databaseName, tableName)
-        jdbcClient.close()
-        return columns
+        try{
+            def columns = jdbcClient.getColumnNames(databaseName, tableName)
+            return columns
+        }
+        catch(SQLException ex){
+            LOGGER.error(ex);
+            return []
+        }finally{
+            jdbcClient.close()
+        }
     }
 
     @Override
