@@ -1,7 +1,6 @@
 $(function () {
 
     neon.query.SERVER_URL = $("#neon-server").val();
-    var columns = [];
     var messageHandler = {
         publishMessage: function () {
         }
@@ -100,7 +99,8 @@ $(function () {
                 data: { database: selectedDatabase.val() },
                 success: function (tableNames) {
                     neon.wizard.populateDropdown('#table-select', tableNames);
-                    neon.filter.initializeFilterSection([]);
+                    neon.filter.setColumns([]);
+                    neon.filter.initializeFilterSection();
                     neon.filterBuilderState.saveState();
                 }
             });
@@ -127,7 +127,7 @@ $(function () {
         }
 
         neon.query.getFieldNames(dataSet.database, dataSet.table, function (data) {
-            columns = data.fieldNames;
+            neon.filter.setColumns(data.fieldNames);
             executingInitFilterSection();
         });
 
@@ -135,7 +135,7 @@ $(function () {
     }
 
     function initFilterForm() {
-        neon.filter.initializeFilterSection(columns);
+        neon.filter.initializeFilterSection();
     }
 
     function clearAllFilters() {
@@ -143,7 +143,7 @@ $(function () {
             var database = $('#database-select').val();
             var table = $('#table-select').val();
             var message = { "database": database, "table": table };
-            neon.filter.initializeFilterSection(columns);
+            neon.filter.initializeFilterSection();
             messageHandler.publishMessage(neon.eventing.Channels.FILTERS_CHANGED, message);
         });
     }

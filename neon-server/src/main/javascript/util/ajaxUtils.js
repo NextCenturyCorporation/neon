@@ -123,6 +123,7 @@ neon.util.AjaxUtils.doAjaxRequest = function (type, url, opts) {
     params.dataType = opts.responseType;
     params.success = opts.success;
     params.error = opts.error;
+    params.global = opts.global;
     // set a default error behavior is none is specified
     if (!params.error) {
         params.error = function (xhr, status, error) {
