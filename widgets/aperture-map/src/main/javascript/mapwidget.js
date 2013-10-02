@@ -52,11 +52,9 @@ $(function () {
         function onActiveDatasetChanged(message) {
             databaseName = message.database;
             tableName = message.table;
-            if (!filterKey) {
-                neon.query.registerForFilterKey(databaseName, tableName, function (filterResponse) {
-                    filterKey = filterResponse;
-                });
-            }
+            neon.query.registerForFilterKey(databaseName, tableName, function (filterResponse) {
+                filterKey = filterResponse;
+            });
             neon.query.getFieldNames(databaseName, tableName, populateFromColumns);
         }
 
