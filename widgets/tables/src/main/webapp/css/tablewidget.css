@@ -46,3 +46,7 @@
 #limit {
     width: 135px;
 }
+
+#sort-ascending, #sort-descending {
+    border-color: #e6e6e6;
+}
