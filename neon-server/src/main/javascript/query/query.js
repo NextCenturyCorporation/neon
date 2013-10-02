@@ -748,7 +748,8 @@ neon.query.saveState = function(id, stateObject, successCallback, errorCallback)
         {
             data: { clientId: id, state: strObject},
             success: successCallback,
-            error: errorCallback
+            error: errorCallback,
+            global: false
         }
     );
 };
