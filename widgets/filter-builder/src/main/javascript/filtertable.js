@@ -52,8 +52,7 @@ neon.filter = (function () {
         });
     };
 
-    var initializeFilterSection = function (columnNames) {
-        columnOptions = columnNames;
+    var initializeFilterSection = function () {
         filterState.data = [];
         filterState.data.push(new FilterRow());
         setFilterDisplay();
@@ -62,6 +61,10 @@ neon.filter = (function () {
 
     var setFilterKey = function (key) {
         filterKey = key;
+    };
+
+    var setColumns = function (columns){
+        columnOptions = columns;
     };
 
     var getFilterKey = function () {
@@ -74,7 +77,7 @@ neon.filter = (function () {
 
     var setFilterState = function (state) {
         filterState = state;
-        columnOptions = state.data[0].columnOptions;
+        setColumns(state.data[0].columnOptions);
         setFilterDisplay();
         setFilterContentFromFilterState();
     };
@@ -175,6 +178,7 @@ neon.filter = (function () {
         removeFilter: removeFilter,
         setFilterKey: setFilterKey,
         setFilterState: setFilterState,
+        setColumns: setColumns,
         getFilterKey: getFilterKey,
         getFilterState: getFilterState,
         initializeFilterSection: initializeFilterSection
