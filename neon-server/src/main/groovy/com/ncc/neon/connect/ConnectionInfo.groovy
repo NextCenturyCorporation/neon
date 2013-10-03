@@ -1,4 +1,5 @@
 package com.ncc.neon.connect
+
 import groovy.transform.Canonical
 /*
  * ************************************************************************
@@ -29,7 +30,7 @@ import groovy.transform.Canonical
 @Canonical
 class ConnectionInfo {
 
-    String dataStoreName
+    DataSources dataSource
     String connectionUrl
     Map<String, String> options = [:]
 }

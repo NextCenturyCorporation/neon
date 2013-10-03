@@ -2,6 +2,7 @@ package com.ncc.neon.session
 
 import com.ncc.neon.connect.Connection
 import com.ncc.neon.connect.ConnectionInfo
+import com.ncc.neon.connect.DataSources
 import com.ncc.neon.connect.HiveConnection
 import com.ncc.neon.connect.MongoConnection
 import com.ncc.neon.connect.UnsupportedDataStoreTypeException
@@ -52,7 +53,7 @@ class ConnectionState {
     @PostConstruct
     void initialize(){
         def hostsString = System.getProperty("mongo.hosts", "localhost")
-        ConnectionInfo info = new ConnectionInfo(dataStoreName: DataSources.mongo.name(), connectionUrl: hostsString)
+        ConnectionInfo info = new ConnectionInfo(dataSource: DataSources.mongo, connectionUrl: hostsString)
         createConnection(info)
     }
 
@@ -70,7 +71,8 @@ class ConnectionState {
     }
 
     void createConnection(String dataStoreName, String hostname) {
-        ConnectionInfo connectionInfo = new ConnectionInfo(dataStoreName: dataStoreName, connectionUrl: hostname)
+        DataSources source = DataSources.valueOf(dataStoreName.toLowerCase())
+        ConnectionInfo connectionInfo = new ConnectionInfo(dataSource: source, connectionUrl: hostname)
         createConnection(connectionInfo)
     }
 
@@ -83,15 +85,15 @@ class ConnectionState {
     }
 
     private void setupConnection(ConnectionInfo info) {
-        switch (info.dataStoreName) {
-            case DataSources.mongo.name():
+        switch (info.dataSource) {
+            case DataSources.mongo:
                 connection = new MongoConnection()
                 break
-            case DataSources.hive.name():
+            case DataSources.hive:
                 connection = new HiveConnection()
                 break
             default:
-                throw new UnsupportedDataStoreTypeException(info.dataStoreName)
+                throw new UnsupportedDataStoreTypeException(info.dataSource.name())
         }
     }
 }

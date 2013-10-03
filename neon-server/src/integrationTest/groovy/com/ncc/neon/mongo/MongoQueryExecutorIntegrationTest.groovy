@@ -4,7 +4,7 @@ import com.mongodb.util.JSON
 import com.ncc.neon.AbstractQueryExecutorIntegrationTest
 import com.ncc.neon.connect.ConnectionInfo
 import com.ncc.neon.session.ConnectionState
-import com.ncc.neon.session.DataSources
+import com.ncc.neon.connect.DataSources
 import com.ncc.neon.query.Query
 import com.ncc.neon.query.clauses.AndWhereClause
 import com.ncc.neon.query.clauses.DistanceUnit
@@ -66,7 +66,7 @@ class MongoQueryExecutorIntegrationTest extends AbstractQueryExecutorIntegration
     protected ConnectionState createConnectionState() {
         def hostsString = System.getProperty("mongo.hosts", "localhost")
         ConnectionState connectionState = new ConnectionState()
-        ConnectionInfo info = new ConnectionInfo(dataStoreName: DataSources.mongo.name(), connectionUrl: hostsString)
+        ConnectionInfo info = new ConnectionInfo(dataSource: DataSources.mongo, connectionUrl: hostsString)
         connectionState.createConnection(info)
         return connectionState
     }

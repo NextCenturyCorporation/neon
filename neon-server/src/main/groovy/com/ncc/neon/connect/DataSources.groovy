@@ -1,4 +1,4 @@
-package com.ncc.neon.session
+package com.ncc.neon.connect
 
 /*
  * ************************************************************************
@@ -32,5 +32,4 @@ package com.ncc.neon.session
 
 enum DataSources {
     mongo, hive
-
 }

@@ -3,7 +3,7 @@ package com.ncc.neon.hive
 import com.ncc.neon.AbstractQueryExecutorIntegrationTest
 import com.ncc.neon.connect.ConnectionInfo
 import com.ncc.neon.session.ConnectionState
-import com.ncc.neon.session.DataSources
+import com.ncc.neon.connect.DataSources
 import com.ncc.neon.connect.HiveConnection
 import com.ncc.neon.query.jdbc.JdbcClient
 import org.apache.hadoop.conf.Configuration
@@ -55,7 +55,7 @@ class HiveQueryExecutorIntegrationTest extends AbstractQueryExecutorIntegrationT
 
     @BeforeClass
     static void beforeClass() {
-        jdbcClient = new HiveConnection().connect(new ConnectionInfo(connectionUrl: HiveIntegrationTestContext.HOST_STRING, dataStoreName: DataSources.hive.name()))
+        jdbcClient = new HiveConnection().connect(new ConnectionInfo(connectionUrl: HiveIntegrationTestContext.HOST_STRING, dataSource: DataSources.hive))
         // make sure we clean up just in case something was left over
         deleteData()
         insertData()
@@ -69,7 +69,7 @@ class HiveQueryExecutorIntegrationTest extends AbstractQueryExecutorIntegrationT
     @Override
     protected ConnectionState createConnectionState() {
         ConnectionState connectionState = new ConnectionState()
-        ConnectionInfo info = new ConnectionInfo(dataStoreName: DataSources.hive.name(), connectionUrl: HiveIntegrationTestContext.HOST_STRING)
+        ConnectionInfo info = new ConnectionInfo(dataSource: DataSources.hive, connectionUrl: HiveIntegrationTestContext.HOST_STRING)
         connectionState.createConnection(info)
         return connectionState
     }
