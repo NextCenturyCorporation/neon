@@ -1,4 +1,4 @@
-include 'neon-server', 'filter-builder', 'query-builder', 'charts', 'tables', 'aperture-map', 'openlayers-map', 'circularheat'
+include 'neon-server', 'filter-builder', 'query-builder', 'charts', 'tables', 'aperture-map', 'openlayers-map', 'circularheat', 'map'
 
 
 def widgetsDir = file('widgets')
