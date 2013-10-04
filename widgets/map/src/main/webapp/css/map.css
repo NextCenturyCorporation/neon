@@ -18,6 +18,6 @@ input[type="checkbox"] {
     float: left;
 }
 
-#layers {
+.layers {
     padding-left: 19px;
 }

@@ -66,13 +66,13 @@
             </div>
 
             <div class="control-group">
-                <label class="control-label" for="layers">Layers</label>
+                <label class="control-label" for="points">Layers</label>
 
-                <label class="checkbox inline control-label" id="layers">
-                    <input type="checkbox" value="points">Points</input>
+                <label class="checkbox inline control-label layers">
+                    <input id="points" type="checkbox" value="points">Points</input>
                 </label>
-                <label class="checkbox inline control-label" id="layers">
-                    <input type="checkbox" value="heatmap">Heatmap</input>
+                <label class="checkbox inline control-label layers">
+                    <input id="density" type="checkbox" value="density">Density</input>
                 </label>
             </div>
         </div>
