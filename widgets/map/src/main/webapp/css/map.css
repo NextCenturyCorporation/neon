@@ -1,1 +1,23 @@
-/* css goes here */
+#map {
+    position: absolute;
+    top: 40px;
+    left: 20px;
+    /** TODO: NEON-583 next two lines make map reactive, temporarily disabled until a better solution is found
+    width: 90%;
+    height: 90%;**/
+    width: 924px;
+    height: 394px;
+}
+
+/* override image properties here so openlayers renders properly */
+img {
+    max-width: none;
+}
+
+input[type="checkbox"] {
+    float: left;
+}
+
+#layers {
+    padding-left: 19px;
+}

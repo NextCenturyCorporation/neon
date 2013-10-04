@@ -26,7 +26,7 @@ module.exports = function (grunt) {
                 dest: 'build/js-temp/<%= pkg.name %>.js'
             },
             dist: {
-                src: ['build/dependencies/**/*.js', '<%= concat.nodeps.dest %>'],
+                src: [lib('openlayers'), lib('heatmap'), 'build/dependencies/**/*.js', '<%= concat.nodeps.dest %>'],
                 dest: outputFile
             }
         },

@@ -1,0 +1,11 @@
+archivesBaseName = 'map'
+
+// open layers needs the theme directory to be next to the open layers js file
+war {
+
+    from("${jsLibDir}/openlayers") {
+        include 'theme/**'
+        into '/'
+    }
+
+}
