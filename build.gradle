@@ -1,5 +1,3 @@
-apply plugin: 'eclipse'
-
 import static com.ncc.common.JSScriptReplacer.*
 import com.ncc.common.JettyTaskUtils
 
@@ -18,18 +16,21 @@ def neonServerWebapps = neonServer + '/webapps'
 // the neon-server is just output as neon.js for simpler referencing
 project(":neon-server").ext.outfile = 'neon'
 
-
-subprojects {
-
+subprojects{
     version = '1.0.0-SNAPSHOT'
+}
+
+configure(subprojects.findAll { it.name != 'common'}) {
+    apply plugin: 'war'
+    apply from: "${rootDir}/gradle/js.gradle"
 
     repositories {
         mavenCentral()
     }
 
-    apply plugin: 'war'
-    apply plugin: 'idea'
-    apply from: "${rootDir}/gradle/js.gradle"
+    dependencies {
+        compile project(":common")
+    }
 
     war {
         description = 'Creates a war file for the project'
@@ -49,6 +50,7 @@ subprojects {
         from(imgDependenciesOutputDir) {
             into 'img'
         }
+
     }
 
     enableJSResourceFiltering(project, project.war)
@@ -61,7 +63,6 @@ subprojects {
     project.getTasksByName('gruntjs', false).each { task ->
         task.dependsOn 'copyCommon'
     }
-
 
     task('deployToTomcat', type: Copy) {
         dependsOn war
@@ -98,7 +99,6 @@ subprojects {
         from(new File(projectDir.parentFile, "common/img").absolutePath)
         into imgDependenciesOutputDir
     }
-
 }
 
 task jettyRunAll(type: com.ncc.common.JettyRunAll) {

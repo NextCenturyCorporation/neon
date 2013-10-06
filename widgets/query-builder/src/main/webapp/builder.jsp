@@ -1,27 +1,22 @@
 <%@page contentType="text/html;charset=UTF-8" %>
 <%@page pageEncoding="UTF-8" %>
 <%@ page session="false" %>
+<%@ taglib prefix="neon" uri="http://nextcentury.com/neon/taglib"%>
 
 <!DOCTYPE html>
 <html>
 <head>
     <title>Query Builder</title>
-
-    <%
-        String neonServerUrl = getServletContext().getInitParameter("neon.url");
-        String owfServerUrl = getServletContext().getInitParameter("owf.url");
-    %>
-
     <link rel="stylesheet" type="text/css" href="css/bootstrap/bootstrap.min.css">
     <link rel="stylesheet" type="text/css" href="css/builder.css"/>
     <link rel="stylesheet" type="text/css" href="css/slickgrid/slick.grid.css"/>
     <link rel="stylesheet" type="text/css" href="css/smoothness/jquery-ui-1.8.16.custom.css"/>
     <!-- widgetbase.css must be included after slickgrid in order to override the slickgrid table color scheme -->
     <link rel="stylesheet" type="text/css" href="css/widgetbase.css">
-    <link rel="stylesheet" type="text/css" href="<%=neonServerUrl%>/css/neon.css"/>
+    <link rel="stylesheet" type="text/css" href="<neon:out name="neon.url"/>/css/neon.css"/>
 
-    <script src="<%=owfServerUrl%>/js/owf-widget.js"></script>
-    <script src="<%=neonServerUrl%>/js/neon.js"></script>
+    <script src="<neon:out name="owf.url"/>/js/owf-widget.js"></script>
+    <script src="<neon:out name="neon.url"/>/js/neon.js"></script>
 
     <!-- build:js js/query-builder.js -->
     <script src="js/tables.js"></script>
@@ -34,8 +29,7 @@
 
 </head>
 <body>
-
-<input type="hidden" id="neon-server" value="<%=neonServerUrl%>"/>
+<neon:hidden-neon-server/>
 
 <div id="queryForm">
     <h4> Enter a Query </h4>
