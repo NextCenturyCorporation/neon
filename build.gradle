@@ -108,6 +108,7 @@ task jettyRunAll(type: com.ncc.common.JettyRunAll) {
     keystorePassword = "neon"
     port = ssl ? 9443 : 9000
 
+
     def serverProject = project(":neon-server")
     def serverProjectName = serverProject.name
     doFirst {
@@ -118,9 +119,9 @@ task jettyRunAll(type: com.ncc.common.JettyRunAll) {
         def dirs = [
                 // we modify the project's webAppDir to use a generated-web for javascript resource filtering,
                 // so hardcode the src/main/webapp instead of using the project.webAppDir
-                "${proj.projectDir}/src/main/webapp".toString(),
+                "${proj.projectDir}/src/main/webapp",
                 // src/main is for javascript and js-lib
-                "${proj.projectDir}/src/main".toString(),
+                "${proj.projectDir}/src/main",
                 proj.dependenciesDir.toString(),
                 new File(proj.projectDir.parentFile, "common").absolutePath
         ]

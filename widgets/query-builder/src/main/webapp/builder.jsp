@@ -13,10 +13,10 @@
     <link rel="stylesheet" type="text/css" href="css/smoothness/jquery-ui-1.8.16.custom.css"/>
     <!-- widgetbase.css must be included after slickgrid in order to override the slickgrid table color scheme -->
     <link rel="stylesheet" type="text/css" href="css/widgetbase.css">
-    <link rel="stylesheet" type="text/css" href="<neon:out name="neon.url"/>/css/neon.css"/>
+    <link rel="stylesheet" type="text/css" href="<neon:neon-url/>/css/neon.css"/>
 
-    <script src="<neon:out name="owf.url"/>/js/owf-widget.js"></script>
-    <script src="<neon:out name="neon.url"/>/js/neon.js"></script>
+    <script src="<neon:owf-url/>/js/owf-widget.js"></script>
+    <script src="<neon:neon-url/>/js/neon.js"></script>
 
     <!-- build:js js/query-builder.js -->
     <script src="js/tables.js"></script>

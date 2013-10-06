@@ -1,8 +1,6 @@
-package com.ncc.neon.taglib
+package com.ncc.neon
 
-import javax.servlet.jsp.JspException
-import javax.servlet.jsp.JspWriter
-import javax.servlet.jsp.tagext.SimpleTagSupport
+import org.junit.Test
 
 
 /*
@@ -31,13 +29,23 @@ import javax.servlet.jsp.tagext.SimpleTagSupport
  * @author tbrooks
  */
 
-class NeonServerTag extends SimpleTagSupport {
+class LoadNeonPropertiesTest {
 
-    public void doTag() throws JspException, IOException {
-        Properties properties = new Properties();
-        properties.load(NeonServerTag.getClassLoader().getResourceAsStream("neon.properties"))
-        JspWriter out = getJspContext().getOut()
-        String url = properties.get("neon.url");
-        out.println('<input type="hidden" id="neon-server" value="' + url + '"/>')
+    @Test
+    void "get owf url"(){
+        LoadNeonProperties loader = new LoadNeonProperties()
+        assert loader.owfUrl == "https://fakeOwfUrl"
+    }
+
+    @Test
+    void "get neon url"(){
+        LoadNeonProperties loader = new LoadNeonProperties()
+        assert loader.neonUrl == "https://fakeNeonUrl"
+    }
+
+    @Test
+    void "make sure properties default works"(){
+        Properties props = new Properties();
+        assert props.getProperty("something", "default") == "default"
     }
 }

@@ -1,11 +1,18 @@
 apply plugin: 'groovy'
 
+def logbackVersion = "1.0.13"
+
 repositories{
     mavenCentral()
 }
 
 dependencies{
-    compile 'org.codehaus.groovy:groovy-all:2.1.6'
-    testCompile 'junit:junit:4.11'
+
+    compile 'org.slf4j:slf4j-api:1.7.2'
+    compile "ch.qos.logback:logback-core:$logbackVersion"
+    compile "ch.qos.logback:logback-classic:$logbackVersion"
     compile 'javax.servlet.jsp:javax.servlet.jsp-api:2.3.1'
+
+    testCompile 'org.codehaus.groovy:groovy-all:2.1.6'
+    testCompile 'junit:junit:4.11'
 }

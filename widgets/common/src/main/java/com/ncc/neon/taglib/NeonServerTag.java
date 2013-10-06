@@ -1,8 +1,11 @@
-package com.ncc.neon.taglib
+package com.ncc.neon.taglib;
 
-import javax.servlet.jsp.JspException
-import javax.servlet.jsp.JspWriter
-import javax.servlet.jsp.tagext.SimpleTagSupport
+import com.ncc.neon.LoadNeonProperties;
+
+import javax.servlet.jsp.JspException;
+import javax.servlet.jsp.JspWriter;
+import javax.servlet.jsp.tagext.SimpleTagSupport;
+import java.io.IOException;
 
 
 /*
@@ -31,15 +34,12 @@ import javax.servlet.jsp.tagext.SimpleTagSupport
  * @author tbrooks
  */
 
-class OutTag extends SimpleTagSupport {
-
-    String name
+public class NeonServerTag extends SimpleTagSupport {
 
     public void doTag() throws JspException, IOException {
-        Properties properties = new Properties();
-        properties.load(OutTag.getClassLoader().getResourceAsStream("neon.properties"))
-        JspWriter out = getJspContext().getOut()
-        String url = properties.get(name);
-        out.println(url)
+        LoadNeonProperties properties = new LoadNeonProperties();
+        JspWriter out = getJspContext().getOut();
+        String url = properties.getNeonUrl();
+        out.println("<input type=\"hidden\" id=\"neon-server\" value=\"" + url + "\"/>");
     }
 }

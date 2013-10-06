@@ -6,17 +6,18 @@
     <short-name>prop</short-name>
     <uri>http://nextcentury.com/neon/taglib</uri>
     <tag>
-        <name>out</name>
-        <tag-class>com.ncc.neon.taglib.OutTag</tag-class>
-        <body-content>empty</body-content>
-        <attribute>
-            <name>name</name>
-        </attribute>
-    </tag>
-    <tag>
         <name>hidden-neon-server</name>
         <tag-class>com.ncc.neon.taglib.NeonServerTag</tag-class>
         <body-content>empty</body-content>
     </tag>
-
+    <tag>
+        <name>neon-url</name>
+        <tag-class>com.ncc.neon.taglib.NeonUrlTag</tag-class>
+        <body-content>empty</body-content>
+    </tag>
+    <tag>
+        <name>owf-url</name>
+        <tag-class>com.ncc.neon.taglib.OwfUrlTag</tag-class>
+        <body-content>empty</body-content>
+    </tag>
 </taglib>
