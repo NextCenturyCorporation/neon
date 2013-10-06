@@ -1,11 +1,10 @@
+<%@page contentType="text/html;charset=UTF-8" %>
+<%@page pageEncoding="UTF-8" %>
+<%@taglib prefix="neon" uri="http://nextcentury.com/neon/taglib" %>
+
 <!DOCTYPE html>
 <html>
 <head>
-    <%
-        String neonServerUrl = getServletContext().getInitParameter("neon.url");
-        String owfServerUrl = getServletContext().getInitParameter("owf.url");
-    %>
-
     <title>Table</title>
 
     <link rel="stylesheet" type="text/css" href="css/slickgrid/slick.grid.css"/>
@@ -13,10 +12,10 @@
     <link rel="stylesheet" type="text/css" href="css/bootstrap/bootstrap.min.css">
     <link rel="stylesheet" type="text/css" href="css/widgetbase.css">
     <link rel="stylesheet" type="text/css" href="css/tablewidget.css">
-    <link rel="stylesheet" type="text/css" href="<%=neonServerUrl%>/css/neon.css">
+    <link rel="stylesheet" type="text/css" href="<neon:neon-url/>/css/neon.css">
 
-    <script src="<%=owfServerUrl%>/js/owf-widget.js"></script>
-    <script src="<%=neonServerUrl%>/js/neon.js"></script>
+    <script src="<neon:owf-url/>/js/owf-widget.js"></script>
+    <script src="<neon:neon-url/>/js/neon.js"></script>
 
     <!-- build:js js/tables.js -->
     <script src="js-lib/jquery/jquery-1.7.min.js"></script>
@@ -39,7 +38,7 @@
 
 </head>
 <body>
-<input type="hidden" id="neon-server" value="<%=neonServerUrl%>"/>
+<neon:hidden-neon-server/>
 
 <div id="options-panel" class="options">
     <div class="controls-row">

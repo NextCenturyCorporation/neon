@@ -1,7 +1,6 @@
 <%@page contentType="text/html;charset=UTF-8" %>
 <%@page pageEncoding="UTF-8" %>
-<%@ page session="false" %>
-<%@ taglib prefix="neon" uri="http://nextcentury.com/neon/taglib"%>
+<%@taglib prefix="neon" uri="http://nextcentury.com/neon/taglib" %>
 
 <!DOCTYPE html>
 <html>

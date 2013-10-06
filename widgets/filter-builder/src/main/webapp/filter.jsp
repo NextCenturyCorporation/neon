@@ -1,25 +1,20 @@
 <%@page contentType="text/html;charset=UTF-8" %>
 <%@page pageEncoding="UTF-8" %>
-<%@ page session="false" %>
+<%@taglib prefix="neon" uri="http://nextcentury.com/neon/taglib" %>
 
 <!DOCTYPE html>
 <html>
 <head>
     <title>Filter Builder</title>
 
-    <%
-        String neonServerUrl = getServletContext().getInitParameter("neon.url");
-        String owfServerUrl = getServletContext().getInitParameter("owf.url");
-    %>
-
     <link rel="stylesheet" type="text/css" href="css/bootstrap/bootstrap.min.css">
-    <link rel="stylesheet" type="text/css" href="<%=neonServerUrl%>/css/neon.css">
+    <link rel="stylesheet" type="text/css" href="<neon:neon-url/>/css/neon.css">
     <link rel="stylesheet" type="text/css" href="css/widgetbase.css">
     <link rel="stylesheet" type="text/css" href="css/filter.css">
     <link href="css/ui-darkness/jquery-ui-1.10.3.custom.min.css" rel="stylesheet">
 
-    <script src="<%=owfServerUrl%>/js/owf-widget.js"></script>
-    <script src="<%=neonServerUrl%>/js/neon.js"></script>
+    <script src="<neon:owf-url/>/js/owf-widget.js"></script>
+    <script src="<neon:neon-url/>/js/neon.js"></script>
 
     <!-- build:js js/filter-builder.js -->
     <script src="js-lib/jquery/jquery-1.10.1.min.js"></script>
@@ -100,8 +95,7 @@
 
 </head>
 <body>
-
-<input type="hidden" id="neon-server" value="<%=neonServerUrl%>"/>
+<neon:hidden-neon-server/>
 
 <div class="container">
     <div id="datastore-container">
