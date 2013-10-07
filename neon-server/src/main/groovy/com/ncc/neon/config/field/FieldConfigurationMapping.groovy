@@ -44,6 +44,10 @@ class FieldConfigurationMapping {
     }
 
     ColumnMapping get(WidgetDataSet widgetDataSet) {
-        fieldConfigurationMapping.get(widgetDataSet)
+        def mapping = fieldConfigurationMapping.get(widgetDataSet)
+        if(!mapping){
+            return new ColumnMapping()
+        }
+        return mapping
     }
 }

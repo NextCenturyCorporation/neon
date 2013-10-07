@@ -1,5 +1,7 @@
 package com.ncc.neon.services
 
+import com.ncc.neon.config.field.ColumnMapping
+
 /*
  * ************************************************************************
  * Copyright (c), 2013 Next Century Corporation. All Rights Reserved.
@@ -29,5 +31,5 @@ package com.ncc.neon.services
 class FieldNames {
 
     Collection<String> fieldNames
-
+    ColumnMapping metadata
 }

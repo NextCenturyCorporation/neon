@@ -33,7 +33,7 @@ $(function () {
 
         var messageHandler = new neon.eventing.MessageHandler({
             activeDatasetChanged: function (message) {
-                neon.chartWidget.onActiveDatasetChanged(message, drawChart);
+                neon.chartWidget.onActiveDatasetChanged(message, drawChart, neon.widget.TIMELINE);
             },
             filtersChanged: onFiltersChanged
 

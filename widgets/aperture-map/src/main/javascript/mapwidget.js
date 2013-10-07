@@ -55,7 +55,7 @@ $(function () {
             neon.query.registerForFilterKey(databaseName, tableName, function (filterResponse) {
                 filterKey = filterResponse;
             });
-            neon.query.getFieldNames(databaseName, tableName, populateFromColumns);
+            neon.query.getFieldNames(databaseName, tableName, neon.widget.MAP, populateFromColumns);
         }
 
         function populateFromColumns(data) {

@@ -28,6 +28,11 @@
  */
 neon.query.SERVER_URL = 'http://localhost:8080/neon';
 
+neon.widget.MAP = "Map";
+neon.widget.TIMELINE = "Timeline";
+neon.widget.BARCHART = "Barchart";
+neon.widget.CIRCULAR_HEAT = "CircularHeat";
+
 /**
  * Represents a query to be constructed against some data source. This class is built so query
  * clauses can be chained together to create an entire query, as shown below
@@ -414,13 +419,14 @@ neon.query.withinDistance = function (locationField, center, distance, distanceU
  * @method getFieldNames
  * @param {String} databaseName The name of the database that holds this data
  * @param {String} tableName The table name whose fields are being returned
+ * @param {String} widgetName The widget name who is requesting the field names. One of {neon.widget}
  * @param {Function} successCallback The callback to call when the field names are successfully retrieved
  * @param {Function} [errorCallback] The optional callback when an error occurs. This is a 3 parameter function that contains the xhr, a short error status and the full error message.
  * @return {neon.util.AjaxRequest} The xhr request object
  */
-neon.query.getFieldNames = function (databaseName, tableName, successCallback, errorCallback) {
+neon.query.getFieldNames = function (databaseName, tableName, widgetName, successCallback, errorCallback) {
     return neon.util.AjaxUtils.doGet(
-        neon.query.queryUrl_('/services/queryservice/fieldnames?databaseName=' + databaseName + '&tableName=' + tableName),
+        neon.query.queryUrl_('/services/queryservice/fieldnames?databaseName=' + databaseName + '&tableName=' + tableName + '&widgetName=' + widgetName),
         {
             success: successCallback,
             error: errorCallback

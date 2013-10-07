@@ -57,7 +57,7 @@ describe('query mapping', function () {
     });
 
     it('get field names', function () {
-        executeAndWait(neon.query.getFieldNames, databaseName, tableName);
+        executeAndWait(neon.query.getFieldNames, databaseName, tableName, "");
         var expected = ['_id', 'firstname', 'lastname', 'city', 'state', 'salary', 'hiredate', 'location'];
         runs(function () {
             expect(currentResult.fieldNames).toBeArrayWithSameElements(expected);

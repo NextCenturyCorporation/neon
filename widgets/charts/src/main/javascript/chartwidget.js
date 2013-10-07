@@ -28,7 +28,7 @@ neon.chartWidget = (function (){
     var filterKey;
     var onChange;
 
-    function onActiveDatasetChanged(message, changeHandler) {
+    function onActiveDatasetChanged(message, changeHandler, widgetName) {
         databaseName = message.database;
         tableName = message.table;
         onChange = changeHandler;
@@ -36,7 +36,7 @@ neon.chartWidget = (function (){
         neon.query.registerForFilterKey(databaseName, tableName, function(filterResponse){
             filterKey = filterResponse;
         });
-        neon.query.getFieldNames(databaseName, tableName, populateFromColumns);
+        neon.query.getFieldNames(databaseName, tableName, widgetName, populateFromColumns);
     }
 
     function populateFromColumns(data) {

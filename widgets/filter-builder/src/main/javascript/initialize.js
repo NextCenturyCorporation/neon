@@ -119,7 +119,7 @@ $(function () {
             executingInitFilterSection();
         });
 
-        neon.query.getFieldNames(dataSet.database, dataSet.table, function (data) {
+        neon.query.getFieldNames(dataSet.database, dataSet.table, "", function (data) {
             neon.filter.setColumns(data.fieldNames);
             executingInitFilterSection();
         });

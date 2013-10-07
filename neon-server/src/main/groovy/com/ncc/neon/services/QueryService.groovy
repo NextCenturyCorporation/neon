@@ -1,10 +1,14 @@
 package com.ncc.neon.services
-import com.ncc.neon.session.ConnectionState
+
+import com.ncc.neon.config.field.ColumnMapping
+import com.ncc.neon.config.field.FieldConfigurationMapping
+import com.ncc.neon.config.field.WidgetDataSet
 import com.ncc.neon.query.Query
 import com.ncc.neon.query.QueryExecutor
 import com.ncc.neon.query.QueryGroup
 import com.ncc.neon.query.QueryUtils
 import com.ncc.neon.query.filter.*
+import com.ncc.neon.session.ConnectionState
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
 
@@ -39,6 +43,9 @@ class QueryService {
 
     @Autowired
     ConnectionState connectionState
+
+    @Autowired
+    FieldConfigurationMapping configurationMapping
 
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
@@ -146,9 +153,21 @@ class QueryService {
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     @Path("fieldnames")
-    FieldNames getFieldNames(@QueryParam("databaseName") String databaseName, @QueryParam("tableName") String tableName) {
+    FieldNames getFieldNames(@QueryParam("databaseName") String databaseName,
+                             @QueryParam("tableName") String tableName,
+                             @QueryParam("widgetName") String widgetName) {
+
+        ColumnMapping mapping = getColumnMapping(databaseName, tableName, widgetName)
         def fieldNames = queryExecutor.getFieldNames(databaseName, tableName)
-        return new FieldNames(fieldNames: fieldNames)
+        return new FieldNames(fieldNames: fieldNames, metadata: mapping)
+    }
+
+    private ColumnMapping getColumnMapping(String databaseName, String tableName, String widgetName) {
+        if (widgetName) {
+            DataSet dataset = new DataSet(databaseName: databaseName, tableName: tableName)
+            return configurationMapping.get(new WidgetDataSet(dataSet: dataset, widgetName: widgetName))
+        }
+        return new ColumnMapping()
     }
 
     private QueryExecutor getQueryExecutor() {
