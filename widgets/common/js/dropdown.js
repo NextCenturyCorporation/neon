@@ -25,16 +25,25 @@ var neon = neon || {};
 
 neon.dropdown = (function () {
 
-    function populateFieldValues(attributeValues, select) {
+    function populateFieldValues(attributeValues, selectId) {
+        var select = $('#' + selectId);
         attributeValues.fieldNames.forEach(function (field) {
             select.append($('<option></option>').attr('value', field).text(field));
         });
+
+        var initialField = attributeValues.metadata.mapping[selectId];
+        if(initialField){
+            setDropdownInitialValue(selectId, initialField);
+            select.change();
+        }
+    }
+
+    function setDropdownInitialValue (selectElementId, value) {
+        $('#' + selectElementId + ' option[value="' + value + '"]').prop('selected', true);
     }
 
     return {
-        setDropdownInitialValue: function (selectElementId, value) {
-            $('#' + selectElementId + ' option[value="' + value + '"]').prop('selected', true);
-        },
+        setDropdownInitialValue: setDropdownInitialValue,
 
         getFieldNamesFromDropdown: function (selectElementId) {
             var optionsSelector = $('#' + selectElementId + ' option');
@@ -54,8 +63,8 @@ neon.dropdown = (function () {
                 var select = $('#' + selectId);
                 select.empty();
                 select.append($('<option></option>').attr('value', '').text('(Select Field)'));
-                populateFieldValues(attributeValues, select);
                 select.change(onChange);
+                populateFieldValues(attributeValues, selectId);
             });
         }
     }
