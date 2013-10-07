@@ -10,7 +10,8 @@ $(function () {
 
         var latField;
         var lonField;
-        var heatmap;
+        var heatmapLayer;
+        var pointsLayer;
 
         var currentData;
         var clientId = OWF.getInstanceId();
@@ -56,14 +57,44 @@ $(function () {
             map = new OpenLayers.Map('map');
             layer = new OpenLayers.Layer.OSM();
 
-            // create our heatmap layer
-            heatmap = new OpenLayers.Layer.Heatmap("Heatmap Layer", map, layer, {visible: true, radius: 10}, {isBaseLayer: false, opacity: 0.3, projection: new OpenLayers.Projection("EPSG:4326")});
-            map.addLayers([layer, heatmap]);
+            //default styling for points layer
+            var defaultStyle = new OpenLayers.StyleMap(OpenLayers.Util.applyDefaults(
+                {fillColor: "#00FF00", fillOpacity: 1, strokeColor: "black", pointRadius: "4"},
+                OpenLayers.Feature.Vector.style["default"]
+            ));
+
+            // create heatmap and points layers
+            heatmapLayer = new OpenLayers.Layer.Heatmap("Heatmap Layer", map, layer, {visible: true, radius: 10}, {isBaseLayer: false, opacity: 0.3, projection: new OpenLayers.Projection("EPSG:4326")});
+            pointsLayer = new OpenLayers.Layer.Vector("Points Layer", {styleMap: defaultStyle});
+
+            //add base map layer
+            map.addLayer(layer);
 
             map.zoomToMaxExtent();
 
             map.events.register("moveend", map, onExtentChanged);
         }
+
+
+
+        $(document).ready(function() {
+            $('#density').click(function() {
+                if($('#density').is(':checked')) {
+                    map.addLayer(heatmapLayer);
+                }
+                else {
+                    map.removeLayer(heatmapLayer);
+                }
+            });
+            $('#points').click(function() {
+                if($('#points').is(':checked')) {
+                    map.addLayer(pointsLayer);
+                }
+                else {
+                    map.removeLayer(pointsLayer);
+                }
+            });
+        });
 
         function onExtentChanged() {
             if (!(latField && lonField)) {
@@ -113,7 +144,6 @@ $(function () {
                     neon.query.saveState(clientId, stateObject);
                 });
             }
-
         }
 
         function buildQuery(latField, lonField, sizeByField, colorByField) {
@@ -154,6 +184,8 @@ $(function () {
             var latField = getLatField();
             var lonField = getLonField();
 
+            addFeaturesToPointsLayer(data);
+
             var transformedTestData = { max: 1, data: [] },
                 datalen = data.length,
                 nudata = [];
@@ -167,7 +199,24 @@ $(function () {
 
             transformedTestData.data = nudata;
 
-            heatmap.setDataSet(transformedTestData);
+            heatmapLayer.setDataSet(transformedTestData);
+        }
+
+        function addFeaturesToPointsLayer(data) {
+            var latField = getLatField();
+            var lonField = getLonField();
+            var newData = [];
+            var features = [];
+
+            _.each(data, function (element) {
+                var point = new OpenLayers.Geometry.Point(element[lonField], element[latField]);
+                point.transform(new OpenLayers.Projection("EPSG:4326"), new OpenLayers.Projection("EPSG:900913"));
+                var feature = new OpenLayers.Feature.Vector(point);
+                newData.push(feature);
+            });
+
+            pointsLayer.removeAllFeatures();
+            pointsLayer.addFeatures(newData);
         }
 
         function getLatField() {
@@ -184,6 +233,27 @@ $(function () {
 
         function getColorByField() {
             return $('#color-by option:selected').val();
+        }
+
+        function applyFill(colorByField, data) {
+            if (colorByField) {
+                var colorScale;
+                // if coloring by a numeric field, find the min/max values and map the other values in between
+                // otherwise, map unique values to specific colors
+                if (isNumeric(colorByField)) {
+                    var min = minValue(data, colorByField);
+                    var max = maxValue(data, colorByField);
+                    colorScale = new aperture.Scalar('color', [min, max]).mapKey(HEATMAP_COLORS);
+                }
+                else {
+                    var values = uniqueValues(data, colorByField);
+                    colorScale = new aperture.Ordinal('color', values).mapKey(ORDINAL_COLORS);
+                }
+                pointsLayer.map('fill').from(colorByField).using(colorScale);
+            }
+            else {
+                pointsLayer.map('fill').asValue(DEFAULT_FILL_COLOR);
+            }
         }
 
         function buildStateObject(query) {
