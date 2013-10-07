@@ -1,5 +1,7 @@
 package com.ncc.neon.hive
 
+import com.ncc.neon.config.field.FieldConfigurationMapping
+import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.ComponentScan
 import org.springframework.context.annotation.Configuration
 import org.springframework.context.annotation.Profile
@@ -33,6 +35,10 @@ class HiveIntegrationTestContext {
 
     static final String HOST_STRING = System.getProperty("hive.host", "localhost:10000")
 
+    @Bean
+    FieldConfigurationMapping configurationBundle(){
+        return new FieldConfigurationMapping()
+    }
 
 
 }

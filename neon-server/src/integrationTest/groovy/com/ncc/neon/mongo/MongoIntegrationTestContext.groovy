@@ -1,6 +1,9 @@
 package com.ncc.neon.mongo
 import com.mongodb.MongoClient
 import com.ncc.neon.config.MongoConfigParser
+import com.ncc.neon.config.field.FieldConfigurationMapping
+import org.codehaus.jackson.map.ObjectMapper
+import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.ComponentScan
 import org.springframework.context.annotation.Configuration
 import org.springframework.context.annotation.Profile
@@ -43,4 +46,8 @@ class MongoIntegrationTestContext {
         MONGO = new MongoClient(serverAddresses)
     }
 
+    @Bean
+    FieldConfigurationMapping configurationBundle(){
+        return new FieldConfigurationMapping()
+    }
 }
