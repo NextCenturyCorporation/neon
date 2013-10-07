@@ -1,6 +1,8 @@
 package com.ncc.neon.config
-
+import com.ncc.neon.config.field.FieldConfigurationMapping
+import org.codehaus.jackson.map.ObjectMapper
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.context.annotation.Profile
 import org.springframework.context.annotation.PropertySource
@@ -52,6 +54,16 @@ class ProductionAppContext {
             properties.load(new FileInputStream(override))
             environment.propertySources.addFirst(new PropertiesPropertySource("overrides", properties))
         }
+    }
+
+    @Bean
+    FieldConfigurationMapping configurationBundle(){
+        String bundle = ProductionAppContext.getClassLoader().getResourceAsStream("config-bundle.json")?.text
+        if(!bundle){
+            return new FieldConfigurationMapping()
+        }
+        ObjectMapper mapper = new ObjectMapper()
+        return mapper.readValue(bundle, FieldConfigurationMapping)
     }
 
 }

@@ -1,7 +1,9 @@
 package com.ncc.neon.config.field
-
-import groovy.transform.ToString
-
+import org.codehaus.jackson.JsonGenerator
+import org.codehaus.jackson.JsonProcessingException
+import org.codehaus.jackson.map.JsonSerializer
+import org.codehaus.jackson.map.ObjectMapper
+import org.codehaus.jackson.map.SerializerProvider
 /*
  * ************************************************************************
  * Copyright (c), 2013 Next Century Corporation. All Rights Reserved.
@@ -29,15 +31,15 @@ import groovy.transform.ToString
  */
 
 /**
- * Maps column names that exist in the dataset to the desired selected value.
+ * Allows serialization of a map key, necessary for Jackson with a complex type as a key in a map.
  */
-@ToString(includeNames = true)
-class ColumnMapping {
 
-    Map<String, String> mapping = [:]
+class WidgetDataSetKeySerializer extends JsonSerializer<WidgetDataSet> {
+    private static final ObjectMapper MAPPER = new ObjectMapper()
 
-    void put(String columnName, String value) {
-        mapping.put(columnName, value)
+    @Override
+    void serialize(WidgetDataSet value, JsonGenerator jgen, SerializerProvider provider) throws IOException, JsonProcessingException {
+        String json = MAPPER.writeValueAsString(value)
+        jgen.writeFieldName(json)
     }
-
 }

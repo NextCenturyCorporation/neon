@@ -1,7 +1,5 @@
 package com.ncc.neon.config.field
 
-import groovy.transform.ToString
-
 /*
  * ************************************************************************
  * Copyright (c), 2013 Next Century Corporation. All Rights Reserved.
@@ -29,15 +27,14 @@ import groovy.transform.ToString
  */
 
 /**
- * Maps column names that exist in the dataset to the desired selected value.
+ * Widget names used for configuration bundles.
  */
-@ToString(includeNames = true)
-class ColumnMapping {
 
-    Map<String, String> mapping = [:]
+class WidgetNames {
 
-    void put(String columnName, String value) {
-        mapping.put(columnName, value)
-    }
+    static final String CIRCULAR_HEAT = "CircularHeat"
+    static final String TIMELINE = "Timeline"
+    static final String BARCHART = "Barchart"
+    static final String MAP = "Map"
 
 }

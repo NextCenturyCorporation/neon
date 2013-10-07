@@ -1,7 +1,7 @@
 package com.ncc.neon.config.field
-
 import com.ncc.neon.query.filter.DataSet
-import groovy.transform.Canonical
+import groovy.transform.EqualsAndHashCode
+import groovy.transform.ToString
 /*
  * ************************************************************************
  * Copyright (c), 2013 Next Century Corporation. All Rights Reserved.
@@ -33,7 +33,8 @@ import groovy.transform.Canonical
  * so this object holds that information.
  */
 
-@Canonical
+@ToString(includeNames = true)
+@EqualsAndHashCode
 class WidgetDataSet {
 
     DataSet dataSet

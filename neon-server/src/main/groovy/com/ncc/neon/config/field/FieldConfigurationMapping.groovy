@@ -1,5 +1,8 @@
 package com.ncc.neon.config.field
 
+import org.codehaus.jackson.map.annotate.JsonDeserialize
+import org.codehaus.jackson.map.annotate.JsonSerialize
+
 /*
  * ************************************************************************
  * Copyright (c), 2013 Next Century Corporation. All Rights Reserved.
@@ -32,13 +35,15 @@ package com.ncc.neon.config.field
 
 class FieldConfigurationMapping {
 
+    @JsonSerialize(keyUsing = WidgetDataSetKeySerializer)
+    @JsonDeserialize(keyUsing = WidgetDataSetKeyDeserializer)
     Map<WidgetDataSet, ColumnMapping> fieldConfigurationMapping = [:]
 
-    void put(WidgetDataSet widgetDataSet, ColumnMapping mapping){
+    void put(WidgetDataSet widgetDataSet, ColumnMapping mapping) {
         fieldConfigurationMapping.put(widgetDataSet, mapping)
     }
 
-    ColumnMapping get(WidgetDataSet widgetDataSet){
+    ColumnMapping get(WidgetDataSet widgetDataSet) {
         fieldConfigurationMapping.get(widgetDataSet)
     }
 }
