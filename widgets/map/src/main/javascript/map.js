@@ -179,7 +179,6 @@ $(function () {
 
         function doRedrawMap(queryResults) {
             var data = queryResults.data;
-
             var latField = getLatField();
             var lonField = getLonField();
 
@@ -205,7 +204,23 @@ $(function () {
             var latField = getLatField();
             var lonField = getLonField();
             var newData = [];
-            var features = [];
+
+            var colorByField = getColorByField();
+            var sizeByField = getSizeByField();
+
+            // If no size by attribute is provided, just use a raw count
+            sizeByField = sizeByField || COUNT_FIELD_NAME;
+            console.log("sizebyfield " + sizeByField);
+            var minSize = minValue(data, sizeByField);
+            console.log("min " + minSize);
+            var maxSize = maxValue(data, sizeByField);
+            console.log("max " + maxSize);
+            var countScale = new aperture.Scalar('size', [minSize, maxSize]).mapKey([MIN_RADIUS, MAX_RADIUS]);
+            console.log("countscale " + countScale);
+
+//            pointsLayer.map('radius').from(sizeByField).using(countScale);
+//            pointsLayer.map('opacity').asValue(0.8);
+//            applyFill(colorByField, data);
 
             _.each(data, function (element) {
                 var point = new OpenLayers.Geometry.Point(element[lonField], element[latField]);
@@ -232,6 +247,18 @@ $(function () {
 
         function getColorByField() {
             return $('#color-by option:selected').val();
+        }
+
+        function minValue(data, attribute) {
+            return d3.min(data, function (el) {
+                return el[attribute];
+            });
+        }
+
+        function maxValue(data, attribute) {
+            return d3.max(data, function (el) {
+                return el[attribute];
+            });
         }
 
         function applyFill(colorByField, data) {
