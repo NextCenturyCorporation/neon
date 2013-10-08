@@ -79,7 +79,7 @@ $(function () {
         }
 
         $(document).ready(function() {
-            $("input[name='layergroup']").change(function() {
+            $("input[name='layer-group']").change(function() {
                 if($('#points').is(':checked')) {
                     map.addLayer(pointsLayer);
                     map.removeLayer(heatmapLayer);
@@ -87,6 +87,7 @@ $(function () {
                 else {
                     map.removeLayer(pointsLayer);
                     map.addLayer(heatmapLayer);
+
                 }
             });
         });

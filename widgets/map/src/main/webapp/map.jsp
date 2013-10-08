@@ -68,10 +68,10 @@
                 <label class="control-label" for="points">Layers</label>
 
                 <label class="radio inline control-label">
-                    <input id="points" type="radio" name="layergroup" value="points" checked>Default</input>
+                    <input id="points" type="radio" name="layer-group" checked>Default</input>
                 </label>
                 <label class="radio inline control-label">
-                    <input id="density" type="radio" name="layergroup" value="density">Density</input>
+                    <input id="density" type="radio" name="layer-group">Density</input>
                 </label>
             </div>
         </div>
