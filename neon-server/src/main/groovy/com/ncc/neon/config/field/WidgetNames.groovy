@@ -36,5 +36,9 @@ class WidgetNames {
     static final String TIMELINE = "Timeline"
     static final String BARCHART = "Barchart"
     static final String MAP = "Map"
+    static final String TABLE = "Table"
 
+    static boolean contains(String widgetName) {
+        [CIRCULAR_HEAT,TIMELINE,BARCHART,MAP,TABLE].contains(widgetName)
+    }
 }
