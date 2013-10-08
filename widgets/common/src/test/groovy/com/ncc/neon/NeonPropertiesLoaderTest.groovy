@@ -1,4 +1,8 @@
-package com.ncc.neon;
+package com.ncc.neon
+
+import org.junit.Test
+
+
 /*
  * ************************************************************************
  * Copyright (c), 2013 Next Century Corporation. All Rights Reserved.
@@ -25,37 +29,23 @@ package com.ncc.neon;
  * @author tbrooks
  */
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+class NeonPropertiesLoaderTest {
 
-import java.util.Properties;
-
-public class LoadNeonProperties {
-
-    private static final Logger LOGGER = LoggerFactory.getLogger(LoadNeonProperties.class);
-
-    private final Properties properties;
-
-    public LoadNeonProperties(){
-        properties = new Properties();
-        loadNeonProperties();
+    @Test
+    void "get owf url"(){
+        NeonPropertiesLoader loader = new NeonPropertiesLoader()
+        assert loader.owfUrl == "https://fakeOwfUrl"
     }
 
-    private void loadNeonProperties() {
-        try{
-            properties.load(LoadNeonProperties.class.getClassLoader().getResourceAsStream("neon.properties"));
-        }
-        catch(Exception ex){
-            LOGGER.info("Unable to load neon.properties, it is not on the classpath. Using default properties.");
-        }
+    @Test
+    void "get neon url"(){
+        NeonPropertiesLoader loader = new NeonPropertiesLoader()
+        assert loader.neonUrl == "https://fakeNeonUrl"
     }
 
-    public String getNeonUrl(){
-        return properties.getProperty("neon.url","https://localhost:9443/neon");
+    @Test
+    void "make sure properties default works"(){
+        Properties props = new Properties();
+        assert props.getProperty("something", "default") == "default"
     }
-
-    public String getOwfUrl(){
-        return properties.getProperty("owf.url","https://localhost:8443/owf");
-    }
-
 }

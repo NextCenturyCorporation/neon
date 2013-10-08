@@ -4,7 +4,7 @@
         version="2.0">
     <tlib-version>1.0</tlib-version>
     <short-name>prop</short-name>
-    <uri>http://nextcentury.com/neon/taglib</uri>
+    <uri>http://nextcentury.com/tags/neon</uri>
     <tag>
         <name>hidden-neon-server</name>
         <tag-class>com.ncc.neon.taglib.NeonServerTag</tag-class>

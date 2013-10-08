@@ -35,7 +35,6 @@ sourceCompatibility = 1.7
 
 def TEST_GROUP = JavaBasePlugin.VERIFICATION_GROUP
 def springVersion = "3.2.1.RELEASE"
-def logbackVersion = "1.0.13"
 
 buildscript {
     repositories {
@@ -237,6 +236,26 @@ processAcceptanceTestResources {
                 "mongo.hosts": getMongoHosts()
         ])
     }
+}
+
+task generateConfigurationBundle(type: JavaExec){
+    dependsOn 'classes'
+    main = 'com.ncc.neon.config.field.GenerateConfigBundleScript'
+    classpath = sourceSets.main.runtimeClasspath
+}
+
+task addConfigurationBundleToAppServer(type: Copy){
+    dependsOn 'generateConfigurationBundle'
+    doFirst {
+        delete "${neonServer}/lib/config-bundle.json"
+    }
+
+    from("${buildDir}/config")
+    into "${neonServer}/lib"
+}
+
+project.getTasksByName('deployToTomcat', false).each { task ->
+    task.dependsOn 'addConfigurationBundleToAppServer'
 }
 
 // if the hosts are not specified just use an empty string and neon will choose defaults

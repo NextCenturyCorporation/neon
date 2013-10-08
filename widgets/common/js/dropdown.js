@@ -31,6 +31,7 @@ neon.dropdown = (function () {
             select.append($('<option></option>').attr('value', field).text(field));
         });
 
+
         if(attributeValues.metadata){
             var initialField = attributeValues.metadata.mapping[selectId];
             if(initialField){
@@ -68,6 +69,9 @@ neon.dropdown = (function () {
                 select.change(onChange);
                 populateFieldValues(attributeValues, selectId);
             });
+            if(_.keys(attributeValues.metadata.mapping).length > 0){
+                onChange();
+            }
         }
     }
 })();

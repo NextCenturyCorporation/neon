@@ -23,6 +23,9 @@ $(function () {
         // a counter of how many items are in each location group used to size the dots if no other size-by attribute is provided
         var COUNT_FIELD_NAME = 'count_';
 
+        var MIN_RADIUS = 3;
+        var MAX_RADIUS = 20;
+
         var map;
 
         // instantiating the message handler adds it as a listener
@@ -179,7 +182,6 @@ $(function () {
 
         function doRedrawMap(queryResults) {
             var data = queryResults.data;
-
             var latField = getLatField();
             var lonField = getLonField();
 
@@ -205,12 +207,43 @@ $(function () {
             var latField = getLatField();
             var lonField = getLonField();
             var newData = [];
-            var features = [];
+
+            var colorByField = getColorByField();
+            var sizeByField = getSizeByField();
+            var range;
+            var possibleRadius = [4, 6, 8, 10, 12, 14, 16, 18];
+
+            // If no size by attribute is provided, just use a raw count
+            sizeByField = sizeByField || COUNT_FIELD_NAME;
+            var minSize = data[0][sizeByField];
+            var maxSize = data[0][sizeByField];
+
+            for(var i = 0; i < data.length; i++) {
+                if(data[i][sizeByField] > maxSize) {
+                    maxSize = data[i][sizeByField];
+                }
+                if(data[i][sizeByField] < minSize) {
+                    minSize = data[i][sizeByField];
+                }
+            }
+
+            range = Math.ceil((maxSize-minSize)/possibleRadius.length);
+
 
             _.each(data, function (element) {
                 var point = new OpenLayers.Geometry.Point(element[lonField], element[latField]);
                 point.transform(new OpenLayers.Projection("EPSG:4326"), new OpenLayers.Projection("EPSG:900913"));
                 var feature = new OpenLayers.Feature.Vector(point);
+
+                var radius = element[sizeByField] % range;
+
+                feature.style = new OpenLayers.Symbolizer.Point({
+                    fillColor: "#00FF00",
+                    fillOpacity: 1,
+                    strokeColor: "black",
+                    pointRadius:radius
+                });
+
                 newData.push(feature);
             });
 
