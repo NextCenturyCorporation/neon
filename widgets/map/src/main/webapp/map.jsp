@@ -67,11 +67,11 @@
             <div class="control-group">
                 <label class="control-label" for="points">Layers</label>
 
-                <label class="checkbox inline control-label layers">
-                    <input id="points" type="checkbox" value="points" checked>Default</input>
+                <label class="radio inline control-label">
+                    <input id="points" type="radio" name="layergroup" value="points" checked>Default</input>
                 </label>
-                <label class="checkbox inline control-label layers">
-                    <input id="density" type="checkbox" value="density">Density</input>
+                <label class="radio inline control-label">
+                    <input id="density" type="radio" name="layergroup" value="density">Density</input>
                 </label>
             </div>
         </div>

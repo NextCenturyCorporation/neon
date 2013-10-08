@@ -78,23 +78,15 @@ $(function () {
             map.events.register("moveend", map, onExtentChanged);
         }
 
-
-
         $(document).ready(function() {
-            $('#density').click(function() {
-                if($('#density').is(':checked')) {
-                    map.addLayer(heatmapLayer);
-                }
-                else {
-                    map.removeLayer(heatmapLayer);
-                }
-            });
-            $('#points').click(function() {
+            $("input[name='layergroup']").change(function() {
                 if($('#points').is(':checked')) {
                     map.addLayer(pointsLayer);
+                    map.removeLayer(heatmapLayer);
                 }
                 else {
                     map.removeLayer(pointsLayer);
+                    map.addLayer(heatmapLayer);
                 }
             });
         });

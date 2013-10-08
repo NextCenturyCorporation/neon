@@ -13,11 +13,3 @@
 img {
     max-width: none;
 }
-
-input[type="checkbox"] {
-    float: left;
-}
-
-.layers {
-    padding-left: 19px;
-}
