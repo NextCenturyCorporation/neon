@@ -69,8 +69,10 @@ neon.dropdown = (function () {
                 select.change(onChange);
                 populateFieldValues(attributeValues, selectId);
             });
-            if(_.keys(attributeValues.metadata.mapping).length > 0){
-                onChange();
+            if(attributeValues.metadata){
+                if(_.keys(attributeValues.metadata.mapping).length > 0){
+                    onChange();
+                }
             }
         }
     }
