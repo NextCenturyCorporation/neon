@@ -15,6 +15,7 @@ def neonServerWebapps = neonServer + '/webapps'
 
 // the neon-server is just output as neon.js for simpler referencing
 project(":neon-server").ext.outfile = 'neon'
+project(":neon-server").ext.neonServer = neonServer
 
 subprojects{
     version = '1.0.0-SNAPSHOT'
@@ -102,7 +103,7 @@ configure(subprojects.findAll { it.name != 'common'}) {
 }
 
 task jettyRunAll(type: com.ncc.common.JettyRunAll) {
-    dependsOn ':neon-server:concatjs'
+    dependsOn ':neon-server:concatjs', ':neon-server:generateConfigurationBundle'
     ssl = true
     keystorePath = this.class.getResource("/keystore").file
     keystorePassword = "neon"
@@ -111,6 +112,8 @@ task jettyRunAll(type: com.ncc.common.JettyRunAll) {
 
     def serverProject = project(":neon-server")
     def serverProjectName = serverProject.name
+    serverProject.sourceSets.main.runtimeClasspath += files("${serverProject.buildDir}/config")
+
     doFirst {
         System.setProperty("log.dir", "${serverProject.buildDir}/jettyRunAllLogs")
     }
@@ -129,6 +132,7 @@ task jettyRunAll(type: com.ncc.common.JettyRunAll) {
         if (proj.name == serverProjectName) {
             dirs << proj.buildDir.absolutePath
         }
+        println dirs
         return dirs
     }
 

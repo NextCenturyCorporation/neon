@@ -32,8 +32,9 @@ import org.slf4j.LoggerFactory
 final class GenerateConfigBundleScript {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(GenerateConfigBundleScript)
-    private static final String BUNDLE_CSV_LOCATION = "neon-server/config/bundle.csv"
-    private static final String OUTPUT_LOCATION = "neon-server/build/config/config-bundle.json"
+    private static final String BUNDLE_CSV_LOCATION = "config/bundle.csv"
+    private static final String OUTPUT_LOCATION = "build/config"
+    private static final String OUTPUT_FILE_NAME = "config-bundle.json"
 
     private final FieldConfigurationMapping configurationMapping = new FieldConfigurationMapping()
 
@@ -41,7 +42,7 @@ final class GenerateConfigBundleScript {
     void parseBundleSpec(){
         File bundleSpec = new File(BUNDLE_CSV_LOCATION)
         if(!bundleSpec.exists()){
-            LOGGER.info("${BUNDLE_CSV_LOCATION} does not exist; not generating any config bundle.")
+            LOGGER.info("${bundleSpec.absolutePath} does not exist; not generating any config bundle.")
             return
         }
         readEachLine(bundleSpec)
@@ -63,7 +64,8 @@ final class GenerateConfigBundleScript {
         ObjectMapper mapper = new ObjectMapper()
         String json = mapper.writeValueAsString(configurationMapping)
 
-        File file = new File(OUTPUT_LOCATION)
+        new File(OUTPUT_LOCATION).mkdirs()
+        File file = new File("$OUTPUT_LOCATION/$OUTPUT_FILE_NAME")
         file.text = json
         LOGGER.info("Outputting config bundle to ${OUTPUT_LOCATION}")
     }
