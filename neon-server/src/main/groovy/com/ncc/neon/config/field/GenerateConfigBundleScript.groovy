@@ -29,7 +29,7 @@ import org.slf4j.LoggerFactory
  * @author tbrooks
  */
 
-class GenerateConfigBundleScript {
+final class GenerateConfigBundleScript {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(GenerateConfigBundleScript)
     private static final String BUNDLE_CSV_LOCATION = "neon-server/config/bundle.csv"
