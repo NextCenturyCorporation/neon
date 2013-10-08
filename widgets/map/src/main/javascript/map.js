@@ -62,7 +62,7 @@ $(function () {
 
             //default styling for points layer
             var defaultStyle = new OpenLayers.StyleMap(OpenLayers.Util.applyDefaults(
-                {fillColor: "#00FF00", fillOpacity: 1, strokeColor: "black", pointRadius: "4"},
+                {fillColor: "#00FF00", fillOpacity:.8, strokeOpacity:.8, strokeWidth: 1, pointRadius: "4"},
                 OpenLayers.Feature.Vector.style["default"]
             ));
 
@@ -210,38 +210,24 @@ $(function () {
 
             var colorByField = getColorByField();
             var sizeByField = getSizeByField();
-            var range;
-            var possibleRadius = [4, 6, 8, 10, 12, 14, 16, 18];
 
             // If no size by attribute is provided, just use a raw count
             sizeByField = sizeByField || COUNT_FIELD_NAME;
-            var minSize = data[0][sizeByField];
-            var maxSize = data[0][sizeByField];
-
-            for(var i = 0; i < data.length; i++) {
-                if(data[i][sizeByField] > maxSize) {
-                    maxSize = data[i][sizeByField];
-                }
-                if(data[i][sizeByField] < minSize) {
-                    minSize = data[i][sizeByField];
-                }
-            }
-
-            range = Math.ceil((maxSize-minSize)/possibleRadius.length);
-
 
             _.each(data, function (element) {
                 var point = new OpenLayers.Geometry.Point(element[lonField], element[latField]);
                 point.transform(new OpenLayers.Projection("EPSG:4326"), new OpenLayers.Projection("EPSG:900913"));
                 var feature = new OpenLayers.Feature.Vector(point);
 
-                var radius = element[sizeByField] % range;
+                //possible values for radius are 5-25, this formula ensures that all radii are in that range
+                var radius = Math.floor((element[sizeByField] % 16) + 5);
 
                 feature.style = new OpenLayers.Symbolizer.Point({
                     fillColor: "#00FF00",
-                    fillOpacity: 1,
-                    strokeColor: "black",
-                    pointRadius:radius
+                    fillOpacity:.8,
+                    strokeOpacity:.8,
+                    strokeWidth: 1,
+                    pointRadius: radius
                 });
 
                 newData.push(feature);
