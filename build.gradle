@@ -132,7 +132,6 @@ task jettyRunAll(type: com.ncc.common.JettyRunAll) {
         if (proj.name == serverProjectName) {
             dirs << proj.buildDir.absolutePath
         }
-        println dirs
         return dirs
     }
 
