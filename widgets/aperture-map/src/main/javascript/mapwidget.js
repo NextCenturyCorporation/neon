@@ -18,6 +18,9 @@ $(function () {
         var clientId = OWF.getInstanceId();
 
         function isNumeric(field) {
+            if(!currentData){
+                return true;
+            }
             return $.isNumeric(currentData[field]);
         }
 
