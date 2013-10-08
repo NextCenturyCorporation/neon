@@ -83,11 +83,14 @@ $(function () {
                 if($('#points').is(':checked')) {
                     map.addLayer(pointsLayer);
                     map.removeLayer(heatmapLayer);
+                    $('#size-by-group').show();
+                    $('#color-by-group').show();
                 }
                 else {
                     map.removeLayer(pointsLayer);
                     map.addLayer(heatmapLayer);
-
+                    $('#size-by-group').hide();
+                    $('#color-by-group').hide();
                 }
             });
         });

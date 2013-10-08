@@ -48,7 +48,7 @@
                 </div>
             </div>
 
-            <div class="control-group">
+            <div id="size-by-group" class="control-group">
                 <label class="control-label" for="size-by">Size By</label>
 
                 <div class="controls">
@@ -56,7 +56,7 @@
                 </div>
             </div>
 
-            <div class="control-group">
+            <div id="color-by-group" class="control-group">
                 <label class="control-label" for="color-by">Color By</label>
 
                 <div class="controls">
