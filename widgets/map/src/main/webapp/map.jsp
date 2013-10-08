@@ -68,7 +68,7 @@
                 <label class="control-label" for="points">Layers</label>
 
                 <label class="checkbox inline control-label layers">
-                    <input id="points" type="checkbox" value="points">Default</input>
+                    <input id="points" type="checkbox" value="points" checked>Default</input>
                 </label>
                 <label class="checkbox inline control-label layers">
                     <input id="density" type="checkbox" value="density">Density</input>

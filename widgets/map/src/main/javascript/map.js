@@ -70,6 +70,9 @@ $(function () {
             //add base map layer
             map.addLayer(layer);
 
+            //add default points layer
+            map.addLayer(pointsLayer);
+
             map.zoomToMaxExtent();
 
             map.events.register("moveend", map, onExtentChanged);
