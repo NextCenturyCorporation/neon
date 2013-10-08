@@ -32,7 +32,7 @@ neon.widget.MAP = "Map";
 neon.widget.TIMELINE = "Timeline";
 neon.widget.BARCHART = "Barchart";
 neon.widget.CIRCULAR_HEAT = "CircularHeat";
-neon.widget.TABLE = "Table"
+neon.widget.TABLE = "Table";
 
 /**
  * Represents a query to be constructed against some data source. This class is built so query

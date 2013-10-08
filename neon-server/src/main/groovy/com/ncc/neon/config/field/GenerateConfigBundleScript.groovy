@@ -37,6 +37,7 @@ class GenerateConfigBundleScript {
 
     private final FieldConfigurationMapping configurationMapping = new FieldConfigurationMapping()
 
+    @SuppressWarnings("JavaIoPackageAccess")
     void parseBundleSpec(){
         File bundleSpec = new File(BUNDLE_CSV_LOCATION)
         if(!bundleSpec.exists()){
@@ -57,6 +58,7 @@ class GenerateConfigBundleScript {
         }
     }
 
+    @SuppressWarnings("JavaIoPackageAccess")
     private void outputFile() {
         ObjectMapper mapper = new ObjectMapper()
         String json = mapper.writeValueAsString(configurationMapping)
@@ -74,7 +76,6 @@ class GenerateConfigBundleScript {
         WidgetDataSet widgetDataSet = new WidgetDataSet(widgetName: dataArray[2], dataSet: dataSet)
 
         def columnMap = parseColumnMap(dataArray[3])
-        println columnMap
 
         configurationMapping.put(widgetDataSet, new ColumnMapping(mapping: columnMap))
     }
