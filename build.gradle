@@ -16,6 +16,9 @@ def neonServerWebapps = neonServer + '/webapps'
 // the neon-server is just output as neon.js for simpler referencing
 project(":neon-server").ext.outfile = 'neon'
 project(":neon-server").ext.neonServer = neonServer
+project(":neon-server").ext.logbackVersion = "1.0.13"
+project(":common").ext.logbackVersion = "1.0.13"
+
 
 subprojects{
     version = '1.0.0-SNAPSHOT'

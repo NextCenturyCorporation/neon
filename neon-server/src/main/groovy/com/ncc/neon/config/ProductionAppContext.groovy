@@ -1,6 +1,8 @@
 package com.ncc.neon.config
 import com.ncc.neon.config.field.FieldConfigurationMapping
 import org.codehaus.jackson.map.ObjectMapper
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
@@ -44,6 +46,8 @@ class ProductionAppContext {
     @Autowired
     private Environment environment
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(ProductionAppContext)
+
     @PostConstruct
     @SuppressWarnings('JavaIoPackageAccess') // suppress to allow local file overrides
     def postConstruct() {
@@ -60,6 +64,7 @@ class ProductionAppContext {
     FieldConfigurationMapping configurationBundle(){
         String bundle = ProductionAppContext.getClassLoader().getResourceAsStream("config-bundle.json")?.text
         if(!bundle){
+            LOGGER.info("No configuration bundle found.")
             return new FieldConfigurationMapping()
         }
         ObjectMapper mapper = new ObjectMapper()

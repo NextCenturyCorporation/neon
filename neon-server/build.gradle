@@ -35,7 +35,6 @@ sourceCompatibility = 1.7
 
 def TEST_GROUP = JavaBasePlugin.VERIFICATION_GROUP
 def springVersion = "3.2.1.RELEASE"
-def logbackVersion = "1.0.13"
 
 buildscript {
     repositories {
