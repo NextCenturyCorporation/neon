@@ -31,10 +31,12 @@ neon.dropdown = (function () {
             select.append($('<option></option>').attr('value', field).text(field));
         });
 
-        var initialField = attributeValues.metadata.mapping[selectId];
-        if(initialField){
-            setDropdownInitialValue(selectId, initialField);
-            select.change();
+        if(attributeValues.metadata){
+            var initialField = attributeValues.metadata.mapping[selectId];
+            if(initialField){
+                setDropdownInitialValue(selectId, initialField);
+                select.change();
+            }
         }
     }
 
