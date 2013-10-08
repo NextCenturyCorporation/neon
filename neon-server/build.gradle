@@ -239,6 +239,26 @@ processAcceptanceTestResources {
     }
 }
 
+task generateConfigurationBundle(type: JavaExec){
+    dependsOn 'classes'
+    main = 'com.ncc.neon.config.field.GenerateConfigBundleScript'
+    classpath = sourceSets.main.runtimeClasspath
+}
+
+task addConfigurationBundleToAppServer(type: Copy){
+    dependsOn 'generateConfigurationBundle'
+    doFirst {
+        delete "${neonServer}/lib/config-bundle.json"
+    }
+
+    from("${buildDir}/config")
+    into "${neonServer}/lib"
+}
+
+project.getTasksByName('deployToTomcat', false).each { task ->
+    task.dependsOn 'addConfigurationBundleToAppServer'
+}
+
 // if the hosts are not specified just use an empty string and neon will choose defaults
 
 def getMongoHosts() {
