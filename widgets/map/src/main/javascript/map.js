@@ -62,7 +62,7 @@ $(function () {
 
             //default styling for points layer
             var defaultStyle = new OpenLayers.StyleMap(OpenLayers.Util.applyDefaults(
-                {fillColor: "#00FF00", fillOpacity:.8, strokeOpacity:.8, strokeWidth: 1, pointRadius: "4"},
+                {fillColor: "#00FF00", fillOpacity: ".8", strokeOpacity: ".8", strokeWidth: "1", pointRadius: "4"},
                 OpenLayers.Feature.Vector.style["default"]
             ));
 
@@ -224,9 +224,9 @@ $(function () {
 
                 feature.style = new OpenLayers.Symbolizer.Point({
                     fillColor: "#00FF00",
-                    fillOpacity:.8,
-                    strokeOpacity:.8,
-                    strokeWidth: 1,
+                    fillOpacity: ".8",
+                    strokeOpacity: ".8",
+                    strokeWidth: "1",
                     pointRadius: radius
                 });
 
