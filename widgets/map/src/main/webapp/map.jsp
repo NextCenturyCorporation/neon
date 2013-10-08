@@ -48,6 +48,17 @@
                 </div>
             </div>
 
+            <div class="control-group">
+                <label class="control-label" for="points">Layers</label>
+
+                <label class="radio inline control-label">
+                    <input id="points" type="radio" name="layer-group" checked>Default</input>
+                </label>
+                <label class="radio inline control-label">
+                    <input id="density" type="radio" name="layer-group">Density</input>
+                </label>
+            </div>
+
             <div id="size-by-group" class="control-group">
                 <label class="control-label" for="size-by">Size By</label>
 
@@ -64,16 +75,6 @@
                 </div>
             </div>
 
-            <div class="control-group">
-                <label class="control-label" for="points">Layers</label>
-
-                <label class="radio inline control-label">
-                    <input id="points" type="radio" name="layer-group" checked>Default</input>
-                </label>
-                <label class="radio inline control-label">
-                    <input id="density" type="radio" name="layer-group">Density</input>
-                </label>
-            </div>
         </div>
     </div>
 
