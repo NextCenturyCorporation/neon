@@ -234,7 +234,6 @@ $(function () {
                 var radius = 3;
                 if(element[sizeByField] > 1) {
                     radius = (2.54*log10(element[sizeByField])) + 3;
-                    console.log(radius);
                 }
 
                 //if colorby is utilized, change default color
