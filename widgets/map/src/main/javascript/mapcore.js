@@ -12,7 +12,6 @@ coreMap.Map = function(elementId, opts){
     this.longitudeMapping = opts.longitudeMapping || coreMap.Map.DEFAULT_LONGITUDE_MAPPING;
 
     this.setupMapAndLayers();
-
 };
 
 coreMap.Map.DEFAULT_WIDTH = 800;
@@ -55,19 +54,36 @@ coreMap.Map.prototype.getValueFromDataElement = function(mapping, element){
     return element[mapping];
 };
 
+coreMap.Map.prototype.toggleLayers = function(){
+    if(this.currentLayer === this.pointsLayer){
+        this.map.addLayer(this.heatmapLayer);
+        this.map.removeLayer(this.pointsLayer);
+        this.currentLayer = this.heatmapLayer;
+    }
+    else{
+        this.map.addLayer(this.pointsLayer);
+        this.map.removeLayer(this.heatmapLayer);
+        this.currentLayer = this.pointsLayer;
+    }
+};
 
 coreMap.Map.prototype.setupMapAndLayers = function(){
     this.map = new OpenLayers.Map();
     var baseLayer = new OpenLayers.Layer.OSM();
     this.map.addLayer(baseLayer);
 
-    var defaultStyle = new OpenLayers.StyleMap(OpenLayers.Util.applyDefaults(
-        {fillColor: "#00FF00", fillOpacity: 0.8, strokeOpacity: 0.8, strokeWidth: 1, pointRadius: 4},
-        OpenLayers.Feature.Vector.style["default"]
-    ));
+    var style = {
+        styleMap: new OpenLayers.StyleMap(OpenLayers.Util.applyDefaults(
+            {fillColor: "#00FF00", fillOpacity: 0.8, strokeOpacity: 0.8, strokeWidth: 1, pointRadius: 4},
+            OpenLayers.Feature.Vector.style["default"]
+        ))
+    };
+    this.pointsLayer = new OpenLayers.Layer.Vector("Points Layer", style);
 
-    this.heatmapLayer = new OpenLayers.Layer.Heatmap("Heatmap Layer", this.map, this.layer, {visible: true, radius: 10}, {isBaseLayer: false, opacity: 0.3, projection: new OpenLayers.Projection("EPSG:4326")});
-    this.pointsLayer = new OpenLayers.Layer.Vector("Points Layer", {styleMap: defaultStyle});
+    var hmOptions = {visible: true, radius: 10};
+    var options = {isBaseLayer: false, opacity: 0.3, projection: new OpenLayers.Projection("EPSG:4326")};
+    this.heatmapLayer = new OpenLayers.Layer.Heatmap("Heatmap Layer", this.map, this.layer, hmOptions, options);
 
-    this.map.addLayer(this.pointsLayer);
+    this.currentLayer = this.pointsLayer;
+    this.map.addLayer(this.currentLayer);
 };
