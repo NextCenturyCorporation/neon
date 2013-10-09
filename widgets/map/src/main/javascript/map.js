@@ -20,7 +20,6 @@ $(function () {
             if(!currentData){
                 return true;
             }
-
             return $.isNumeric(currentData[field]);
         }
 
@@ -212,11 +211,19 @@ $(function () {
             var lonField = getLonField();
             var newData = [];
 
-            var colorByField = getColorByField();
             var sizeByField = getSizeByField();
-
             // If no size by attribute is provided, just use a raw count
             sizeByField = sizeByField || COUNT_FIELD_NAME;
+
+            var colorByField = getColorByField();
+            var colorScale = d3.scale.category20();
+            var color = "#00FF00";
+
+            if(isNumeric(colorByField)) {
+                var min = minValue(data, colorByField);
+                var max = maxValue(data, colorByField);
+                colorScale = d3.scale.linear().domain([min, max]).range(['#FFFF00', '#FF0000']);
+            }
 
             _.each(data, function (element) {
                 var point = new OpenLayers.Geometry.Point(element[lonField], element[latField]);
@@ -229,13 +236,16 @@ $(function () {
                     radius = (3.28*log10(element[sizeByField])) + 3;
                 }
 
-                console.log(radius);
+                //if colorby is utilized, change default color
+                if(colorByField) {
+                    color = colorScale(element[colorByField]);
+                }
 
                 feature.style = new OpenLayers.Symbolizer.Point({
-                    fillColor: "#00FF00",
+                    fillColor: color,
                     fillOpacity: 0.8,
                     strokeOpacity: 0.8,
-                    strokeWidth: 1,
+                    strokeWidth: 0.3,
                     pointRadius: radius
                 });
 
@@ -266,25 +276,16 @@ $(function () {
             return $('#color-by option:selected').val();
         }
 
-        function applyFill(colorByField, data) {
-            if (colorByField) {
-                var colorScale;
-                // if coloring by a numeric field, find the min/max values and map the other values in between
-                // otherwise, map unique values to specific colors
-                if (isNumeric(colorByField)) {
-                    var min = minValue(data, colorByField);
-                    var max = maxValue(data, colorByField);
-                    colorScale = new aperture.Scalar('color', [min, max]).mapKey(HEATMAP_COLORS);
-                }
-                else {
-                    var values = uniqueValues(data, colorByField);
-                    colorScale = new aperture.Ordinal('color', values).mapKey(ORDINAL_COLORS);
-                }
-                pointsLayer.map('fill').from(colorByField).using(colorScale);
-            }
-            else {
-                pointsLayer.map('fill').asValue(DEFAULT_FILL_COLOR);
-            }
+        function minValue(data, attribute) {
+            return d3.min(data, function (el) {
+                return el[attribute];
+            });
+        }
+
+        function maxValue(data, attribute) {
+            return d3.max(data, function (el) {
+                return el[attribute];
+            });
         }
 
         function buildStateObject(query) {
