@@ -65,7 +65,7 @@ $(function () {
 
             //default styling for points layer
             var defaultStyle = new OpenLayers.StyleMap(OpenLayers.Util.applyDefaults(
-                {fillColor: "#00FF00", fillOpacity: 0.8, stroke: "#888888", pointRadius: 4},
+                {fillColor: "#00FF00", fillOpacity: 0.8, strokeOpacity: 0.8, strokeWidth: 0.5, stroke: "#888888", pointRadius: 4},
                 OpenLayers.Feature.Vector.style["default"]
             ));
 
@@ -188,7 +188,7 @@ $(function () {
             var latField = getLatField();
             var lonField = getLonField();
 
-            addFeaturesToPointsLayer(data);
+            configurePointsLayer(data);
 
             var transformedTestData = { max: 1, data: [] },
                 datalen = data.length,
@@ -208,7 +208,7 @@ $(function () {
             heatmapLayer.setDataSet(transformedTestData);
         }
 
-        function addFeaturesToPointsLayer(data) {
+        function configurePointsLayer(data) {
             var latField = getLatField();
             var lonField = getLonField();
             var newData = [];
@@ -246,6 +246,8 @@ $(function () {
                 feature.style = new OpenLayers.Symbolizer.Point({
                     fillColor: color,
                     fillOpacity: 0.8,
+                    strokeOpacity: 0.8,
+                    strokeWidth: 0.5,
                     stroke: "#888888",
                     pointRadius: radius
                 });
