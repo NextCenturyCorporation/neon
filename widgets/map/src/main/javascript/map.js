@@ -65,7 +65,7 @@ $(function () {
 
             //default styling for points layer
             var defaultStyle = new OpenLayers.StyleMap(OpenLayers.Util.applyDefaults(
-                {fillColor: "#00FF00", fillOpacity: 0.8, strokeOpacity: 0.8, strokeWidth: 1, pointRadius: 4},
+                {fillColor: "#00FF00", fillOpacity: 0.8, stroke: "#888888", pointRadius: 4},
                 OpenLayers.Feature.Vector.style["default"]
             ));
 
@@ -195,10 +195,12 @@ $(function () {
                 nudata = [];
 
             while (datalen--) {
-                nudata.push({
-                    lonlat: new OpenLayers.LonLat(data[datalen][lonField], data[datalen][latField]),
-                    count: data[datalen].count_
-                });
+                if(data[datalen]) {
+                    nudata.push({
+                        lonlat: new OpenLayers.LonLat(data[datalen][lonField], data[datalen][latField]),
+                        count: data[datalen].count_
+                    });
+                }
             }
 
             transformedTestData.data = nudata;
@@ -244,8 +246,7 @@ $(function () {
                 feature.style = new OpenLayers.Symbolizer.Point({
                     fillColor: color,
                     fillOpacity: 0.8,
-                    strokeOpacity: 0.8,
-                    strokeWidth: 0.3,
+                    stroke: "#888888",
                     pointRadius: radius
                 });
 
