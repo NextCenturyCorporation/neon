@@ -66,7 +66,7 @@ $(function () {
 
             //default styling for points layer
             var defaultStyle = new OpenLayers.StyleMap(OpenLayers.Util.applyDefaults(
-                {fillColor: "#00FF00", fillOpacity: ".8", strokeOpacity: ".8", strokeWidth: "1", pointRadius: "4"},
+                {fillColor: "#00FF00", fillOpacity: 0.8, strokeOpacity: 0.8, strokeWidth: 1, pointRadius: 4},
                 OpenLayers.Feature.Vector.style["default"]
             ));
 
@@ -224,13 +224,18 @@ $(function () {
                 var feature = new OpenLayers.Feature.Vector(point);
 
                 //possible values for radius are 5-25, this formula ensures that all radii are in that range
-                var radius = Math.floor((element[sizeByField] % 16) + 5);
+                var radius = 3;
+                if(element[sizeByField] > 1) {
+                    radius = (3.28*log10(element[sizeByField])) + 3;
+                }
+
+                console.log(radius);
 
                 feature.style = new OpenLayers.Symbolizer.Point({
                     fillColor: "#00FF00",
-                    fillOpacity: ".8",
-                    strokeOpacity: ".8",
-                    strokeWidth: "1",
+                    fillOpacity: 0.8,
+                    strokeOpacity: 0.8,
+                    strokeWidth: 1,
                     pointRadius: radius
                 });
 
@@ -239,6 +244,10 @@ $(function () {
 
             pointsLayer.removeAllFeatures();
             pointsLayer.addFeatures(newData);
+        }
+
+        function log10(num) {
+            return (Math.log(num)/Math.log(10));
         }
 
         function getLatField() {
