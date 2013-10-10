@@ -80,9 +80,9 @@ coreMap.Map.prototype.setupLayers = function(){
     };
     this.pointsLayer = new OpenLayers.Layer.Vector("Points Layer", style);
 
-    var hmOptions = {visible: true, radius: 10};
+    var heatmapOptions = {visible: true, radius: 10};
     var options = {isBaseLayer: false, opacity: 0.3, projection: new OpenLayers.Projection("EPSG:4326")};
-    this.heatmapLayer = new OpenLayers.Layer.Heatmap("Heatmap Layer", this.map, this.layer, hmOptions, options);
+    this.heatmapLayer = new OpenLayers.Layer.Heatmap("Heatmap Layer", this.map, this.layer, heatmapOptions, options);
 
     this.currentLayer = this.pointsLayer;
     this.map.addLayer(this.currentLayer);

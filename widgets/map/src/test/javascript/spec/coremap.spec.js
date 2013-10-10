@@ -19,14 +19,24 @@
  * PROPRIETARY AND CONFIDENTIAL TRADE SECRET MATERIAL NOT FOR DISCLOSURE OUTSIDE
  * OF NEXT CENTURY CORPORATION EXCEPT BY PRIOR WRITTEN PERMISSION AND WHEN
  * RECIPIENT IS UNDER OBLIGATION TO MAINTAIN SECRECY.
+ *
+ * @author tbrooks
  */
-
 
 describe('map', function () {
     var mapId = "map";
 
     beforeEach(function () {
         setFixtures("<div id='" + mapId +"'></div>");
+    });
+
+    it('has a default layer and can toggle layers', function () {
+        var map = new coreMap.Map(mapId);
+        expect(map.currentLayer.name).toEqual("Points Layer");
+        map.toggleLayers();
+        expect(map.currentLayer.name).toEqual("Heatmap Layer");
+        map.toggleLayers();
+        expect(map.currentLayer.name).toEqual("Points Layer");
     });
 
     it('has default width and height', function () {
@@ -40,7 +50,7 @@ describe('map', function () {
         var opts = {
             width: 200,
             height: 100
-        }
+        };
 
         var map = new coreMap.Map(mapId, opts);
 
@@ -49,7 +59,7 @@ describe('map', function () {
     });
 
     it('has default data mapping of latitude and longitude', function () {
-        var data = [{latitude: 50, longitude: 20}, {longitude: 40, latitude: -30}]
+        var data = [{latitude: 50, longitude: 20}, {longitude: 40, latitude: -30}];
         var map = new coreMap.Map(mapId);
         map.setData(data);
 
@@ -60,7 +70,7 @@ describe('map', function () {
     });
 
     it('default latitude and longitude mapping can be overridden', function () {
-        var data = [[50,20], [-30, 40]]
+        var data = [[50,20], [-30, 40]];
 
         var opts = {
             data: data,
@@ -70,7 +80,7 @@ describe('map', function () {
             longitudeMapping: function(element){
                 return element[1];
             }
-        }
+        };
 
         var map = new coreMap.Map(mapId, opts);
 
