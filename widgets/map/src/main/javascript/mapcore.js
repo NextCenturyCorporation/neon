@@ -10,6 +10,7 @@ coreMap.Map = function(elementId, opts){
     this.data = opts.data;
     this.latitudeMapping = opts.latitudeMapping || coreMap.Map.DEFAULT_LATITUDE_MAPPING;
     this.longitudeMapping = opts.longitudeMapping || coreMap.Map.DEFAULT_LONGITUDE_MAPPING;
+    this.countMapping = opts.countMapping || coreMap.Map.DEFAULT_COUNT_MAPPING;
 
     this.map = new OpenLayers.Map();
     this.setupLayers();
@@ -19,6 +20,15 @@ coreMap.Map.DEFAULT_WIDTH = 800;
 coreMap.Map.DEFAULT_HEIGHT = 600;
 coreMap.Map.DEFAULT_LATITUDE_MAPPING = "latitude";
 coreMap.Map.DEFAULT_LONGITUDE_MAPPING = "longitude";
+coreMap.Map.DEFAULT_COUNT_MAPPING = "count_";
+
+coreMap.Map.DEFAULT_OPACITY = 0.8;
+coreMap.Map.DEFAULT_STROKE_WIDTH = 0.5;
+coreMap.Map.DEFAULT_COLOR = "#00ff00";
+coreMap.Map.DEFAULT_STROKE_COLOR = "#ffffff";
+coreMap.Map.DEFAULT_RADIUS = 3;
+
+
 
 coreMap.Map.prototype.setData = function(mapData){
     this.data = mapData;
@@ -42,10 +52,61 @@ coreMap.Map.prototype.renderData = function(){
         point.transform(new OpenLayers.Projection("EPSG:4326"), new OpenLayers.Projection("EPSG:900913"));
         var feature = new OpenLayers.Feature.Vector(point);
         mapData.push(feature);
+
+        feature.style = me.stylePoint(element);
+
     });
 
     me.pointsLayer.removeAllFeatures();
     me.pointsLayer.addFeatures(mapData);
+};
+
+coreMap.Map.prototype.stylePoint = function(element){
+    var radius = this.calculateRadius(element);
+    return this.createStyleObject(null, radius);
+};
+
+coreMap.Map.prototype.calculateRadius = function(element){
+    var count = this.getValueFromDataElement(this.countMapping, element);
+    var radius = coreMap.Map.DEFAULT_RADIUS;
+    if(count > 1) {
+        radius = (2.54 * this.log10(count)) + 3;
+    }
+    return radius;
+
+};
+
+coreMap.Map.prototype.log10 = function (num) {
+    return (Math.log(num)/Math.log(10));
+};
+
+coreMap.Map.prototype.minValue = function(data, mapping) {
+    var me = this;
+    return d3.min(data, function (el) {
+        return me.getValueFromDataElement(mapping, el);
+    });
+};
+
+coreMap.Map.prototype.maxValue = function(data, mapping) {
+    var me = this;
+    return d3.max(data, function (el) {
+        return me.getValueFromDataElement(mapping, el);
+    });
+};
+
+
+coreMap.Map.prototype.createStyleObject = function(color, radius){
+    color = color || coreMap.Map.DEFAULT_COLOR;
+    radius = radius || coreMap.Map.DEFAULT_RADIUS;
+
+    return new OpenLayers.Symbolizer.Point({
+        fillColor: color,
+        fillOpacity: coreMap.Map.DEFAULT_OPACITY,
+        strokeOpacity: coreMap.Map.DEFAULT_OPACITY,
+        strokeWidth: coreMap.Map.DEFAULT_STROKE_WIDTH,
+        stroke: coreMap.Map.DEFAULT_STROKE_COLOR,
+        pointRadius: radius
+    });
 };
 
 coreMap.Map.prototype.getValueFromDataElement = function(mapping, element){

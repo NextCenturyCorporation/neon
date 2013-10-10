@@ -90,4 +90,73 @@ describe('map', function () {
         expect(map.getValueFromDataElement(map.longitudeMapping, data[1])).toEqual(40);
     });
 
+    it('has default radius of 3', function () {
+        var data = [{latitude: 50, longitude: 20}, {longitude: 40, latitude: -30}];
+        var map = new coreMap.Map(mapId);
+        map.setData(data);
+        map.draw();
+
+        expect(map.currentLayer.features[0].style.pointRadius).toEqual(3);
+        expect(map.currentLayer.features[1].style.pointRadius).toEqual(3);
+
+    });
+
+    it('has radius depending on count', function () {
+        var data = [{latitude: 50, longitude: 20, count_: 10},
+            {longitude: 40, latitude: -30, count_: 1},
+            {longitude: 40, latitude: -30, count_: 0},
+            {longitude: 40, latitude: -30, count_: -5},
+            {longitude: 40, latitude: -30, count_: null}
+        ];
+        var map = new coreMap.Map(mapId);
+        map.setData(data);
+        map.draw();
+
+        expect(map.currentLayer.features[0].style.pointRadius).toEqual(5.54);
+        expect(map.currentLayer.features[1].style.pointRadius).toEqual(3);
+        expect(map.currentLayer.features[2].style.pointRadius).toEqual(3);
+        expect(map.currentLayer.features[3].style.pointRadius).toEqual(3);
+        expect(map.currentLayer.features[4].style.pointRadius).toEqual(3);
+    });
+
+    it('has radius ranging between 3 and 21', function () {
+        var data = [{latitude: 50, longitude: 20, count_: -5000},
+            {longitude: 10, latitude: -30, count_: 5},
+            {longitude: 20, latitude: -30, count_: 50 * 1000},
+            {longitude: 50, latitude: -30, count_: 5 * 1000 * 1000}
+        ];
+        var map = new coreMap.Map(mapId);
+        map.setData(data);
+        map.draw();
+
+        expect(map.currentLayer.features[0].style.pointRadius).toEqual(3);
+        expect(map.currentLayer.features[1].style.pointRadius).toBeCloseTo(4.78);
+        expect(map.currentLayer.features[2].style.pointRadius).toBeCloseTo(14.94);
+        expect(map.currentLayer.features[3].style.pointRadius).toBeCloseTo(20.02);
+    });
+
+    it('gets correct minimum and maximum', function () {
+        var data = [{latitude: 50, longitude: 20},
+            {longitude: 10, latitude: -30},
+            {longitude: 20, latitude: 0},
+            {longitude: 50, latitude: 25}
+        ];
+        var map = new coreMap.Map(mapId);
+
+        expect(map.minValue(data, 'latitude')).toEqual(-30);
+        expect(map.maxValue(data, 'latitude')).toEqual(50);
+    });
+
+    it('gets correct minimum and maximum when using function', function () {
+        var data = [[50,20], [-30, 40]];
+
+        var latMap = function(element){
+            return element[0];
+        };
+
+        var map = new coreMap.Map(mapId);
+
+        expect(map.minValue(data, latMap)).toEqual(-30);
+        expect(map.maxValue(data, latMap)).toEqual(50);
+    });
 });
