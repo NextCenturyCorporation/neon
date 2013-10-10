@@ -7,6 +7,7 @@ $(function () {
         var databaseName;
         var tableName;
         var filterKey;
+        var filter;
 
         var latField;
         var lonField;
@@ -100,6 +101,11 @@ $(function () {
                     $('#color-by-group').hide();
                 }
             });
+
+            $('#map-redraw-button').click(function() {
+                redrawMap();
+                eventPublisher.replaceFilter(filterKey, filter);
+            });
         });
 
         function onExtentChanged() {
@@ -125,12 +131,7 @@ $(function () {
             var bottomClause = neon.query.where(latField, ">=", minLat);
             var topClause = neon.query.where(latField, "<=", maxLat);
             var filterClause = neon.query.and(leftClause, rightClause, bottomClause, topClause);
-            var filter = new neon.query.Filter().selectFrom(databaseName, tableName).where(filterClause);
-
-            $('#map-redraw-button').click(function() {
-                redrawMap();
-                eventPublisher.replaceFilter(filterKey, filter);
-            });
+            filter = new neon.query.Filter().selectFrom(databaseName, tableName).where(filterClause);
         }
 
         function redrawMap() {
