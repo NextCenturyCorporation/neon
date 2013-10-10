@@ -10,12 +10,11 @@
     <link rel="stylesheet" type="text/css" href="css/bootstrap/bootstrap.min.css">
     <link rel="stylesheet" type="text/css" href="css/widgetbase.css">
     <link rel="stylesheet" type="text/css" href="css/map.css">
-    <link rel="stylesheet" type="text/css" href="<neon:neon-url/>/css/neon.css">
-
-    <script src="<neon:owf-url/>/js/owf-widget.js"></script>
-    <script src="<neon:neon-url/>/js/neon.js"></script>
 
     <!-- build:js js/map.js -->
+    <script src="js-lib/lodash/1.3.1/lodash.min.js"></script>
+    <script src="js-lib/d3/d3.v3.min.js"></script>
+    <script src="js-lib/jquery/jquery-1.10.1.min.js"></script>
     <script src="js-lib/openlayers/OpenLayers.js"></script>
     <script src="js-lib/heatmap/heatmap.js"></script>
     <script src="js-lib/heatmap/heatmap-openlayers.js"></script>
