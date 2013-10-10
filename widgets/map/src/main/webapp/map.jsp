@@ -60,6 +60,12 @@
                 </label>
             </div>
 
+            <div class="control-group">
+                <div class="btn-group">
+                    <button class="btn" id="map-redraw-button">Redraw Map</button>
+                </div>
+            </div>
+
             <div id="size-by-group" class="control-group">
                 <label class="control-label" for="size-by">Size By</label>
 

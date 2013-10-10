@@ -63,6 +63,7 @@ $(function () {
             map = new OpenLayers.Map('map');
             layer = new OpenLayers.Layer.OSM();
 
+
             //default styling for points layer
             var defaultStyle = new OpenLayers.StyleMap(OpenLayers.Util.applyDefaults(
                 {fillColor: "#00FF00", fillOpacity: 0.8, strokeOpacity: 0.8, strokeWidth: 0.5, stroke: "#888888", pointRadius: 4},
@@ -126,7 +127,10 @@ $(function () {
             var filterClause = neon.query.and(leftClause, rightClause, bottomClause, topClause);
             var filter = new neon.query.Filter().selectFrom(databaseName, tableName).where(filterClause);
 
-            eventPublisher.replaceFilter(filterKey, filter);
+            $('#map-redraw-button').click(function() {
+                redrawMap();
+                eventPublisher.replaceFilter(filterKey, filter);
+            });
         }
 
         function redrawMap() {
