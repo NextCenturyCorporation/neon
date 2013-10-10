@@ -139,7 +139,7 @@ describe('map', function () {
         var data = [{latitude: 50, longitude: 20},
             {longitude: 10, latitude: -30},
             {longitude: 20, latitude: 0},
-            {longitude: 50, latitude: 25}
+            {longitude: 50, latitude: null}
         ];
         var map = new coreMap.Map(mapId);
 
