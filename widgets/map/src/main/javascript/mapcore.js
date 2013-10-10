@@ -11,7 +11,8 @@ coreMap.Map = function(elementId, opts){
     this.latitudeMapping = opts.latitudeMapping || coreMap.Map.DEFAULT_LATITUDE_MAPPING;
     this.longitudeMapping = opts.longitudeMapping || coreMap.Map.DEFAULT_LONGITUDE_MAPPING;
 
-    this.setupMapAndLayers();
+    this.map = new OpenLayers.Map();
+    this.setupLayers();
 };
 
 coreMap.Map.DEFAULT_WIDTH = 800;
@@ -67,8 +68,7 @@ coreMap.Map.prototype.toggleLayers = function(){
     }
 };
 
-coreMap.Map.prototype.setupMapAndLayers = function(){
-    this.map = new OpenLayers.Map();
+coreMap.Map.prototype.setupLayers = function(){
     var baseLayer = new OpenLayers.Layer.OSM();
     this.map.addLayer(baseLayer);
 

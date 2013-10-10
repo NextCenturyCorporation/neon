@@ -22,12 +22,25 @@ module.exports = function (grunt) {
                 stripBanners: true
             },
             nodeps: {
-                src: [src('map.js')],
+                src: [src('mapcore.js')],
                 dest: 'build/js-temp/<%= pkg.name %>.js'
             },
             dist: {
-                src: [lib('openlayers'), lib('heatmap'), 'build/dependencies/**/*.js', '<%= concat.nodeps.dest %>'],
+                src: [lib('jquery'), lib('d3'), lib('openlayers'), lib('heatmap'), 'build/dependencies/**/*.js', '<%= concat.nodeps.dest %>'],
                 dest: outputFile
+            }
+        },
+        jasmine: {
+            unit: {
+                src: outputFile,
+                options: {
+                    specs: 'src/test/javascript/spec/**/*.spec.js',
+                    vendor: '../../js-test-support/lib/**/*.js',
+                    helpers: '../../js-test-support/helpers/**/*.js',
+                    '--web-security': false,
+                    '--local-to-remote-url-access': true,
+                    '--ignore-ssl-errors': true
+                }
             }
         },
         jshint: {
@@ -41,8 +54,9 @@ module.exports = function (grunt) {
 
     grunt.loadNpmTasks('grunt-contrib-concat');
     grunt.loadNpmTasks('grunt-contrib-jshint');
+    grunt.loadNpmTasks('grunt-contrib-jasmine');
 
     // hint after concatenation since the concatenated version is also hinted
-    grunt.registerTask('default', ['concat', 'jshint']);
+    grunt.registerTask('default', ['concat', 'jshint', 'jasmine:unit']);
 
 };
