@@ -232,6 +232,10 @@ $(function () {
                 colorScale = d3.scale.linear().domain([min, max]).range(['#FFFF00', '#FF0000']);
             }
 
+            //change multiple for radius formula based on range of data
+            var maxCount = maxValue(data, sizeByField);
+            var multiple = 17/log10(maxCount);
+
             _.each(data, function (element) {
                 var point = new OpenLayers.Geometry.Point(element[lonField], element[latField]);
                 point.transform(new OpenLayers.Projection("EPSG:4326"), new OpenLayers.Projection("EPSG:900913"));
@@ -240,7 +244,7 @@ $(function () {
                 //possible values for radius are 3-20, this formula ensures that all radii are in that range
                 var radius = 3;
                 if(element[sizeByField] > 1) {
-                    radius = (2.54*log10(element[sizeByField])) + 3;
+                    radius = (multiple*log10(element[sizeByField])) + 3;
                 }
 
                 //if colorby is utilized, change default color
