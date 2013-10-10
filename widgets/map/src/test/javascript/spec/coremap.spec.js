@@ -112,7 +112,7 @@ describe('map', function () {
         map.setData(data);
         map.draw();
 
-        expect(map.currentLayer.features[0].style.pointRadius).toEqual(5.54);
+        expect(map.currentLayer.features[0].style.pointRadius).toBeCloseTo(10.383);
         expect(map.currentLayer.features[1].style.pointRadius).toEqual(3);
         expect(map.currentLayer.features[2].style.pointRadius).toEqual(3);
         expect(map.currentLayer.features[3].style.pointRadius).toEqual(3);
@@ -130,9 +130,9 @@ describe('map', function () {
         map.draw();
 
         expect(map.currentLayer.features[0].style.pointRadius).toEqual(3);
-        expect(map.currentLayer.features[1].style.pointRadius).toBeCloseTo(4.78);
-        expect(map.currentLayer.features[2].style.pointRadius).toBeCloseTo(14.94);
-        expect(map.currentLayer.features[3].style.pointRadius).toBeCloseTo(20.02);
+        expect(map.currentLayer.features[1].style.pointRadius).toBeCloseTo(3.77);
+        expect(map.currentLayer.features[2].style.pointRadius).toBeCloseTo(8.179);
+        expect(map.currentLayer.features[3].style.pointRadius).toBeCloseTo(10.383);
     });
 
     it('gets correct minimum and maximum', function () {

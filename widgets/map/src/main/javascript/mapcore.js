@@ -1,3 +1,6 @@
+//TODO: Documentation
+//TODO: The numeric color by scale for numeric color column mapping.
+
 var coreMap = coreMap || {};
 
 coreMap.Map = function(elementId, opts){
@@ -10,8 +13,10 @@ coreMap.Map = function(elementId, opts){
     this.data = opts.data;
     this.latitudeMapping = opts.latitudeMapping || coreMap.Map.DEFAULT_LATITUDE_MAPPING;
     this.longitudeMapping = opts.longitudeMapping || coreMap.Map.DEFAULT_LONGITUDE_MAPPING;
-    this.countMapping = opts.countMapping || coreMap.Map.DEFAULT_COUNT_MAPPING;
+    this.sizeMapping = opts.sizeMapping || coreMap.Map.DEFAULT_SIZE_MAPPING;
+    this.colorMapping = opts.colorMapping;
 
+    this.colorScale = d3.scale.category20();
     this.map = new OpenLayers.Map();
     this.setupLayers();
 };
@@ -20,27 +25,42 @@ coreMap.Map.DEFAULT_WIDTH = 800;
 coreMap.Map.DEFAULT_HEIGHT = 600;
 coreMap.Map.DEFAULT_LATITUDE_MAPPING = "latitude";
 coreMap.Map.DEFAULT_LONGITUDE_MAPPING = "longitude";
-coreMap.Map.DEFAULT_COUNT_MAPPING = "count_";
+coreMap.Map.DEFAULT_SIZE_MAPPING = "count_";
 
 coreMap.Map.DEFAULT_OPACITY = 0.8;
 coreMap.Map.DEFAULT_STROKE_WIDTH = 0.5;
 coreMap.Map.DEFAULT_COLOR = "#00ff00";
 coreMap.Map.DEFAULT_STROKE_COLOR = "#ffffff";
-coreMap.Map.DEFAULT_RADIUS = 3;
+coreMap.Map.MIN_RADIUS = 3;
+coreMap.Map.MAX_RADIUS = 20;
 
-
+coreMap.Map.prototype.draw = function(){
+    this.map.render(this.elementId);
+    this.map.zoomToMaxExtent();
+    this.addDataToPointsLayer();
+};
 
 coreMap.Map.prototype.setData = function(mapData){
     this.data = mapData;
 };
 
-coreMap.Map.prototype.draw = function(){
-    this.map.render(this.elementId);
-    this.map.zoomToMaxExtent();
-    this.renderData();
+coreMap.Map.prototype.setLatitudeMapping = function(mapping){
+    this.latitudeMapping = mapping;
 };
 
-coreMap.Map.prototype.renderData = function(){
+coreMap.Map.prototype.setLongitudeMapping = function(mapping){
+    this.longitudeMapping = mapping;
+};
+
+coreMap.Map.prototype.setSizeMapping = function(mapping){
+    this.sizeMapping = mapping;
+};
+
+coreMap.Map.prototype.setColorMapping = function(mapping){
+    this.colorMapping = mapping;
+};
+
+coreMap.Map.prototype.addDataToPointsLayer = function(){
     var me = this;
 
     var mapData = [];
@@ -54,7 +74,6 @@ coreMap.Map.prototype.renderData = function(){
         mapData.push(feature);
 
         feature.style = me.stylePoint(element);
-
     });
 
     me.pointsLayer.removeAllFeatures();
@@ -63,22 +82,37 @@ coreMap.Map.prototype.renderData = function(){
 
 coreMap.Map.prototype.stylePoint = function(element){
     var radius = this.calculateRadius(element);
-    return this.createStyleObject(null, radius);
+    var color = this.calculateColor(element);
+
+    return this.createStyleObject(color, radius);
 };
 
 coreMap.Map.prototype.calculateRadius = function(element){
-    var count = this.getValueFromDataElement(this.countMapping, element);
-    var radius = coreMap.Map.DEFAULT_RADIUS;
-    if(count > 1) {
-        radius = (2.54 * this.log10(count)) + 3;
+    var maxSize = this.maxValue(this.data, this.sizeMapping);
+    var multiplier = (coreMap.Map.MAX_RADIUS - coreMap.Map.MIN_RADIUS)/Math.log(maxSize);
+
+    var size = this.getValueFromDataElement(this.sizeMapping, element);
+    var radius = coreMap.Map.MIN_RADIUS;
+    if(size > 1) {
+        radius = (multiplier * this.log10(size)) + coreMap.Map.MIN_RADIUS;
     }
     return radius;
+};
 
+coreMap.Map.prototype.calculateColor = function(element){
+    var category = this.getValueFromDataElement(this.colorMapping, element);
+
+    if(!category){
+        return coreMap.Map.DEFAULT_COLOR;
+    }
+
+    return this.colorScale(category);
 };
 
 coreMap.Map.prototype.log10 = function (num) {
     return (Math.log(num)/Math.log(10));
 };
+
 
 coreMap.Map.prototype.minValue = function(data, mapping) {
     var me = this;
@@ -94,10 +128,9 @@ coreMap.Map.prototype.maxValue = function(data, mapping) {
     });
 };
 
-
 coreMap.Map.prototype.createStyleObject = function(color, radius){
     color = color || coreMap.Map.DEFAULT_COLOR;
-    radius = radius || coreMap.Map.DEFAULT_RADIUS;
+    radius = radius || coreMap.Map.MIN_RADIUS;
 
     return new OpenLayers.Symbolizer.Point({
         fillColor: color,
