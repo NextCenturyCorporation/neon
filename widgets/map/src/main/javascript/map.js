@@ -127,7 +127,10 @@ $(function () {
             var filterClause = neon.query.and(leftClause, rightClause, bottomClause, topClause);
             var filter = new neon.query.Filter().selectFrom(databaseName, tableName).where(filterClause);
 
-            eventPublisher.replaceFilter(filterKey, filter);
+            $('#map-redraw-button').click(function() {
+                redrawMap();
+                eventPublisher.replaceFilter(filterKey, filter);
+            });
         }
 
         function redrawMap() {

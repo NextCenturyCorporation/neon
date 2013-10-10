@@ -13,3 +13,7 @@
 img {
     max-width: none;
 }
+
+#map-redraw-button {
+    margin-left: 20px;
+}
