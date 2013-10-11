@@ -62,7 +62,7 @@
 
             <div class="control-group">
                 <div class="btn-group">
-                    <button class="btn" id="map-redraw-button">Redraw Map</button>
+                    <button class="btn-small" id="map-redraw-button">Redraw Map</button>
                 </div>
             </div>
 
