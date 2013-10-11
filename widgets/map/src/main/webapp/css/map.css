@@ -12,3 +12,8 @@ img {
 #map-redraw-button {
     margin-left: 20px;
 }
+
+#OpenLayers_Control_Attribution_7 {
+    right: 0;
+    bottom: 0;
+}
