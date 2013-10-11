@@ -38,7 +38,7 @@ coreMap.Map.prototype.draw = function(){
     this.sizeMapContainer();
     this.map.render(this.elementId);
     this.map.zoomToMaxExtent();
-    this.addDataToPointsLayer();
+    this.addDataToLayers();
 };
 
 coreMap.Map.prototype.setData = function(mapData){
@@ -61,24 +61,40 @@ coreMap.Map.prototype.setColorMapping = function(mapping){
     this.colorMapping = mapping;
 };
 
-coreMap.Map.prototype.addDataToPointsLayer = function(){
+coreMap.Map.prototype.addDataToLayers = function(){
     var me = this;
 
+    var heatmapData = [];
     var mapData = [];
     _.each(this.data, function (element) {
         var longitude = me.getValueFromDataElement(me.longitudeMapping, element);
         var latitude = me.getValueFromDataElement(me.latitudeMapping, element);
 
-        var point = new OpenLayers.Geometry.Point(longitude, latitude);
-        point.transform(new OpenLayers.Projection("EPSG:4326"), new OpenLayers.Projection("EPSG:900913"));
-        var feature = new OpenLayers.Feature.Vector(point);
-        mapData.push(feature);
-
-        feature.style = me.stylePoint(element);
+        heatmapData.push(me.createHeatmapDataPoint(element, longitude, latitude));
+        mapData.push(me.createPointsLayerDataPoint(element, longitude, latitude));
     });
 
+    me.heatmapLayer.setDataSet({ max: 1, data: heatmapData});
     me.pointsLayer.removeAllFeatures();
     me.pointsLayer.addFeatures(mapData);
+};
+
+coreMap.Map.prototype.createPointsLayerDataPoint = function(element, longitude, latitude){
+    var point = new OpenLayers.Geometry.Point(longitude, latitude);
+    point.transform(new OpenLayers.Projection("EPSG:4326"), new OpenLayers.Projection("EPSG:900913"));
+    var feature = new OpenLayers.Feature.Vector(point);
+    feature.style = this.stylePoint(element);
+    return feature;
+};
+
+coreMap.Map.prototype.createHeatmapDataPoint = function(element, longitude, latitude){
+    var count = this.getValueFromDataElement(coreMap.Map.DEFAULT_SIZE_MAPPING, element);
+    var point = new OpenLayers.LonLat(longitude, latitude);
+
+    return {
+        lonlat: point,
+        count: count
+    };
 };
 
 coreMap.Map.prototype.stylePoint = function(element){
@@ -90,6 +106,10 @@ coreMap.Map.prototype.stylePoint = function(element){
 
 coreMap.Map.prototype.calculateRadius = function(element){
     var minValue = this.minValue(this.data, this.sizeMapping);
+    if(minValue < 1){
+        minValue = 1;
+    }
+
     var size = this.getValueFromDataElement(this.sizeMapping, element);
     var radius = coreMap.Map.MIN_RADIUS;
     if(size > 1) {

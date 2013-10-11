@@ -42,8 +42,8 @@ describe('map', function () {
     it('has default width and height', function () {
         var map = new coreMap.Map(mapId);
 
-        expect(map.width).toEqual(800);
-        expect(map.height).toEqual(600);
+        expect(map.width).toEqual(1024);
+        expect(map.height).toEqual(680);
     });
 
     it('default width and height can be overridden', function () {
@@ -112,7 +112,7 @@ describe('map', function () {
         map.setData(data);
         map.draw();
 
-        expect(map.currentLayer.features[0].style.pointRadius).toBeCloseTo(10.383);
+        expect(map.currentLayer.features[0].style.pointRadius).toBeCloseTo(5.303);
         expect(map.currentLayer.features[1].style.pointRadius).toEqual(3);
         expect(map.currentLayer.features[2].style.pointRadius).toEqual(3);
         expect(map.currentLayer.features[3].style.pointRadius).toEqual(3);
@@ -130,9 +130,9 @@ describe('map', function () {
         map.draw();
 
         expect(map.currentLayer.features[0].style.pointRadius).toEqual(3);
-        expect(map.currentLayer.features[1].style.pointRadius).toBeCloseTo(3.77);
-        expect(map.currentLayer.features[2].style.pointRadius).toBeCloseTo(8.179);
-        expect(map.currentLayer.features[3].style.pointRadius).toBeCloseTo(10.383);
+        expect(map.currentLayer.features[1].style.pointRadius).toBeCloseTo(4.609);
+        expect(map.currentLayer.features[2].style.pointRadius).toBeCloseTo(13.82);
+        expect(map.currentLayer.features[3].style.pointRadius).toBeCloseTo(18.426);
     });
 
     it('gets correct minimum and maximum', function () {
