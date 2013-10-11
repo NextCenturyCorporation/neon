@@ -1,6 +1,6 @@
-#map {
+.map-location {
     position: absolute;
-    top: 0px;
+    top: 40px;
     left: 0px;
 }
 
