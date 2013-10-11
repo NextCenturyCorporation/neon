@@ -15,7 +15,10 @@ $(function(){
 
     map.setData(data);
     map.setColorMapping(function(element){
-        return element.longitude;
+        return element.latitude;
+    });
+    map.setSizeMapping(function(element){
+        return element.latitude;
     });
     map.draw();
 

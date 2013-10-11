@@ -21,8 +21,8 @@ coreMap.Map = function(elementId, opts){
     this.setupLayers();
 };
 
-coreMap.Map.DEFAULT_WIDTH = 800;
-coreMap.Map.DEFAULT_HEIGHT = 600;
+coreMap.Map.DEFAULT_WIDTH = 1024;
+coreMap.Map.DEFAULT_HEIGHT = 680;
 coreMap.Map.DEFAULT_LATITUDE_MAPPING = "latitude";
 coreMap.Map.DEFAULT_LONGITUDE_MAPPING = "longitude";
 coreMap.Map.DEFAULT_SIZE_MAPPING = "count_";
@@ -35,6 +35,7 @@ coreMap.Map.MIN_RADIUS = 3;
 coreMap.Map.MAX_RADIUS = 20;
 
 coreMap.Map.prototype.draw = function(){
+    this.sizeMapContainer();
     this.map.render(this.elementId);
     this.map.zoomToMaxExtent();
     this.addDataToPointsLayer();
@@ -84,17 +85,15 @@ coreMap.Map.prototype.stylePoint = function(element){
     var radius = this.calculateRadius(element);
     var color = this.calculateColor(element);
 
-    return this.createStyleObject(color, radius);
+    return this.createPointStyleObject(color, radius);
 };
 
 coreMap.Map.prototype.calculateRadius = function(element){
-    var maxSize = this.maxValue(this.data, this.sizeMapping);
-    var multiplier = (coreMap.Map.MAX_RADIUS - coreMap.Map.MIN_RADIUS)/Math.log(maxSize);
-
+    var minValue = this.minValue(this.data, this.sizeMapping);
     var size = this.getValueFromDataElement(this.sizeMapping, element);
     var radius = coreMap.Map.MIN_RADIUS;
     if(size > 1) {
-        radius = (multiplier * this.log10(size)) + coreMap.Map.MIN_RADIUS;
+        radius = Math.log(size - minValue + 1) + coreMap.Map.MIN_RADIUS;
     }
     return radius;
 };
@@ -105,12 +104,7 @@ coreMap.Map.prototype.calculateColor = function(element){
     if(!category){
         return coreMap.Map.DEFAULT_COLOR;
     }
-
     return this.colorScale(category);
-};
-
-coreMap.Map.prototype.log10 = function (num) {
-    return (Math.log(num)/Math.log(10));
 };
 
 
@@ -128,7 +122,7 @@ coreMap.Map.prototype.maxValue = function(data, mapping) {
     });
 };
 
-coreMap.Map.prototype.createStyleObject = function(color, radius){
+coreMap.Map.prototype.createPointStyleObject = function(color, radius){
     color = color || coreMap.Map.DEFAULT_COLOR;
     radius = radius || coreMap.Map.MIN_RADIUS;
 
@@ -160,6 +154,13 @@ coreMap.Map.prototype.toggleLayers = function(){
         this.map.removeLayer(this.heatmapLayer);
         this.currentLayer = this.pointsLayer;
     }
+};
+
+coreMap.Map.prototype.sizeMapContainer = function(){
+   $(this.selectorText).css({
+       width: this.width,
+       height: this.height
+   });
 };
 
 coreMap.Map.prototype.setupLayers = function(){
