@@ -17,7 +17,8 @@ coreMap.Map = function(elementId, opts){
     this.colorMapping = opts.colorMapping;
 
     this.colorScale = d3.scale.category20();
-    this.map = new OpenLayers.Map();
+
+    this.initializeMap();
     this.setupLayers();
 };
 
@@ -33,6 +34,11 @@ coreMap.Map.DEFAULT_COLOR = "#00ff00";
 coreMap.Map.DEFAULT_STROKE_COLOR = "#ffffff";
 coreMap.Map.MIN_RADIUS = 3;
 coreMap.Map.MAX_RADIUS = 20;
+
+coreMap.Map.prototype.initializeMap = function(){
+    this.map = new OpenLayers.Map();
+    this.map.size = new OpenLayers.Size(this.width, this.height);
+};
 
 coreMap.Map.prototype.draw = function(){
     this.sizeMapContainer();
@@ -197,7 +203,7 @@ coreMap.Map.prototype.setupLayers = function(){
 
     var heatmapOptions = {visible: true, radius: 10};
     var options = {isBaseLayer: false, opacity: 0.3, projection: new OpenLayers.Projection("EPSG:4326")};
-    this.heatmapLayer = new OpenLayers.Layer.Heatmap("Heatmap Layer", this.map, this.layer, heatmapOptions, options);
+    this.heatmapLayer = new OpenLayers.Layer.Heatmap("Heatmap Layer", this.map, baseLayer, heatmapOptions, options);
 
     this.currentLayer = this.pointsLayer;
     this.map.addLayer(this.currentLayer);

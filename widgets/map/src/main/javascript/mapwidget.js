@@ -20,7 +20,8 @@ $(function(){
     map.setSizeMapping(function(element){
         return element.latitude;
     });
+
     map.draw();
 
-
 });
+
