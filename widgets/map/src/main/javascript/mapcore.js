@@ -18,6 +18,8 @@ coreMap.Map = function(elementId, opts){
 
     this.colorScale = d3.scale.category20();
 
+    this.rendered = false;
+
     this.initializeMap();
     this.setupLayers();
 };
@@ -37,14 +39,17 @@ coreMap.Map.MAX_RADIUS = 20;
 
 coreMap.Map.prototype.initializeMap = function(){
     this.map = new OpenLayers.Map();
-    //We need to set this size before initializing the heatmap.
+    //We need to set this size object before initializing the heatmap.
     this.map.size = new OpenLayers.Size(this.width, this.height);
 };
 
 coreMap.Map.prototype.draw = function(){
-    this.sizeMapContainer();
-    this.map.render(this.elementId);
-    this.map.zoomToMaxExtent();
+    if(!this.rendered){
+        this.sizeMapContainer();
+        this.map.render(this.elementId);
+        this.map.zoomToMaxExtent();
+        this.rendered = true;
+    }
     this.addDataToLayers();
 };
 
@@ -68,6 +73,19 @@ coreMap.Map.prototype.setColorMapping = function(mapping){
     this.colorMapping = mapping;
 };
 
+coreMap.Map.prototype.toggleLayers = function(){
+    if(this.currentLayer === this.pointsLayer){
+        this.map.addLayer(this.heatmapLayer);
+        this.map.removeLayer(this.pointsLayer);
+        this.currentLayer = this.heatmapLayer;
+    }
+    else{
+        this.map.addLayer(this.pointsLayer);
+        this.map.removeLayer(this.heatmapLayer);
+        this.currentLayer = this.pointsLayer;
+    }
+};
+
 coreMap.Map.prototype.addDataToLayers = function(){
     var me = this;
 
@@ -80,6 +98,7 @@ coreMap.Map.prototype.addDataToLayers = function(){
         heatmapData.push(me.createHeatmapDataPoint(element, longitude, latitude));
         mapData.push(me.createPointsLayerDataPoint(element, longitude, latitude));
     });
+
 
     me.heatmapLayer.setDataSet({ max: 1, data: heatmapData});
     me.pointsLayer.removeAllFeatures();
@@ -168,19 +187,6 @@ coreMap.Map.prototype.getValueFromDataElement = function(mapping, element){
         return mapping.call(this, element);
     }
     return element[mapping];
-};
-
-coreMap.Map.prototype.toggleLayers = function(){
-    if(this.currentLayer === this.pointsLayer){
-        this.map.addLayer(this.heatmapLayer);
-        this.map.removeLayer(this.pointsLayer);
-        this.currentLayer = this.heatmapLayer;
-    }
-    else{
-        this.map.addLayer(this.pointsLayer);
-        this.map.removeLayer(this.heatmapLayer);
-        this.currentLayer = this.pointsLayer;
-    }
 };
 
 coreMap.Map.prototype.sizeMapContainer = function(){
