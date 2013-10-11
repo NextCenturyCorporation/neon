@@ -50,6 +50,8 @@ $(function () {
         function onDatasetChanged(message) {
             databaseName = message.database;
             tableName = message.table;
+            map.setCenter(new OpenLayers.LonLat(0, 0));
+            map.zoomToMaxExtent();
             neon.query.registerForFilterKey(databaseName, tableName, function (filterResponse) {
                 filterKey = filterResponse;
             });
