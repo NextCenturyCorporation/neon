@@ -248,14 +248,13 @@ $(function () {
             var multiple = 17/log10(maxCount);
 
             _.each(data, function (element) {
-                if(element[sizeByField]) {
                     var point = new OpenLayers.Geometry.Point(element[lonField], element[latField]);
                     point.transform(new OpenLayers.Projection("EPSG:4326"), new OpenLayers.Projection("EPSG:900913"));
                     var feature = new OpenLayers.Feature.Vector(point);
 
                     //possible values for radius are 3-20, this formula ensures that all radii are in that range
                     var radius = 3;
-                    if(element[sizeByField] > 1) {
+                    if(element[sizeByField] && element[sizeByField] > 1) {
                         radius = (multiple*log10(element[sizeByField])) + 3;
                     }
 
@@ -274,7 +273,6 @@ $(function () {
                     });
 
                     newData.push(feature);
-                }
             });
 
             pointsLayer.removeAllFeatures();
