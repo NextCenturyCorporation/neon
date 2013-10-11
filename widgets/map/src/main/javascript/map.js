@@ -248,31 +248,33 @@ $(function () {
             var multiple = 17/log10(maxCount);
 
             _.each(data, function (element) {
-                var point = new OpenLayers.Geometry.Point(element[lonField], element[latField]);
-                point.transform(new OpenLayers.Projection("EPSG:4326"), new OpenLayers.Projection("EPSG:900913"));
-                var feature = new OpenLayers.Feature.Vector(point);
+                if(element[sizeByField]) {
+                    var point = new OpenLayers.Geometry.Point(element[lonField], element[latField]);
+                    point.transform(new OpenLayers.Projection("EPSG:4326"), new OpenLayers.Projection("EPSG:900913"));
+                    var feature = new OpenLayers.Feature.Vector(point);
 
-                //possible values for radius are 3-20, this formula ensures that all radii are in that range
-                var radius = 3;
-                if(element[sizeByField] > 1) {
-                    radius = (multiple*log10(element[sizeByField])) + 3;
+                    //possible values for radius are 3-20, this formula ensures that all radii are in that range
+                    var radius = 3;
+                    if(element[sizeByField] > 1) {
+                        radius = (multiple*log10(element[sizeByField])) + 3;
+                    }
+
+                    //if colorby is utilized, change default color
+                    if(colorByField) {
+                        color = colorScale(element[colorByField]);
+                    }
+
+                    feature.style = new OpenLayers.Symbolizer.Point({
+                        fillColor: color,
+                        fillOpacity: 0.8,
+                        strokeOpacity: 0.8,
+                        strokeWidth: 0.5,
+                        stroke: "#888888",
+                        pointRadius: radius
+                    });
+
+                    newData.push(feature);
                 }
-
-                //if colorby is utilized, change default color
-                if(colorByField) {
-                    color = colorScale(element[colorByField]);
-                }
-
-                feature.style = new OpenLayers.Symbolizer.Point({
-                    fillColor: color,
-                    fillOpacity: 0.8,
-                    strokeOpacity: 0.8,
-                    strokeWidth: 0.5,
-                    stroke: "#888888",
-                    pointRadius: radius
-                });
-
-                newData.push(feature);
             });
 
             pointsLayer.removeAllFeatures();
