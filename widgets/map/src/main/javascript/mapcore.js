@@ -37,6 +37,7 @@ coreMap.Map.MAX_RADIUS = 20;
 
 coreMap.Map.prototype.initializeMap = function(){
     this.map = new OpenLayers.Map();
+    //We need to set this size before initializing the heatmap.
     this.map.size = new OpenLayers.Size(this.width, this.height);
 };
 
