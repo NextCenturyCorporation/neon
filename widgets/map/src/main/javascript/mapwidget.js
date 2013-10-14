@@ -74,7 +74,6 @@ $(function () {
 
         function setLayerChangeListener() {
             neon.mapWidgetUtils.setLayerChangeListener(function () {
-                console.log("here");
                 if ($('#points').is(':checked')) {
                     map.toggleLayers();
                     $('#color-by-group').show();
