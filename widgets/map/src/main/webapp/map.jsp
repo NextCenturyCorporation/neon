@@ -25,8 +25,11 @@
     <script src="javascript/mapcore.js"></script>
     <!-- endbuild -->
 
-    <!-- build:js js/mapwidget.js -->
+    <!-- build:js js/mapwidgetutils.js -->
     <script src="javascript/mapwidgetutils.js"></script>
+    <!-- endbuild -->
+
+    <!-- build:js js/mapwidget.js -->
     <script src="javascript/mapwidget.js"></script>
     <!-- endbuild -->
 
