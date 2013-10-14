@@ -8,4 +8,10 @@ war {
         into '/'
     }
 
+    from(jsSrcDir) {
+        include 'mapwidget.js'
+        include 'mapwidgetutils.js'
+        into 'js'
+    }
+
 }
