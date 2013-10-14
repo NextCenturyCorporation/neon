@@ -198,9 +198,13 @@ $(function () {
                 tableName = data.filterKey.dataSet.tableName;
                 neon.dropdown.populateAttributeDropdowns(data.columns, ['latitude', 'longitude', 'color-by', 'size-by'], queryForMapData);
                 neon.dropdown.setDropdownInitialValue("latitude", data.selectedLatitude);
+                $('#latitude').change();
                 neon.dropdown.setDropdownInitialValue("longitude", data.selectedLongitude);
+                $('#longitude').change();
                 neon.dropdown.setDropdownInitialValue("color-by", data.selectedColorBy);
+                $('#color-by').change();
                 neon.dropdown.setDropdownInitialValue("size-by", data.selectedSizeBy);
+
                 neon.query.executeQuery(data.query, redrawMapData);
             });
         }
