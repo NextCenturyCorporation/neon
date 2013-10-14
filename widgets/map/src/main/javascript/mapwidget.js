@@ -45,7 +45,12 @@ $(function () {
         restoreState();
 
         function initialize() {
-            map = new coreMap.Map("map");
+            var opts = {
+                width: coreMap.Map.DEFAULT_WIDTH *.75,
+                height: coreMap.Map.DEFAULT_HEIGHT *.6
+            };
+
+            map = new coreMap.Map("map", opts);
             setMapMappingFunctions();
             setLayerChangeListener();
             setApplyFiltersListener();
@@ -91,33 +96,21 @@ $(function () {
             var lonField = neon.mapWidgetUtils.getLongitudeField();
             var latField = neon.mapWidgetUtils.getLatitudeField();
 
-            var extent = map.map.getExtent();
-            var llPoint = new OpenLayers.LonLat(extent.left, extent.bottom);
-            var urPoint = new OpenLayers.LonLat(extent.right, extent.top);
-            var proj1 = new OpenLayers.Projection("EPSG:4326");
-            var proj2 = new OpenLayers.Projection("EPSG:900913");
-            llPoint.transform(proj2, proj1);
-            urPoint.transform(proj2, proj1);
-            var minLon = Math.min(llPoint.lon, urPoint.lon);
-            var maxLon = Math.max(llPoint.lon, urPoint.lon);
-
-            var minLat = Math.min(llPoint.lat, urPoint.lat);
-            var maxLat = Math.max(llPoint.lat, urPoint.lat);
-
-            var leftClause = neon.query.where(lonField, ">=", minLon);
-            var rightClause = neon.query.where(lonField, "<=", maxLon);
-            var bottomClause = neon.query.where(latField, ">=", minLat);
-            var topClause = neon.query.where(latField, "<=", maxLat);
+            var extent = map.getExtent();
+            var leftClause = neon.query.where(lonField, ">=", extent.minimumLongitude);
+            var rightClause = neon.query.where(lonField, "<=", extent.maximumLongitude);
+            var bottomClause = neon.query.where(latField, ">=", extent.minimumLatitude);
+            var topClause = neon.query.where(latField, "<=", extent.maximumLatitude);
             var filterClause = neon.query.and(leftClause, rightClause, bottomClause, topClause);
 
             //if the current extent includes the international date line
-            if(minLon && maxLon < 0) {
-                minLon = minLon + 360;
-                leftClause = neon.query.where(lonField, ">=", minLon);
+            if(extent.minimumLongitude && extent.maximumLongitude < 0) {
+                leftClause = neon.query.where(lonField, ">=", extent.minimumLongitude + 360);
                 var leftDateLine = neon.query.where(lonField, "<=", 180);
                 var rightDateLine = neon.query.where(lonField, ">=", -180);
 
-                filterClause = neon.query.and(topClause, bottomClause, neon.query.or(neon.query.and(leftClause, leftDateLine), neon.query.and(rightClause, rightDateLine)));
+                var datelineClause = neon.query.or(neon.query.and(leftClause, leftDateLine), neon.query.and(rightClause, rightDateLine));
+                filterClause = neon.query.and(topClause, bottomClause, datelineClause);
             }
 
             return new neon.query.Filter().selectFrom(databaseName, tableName).where(filterClause);
@@ -208,7 +201,6 @@ $(function () {
                 neon.dropdown.setDropdownInitialValue("longitude", data.selectedLongitude);
                 neon.dropdown.setDropdownInitialValue("color-by", data.selectedColorBy);
                 neon.dropdown.setDropdownInitialValue("size-by", data.selectedSizeBy);
-
                 neon.query.executeQuery(data.query, redrawMapData);
             });
         }

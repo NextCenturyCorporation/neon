@@ -92,6 +92,29 @@ coreMap.Map.prototype.toggleLayers = function(){
     }
 };
 
+coreMap.Map.prototype.getExtent = function(){
+    var extent = this.map.getExtent();
+    var llPoint = new OpenLayers.LonLat(extent.left, extent.bottom);
+    var urPoint = new OpenLayers.LonLat(extent.right, extent.top);
+    var proj1 = new OpenLayers.Projection("EPSG:4326");
+    var proj2 = new OpenLayers.Projection("EPSG:900913");
+    llPoint.transform(proj2, proj1);
+    urPoint.transform(proj2, proj1);
+    var minLon = Math.min(llPoint.lon, urPoint.lon);
+    var maxLon = Math.max(llPoint.lon, urPoint.lon);
+
+    var minLat = Math.min(llPoint.lat, urPoint.lat);
+    var maxLat = Math.max(llPoint.lat, urPoint.lat);
+
+    return {
+        minimumLatitude: minLat,
+        minimumLongitude: minLon,
+        maximumLatitude: maxLat,
+        maximumLongitude: maxLon
+    };
+};
+
+
 coreMap.Map.prototype.addDataToLayers = function(){
     var me = this;
 
