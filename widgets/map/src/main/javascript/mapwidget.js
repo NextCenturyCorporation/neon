@@ -74,6 +74,7 @@ $(function () {
 
         function setLayerChangeListener() {
             neon.mapWidgetUtils.setLayerChangeListener(function () {
+                console.log("here");
                 if ($('#points').is(':checked')) {
                     map.toggleLayers();
                     $('#color-by-group').show();
@@ -82,6 +83,9 @@ $(function () {
                     map.toggleLayers();
                     $('#color-by-group').hide();
                 }
+                var query = buildQuery();
+                var stateObject = buildStateObject(query);
+                neon.query.saveState(clientId, stateObject);
             });
         }
 
@@ -129,7 +133,6 @@ $(function () {
         function populateFromColumns(data) {
             neon.dropdown.populateAttributeDropdowns(data, ['latitude', 'longitude', 'color-by', 'size-by'], queryForMapData);
         }
-
 
         function onFiltersChanged() {
             queryForMapData();
@@ -187,6 +190,7 @@ $(function () {
                 selectedLongitude: neon.mapWidgetUtils.getLongitudeField(),
                 selectedColorBy: neon.mapWidgetUtils.getColorByField(),
                 selectedSizeBy: neon.mapWidgetUtils.getSizeByField(),
+                selectedLayer: neon.mapWidgetUtils.getLayer(),
                 query: query
             };
         }
@@ -204,6 +208,13 @@ $(function () {
                 neon.dropdown.setDropdownInitialValue("color-by", data.selectedColorBy);
                 $('#color-by').change();
                 neon.dropdown.setDropdownInitialValue("size-by", data.selectedSizeBy);
+                //$('#size-by').change();
+                neon.mapWidgetUtils.setLayer(data.selectedLayer);
+                if(data.selectedLayer === "heatmap") {
+                    map.toggleLayers();
+                    $('#color-by-group').hide();
+                    $('#heatmap').attr('checked', true);
+                }
 
                 neon.query.executeQuery(data.query, redrawMapData);
             });

@@ -18,6 +18,10 @@ neon.mapWidgetUtils = (function (){
         return $('#color-by option:selected').val();
     }
 
+    function getLayer() {
+        return $("input[name='layer-group']:checked").val();
+    }
+
     function getDropdownSelectedValue(dropdownName){
         return $('#' + dropdownName + ' option:selected').val();
     }
@@ -32,6 +36,10 @@ neon.mapWidgetUtils = (function (){
         $("input[name='layer-group']").change(onChange);
     }
 
+    function setLayer(selectElementId) {
+        $('#' + selectElementId).attr('checked', true);
+    }
+
     return {
         addDropdownChangeListener: addDropdownChangeListener,
         setLayerChangeListener: setLayerChangeListener,
@@ -39,6 +47,8 @@ neon.mapWidgetUtils = (function (){
         getLongitudeField: getLonField,
         getSizeByField: getSizeByField,
         getColorByField: getColorByField,
+        getLayer: getLayer,
+        setLayer: setLayer,
         latitudeAndLongitudeAreSelected : function(){
             return (getLatField() && getLonField());
         }
