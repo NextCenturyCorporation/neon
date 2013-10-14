@@ -1,27 +1,217 @@
-$(function(){
-    var map = new coreMap.Map("map");
+/*
+ * ************************************************************************
+ * Copyright (c), 2013 Next Century Corporation. All Rights Reserved.
+ *
+ * This software code is the exclusive property of Next Century Corporation and is
+ * protected by United States and International laws relating to the protection
+ * of intellectual property.  Distribution of this software code by or to an
+ * unauthorized party, or removal of any of these notices, is strictly
+ * prohibited and punishable by law.
+ *
+ * UNLESS PROVIDED OTHERWISE IN A LICENSE AGREEMENT GOVERNING THE USE OF THIS
+ * SOFTWARE, TO WHICH YOU ARE AN AUTHORIZED PARTY, THIS SOFTWARE CODE HAS BEEN
+ * ACQUIRED BY YOU "AS IS" AND WITHOUT WARRANTY OF ANY KIND.  ANY USE BY YOU OF
+ * THIS SOFTWARE CODE IS AT YOUR OWN RISK.  ALL WARRANTIES OF ANY KIND, EITHER
+ * EXPRESSED OR IMPLIED, INCLUDING, WITHOUT LIMITATION, IMPLIED WARRANTIES OF
+ * MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE, ARE HEREBY EXPRESSLY
+ * DISCLAIMED.
+ *
+ * PROPRIETARY AND CONFIDENTIAL TRADE SECRET MATERIAL NOT FOR DISCLOSURE OUTSIDE
+ * OF NEXT CENTURY CORPORATION EXCEPT BY PRIOR WRITTEN PERMISSION AND WHEN
+ * RECIPIENT IS UNDER OBLIGATION TO MAINTAIN SECRECY.
+ */
 
-    var data = [
-        {latitude: 50, longitude: 0, count_: 5, category: "blue"},
-        {latitude: 37, longitude: -117, count_: 10, category: "blue"},
-        {latitude: 50, longitude: 40, count_: 5, category: "green"},
-        {latitude: 37, longitude: -147, count_: 10, category: "green"},
-        {latitude: 50, longitude: 30, count_: 5, category: "yellow"},
-        {latitude: 37, longitude: -137, count_: 10, category: "yellow"},
-        {latitude: 50, longitude: 20, count_: 5, category: "white"},
-        {latitude: 37, longitude: -127, count_: 10, category: "white"},
-        {latitude: 40, longitude: -96, count_: 15, category: "red"}
-    ];
+$(function () {
 
-    map.setData(data);
-    map.setColorMapping(function(element){
-        return element.latitude;
+    OWF.ready(function () {
+        OWF.relayFile = 'js/eventing/rpc_relay.uncompressed.html';
+        neon.query.SERVER_URL = $("#neon-server").val();
+
+        var databaseName;
+        var tableName;
+        var filterKey;
+        var clientId = OWF.getInstanceId();
+
+        var messageHandler = new neon.eventing.MessageHandler({
+            activeDatasetChanged: onActiveDatasetChanged,
+            filtersChanged: onFiltersChanged
+        });
+        var eventPublisher = new neon.eventing.OWFEventPublisher(messageHandler);
+
+        var map;
+
+        neon.toggle.createOptionsPanel("#options-panel");
+        initialize();
+        restoreState();
+
+        function initialize() {
+            map = new coreMap.Map("map");
+            setMapMappingFunctions();
+            setLayerChangeListener();
+            setApplyFiltersListener();
+            map.draw();
+        }
+
+        function setMapMappingFunctions() {
+            neon.mapWidgetUtils.addDropdownChangeListener("latitude", function (value) {
+                map.setLatitudeMapping(value);
+            });
+            neon.mapWidgetUtils.addDropdownChangeListener("longitude", function (value) {
+                map.setLongitudeMapping(value);
+            });
+            neon.mapWidgetUtils.addDropdownChangeListener("size-by", function (value) {
+                map.setSizeMapping(value);
+            });
+            neon.mapWidgetUtils.addDropdownChangeListener("color-by", function (value) {
+                map.setColorMapping(value);
+            });
+        }
+
+        function setLayerChangeListener() {
+            neon.mapWidgetUtils.setLayerChangeListener(function () {
+                if ($('#points').is(':checked')) {
+                    map.toggleLayers();
+                    $('#color-by-group').show();
+                }
+                else {
+                    map.toggleLayers();
+                    $('#color-by-group').hide();
+                }
+            });
+        }
+
+        function setApplyFiltersListener(){
+            $('#map-redraw-button').click(function() {
+                var filter = createFilterFromExtent();
+                eventPublisher.replaceFilter(filterKey, filter);
+            });
+        }
+
+        function createFilterFromExtent(){
+            var lonField = neon.mapWidgetUtils.getLongitudeField();
+            var latField = neon.mapWidgetUtils.getLatitudeField();
+
+            var extent = map.map.getExtent();
+            var llPoint = new OpenLayers.LonLat(extent.left, extent.bottom);
+            var urPoint = new OpenLayers.LonLat(extent.right, extent.top);
+            var proj1 = new OpenLayers.Projection("EPSG:4326");
+            var proj2 = new OpenLayers.Projection("EPSG:900913");
+            llPoint.transform(proj2, proj1);
+            urPoint.transform(proj2, proj1);
+            var minLon = Math.min(llPoint.lon, urPoint.lon);
+            var maxLon = Math.max(llPoint.lon, urPoint.lon);
+
+            var minLat = Math.min(llPoint.lat, urPoint.lat);
+            var maxLat = Math.max(llPoint.lat, urPoint.lat);
+
+            var leftClause = neon.query.where(lonField, ">=", minLon);
+            var rightClause = neon.query.where(lonField, "<=", maxLon);
+            var bottomClause = neon.query.where(latField, ">=", minLat);
+            var topClause = neon.query.where(latField, "<=", maxLat);
+            var filterClause = neon.query.and(leftClause, rightClause, bottomClause, topClause);
+
+            //if the current extent includes the international date line
+            if(minLon && maxLon < 0) {
+                minLon = minLon + 360;
+                leftClause = neon.query.where(lonField, ">=", minLon);
+                var leftDateLine = neon.query.where(lonField, "<=", 180);
+                var rightDateLine = neon.query.where(lonField, ">=", -180);
+
+                filterClause = neon.query.and(topClause, bottomClause, neon.query.or(neon.query.and(leftClause, leftDateLine), neon.query.and(rightClause, rightDateLine)));
+            }
+
+            return new neon.query.Filter().selectFrom(databaseName, tableName).where(filterClause);
+        }
+
+        function onActiveDatasetChanged(message) {
+            databaseName = message.database;
+            tableName = message.table;
+            map.reset();
+            neon.query.registerForFilterKey(databaseName, tableName, function (filterResponse) {
+                filterKey = filterResponse;
+            });
+            neon.query.getFieldNames(databaseName, tableName, neon.widget.MAP, populateFromColumns);
+        }
+
+        function populateFromColumns(data) {
+            neon.dropdown.populateAttributeDropdowns(data, ['latitude', 'longitude', 'color-by', 'size-by'], queryForMapData);
+        }
+
+
+        function onFiltersChanged() {
+            queryForMapData();
+        }
+
+        function queryForMapData(){
+            if(!neon.mapWidgetUtils.latitudeAndLongitudeAreSelected()){
+                return;
+            }
+
+            var query = buildQuery();
+            var stateObject = buildStateObject(query);
+            neon.query.executeQuery(query, redrawMapData);
+            neon.query.saveState(clientId, stateObject);
+        }
+
+        function buildQuery() {
+            var query = new neon.query.Query().selectFrom(databaseName, tableName);
+            appendGroupByClause(query);
+            appendSizeByFieldClause(query);
+            return query;
+        }
+
+        function appendGroupByClause(query) {
+            var groupByFields = [neon.mapWidgetUtils.getLatitudeField(), neon.mapWidgetUtils.getLongitudeField()];
+            var colorByField = neon.mapWidgetUtils.getColorByField();
+
+            if (colorByField) {
+                groupByFields.push(colorByField);
+            }
+            neon.query.Query.prototype.groupBy.apply(query, groupByFields);
+        }
+
+        function appendSizeByFieldClause(query) {
+            // if a specific field to size the radius by was chosen, use that. otherwise use a generic count
+            var sizeByField = neon.mapWidgetUtils.getSizeByField();
+            if (sizeByField) {
+                query.aggregate(neon.query.SUM, sizeByField, sizeByField);
+            }
+            else {
+                query.aggregate(neon.query.COUNT, null, coreMap.Map.DEFAULT_SIZE_MAPPING);
+            }
+        }
+
+        function redrawMapData(mapData){
+            map.setData(mapData.data);
+            map.draw();
+        }
+
+        function buildStateObject(query) {
+            return {
+                filterKey: filterKey,
+                columns: neon.dropdown.getFieldNamesFromDropdown("latitude"),
+                selectedLatitude: neon.mapWidgetUtils.getLatitudeField(),
+                selectedLongitude: neon.mapWidgetUtils.getLongitudeField(),
+                selectedColorBy: neon.mapWidgetUtils.getColorByField(),
+                selectedSizeBy: neon.mapWidgetUtils.getSizeByField(),
+                query: query
+            };
+        }
+
+        function restoreState() {
+            neon.query.getSavedState(clientId, function (data) {
+                filterKey = data.filterKey;
+                databaseName = data.filterKey.dataSet.databaseName;
+                tableName = data.filterKey.dataSet.tableName;
+                neon.dropdown.populateAttributeDropdowns(data.columns, ['latitude', 'longitude', 'color-by', 'size-by'], queryForMapData);
+                neon.dropdown.setDropdownInitialValue("latitude", data.selectedLatitude);
+                neon.dropdown.setDropdownInitialValue("longitude", data.selectedLongitude);
+                neon.dropdown.setDropdownInitialValue("color-by", data.selectedColorBy);
+                neon.dropdown.setDropdownInitialValue("size-by", data.selectedSizeBy);
+
+                neon.query.executeQuery(data.query, redrawMapData);
+            });
+        }
+
     });
-    map.setSizeMapping(function(element){
-        return element.latitude;
-    });
-
-    map.draw();
-
 });
-

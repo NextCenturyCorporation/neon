@@ -72,7 +72,6 @@ OpenLayers.Layer.Heatmap = OpenLayers.Class(OpenLayers.Layer, {
 		dataset = obj.data,
 		dlen = dataset.length,
                 entry, lonlat, pixel;
-
 		set.max = obj.max;
 		set.data = [];
 		// get the pixels for all the lonlat entries

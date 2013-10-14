@@ -37,12 +37,6 @@ coreMap.Map.DEFAULT_STROKE_COLOR = "#ffffff";
 coreMap.Map.MIN_RADIUS = 3;
 coreMap.Map.MAX_RADIUS = 20;
 
-coreMap.Map.prototype.initializeMap = function(){
-    this.map = new OpenLayers.Map();
-    //We need to set this size object before initializing the heatmap.
-    this.map.size = new OpenLayers.Size(this.width, this.height);
-};
-
 coreMap.Map.prototype.draw = function(){
     if(!this.rendered){
         this.sizeMapContainer();
@@ -51,6 +45,14 @@ coreMap.Map.prototype.draw = function(){
         this.rendered = true;
     }
     this.addDataToLayers();
+};
+
+coreMap.Map.prototype.reset = function(){
+    this.setData([]);
+    this.draw();
+    this.map.setCenter(new OpenLayers.LonLat(0, 0));
+    this.map.zoomToMaxExtent();
+
 };
 
 coreMap.Map.prototype.setData = function(mapData){
@@ -196,6 +198,12 @@ coreMap.Map.prototype.sizeMapContainer = function(){
    });
 };
 
+coreMap.Map.prototype.initializeMap = function(){
+    this.map = new OpenLayers.Map();
+    //We need to set this size object before initializing the heatmap.
+    this.map.size = new OpenLayers.Size(this.width, this.height);
+};
+
 coreMap.Map.prototype.setupLayers = function(){
     var baseLayer = new OpenLayers.Layer.OSM();
     this.map.addLayer(baseLayer);
@@ -210,8 +218,11 @@ coreMap.Map.prototype.setupLayers = function(){
 
     var heatmapOptions = {visible: true, radius: 10};
     var options = {isBaseLayer: false, opacity: 0.3, projection: new OpenLayers.Projection("EPSG:4326")};
+    console.log(this.map);
     this.heatmapLayer = new OpenLayers.Layer.Heatmap("Heatmap Layer", this.map, baseLayer, heatmapOptions, options);
 
     this.currentLayer = this.pointsLayer;
     this.map.addLayer(this.currentLayer);
+
+
 };

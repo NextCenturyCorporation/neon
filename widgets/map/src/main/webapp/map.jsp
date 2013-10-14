@@ -22,7 +22,12 @@
     <script src="js-lib/heatmap/heatmap-openlayers.js"></script>
     <script src="js/toggle.js"></script>
     <script src="js/dropdown.js"></script>
-    <script src="javascript/map.js"></script>
+    <script src="javascript/mapcore.js"></script>
+    <!-- endbuild -->
+
+    <!-- build:js js/mapwidget.js -->
+    <script src="javascript/mapwidgetutils.js"></script>
+    <script src="javascript/mapwidget.js"></script>
     <!-- endbuild -->
 
 </head>
@@ -49,6 +54,14 @@
                 </div>
             </div>
 
+            <div id="size-by-group" class="control-group">
+                <label class="control-label" for="size-by">Size By</label>
+
+                <div class="controls">
+                    <select id="size-by" class="configuration-dropdown"></select>
+                </div>
+            </div>
+
             <div class="control-group">
                 <label class="control-label" for="points">Layers</label>
 
@@ -66,13 +79,6 @@
                 </div>
             </div>
 
-            <div id="size-by-group" class="control-group">
-                <label class="control-label" for="size-by">Size By</label>
-
-                <div class="controls">
-                    <select id="size-by" class="configuration-dropdown"></select>
-                </div>
-            </div>
 
             <div id="color-by-group" class="control-group">
                 <label class="control-label" for="color-by">Color By</label>
@@ -85,7 +91,7 @@
         </div>
     </div>
 
-    <div id="map" class="map-location" style="width:960px; height:400px"></div>
+    <div id="map" class="map-location"></div>
 </div>
 
 </body>

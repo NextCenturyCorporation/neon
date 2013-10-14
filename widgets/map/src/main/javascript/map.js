@@ -160,7 +160,6 @@ $(function () {
                     var sizeByField = getSizeByField();
                     var colorByField = getColorByField();
 
-
                     var query = buildQuery(latField, lonField, sizeByField, colorByField);
                     var stateObject = buildStateObject(query);
                     neon.query.executeQuery(query, doRedrawMap);
