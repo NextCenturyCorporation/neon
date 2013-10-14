@@ -43,6 +43,10 @@ coreMap.Map.prototype.draw = function(){
         this.map.render(this.elementId);
         this.map.zoomToMaxExtent();
         this.rendered = true;
+        this.map.addLayer(this.pointsLayer);
+        this.map.addLayer(this.heatmapLayer);
+        this.currentLayer = this.pointsLayer;
+        this.heatmapLayer.toggle();
     }
     this.addDataToLayers();
 };
@@ -77,13 +81,13 @@ coreMap.Map.prototype.setColorMapping = function(mapping){
 
 coreMap.Map.prototype.toggleLayers = function(){
     if(this.currentLayer === this.pointsLayer){
-        this.map.addLayer(this.heatmapLayer);
-        this.map.removeLayer(this.pointsLayer);
+        this.pointsLayer.setVisibility(false);
+        this.heatmapLayer.toggle();
         this.currentLayer = this.heatmapLayer;
     }
     else{
-        this.map.addLayer(this.pointsLayer);
-        this.map.removeLayer(this.heatmapLayer);
+        this.heatmapLayer.toggle();
+        this.pointsLayer.setVisibility(true);
         this.currentLayer = this.pointsLayer;
     }
 };
@@ -218,11 +222,5 @@ coreMap.Map.prototype.setupLayers = function(){
 
     var heatmapOptions = {visible: true, radius: 10};
     var options = {isBaseLayer: false, opacity: 0.3, projection: new OpenLayers.Projection("EPSG:4326")};
-    console.log(this.map);
     this.heatmapLayer = new OpenLayers.Layer.Heatmap("Heatmap Layer", this.map, baseLayer, heatmapOptions, options);
-
-    this.currentLayer = this.pointsLayer;
-    this.map.addLayer(this.currentLayer);
-
-
 };

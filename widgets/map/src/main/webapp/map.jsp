@@ -17,7 +17,7 @@
 
     <!-- build:js js/map.js -->
     <script src="js-lib/d3/d3.v3.min.js"></script>
-    <script src="js-lib/openlayers/OpenLayers.js"></script>
+    <script src="js-lib/openlayers/OpenLayers.debug.js"></script>
     <script src="js-lib/heatmap/heatmap.js"></script>
     <script src="js-lib/heatmap/heatmap-openlayers.js"></script>
     <script src="js/toggle.js"></script>

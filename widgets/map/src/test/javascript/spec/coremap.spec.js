@@ -32,6 +32,7 @@ describe('map', function () {
 
     it('has a default layer and can toggle layers', function () {
         var map = new coreMap.Map(mapId);
+        map.draw();
         expect(map.currentLayer.name).toEqual("Points Layer");
         map.toggleLayers();
         expect(map.currentLayer.name).toEqual("Heatmap Layer");
