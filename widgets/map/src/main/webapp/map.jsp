@@ -37,7 +37,6 @@
 <body>
 <neon:hidden-neon-server/>
 
-<div class="container">
 
     <div id="options-panel" class="options">
         <div class="controls-row">
@@ -95,7 +94,6 @@
     </div>
 
     <div id="map" class="map-location"></div>
-</div>
 
 </body>
 </html>
