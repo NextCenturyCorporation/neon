@@ -47,7 +47,7 @@ $(function () {
         function initialize() {
             var opts = {
                 width: coreMap.Map.DEFAULT_WIDTH *.75,
-                height: coreMap.Map.DEFAULT_HEIGHT *.6,
+                height: coreMap.Map.DEFAULT_HEIGHT * 0.6
             };
 
             map = new coreMap.Map("map", opts);
