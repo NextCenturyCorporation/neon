@@ -47,7 +47,7 @@ $(function () {
         function initialize() {
             var opts = {
                 width: coreMap.Map.DEFAULT_WIDTH *.75,
-                height: coreMap.Map.DEFAULT_HEIGHT *.6
+                height: coreMap.Map.DEFAULT_HEIGHT * 0.6
             };
 
             map = new coreMap.Map("map", opts);
@@ -55,6 +55,13 @@ $(function () {
             setLayerChangeListener();
             setApplyFiltersListener();
             map.draw();
+            map.register("moveend", map, onMapMovement);
+        }
+
+        function onMapMovement() {
+            var query = buildQuery();
+            var stateObject = buildStateObject(query);
+            neon.query.saveState(clientId, stateObject);
         }
 
         function setMapMappingFunctions() {
@@ -190,6 +197,7 @@ $(function () {
                 selectedColorBy: neon.mapWidgetUtils.getColorByField(),
                 selectedSizeBy: neon.mapWidgetUtils.getSizeByField(),
                 selectedLayer: neon.mapWidgetUtils.getLayer(),
+                selectedExtent: map.getExtent(),
                 query: query
             };
         }
@@ -207,13 +215,15 @@ $(function () {
                 neon.dropdown.setDropdownInitialValue("color-by", data.selectedColorBy);
                 $('#color-by').change();
                 neon.dropdown.setDropdownInitialValue("size-by", data.selectedSizeBy);
-                //$('#size-by').change();
+                //TODO: fix size-by so that it still sizes by count if nothing is selected
+                $('#size-by').change();
                 neon.mapWidgetUtils.setLayer(data.selectedLayer);
                 if(data.selectedLayer === "heatmap") {
                     map.toggleLayers();
                     $('#color-by-group').hide();
                     $('#heatmap').attr('checked', true);
                 }
+                map.zoomToExtent(data.selectedExtent);
 
                 neon.query.executeQuery(data.query, redrawMapData);
             });
