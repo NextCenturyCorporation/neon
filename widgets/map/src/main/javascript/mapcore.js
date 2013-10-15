@@ -228,6 +228,36 @@ coreMap.Map.prototype.getExtent = function(){
 };
 
 /**
+ * Sets the viewable extent of the map.
+ * @param {Object} extent An object containing the bounds of the viewable extent.
+ */
+
+coreMap.Map.prototype.zoomToExtent = function(extent) {
+    var llPoint = new OpenLayers.LonLat(extent['minimumLongitude'], extent['minimumLatitude']);
+    var urPoint = new OpenLayers.LonLat(extent['maximumLongitude'], extent['maximumLatitude']);
+
+    llPoint.transform(new OpenLayers.Projection("EPSG:4326"), new OpenLayers.Projection("EPSG:900913"));
+    urPoint.transform(new OpenLayers.Projection("EPSG:4326"), new OpenLayers.Projection("EPSG:900913"));
+    var minLon = Math.min(llPoint.lon, urPoint.lon);
+    var maxLon = Math.max(llPoint.lon, urPoint.lon);
+    var minLat = Math.min(llPoint.lat, urPoint.lat);
+    var maxLat = Math.max(llPoint.lat, urPoint.lat);
+
+    this.map.zoomToExtent([minLon, minLat, maxLon, maxLat]);
+};
+
+/**
+ * Registers a listener for a particular map event.
+ * @param {String} type A map event type.
+ * @param {Object} obj An object that the listener should be registered on.
+ * @param {Function} listener A function to be called when the event occurs.
+ */
+
+coreMap.Map.prototype.register = function(type, obj, listener) {
+    this.map.events.register(type, obj, listener);
+};
+
+/**
  * Takes the map's data and plots it on each layer.
  */
 
