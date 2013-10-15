@@ -33,7 +33,9 @@ configure(subprojects.findAll { it.name != 'common'}) {
     }
 
     dependencies {
-        compile project(":common")
+        compile (project(":common")){
+            exclude module: 'javax.servlet.jsp-api'
+        }
     }
 
     war {
