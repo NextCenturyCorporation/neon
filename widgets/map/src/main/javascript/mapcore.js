@@ -253,6 +253,9 @@ coreMap.Map.prototype.addDataToLayers = function(){
 
 /**
  * Creates a point to be added to the heatmap layer.
+ * @param {Object} element One data element of the map's data array.
+ * @param {number} longitude The longitude value of the data element
+ * @param {number} latitude The latitude value of the data element.
  * @return {Object} an object containing the location and count for the heatmap.
  */
 
