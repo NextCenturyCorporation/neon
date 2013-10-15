@@ -380,10 +380,10 @@ coreMap.Map.prototype.maxValue = function(data, mapping) {
 };
 
 /**
- * Calculate the maximum value of the data, using one of the mapping functions.
- * @param {Object} data The array of data elements.
+ * Gets a value from a data element using a mapping string or function.
  * @param {String | Function} mapping The mapping from data element object to value.
- * @returns {number} The maximum value in the data
+ * @param {Object} element An element of the data array.
+ * @returns The value in the data element.
  */
 
 coreMap.Map.prototype.getValueFromDataElement = function(mapping, element){
