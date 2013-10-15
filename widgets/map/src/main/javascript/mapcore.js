@@ -88,6 +88,8 @@ coreMap.Map = function(elementId, opts){
     this.setupLayers();
 };
 
+coreMap.Map.DEFAULT_DATA_LIMIT = 2000;
+
 coreMap.Map.DEFAULT_WIDTH = 1024;
 coreMap.Map.DEFAULT_HEIGHT = 680;
 coreMap.Map.DEFAULT_LATITUDE_MAPPING = "latitude";
@@ -100,6 +102,7 @@ coreMap.Map.DEFAULT_COLOR = "#00ff00";
 coreMap.Map.DEFAULT_STROKE_COLOR = "#ffffff";
 coreMap.Map.MIN_RADIUS = 3;
 coreMap.Map.MAX_RADIUS = 20;
+
 
 /**
  * Draws the map. The first time this is called, it will render the map.
@@ -139,7 +142,12 @@ coreMap.Map.prototype.reset = function(){
  */
 
 coreMap.Map.prototype.setData = function(mapData){
-    this.data = mapData;
+    if(mapData.length >= coreMap.Map.DEFAULT_DATA_LIMIT){
+        console.error("Unable to set data. The map cannot handle more than 2,000 points");
+    }
+    else{
+        this.data = mapData;
+    }
 };
 
 
