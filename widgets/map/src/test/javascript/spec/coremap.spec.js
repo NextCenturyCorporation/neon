@@ -40,25 +40,6 @@ describe('map', function () {
         expect(map.currentLayer.name).toEqual("Points Layer");
     });
 
-    it('has default width and height', function () {
-        var map = new coreMap.Map(mapId);
-
-        expect(map.width).toEqual(1024);
-        expect(map.height).toEqual(680);
-    });
-
-    it('default width and height can be overridden', function () {
-        var opts = {
-            width: 200,
-            height: 100
-        };
-
-        var map = new coreMap.Map(mapId, opts);
-
-        expect(map.width).toEqual(200);
-        expect(map.height).toEqual(100);
-    });
-
     it('has default data mapping of latitude and longitude', function () {
         var data = [{latitude: 50, longitude: 20}, {longitude: 40, latitude: -30}];
         var map = new coreMap.Map(mapId);

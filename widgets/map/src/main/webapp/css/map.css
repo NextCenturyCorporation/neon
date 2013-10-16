@@ -17,3 +17,9 @@ img {
     right: 0;
     bottom: 0;
 }
+
+#map {
+    /*height cannot be 100% because of the options bar*/
+    height: 90%;
+    width: 100%;
+}

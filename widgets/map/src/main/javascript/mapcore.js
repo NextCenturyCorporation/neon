@@ -72,8 +72,6 @@ coreMap.Map = function(elementId, opts){
     opts = opts || {};
 
     this.elementId = elementId;
-    this.width = opts.width || coreMap.Map.DEFAULT_WIDTH;
-    this.height = opts.height || coreMap.Map.DEFAULT_HEIGHT;
     this.data = opts.data;
     this.latitudeMapping = opts.latitudeMapping || coreMap.Map.DEFAULT_LATITUDE_MAPPING;
     this.longitudeMapping = opts.longitudeMapping || coreMap.Map.DEFAULT_LONGITUDE_MAPPING;
@@ -83,6 +81,27 @@ coreMap.Map = function(elementId, opts){
     this.colorScale = d3.scale.category20();
 
     this.rendered = false;
+
+    this.mapSelector = '#map';
+
+    if(opts.responsive === undefined) {
+        this.responsive = true;
+    }
+    else {
+        this.responsive = opts.responsive;
+    }
+
+    if (this.responsive) {
+        this.redrawOnResize();
+        this.width = $(this.mapSelector).width();
+        this.height = $(this.mapSelector).height();
+    }
+    else {
+        this.width = opts.width || coreMap.Map.DEFAULT_WIDTH;
+        this.userSetWidth = this.width;
+        this.height = opts.height || coreMap.Map.DEFAULT_HEIGHT;
+        this.userSetHeight = this.height;
+    }
 
     this.initializeMap();
     this.setupLayers();
@@ -474,4 +493,42 @@ coreMap.Map.prototype.setupLayers = function(){
     var heatmapOptions = {visible: true, radius: 10};
     var options = {isBaseLayer: false, opacity: 0.3, projection: new OpenLayers.Projection("EPSG:4326")};
     this.heatmapLayer = new OpenLayers.Layer.Heatmap("Heatmap Layer", this.map, baseLayer, heatmapOptions, options);
+};
+
+coreMap.Map.prototype.determineWidth = function (selector) {
+    if (this.userSetWidth) {
+        return this.userSetWidth;
+    }
+    else if ($(selector).width() && $(selector).width() !== 0) {
+        $(selector).css("width", "100%");
+        return $(selector).width();
+    }
+    return coreMap.Map.DEFAULT_WIDTH;
+};
+
+coreMap.Map.prototype.determineHeight = function (selector) {
+    if (this.userSetHeight) {
+        return this.userSetHeight;
+    }
+    else if ($(selector).height() && $(selector).height() !== 0) {
+        $(selector).css("height", "90%%");
+        return $(selector).height();
+    }
+    return coreMap.Map.DEFAULT_HEIGHT;
+};
+
+coreMap.Map.prototype.redrawOnResize = function () {
+    var me = this;
+
+    function drawChart() {
+        me.draw();
+    }
+
+    //Debounce is needed because browser resizes fire this resize event multiple times.
+    $(window).resize(function () {
+        me.width = me.determineWidth(me.mapSelector);
+        me.height = me.determineHeight(me.mapSelector);
+        _.debounce(drawChart, 100);
+    });
+
 };
