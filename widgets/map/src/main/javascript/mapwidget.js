@@ -32,6 +32,8 @@ $(function () {
         var filterKey;
         var clientId = OWF.getInstanceId();
 
+        var options = ['latitude', 'longitude', 'color-by', 'size-by'];
+
         var messageHandler = new neon.eventing.MessageHandler({
             activeDatasetChanged: onActiveDatasetChanged,
             filtersChanged: onFiltersChanged
@@ -132,7 +134,7 @@ $(function () {
         }
 
         function populateFromColumns(data) {
-            neon.dropdown.populateAttributeDropdowns(data, ['latitude', 'longitude', 'color-by', 'size-by'], queryForMapData);
+            neon.dropdown.populateAttributeDropdowns(data, options, queryForMapData);
         }
 
         function onFiltersChanged() {
@@ -202,16 +204,18 @@ $(function () {
                 filterKey = data.filterKey;
                 databaseName = data.filterKey.dataSet.databaseName;
                 tableName = data.filterKey.dataSet.tableName;
-                neon.dropdown.populateAttributeDropdowns(data.columns, ['latitude', 'longitude', 'color-by', 'size-by'], queryForMapData);
+                neon.dropdown.populateAttributeDropdowns(data.columns, options, queryForMapData);
+
                 neon.dropdown.setDropdownInitialValue("latitude", data.selectedLatitude);
-                $('#latitude').change();
                 neon.dropdown.setDropdownInitialValue("longitude", data.selectedLongitude);
-                $('#longitude').change();
                 neon.dropdown.setDropdownInitialValue("color-by", data.selectedColorBy);
-                $('#color-by').change();
                 neon.dropdown.setDropdownInitialValue("size-by", data.selectedSizeBy);
                 //TODO: fix size-by so that it still sizes by count if nothing is selected
-                $('#size-by').change();
+
+                _.each(options, function(selector) {
+                    $('#' + selector).change();
+                });
+
                 neon.mapWidgetUtils.setLayer(data.selectedLayer);
                 if(data.selectedLayer === "heatmap") {
                     map.toggleLayers();
