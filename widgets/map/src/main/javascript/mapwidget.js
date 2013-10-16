@@ -45,7 +45,7 @@ $(function () {
         restoreState();
 
         function initialize() {
-            map = new coreMap.Map("map", opts);
+            map = new coreMap.Map("map");
             setMapMappingFunctions();
             setLayerChangeListener();
             setApplyFiltersListener();

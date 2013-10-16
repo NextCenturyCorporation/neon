@@ -94,14 +94,14 @@ describe('map', function () {
         map.setData(data);
         map.draw();
 
-        expect(map.currentLayer.features[0].style.pointRadius).toBeCloseTo(5.303);
+        expect(map.currentLayer.features[0].style.pointRadius).toBeCloseTo(13);
         expect(map.currentLayer.features[1].style.pointRadius).toEqual(3);
         expect(map.currentLayer.features[2].style.pointRadius).toEqual(3);
         expect(map.currentLayer.features[3].style.pointRadius).toEqual(3);
         expect(map.currentLayer.features[4].style.pointRadius).toEqual(3);
     });
 
-    it('has radius ranging between 3 and 21', function () {
+    it('has radius ranging between 3 and 13', function () {
         var data = [{latitude: 50, longitude: 20, count_: -5000},
             {longitude: 10, latitude: -30, count_: 5},
             {longitude: 20, latitude: -30, count_: 50 * 1000},
@@ -112,9 +112,9 @@ describe('map', function () {
         map.draw();
 
         expect(map.currentLayer.features[0].style.pointRadius).toEqual(3);
-        expect(map.currentLayer.features[1].style.pointRadius).toBeCloseTo(4.609);
-        expect(map.currentLayer.features[2].style.pointRadius).toBeCloseTo(13.82);
-        expect(map.currentLayer.features[3].style.pointRadius).toBeCloseTo(18.426);
+        expect(map.currentLayer.features[1].style.pointRadius).toBeCloseTo(4.043);
+        expect(map.currentLayer.features[2].style.pointRadius).toBeCloseTo(10.014);
+        expect(map.currentLayer.features[3].style.pointRadius).toBeCloseTo(13);
     });
 
     it('gets correct minimum and maximum', function () {

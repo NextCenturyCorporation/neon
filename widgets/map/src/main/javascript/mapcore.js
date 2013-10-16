@@ -120,7 +120,7 @@ coreMap.Map.DEFAULT_STROKE_WIDTH = 0.5;
 coreMap.Map.DEFAULT_COLOR = "#00ff00";
 coreMap.Map.DEFAULT_STROKE_COLOR = "#ffffff";
 coreMap.Map.MIN_RADIUS = 3;
-coreMap.Map.MAX_RADIUS = 20;
+coreMap.Map.MAX_RADIUS = 13;
 
 
 /**
@@ -383,15 +383,15 @@ coreMap.Map.prototype.createPointStyleObject = function(color, radius){
  */
 
 coreMap.Map.prototype.calculateRadius = function(element){
-    var minValue = this.minValue(this.data, this.sizeMapping);
-    if(minValue < 1){
-        minValue = 1;
+    var maxValue = this.maxValue(this.data, this.sizeMapping);
+    if(maxValue < 1){
+        return coreMap.Map.MIN_RADIUS;
     }
 
     var size = this.getValueFromDataElement(this.sizeMapping, element);
     var radius = coreMap.Map.MIN_RADIUS;
     if(size > 1) {
-        radius = Math.log(size - minValue + 1) + coreMap.Map.MIN_RADIUS;
+        radius = (10/Math.log(maxValue) * Math.log(size)) + coreMap.Map.MIN_RADIUS;
     }
     return radius;
 };
