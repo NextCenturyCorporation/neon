@@ -50,7 +50,7 @@ $(function () {
             setLayerChangeListener();
             setApplyFiltersListener();
             map.draw();
-            map.register("moveend", map, onMapMovement);
+            map.register("moveend", this, onMapMovement);
         }
 
         function onMapMovement() {
