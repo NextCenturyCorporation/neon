@@ -529,6 +529,10 @@ coreMap.Map.prototype.redrawOnResize = function () {
     $(window).resize(function () {
         me.width = me.determineWidth(me.mapSelector);
         me.height = me.determineHeight(me.mapSelector);
+
+        $("canvas").css("height", me.height);
+        $("canvas").css("width", me. width);
+
         _.debounce(drawChart, 100);
     });
 
