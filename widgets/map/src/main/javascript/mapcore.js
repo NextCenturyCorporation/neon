@@ -512,7 +512,7 @@ coreMap.Map.prototype.determineHeight = function (selector) {
         return this.userSetHeight;
     }
     else if ($(selector).height() && $(selector).height() !== 0) {
-        $(selector).css("height", "90%%");
+        $(selector).css("height", "90%");
         return $(selector).height();
     }
     return coreMap.Map.DEFAULT_HEIGHT;
