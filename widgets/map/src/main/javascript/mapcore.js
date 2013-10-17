@@ -198,7 +198,7 @@ coreMap.Map.prototype.setLongitudeMapping = function(mapping){
  */
 
 coreMap.Map.prototype.setSizeMapping = function(mapping){
-    this.sizeMapping = mapping;
+    this.sizeMapping = mapping || coreMap.Map.DEFAULT_SIZE_MAPPING;
 };
 
 /**
