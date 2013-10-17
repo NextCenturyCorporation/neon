@@ -107,7 +107,7 @@ coreMap.Map = function(elementId, opts){
     this.setupLayers();
 };
 
-coreMap.Map.DEFAULT_DATA_LIMIT = 2000;
+coreMap.Map.DEFAULT_DATA_LIMIT = 8000;
 
 coreMap.Map.DEFAULT_WIDTH = 1024;
 coreMap.Map.DEFAULT_HEIGHT = 680;
@@ -162,7 +162,8 @@ coreMap.Map.prototype.reset = function(){
 
 coreMap.Map.prototype.setData = function(mapData){
     if(mapData.length >= coreMap.Map.DEFAULT_DATA_LIMIT){
-        console.error("Unable to set data. The map cannot handle more than 2,000 points");
+        console.log(mapData.length);
+        console.error("Unable to set data. The map cannot handle more than " + DEFAULT_DATA_LIMIT + " points");
     }
     else{
         this.data = mapData;
