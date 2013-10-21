@@ -1,3 +1,6 @@
+#Version for releases
+version=0.4.3
+
 # note that have tests take a long time so -DintegrationTest.single=Mongo can be added to the jvmargs to run only mongo tests
 org.gradle.jvmargs=-Xmx1024m -XX:MaxPermSize=256m
 org.gradle.daemon=true
