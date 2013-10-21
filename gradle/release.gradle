@@ -41,7 +41,7 @@ task verifyVersion() << {
         throwVersionError()
     }
 
-    String question = "\nThe current version is '${version}'. Continue? [y/n] "
+    String question = "\nThe current version is '${version}'. Continue with the release? [y/n] "
     def verify
 
     def console = System.console()
@@ -65,7 +65,7 @@ task tagWithCurrentVersion(type: GitTag) {
 
     dependsOn 'build', 'verifyVersion'
     tagName = version
-    message = "Release of ${version}"
+    message = "Release of ${project.version}"
 }
 
 task pushTag(type: GitPush) {
