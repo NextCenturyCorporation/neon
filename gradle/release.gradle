@@ -27,7 +27,7 @@ publishing {
 }
 
 task release(){
-    description = "Releases the project"
+    description = "Releases the project with the current version. This will tag the project in git and upload the versioned neon.war to nexus."
     group = RELEASE_GROUP
     dependsOn 'pushTag', 'publish'
 }
