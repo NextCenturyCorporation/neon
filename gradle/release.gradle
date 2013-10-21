@@ -1,0 +1,81 @@
+apply plugin: 'maven-publish'
+apply plugin: 'java'
+import org.ajoberstar.gradle.git.tasks.*
+
+def RELEASE_GROUP = "Release"
+
+buildscript {
+    repositories { mavenCentral() }
+    dependencies { classpath 'org.ajoberstar:gradle-git:0.6.3' }
+}
+
+publishing {
+    publications {
+        neon(MavenPublication) {
+            artifactId 'neon'
+            project(":neon-server").tasks.war.baseName = "neon"
+            artifact project(":neon-server").tasks.war
+        }
+    }
+
+    repositories {
+        maven {
+            url "http://build-va/nexus/content/repositories/internal-releases"
+        }
+    }
+    publishNeonPublicationToMavenRepository.dependsOn 'verifyVersion'
+}
+
+task release(){
+    description = "Releases the project"
+    group = RELEASE_GROUP
+    dependsOn 'pushTag', 'publish'
+}
+
+task verifyVersion() << {
+    description = "Allows a user to verify the version"
+    group = RELEASE_GROUP
+
+    def version = project.version
+    if(version == "unspecified"){
+        throwVersionError()
+    }
+
+    String question = "\nThe current version is '${version}'. Continue? [y/n] "
+    def verify
+
+    def console = System.console()
+    if(console){
+        verify = console.readLine(question)
+    }
+    else{
+        println question
+        System.in.withReader {
+            verify = it.readLine()
+        }
+    }
+    if(!verify.equalsIgnoreCase("y")){
+        throwVersionError()
+    }
+}
+
+task tagWithCurrentVersion(type: GitTag) {
+    description = "Tags the current version in git"
+    group = RELEASE_GROUP
+
+    dependsOn 'build', 'verifyVersion'
+    tagName = version
+    message = "Release of ${version}"
+}
+
+task pushTag(type: GitPush) {
+    description = "Pushes the tag to the remote origin"
+    group = RELEASE_GROUP
+
+    dependsOn 'tagWithCurrentVersion'
+    namesOrSpecs = [version]
+}
+
+void throwVersionError(){
+    throw new GradleException("Please update the project version. It is currently ${version}")
+}

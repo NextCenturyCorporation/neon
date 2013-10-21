@@ -1,6 +1,7 @@
 import static com.ncc.common.JSScriptReplacer.*
 import com.ncc.common.JettyTaskUtils
 
+apply from: "${rootDir}/gradle/release.gradle"
 defaultTasks 'clean', 'build'
 
 repositories {
@@ -19,14 +20,15 @@ project(":neon-server").ext.neonServer = neonServer
 project(":neon-server").ext.logbackVersion = "1.0.13"
 project(":common").ext.logbackVersion = "1.0.13"
 
-
-subprojects{
-    version = '1.0.0-SNAPSHOT'
-}
+def NEON_VERSION = "0.4.1"
+version = NEON_VERSION
+group = "com.ncc.neon"
 
 configure(subprojects.findAll { it.name != 'common'}) {
     apply plugin: 'war'
     apply from: "${rootDir}/gradle/js.gradle"
+
+    version = NEON_VERSION
 
     repositories {
         mavenCentral()
@@ -41,7 +43,6 @@ configure(subprojects.findAll { it.name != 'common'}) {
     war {
         description = 'Creates a war file for the project'
         // strip out the version from the war
-        version ""
 
         // not all projects will have all of these directories, so it will just copy the needed ones
         from(jsOutputFile) {
