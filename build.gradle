@@ -79,7 +79,9 @@ configure(subprojects.findAll { it.name != 'common'}) {
             delete "${neonServerWebapps}/${war.baseName}", "${neonServerWebapps}/${war.baseName}.war"
         }
 
-        from war.destinationDir
+        from (war.destinationDir){
+            rename war.archiveName, "${war.baseName}.war"
+        }
         into neonServerWebapps
 
         doLast {
