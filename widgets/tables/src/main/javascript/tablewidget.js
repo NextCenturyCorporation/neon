@@ -51,7 +51,7 @@ $(function () {
         function populateInitialData(message) {
             databaseName = message.database;
             tableName = message.table;
-            neon.query.getFieldNames(databaseName, tableName, "", populateSortFieldDropdown);
+            neon.query.getFieldNames(databaseName, tableName, neon.widget.TABLE, populateSortFieldDropdown);
         }
 
         function populateSortFieldDropdown(data) {
