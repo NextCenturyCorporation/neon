@@ -32,6 +32,12 @@ task release(){
     dependsOn 'pushTag', 'publish'
 }
 
+task verifyMasterBranch(type: GitBranchList) << {
+    if(getWorkingBranch().name != "master"){
+        throw new GradleException("Not currently on the git master branch, so tagging will not work. Aborting the release.")
+    }
+}
+
 task verifyVersion() << {
     description = "Allows a user to verify the version"
     group = RELEASE_GROUP
@@ -63,7 +69,7 @@ task tagWithCurrentVersion(type: GitTag) {
     description = "Tags the current version in git"
     group = RELEASE_GROUP
 
-    dependsOn 'build', 'verifyVersion'
+    dependsOn 'build', 'verifyMasterBranch', 'verifyVersion'
     tagName = version
     message = "Release of ${project.version}"
 }
