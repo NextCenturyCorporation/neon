@@ -4,11 +4,13 @@ import org.ajoberstar.gradle.git.tasks.*
 
 def RELEASE_GROUP = "Release"
 
+
 buildscript {
     repositories { mavenCentral() }
     dependencies { classpath 'org.ajoberstar:gradle-git:0.6.3' }
 }
 
+group = "com.ncc.neon"
 publishing {
     publications {
         neon(MavenPublication) {
@@ -23,7 +25,7 @@ publishing {
             url "http://build-va/nexus/content/repositories/internal-releases"
         }
     }
-    publishNeonPublicationToMavenRepository.dependsOn 'verifyVersion'
+    publishNeonPublicationToMavenRepository.dependsOn 'tagWithCurrentVersion'
 }
 
 task release(){

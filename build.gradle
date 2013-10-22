@@ -1,7 +1,6 @@
 import static com.ncc.common.JSScriptReplacer.*
 import com.ncc.common.JettyTaskUtils
 
-
 defaultTasks 'clean', 'build'
 
 repositories {
@@ -19,9 +18,6 @@ project(":neon-server").ext.outfile = 'neon'
 project(":neon-server").ext.neonServer = neonServer
 project(":neon-server").ext.logbackVersion = "1.0.13"
 project(":common").ext.logbackVersion = "1.0.13"
-
-group = "com.ncc.neon"
-apply from: "${rootDir}/gradle/release.gradle"
 
 configure(subprojects.findAll { it.name != 'common'}) {
     apply plugin: 'war'
