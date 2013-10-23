@@ -34,10 +34,15 @@ describe('map', function () {
         var map = new coreMap.Map(mapId);
         map.draw();
         expect(map.currentLayer.name).toEqual("Points Layer");
+        expect(map.heatmapLayer.heatmap.get("visible")).toEqual(false);
         map.toggleLayers();
         expect(map.currentLayer.name).toEqual("Heatmap Layer");
+        expect(map.pointsLayer.getVisibility()).toEqual(false);
+        expect(map.heatmapLayer.heatmap.get("visible")).toEqual(true);
         map.toggleLayers();
         expect(map.currentLayer.name).toEqual("Points Layer");
+        expect(map.heatmapLayer.heatmap.get("visible")).toEqual(false);
+
     });
 
     it('has default data mapping of latitude and longitude', function () {
@@ -140,7 +145,7 @@ describe('map', function () {
     });
 
     it('gets correct minimum and maximum', function () {
-        var data = [{latitude: 50, longitude: 20},
+        var data = [{longitude: 20, latitude: 45},
             {longitude: 10, latitude: -30},
             {longitude: 20, latitude: 0},
             {longitude: 50, latitude: null}
@@ -148,7 +153,7 @@ describe('map', function () {
         var map = new coreMap.Map(mapId);
 
         expect(map.minValue(data, 'latitude')).toEqual(-30);
-        expect(map.maxValue(data, 'latitude')).toEqual(50);
+        expect(map.maxValue(data, 'latitude')).toEqual(45);
     });
 
     it('gets correct minimum and maximum when using function', function () {
