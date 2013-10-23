@@ -63,16 +63,16 @@ $(function () {
 
         function setMapMappingFunctions() {
             neon.mapWidgetUtils.addDropdownChangeListener("latitude", function (value) {
-                map.setLatitudeMapping(value);
+                map.latitudeMapping = value;
             });
             neon.mapWidgetUtils.addDropdownChangeListener("longitude", function (value) {
-                map.setLongitudeMapping(value);
+                map.longitudeMapping = value;
             });
             neon.mapWidgetUtils.addDropdownChangeListener("size-by", function (value) {
-                map.setSizeMapping(value);
+                map.sizeMapping = value;
             });
             neon.mapWidgetUtils.addDropdownChangeListener("color-by", function (value) {
-                map.setColorMapping(value);
+                map.colorMapping = value;
             });
         }
 
