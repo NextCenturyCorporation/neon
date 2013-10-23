@@ -72,29 +72,25 @@ coreMap.Map = function(elementId, opts){
     opts = opts || {};
 
     this.elementId = elementId;
+    this.selector = $(elementId);
     this.data = opts.data;
+
     this.latitudeMapping = opts.latitudeMapping || coreMap.Map.DEFAULT_LATITUDE_MAPPING;
     this.longitudeMapping = opts.longitudeMapping || coreMap.Map.DEFAULT_LONGITUDE_MAPPING;
     this.sizeMapping = opts.sizeMapping || coreMap.Map.DEFAULT_SIZE_MAPPING;
     this.colorMapping = opts.colorMapping;
 
     this.colorScale = d3.scale.category20();
+    this.responsive = true;
 
-    this.rendered = false;
-
-    this.mapSelector = '#map';
-
-    if(opts.responsive === undefined) {
-        this.responsive = true;
-    }
-    else {
-        this.responsive = opts.responsive;
+    if(opts.responsive === false){
+        this.responsive = false;
     }
 
     if (this.responsive) {
         this.redrawOnResize();
-        this.width = $(this.mapSelector).width();
-        this.height = $(this.mapSelector).height();
+        this.width = this.selector.width();
+        this.height = this.selector.height();
     }
     else {
         this.width = opts.width || coreMap.Map.DEFAULT_WIDTH;
@@ -105,6 +101,8 @@ coreMap.Map = function(elementId, opts){
 
     this.initializeMap();
     this.setupLayers();
+    this.map.zoomToMaxExtent();
+    this.heatmapLayer.toggle();
 };
 
 coreMap.Map.DEFAULT_DATA_LIMIT = 8000;
@@ -116,34 +114,38 @@ coreMap.Map.DEFAULT_LONGITUDE_MAPPING = "longitude";
 coreMap.Map.DEFAULT_SIZE_MAPPING = "count_";
 
 coreMap.Map.DEFAULT_OPACITY = 0.8;
-coreMap.Map.DEFAULT_STROKE_WIDTH = 0.5;
+coreMap.Map.DEFAULT_STROKE_WIDTH = 1;
 coreMap.Map.DEFAULT_COLOR = "#00ff00";
 coreMap.Map.DEFAULT_STROKE_COLOR = "#ffffff";
 coreMap.Map.MIN_RADIUS = 3;
 coreMap.Map.MAX_RADIUS = 13;
 
-
 /**
- * Draws the map. The first time this is called, it will render the map.
- * Subsequent times it is called it will redraw the map's data.
+ * Draws the map data
+ * @method draw
  */
 
 coreMap.Map.prototype.draw = function(){
-    if(!this.rendered){
-        this.sizeMapContainer();
-        this.map.render(this.elementId);
-        this.map.zoomToMaxExtent();
-        this.rendered = true;
-        this.map.addLayer(this.pointsLayer);
-        this.map.addLayer(this.heatmapLayer);
-        this.currentLayer = this.pointsLayer;
-        this.heatmapLayer.toggle();
-    }
-    this.addDataToLayers();
+    var me = this;
+
+    var heatmapData = [];
+    var mapData = [];
+    _.each(this.data, function (element) {
+        var longitude = me.getValueFromDataElement(me.longitudeMapping, element);
+        var latitude = me.getValueFromDataElement(me.latitudeMapping, element);
+
+        heatmapData.push(me.createHeatmapDataPoint(element, longitude, latitude));
+        mapData.push(me.createPointsLayerDataPoint(element, longitude, latitude));
+    });
+
+    me.heatmapLayer.setDataSet({ max: 1, data: heatmapData});
+    me.pointsLayer.removeAllFeatures();
+    me.pointsLayer.addFeatures(mapData);
 };
 
 /**
  * Resets the map. This clears all the data, zooms all the way out and centers the map.
+ * @method reset
  */
 
 coreMap.Map.prototype.reset = function(){
@@ -158,6 +160,7 @@ coreMap.Map.prototype.reset = function(){
  * Sets the map's data.
  * @param mapData the data to be set. This should be an array of points. The points may be specified
  * in any way, This component uses the mapping objects to map each array element to latitude, longitude, size and color.
+ * @method setData
  */
 
 coreMap.Map.prototype.setData = function(mapData){
@@ -170,49 +173,9 @@ coreMap.Map.prototype.setData = function(mapData){
     }
 };
 
-
-/**
- * Sets the mapping between a data element and latitude.
- * @param {String | function} mapping can be a function or string. Use a string if the latitude has a name in the data element object.
- * Use a function for any other mapping between a data element and latitude.
- */
-
-coreMap.Map.prototype.setLatitudeMapping = function(mapping){
-    this.latitudeMapping = mapping;
-};
-
-/**
- * Sets the mapping between a data element and longitude.
- * @param {String | function} mapping can be a function or string. Use a string if the longitude has a name in the data element object.
- * Use a function for any other mapping between a data element and longitude.
- */
-
-coreMap.Map.prototype.setLongitudeMapping = function(mapping){
-    this.longitudeMapping = mapping;
-};
-
-/**
- * Sets the mapping between a data element and size.
- * @param {String | function} mapping can be a function or string. Use a string if the size has a name in the data element object.
- * Use a function for any other mapping between a data element and size.
- */
-
-coreMap.Map.prototype.setSizeMapping = function(mapping){
-    this.sizeMapping = mapping || coreMap.Map.DEFAULT_SIZE_MAPPING;
-};
-
-/**
- * Sets the mapping between a data element and color.
- * @param {String | function} mapping can be a function or string. Use a string if the category for color
- * has a name in the data element object. Use a function for any other mapping between a data element and color category.
- */
-
-coreMap.Map.prototype.setColorMapping = function(mapping){
-    this.colorMapping = mapping;
-};
-
 /**
  * Toggles visibility between the points layer and heatmap layer.
+ * @method toggleLayers
  */
 
 coreMap.Map.prototype.toggleLayers = function(){
@@ -231,6 +194,7 @@ coreMap.Map.prototype.toggleLayers = function(){
 /**
  * Get the current viewable extent.
  * @return {Object} An object that contains the minimum and maximum latitudes and longitudes currently shown.
+ * @method getExtent
  */
 
 coreMap.Map.prototype.getExtent = function(){
@@ -258,6 +222,7 @@ coreMap.Map.prototype.getExtent = function(){
 /**
  * Sets the viewable extent of the map.
  * @param {Object} extent An object containing the bounds of the viewable extent.
+ * @method zoomToExtent
  */
 
 coreMap.Map.prototype.zoomToExtent = function(extent) {
@@ -279,33 +244,11 @@ coreMap.Map.prototype.zoomToExtent = function(extent) {
  * @param {String} type A map event type.
  * @param {Object} obj An object that the listener should be registered on.
  * @param {Function} listener A function to be called when the event occurs.
+ * @method register
  */
 
 coreMap.Map.prototype.register = function(type, obj, listener) {
     this.map.events.register(type, obj, listener);
-};
-
-/**
- * Takes the map's data and plots it on each layer.
- */
-
-coreMap.Map.prototype.addDataToLayers = function(){
-    var me = this;
-
-    var heatmapData = [];
-    var mapData = [];
-    _.each(this.data, function (element) {
-        var longitude = me.getValueFromDataElement(me.longitudeMapping, element);
-        var latitude = me.getValueFromDataElement(me.latitudeMapping, element);
-
-        heatmapData.push(me.createHeatmapDataPoint(element, longitude, latitude));
-        mapData.push(me.createPointsLayerDataPoint(element, longitude, latitude));
-    });
-
-
-    me.heatmapLayer.setDataSet({ max: 1, data: heatmapData});
-    me.pointsLayer.removeAllFeatures();
-    me.pointsLayer.addFeatures(mapData);
 };
 
 
@@ -315,10 +258,11 @@ coreMap.Map.prototype.addDataToLayers = function(){
  * @param {number} longitude The longitude value of the data element
  * @param {number} latitude The latitude value of the data element.
  * @return {Object} an object containing the location and count for the heatmap.
+ * @method createHeatmapDataPoint
  */
 
 coreMap.Map.prototype.createHeatmapDataPoint = function(element, longitude, latitude){
-    var count = this.getValueFromDataElement(coreMap.Map.DEFAULT_SIZE_MAPPING, element);
+    var count = this.getValueFromDataElement(this.sizeMapping, element);
     var point = new OpenLayers.LonLat(longitude, latitude);
 
     return {
@@ -333,6 +277,7 @@ coreMap.Map.prototype.createHeatmapDataPoint = function(element, longitude, lati
  * @param {number} longitude The longitude value of the data element
  * @param {number} latitude The latitude value of the data element.
  * @return {OpenLayers.Feature.Vector} the point to be added.
+ * @method createPointsLayerDataPoint
  */
 
 coreMap.Map.prototype.createPointsLayerDataPoint = function(element, longitude, latitude){
@@ -346,7 +291,8 @@ coreMap.Map.prototype.createPointsLayerDataPoint = function(element, longitude, 
 /**
  * Styles the data element based on the size and color.
  * @param {Object} element One data element of the map's data array.
- * @returns {OpenLayers.Symbolizer.Point} The style object
+ * @return {OpenLayers.Symbolizer.Point} The style object
+ * @method stylePoint
  */
 
 coreMap.Map.prototype.stylePoint = function(element){
@@ -360,7 +306,8 @@ coreMap.Map.prototype.stylePoint = function(element){
  * Creates the style object for a point
  * @param {String} color The color of the point
  * @param {number} radius The radius of the point
- * @returns {OpenLayers.Symbolizer.Point} The style object
+ * @return {OpenLayers.Symbolizer.Point} The style object
+ * @method createPointStyleObject
  */
 
 coreMap.Map.prototype.createPointStyleObject = function(color, radius){
@@ -380,7 +327,8 @@ coreMap.Map.prototype.createPointStyleObject = function(color, radius){
 /**
  * Calculate the desired radius of a point.
  * @param {Object} element One data element of the map's data array.
- * @returns {number} The radius
+ * @return {number} The radius
+ * @method calculateRadius
  */
 
 coreMap.Map.prototype.calculateRadius = function(element){
@@ -400,7 +348,8 @@ coreMap.Map.prototype.calculateRadius = function(element){
 /**
  * Calculate the desired color of a point.
  * @param {Object} element One data element of the map's data array.
- * @returns {String} The color
+ * @return {String} The color
+ * @method calculateColor
  */
 
 coreMap.Map.prototype.calculateColor = function(element){
@@ -416,7 +365,8 @@ coreMap.Map.prototype.calculateColor = function(element){
  * Calculate the minimum value of the data, using one of the mapping functions.
  * @param {Object} data The array of data elements.
  * @param {String | Function} mapping The mapping from data element object to value.
- * @returns {number} The minimum value in the data
+ * @return {number} The minimum value in the data
+ * @method minValue
  */
 
 coreMap.Map.prototype.minValue = function(data, mapping) {
@@ -430,7 +380,8 @@ coreMap.Map.prototype.minValue = function(data, mapping) {
  * Calculate the maximum value of the data, using one of the mapping functions.
  * @param {Object} data The array of data elements.
  * @param {String | Function} mapping The mapping from data element object to value.
- * @returns {number} The maximum value in the data
+ * @return {number} The maximum value in the data
+ * @method maxValue
  */
 
 coreMap.Map.prototype.maxValue = function(data, mapping) {
@@ -444,7 +395,8 @@ coreMap.Map.prototype.maxValue = function(data, mapping) {
  * Gets a value from a data element using a mapping string or function.
  * @param {String | Function} mapping The mapping from data element object to value.
  * @param {Object} element An element of the data array.
- * @returns The value in the data element.
+ * @return The value in the data element.
+ * @method getValueFromDataElement
  */
 
 coreMap.Map.prototype.getValueFromDataElement = function(mapping, element){
@@ -455,28 +407,21 @@ coreMap.Map.prototype.getValueFromDataElement = function(mapping, element){
 };
 
 /**
- * Sets the size of the parent div or span of the map using the map's width and height.
- */
-
-coreMap.Map.prototype.sizeMapContainer = function(){
-   $('#' + this.elementId).css({
-       width: this.width,
-       height: this.height
-   });
-};
-
-/**
  * Initializes the map.
+ * @method initializeMap
  */
 
 coreMap.Map.prototype.initializeMap = function(){
-    this.map = new OpenLayers.Map();
-    //We need to set this size object before initializing the heatmap.
-    this.map.size = new OpenLayers.Size(this.width, this.height);
+    $('#' + this.elementId).css({
+        width: this.width,
+        height: this.height
+    });
+    this.map = new OpenLayers.Map(this.elementId);
 };
 
 /**
  * Initializes the map layers and adds the base layer.
+ * @method setupLayers
  */
 
 coreMap.Map.prototype.setupLayers = function(){
@@ -494,29 +439,51 @@ coreMap.Map.prototype.setupLayers = function(){
     var heatmapOptions = {visible: true, radius: 10};
     var options = {isBaseLayer: false, opacity: 0.3, projection: new OpenLayers.Projection("EPSG:4326")};
     this.heatmapLayer = new OpenLayers.Layer.Heatmap("Heatmap Layer", this.map, baseLayer, heatmapOptions, options);
+
+
+    this.map.addLayer(this.pointsLayer);
+    this.map.addLayer(this.heatmapLayer);
+    this.currentLayer = this.pointsLayer;
 };
+
+/**
+ * Determine the width of the map.
+ * @param {Object} selector The jquery selector of the map element
+ * @method determineWidth
+ */
 
 coreMap.Map.prototype.determineWidth = function (selector) {
     if (this.userSetWidth) {
         return this.userSetWidth;
     }
-    else if ($(selector).width() && $(selector).width() !== 0) {
-        $(selector).css("width", "100%");
-        return $(selector).width();
+    else if (selector.width() && selector.width() !== 0) {
+        selector.css("width", "100%");
+        return selector.width();
     }
     return coreMap.Map.DEFAULT_WIDTH;
 };
+
+/**
+ * Determine the height of the map.
+ * @param {Object} selector The jquery selector of the map element
+ * @method determineHeight
+ */
 
 coreMap.Map.prototype.determineHeight = function (selector) {
     if (this.userSetHeight) {
         return this.userSetHeight;
     }
-    else if ($(selector).height() && $(selector).height() !== 0) {
-        $(selector).css("height", "90%");
-        return $(selector).height();
+    else if (selector.height() && selector.height() !== 0) {
+        selector.css("height", "90%");
+        return selector.height();
     }
     return coreMap.Map.DEFAULT_HEIGHT;
 };
+
+/**
+ * Add a resize listener on the window to redraw the map
+ * @method redrawOnResize
+ */
 
 coreMap.Map.prototype.redrawOnResize = function () {
     var me = this;
@@ -527,8 +494,8 @@ coreMap.Map.prototype.redrawOnResize = function () {
 
     //Debounce is needed because browser resizes fire this resize event multiple times.
     $(window).resize(function () {
-        me.width = me.determineWidth(me.mapSelector);
-        me.height = me.determineHeight(me.mapSelector);
+        me.width = me.determineWidth(me.selector);
+        me.height = me.determineHeight(me.selector);
 
         $("canvas").css("height", me.height);
         $("canvas").css("width", me. width);

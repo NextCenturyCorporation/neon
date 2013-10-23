@@ -25,7 +25,9 @@ publishing {
             url "http://build-va/nexus/content/repositories/internal-releases"
         }
     }
-    publishNeonPublicationToMavenRepository.dependsOn 'tagWithCurrentVersion'
+
+    publishNeonPublicationToMavenRepository.dependsOn 'verifyVersion', 'verifyMasterBranch'
+
 }
 
 task release(){
@@ -58,9 +60,8 @@ task verifyVersion() << {
     }
     else{
         println question
-        System.in.withReader {
-            verify = it.readLine()
-        }
+        def reader = System.in.newReader()
+        verify = reader.readLine()
     }
     if(!verify.equalsIgnoreCase("y")){
         throwVersionError()
