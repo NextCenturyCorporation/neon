@@ -35,8 +35,7 @@
 
 </head>
 <body>
-<neon:hidden-neon-server/>
-
+    <neon:hidden-neon-server/>
 
     <div id="options-panel" class="options">
         <div class="controls-row">

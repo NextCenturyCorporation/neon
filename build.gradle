@@ -78,7 +78,7 @@ configure(subprojects.findAll { it.name != 'common'}) {
         into neonServerWebapps
 
         doLast {
-            println "Copying $war.archivePath into $neonServerWebapps"
+            println "Copying $war.archivePath to $neonServerWebapps/${war.baseName}.war"
         }
     }
 
