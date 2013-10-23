@@ -31,7 +31,6 @@ apply plugin: 'jetty'
 apply plugin: 'antlr4'
 apply from: "${rootDir}/gradle/release.gradle"
 
-archivesBaseName = 'neon'
 sourceCompatibility = 1.7
 
 def TEST_GROUP = JavaBasePlugin.VERIFICATION_GROUP
@@ -135,6 +134,7 @@ dependencies {
 }
 
 war {
+    baseName = "neon"
     from(jsOutputFile) {
         into 'js'
     }

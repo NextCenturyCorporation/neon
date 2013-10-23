@@ -73,7 +73,7 @@ configure(subprojects.findAll { it.name != 'common'}) {
         }
 
         from (war.destinationDir){
-            rename war.archiveName, "${war.baseName}.war"
+            rename { "${war.baseName}.war" }
         }
         into neonServerWebapps
 
