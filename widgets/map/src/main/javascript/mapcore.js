@@ -120,6 +120,9 @@ coreMap.Map.DEFAULT_STROKE_COLOR = "#ffffff";
 coreMap.Map.MIN_RADIUS = 3;
 coreMap.Map.MAX_RADIUS = 13;
 
+coreMap.Map.SOURCE_PROJECTION = new OpenLayers.Projection("EPSG:4326");
+coreMap.Map.DESTINATION_PROJECTION = new OpenLayers.Projection("EPSG:900913");
+
 /**
  * Draws the map data
  * @method draw
@@ -199,12 +202,10 @@ coreMap.Map.prototype.toggleLayers = function(){
 
 coreMap.Map.prototype.getExtent = function(){
     var extent = this.map.getExtent();
+    extent.transform(coreMap.Map.DESTINATION_PROJECTION, coreMap.Map.SOURCE_PROJECTION);
     var llPoint = new OpenLayers.LonLat(extent.left, extent.bottom);
     var urPoint = new OpenLayers.LonLat(extent.right, extent.top);
-    var proj1 = new OpenLayers.Projection("EPSG:4326");
-    var proj2 = new OpenLayers.Projection("EPSG:900913");
-    llPoint.transform(proj2, proj1);
-    urPoint.transform(proj2, proj1);
+
     var minLon = Math.min(llPoint.lon, urPoint.lon);
     var maxLon = Math.max(llPoint.lon, urPoint.lon);
 
@@ -229,8 +230,8 @@ coreMap.Map.prototype.zoomToExtent = function(extent) {
     var llPoint = new OpenLayers.LonLat(extent['minimumLongitude'], extent['minimumLatitude']);
     var urPoint = new OpenLayers.LonLat(extent['maximumLongitude'], extent['maximumLatitude']);
 
-    llPoint.transform(new OpenLayers.Projection("EPSG:4326"), new OpenLayers.Projection("EPSG:900913"));
-    urPoint.transform(new OpenLayers.Projection("EPSG:4326"), new OpenLayers.Projection("EPSG:900913"));
+    llPoint.transform(coreMap.Map.SOURCE_PROJECTION, coreMap.Map.DESTINATION_PROJECTION);
+    urPoint.transform(coreMap.Map.SOURCE_PROJECTION, coreMap.Map.DESTINATION_PROJECTION);
     var minLon = Math.min(llPoint.lon, urPoint.lon);
     var maxLon = Math.max(llPoint.lon, urPoint.lon);
     var minLat = Math.min(llPoint.lat, urPoint.lat);
