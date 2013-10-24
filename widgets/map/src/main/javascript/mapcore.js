@@ -232,12 +232,8 @@ coreMap.Map.prototype.zoomToExtent = function(extent) {
 
     llPoint.transform(coreMap.Map.SOURCE_PROJECTION, coreMap.Map.DESTINATION_PROJECTION);
     urPoint.transform(coreMap.Map.SOURCE_PROJECTION, coreMap.Map.DESTINATION_PROJECTION);
-    var minLon = Math.min(llPoint.lon, urPoint.lon);
-    var maxLon = Math.max(llPoint.lon, urPoint.lon);
-    var minLat = Math.min(llPoint.lat, urPoint.lat);
-    var maxLat = Math.max(llPoint.lat, urPoint.lat);
 
-    this.map.zoomToExtent([minLon, minLat, maxLon, maxLat]);
+    this.map.zoomToExtent([llPoint.lon, llPoint.lat, urPoint.lon, urPoint.lat]);
 };
 
 /**
