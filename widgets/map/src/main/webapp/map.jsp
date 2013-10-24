@@ -58,7 +58,12 @@
             </div>
             <div class="control-group">
                 <div class="btn-group">
-                    <button class="btn-small" id="map-redraw-button">Redraw Map</button>
+                    <button class="btn-small map-button" id="map-redraw-button">Redraw Map</button>
+                </div>
+            </div>
+            <div class="control-group">
+                <div class="btn-group">
+                    <button class="btn-small map-button" id="map-reset-button">Reset Map</button>
                 </div>
             </div>
         </div>

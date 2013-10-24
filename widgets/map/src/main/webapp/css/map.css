@@ -9,7 +9,7 @@ img {
     max-width: none;
 }
 
-#map-redraw-button {
+.map-button {
     width: 150px;
 }
 

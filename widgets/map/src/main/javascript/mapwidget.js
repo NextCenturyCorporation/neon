@@ -115,6 +115,12 @@ $(function () {
                 var filter = createFilterFromExtent();
                 eventPublisher.replaceFilter(filterKey, filter);
             });
+            $('#map-reset-button').click(function() {
+                map.reset();
+                var filter = new neon.query.Filter().selectFrom(databaseName, tableName);
+                eventPublisher.replaceFilter(filterKey, filter);
+
+            });
             $('#auto-filter').click(onMapMovement);
         }
 
