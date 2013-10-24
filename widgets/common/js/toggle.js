@@ -27,19 +27,19 @@ neon.toggle = (function () {
 
     function decorateOptionsPanel(selector, id) {
         var idString = '';
-        if (arguments.length === 2) {
+        if (id) {
             idString = 'id="' + id + '" ';
         }
         $(selector).replaceWith(function () {
-            return '<div ' + idString + 'class="options-bar"><div class="toggle"><label class="options-label">Options</label><img src="img/arrow.png" class="toggle-image"/></div>' + $(this)[0].outerHTML + '</div>';
+            return '<div ' + idString + 'class="options-bar"><div id="options-toggle-id" class="toggle"><label class="options-label">Options</label><img src="img/arrow.png" class="toggle-image"/></div>' + $(this)[0].outerHTML + '</div>';
         });
     }
 
     return {
         createOptionsPanel: function (selector, id) {
-            $(document).ready(function() {
+            $(function() {
                 decorateOptionsPanel(selector, id);
-                $(".toggle").click(function() {
+                $("#options-toggle-id").click(function() {
                     $(selector).slideToggle("slow");
                 });
             });

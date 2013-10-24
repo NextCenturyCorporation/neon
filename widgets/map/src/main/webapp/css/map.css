@@ -23,3 +23,15 @@ img {
     height: 90%;
     width: 100%;
 }
+
+.functions-bar {
+    position: fixed;
+    top: 5px;
+    right: 170px;
+    height: auto;
+    width: 160px;
+    z-index: 2000;
+    color: #cccccc;
+    background-color: black;
+    border: 1px solid #cccccc;
+}

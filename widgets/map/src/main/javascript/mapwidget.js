@@ -42,12 +42,13 @@ $(function () {
 
         var map;
 
-        neon.toggle.createOptionsPanel("#options-panel");
+
         initialize();
         restoreState();
 
         function initialize() {
             map = new coreMap.Map("map");
+            installOptionsPanels();
             setMapMappingFunctions();
             setLayerChangeListener();
             setApplyFiltersListener();
@@ -56,9 +57,26 @@ $(function () {
         }
 
         function onMapMovement() {
-            var query = buildQuery();
-            var stateObject = buildStateObject(query);
-            neon.query.saveState(clientId, stateObject);
+            var checked = $("#auto-filter").is(':checked');
+
+            if(checked && neon.mapWidgetUtils.latitudeAndLongitudeAreSelected()){
+                $("#map-redraw-button").attr("disabled", true);
+                var filter = createFilterFromExtent();
+                eventPublisher.replaceFilter(filterKey, filter);
+            }
+            else{
+                $("#map-redraw-button").removeAttr("disabled");
+                var query = buildQuery();
+                var stateObject = buildStateObject(query);
+                neon.query.saveState(clientId, stateObject);
+            }
+        }
+
+        function installOptionsPanels(){
+            neon.toggle.createOptionsPanel("#options-panel");
+            $("#functions-toggle-id").click(function() {
+                $("#functions-panel").slideToggle("slow");
+            });
         }
 
         function setMapMappingFunctions() {
@@ -97,6 +115,7 @@ $(function () {
                 var filter = createFilterFromExtent();
                 eventPublisher.replaceFilter(filterKey, filter);
             });
+            $('#auto-filter').click(onMapMovement);
         }
 
         function createFilterFromExtent(){
@@ -195,6 +214,7 @@ $(function () {
                 selectedSizeBy: neon.mapWidgetUtils.getSizeByField(),
                 selectedLayer: neon.mapWidgetUtils.getLayer(),
                 selectedExtent: map.getExtent(),
+                autoFilterChecked: $("#auto-filter").is(':checked'),
                 query: query
             };
         }
@@ -218,6 +238,10 @@ $(function () {
                 _.each(options, function(selector) {
                     $('#' + selector).change();
                 });
+
+                if(data.autoFilterChecked){
+                    $('#auto-filter').attr('checked', true);
+                }
 
                 neon.mapWidgetUtils.setLayer(data.selectedLayer);
                 if(data.selectedLayer === "heatmap") {

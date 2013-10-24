@@ -36,6 +36,33 @@
 </head>
 <body>
     <neon:hidden-neon-server/>
+    <div class="functions-bar">
+        <div id="functions-toggle-id" class="toggle"><label class="options-label">Functions</label><img src="img/arrow.png" class="toggle-image"/></div>
+        <div id="functions-panel" class="options">
+            <div class="control-group">
+                <label class="control-label" for="points">Layers</label>
+
+                <label class="radio inline control-label">
+                    <input id="points" type="radio" name="layer-group" value="points" checked>Default</input>
+                </label>
+                <label class="radio inline control-label">
+                    <input id="heatmap" type="radio" name="layer-group" value="heatmap">Density</input>
+                </label>
+            </div>
+            <div class="control-group">
+                <div class="checkbox" style="width:100px">
+                    <label>
+                        <input id="auto-filter" type="checkbox" value="autoFilter">Auto Filter</input>
+                    </label>
+                </div>
+            </div>
+            <div class="control-group">
+                <div class="btn-group">
+                    <button class="btn-small" id="map-redraw-button">Redraw Map</button>
+                </div>
+            </div>
+        </div>
+    </div>
 
     <div id="options-panel" class="options">
         <div class="controls-row">
@@ -62,24 +89,6 @@
                     <select id="size-by" class="configuration-dropdown"></select>
                 </div>
             </div>
-
-            <div class="control-group">
-                <label class="control-label" for="points">Layers</label>
-
-                <label class="radio inline control-label">
-                    <input id="points" type="radio" name="layer-group" value="points" checked>Default</input>
-                </label>
-                <label class="radio inline control-label">
-                    <input id="heatmap" type="radio" name="layer-group" value="heatmap">Density</input>
-                </label>
-            </div>
-
-            <div class="control-group">
-                <div class="btn-group">
-                    <button class="btn-small" id="map-redraw-button">Redraw Map</button>
-                </div>
-            </div>
-
 
             <div id="color-by-group" class="control-group">
                 <label class="control-label" for="color-by">Color By</label>
