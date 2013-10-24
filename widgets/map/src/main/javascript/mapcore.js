@@ -279,7 +279,7 @@ coreMap.Map.prototype.createHeatmapDataPoint = function(element, longitude, lati
 
 coreMap.Map.prototype.createPointsLayerDataPoint = function(element, longitude, latitude){
     var point = new OpenLayers.Geometry.Point(longitude, latitude);
-    point.transform(new OpenLayers.Projection("EPSG:4326"), new OpenLayers.Projection("EPSG:900913"));
+    point.transform(coreMap.Map.SOURCE_PROJECTION, coreMap.Map.DESTINATION_PROJECTION);
     var feature = new OpenLayers.Feature.Vector(point);
     feature.style = this.stylePoint(element);
     return feature;
@@ -434,7 +434,7 @@ coreMap.Map.prototype.setupLayers = function(){
     this.pointsLayer = new OpenLayers.Layer.Vector("Points Layer", style);
 
     var heatmapOptions = {visible: true, radius: 10};
-    var options = {isBaseLayer: false, opacity: 0.3, projection: new OpenLayers.Projection("EPSG:4326")};
+    var options = {isBaseLayer: false, opacity: 0.3, projection: coreMap.Map.SOURCE_PROJECTION};
     this.heatmapLayer = new OpenLayers.Layer.Heatmap("Heatmap Layer", this.map, baseLayer, heatmapOptions, options);
 
 
