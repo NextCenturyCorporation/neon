@@ -28,5 +28,5 @@ sampleDB,sampleTable,Barchart,[x:depth(km);y:magnitude]
 
 sampleDB,sampleTable,Timeline,[x:time;time-granularity:hour]
 
-sampleDB,sampleTable,CircularHeat,[date:updated]
+sampleDB,sampleTable,CircularHeat,[date:time]
 sampleDB,sampleTable,CircularHeat,[date:updated]sampleDB,sampleTable,Timeline,[x:time;time-granularity:hour]sampleDB,sampleTable,Map,[]sampleDB,sampleTable,Map,[latitude:latitude;longitude:longitude;size-by:magnitude;color-by:depth(km)
