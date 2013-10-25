@@ -327,15 +327,17 @@ coreMap.Map.prototype.createPointStyleObject = function(color, radius){
  */
 
 coreMap.Map.prototype.calculateRadius = function(element){
+    var minValue = this.minValue(this.data, this.sizeMapping);
     var maxValue = this.maxValue(this.data, this.sizeMapping);
-    if(maxValue < 1){
+    if(maxValue - minValue === 0){
         return coreMap.Map.MIN_RADIUS;
     }
 
     var size = this.getValueFromDataElement(this.sizeMapping, element);
     var radius = coreMap.Map.MIN_RADIUS;
-    if(size > 1) {
-        radius = (10/Math.log(maxValue) * Math.log(size)) + coreMap.Map.MIN_RADIUS;
+    if(size >= 1) {
+        var slope = 10 / (maxValue - minValue);
+        radius = Math.round(slope * size + 5);
     }
     return radius;
 };
