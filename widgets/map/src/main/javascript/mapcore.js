@@ -141,6 +141,8 @@ coreMap.Map.prototype.draw = function(){
         mapData.push(me.createPointsLayerDataPoint(element, longitude, latitude));
     });
 
+
+
     me.heatmapLayer.setDataSet({ max: 1, data: heatmapData});
     me.pointsLayer.removeAllFeatures();
     me.pointsLayer.addFeatures(mapData);
@@ -169,7 +171,7 @@ coreMap.Map.prototype.reset = function(){
 coreMap.Map.prototype.setData = function(mapData){
     if(mapData.length >= coreMap.Map.DEFAULT_DATA_LIMIT){
         console.log(mapData.length);
-        console.error("Unable to set data. The map cannot handle more than " + DEFAULT_DATA_LIMIT + " points");
+        console.error("Unable to set data. The map cannot handle more than " + coreMap.Map.DEFAULT_DATA_LIMIT + " points");
     }
     else{
         this.data = mapData;
@@ -491,12 +493,6 @@ coreMap.Map.prototype.redrawOnResize = function () {
 
     //Debounce is needed because browser resizes fire this resize event multiple times.
     $(window).resize(function () {
-        me.width = me.determineWidth(me.selector);
-        me.height = me.determineHeight(me.selector);
-
-        $("canvas").css("height", me.height);
-        $("canvas").css("width", me. width);
-
         _.debounce(drawChart, 100);
     });
 
