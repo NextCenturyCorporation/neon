@@ -21,3 +21,12 @@ kiva,loans,Map,[latitude:location_geo_lat;longitude:location_geo_lon;color-by:lo
 kiva,lenders,CircularHeat,[date:member_since]
 kiva,lenders,Timeline,[x:member_since;y:loan_count]
 kiva,lenders,Barchart,[x:invitee_count]
+
+sampleDB,sampleTable,Map,[latitude:latitude;longitude:longitude;size-by:magnitude;color-by:depth(km)]
+
+sampleDB,sampleTable,Barchart,[x:depth(km);y:magnitude]
+
+sampleDB,sampleTable,Timeline,[x:time;time-granularity:hour]
+
+sampleDB,sampleTable,CircularHeat,[date:time]
+sampleDB,sampleTable,CircularHeat,[date:updated]sampleDB,sampleTable,Timeline,[x:time;time-granularity:hour]sampleDB,sampleTable,Map,[]sampleDB,sampleTable,Map,[latitude:latitude;longitude:longitude;size-by:magnitude;color-by:depth(km)
