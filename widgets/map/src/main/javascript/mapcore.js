@@ -89,14 +89,12 @@ coreMap.Map = function(elementId, opts){
 
     if (this.responsive) {
         this.redrawOnResize();
-        this.width = this.selector.width();
-        this.height = this.selector.height();
+        this.width = $(window).width();
+        this.height = $(window).height() - 40;
     }
     else {
         this.width = opts.width || coreMap.Map.DEFAULT_WIDTH;
-        this.userSetWidth = this.width;
         this.height = opts.height || coreMap.Map.DEFAULT_HEIGHT;
-        this.userSetHeight = this.height;
     }
 
     this.initializeMap();
@@ -140,8 +138,6 @@ coreMap.Map.prototype.draw = function(){
         heatmapData.push(me.createHeatmapDataPoint(element, longitude, latitude));
         mapData.push(me.createPointsLayerDataPoint(element, longitude, latitude));
     });
-
-
 
     me.heatmapLayer.setDataSet({ max: 1, data: heatmapData});
     me.pointsLayer.removeAllFeatures();
@@ -446,54 +442,22 @@ coreMap.Map.prototype.setupLayers = function(){
 };
 
 /**
- * Determine the width of the map.
- * @param {Object} selector The jquery selector of the map element
- * @method determineWidth
- */
-
-coreMap.Map.prototype.determineWidth = function (selector) {
-    if (this.userSetWidth) {
-        return this.userSetWidth;
-    }
-    else if (selector.width() && selector.width() !== 0) {
-        selector.css("width", "100%");
-        return selector.width();
-    }
-    return coreMap.Map.DEFAULT_WIDTH;
-};
-
-/**
- * Determine the height of the map.
- * @param {Object} selector The jquery selector of the map element
- * @method determineHeight
- */
-
-coreMap.Map.prototype.determineHeight = function (selector) {
-    if (this.userSetHeight) {
-        return this.userSetHeight;
-    }
-    else if (selector.height() && selector.height() !== 0) {
-        selector.css("height", "90%");
-        return selector.height();
-    }
-    return coreMap.Map.DEFAULT_HEIGHT;
-};
-
-/**
  * Add a resize listener on the window to redraw the map
  * @method redrawOnResize
  */
 
 coreMap.Map.prototype.redrawOnResize = function () {
+
     var me = this;
-
-    function drawChart() {
-        me.draw();
-    }
-
-    //Debounce is needed because browser resizes fire this resize event multiple times.
     $(window).resize(function () {
-        _.debounce(drawChart, 100);
+        me.width = $(window).width();
+        me.height = $(window).height() - 40;
+
+        $('#' + me.elementId).css({
+            width: me.width,
+            height: me.height
+        });
+        me.map.updateSize();
     });
 
 };

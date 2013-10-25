@@ -18,12 +18,6 @@ img {
     bottom: 0;
 }
 
-#map {
-    /*height cannot be 100% because of the options bar*/
-    height: 90%;
-    width: 100%;
-}
-
 .functions-bar {
     position: fixed;
     top: 5px;

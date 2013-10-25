@@ -87,7 +87,12 @@ $(function () {
                 map.longitudeMapping = value;
             });
             neon.mapWidgetUtils.addDropdownChangeListener("size-by", function (value) {
-                map.sizeMapping = value;
+                if(value){
+                    map.sizeMapping = value;
+                }
+                else{
+                    map.sizeMapping = coreMap.Map.DEFAULT_SIZE_MAPPING;
+                }
             });
             neon.mapWidgetUtils.addDropdownChangeListener("color-by", function (value) {
                 map.colorMapping = value;
@@ -234,12 +239,10 @@ $(function () {
                 databaseName = data.filterKey.dataSet.databaseName;
                 tableName = data.filterKey.dataSet.tableName;
                 neon.dropdown.populateAttributeDropdowns(data.columns, options, queryForMapData);
-
                 neon.dropdown.setDropdownInitialValue("latitude", data.selectedLatitude);
                 neon.dropdown.setDropdownInitialValue("longitude", data.selectedLongitude);
                 neon.dropdown.setDropdownInitialValue("color-by", data.selectedColorBy);
                 neon.dropdown.setDropdownInitialValue("size-by", data.selectedSizeBy);
-                //TODO: fix size-by so that it still sizes by count if nothing is selected
 
                 _.each(options, function(selector) {
                     $('#' + selector).change();
