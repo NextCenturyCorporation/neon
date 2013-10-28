@@ -10,6 +10,21 @@ buildscript {
     dependencies { classpath 'org.ajoberstar:gradle-git:0.6.3' }
 }
 
+
+repositories {
+    maven {
+        url "http://build-va/nexus/content/repositories/internal-releases"
+    }
+}
+
+configurations {
+    installerShell
+}
+
+dependencies {
+    installerShell 'neon:neon-installer-shell:1.0'
+}
+
 group = "com.ncc.neon"
 publishing {
     publications {
@@ -17,6 +32,11 @@ publishing {
             artifactId 'neon'
             project(":neon-server").tasks.war.baseName = "neon"
             artifact project(":neon-server").tasks.war
+
+            artifact zipNeonBundle {
+                classifier "bundle"
+            }
+
         }
     }
 
@@ -83,6 +103,45 @@ task pushTag(type: GitPush) {
 
     dependsOn 'tagWithCurrentVersion'
     namesOrSpecs = [version]
+}
+
+task unzipInstallerShell(type: Copy){
+    description = "Unzips the installer shell into a build directory"
+    group = RELEASE_GROUP
+    def zipFile = configurations.installerShell.find { return it}
+    def unZippedDir = file("${buildDir}/installer")
+    from zipTree(zipFile)
+    into unZippedDir
+
+}
+
+task buildAllWars() {
+    dependsOn ":neon-server:war", ":charts:war", ":circularheat:war", ":filter-builder:war", ":map:war", ":query-builder:war", ":tables:war"
+}
+
+task copyWarsIntoInstaller(type: Copy) {
+    dependsOn 'unzipInstallerShell', 'buildAllWars'
+    into "${buildDir}/installer/neon-bundle/apache-tomcat-7.0.21/webapps"
+
+    from "${project(":neon-server").buildDir}/libs"
+    from "${project(":charts").buildDir}/libs"
+    from "${project(":circularheat").buildDir}/libs"
+    from "${project(":filter-builder").buildDir}/libs"
+    from "${project(":map").buildDir}/libs"
+    from "${project(":query-builder").buildDir}/libs"
+    from "${project(":tables").buildDir}/libs"
+
+    rename { fileName ->
+        def baseName = fileName.substring(0, fileName.lastIndexOf("-"))
+        baseName = (baseName == "neon-server") ? "neon" : baseName
+        return "${baseName}.war"
+    }
+}
+
+task zipNeonBundle(type: Zip) {
+    dependsOn 'copyWarsIntoInstaller'
+    from "${buildDir}/installer/neon-bundle"
+    baseName = 'neon-bundle'
 }
 
 void throwVersionError(){
