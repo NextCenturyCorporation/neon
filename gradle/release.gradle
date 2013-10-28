@@ -140,7 +140,7 @@ task copyWarsIntoInstaller(type: Copy) {
 
 task zipNeonBundle(type: Zip) {
     dependsOn 'copyWarsIntoInstaller'
-    from "${buildDir}/installer/neon-bundle"
+    from "${buildDir}/installer"
     baseName = 'neon-bundle'
 }
 
