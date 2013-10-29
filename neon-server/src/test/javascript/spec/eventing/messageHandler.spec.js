@@ -22,55 +22,32 @@
  */
 describe('message handler', function () {
 
-
     beforeEach(function() {
         neon.mock.clearChannels();
     });
 
-    function testPublishedMessageReceived_(channelName, callbackName, params, context) {
+    function testPublishedMessageReceived(channelName, callbackName, params) {
         // were the ones that sent the message
-        var expectedParams = {};
-        _.extend(expectedParams,  params);
-
         var callback = jasmine.createSpy(channelName);
         var callbacks = {};
         callbacks[callbackName] = callback;
-        callbacks.context = context;
-        var messageHandler = new neon.eventing.MessageHandler(callbacks);
-        messageHandler.publishMessage(channelName, params);
+        neon.eventing.messageHandler.subscribeToNeonEvents(callbacks);
+        neon.eventing.messageHandler.publish(channelName, params);
 
         // the parameters should have a source appended to it with the message handler's id so objects know if they
-        expectedParams._source = messageHandler.id;
-        expect(callback).toHaveBeenCalledWith(expectedParams);
+        expect(callback).toHaveBeenCalledWith(params, 'owfEventingMockSender');
     }
 
     it('should be notified when a message is published to the selection changed channel', function() {
-        testPublishedMessageReceived_(neon.eventing.Channels.SELECTION_CHANGED, 'selectionChanged', {id:"selectionChanged"});
+        testPublishedMessageReceived(neon.eventing.Channels.SELECTION_CHANGED, 'selectionChanged', {id:"selectionChanged"});
     });
 
     it('should be notified when a message is published to the filters changed channel', function() {
-        testPublishedMessageReceived_(neon.eventing.Channels.FILTERS_CHANGED, 'filtersChanged', {id:"filtersChanged"});
+        testPublishedMessageReceived(neon.eventing.Channels.FILTERS_CHANGED, 'filtersChanged', {id:"filtersChanged"});
     });
 
     it('should be notified when a message is published to the active dataset changed channel', function() {
-        testPublishedMessageReceived_(neon.eventing.Channels.ACTIVE_DATASET_CHANGED, 'activeDatasetChanged', {id:"activeDatasetChanged"});
+        testPublishedMessageReceived(neon.eventing.Channels.ACTIVE_DATASET_CHANGED, 'activeDatasetChanged', {id:"activeDatasetChanged"});
     });
 
-
-    it('should use the passed in context', function() {
-        // for this test, the callback should act on the the context object
-        var called = false;
-        var context = {};
-        context.callMe = function() { called = true; };
-        var callback = function() {
-            this.callMe();
-        };
-        var messageHandler = new neon.eventing.MessageHandler({
-            filtersChanged: callback,
-            context: context
-        });
-        // params are unused in this test
-        messageHandler.publishMessage(neon.eventing.Channels.FILTERS_CHANGED, {});
-        expect(called).toBe(true);
-    });
 });

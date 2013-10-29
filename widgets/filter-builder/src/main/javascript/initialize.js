@@ -1,11 +1,5 @@
 $(function () {
 
-    neon.query.SERVER_URL = $("#neon-server").val();
-    var messageHandler = {
-        publishMessage: function () {
-        }
-    };
-
     initializeWidget();
     neon.filterBuilderState.restoreState();
 
@@ -19,10 +13,8 @@ $(function () {
     }
 
     function setupOWFMessageHandler() {
+        neon.query.SERVER_URL = $("#neon-server").val();
         if (typeof (OWF) !== "undefined") {
-            OWF.ready(function () {
-                messageHandler = new neon.eventing.MessageHandler({});
-            });
             OWF.relayFile = 'js/eventing/rpc_relay.uncompressed.html';
         }
     }
@@ -132,12 +124,11 @@ $(function () {
     }
 
     function clearAllFilters() {
-        neon.query.clearFilters(function () {
+        neon.eventing.owfEventPublisher.clearFilters(function () {
             var database = $('#database-select').val();
             var table = $('#table-select').val();
             var message = { "database": database, "table": table };
             neon.filter.initializeFilterSection();
-            messageHandler.publishMessage(neon.eventing.Channels.FILTERS_CHANGED, message);
         });
     }
 
@@ -145,7 +136,7 @@ $(function () {
         var database = $('#database-select').val();
         var table = $('#table-select').val();
         var message = { "database": database, "table": table };
-        messageHandler.publishMessage(neon.eventing.Channels.ACTIVE_DATASET_CHANGED, message);
+        neon.eventing.messageHandler.publish(neon.eventing.Channels.ACTIVE_DATASET_CHANGED, message);
     }
 
 });

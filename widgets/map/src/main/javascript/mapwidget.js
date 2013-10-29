@@ -34,11 +34,10 @@ $(function () {
 
         var options = ['latitude', 'longitude', 'color-by', 'size-by'];
 
-        var messageHandler = new neon.eventing.MessageHandler({
+        neon.eventing.messageHandler.subscribeToNeonEvents({
             activeDatasetChanged: onActiveDatasetChanged,
             filtersChanged: onFiltersChanged
         });
-        var eventPublisher = new neon.eventing.OWFEventPublisher(messageHandler);
 
         var map;
 
@@ -62,7 +61,7 @@ $(function () {
             if(checked && neon.mapWidgetUtils.latitudeAndLongitudeAreSelected()){
                 $("#map-redraw-button").attr("disabled", true);
                 var filter = createFilterFromExtent();
-                eventPublisher.replaceFilter(filterKey, filter);
+                neon.eventing.owfEventPublisher.replaceFilter(filterKey, filter);
             }
             else{
                 $("#map-redraw-button").removeAttr("disabled");
@@ -118,12 +117,12 @@ $(function () {
         function setApplyFiltersListener(){
             $('#map-redraw-button').click(function() {
                 var filter = createFilterFromExtent();
-                eventPublisher.replaceFilter(filterKey, filter);
+                neon.eventing.owfEventPublisher.replaceFilter(filterKey, filter);
             });
             $('#map-reset-button').click(function() {
                 map.reset();
                 var filter = new neon.query.Filter().selectFrom(databaseName, tableName);
-                eventPublisher.replaceFilter(filterKey, filter);
+                neon.eventing.owfEventPublisher.replaceFilter(filterKey, filter);
 
             });
             $('#auto-filter').click(onMapMovement);

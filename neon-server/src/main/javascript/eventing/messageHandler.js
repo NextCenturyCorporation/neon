@@ -21,84 +21,39 @@
  * RECIPIENT IS UNDER OBLIGATION TO MAINTAIN SECRECY.
  */
 
-/**
- * This class is used for sending and receiving messages on OWF channels
- *
- * @namespace neon.eventing
- * @class MessageHandler
- * @param callbackOpts An associative array mapping of function callbacks
- * @example
- *     { selectionChanged: selectionChangedCallback, filtersChanged: filtersChangedCallback }
- * @constructor
- */
-neon.eventing.MessageHandler = function (callbackOpts) {
+neon.eventing.messageHandler = (function () {
 
-    var me = this;
-    var registerChannels = function() {
-        _.each([
-            {channel: neon.eventing.Channels.SELECTION_CHANGED, callback: me.selectionChanged},
-            {channel: neon.eventing.Channels.FILTERS_CHANGED, callback: me.filtersChanged},
-            {channel: neon.eventing.Channels.ACTIVE_DATASET_CHANGED, callback: me.activeDatasetChanged}
+    function subscribe(channel, callback){
+        OWF.Eventing.subscribe(channel, function (sender, message) {
+            callback(message, sender);
+        });
+    }
 
-        ],
-            function (channelConfig) {
-                OWF.Eventing.subscribe(channelConfig.channel,
-                    function (sender, message) {
-                        channelConfig.callback.call(me.context, message);
+
+    return {
+        subscribeToNeonEvents: function (neonCallbacks) {
+            neonCallbacks = neonCallbacks || {};
+
+            var globalChannelConfigs = [
+                {channel: neon.eventing.Channels.SELECTION_CHANGED, callback: neonCallbacks.selectionChanged},
+                {channel: neon.eventing.Channels.FILTERS_CHANGED, callback: neonCallbacks.filtersChanged},
+                {channel: neon.eventing.Channels.ACTIVE_DATASET_CHANGED, callback: neonCallbacks.activeDatasetChanged}
+            ];
+
+            _.each(globalChannelConfigs, function (channelConfig) {
+                subscribe(channelConfig.channel, function (sender, message) {
+                        if (channelConfig.callback) {
+                            channelConfig.callback(sender, message);
+                        }
                     }
                 );
             });
+        },
+
+        publish: function (channel, message) {
+            OWF.Eventing.publish(channel, message);
+        },
+        subscribe: subscribe
     };
 
-    this.id =  uuid.v4();
-
-    /**
-     * The callback function that is invoked when a the selection of items changes
-     * @property selectionChanged
-     * @type {Function}
-     */
-    this.selectionChanged = function (message) {
-    };
-
-    /**
-     * The callback function that is invoked when the currently applied filters change
-     * @property filtersChanged
-     * @type {Function}
-     */
-    this.filtersChanged = function (message) {
-    };
-
-    /**
-     * The callback function that is invoked when the active dataset changes
-     * @property activeDatasetChanged
-     * @type {Function}
-     */
-    this.activeDatasetChanged = function (message) {
-    };
-
-    /**
-     * The *this* context used for the function callbacks
-     * @property context
-     * @type {Object}
-     */
-    this.context = null;
-
-    _.extend(this, callbackOpts);
-
-    registerChannels();
-
-};
-
-
-
-/**
- * Publishes the message to a channel with the specified name
- * @method publishMessage
- * @param channel The name of the channel to publish the message
- * @param message The message to send. Note that the message gets a _source property added to it with
- * the id of the message handler that sent it so receivers can ignore their own messages if desired
- */
-neon.eventing.MessageHandler.prototype.publishMessage = function (channel, message) {
-    message._source = this.id;
-    OWF.Eventing.publish(channel, message);
-};
+})();

@@ -33,11 +33,9 @@ $(function () {
 
         var clientId = OWF.getInstanceId();
 
-        // just creating the message handler will register the listeners
-        var messageHandler = new neon.eventing.MessageHandler({
+        neon.eventing.messageHandler.subscribeToNeonEvents({
             activeDatasetChanged: populateInitialData,
             filtersChanged: updateTable
-
         });
 
         neon.toggle.createOptionsPanel("#options-panel", "table-options");

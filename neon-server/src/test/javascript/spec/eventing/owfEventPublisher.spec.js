@@ -37,8 +37,6 @@ describe('publishing events to OWF channels', function () {
 
     beforeEach(function () {
         publishMock = jasmine.createSpy('message publisher');
-        messageHandler = new neon.eventing.MessageHandler();
-        owfEventPublisher = new neon.eventing.OWFEventPublisher(messageHandler);
         OWF.Eventing.publish = publishMock;
     });
 
@@ -55,16 +53,15 @@ describe('publishing events to OWF channels', function () {
      * @param delegateMethodName The underlying query method to which the OWF query executor delegates its calls to. This
      * is used to ensure that the correct method is actually called.
      */
-    function testResultsPublishedToChannel_(channel, queryExecutorMethod, args, delegateMethodName) {
+    function testResultsPublishedToChannel(channel, queryExecutorMethod, args, delegateMethodName) {
         // not all of the real methods actually return any results , but for this test it doesn't matter
         var mockResults = {mock: "results"};
         var delegateSpy = spyOn(neon.query, delegateMethodName).andCallThrough();
         neon.mock.AjaxMockUtils.mockNextAjaxCall(mockResults);
-        queryExecutorMethod.apply(owfEventPublisher, args);
+        queryExecutorMethod.apply(args);
         var expectedArgs = {};
         _.extend(expectedArgs, mockResults);
         // the owf query executor appends a source, so add it here
-        expectedArgs._source = messageHandler.id;
         expect(publishMock).toHaveBeenCalledWith(channel, expectedArgs);
 
         // verify that the correct delegate method on the query executor was actually called
@@ -81,18 +78,18 @@ describe('publishing events to OWF channels', function () {
             }
         };
         var filter = new neon.query.Filter().selectFrom(databaseName, tableName);
-        testResultsPublishedToChannel_(
+        testResultsPublishedToChannel(
             neon.eventing.Channels.FILTERS_CHANGED,
-            neon.eventing.OWFEventPublisher.prototype.addFilter,
+            neon.eventing.owfEventPublisher.addFilter,
             [filterKey, filter],
             'addFilter'
         );
     });
 
     it('should publish remove filter results', function () {
-        testResultsPublishedToChannel_(
+        testResultsPublishedToChannel(
             neon.eventing.Channels.FILTERS_CHANGED,
-            neon.eventing.OWFEventPublisher.prototype.removeFilter,
+            neon.eventing.owfEventPublisher.removeFilter,
             ["filterId"],
             'removeFilter'
         );
@@ -100,9 +97,9 @@ describe('publishing events to OWF channels', function () {
 
     it('should publish clear filter results', function () {
 
-        testResultsPublishedToChannel_(
+        testResultsPublishedToChannel(
             neon.eventing.Channels.FILTERS_CHANGED,
-            neon.eventing.OWFEventPublisher.prototype.clearFilters,
+            neon.eventing.owfEventPublisher.clearFilters,
             [],
             'clearFilters'
         );
@@ -110,18 +107,18 @@ describe('publishing events to OWF channels', function () {
 
     it('should publish set selection by filter', function () {
         var filter = new neon.query.Filter().selectFrom(databaseName, tableName);
-        testResultsPublishedToChannel_(
+        testResultsPublishedToChannel(
             neon.eventing.Channels.SELECTION_CHANGED,
-            neon.eventing.OWFEventPublisher.prototype.setSelectionWhere,
+            neon.eventing.owfEventPublisher.setSelectionWhere,
             [filter],
             'setSelectionWhere'
         );
     });
 
     it('should publish set selection by ids', function () {
-        testResultsPublishedToChannel_(
+        testResultsPublishedToChannel(
             neon.eventing.Channels.SELECTION_CHANGED,
-            neon.eventing.OWFEventPublisher.prototype.setSelectedIds,
+            neon.eventing.owfEventPublisher.setSelectedIds,
             [
                 ["id"]
             ],
@@ -130,9 +127,9 @@ describe('publishing events to OWF channels', function () {
     });
 
     it('should publish add selection ids', function () {
-        testResultsPublishedToChannel_(
+        testResultsPublishedToChannel(
             neon.eventing.Channels.SELECTION_CHANGED,
-            neon.eventing.OWFEventPublisher.prototype.addSelectedIds,
+            neon.eventing.owfEventPublisher.addSelectedIds,
             [
                 ["id"]
             ],
@@ -141,9 +138,9 @@ describe('publishing events to OWF channels', function () {
     });
 
     it('should publish remove selection ids', function () {
-        testResultsPublishedToChannel_(
+        testResultsPublishedToChannel(
             neon.eventing.Channels.SELECTION_CHANGED,
-            neon.eventing.OWFEventPublisher.prototype.removeSelectedIds,
+            neon.eventing.owfEventPublisher.removeSelectedIds,
             [
                 ["id"]
             ],
@@ -152,9 +149,9 @@ describe('publishing events to OWF channels', function () {
     });
 
     it('should publish clear selection', function () {
-        testResultsPublishedToChannel_(
+        testResultsPublishedToChannel(
             neon.eventing.Channels.SELECTION_CHANGED,
-            neon.eventing.OWFEventPublisher.prototype.clearSelection,
+            neon.eventing.owfEventPublisher.clearSelection,
             [
                 ["id"]
             ],

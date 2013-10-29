@@ -30,7 +30,7 @@ describe('query', function() {
         query.groupBy(fieldName);
         expect(query.groupByClauses.length).toEqual(1);
         var wrapped = query.groupByClauses[0];
-        verifySingleFieldClause_(fieldName, wrapped);
+        verifySingleFieldClause(fieldName, wrapped);
     });
 
     it('should pass a field function clause through directly', function() {
@@ -38,7 +38,7 @@ describe('query', function() {
         var query = new neon.query.Query();
         query.groupBy(groupByFunctionClause);
         expect(query.groupByClauses.length).toEqual(1);
-        verifyGroupByFunctionClause_(groupByFunctionClause, query.groupByClauses[0]);
+        verifyGroupByFunctionClause(groupByFunctionClause, query.groupByClauses[0]);
     });
 
     it('should allow multiple group by clauses', function() {
@@ -47,16 +47,16 @@ describe('query', function() {
         var query = new neon.query.Query();
         query.groupBy(fieldName, groupByFunctionClause);
         expect(query.groupByClauses.length).toEqual(2);
-        verifySingleFieldClause_(fieldName, query.groupByClauses[0]);
-        verifyGroupByFunctionClause_(groupByFunctionClause, query.groupByClauses[1]);
+        verifySingleFieldClause(fieldName, query.groupByClauses[0]);
+        verifyGroupByFunctionClause(groupByFunctionClause, query.groupByClauses[1]);
     });
 
-    function verifySingleFieldClause_(fieldName, actual) {
+    function verifySingleFieldClause(fieldName, actual) {
         expect(actual).toBeInstanceOf(neon.query.GroupBySingleFieldClause);
         expect(actual.field).toBe(fieldName);
     }
 
-    function verifyGroupByFunctionClause_(expected, actual) {
+    function verifyGroupByFunctionClause(expected, actual) {
         expect(actual).toBe(expected);
     }
 

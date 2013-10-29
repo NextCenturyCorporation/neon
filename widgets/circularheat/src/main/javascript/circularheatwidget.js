@@ -1,8 +1,6 @@
 $(function () {
 
     OWF.ready(function () {
-        OWF.relayFile = 'js/eventing/rpc_relay.uncompressed.html';
-        neon.query.SERVER_URL = $("#neon-server").val();
 
         var databaseName;
         var tableName;
@@ -14,16 +12,21 @@ $(function () {
 
         var clientId = OWF.getInstanceId();
 
-        // instantiating the message handler adds it as a listener
-        var messageHandler = new neon.eventing.MessageHandler({
-            activeDatasetChanged: onDatasetChanged,
-            filtersChanged: onFiltersChanged
-        });
+        initialize();
 
-        neon.toggle.createOptionsPanel("#options-panel");
-        initChart();
-        restoreState();
+        function initialize(){
+            OWF.relayFile = 'js/eventing/rpc_relay.uncompressed.html';
+            neon.query.SERVER_URL = $("#neon-server").val();
 
+            neon.eventing.messageHandler.subscribeToNeonEvents({
+                activeDatasetChanged: onDatasetChanged,
+                filtersChanged: onFiltersChanged
+            });
+
+            neon.toggle.createOptionsPanel("#options-panel");
+            initChart();
+            restoreState();
+        }
 
         function initChart() {
             chart = circularHeatChart()

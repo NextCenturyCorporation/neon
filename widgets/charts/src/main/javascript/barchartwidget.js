@@ -25,23 +25,27 @@
 $(function () {
 
     OWF.ready(function () {
-        OWF.relayFile = 'js/eventing/rpc_relay.uncompressed.html';
-        neon.query.SERVER_URL = $("#neon-server").val();
 
         var COUNT_FIELD_NAME = 'Count';
         var clientId = OWF.getInstanceId();
+        initialize();
 
-        // just creating the message handler will receive messages
-        var messageHandler = new neon.eventing.MessageHandler({
-            activeDatasetChanged: function (message) {
-                neon.chartWidget.onActiveDatasetChanged(message, drawChart, neon.widget.BARCHART);
-            },
-            filtersChanged: drawChart
-        });
+        function initialize() {
+            OWF.relayFile = 'js/eventing/rpc_relay.uncompressed.html';
+            neon.query.SERVER_URL = $("#neon-server").val();
 
-        neon.toggle.createOptionsPanel("#options-panel");
-        drawChart();
-        restoreState();
+            neon.eventing.messageHandler.subscribeToNeonEvents({
+                activeDatasetChanged: function (message) {
+                    neon.chartWidget.onActiveDatasetChanged(message, drawChart, neon.widget.BARCHART);
+                },
+                filtersChanged: drawChart
+            });
+
+
+            neon.toggle.createOptionsPanel("#options-panel");
+            drawChart();
+            restoreState();
+        }
 
         /**
          * Redraws the chart based on the user selected attribtues

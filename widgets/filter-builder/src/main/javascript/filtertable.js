@@ -1,17 +1,6 @@
 var neon = neon || {};
 neon.filter = (function () {
 
-    var messageHandler = {
-        publishMessage: function () {
-        }
-    };
-
-    if (typeof (OWF) !== "undefined") {
-        OWF.ready(function () {
-            messageHandler = new neon.eventing.MessageHandler();
-        });
-    }
-
     var filterKey;
     var columnOptions;
     var operatorOptions = ["=", "!=", ">", "<", ">=", "<="];
@@ -33,11 +22,10 @@ neon.filter = (function () {
         updateDataFromForm(id);
         var filter = buildFilterFromData();
 
-        neon.query.replaceFilter(filterKey, filter, function () {
+        neon.eventing.owfEventPublisher.replaceFilter(filterKey, filter, function(){
             if (!updatingExisting) {
                 filterState.data.push(new FilterRow());
             }
-            messageHandler.publishMessage(neon.eventing.Channels.FILTERS_CHANGED, {});
             redrawFilterContentAndSaveState();
         });
     };
@@ -46,10 +34,7 @@ neon.filter = (function () {
         filterState.data.splice(id, 1);
         var filter = buildFilterFromData();
 
-        neon.query.replaceFilter(filterKey, filter, function () {
-            messageHandler.publishMessage(neon.eventing.Channels.FILTERS_CHANGED, {});
-            redrawFilterContentAndSaveState();
-        });
+        neon.eventing.owfEventPublisher.replaceFilter(filterKey, filter, redrawFilterContentAndSaveState);
     };
 
     var initializeFilterSection = function () {

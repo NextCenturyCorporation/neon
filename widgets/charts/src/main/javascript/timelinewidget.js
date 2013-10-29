@@ -25,26 +25,28 @@ $(function () {
 
     OWF.ready(function () {
         var timeline;
-        OWF.relayFile = 'js/eventing/rpc_relay.uncompressed.html';
-        neon.query.SERVER_URL = $("#neon-server").val();
-
         var COUNT_FIELD_NAME = 'Count';
         var clientId = OWF.getInstanceId();
 
-        var messageHandler = new neon.eventing.MessageHandler({
-            activeDatasetChanged: function (message) {
-                neon.chartWidget.onActiveDatasetChanged(message, drawChart, neon.widget.TIMELINE);
-            },
-            filtersChanged: onFiltersChanged
+        initialize();
 
-        });
-        var eventPublisher = new neon.eventing.OWFEventPublisher(messageHandler);
+        function initialize(){
+            OWF.relayFile = 'js/eventing/rpc_relay.uncompressed.html';
+            neon.query.SERVER_URL = $("#neon-server").val();
+            neon.eventing.messageHandler.subscribeToNeonEvents({
+                activeDatasetChanged: function (message) {
+                    neon.chartWidget.onActiveDatasetChanged(message, drawChart, neon.widget.TIMELINE);
+                },
+                filtersChanged: onFiltersChanged
+            });
 
-        neon.toggle.createOptionsPanel("#options-panel");
-        populateTimeGranularityDropdown();
-        configureButtons();
-        drawChart();
-        restoreState();
+
+            neon.toggle.createOptionsPanel("#options-panel");
+            populateTimeGranularityDropdown();
+            configureButtons();
+            drawChart();
+            restoreState();
+        }
 
         function configureButtons() {
             configureRedrawBoundsButton();
@@ -73,17 +75,12 @@ $(function () {
             // initially disabled until filter added
             disableResetFilterButton();
             getResetFilterButton().click(function () {
-                //TODO: NEON-64 Once a callback is added, we can use the owfEventPublisher code.
-                neon.query.removeFilter(neon.chartWidget.getFilterKey(), function(){
-                    messageHandler.publishMessage(neon.eventing.Channels.FILTERS_CHANGED, {});
-                    drawChart();
-                });
-
+                neon.eventing.owfEventPublisher.removeFilter(neon.chartWidget.getFilterKey(), drawChart);
             });
         }
 
-        function onFiltersChanged(message) {
-            if (message._source === messageHandler.id) {
+        function onFiltersChanged(message, sender) {
+            if (sender === OWF.getIframeId()) {
                 getResetFilterButton().removeAttr('disabled');
             }
             else{
@@ -167,7 +164,7 @@ $(function () {
                 var filterClause = neon.query.and(startFilterClause, endFilterClause);
                 var filter = new neon.query.Filter().selectFrom(neon.chartWidget.getDatabaseName(), neon.chartWidget.getTableName()).where(filterClause);
 
-                eventPublisher.replaceFilter(neon.chartWidget.getFilterKey(), filter);
+                neon.eventing.owfEventPublisher.replaceFilter(neon.chartWidget.getFilterKey(), filter);
             });
         }
 
