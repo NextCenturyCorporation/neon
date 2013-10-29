@@ -133,18 +133,28 @@ $(function () {
             var latField = neon.mapWidgetUtils.getLatitudeField();
 
             var extent = map.getExtent();
+
             var leftClause = neon.query.where(lonField, ">=", extent.minimumLongitude);
             var rightClause = neon.query.where(lonField, "<=", extent.maximumLongitude);
             var bottomClause = neon.query.where(latField, ">=", extent.minimumLatitude);
             var topClause = neon.query.where(latField, "<=", extent.maximumLatitude);
             var filterClause = neon.query.and(leftClause, rightClause, bottomClause, topClause);
 
-            //if the current extent includes the international date line
-            if(extent.minimumLongitude && extent.maximumLongitude < 0) {
+            //Deal with different dateline crossing scenarios.
+            if(extent.minimumLongitude < -180 && extent.maximumLongitude > 180){
+                filterClause = neon.query.and(topClause, bottomClause);
+            }
+            else if(extent.minimumLongitude < -180) {
                 leftClause = neon.query.where(lonField, ">=", extent.minimumLongitude + 360);
                 var leftDateLine = neon.query.where(lonField, "<=", 180);
                 var rightDateLine = neon.query.where(lonField, ">=", -180);
-
+                var datelineClause = neon.query.or(neon.query.and(leftClause, leftDateLine), neon.query.and(rightClause, rightDateLine));
+                filterClause = neon.query.and(topClause, bottomClause, datelineClause);
+            }
+            else if(extent.maximumLongitude > 180){
+                rightClause = neon.query.where(lonField, "<=", extent.maximumLongitude - 360);
+                var rightDateLine = neon.query.where(lonField, ">=", -180);
+                var leftDateLine = neon.query.where(lonField, "<=", 180);
                 var datelineClause = neon.query.or(neon.query.and(leftClause, leftDateLine), neon.query.and(rightClause, rightDateLine));
                 filterClause = neon.query.and(topClause, bottomClause, datelineClause);
             }
