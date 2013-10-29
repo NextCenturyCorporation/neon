@@ -33,10 +33,10 @@ publishing {
             project(":neon-server").tasks.war.baseName = "neon"
             artifact project(":neon-server").tasks.war
 
-            artifact zipNeonBundle {
-                classifier "bundle"
-            }
-
+        }
+        bundle(MavenPublication){
+            artifactId 'neon-bundle'
+            artifact zipNeonBundle
         }
     }
 
@@ -47,6 +47,7 @@ publishing {
     }
 
     publishNeonPublicationToMavenRepository.dependsOn 'verifyVersion', 'verifyMasterBranch'
+    publishBundlePublicationToMavenRepository.dependsOn 'verifyVersion', 'verifyMasterBranch'
 
 }
 
