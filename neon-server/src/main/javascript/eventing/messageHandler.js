@@ -21,39 +21,80 @@
  * RECIPIENT IS UNDER OBLIGATION TO MAINTAIN SECRECY.
  */
 
+/**
+ A utility that allows a user to publish and subscribe to OWF events in Neon.
+ Each widget should call subscribeToNeonEvents() on initialization in order to subscribe
+ to Neon's filter, selection, and active callback events.
+ @class neon.eventing.messageHandler
+ @static
+ **/
+
 neon.eventing.messageHandler = (function () {
 
+    /**
+     * Publish to an OWF channel
+     * @param channel {string} The channel to which one can publish a message
+     * @param message {object} The payload of the publication.
+     * @method publish
+     */
+
+    function publish(channel, message) {
+        OWF.Eventing.publish(channel, message);
+    }
+
+    /**
+     * Subscribe to an OWF channel.
+     * @param channel {string} The channel to which the callback is registered
+     * @param callback {function} A function to execute when the channel receives the message. The function
+     * can contain two parameters, the message that was published, and the sender that published the message.
+     * The sender object will be equal to the OWF.getIframeId() of the publishing widget.
+     * @method subscribe
+     */
     function subscribe(channel, callback){
+        // We reverse the sender and message parameters here because typical usage requires the message
+        // but not the sender. Callbacks can omit the second parameter if they do not need the sender.
         OWF.Eventing.subscribe(channel, function (sender, message) {
             callback(message, sender);
         });
     }
 
+    /**
+     * Subscribe to Neon's global events.
+     * @param neonCallbacks {object} An object containing callback functions to Neon's events. Each function can contain
+     * two parameters, the message published, and the sender that published the message.
+     * <ul>
+     *     <li>selectionChanged - function to execute when the selection has changed</li>
+     *     <li>filtersChanged - function to execute when the filters have been changed</li>
+     *     <li>activeDatasetChanged - function to execute when the active dataset has changed</li>
+     * </ul>
+     * @method subscribeToNeonEvents
+     */
+    function subscribeToNeonEvents(neonCallbacks) {
+        var globalChannelConfigs = createGlobalChannelSubscriptions(neonCallbacks);
+        _.each(globalChannelConfigs, function (channelConfig) {
+            subscribe(channelConfig.channel, function (sender, message) {
+                    if (channelConfig.callback && typeof channelConfig.callback === 'function') {
+                        channelConfig.callback(sender, message);
+                    }
+                }
+            );
+        });
+
+    }
+
+    function createGlobalChannelSubscriptions(neonCallbacks) {
+        neonCallbacks = neonCallbacks || {};
+        return [
+            {channel: neon.eventing.Channels.SELECTION_CHANGED, callback: neonCallbacks.selectionChanged},
+            {channel: neon.eventing.Channels.FILTERS_CHANGED, callback: neonCallbacks.filtersChanged},
+            {channel: neon.eventing.Channels.ACTIVE_DATASET_CHANGED, callback: neonCallbacks.activeDatasetChanged}
+        ];
+    }
 
     return {
-        subscribeToNeonEvents: function (neonCallbacks) {
-            neonCallbacks = neonCallbacks || {};
-
-            var globalChannelConfigs = [
-                {channel: neon.eventing.Channels.SELECTION_CHANGED, callback: neonCallbacks.selectionChanged},
-                {channel: neon.eventing.Channels.FILTERS_CHANGED, callback: neonCallbacks.filtersChanged},
-                {channel: neon.eventing.Channels.ACTIVE_DATASET_CHANGED, callback: neonCallbacks.activeDatasetChanged}
-            ];
-
-            _.each(globalChannelConfigs, function (channelConfig) {
-                subscribe(channelConfig.channel, function (sender, message) {
-                        if (channelConfig.callback) {
-                            channelConfig.callback(sender, message);
-                        }
-                    }
-                );
-            });
-        },
-
-        publish: function (channel, message) {
-            OWF.Eventing.publish(channel, message);
-        },
-        subscribe: subscribe
+        subscribeToNeonEvents: subscribeToNeonEvents,
+        subscribe: subscribe,
+        publish: publish
     };
 
 })();
