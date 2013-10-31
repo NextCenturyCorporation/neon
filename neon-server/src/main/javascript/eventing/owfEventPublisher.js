@@ -21,12 +21,17 @@
  * RECIPIENT IS UNDER OBLIGATION TO MAINTAIN SECRECY.
  */
 
+/**
+ Wraps neon query functions that should automatically fire OWF events.
+ @class neon.eventing.owfEventPublisher
+ @static
+ **/
 
 neon.eventing.owfEventPublisher = (function () {
 
     function createChannelCallback(channelName, successCallback){
         var callback = function(results){
-            if(successCallback){
+            if(successCallback && typeof successCallback === 'function'){
                 successCallback();
             }
             neon.eventing.messageHandler.publish(channelName, results || {});
@@ -35,30 +40,75 @@ neon.eventing.owfEventPublisher = (function () {
     }
 
     return {
+        /**
+         * Fires a filter changed event.
+         * See {{#crossLink "neon.query.Query/addFilter:method"}}{{/crossLink}}
+         * @method addFilter
+         */
         addFilter: function(filterKey, filter, successCallback, errorCallback){
             neon.query.addFilter(filterKey, filter, createChannelCallback(neon.eventing.Channels.FILTERS_CHANGED, successCallback), errorCallback);
         },
+        /**
+         * Fires a filter changed event.
+         * See {{#crossLink "neon.query.Query/removeFilter:method"}}{{/crossLink}}
+         * @method removeFilter
+         */
         removeFilter: function(filterKey, successCallback, errorCallback){
             neon.query.removeFilter(filterKey, createChannelCallback(neon.eventing.Channels.FILTERS_CHANGED, successCallback), errorCallback);
         },
+        /**
+         * Fires a filter changed event.
+         * See {{#crossLink "neon.query.Query/replaceFilter:method"}}{{/crossLink}}
+         * @method replaceFilter
+         */
         replaceFilter: function(filterKey, filter, successCallback, errorCallback){
             neon.query.replaceFilter(filterKey, filter, createChannelCallback(neon.eventing.Channels.FILTERS_CHANGED, successCallback), errorCallback);
         },
+        /**
+         * Fires a filter changed event.
+         * See {{#crossLink "neon.query.Query/clearFilters:method"}}{{/crossLink}}
+         * @method clearFilters
+         */
         clearFilters: function (successCallback, errorCallback) {
             neon.query.clearFilters(createChannelCallback(neon.eventing.Channels.FILTERS_CHANGED, successCallback), errorCallback);
         },
+        /**
+         * Fires a selection changed event.
+         * See {{#crossLink "neon.query.Query/setSelectionWhere:method"}}{{/crossLink}}
+         * @method setSelectionWhere
+         */
         setSelectionWhere: function(filter, successCallback, errorCallback){
             neon.query.setSelectionWhere(filter, createChannelCallback(neon.eventing.Channels.SELECTION_CHANGED, successCallback), errorCallback);
         },
+        /**
+         * Fires a selection changed event.
+         * See {{#crossLink "neon.query.Query/setSelectedIds:method"}}{{/crossLink}}
+         * @method setSelectedIds
+         */
         setSelectedIds: function(ids, successCallback, errorCallback){
             neon.query.setSelectedIds(ids, createChannelCallback(neon.eventing.Channels.SELECTION_CHANGED, successCallback), errorCallback);
         },
+        /**
+         * Fires a selection changed event.
+         * See {{#crossLink "neon.query.Query/addSelectedIds:method"}}{{/crossLink}}
+         * @method addSelectedIds
+         */
         addSelectedIds: function (ids, successCallback, errorCallback) {
             neon.query.addSelectedIds(ids, createChannelCallback(neon.eventing.Channels.SELECTION_CHANGED, successCallback), errorCallback);
         },
+        /**
+         * Fires a selection changed event.
+         * See {{#crossLink "neon.query.Query/removeSelectedIds:method"}}{{/crossLink}}
+         * @method removeSelectedIds
+         */
         removeSelectedIds: function (ids, successCallback, errorCallback) {
             neon.query.removeSelectedIds(ids, createChannelCallback(neon.eventing.Channels.SELECTION_CHANGED, successCallback), errorCallback);
         },
+        /**
+         * Fires a selection changed event.
+         * See {{#crossLink "neon.query.Query/clearSelection:method"}}{{/crossLink}}
+         * @method clearSelection
+         */
         clearSelection: function (successCallback, errorCallback) {
             neon.query.clearSelection(createChannelCallback(neon.eventing.Channels.SELECTION_CHANGED, successCallback), errorCallback);
         }

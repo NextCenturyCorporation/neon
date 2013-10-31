@@ -32,18 +32,18 @@ neon.eventing.Channels = {};
 
 /**
  * @property SELECTION_CHANGED
- * @type {String}
+ * @type {string}
  */
 neon.eventing.Channels.SELECTION_CHANGED = 'selection_changed';
 
 /**
  * @property FILTERS_CHANGED
- * @type {String}
+ * @type {string}
  */
 neon.eventing.Channels.FILTERS_CHANGED = 'filters_changed';
 
 /**
  * @property ACTIVE_DATASET_CHANGED
- * @type {String}
+ * @type {string}
  */
 neon.eventing.Channels.ACTIVE_DATASET_CHANGED = 'active_dataset_changed';

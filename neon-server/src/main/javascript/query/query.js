@@ -684,7 +684,7 @@ neon.query.addSelectedIds = function (ids, successCallback, errorCallback) {
 
 /**
  * Adds the items with the specified ids to the current selection
- * @method addSelectedIds
+ * @method removeSelectedIds
  * @param {Array} ids An array of ids of items to add to the selection
  * @param {Function} successCallback The callback to execute when selection is completed
  * @param {Function} [errorCallback] The optional callback when an error occurs. This is a 3 parameter function that contains the xhr, a short error status and the full error message.

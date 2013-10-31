@@ -79,7 +79,6 @@ neon.eventing.messageHandler = (function () {
                 }
             );
         });
-
     }
 
     function createGlobalChannelSubscriptions(neonCallbacks) {
