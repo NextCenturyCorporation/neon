@@ -39,15 +39,15 @@ describe('message handler', function () {
     }
 
     it('should be notified when a message is published to the selection changed channel', function() {
-        testPublishedMessageReceived(neon.eventing.Channels.SELECTION_CHANGED, 'selectionChanged', {id:"selectionChanged"});
+        testPublishedMessageReceived(neon.eventing.channels.SELECTION_CHANGED, 'selectionChanged', {id:"selectionChanged"});
     });
 
     it('should be notified when a message is published to the filters changed channel', function() {
-        testPublishedMessageReceived(neon.eventing.Channels.FILTERS_CHANGED, 'filtersChanged', {id:"filtersChanged"});
+        testPublishedMessageReceived(neon.eventing.channels.FILTERS_CHANGED, 'filtersChanged', {id:"filtersChanged"});
     });
 
     it('should be notified when a message is published to the active dataset changed channel', function() {
-        testPublishedMessageReceived(neon.eventing.Channels.ACTIVE_DATASET_CHANGED, 'activeDatasetChanged', {id:"activeDatasetChanged"});
+        testPublishedMessageReceived(neon.eventing.channels.ACTIVE_DATASET_CHANGED, 'activeDatasetChanged', {id:"activeDatasetChanged"});
     });
 
 });

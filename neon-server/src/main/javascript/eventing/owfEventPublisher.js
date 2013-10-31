@@ -46,7 +46,7 @@ neon.eventing.owfEventPublisher = (function () {
          * @method addFilter
          */
         addFilter: function(filterKey, filter, successCallback, errorCallback){
-            neon.query.addFilter(filterKey, filter, createChannelCallback(neon.eventing.Channels.FILTERS_CHANGED, successCallback), errorCallback);
+            neon.query.addFilter(filterKey, filter, createChannelCallback(neon.eventing.channels.FILTERS_CHANGED, successCallback), errorCallback);
         },
         /**
          * Fires a filter changed event.
@@ -54,7 +54,7 @@ neon.eventing.owfEventPublisher = (function () {
          * @method removeFilter
          */
         removeFilter: function(filterKey, successCallback, errorCallback){
-            neon.query.removeFilter(filterKey, createChannelCallback(neon.eventing.Channels.FILTERS_CHANGED, successCallback), errorCallback);
+            neon.query.removeFilter(filterKey, createChannelCallback(neon.eventing.channels.FILTERS_CHANGED, successCallback), errorCallback);
         },
         /**
          * Fires a filter changed event.
@@ -62,7 +62,7 @@ neon.eventing.owfEventPublisher = (function () {
          * @method replaceFilter
          */
         replaceFilter: function(filterKey, filter, successCallback, errorCallback){
-            neon.query.replaceFilter(filterKey, filter, createChannelCallback(neon.eventing.Channels.FILTERS_CHANGED, successCallback), errorCallback);
+            neon.query.replaceFilter(filterKey, filter, createChannelCallback(neon.eventing.channels.FILTERS_CHANGED, successCallback), errorCallback);
         },
         /**
          * Fires a filter changed event.
@@ -70,7 +70,7 @@ neon.eventing.owfEventPublisher = (function () {
          * @method clearFilters
          */
         clearFilters: function (successCallback, errorCallback) {
-            neon.query.clearFilters(createChannelCallback(neon.eventing.Channels.FILTERS_CHANGED, successCallback), errorCallback);
+            neon.query.clearFilters(createChannelCallback(neon.eventing.channels.FILTERS_CHANGED, successCallback), errorCallback);
         },
         /**
          * Fires a selection changed event.
@@ -78,7 +78,7 @@ neon.eventing.owfEventPublisher = (function () {
          * @method setSelectionWhere
          */
         setSelectionWhere: function(filter, successCallback, errorCallback){
-            neon.query.setSelectionWhere(filter, createChannelCallback(neon.eventing.Channels.SELECTION_CHANGED, successCallback), errorCallback);
+            neon.query.setSelectionWhere(filter, createChannelCallback(neon.eventing.channels.SELECTION_CHANGED, successCallback), errorCallback);
         },
         /**
          * Fires a selection changed event.
@@ -86,7 +86,7 @@ neon.eventing.owfEventPublisher = (function () {
          * @method setSelectedIds
          */
         setSelectedIds: function(ids, successCallback, errorCallback){
-            neon.query.setSelectedIds(ids, createChannelCallback(neon.eventing.Channels.SELECTION_CHANGED, successCallback), errorCallback);
+            neon.query.setSelectedIds(ids, createChannelCallback(neon.eventing.channels.SELECTION_CHANGED, successCallback), errorCallback);
         },
         /**
          * Fires a selection changed event.
@@ -94,7 +94,7 @@ neon.eventing.owfEventPublisher = (function () {
          * @method addSelectedIds
          */
         addSelectedIds: function (ids, successCallback, errorCallback) {
-            neon.query.addSelectedIds(ids, createChannelCallback(neon.eventing.Channels.SELECTION_CHANGED, successCallback), errorCallback);
+            neon.query.addSelectedIds(ids, createChannelCallback(neon.eventing.channels.SELECTION_CHANGED, successCallback), errorCallback);
         },
         /**
          * Fires a selection changed event.
@@ -102,7 +102,7 @@ neon.eventing.owfEventPublisher = (function () {
          * @method removeSelectedIds
          */
         removeSelectedIds: function (ids, successCallback, errorCallback) {
-            neon.query.removeSelectedIds(ids, createChannelCallback(neon.eventing.Channels.SELECTION_CHANGED, successCallback), errorCallback);
+            neon.query.removeSelectedIds(ids, createChannelCallback(neon.eventing.channels.SELECTION_CHANGED, successCallback), errorCallback);
         },
         /**
          * Fires a selection changed event.
@@ -110,7 +110,7 @@ neon.eventing.owfEventPublisher = (function () {
          * @method clearSelection
          */
         clearSelection: function (successCallback, errorCallback) {
-            neon.query.clearSelection(createChannelCallback(neon.eventing.Channels.SELECTION_CHANGED, successCallback), errorCallback);
+            neon.query.clearSelection(createChannelCallback(neon.eventing.channels.SELECTION_CHANGED, successCallback), errorCallback);
         }
     };
 

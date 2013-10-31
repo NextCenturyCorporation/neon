@@ -84,9 +84,9 @@ neon.eventing.messageHandler = (function () {
     function createGlobalChannelSubscriptions(neonCallbacks) {
         neonCallbacks = neonCallbacks || {};
         return [
-            {channel: neon.eventing.Channels.SELECTION_CHANGED, callback: neonCallbacks.selectionChanged},
-            {channel: neon.eventing.Channels.FILTERS_CHANGED, callback: neonCallbacks.filtersChanged},
-            {channel: neon.eventing.Channels.ACTIVE_DATASET_CHANGED, callback: neonCallbacks.activeDatasetChanged}
+            {channel: neon.eventing.channels.SELECTION_CHANGED, callback: neonCallbacks.selectionChanged},
+            {channel: neon.eventing.channels.FILTERS_CHANGED, callback: neonCallbacks.filtersChanged},
+            {channel: neon.eventing.channels.ACTIVE_DATASET_CHANGED, callback: neonCallbacks.activeDatasetChanged}
         ];
     }
 

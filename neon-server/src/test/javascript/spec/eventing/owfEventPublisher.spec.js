@@ -79,7 +79,7 @@ describe('publishing events to OWF channels', function () {
         };
         var filter = new neon.query.Filter().selectFrom(databaseName, tableName);
         testResultsPublishedToChannel(
-            neon.eventing.Channels.FILTERS_CHANGED,
+            neon.eventing.channels.FILTERS_CHANGED,
             neon.eventing.owfEventPublisher.addFilter,
             [filterKey, filter],
             'addFilter'
@@ -88,7 +88,7 @@ describe('publishing events to OWF channels', function () {
 
     it('should publish remove filter results', function () {
         testResultsPublishedToChannel(
-            neon.eventing.Channels.FILTERS_CHANGED,
+            neon.eventing.channels.FILTERS_CHANGED,
             neon.eventing.owfEventPublisher.removeFilter,
             ["filterId"],
             'removeFilter'
@@ -98,7 +98,7 @@ describe('publishing events to OWF channels', function () {
     it('should publish clear filter results', function () {
 
         testResultsPublishedToChannel(
-            neon.eventing.Channels.FILTERS_CHANGED,
+            neon.eventing.channels.FILTERS_CHANGED,
             neon.eventing.owfEventPublisher.clearFilters,
             [],
             'clearFilters'
@@ -108,7 +108,7 @@ describe('publishing events to OWF channels', function () {
     it('should publish set selection by filter', function () {
         var filter = new neon.query.Filter().selectFrom(databaseName, tableName);
         testResultsPublishedToChannel(
-            neon.eventing.Channels.SELECTION_CHANGED,
+            neon.eventing.channels.SELECTION_CHANGED,
             neon.eventing.owfEventPublisher.setSelectionWhere,
             [filter],
             'setSelectionWhere'
@@ -117,7 +117,7 @@ describe('publishing events to OWF channels', function () {
 
     it('should publish set selection by ids', function () {
         testResultsPublishedToChannel(
-            neon.eventing.Channels.SELECTION_CHANGED,
+            neon.eventing.channels.SELECTION_CHANGED,
             neon.eventing.owfEventPublisher.setSelectedIds,
             [
                 ["id"]
@@ -128,7 +128,7 @@ describe('publishing events to OWF channels', function () {
 
     it('should publish add selection ids', function () {
         testResultsPublishedToChannel(
-            neon.eventing.Channels.SELECTION_CHANGED,
+            neon.eventing.channels.SELECTION_CHANGED,
             neon.eventing.owfEventPublisher.addSelectedIds,
             [
                 ["id"]
@@ -139,7 +139,7 @@ describe('publishing events to OWF channels', function () {
 
     it('should publish remove selection ids', function () {
         testResultsPublishedToChannel(
-            neon.eventing.Channels.SELECTION_CHANGED,
+            neon.eventing.channels.SELECTION_CHANGED,
             neon.eventing.owfEventPublisher.removeSelectedIds,
             [
                 ["id"]
@@ -150,7 +150,7 @@ describe('publishing events to OWF channels', function () {
 
     it('should publish clear selection', function () {
         testResultsPublishedToChannel(
-            neon.eventing.Channels.SELECTION_CHANGED,
+            neon.eventing.channels.SELECTION_CHANGED,
             neon.eventing.owfEventPublisher.clearSelection,
             [
                 ["id"]
