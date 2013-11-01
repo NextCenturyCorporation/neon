@@ -1,3 +1,8 @@
+/**
+ * This class has a list widgets packaged with neon.
+ * @class neon.widget
+ */
+
 neon.widget = {
     MAP: "Map",
     TIMELINE: "Timeline",

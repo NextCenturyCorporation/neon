@@ -53,6 +53,7 @@ neon.query.Query = function () {
     this.isDistinct = false;
     this.aggregates = [];
     this.sortClauses = [];
+    this.limitClause = undefined;
 };
 
 /**
@@ -204,7 +205,7 @@ neon.query.Query.prototype.withFields = function (fields) {
 /**
  * Sets the *where* clause of the query to determine how to select the data
  * @method where
- * @param {Object} arguments The arguments can be in either multiple formats<br>
+ * The arguments can be in either multiple formats<br>
  * <ol>
  *    <li>A 3 argument array as follows:
  *      <ul>
@@ -778,74 +779,6 @@ neon.query.queryUrl_ = function (path) {
     return neon.query.SERVER_URL + path;
 };
 
-/**
- * Creates a filter that can be applied to a dataset
- * @namespace neon.query
- * @class Filter
- * @constructor
- */
-neon.query.Filter = function () {
-
-    /*jshint expr: true */
-    this.whereClause;
-    this.transform_;
-};
-
-/**
- * Sets the *select* clause of the filter to select data from the specified dataset
- * @method selectFrom
- * @param {String} databaseName The name of the database that contains the data
- * @param {String} tableName The table to select from
- * @return {neon.query.Filter} This filter object
- */
-neon.query.Filter.prototype.selectFrom = function (databaseName, tableName) {
-    this.databaseName = databaseName;
-    this.tableName = tableName;
-    return this;
-};
-
-
-/**
- * Adds a *where* clause to the filter.
- * @param {Object} arguments See {{#crossLink "neon.query.Query/where"}}{{/crossLink}} for documentation on how to structure the parameters
- * @method where
- * @return {neon.query.Filter} This filter object
- */
-neon.query.Filter.prototype.where = function () {
-    if (arguments.length === 3) {
-        this.whereClause = neon.query.where(arguments[0], arguments[1], arguments[2]);
-    }
-    else {
-        // must be a boolean/geospatial clause
-        this.whereClause = arguments[0];
-    }
-    return this;
-};
-
-/**
- * Adds a *withinDistance* clause to the filter.
- * @param {String} locationField The name of the field containing the location value
- * @param {neon.util.LatLon} center The point from which the distance is measured
- * @param {double} distance The maximum distance from the center point a result must be within to be returned in the query
- * @param {String} distanceUnit The unit of measure for the distance. See the constants in this class.
- * @method withinDistance
- * @return {neon.query.Filter} This filter object
- */
-neon.query.Filter.prototype.withinDistance = function (locationField, center, distance, distanceUnit) {
-    return this.where(neon.query.withinDistance(locationField, center, distance, distanceUnit));
-};
-
-/**
- * Specifies a name of a transform to apply to the json before returning it from the query
- * @method transform
- * @param {String} transformName
- * @param {Array} [transformParams]
- * @return {neon.query.Filter} This filter object
- */
-neon.query.Filter.prototype.transform = function (transformName, transformParams) {
-    this.transform_ = new neon.query.Transform(transformName, transformParams);
-    return this;
-};
 
 /**
  * A generic function that can be applied to a field (on the server side). For example, this could be an aggregation
