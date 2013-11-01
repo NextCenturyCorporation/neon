@@ -75,7 +75,7 @@ $(function () {
             // initially disabled until filter added
             disableResetFilterButton();
             getResetFilterButton().click(function () {
-                neon.eventing.owfEventPublisher.removeFilter(neon.chartWidget.getFilterKey(), drawChart);
+                neon.eventing.publishing.removeFilter(neon.chartWidget.getFilterKey(), drawChart);
             });
         }
 
@@ -164,7 +164,7 @@ $(function () {
                 var filterClause = neon.query.and(startFilterClause, endFilterClause);
                 var filter = new neon.query.Filter().selectFrom(neon.chartWidget.getDatabaseName(), neon.chartWidget.getTableName()).where(filterClause);
 
-                neon.eventing.owfEventPublisher.replaceFilter(neon.chartWidget.getFilterKey(), filter);
+                neon.eventing.publishing.replaceFilter(neon.chartWidget.getFilterKey(), filter);
             });
         }
 

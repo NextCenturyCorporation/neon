@@ -22,7 +22,7 @@ neon.filter = (function () {
         updateDataFromForm(id);
         var filter = buildFilterFromData();
 
-        neon.eventing.owfEventPublisher.replaceFilter(filterKey, filter, function(){
+        neon.eventing.publishing.replaceFilter(filterKey, filter, function(){
             if (!updatingExisting) {
                 filterState.data.push(new FilterRow());
             }
@@ -34,7 +34,7 @@ neon.filter = (function () {
         filterState.data.splice(id, 1);
         var filter = buildFilterFromData();
 
-        neon.eventing.owfEventPublisher.replaceFilter(filterKey, filter, redrawFilterContentAndSaveState);
+        neon.eventing.publishing.replaceFilter(filterKey, filter, redrawFilterContentAndSaveState);
     };
 
     var initializeFilterSection = function () {

@@ -23,13 +23,13 @@
 
 /**
  A utility that allows a user to publish and subscribe to OWF events in Neon.
- Each widget should call subscribeToNeonEvents() on initialization in order to subscribe
+ Each widget should call registerForNeonEvents() on initialization in order to subscribe
  to Neon's filter, selection, and active callback events.
- @class neon.eventing.messageHandler
+ @class neon.eventing.messaging
  @static
  **/
 
-neon.eventing.messageHandler = (function () {
+neon.eventing.messaging = (function () {
 
     /**
      * Publish to an OWF channel
@@ -67,7 +67,7 @@ neon.eventing.messageHandler = (function () {
      *     <li>filtersChanged - function to execute when the filters have been changed</li>
      *     <li>activeDatasetChanged - function to execute when the active dataset has changed</li>
      * </ul>
-     * @method subscribeToNeonEvents
+     * @method registerForNeonEvents
      */
     function subscribeToNeonEvents(neonCallbacks) {
         var globalChannelConfigs = createGlobalChannelSubscriptions(neonCallbacks);
@@ -91,7 +91,7 @@ neon.eventing.messageHandler = (function () {
     }
 
     return {
-        subscribeToNeonEvents: subscribeToNeonEvents,
+        registerForNeonEvents: subscribeToNeonEvents,
         subscribe: subscribe,
         publish: publish
     };

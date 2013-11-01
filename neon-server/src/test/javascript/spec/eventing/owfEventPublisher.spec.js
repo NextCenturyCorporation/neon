@@ -80,7 +80,7 @@ describe('publishing events to OWF channels', function () {
         var filter = new neon.query.Filter().selectFrom(databaseName, tableName);
         testResultsPublishedToChannel(
             neon.eventing.channels.FILTERS_CHANGED,
-            neon.eventing.owfEventPublisher.addFilter,
+            neon.eventing.publishing.addFilter,
             [filterKey, filter],
             'addFilter'
         );
@@ -89,7 +89,7 @@ describe('publishing events to OWF channels', function () {
     it('should publish remove filter results', function () {
         testResultsPublishedToChannel(
             neon.eventing.channels.FILTERS_CHANGED,
-            neon.eventing.owfEventPublisher.removeFilter,
+            neon.eventing.publishing.removeFilter,
             ["filterId"],
             'removeFilter'
         );
@@ -99,7 +99,7 @@ describe('publishing events to OWF channels', function () {
 
         testResultsPublishedToChannel(
             neon.eventing.channels.FILTERS_CHANGED,
-            neon.eventing.owfEventPublisher.clearFilters,
+            neon.eventing.publishing.clearFilters,
             [],
             'clearFilters'
         );
@@ -109,7 +109,7 @@ describe('publishing events to OWF channels', function () {
         var filter = new neon.query.Filter().selectFrom(databaseName, tableName);
         testResultsPublishedToChannel(
             neon.eventing.channels.SELECTION_CHANGED,
-            neon.eventing.owfEventPublisher.setSelectionWhere,
+            neon.eventing.publishing.setSelectionWhere,
             [filter],
             'setSelectionWhere'
         );
@@ -118,7 +118,7 @@ describe('publishing events to OWF channels', function () {
     it('should publish set selection by ids', function () {
         testResultsPublishedToChannel(
             neon.eventing.channels.SELECTION_CHANGED,
-            neon.eventing.owfEventPublisher.setSelectedIds,
+            neon.eventing.publishing.setSelectedIds,
             [
                 ["id"]
             ],
@@ -129,7 +129,7 @@ describe('publishing events to OWF channels', function () {
     it('should publish add selection ids', function () {
         testResultsPublishedToChannel(
             neon.eventing.channels.SELECTION_CHANGED,
-            neon.eventing.owfEventPublisher.addSelectedIds,
+            neon.eventing.publishing.addSelectedIds,
             [
                 ["id"]
             ],
@@ -140,7 +140,7 @@ describe('publishing events to OWF channels', function () {
     it('should publish remove selection ids', function () {
         testResultsPublishedToChannel(
             neon.eventing.channels.SELECTION_CHANGED,
-            neon.eventing.owfEventPublisher.removeSelectedIds,
+            neon.eventing.publishing.removeSelectedIds,
             [
                 ["id"]
             ],
@@ -151,7 +151,7 @@ describe('publishing events to OWF channels', function () {
     it('should publish clear selection', function () {
         testResultsPublishedToChannel(
             neon.eventing.channels.SELECTION_CHANGED,
-            neon.eventing.owfEventPublisher.clearSelection,
+            neon.eventing.publishing.clearSelection,
             [
                 ["id"]
             ],

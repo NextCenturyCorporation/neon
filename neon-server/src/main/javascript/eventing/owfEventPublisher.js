@@ -23,18 +23,18 @@
 
 /**
  Wraps neon query functions that should automatically fire OWF events.
- @class neon.eventing.owfEventPublisher
+ @class neon.eventing.publishing
  @static
  **/
 
-neon.eventing.owfEventPublisher = (function () {
+neon.eventing.publishing = (function () {
 
     function createChannelCallback(channelName, successCallback){
         var callback = function(results){
             if(successCallback && typeof successCallback === 'function'){
                 successCallback();
             }
-            neon.eventing.messageHandler.publish(channelName, results || {});
+            neon.eventing.messaging.publish(channelName, results || {});
         };
         return callback;
     }

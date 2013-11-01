@@ -61,7 +61,7 @@ $(function () {
             if(checked && neon.mapWidgetUtils.latitudeAndLongitudeAreSelected()){
                 $("#map-redraw-button").attr("disabled", true);
                 var filter = createFilterFromExtent();
-                neon.eventing.owfEventPublisher.replaceFilter(filterKey, filter);
+                neon.eventing.publishing.replaceFilter(filterKey, filter);
             }
             else{
                 $("#map-redraw-button").removeAttr("disabled");
@@ -117,12 +117,12 @@ $(function () {
         function setApplyFiltersListener(){
             $('#map-redraw-button').click(function() {
                 var filter = createFilterFromExtent();
-                neon.eventing.owfEventPublisher.replaceFilter(filterKey, filter);
+                neon.eventing.publishing.replaceFilter(filterKey, filter);
             });
             $('#map-reset-button').click(function() {
                 map.reset();
                 var filter = new neon.query.Filter().selectFrom(databaseName, tableName);
-                neon.eventing.owfEventPublisher.replaceFilter(filterKey, filter);
+                neon.eventing.publishing.replaceFilter(filterKey, filter);
 
             });
             $('#auto-filter').click(onMapMovement);

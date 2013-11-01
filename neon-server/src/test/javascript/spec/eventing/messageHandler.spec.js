@@ -31,8 +31,8 @@ describe('message handler', function () {
         var callback = jasmine.createSpy(channelName);
         var callbacks = {};
         callbacks[callbackName] = callback;
-        neon.eventing.messageHandler.subscribeToNeonEvents(callbacks);
-        neon.eventing.messageHandler.publish(channelName, params);
+        neon.eventing.messaging.registerForNeonEvents(callbacks);
+        neon.eventing.messaging.publish(channelName, params);
 
         // the parameters should have a source appended to it with the message handler's id so objects know if they
         expect(callback).toHaveBeenCalledWith(params, 'owfEventingMockSender');

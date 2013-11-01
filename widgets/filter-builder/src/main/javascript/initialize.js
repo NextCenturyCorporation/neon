@@ -124,7 +124,7 @@ $(function () {
     }
 
     function clearAllFilters() {
-        neon.eventing.owfEventPublisher.clearFilters(function () {
+        neon.eventing.publishing.clearFilters(function () {
             var database = $('#database-select').val();
             var table = $('#table-select').val();
             var message = { "database": database, "table": table };

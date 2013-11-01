@@ -33,8 +33,8 @@ neon.util.ajaxUtils = (function(){
     var errorLogger = neon.util.loggerUtils.getLogger('neon.util.ajaxUtils.error');
 
     neon.util.loggerUtils.useBrowserConsoleAppender(errorLogger);
-    //document ready is used here so that this call is not overwritten by other jquery includes
     $(function () {
+        //document ready is used here so that this call is not overwritten by other jquery includes
         useDefaultStartStopCallbacks();
     });
 
