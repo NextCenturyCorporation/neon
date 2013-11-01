@@ -45,7 +45,7 @@ task createPackageJson(type: Copy) {
     rename "package.json.template", "package.json"
     filter(ReplaceTokens, tokens: [
             "name": project.name,
-            "version": project.version.split("-")[0]
+            "version": project.version
     ])
 }
 

@@ -19,7 +19,13 @@ project(":neon-server").ext.neonServer = neonServer
 project(":neon-server").ext.logbackVersion = "1.0.13"
 project(":common").ext.logbackVersion = "1.0.13"
 
+//This must be a valid semantic version.
+def CURRENT_NEON_VERSION = "0.6.0"
+version = CURRENT_NEON_VERSION
+
 configure(subprojects.findAll { it.name != 'common'}) {
+    version = CURRENT_NEON_VERSION
+
     apply plugin: 'war'
     apply from: "${rootDir}/gradle/js.gradle"
 
