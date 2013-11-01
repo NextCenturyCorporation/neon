@@ -136,7 +136,7 @@ $(function () {
         var database = $('#database-select').val();
         var table = $('#table-select').val();
         var message = { "database": database, "table": table };
-        neon.eventing.messageHandler.publish(neon.eventing.channels.ACTIVE_DATASET_CHANGED, message);
+        neon.eventing.messaging.publish(neon.eventing.channels.ACTIVE_DATASET_CHANGED, message);
     }
 
 });

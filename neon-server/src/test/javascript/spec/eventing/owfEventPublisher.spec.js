@@ -29,9 +29,6 @@ describe('publishing events to OWF channels', function () {
     /** saves the original publish method so it can be restored at the end of the test */
     var originalPublishMethod = OWF.Eventing.publish;
 
-    var owfEventPublisher;
-    var messageHandler;
-
     var databaseName = 'mockDatabaseName';
     var tableName = 'mockTableName';
 

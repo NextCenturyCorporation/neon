@@ -34,7 +34,7 @@ $(function () {
 
         var options = ['latitude', 'longitude', 'color-by', 'size-by'];
 
-        neon.eventing.messageHandler.subscribeToNeonEvents({
+        neon.eventing.messaging.registerForNeonEvents({
             activeDatasetChanged: onActiveDatasetChanged,
             filtersChanged: onFiltersChanged
         });

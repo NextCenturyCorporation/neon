@@ -69,7 +69,7 @@ neon.eventing.messaging = (function () {
      * </ul>
      * @method registerForNeonEvents
      */
-    function subscribeToNeonEvents(neonCallbacks) {
+    function registerForNeonEvents(neonCallbacks) {
         var globalChannelConfigs = createGlobalChannelSubscriptions(neonCallbacks);
         _.each(globalChannelConfigs, function (channelConfig) {
             subscribe(channelConfig.channel, function (sender, message) {
@@ -91,7 +91,7 @@ neon.eventing.messaging = (function () {
     }
 
     return {
-        registerForNeonEvents: subscribeToNeonEvents,
+        registerForNeonEvents: registerForNeonEvents,
         subscribe: subscribe,
         publish: publish
     };

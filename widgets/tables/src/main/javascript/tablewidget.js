@@ -33,7 +33,7 @@ $(function () {
 
         var clientId = OWF.getInstanceId();
 
-        neon.eventing.messageHandler.subscribeToNeonEvents({
+        neon.eventing.messaging.registerForNeonEvents({
             activeDatasetChanged: populateInitialData,
             filtersChanged: updateTable
         });

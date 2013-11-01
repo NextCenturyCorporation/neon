@@ -33,7 +33,7 @@ $(function () {
         function initialize(){
             OWF.relayFile = 'js/eventing/rpc_relay.uncompressed.html';
             neon.query.SERVER_URL = $("#neon-server").val();
-            neon.eventing.messageHandler.subscribeToNeonEvents({
+            neon.eventing.messaging.registerForNeonEvents({
                 activeDatasetChanged: function (message) {
                     neon.chartWidget.onActiveDatasetChanged(message, drawChart, neon.widget.TIMELINE);
                 },
