@@ -43,7 +43,7 @@ $(function () {
     }
 
     function setupHostnames() {
-        neon.util.AjaxUtils.doGet(neon.query.SERVER_URL + "/services/filterservice/hostnames",
+        neon.util.ajaxUtils.doGet(neon.query.SERVER_URL + "/services/filterservice/hostnames",
             {
                 success: function (data) {
                     $("#hostname-input").autocomplete({
@@ -67,7 +67,7 @@ $(function () {
         var databaseSelectedOption = $('#datastore-select option:selected');
         var hostnameSelector = $('#hostname-input');
 
-        neon.util.AjaxUtils.doPost(neon.query.SERVER_URL + "/services/filterservice/connect",
+        neon.util.ajaxUtils.doPost(neon.query.SERVER_URL + "/services/filterservice/connect",
             {
                 data: { datastore: databaseSelectedOption.val(), hostname: hostnameSelector.val() },
                 success: populateDatabaseDropdown
@@ -75,7 +75,7 @@ $(function () {
     }
 
     function populateDatabaseDropdown() {
-        neon.util.AjaxUtils.doGet(neon.query.SERVER_URL + "/services/filterservice/databasenames",
+        neon.util.ajaxUtils.doGet(neon.query.SERVER_URL + "/services/filterservice/databasenames",
             {
                 success: function (databaseNames) {
                     neon.wizard.populateDropdown('#database-select', databaseNames);
@@ -86,7 +86,7 @@ $(function () {
 
     function populateTableDropdown() {
         var selectedDatabase = $('#database-select option:selected');
-        neon.util.AjaxUtils.doPost(neon.query.SERVER_URL + "/services/filterservice/tablenames",
+        neon.util.ajaxUtils.doPost(neon.query.SERVER_URL + "/services/filterservice/tablenames",
             {
                 data: { database: selectedDatabase.val() },
                 success: function (tableNames) {

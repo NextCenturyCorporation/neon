@@ -513,7 +513,7 @@ describe('query mapping', function () {
 
         var argsArray = [];
         // the first argument is the function - the rest of the arguments are passed through to the function
-        argsArray = argsArray.concat(neon.util.ArrayUtils.argumentsToArray(arguments).slice(1));
+        argsArray = argsArray.concat(neon.util.arrayUtils.argumentsToArray(arguments).slice(1));
         argsArray.push(function (res) {
             currentResult = res;
             done = true;
@@ -532,7 +532,7 @@ describe('query mapping', function () {
      */
     function rows(indices) {
         var data = [];
-        neon.util.ArrayUtils.argumentsToArray(arguments).forEach(function (index) {
+        neon.util.arrayUtils.argumentsToArray(arguments).forEach(function (index) {
             data.push(allData[index]);
         });
         return data;

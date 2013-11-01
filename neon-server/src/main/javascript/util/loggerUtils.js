@@ -23,65 +23,49 @@
 
 /**
  * Provides utility methods for working with a log4javascript logger
- * @namespace neon.util
- * @class LoggerUtils
+ * @class neon.util,LoggerUtils
  */
 
-neon.util.LoggerUtils = {};
-neon.util.LoggerUtils.popupAppender_ = new log4javascript.PopUpAppender();
-neon.util.LoggerUtils.browserConsoleAppender_ = new log4javascript.BrowserConsoleAppender();
-
-/**
- * Sets whether or not the popup appender should be used for the logger
- * @method usePopupAppender
- * @param {Object} logger The log4javascript logger from which to attach/detach the popup appender
- * @param {boolean} use Indicates if the popup appender should be used
- */
-neon.util.LoggerUtils.usePopupAppender = function (logger, use) {
-    neon.util.LoggerUtils.useAppender_(logger, neon.util.LoggerUtils.popupAppender_, use);
-};
-
-/**
- * Sets whether or not the browser console appender should be used for the logger
- * @method useBrowserConsoleAppender
- * @param {Object} logger The log4javascript logger from which to attach/detach the popup appender
- * @param {boolean} use Indicates if the popup appender should be used
- */
-neon.util.LoggerUtils.useBrowserConsoleAppender = function (logger, use) {
-    neon.util.LoggerUtils.useAppender_(logger, neon.util.LoggerUtils.browserConsoleAppender_, use);
-};
-
-/**
- * Gets a global logger (with no name) that can be used by different classes. Any configuration changes to the
- * global logger will affect all usages of it.
- * @method getGlobalLogger
- * @return {Object} The global logger
- */
-neon.util.LoggerUtils.getGlobalLogger = function () {
-    return log4javascript.getLogger("[global]");
-};
-
-/**
- *
- * Sets whether or not the specified appender should be used for logging
- * @method useAppender_
- * @param {Object} logger The logger from which to attach/detach the appender
- * @param {Object} appender The appender to enable/disable
- * @param {boolean} use Indicates if the appender should be enabled or disabled
- * @private
- */
-neon.util.LoggerUtils.useAppender_ = function (logger, appender, use) {
-    if (use) {
-        logger.addAppender(appender);
-    }
-    else {
-        logger.removeAppender(appender);
-    }
-
-};
-
-(function () {
+neon.util.LoggerUtils = (function(){
+    var popupAppender = new log4javascript.PopUpAppender();
+    var browserConsoleAppender = new log4javascript.BrowserConsoleAppender();
     var layout = new log4javascript.PatternLayout("%d{HH:mm:ss} %-5p - %m%n");
-    neon.util.LoggerUtils.popupAppender_.setLayout(layout);
-    neon.util.LoggerUtils.browserConsoleAppender_.setThreshold(log4javascript.Level.ALL);
+
+    popupAppender.setLayout(layout);
+    browserConsoleAppender.setThreshold(log4javascript.Level.ALL);
+
+    /**
+     * Sets whether or not the popup appender should be used for the logger
+     * @method usePopupAppender
+     * @param {Object} logger The log4javascript logger from which to attach/detach the popup appender
+     */
+    function usePopupAppender(logger){
+        logger.addAppender(popupAppender);
+    }
+
+    /**
+     * Sets whether or not the browser console appender should be used for the logger
+     * @method useBrowserConsoleAppender
+     * @param {Object} logger The log4javascript logger from which to attach/detach the popup appender
+     */
+    function useBrowserConsoleAppender(logger){
+        logger.addAppender(browserConsoleAppender);
+    }
+
+    /**
+     * Gets a global logger (with no name) that can be used by different classes. Any configuration changes to the
+     * global logger will affect all usages of it.
+     * @method getGlobalLogger
+     * @return {Object} The global logger
+     */
+    function getGlobablLogger(){
+        return log4javascript.getLogger("[global]");
+    }
+
+    return {
+        usePopupAppender: usePopupAppender,
+        useBrowserConsoleAppender: useBrowserConsoleAppender,
+        getGlobalLogger:getGlobablLogger
+    };
+
 })();

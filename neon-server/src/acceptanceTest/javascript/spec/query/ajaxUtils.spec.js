@@ -33,7 +33,7 @@ describe('ajax utils', function () {
     it('cancels ajax request', function () {
         var statusText = "";
         // transformServiceUrl is generated dynamically during the build and included in the acceptance test helper file
-        var request = neon.util.AjaxUtils.doGet(transformServiceUrl + '/neon/timeouttest', {
+        var request = neon.util.ajaxUtils.doGet(transformServiceUrl + '/neon/timeouttest', {
             // we should get an error with an "abort" status
             error: function (xhr, status, msg) {
                 statusText = xhr.statusText;

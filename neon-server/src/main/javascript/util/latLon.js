@@ -31,7 +31,7 @@
 
  */
 neon.util.LatLon = function (latDegrees, lonDegrees) {
-    neon.util.LatLon.validateArgs_(latDegrees, lonDegrees);
+    this.validateArgs_(latDegrees, lonDegrees);
 
     /**
      * The latitude in degrees
@@ -49,7 +49,7 @@ neon.util.LatLon = function (latDegrees, lonDegrees) {
 
 };
 
-neon.util.LatLon.validateArgs_ = function (latDegrees, lonDegrees) {
+neon.util.LatLon.prototype.validateArgs_ = function (latDegrees, lonDegrees) {
     if (latDegrees > 90 || latDegrees < -90) {
         throw new Error('Invalid latitude ' + latDegrees + '. Must be in range [-90,90]');
     }

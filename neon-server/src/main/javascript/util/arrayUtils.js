@@ -23,18 +23,18 @@
 /**
  * Utility methods for working with arrays
  * @namespace neon.util
- * @class ArrayUtils
+ * @class arrayUtils
  */
 
-neon.util.ArrayUtils = {};
+neon.util.arrayUtils = {
 
-/**
- * Converts the javascript *arguments* to an array.
- * @method argumentsToArray
- * @param args The *arguments* variable from another function to convert to an array
- * @return {Array}
- */
-neon.util.ArrayUtils.argumentsToArray = function(args) {
-    return Array.prototype.slice.call(args);
+    /**
+     * Converts the javascript *arguments* to an array.
+     * @method argumentsToArray
+     * @param args The *arguments* variable from another function to convert to an array
+     * @return {Array}
+     */
+    argumentsToArray: function(args) {
+        return Array.prototype.slice.call(args);
+    }
 };
-

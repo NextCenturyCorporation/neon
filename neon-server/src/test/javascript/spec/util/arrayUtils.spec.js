@@ -32,7 +32,7 @@ describe('array utils', function () {
 
 
 
-        var argsArray = neon.util.ArrayUtils.argumentsToArray(args);
+        var argsArray = neon.util.arrayUtils.argumentsToArray(args);
         expect(argsArray).toBeEqualArray(['a','b','c']);
     });
 

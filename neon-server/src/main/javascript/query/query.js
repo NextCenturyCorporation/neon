@@ -205,7 +205,7 @@ neon.query.Query.prototype.selectFrom = function (databaseName, tableName) {
  *     new neon.query.Query(...).withFields("field1","field2");
  */
 neon.query.Query.prototype.withFields = function (fields) {
-    this.fields = neon.util.ArrayUtils.argumentsToArray(arguments);
+    this.fields = neon.util.arrayUtils.argumentsToArray(arguments);
     return this;
 };
 
@@ -251,7 +251,7 @@ neon.query.Query.prototype.groupBy = function (fields) {
     this.groupByClauses.length = 0;
     var me = this;
 
-    var list = neon.util.ArrayUtils.argumentsToArray(arguments);
+    var list = neon.util.arrayUtils.argumentsToArray(arguments);
     list.forEach(function (field) {
         // if the user provided a string, convert that to the groupBy representation of a single field, otherwise,
         // they provided a groupBy function so just use that
@@ -313,7 +313,7 @@ neon.query.Query.prototype.sortBy = function (fieldName, sortOrder) {
     // operation which may include multiple fields, so this method does not append to the existing
     // sortBy fields, but replaces them
     this.sortClauses.length = 0;
-    var list = neon.util.ArrayUtils.argumentsToArray(arguments);
+    var list = neon.util.arrayUtils.argumentsToArray(arguments);
     for (var i = 0; i < list.length; i += 2) {
         var field = list[i];
         var order = list[i + 1];
@@ -386,7 +386,7 @@ neon.query.where = function (fieldName, op, value) {
  * @return {Object}
  */
 neon.query.and = function (clauses) {
-    return new neon.query.BooleanClause('and', neon.util.ArrayUtils.argumentsToArray(arguments));
+    return new neon.query.BooleanClause('and', neon.util.arrayUtils.argumentsToArray(arguments));
 };
 
 /**
@@ -398,7 +398,7 @@ neon.query.and = function (clauses) {
  * @return {Object}
  */
 neon.query.or = function (clauses) {
-    return new neon.query.BooleanClause('or', neon.util.ArrayUtils.argumentsToArray(arguments));
+    return new neon.query.BooleanClause('or', neon.util.arrayUtils.argumentsToArray(arguments));
 };
 
 /**
@@ -426,7 +426,7 @@ neon.query.withinDistance = function (locationField, center, distance, distanceU
  * @return {neon.util.AjaxRequest} The xhr request object
  */
 neon.query.getFieldNames = function (databaseName, tableName, widgetName, successCallback, errorCallback) {
-    return neon.util.AjaxUtils.doGet(
+    return neon.util.ajaxUtils.doGet(
         neon.query.queryUrl_('/services/queryservice/fieldnames?databaseName=' + databaseName + '&tableName=' + tableName + '&widgetName=' + widgetName),
         {
             success: successCallback,
@@ -463,7 +463,7 @@ neon.query.executeQueryGroup = function (queryGroup, successCallback, errorCallb
 
 neon.query.doExecuteQuery_ = function (query, transform, successCallback, errorCallback, serviceName) {
     var queryParams = neon.query.buildQueryParamsString_(query, transform);
-    return neon.util.AjaxUtils.doPostJSON(
+    return neon.util.ajaxUtils.doPostJSON(
         query,
         neon.query.queryUrl_('/services/queryservice/' + serviceName + '?' + queryParams),
         {
@@ -503,7 +503,7 @@ neon.query.registerForFilterKey = function(databaseName, tableName, successCallb
         tableName: tableName
     };
 
-    return neon.util.AjaxUtils.doPostJSON(
+    return neon.util.ajaxUtils.doPostJSON(
         dataSet,
         neon.query.queryUrl_('/services/queryservice/registerforfilterkey'),
         {
@@ -529,7 +529,7 @@ neon.query.addFilter = function (filterKey, filter, successCallback, errorCallba
         filter: filter
     };
 
-    return neon.util.AjaxUtils.doPostJSON(
+    return neon.util.ajaxUtils.doPostJSON(
         filterContainer,
         neon.query.queryUrl_('/services/queryservice/addfilter'),
         {
@@ -548,7 +548,7 @@ neon.query.addFilter = function (filterKey, filter, successCallback, errorCallba
  * @return {neon.util.AjaxRequest} The xhr request object
  */
 neon.query.removeFilter = function (filterKey, successCallback, errorCallback) {
-    return neon.util.AjaxUtils.doPostJSON(
+    return neon.util.ajaxUtils.doPostJSON(
         filterKey,
         neon.query.queryUrl_('/services/queryservice/removefilter'),
         {
@@ -573,7 +573,7 @@ neon.query.replaceFilter = function (filterKey, filter, successCallback, errorCa
         filter: filter
     };
 
-    return neon.util.AjaxUtils.doPostJSON(
+    return neon.util.ajaxUtils.doPostJSON(
         filterContainer,
         neon.query.queryUrl_('/services/queryservice/replacefilter'),
         {
@@ -591,7 +591,7 @@ neon.query.replaceFilter = function (filterKey, filter, successCallback, errorCa
  * @return {neon.util.AjaxRequest} The xhr request object
  */
 neon.query.clearFilters = function (successCallback, errorCallback) {
-    return neon.util.AjaxUtils.doPost(
+    return neon.util.ajaxUtils.doPost(
         neon.query.queryUrl_('/services/queryservice/clearfilters'),
         {
             success: successCallback,
@@ -609,7 +609,7 @@ neon.query.clearFilters = function (successCallback, errorCallback) {
  * @return {neon.util.AjaxRequest} The xhr request object
  */
 neon.query.setSelectionWhere = function (filter, successCallback, errorCallback) {
-    return neon.util.AjaxUtils.doPostJSON(
+    return neon.util.ajaxUtils.doPostJSON(
         filter,
         neon.query.queryUrl_('/services/queryservice/setselectionwhere'),
         {
@@ -632,7 +632,7 @@ neon.query.getSelectionWhere = function (filter, successCallback, errorCallback)
     if (filter.transform_) {
         queryParams += '?transform=' + filter.transform_;
     }
-    return neon.util.AjaxUtils.doPostJSON(
+    return neon.util.ajaxUtils.doPostJSON(
         filter,
         neon.query.queryUrl_('/services/queryservice/getselectionwhere' + queryParams),
         {
@@ -652,7 +652,7 @@ neon.query.getSelectionWhere = function (filter, successCallback, errorCallback)
  * @return {neon.util.AjaxRequest} The xhr request object
  */
 neon.query.setSelectedIds = function (ids, successCallback, errorCallback) {
-    return neon.util.AjaxUtils.doPostJSON(
+    return neon.util.ajaxUtils.doPostJSON(
         ids,
         neon.query.queryUrl_('/services/queryservice/setselectedids'),
         {
@@ -672,7 +672,7 @@ neon.query.setSelectedIds = function (ids, successCallback, errorCallback) {
  * @return {neon.util.AjaxRequest} The xhr request object
  */
 neon.query.addSelectedIds = function (ids, successCallback, errorCallback) {
-    return neon.util.AjaxUtils.doPostJSON(
+    return neon.util.ajaxUtils.doPostJSON(
         ids,
         neon.query.queryUrl_('/services/queryservice/addselectedids'),
         {
@@ -691,7 +691,7 @@ neon.query.addSelectedIds = function (ids, successCallback, errorCallback) {
  * @return {neon.util.AjaxRequest} The xhr request object
  */
 neon.query.removeSelectedIds = function (ids, successCallback, errorCallback) {
-    return neon.util.AjaxUtils.doPostJSON(
+    return neon.util.ajaxUtils.doPostJSON(
         ids,
         neon.query.queryUrl_('/services/queryservice/removeselectedids'),
         {
@@ -709,7 +709,7 @@ neon.query.removeSelectedIds = function (ids, successCallback, errorCallback) {
  * @return {neon.util.AjaxRequest} The xhr request object
  */
 neon.query.clearSelection = function (successCallback, errorCallback) {
-    return neon.util.AjaxUtils.doPost(
+    return neon.util.ajaxUtils.doPost(
         neon.query.queryUrl_('/services/queryservice/clearselection'),
         {
             success: successCallback,
@@ -727,7 +727,7 @@ neon.query.clearSelection = function (successCallback, errorCallback) {
  * @return {neon.util.AjaxRequest} The xhr request object
  */
 neon.query.submitTextQuery = function(queryText, successCallback, errorCallback) {
-    return neon.util.AjaxUtils.doPost(
+    return neon.util.ajaxUtils.doPost(
         neon.query.queryUrl_('/services/languageservice/query'),
         {
             data: { text: queryText },
@@ -751,7 +751,7 @@ neon.query.submitTextQuery = function(queryText, successCallback, errorCallback)
 
 neon.query.saveState = function(id, stateObject, successCallback, errorCallback) {
     var strObject = JSON.stringify(stateObject);
-    return neon.util.AjaxUtils.doPost(
+    return neon.util.ajaxUtils.doPost(
         neon.query.queryUrl_('/services/sessionstateservice/savestate'),
         {
             data: { clientId: id, state: strObject},
@@ -771,7 +771,7 @@ neon.query.saveState = function(id, stateObject, successCallback, errorCallback)
  */
 
 neon.query.getSavedState = function(id, successCallback) {
-    return neon.util.AjaxUtils.doGet(
+    return neon.util.ajaxUtils.doGet(
         neon.query.queryUrl_('/services/sessionstateservice/restoreState?clientId=' + id),
         {
             success: successCallback,

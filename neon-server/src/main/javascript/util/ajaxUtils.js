@@ -21,7 +21,7 @@
  * RECIPIENT IS UNDER OBLIGATION TO MAINTAIN SECRECY.
  */
 
-neon.util.AjaxUtils = {};
+neon.util.ajaxUtils = {};
 
 
 /**
@@ -30,22 +30,22 @@ neon.util.AjaxUtils = {};
  * @class AjaxUtils
  */
 
-neon.util.AjaxUtils.overlayId_ = 'neon-overlay';
-neon.util.AjaxUtils.logger_ = neon.util.LoggerUtils.getGlobalLogger();
+neon.util.ajaxUtils.overlayId_ = 'neon-overlay';
+neon.util.ajaxUtils.logger_ = neon.util.LoggerUtils.getGlobalLogger();
 
 // this logger is used specifically for error logging and should not be confused with the global logger which logs
 // all ajax requests
-neon.util.AjaxUtils.errorLogger_ = log4javascript.getLogger('neon.util.AjaxUtils.error');
+neon.util.ajaxUtils.errorLogger_ = log4javascript.getLogger('neon.util.ajaxUtils.error');
 
 /**
  * Asynchronously makes a post request to the specified URL
  * @method doPost
  * @param {String} url The URL to post the data to
- * @param {Object} opts See {{#crossLink "neon.util.AjaxUtils/doAjaxRequest"}}{{/crossLink}}
+ * @param {Object} opts See {{#crossLink "neon.util.ajaxUtils/doAjaxRequest"}}{{/crossLink}}
  * @return {neon.util.AjaxRequest} The xhr request object
  */
-neon.util.AjaxUtils.doPost = function (url, opts) {
-    return neon.util.AjaxUtils.doAjaxRequest('POST', url, opts);
+neon.util.ajaxUtils.doPost = function (url, opts) {
+    return neon.util.ajaxUtils.doAjaxRequest('POST', url, opts);
 };
 
 /**
@@ -54,24 +54,24 @@ neon.util.AjaxUtils.doPost = function (url, opts) {
  * @method doPostJSON
  * @param {Object} object The object to post
  * @param {String} url The URL to post to
- * @param {Object} opts See {{#crossLink "neon.util.AjaxUtils/doAjaxRequest"}}{{/crossLink}}
+ * @param {Object} opts See {{#crossLink "neon.util.ajaxUtils/doAjaxRequest"}}{{/crossLink}}
  * @return {neon.util.AjaxRequest} The xhr request object
  */
-neon.util.AjaxUtils.doPostJSON = function (object, url, opts) {
+neon.util.ajaxUtils.doPostJSON = function (object, url, opts) {
     var data = JSON.stringify(object);
     var fullOpts = _.extend({}, opts, {data: data, contentType: 'application/json', responseType: 'json'});
-    return neon.util.AjaxUtils.doPost(url, fullOpts);
+    return neon.util.ajaxUtils.doPost(url, fullOpts);
 };
 
 /**
  * Makes an ajax GET request
  * @method doGet
  * @param {String} url The url to get
- * @param {Object} opts See {{#crossLink "neon.util.AjaxUtils/doAjaxRequest"}}{{/crossLink}}
+ * @param {Object} opts See {{#crossLink "neon.util.ajaxUtils/doAjaxRequest"}}{{/crossLink}}
  * @return {neon.util.AjaxRequest} The xhr request object
  */
-neon.util.AjaxUtils.doGet = function (url, opts) {
-    return neon.util.AjaxUtils.doAjaxRequest('GET', url, opts);
+neon.util.ajaxUtils.doGet = function (url, opts) {
+    return neon.util.ajaxUtils.doAjaxRequest('GET', url, opts);
 };
 
 /**
@@ -81,7 +81,7 @@ neon.util.AjaxUtils.doGet = function (url, opts) {
  * @param {Function} requestStart
  * @param {Function} requestEnd
  */
-neon.util.AjaxUtils.setStartStopCallbacks = function (requestStart, requestEnd) {
+neon.util.ajaxUtils.setStartStopCallbacks = function (requestStart, requestEnd) {
     $(document).ajaxStart(requestStart);
     $(document).ajaxStop(requestEnd);
 };
@@ -90,10 +90,10 @@ neon.util.AjaxUtils.setStartStopCallbacks = function (requestStart, requestEnd) 
  * Uses a default spinner when ajax queries are made. If this method is used, the neon.css file needs to be included.
  * @method useDefaultStartStopCallbacks_
  */
-neon.util.AjaxUtils.useDefaultStartStopCallbacks_ = function () {
-    neon.util.AjaxUtils.setStartStopCallbacks(
-        neon.util.AjaxUtils.showDefaultSpinner_,
-        neon.util.AjaxUtils.hideDefaultSpinner_);
+neon.util.ajaxUtils.useDefaultStartStopCallbacks_ = function () {
+    neon.util.ajaxUtils.setStartStopCallbacks(
+        neon.util.ajaxUtils.showDefaultSpinner_,
+        neon.util.ajaxUtils.hideDefaultSpinner_);
 };
 
 
@@ -112,7 +112,7 @@ neon.util.AjaxUtils.useDefaultStartStopCallbacks_ = function () {
  * </ul>
  * @return {neon.util.AjaxRequest} The xhr request object
  */
-neon.util.AjaxUtils.doAjaxRequest = function (type, url, opts) {
+neon.util.ajaxUtils.doAjaxRequest = function (type, url, opts) {
     var params = {};
     params.type = type;
     params.url = url;
@@ -127,28 +127,28 @@ neon.util.AjaxUtils.doAjaxRequest = function (type, url, opts) {
     // set a default error behavior is none is specified
     if (!params.error) {
         params.error = function (xhr, status, error) {
-            neon.util.AjaxUtils.errorLogger_.error(xhr, status, error);
+            neon.util.ajaxUtils.errorLogger_.error(xhr, status, error);
         };
     }
-    neon.util.AjaxUtils.logRequest_(params);
+    neon.util.ajaxUtils.logRequest_(params);
     var xhr = $.ajax(params);
     return new neon.util.AjaxRequest(xhr);
 };
 
-neon.util.AjaxUtils.logRequest_ = function (params) {
-    neon.util.AjaxUtils.logger_.debug('Making', params.type, 'request to URL', params.url, 'with data', params.data);
+neon.util.ajaxUtils.logRequest_ = function (params) {
+    neon.util.ajaxUtils.logger_.debug('Making', params.type, 'request to URL', params.url, 'with data', params.data);
 };
 
 
-neon.util.AjaxUtils.showDefaultSpinner_ = function () {
-    $('body').append($('<div>').attr('id', neon.util.AjaxUtils.overlayId_).addClass('overlay-container'));
-    $('#' + neon.util.AjaxUtils.overlayId_)
+neon.util.ajaxUtils.showDefaultSpinner_ = function () {
+    $('body').append($('<div>').attr('id', neon.util.ajaxUtils.overlayId_).addClass('overlay-container'));
+    $('#' + neon.util.ajaxUtils.overlayId_)
         .append($('<div>').addClass('overlay'));
-    $('#' + neon.util.AjaxUtils.overlayId_).append($('<div>').addClass('spinner'));
+    $('#' + neon.util.ajaxUtils.overlayId_).append($('<div>').addClass('spinner'));
 };
 
-neon.util.AjaxUtils.hideDefaultSpinner_ = function () {
-    $('#' + neon.util.AjaxUtils.overlayId_).remove();
+neon.util.ajaxUtils.hideDefaultSpinner_ = function () {
+    $('#' + neon.util.ajaxUtils.overlayId_).remove();
 };
 
 /**
@@ -172,9 +172,9 @@ neon.util.AjaxRequest.prototype.cancel = function () {
 };
 
 (function () {
-    neon.util.LoggerUtils.useBrowserConsoleAppender(neon.util.AjaxUtils.errorLogger_, true);
+    neon.util.LoggerUtils.useBrowserConsoleAppender(neon.util.ajaxUtils.errorLogger_, true);
     //document ready is used here so that this call is not overwritten by other jquery includes
     $(document).ready(function () {
-        neon.util.AjaxUtils.useDefaultStartStopCallbacks_();
+        neon.util.ajaxUtils.useDefaultStartStopCallbacks_();
     });
 })();
