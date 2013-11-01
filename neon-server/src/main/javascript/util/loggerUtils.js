@@ -23,10 +23,11 @@
 
 /**
  * Provides utility methods for working with a log4javascript logger
- * @class neon.util,LoggerUtils
+ * @class neon.util,loggerUtils
+ * @static
  */
 
-neon.util.LoggerUtils = (function(){
+neon.util.loggerUtils = (function(){
     var popupAppender = new log4javascript.PopUpAppender();
     var browserConsoleAppender = new log4javascript.BrowserConsoleAppender();
     var layout = new log4javascript.PatternLayout("%d{HH:mm:ss} %-5p - %m%n");
@@ -62,10 +63,20 @@ neon.util.LoggerUtils = (function(){
         return log4javascript.getLogger("[global]");
     }
 
+    /**
+     * Creates a log4javascript logger
+     * @param name The name of the logger
+     * @returns {Object} a log4javascript logger
+     */
+    function getLogger(name){
+        return log4javascript.getLogger(name);
+    }
+
     return {
         usePopupAppender: usePopupAppender,
         useBrowserConsoleAppender: useBrowserConsoleAppender,
-        getGlobalLogger:getGlobablLogger
+        getGlobalLogger:getGlobablLogger,
+        getLogger: getLogger
     };
 
 })();
