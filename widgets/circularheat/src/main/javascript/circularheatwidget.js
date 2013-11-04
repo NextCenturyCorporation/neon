@@ -78,16 +78,16 @@ neon.ready(function () {
     }
 
     function drawChart(queryResults) {
-        rawData = queryResults.data;
+        var rawData = queryResults.data;
 
-        data = [];
+        var data = [];
 
-        for (ii = 0; ii < HOURS_IN_WEEK; ++ii) {
-            data[ii] = 0;
+        for (var i = 0; i < HOURS_IN_WEEK; i++) {
+            data[i] = 0;
         }
 
-        rawData.forEach(function (d) {
-            data[(d.day - 1) * HOURS_IN_DAY + d.hour] = d.count;
+        _.each(rawData, function (element) {
+            data[(element.day - 1) * HOURS_IN_DAY + element.hour] = element.count;
         });
 
         d3.select('#circularheatchart')
