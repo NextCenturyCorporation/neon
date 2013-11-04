@@ -32,6 +32,35 @@
 neon.eventing.messaging = (function () {
 
     /**
+     * Gets the id of the iframe in which this widget exists
+     * @method getIframeId
+     * @returns the iframe id
+     */
+    function getIframeId() {
+        return OWF.getIframeId();
+    }
+
+    /**
+     * Returns a uniqueId for a widget for this session.
+     * @method getInstanceId
+     * @returns A unique identifier for this widget.
+     */
+
+    function getInstanceId() {
+        return OWF.getInstanceId();
+    }
+
+    /**
+     * Set the path to the rpc_relay.uncompressed.html file. The default is
+     * 'js/eventing/rpc_replay.uncompressed.html'
+     * @param relayPath {string} The path to the OWF rpc_relay file.
+     * @method setRelayFile
+     */
+    function setRelayFile(relayPath) {
+        OWF.relayFile = relayPath;
+    }
+
+    /**
      * Publish to an OWF channel
      * @param channel {string} The channel to which one can publish a message
      * @param message {object} The payload of the publication.
@@ -50,7 +79,7 @@ neon.eventing.messaging = (function () {
      * The sender object will be equal to the OWF.getIframeId() of the publishing widget.
      * @method subscribe
      */
-    function subscribe(channel, callback){
+    function subscribe(channel, callback) {
         // We reverse the sender and message parameters here because typical usage requires the message
         // but not the sender. Callbacks can omit the second parameter if they do not need the sender.
         OWF.Eventing.subscribe(channel, function (sender, message) {
@@ -91,6 +120,9 @@ neon.eventing.messaging = (function () {
     }
 
     return {
+        getIframeId: getIframeId,
+        getInstanceId: getInstanceId,
+        setRelayFile: setRelayFile,
         registerForNeonEvents: registerForNeonEvents,
         subscribe: subscribe,
         publish: publish

@@ -27,6 +27,12 @@ neon.mock.Channel = function() {
     this.callbacks = [];
 }
 
+OWF.Util = {
+    isRunningInOWF: function(){
+        return true;
+    }
+};
+
 OWF.Eventing.subscribe = function(channelName, callback) {
     if ( !(channelName in neon.mock.channelRegistry) ) {
         neon.mock.channelRegistry[channelName] = new neon.mock.Channel();
