@@ -116,10 +116,6 @@ task unzipInstallerShell(type: Copy){
 
 }
 
-task print()<<{
-    println project.libsDirName
-}
-
 task buildAllWars() {
     def projects = project.getParent().getAllprojects().findAll { it.getTasksByName("war", false) }
     def tasks = projects.collect { it.tasks.war}
