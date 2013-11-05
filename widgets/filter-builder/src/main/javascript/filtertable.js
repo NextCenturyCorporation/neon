@@ -1,5 +1,5 @@
 var neon = neon || {};
-neon.filter = (function () {
+neon.filterTable = (function () {
 
     var filterKey;
     var columnOptions;

@@ -21,183 +21,149 @@
  * RECIPIENT IS UNDER OBLIGATION TO MAINTAIN SECRECY.
  */
 
-$(function () {
+neon.ready(function () {
+    var timeline;
+    var COUNT_FIELD_NAME = 'Count';
+    var clientId = neon.eventing.messaging.getInstanceId();
 
-    OWF.ready(function () {
-        var timeline;
-        var COUNT_FIELD_NAME = 'Count';
-        var clientId = OWF.getInstanceId();
+    initialize();
 
-        initialize();
-
-        function initialize(){
-            OWF.relayFile = 'js/eventing/rpc_relay.uncompressed.html';
-            neon.query.SERVER_URL = $("#neon-server").val();
-            neon.eventing.messaging.registerForNeonEvents({
-                activeDatasetChanged: function (message) {
-                    neon.chartWidget.onActiveDatasetChanged(message, drawChart, neon.widget.TIMELINE);
-                },
-                filtersChanged: onFiltersChanged
-            });
+    function initialize() {
+        neon.query.SERVER_URL = $("#neon-server").val();
+        neon.eventing.messaging.registerForNeonEvents({
+            activeDatasetChanged: function (message) {
+                neon.chartWidget.onActiveDatasetChanged(message, drawChart, neon.widget.TIMELINE);
+            },
+            filtersChanged: onFiltersChanged
+        });
 
 
-            neon.toggle.createOptionsPanel("#options-panel");
-            populateTimeGranularityDropdown();
-            configureButtons();
+        neon.toggle.createOptionsPanel("#options-panel");
+        populateTimeGranularityDropdown();
+        configureButtons();
+        drawChart();
+        restoreState();
+    }
+
+    function configureButtons() {
+        $('#redraw-bounds').click(function () {
             drawChart();
-            restoreState();
+        });
+        $('#reset-filter').click(function () {
+            neon.eventing.publishing.removeFilter(neon.chartWidget.getFilterKey(), drawChart);
+        });
+    }
+
+    function onFiltersChanged(message, sender) {
+        if (sender !== neon.eventing.messaging.getIframeId()) {
+            drawChart();
+        }
+    }
+
+    /**
+     * Redraws the chart based on the user selected attribtues
+     * @method drawChart
+     */
+    function drawChart() {
+
+        var xAttr = neon.chartWidget.getXAttribute();
+        var yAttr = neon.chartWidget.getYAttribute();
+
+        if (!xAttr) {
+            doDrawChart({data: []});
+            return;
         }
 
-        function configureButtons() {
-            configureRedrawBoundsButton();
-            configureResetFilterButton();
+        var groupByHourClause = new neon.query.GroupByFunctionClause(neon.query.HOUR, xAttr, 'hour');
+        var groupByDayClause = new neon.query.GroupByFunctionClause(neon.query.DAY, xAttr, 'day');
+        var groupByMonthClause = new neon.query.GroupByFunctionClause(neon.query.MONTH, xAttr, 'month');
+        var groupByYearClause = new neon.query.GroupByFunctionClause(neon.query.YEAR, xAttr, 'year');
+
+        var query = new neon.query.Query()
+            .selectFrom(neon.chartWidget.getDatabaseName(), neon.chartWidget.getTableName())
+            .where(xAttr, '!=', null)
+            .groupBy(groupByYearClause, groupByMonthClause, groupByDayClause, groupByHourClause);
+
+        if (yAttr) {
+            query.aggregate(neon.query.SUM, yAttr, yAttr);
+        }
+        else {
+            query.aggregate(neon.query.COUNT, null, COUNT_FIELD_NAME);
+        }
+        var stateObject = buildStateObject(query);
+        neon.query.executeQuery(query, doDrawChart);
+        neon.query.saveState(clientId, stateObject);
+    }
+
+    function doDrawChart(data) {
+
+        $('#chart').empty();
+
+        var xAttr = neon.chartWidget.getXAttribute();
+        var yAttr = neon.chartWidget.getYAttribute();
+
+        if (!yAttr) {
+            yAttr = COUNT_FIELD_NAME;
         }
 
-        function getRedrawBoundsButton() {
-            return $('#redraw-bounds');
-        }
+        var dataByDate = data.data.map(function (el) {
+            //month is 1-based
+            var date = new Date(Date.UTC(el.year, el.month - 1, el.day, el.hour));
+            var count = el[yAttr];
+            var result = {};
+            result[xAttr] = date;
+            result[yAttr] = count;
+            return result;
+        });
 
-        function getResetFilterButton() {
-            return $('#reset-filter');
-        }
+        var granularity = $('#time-granularity option:selected').val();
+        var opts = { "data": dataByDate, "x": xAttr, "y": yAttr,
+            "interval": granularity, responsive: true};
 
-        function disableResetFilterButton() {
-            getResetFilterButton().attr('disabled', 'disabled');
-        }
+        // TODO: We need this because we set a window listener which holds a reference to old timeline objects.
+        // We should really only use one timeline object, but that will be fixed as part of NEON-294
+        $(window).off("resize");
+        timeline = new charts.Timeline('#chart', opts);
+        configureFiltering(timeline, xAttr);
+        timeline.draw();
+    }
 
-        function configureRedrawBoundsButton() {
-            getRedrawBoundsButton().click(function () {
-                drawChart();
-            });
-        }
+    function configureFiltering(timeline, xAttr) {
+        timeline.onFilter(function (startDate, endDate) {
+            var startFilterClause = neon.query.where(xAttr, '>=', startDate);
+            var endFilterClause = neon.query.where(xAttr, '<', endDate);
+            var filterClause = neon.query.and(startFilterClause, endFilterClause);
+            var filter = new neon.query.Filter().selectFrom(neon.chartWidget.getDatabaseName(), neon.chartWidget.getTableName()).where(filterClause);
 
-        function configureResetFilterButton() {
-            // initially disabled until filter added
-            disableResetFilterButton();
-            getResetFilterButton().click(function () {
-                neon.eventing.publishing.removeFilter(neon.chartWidget.getFilterKey(), drawChart);
-            });
-        }
+            neon.eventing.publishing.replaceFilter(neon.chartWidget.getFilterKey(), filter);
+        });
+    }
 
-        function onFiltersChanged(message, sender) {
-            if (sender === OWF.getIframeId()) {
-                getResetFilterButton().removeAttr('disabled');
-            }
-            else{
-                drawChart();
-                disableResetFilterButton();
-            }
-        }
+    function populateTimeGranularityDropdown() {
+        neon.dropdown.populateAttributeDropdowns({fieldNames: charts.Timeline.GRANULARITIES_}, "time-granularity", drawChart);
+    }
 
-        /**
-         * Redraws the chart based on the user selected attribtues
-         * @method drawChart
-         */
-        function drawChart() {
+    function buildStateObject(query) {
+        return {
+            filterKey: neon.chartWidget.getFilterKey(),
+            columns: neon.dropdown.getFieldNamesFromDropdown("x"),
+            xValue: neon.chartWidget.getXAttribute(),
+            yValue: neon.chartWidget.getYAttribute(),
+            timeGranularity: $('#time-granularity').val(),
+            query: query
+        };
+    }
 
-            var xAttr = neon.chartWidget.getXAttribute();
-            var yAttr = neon.chartWidget.getYAttribute();
-
-            if (!xAttr) {
-                doDrawChart({data: []});
-                return;
-            }
-
-            var groupByHourClause = new neon.query.GroupByFunctionClause(neon.query.HOUR, xAttr, 'hour');
-            var groupByDayClause = new neon.query.GroupByFunctionClause(neon.query.DAY, xAttr, 'day');
-            var groupByMonthClause = new neon.query.GroupByFunctionClause(neon.query.MONTH, xAttr, 'month');
-            var groupByYearClause = new neon.query.GroupByFunctionClause(neon.query.YEAR, xAttr, 'year');
-
-            var query = new neon.query.Query()
-                .selectFrom(neon.chartWidget.getDatabaseName(), neon.chartWidget.getTableName())
-                .where(xAttr, '!=', null)
-                .groupBy(groupByYearClause, groupByMonthClause, groupByDayClause, groupByHourClause);
-
-            if (yAttr) {
-                query.aggregate(neon.query.SUM, yAttr, yAttr);
-            }
-            else {
-                query.aggregate(neon.query.COUNT, null, COUNT_FIELD_NAME);
-            }
-            var stateObject = buildStateObject(query);
-            neon.query.executeQuery(query, doDrawChart);
-            neon.query.saveState(clientId, stateObject);
-        }
-
-        function doDrawChart(data) {
-
-            $('#chart').empty();
-
-            var xAttr = neon.chartWidget.getXAttribute();
-            var yAttr = neon.chartWidget.getYAttribute();
-
-            if (!yAttr) {
-                yAttr = COUNT_FIELD_NAME;
-            }
-
-            var dataByDate = data.data.map(function (el) {
-                //month is 1-based
-                var date = new Date(Date.UTC(el.year, el.month - 1, el.day, el.hour));
-                var count = el[yAttr];
-                var result = {};
-                result[xAttr] = date;
-                result[yAttr] = count;
-                return result;
-            });
-
-            var granularity = $('#time-granularity option:selected').val();
-            var opts = { "data": dataByDate, "x": xAttr, "y": yAttr,
-                "interval": granularity, responsive: true};
-
-            // TODO: We need this because we set a window listener which holds a reference to old timeline objects.
-            // We should really only use one timeline object, but that will be fixed as part of NEON-294
-            $(window).off("resize");
-            timeline = new charts.Timeline('#chart', opts);
-            configureFiltering(timeline, xAttr);
-            timeline.draw();
-        }
-
-        function configureFiltering(timeline, xAttr) {
-            timeline.onFilter(function (startDate, endDate) {
-                var startFilterClause = neon.query.where(xAttr, '>=', startDate);
-                var endFilterClause = neon.query.where(xAttr, '<', endDate);
-                var filterClause = neon.query.and(startFilterClause, endFilterClause);
-                var filter = new neon.query.Filter().selectFrom(neon.chartWidget.getDatabaseName(), neon.chartWidget.getTableName()).where(filterClause);
-
-                neon.eventing.publishing.replaceFilter(neon.chartWidget.getFilterKey(), filter);
-            });
-        }
-
-        function populateTimeGranularityDropdown() {
-
-            neon.dropdown.populateAttributeDropdowns({fieldNames: charts.Timeline.GRANULARITIES_}, "time-granularity", drawChart);
-        }
-
-        function buildStateObject(query) {
-            return {
-                filterKey: neon.chartWidget.getFilterKey(),
-                columns: neon.dropdown.getFieldNamesFromDropdown("x"),
-                xValue: neon.chartWidget.getXAttribute(),
-                yValue: neon.chartWidget.getYAttribute(),
-                timeGranularity: $('#time-granularity').val(),
-                query: query
-            };
-        }
-
-        function restoreState() {
-            neon.query.getSavedState(clientId, function (data) {
-                neon.chartWidget.setFilterKey(data.filterKey);
-                neon.chartWidget.setDatabaseName(data.filterKey.dataSet.databaseName);
-                neon.chartWidget.setTableName(data.filterKey.dataSet.tableName);
-                neon.dropdown.populateAttributeDropdowns(data.columns, ['x','y'], drawChart);
-                neon.dropdown.setDropdownInitialValue("x", data.xValue);
-                neon.dropdown.setDropdownInitialValue("y", data.yValue);
-                neon.dropdown.setDropdownInitialValue("time-granularity", data.timeGranularity);
-                neon.query.executeQuery(data.query, doDrawChart);
-                getResetFilterButton().removeAttr('disabled');
-            });
-        }
-    });
-
-
+    function restoreState() {
+        neon.query.getSavedState(clientId, function (data) {
+            neon.chartWidget.setFilterKey(data.filterKey);
+            neon.chartWidget.setDatabaseName(data.filterKey.dataSet.databaseName);
+            neon.chartWidget.setTableName(data.filterKey.dataSet.tableName);
+            neon.dropdown.populateAttributeDropdowns(data.columns, ['x', 'y'], drawChart);
+            neon.dropdown.setDropdownInitialValue("x", data.xValue);
+            neon.dropdown.setDropdownInitialValue("y", data.yValue);
+            neon.dropdown.setDropdownInitialValue("time-granularity", data.timeGranularity);
+            neon.query.executeQuery(data.query, doDrawChart);
+        });
+    }
 });

@@ -83,8 +83,8 @@ $(function () {
                 data: { database: selectedDatabase.val() },
                 success: function (tableNames) {
                     neon.wizard.populateDropdown('#table-select', tableNames);
-                    neon.filter.setColumns([]);
-                    neon.filter.initializeFilterSection();
+                    neon.filterTable.setColumns([]);
+                    neon.filterTable.initializeFilterSection();
                     neon.filterBuilderState.saveState();
                 }
             });
@@ -99,12 +99,12 @@ $(function () {
         });
 
         neon.query.registerForFilterKey(dataSet.database, dataSet.table, function (filterResponse) {
-            neon.filter.setFilterKey(filterResponse);
+            neon.filterTable.setFilterKey(filterResponse);
             executingInitFilterSection();
         });
 
         neon.query.getFieldNames(dataSet.database, dataSet.table, "", function (data) {
-            neon.filter.setColumns(data.fieldNames);
+            neon.filterTable.setColumns(data.fieldNames);
             executingInitFilterSection();
         });
 
@@ -112,7 +112,7 @@ $(function () {
     }
 
     function initFilterForm() {
-        neon.filter.initializeFilterSection();
+        neon.filterTable.initializeFilterSection();
     }
 
     function clearAllFilters() {
@@ -120,7 +120,7 @@ $(function () {
             var database = $('#database-select').val();
             var table = $('#table-select').val();
             var message = { "database": database, "table": table };
-            neon.filter.initializeFilterSection();
+            neon.filterTable.initializeFilterSection();
         });
     }
 

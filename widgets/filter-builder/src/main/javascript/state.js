@@ -32,8 +32,8 @@ neon.filterBuilderState = (function () {
     function restoreConnectionAndFilterState(data){
         $("#filter-container").show();
         $("#clear-filters-button").show();
-        neon.filter.setFilterKey(data.filterKey);
-        neon.filter.setFilterState(data.filterState);
+        neon.filterTable.setFilterKey(data.filterKey);
+        neon.filterTable.setFilterState(data.filterState);
         $("input[type='radio'][name='boolean'][value=" + data.andOr + "]").attr('checked', 'checked');
     }
 
@@ -59,8 +59,8 @@ neon.filterBuilderState = (function () {
         var selectedAndOr = $("input[type='radio'][name='boolean']:checked").val();
 
         $.extend(stateObject, {
-            filterKey: neon.filter.getFilterKey(),
-            filterState: neon.filter.getFilterState(),
+            filterKey: neon.filterTable.getFilterKey(),
+            filterState: neon.filterTable.getFilterState(),
             andOr: selectedAndOr
         });
 
@@ -68,7 +68,7 @@ neon.filterBuilderState = (function () {
     }
 
     function saveState(){
-        if(neon.filter.getFilterKey()){
+        if(neon.filterTable.getFilterKey()){
             neon.query.saveState(clientId, buildFullStateObject());
         }
         else{
