@@ -22,7 +22,7 @@
     <script src="js-lib/jquery/jquery-1.10.1.min.js"></script>
     <script src="js-lib/jquery-resize/jquery.ba-resize-1.1.min.js"></script>
     <script src="js-lib/lodash/1.3.1/lodash.min.js"></script>
-    <script src="javascript/init.js"></script>
+    <script src="javascript/initialize.js"></script>
     <script src="javascript/builder.js"></script>
     <!-- endbuild -->
 
