@@ -67,7 +67,7 @@
             <div class="control-group">
                 {{#unless submittable}}
                 <div class="btn-group">
-                    <button class="btn" id="add-filter-button" onclick="neon.filter.addFilter({{@index}})">
+                    <button class="btn" id="add-filter-button" onclick="neon.filterTable.addFilter({{@index}})">
                         Add
                     </button>
 
@@ -75,13 +75,13 @@
                 {{/unless}}
                 {{#if submittable}}
                 <div class="btn-group">
-                    <button class="btn btn-mini" id="update-filter-button" onclick="neon.filter.addFilter({{@index}})">
+                    <button class="btn btn-mini" id="update-filter-button" onclick="neon.filterTable.addFilter({{@index}})">
                         Update
                     </button>
                 </div>
 
                 <div class="btn-group">
-                    <button class="btn btn-mini" id="remove-filter-button" onclick="neon.filter.removeFilter({{@index}})">
+                    <button class="btn btn-mini" id="remove-filter-button" onclick="neon.filterTable.removeFilter({{@index}})">
                         Remove
                     </button>
                 </div>

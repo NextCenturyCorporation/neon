@@ -135,8 +135,10 @@ coreMap.Map.prototype.draw = function(){
         var longitude = me.getValueFromDataElement(me.longitudeMapping, element);
         var latitude = me.getValueFromDataElement(me.latitudeMapping, element);
 
-        heatmapData.push(me.createHeatmapDataPoint(element, longitude, latitude));
-        mapData.push(me.createPointsLayerDataPoint(element, longitude, latitude));
+        if($.isNumeric(latitude) && $.isNumeric(longitude)){
+            heatmapData.push(me.createHeatmapDataPoint(element, longitude, latitude));
+            mapData.push(me.createPointsLayerDataPoint(element, longitude, latitude));
+        }
     });
 
     me.heatmapLayer.setDataSet({ max: 1, data: heatmapData});
