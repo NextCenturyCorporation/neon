@@ -4,17 +4,15 @@ neon.filterBuilderState = (function () {
     var clientId;
 
     function restoreState(){
-        if(typeof (OWF) !== "undefined"){
-            OWF.ready(function(){
-                clientId = OWF.getInstanceId();
-                neon.query.getSavedState(clientId, function(data){
-                    restoreConnectionState(data);
-                    if(data.filterKey){
-                        restoreConnectionAndFilterState(data);
-                    }
-                });
+        neon.ready(function(){
+            clientId = neon.eventing.messaging.getInstanceId();
+            neon.query.getSavedState(clientId, function(data){
+                restoreConnectionState(data);
+                if(data.filterKey){
+                    restoreConnectionAndFilterState(data);
+                }
             });
-        }
+        });
     }
 
     function restoreConnectionState(data){

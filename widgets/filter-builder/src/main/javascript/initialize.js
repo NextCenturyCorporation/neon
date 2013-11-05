@@ -3,20 +3,12 @@ $(function () {
     initializeWidget();
     neon.filterBuilderState.restoreState();
 
-
     function initializeWidget() {
-        setupOWFMessageHandler();
+        neon.query.SERVER_URL = $("#neon-server").val();
         createHandlebarsHelpers();
         hideWizardSteps();
         setupHostnames();
         addClickHandlers();
-    }
-
-    function setupOWFMessageHandler() {
-        neon.query.SERVER_URL = $("#neon-server").val();
-        if (typeof (OWF) !== "undefined") {
-            OWF.relayFile = 'js/eventing/rpc_relay.uncompressed.html';
-        }
     }
 
     function createHandlebarsHelpers() {
