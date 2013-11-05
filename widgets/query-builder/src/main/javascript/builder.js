@@ -28,8 +28,8 @@ neon.queryBuilder = (function () {
     var numberOfRows = 0;
 
     var clientId;
-    OWF.ready(function(){
-       clientId = OWF.getInstanceId();
+    neon.ready(function(){
+       clientId =  neon.eventing.messaging.getInstanceId();
        restoreState();
     });
 

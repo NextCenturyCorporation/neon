@@ -22,7 +22,6 @@
  */
 
 $(function() {
-    OWF.relayFile = 'js/eventing/rpc_relay.uncompressed.html';
     neon.query.SERVER_URL = $("#neon-server").val();
 
     function layout(){
