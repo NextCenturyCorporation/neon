@@ -21,18 +21,18 @@
  * RECIPIENT IS UNDER OBLIGATION TO MAINTAIN SECRECY.
  */
 
-$(function () {
+neon.ready(function () {
+    neon.query.SERVER_URL = $("#neon-server").val();
 
-    OWF.ready(function () {
-        OWF.relayFile = 'js/eventing/rpc_relay.uncompressed.html';
-        neon.query.SERVER_URL = $("#neon-server").val();
+    var databaseName;
+    var tableName;
+    var table;
 
-        var databaseName;
-        var tableName;
-        var table;
+    var clientId = neon.eventing.messaging.getInstanceId();
 
-        var clientId = OWF.getInstanceId();
+    initialize();
 
+    function initialize(){
         neon.eventing.messaging.registerForNeonEvents({
             activeDatasetChanged: populateInitialData,
             filtersChanged: updateTable
@@ -45,125 +45,124 @@ $(function () {
 
         $(window).resize(sizeTableToRemainingSpace);
         sizeTableToRemainingSpace();
+    }
 
-        function populateInitialData(message) {
-            databaseName = message.database;
-            tableName = message.table;
-            neon.query.getFieldNames(databaseName, tableName, neon.widget.TABLE, populateSortFieldDropdown);
+    function populateInitialData(message) {
+        databaseName = message.database;
+        tableName = message.table;
+        neon.query.getFieldNames(databaseName, tableName, neon.widget.TABLE, populateSortFieldDropdown);
+    }
+
+    function populateSortFieldDropdown(data) {
+        neon.dropdown.populateAttributeDropdowns(data, 'sort-field', updateTable);
+        updateTable();
+    }
+
+    function getSortField() {
+        return $('#sort-field').val();
+    }
+
+    function populateSortDirection() {
+        var ascending = $('#sort-ascending');
+        var descending = $('#sort-descending');
+
+        ascending.val(neon.query.ASCENDING);
+        descending.val(neon.query.DESCENDING);
+
+        ascending.click(updateSortDirection);
+        descending.click(updateSortDirection);
+
+        styleSortDirectionButtonFromValue(neon.query.ASCENDING);
+    }
+
+    function styleSortDirectionButtonFromValue(value) {
+        var ascending = $('#sort-ascending');
+        var descending = $('#sort-descending');
+        ascending.removeClass('active');
+        descending.removeClass('active');
+
+        var button = ascending;
+        if (parseInt(value) === neon.query.DESCENDING) {
+            button = descending;
         }
 
-        function populateSortFieldDropdown(data) {
-            neon.dropdown.populateAttributeDropdowns(data, 'sort-field', updateTable);
+        button.addClass('active');
+        $('#sort-direction').val(button.val());
+    }
+
+    function updateSortDirection() {
+        var sortVal = $(this).val();
+        $('#sort-direction').val(sortVal);
+
+        if (getSortField()) {
             updateTable();
         }
+    }
 
-        function getSortField() {
-            return $('#sort-field').val();
+    function updateTable() {
+        var query = new neon.query.Query().selectFrom(databaseName, tableName);
+        applyLimit(query);
+        applySort(query);
+
+        var stateObject = buildStateObject(query);
+        neon.query.executeQuery(query, populateTable);
+        neon.query.saveState(clientId, stateObject);
+    }
+
+    function applyLimit(query) {
+        var limitVal = $('#limit').val();
+        // make sure there is a value - it could be empty (no limit) which is valid
+        if (limitVal) {
+            query.limit(parseInt(limitVal));
         }
+    }
 
-        function populateSortDirection() {
-            var ascending = $('#sort-ascending');
-            var descending = $('#sort-descending');
-
-            ascending.val(neon.query.ASCENDING);
-            descending.val(neon.query.DESCENDING);
-
-            ascending.click(updateSortDirection);
-            descending.click(updateSortDirection);
-
-            styleSortDirectionButtonFromValue(neon.query.ASCENDING);
+    function applySort(query) {
+        var sortField = getSortField();
+        if (sortField) {
+            var sortDirection = $('#sort-direction').val();
+            query.sortBy(sortField, sortDirection);
         }
+    }
 
-        function styleSortDirectionButtonFromValue(value){
-            var ascending = $('#sort-ascending');
-            var descending = $('#sort-descending');
-            ascending.removeClass('active');
-            descending.removeClass('active');
+    function populateTable(data) {
+        table = new tables.Table('#table', {data: data.data}).draw();
+        sizeTableToRemainingSpace();
+    }
 
-            var button = ascending;
-            if(parseInt(value) === neon.query.DESCENDING){
-                button = descending;
-            }
-
-            button.addClass('active');
-            $('#sort-direction').val(button.val());
+    function sizeTableToRemainingSpace() {
+        // table may not be drawn yet
+        if (table) {
+            table.refreshLayout();
         }
+    }
 
-        function updateSortDirection() {
-            var sortVal = $(this).val();
-            $('#sort-direction').val(sortVal);
+    function addLimitListener() {
+        $('#limit').change(updateTable);
+    }
 
-            if (getSortField()) {
-                updateTable();
-            }
-        }
+    function buildStateObject(query) {
+        return {
+            databaseName: databaseName,
+            tableName: tableName,
+            limitValue: $('#limit').val(),
+            sortColumns: neon.dropdown.getFieldNamesFromDropdown("sort-field"),
+            sortValue: getSortField(),
+            sortDirection: $('#sort-direction').val(),
+            query: query
+        };
+    }
 
-        function updateTable() {
-            var query = new neon.query.Query().selectFrom(databaseName, tableName);
-            applyLimit(query);
-            applySort(query);
-
-            var stateObject = buildStateObject(query);
-            neon.query.executeQuery(query, populateTable);
-            neon.query.saveState(clientId, stateObject);
-        }
-
-        function applyLimit(query) {
-            var limitVal = $('#limit').val();
-            // make sure there is a value - it could be empty (no limit) which is valid
-            if (limitVal) {
-                query.limit(parseInt(limitVal));
-            }
-        }
-
-        function applySort(query) {
-            var sortField = getSortField();
-            if (sortField) {
-                var sortDirection = $('#sort-direction').val();
-                query.sortBy(sortField, sortDirection);
-            }
-        }
-
-        function populateTable(data) {
-            table = new tables.Table('#table', {data: data.data}).draw();
-            sizeTableToRemainingSpace();
-        }
-
-        function sizeTableToRemainingSpace() {
-            // table may not be drawn yet
-            if (table) {
-                table.refreshLayout();
-            }
-        }
-
-        function addLimitListener() {
-            $('#limit').change(updateTable);
-        }
-
-        function buildStateObject(query) {
-            return {
-                databaseName: databaseName,
-                tableName: tableName,
-                limitValue: $('#limit').val(),
-                sortColumns: neon.dropdown.getFieldNamesFromDropdown("sort-field"),
-                sortValue: getSortField(),
-                sortDirection: $('#sort-direction').val(),
-                query: query
-            };
-        }
-
-        function restoreState() {
-            neon.query.getSavedState(clientId, function (data) {
-                databaseName = data.databaseName;
-                tableName = data.tableName;
-                $('#limit').val(data.limitValue);
-                neon.dropdown.populateAttributeDropdowns(data.sortColumns, 'sort-field', updateTable);
-                neon.dropdown.setDropdownInitialValue("sort-field", data.sortValue);
-                styleSortDirectionButtonFromValue(data.sortDirection);
-                neon.query.executeQuery(data.query, populateTable);
-            });
-        }
-
-    });
+    function restoreState() {
+        neon.query.getSavedState(clientId, function (data) {
+            databaseName = data.databaseName;
+            tableName = data.tableName;
+            $('#limit').val(data.limitValue);
+            neon.dropdown.populateAttributeDropdowns(data.sortColumns, 'sort-field', updateTable);
+            neon.dropdown.setDropdownInitialValue("sort-field", data.sortValue);
+            styleSortDirectionButtonFromValue(data.sortDirection);
+            neon.query.executeQuery(data.query, populateTable);
+        });
+    }
 
 });
