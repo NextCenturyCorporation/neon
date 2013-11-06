@@ -47,7 +47,7 @@ buildscript {
         }
     }
     dependencies {
-        classpath 'org.mongodb:mongo-java-driver:2.10.1'
+        classpath 'org.mongodb:mongo-java-driver:2.11.3'
         classpath ':antlr4-plugin:0.1'
     }
 }
@@ -90,7 +90,7 @@ dependencies {
     compile 'com.sun.jersey:jersey-server:1.15'
     compile 'com.sun.jersey:jersey-json:1.15'
     compile 'com.sun.jersey.contribs:jersey-spring:1.15'
-    compile 'org.mongodb:mongo-java-driver:2.10.1'
+    compile 'org.mongodb:mongo-java-driver:2.11.3'
     compile "org.springframework:spring-web:$springVersion"
     compile 'joda-time:joda-time:2.1'
     compile 'org.slf4j:slf4j-api:1.7.2'

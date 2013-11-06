@@ -1,5 +1,6 @@
 package com.ncc.neon.metadata
 
+import com.mongodb.MongoClient
 
 /*
  * ************************************************************************
@@ -23,12 +24,41 @@ package com.ncc.neon.metadata
  * OF NEXT CENTURY CORPORATION EXCEPT BY PRIOR WRITTEN PERMISSION AND WHEN
  * RECIPIENT IS UNDER OBLIGATION TO MAINTAIN SECRECY.
  *
- *
+ * 
+ * @author tbrooks
  */
 
-class HelloGroovy {
+class MetadataConnection {
 
-    String helloWorld(){
-        return "hello world"
+    private final MongoClient client
+
+    MetadataConnection(){
+        this.client = new MongoClient()
+        addShutdownHook()
     }
+
+    MetadataConnection(String url){
+        this.client = new MongoClient(url)
+        addShutdownHook()
+    }
+
+    MetadataConnection(MongoClient client){
+        this.client = client
+        addShutdownHook()
+    }
+
+    private addShutdownHook(){
+        addShutdownHook{
+            close()
+        }
+    }
+
+    MongoClient getClient(){
+        return this.client
+    }
+
+    void close(){
+        client.close()
+    }
+
 }

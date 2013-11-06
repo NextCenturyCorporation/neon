@@ -31,7 +31,7 @@ class HelloGroovyTest {
 
     @Test
     void testHelloWorld(){
-        HelloGroovy hello = new HelloGroovy()
-        assert hello.helloWorld() == "hello world"
+        String hello = "hello world"
+        assert hello == "hello world"
     }
 }
