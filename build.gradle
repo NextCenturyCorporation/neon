@@ -23,7 +23,7 @@ project(":common").ext.logbackVersion = "1.0.13"
 def CURRENT_NEON_VERSION = "0.6.0"
 version = CURRENT_NEON_VERSION
 
-configure(subprojects.findAll { it.name != 'common'}) {
+configure(subprojects.findAll { it.name != 'common' && it.name != 'metadata'}) {
     version = CURRENT_NEON_VERSION
 
     apply plugin: 'war'
