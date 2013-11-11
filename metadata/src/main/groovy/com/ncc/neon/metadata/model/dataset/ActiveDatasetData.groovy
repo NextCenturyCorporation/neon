@@ -1,4 +1,4 @@
-package com.ncc.neon.metadata.model.dataSet
+package com.ncc.neon.metadata.model.dataset
 
 import groovy.transform.ToString
 /*

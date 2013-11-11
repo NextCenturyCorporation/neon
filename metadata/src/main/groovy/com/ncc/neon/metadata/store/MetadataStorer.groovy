@@ -4,7 +4,7 @@ import com.mongodb.DBCollection
 import com.mongodb.DBObject
 import com.mongodb.MongoClient
 import com.ncc.neon.metadata.MetadataConnection
-import com.ncc.neon.metadata.model.dataSet.ActiveDatasetData
+import com.ncc.neon.metadata.model.dataset.ActiveDatasetData
 import com.ncc.neon.metadata.model.query.DefaultColumnData
 import com.ncc.neon.metadata.model.widget.WidgetInitializationData
 /*

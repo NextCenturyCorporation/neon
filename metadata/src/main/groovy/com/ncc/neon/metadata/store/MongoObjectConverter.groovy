@@ -1,6 +1,8 @@
 package com.ncc.neon.metadata.store
+
 import com.mongodb.BasicDBObject
 import com.mongodb.DBObject
+
 /*
  * ************************************************************************
  * Copyright (c), 2013 Next Century Corporation. All Rights Reserved.
@@ -33,13 +35,13 @@ import com.mongodb.DBObject
 
 class MongoObjectConverter {
 
-    private static final String CLASS = "class";
+    private static final String CLASS = "class"
 
-    BasicDBObject convertToMongo(def obj){
+    BasicDBObject convertToMongo(def obj) {
         BasicDBObject document = new BasicDBObject()
-        obj.metaClass.properties.each{
+        obj.metaClass.properties.each {
             def value = obj[it.name]
-            if(it.name == CLASS) {
+            if (it.name == CLASS) {
                 value = obj.class.name
             }
             document.append(it.name, value)
@@ -47,11 +49,11 @@ class MongoObjectConverter {
         return document
     }
 
-    def convertToObject(DBObject dbObject){
-        def object = Class.forName(dbObject.get(CLASS)).newInstance()
+    def convertToObject(DBObject dbObject) {
+        def object = MongoObjectConverter.classLoader.loadClass(dbObject.get(CLASS)).newInstance()
 
         dbObject.each { k, v ->
-            if(k == CLASS || k == "_id"){
+            if (k == CLASS || k == "_id") {
                 return
             }
             object[k] = v
