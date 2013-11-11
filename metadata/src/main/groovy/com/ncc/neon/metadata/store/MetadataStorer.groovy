@@ -56,15 +56,15 @@ class MetadataStorer {
         }
     }
 
-    void save(WidgetInitializationData data) {
+    void store(WidgetInitializationData data) {
         saveClosure("widget", data)
     }
 
-    void save(DefaultColumnData data) {
+    void store(DefaultColumnData data) {
         saveClosure("column", data)
     }
 
-    void save(ActiveDatasetData data) {
+    void store(ActiveDatasetData data) {
         saveClosure("dataset", data)
     }
 
