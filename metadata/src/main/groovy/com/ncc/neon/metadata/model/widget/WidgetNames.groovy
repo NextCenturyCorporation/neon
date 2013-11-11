@@ -1,6 +1,4 @@
-package com.ncc.neon.metadata
-
-import com.mongodb.MongoClient
+package com.ncc.neon.metadata.model.widget
 
 /*
  * ************************************************************************
@@ -29,40 +27,17 @@ import com.mongodb.MongoClient
  */
 
 /**
- * Contains a connection to Mongo.
+ * Possible widget names. Used as constants.
  */
 
-class MetadataConnection {
+class WidgetNames {
+    static final String CIRCULAR_HEAT = "CircularHeat"
+    static final String TIMELINE = "Timeline"
+    static final String BARCHART = "Barchart"
+    static final String MAP = "Map"
+    static final String TABLE = "Table"
 
-    private final MongoClient client
-
-    MetadataConnection(){
-        this.client = new MongoClient()
-        addShutdownHook()
+    static boolean contains(String widgetName) {
+        [CIRCULAR_HEAT,TIMELINE,BARCHART,MAP,TABLE].contains(widgetName)
     }
-
-    MetadataConnection(String url){
-        this.client = new MongoClient(url)
-        addShutdownHook()
-    }
-
-    MetadataConnection(MongoClient client){
-        this.client = client
-        addShutdownHook()
-    }
-
-    private addShutdownHook(){
-        addShutdownHook{
-            close()
-        }
-    }
-
-    MongoClient getClient(){
-        return this.client
-    }
-
-    void close(){
-        client.close()
-    }
-
 }

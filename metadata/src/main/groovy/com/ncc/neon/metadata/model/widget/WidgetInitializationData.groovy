@@ -1,7 +1,6 @@
-package com.ncc.neon.metadata
+package com.ncc.neon.metadata.model.widget
 
-import com.mongodb.MongoClient
-
+import groovy.transform.ToString
 /*
  * ************************************************************************
  * Copyright (c), 2013 Next Century Corporation. All Rights Reserved.
@@ -29,40 +28,11 @@ import com.mongodb.MongoClient
  */
 
 /**
- * Contains a connection to Mongo.
+ * Metadata about a widget to be retrieved on initialization.
  */
 
-class MetadataConnection {
-
-    private final MongoClient client
-
-    MetadataConnection(){
-        this.client = new MongoClient()
-        addShutdownHook()
-    }
-
-    MetadataConnection(String url){
-        this.client = new MongoClient(url)
-        addShutdownHook()
-    }
-
-    MetadataConnection(MongoClient client){
-        this.client = client
-        addShutdownHook()
-    }
-
-    private addShutdownHook(){
-        addShutdownHook{
-            close()
-        }
-    }
-
-    MongoClient getClient(){
-        return this.client
-    }
-
-    void close(){
-        client.close()
-    }
-
+@ToString(includeNames = true)
+class WidgetInitializationData {
+    String widgetName
+    String initDataJson
 }

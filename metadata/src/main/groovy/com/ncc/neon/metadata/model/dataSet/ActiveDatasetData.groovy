@@ -1,7 +1,6 @@
-package com.ncc.neon.metadata
+package com.ncc.neon.metadata.model.dataSet
 
-import com.mongodb.MongoClient
-
+import groovy.transform.ToString
 /*
  * ************************************************************************
  * Copyright (c), 2013 Next Century Corporation. All Rights Reserved.
@@ -29,40 +28,13 @@ import com.mongodb.MongoClient
  */
 
 /**
- * Contains a connection to Mongo.
+ * Contains metadata about the active data set.
  */
 
-class MetadataConnection {
-
-    private final MongoClient client
-
-    MetadataConnection(){
-        this.client = new MongoClient()
-        addShutdownHook()
-    }
-
-    MetadataConnection(String url){
-        this.client = new MongoClient(url)
-        addShutdownHook()
-    }
-
-    MetadataConnection(MongoClient client){
-        this.client = client
-        addShutdownHook()
-    }
-
-    private addShutdownHook(){
-        addShutdownHook{
-            close()
-        }
-    }
-
-    MongoClient getClient(){
-        return this.client
-    }
-
-    void close(){
-        client.close()
-    }
-
+@ToString(includeNames = true)
+class ActiveDatasetData {
+    String widgetName
+    String databaseName
+    String tableName
+    Map<String,String> data = [:]
 }

@@ -1,7 +1,12 @@
-package com.ncc.neon.metadata
-
+package com.ncc.neon.metadata.store
+import com.mongodb.DB
+import com.mongodb.DBCollection
+import com.mongodb.DBObject
 import com.mongodb.MongoClient
-
+import com.ncc.neon.metadata.MetadataConnection
+import com.ncc.neon.metadata.model.dataSet.ActiveDatasetData
+import com.ncc.neon.metadata.model.query.DefaultColumnData
+import com.ncc.neon.metadata.model.widget.WidgetInitializationData
 /*
  * ************************************************************************
  * Copyright (c), 2013 Next Century Corporation. All Rights Reserved.
@@ -29,40 +34,38 @@ import com.mongodb.MongoClient
  */
 
 /**
- * Contains a connection to Mongo.
+ * An api for storing metadata objects.
  */
 
-class MetadataConnection {
+class MetadataStorer {
 
-    private final MongoClient client
+    private final MongoObjectConverter converter
+    private final def saveClosure
 
-    MetadataConnection(){
-        this.client = new MongoClient()
-        addShutdownHook()
-    }
+    MetadataStorer(MetadataConnection connection) {
+        this.converter = new MongoObjectConverter()
 
-    MetadataConnection(String url){
-        this.client = new MongoClient(url)
-        addShutdownHook()
-    }
+        this.saveClosure = { String name, data ->
+            DBObject document = converter.convertToMongo(data)
 
-    MetadataConnection(MongoClient client){
-        this.client = client
-        addShutdownHook()
-    }
+            MongoClient mongo = connection.client
+            DB database = mongo.getDB("metadata")
+            DBCollection widget = database.createCollection(name, null)
 
-    private addShutdownHook(){
-        addShutdownHook{
-            close()
+            widget.insert(document)
         }
     }
 
-    MongoClient getClient(){
-        return this.client
+    void save(WidgetInitializationData data) {
+        saveClosure("widget", data)
     }
 
-    void close(){
-        client.close()
+    void save(DefaultColumnData data) {
+        saveClosure("column", data)
+    }
+
+    void save(ActiveDatasetData data) {
+        saveClosure("dataset", data)
     }
 
 }

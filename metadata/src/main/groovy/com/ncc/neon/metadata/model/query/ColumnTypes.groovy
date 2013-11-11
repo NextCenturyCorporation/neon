@@ -1,6 +1,4 @@
-package com.ncc.neon.metadata
-
-import com.mongodb.MongoClient
+package com.ncc.neon.metadata.model.query
 
 /*
  * ************************************************************************
@@ -29,40 +27,13 @@ import com.mongodb.MongoClient
  */
 
 /**
- * Contains a connection to Mongo.
+ * Possible types of a column. Used as constants.
  */
 
-class MetadataConnection {
-
-    private final MongoClient client
-
-    MetadataConnection(){
-        this.client = new MongoClient()
-        addShutdownHook()
-    }
-
-    MetadataConnection(String url){
-        this.client = new MongoClient(url)
-        addShutdownHook()
-    }
-
-    MetadataConnection(MongoClient client){
-        this.client = client
-        addShutdownHook()
-    }
-
-    private addShutdownHook(){
-        addShutdownHook{
-            close()
-        }
-    }
-
-    MongoClient getClient(){
-        return this.client
-    }
-
-    void close(){
-        client.close()
-    }
-
+class ColumnTypes {
+    static final String STRING = "string"
+    static final String NUMBER = "number"
+    static final String DATE = "date"
+    static final String BOOLEAN = "boolean"
+    static final String NULL = "null"
 }

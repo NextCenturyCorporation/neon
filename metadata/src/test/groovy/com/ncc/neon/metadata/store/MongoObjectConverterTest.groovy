@@ -1,6 +1,7 @@
-package com.ncc.neon.metadata
+package com.ncc.neon.metadata.store
 
-import com.mongodb.MongoClient
+import com.ncc.neon.metadata.model.widget.WidgetInitializationData
+import org.junit.Test
 
 /*
  * ************************************************************************
@@ -28,41 +29,18 @@ import com.mongodb.MongoClient
  * @author tbrooks
  */
 
-/**
- * Contains a connection to Mongo.
- */
+class MongoObjectConverterTest {
 
-class MetadataConnection {
+    private final WidgetInitializationData data = new WidgetInitializationData(widgetName: "widget", initDataJson: '{"hello": "world"}')
 
-    private final MongoClient client
+    @Test
+    void testConversion() {
+        MongoObjectConverter converter = new MongoObjectConverter()
+        def document = converter.convertToMongo(data)
+        def obj = converter.convertToObject(document)
 
-    MetadataConnection(){
-        this.client = new MongoClient()
-        addShutdownHook()
-    }
-
-    MetadataConnection(String url){
-        this.client = new MongoClient(url)
-        addShutdownHook()
-    }
-
-    MetadataConnection(MongoClient client){
-        this.client = client
-        addShutdownHook()
-    }
-
-    private addShutdownHook(){
-        addShutdownHook{
-            close()
-        }
-    }
-
-    MongoClient getClient(){
-        return this.client
-    }
-
-    void close(){
-        client.close()
+        assert obj.widgetName == data.widgetName
+        assert obj.initDataJson == data.initDataJson
     }
 
 }

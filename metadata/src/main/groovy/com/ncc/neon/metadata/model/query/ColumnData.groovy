@@ -1,6 +1,4 @@
-package com.ncc.neon.metadata
-
-import org.junit.Test
+package com.ncc.neon.metadata.model.query
 
 /*
  * ************************************************************************
@@ -25,13 +23,24 @@ import org.junit.Test
  * RECIPIENT IS UNDER OBLIGATION TO MAINTAIN SECRECY.
  *
  * 
+ * @author tbrooks
  */
 
-class HelloGroovyTest {
+/**
+ * Contains metadata about a column in a dataset.
+ */
 
-    @Test
-    void testHelloWorld(){
-        String hello = "hello world"
-        assert hello == "hello world"
-    }
+interface ColumnData {
+
+    String getDatabaseName()
+    String getTableName()
+    String getColumnName()
+    String getColumnType()
+    boolean isNumeric()
+    boolean isGeographical()
+    boolean isTemporal()
+    boolean isCategorical()
+    boolean isNullable()
+    boolean isHeterogeneous()
+
 }

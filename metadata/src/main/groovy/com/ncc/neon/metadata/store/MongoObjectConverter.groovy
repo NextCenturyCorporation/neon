@@ -1,7 +1,6 @@
-package com.ncc.neon.metadata
-
-import com.mongodb.MongoClient
-
+package com.ncc.neon.metadata.store
+import com.mongodb.BasicDBObject
+import com.mongodb.DBObject
 /*
  * ************************************************************************
  * Copyright (c), 2013 Next Century Corporation. All Rights Reserved.
@@ -29,40 +28,35 @@ import com.mongodb.MongoClient
  */
 
 /**
- * Contains a connection to Mongo.
+ * Turns a groovy object into a mongo DbObject and visa-versa.
  */
 
-class MetadataConnection {
+class MongoObjectConverter {
 
-    private final MongoClient client
+    private static final String CLASS = "class";
 
-    MetadataConnection(){
-        this.client = new MongoClient()
-        addShutdownHook()
-    }
-
-    MetadataConnection(String url){
-        this.client = new MongoClient(url)
-        addShutdownHook()
-    }
-
-    MetadataConnection(MongoClient client){
-        this.client = client
-        addShutdownHook()
-    }
-
-    private addShutdownHook(){
-        addShutdownHook{
-            close()
+    BasicDBObject convertToMongo(def obj){
+        BasicDBObject document = new BasicDBObject()
+        obj.metaClass.properties.each{
+            def value = obj[it.name]
+            if(it.name == CLASS) {
+                value = obj.class.name
+            }
+            document.append(it.name, value)
         }
+        return document
     }
 
-    MongoClient getClient(){
-        return this.client
-    }
+    def convertToObject(DBObject dbObject){
+        def object = Class.forName(dbObject.get(CLASS)).newInstance()
 
-    void close(){
-        client.close()
+        dbObject.each { k, v ->
+            if(k == CLASS || k == "_id"){
+                return
+            }
+            object[k] = v
+        }
+        return object
     }
 
 }

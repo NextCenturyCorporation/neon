@@ -1,6 +1,6 @@
-package com.ncc.neon.metadata
+package com.ncc.neon.metadata.model.query
 
-import com.mongodb.MongoClient
+import groovy.transform.ToString
 
 /*
  * ************************************************************************
@@ -29,40 +29,21 @@ import com.mongodb.MongoClient
  */
 
 /**
- * Contains a connection to Mongo.
+ * Default implementation of metadata about a column.
  */
 
-class MetadataConnection {
+@ToString(includeNames = true)
+class DefaultColumnData implements ColumnData{
 
-    private final MongoClient client
-
-    MetadataConnection(){
-        this.client = new MongoClient()
-        addShutdownHook()
-    }
-
-    MetadataConnection(String url){
-        this.client = new MongoClient(url)
-        addShutdownHook()
-    }
-
-    MetadataConnection(MongoClient client){
-        this.client = client
-        addShutdownHook()
-    }
-
-    private addShutdownHook(){
-        addShutdownHook{
-            close()
-        }
-    }
-
-    MongoClient getClient(){
-        return this.client
-    }
-
-    void close(){
-        client.close()
-    }
+    String databaseName
+    String tableName
+    String columnName
+    String columnType
+    boolean numeric
+    boolean geographical
+    boolean temporal
+    boolean categorical
+    boolean nullable
+    boolean heterogeneous
 
 }
