@@ -109,6 +109,7 @@ dependencies {
         // we already include slf4j
         exclude module: 'slf4j-log4j12'
     }
+    compile project(":metadata")
 
     providedCompile 'javax.servlet:javax.servlet-api:3.0.1'
 
