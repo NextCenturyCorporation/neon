@@ -34,8 +34,8 @@ import javax.ws.rs.core.MediaType
  */
 
 @Component
-@Path("/filterservice")
-class FilterService {
+@Path("/connectionservice")
+class ConnectionService {
 
     @Autowired
     ConnectionState connectionState
