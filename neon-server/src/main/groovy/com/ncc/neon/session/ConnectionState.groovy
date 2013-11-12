@@ -1,12 +1,8 @@
 package com.ncc.neon.session
-
-import com.ncc.neon.connect.Connection
-import com.ncc.neon.connect.ConnectionInfo
-import com.ncc.neon.connect.DataSources
-import com.ncc.neon.connect.HiveConnection
-import com.ncc.neon.connect.MongoConnection
-import com.ncc.neon.connect.UnsupportedDataStoreTypeException
+import com.ncc.neon.connect.*
 import com.ncc.neon.query.QueryExecutor
+import com.ncc.neon.query.mongo.MongoQueryExecutor
+import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.annotation.Scope
 import org.springframework.context.annotation.ScopedProxyMode
 import org.springframework.stereotype.Component
@@ -46,27 +42,39 @@ import javax.annotation.PostConstruct
 @Scope(value = WebApplicationContext.SCOPE_SESSION, proxyMode = ScopedProxyMode.TARGET_CLASS)
 class ConnectionState {
 
+    @Autowired
+    private MetadataConnectionHolder metadataConnectionHolder
+
+    private ConnectionInfo metadataConnectionInfo
+    private MongoQueryExecutor metadataQueryExecutor
+
+    private ConnectionInfo currentConnectionInfo
+
     private Connection connection
     private QueryExecutor queryExecutor
-    private ConnectionInfo info
 
     @PostConstruct
     void initialize(){
-        def hostsString = System.getProperty("mongo.hosts", "localhost")
-        ConnectionInfo info = new ConnectionInfo(dataSource: DataSources.mongo, connectionUrl: hostsString)
-        createConnection(info)
+        this.metadataConnectionInfo = new ConnectionInfo(dataSource: DataSources.mongo, connectionUrl: metadataConnectionHolder.connectionUrl)
+        this.metadataQueryExecutor = new MongoQueryExecutor(metadataConnectionHolder.mongoClient)
+        createConnection(this.metadataConnectionInfo)
     }
 
     void createConnection(ConnectionInfo info) {
-        // the init check ensures the connection is re-established after deserialization
-        if (info == this.info) {
+        if(info == this.currentConnectionInfo){
             return
         }
 
-        this.info = info
         closeConnection()
-        setupConnection(info)
+        this.currentConnectionInfo = info
 
+        if(info == this.metadataConnectionInfo){
+            this.connection = null
+            this.queryExecutor = metadataQueryExecutor
+            return
+        }
+
+        setupConnection(info)
         queryExecutor = QueryExecutorFactory.create(connection, info)
     }
 

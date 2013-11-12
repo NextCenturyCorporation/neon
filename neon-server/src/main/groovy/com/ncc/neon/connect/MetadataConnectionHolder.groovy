@@ -1,12 +1,8 @@
-package com.ncc.neon.services
-
-import com.ncc.neon.session.ConnectionState
-import org.springframework.beans.factory.annotation.Autowired
+package com.ncc.neon.connect
+import com.mongodb.MongoClient
+import com.ncc.neon.metadata.MetadataConnection
+import com.ncc.neon.metadata.store.MetadataRetriever
 import org.springframework.stereotype.Component
-
-import javax.ws.rs.*
-import javax.ws.rs.core.MediaType
-
 /*
  * ************************************************************************
  * Copyright (c), 2013 Next Century Corporation. All Rights Reserved.
@@ -34,37 +30,17 @@ import javax.ws.rs.core.MediaType
  */
 
 @Component
-@Path("/filterservice")
-class FilterService {
+class MetadataConnectionHolder {
 
-    @Autowired
-    ConnectionState connectionState
+    final MongoClient mongoClient
+    final MetadataRetriever metadataRetriever
+    final String connectionUrl
 
-    @GET
-    @Produces(MediaType.APPLICATION_JSON)
-    @Path("hostnames")
-    List<String> getHostnames() {
-        return ["localhost"]
+    public MetadataConnectionHolder(){
+        this.connectionUrl = System.getProperty("mongo.hosts", "localhost")
+        MetadataConnection connection = new MetadataConnection(connectionUrl)
+        this.mongoClient = connection.client
+        this.metadataRetriever = new MetadataRetriever(connection)
     }
 
-    @POST
-    @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
-    @Path("connect")
-    void connect(@FormParam("datastore") String datastore, @FormParam("hostname") String hostname) {
-        connectionState.createConnection(datastore, hostname)
-    }
-
-    @GET
-    @Produces(MediaType.APPLICATION_JSON)
-    @Path("databasenames")
-    List<String> getDatabaseNames() {
-        connectionState.queryExecutor.showDatabases()
-    }
-
-    @POST
-    @Produces(MediaType.APPLICATION_JSON)
-    @Path("tablenames")
-    List<String> getTableNames(@FormParam("database") String database) {
-        connectionState.queryExecutor.showTables(database)
-    }
 }
