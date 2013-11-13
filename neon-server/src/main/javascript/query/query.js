@@ -604,7 +604,7 @@ neon.query.clearFilters = function (successCallback, errorCallback) {
 neon.query.setSelectionWhere = function (filter, successCallback, errorCallback) {
     return neon.util.ajaxUtils.doPostJSON(
         filter,
-        neon.query.queryUrl_('/services/queryservice/setselectionwhere'),
+        neon.query.queryUrl_('/services/selectionservice/setselectionwhere'),
         {
             success: successCallback,
             error: errorCallback
@@ -627,7 +627,7 @@ neon.query.getSelectionWhere = function (filter, successCallback, errorCallback)
     }
     return neon.util.ajaxUtils.doPostJSON(
         filter,
-        neon.query.queryUrl_('/services/queryservice/getselectionwhere' + queryParams),
+        neon.query.queryUrl_('/services/selectionservice/getselectionwhere' + queryParams),
         {
             success: successCallback,
             error: errorCallback
@@ -647,7 +647,7 @@ neon.query.getSelectionWhere = function (filter, successCallback, errorCallback)
 neon.query.setSelectedIds = function (ids, successCallback, errorCallback) {
     return neon.util.ajaxUtils.doPostJSON(
         ids,
-        neon.query.queryUrl_('/services/queryservice/setselectedids'),
+        neon.query.queryUrl_('/services/selectionservice/setselectedids'),
         {
             success: successCallback,
             error: errorCallback
@@ -667,7 +667,7 @@ neon.query.setSelectedIds = function (ids, successCallback, errorCallback) {
 neon.query.addSelectedIds = function (ids, successCallback, errorCallback) {
     return neon.util.ajaxUtils.doPostJSON(
         ids,
-        neon.query.queryUrl_('/services/queryservice/addselectedids'),
+        neon.query.queryUrl_('/services/selectionservice/addselectedids'),
         {
             success: successCallback,
             error: errorCallback
@@ -686,7 +686,7 @@ neon.query.addSelectedIds = function (ids, successCallback, errorCallback) {
 neon.query.removeSelectedIds = function (ids, successCallback, errorCallback) {
     return neon.util.ajaxUtils.doPostJSON(
         ids,
-        neon.query.queryUrl_('/services/queryservice/removeselectedids'),
+        neon.query.queryUrl_('/services/selectionservice/removeselectedids'),
         {
             success: successCallback,
             error: errorCallback
@@ -703,7 +703,7 @@ neon.query.removeSelectedIds = function (ids, successCallback, errorCallback) {
  */
 neon.query.clearSelection = function (successCallback, errorCallback) {
     return neon.util.ajaxUtils.doPost(
-        neon.query.queryUrl_('/services/queryservice/clearselection'),
+        neon.query.queryUrl_('/services/selectionservice/clearselection'),
         {
             success: successCallback,
             error: errorCallback

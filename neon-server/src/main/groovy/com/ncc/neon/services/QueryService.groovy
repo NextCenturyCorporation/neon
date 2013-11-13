@@ -7,7 +7,6 @@ import com.ncc.neon.query.QueryExecutor
 import com.ncc.neon.query.QueryGroup
 import com.ncc.neon.query.QueryUtils
 import com.ncc.neon.query.filter.DataSet
-import com.ncc.neon.query.filter.Filter
 import com.ncc.neon.result.FieldNames
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
@@ -70,56 +69,6 @@ class QueryService {
                              @QueryParam("param") List<String> transformParams) {
         QueryExecutor queryExecutor = queryExecutorFactory.create()
         return QueryUtils.wrapJsonInDataElement(queryExecutor.execute(query, includeFiltered), transformClassName, transformParams)
-    }
-
-    @POST
-    @Consumes(MediaType.APPLICATION_JSON)
-    @Path("setselectionwhere")
-    void setSelectionWhere(Filter filter) {
-        QueryExecutor queryExecutor = queryExecutorFactory.create()
-        queryExecutor.setSelectionWhere(filter)
-    }
-
-    @POST
-    @Consumes(MediaType.APPLICATION_JSON)
-    @Path("setselectedids")
-    void setSelectedIds(Collection<Object> ids) {
-        QueryExecutor queryExecutor = queryExecutorFactory.create()
-        queryExecutor.setSelectedIds(ids)
-    }
-
-    @POST
-    @Consumes(MediaType.APPLICATION_JSON)
-    @Produces(MediaType.APPLICATION_JSON)
-    @Path("getselectionwhere")
-    String getSelectionWhere(Filter filter,
-                             @QueryParam("transform") String transformClassName,
-                             @QueryParam("param") List<String> transformParams) {
-        QueryExecutor queryExecutor = queryExecutorFactory.create()
-        return QueryUtils.wrapJsonInDataElement(queryExecutor.getSelectionWhere(filter), transformClassName, transformParams)
-    }
-
-    @POST
-    @Consumes(MediaType.APPLICATION_JSON)
-    @Path("addselectedids")
-    void addSelectedIds(Collection<Object> ids) {
-        QueryExecutor queryExecutor = queryExecutorFactory.create()
-        queryExecutor.addSelectedIds(ids)
-    }
-
-    @POST
-    @Consumes(MediaType.APPLICATION_JSON)
-    @Path("removeselectedids")
-    void removeSelectedIds(Collection<Object> ids) {
-        QueryExecutor queryExecutor = queryExecutorFactory.create()
-        queryExecutor.removeSelectedIds(ids)
-    }
-
-    @POST
-    @Path("clearselection")
-    void clearSelection() {
-        QueryExecutor queryExecutor = queryExecutorFactory.create()
-        queryExecutor.clearSelection()
     }
 
     @GET
