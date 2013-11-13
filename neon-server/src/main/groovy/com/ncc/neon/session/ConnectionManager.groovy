@@ -1,13 +1,9 @@
-package com.ncc.neon.services
-import com.ncc.neon.language.QueryParser
-import com.ncc.neon.query.Query
-import com.ncc.neon.query.QueryUtils
-import com.ncc.neon.session.QueryExecutorFactory
+package com.ncc.neon.session
+import com.ncc.neon.connect.ConnectionInfo
+import com.ncc.neon.connect.DataSources
+import com.ncc.neon.metadata.MetadataConnection
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
-
-import javax.ws.rs.*
-import javax.ws.rs.core.MediaType
 /*
  * ************************************************************************
  * Copyright (c), 2013 Next Century Corporation. All Rights Reserved.
@@ -35,25 +31,39 @@ import javax.ws.rs.core.MediaType
  */
 
 @Component
-@Path("/languageservice")
-class LanguageService {
+class ConnectionManager {
+
+    private final MetadataConnection metadataConnection
+    private final String defaultMongoUrl
 
     @Autowired
-    QueryParser queryParser
+    SessionConnection sessionConnection
 
-    @Autowired
-    QueryExecutorFactory queryExecutorFactory
-
-    @POST
-    @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
-    @Produces(MediaType.APPLICATION_JSON)
-    @Path("query")
-    String executeQuery(@FormParam("text") String text) {
-        Query query = queryParser.parse(text)
-
-        return QueryUtils.wrapJsonInDataElement(queryExecutorFactory.create().execute(query, false))
+    ConnectionManager() {
+        this.defaultMongoUrl = System.getProperty("mongo.hosts", "localhost")
+        this.metadataConnection = new MetadataConnection(defaultMongoUrl)
     }
 
+    void connect(ConnectionInfo info) {
+        if(info.dataSource == DataSources.mongo && info.connectionUrl == defaultMongoUrl){
+            sessionConnection.connectionInfo = null
+            return
+        }
+        sessionConnection.connectionInfo = info
+    }
+
+    def getClient() {
+        if(!sessionConnection.connectionInfo){
+            return metadataConnection.client
+        }
+        return sessionConnection.getClient()
+    }
+
+    boolean isConnectedToHive() {
+        sessionConnection.connectionInfo?.dataSource == DataSources.hive
+    }
+
+    void closeConnection(){
+        sessionConnection.closeConnection()
+    }
 }
-
-

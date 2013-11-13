@@ -35,6 +35,7 @@ import java.sql.*
  */
 //We have to suppress this warning in order to load the the JDBC driver via DriverManager. See NEON-459
 @SuppressWarnings('ClassForName')
+@SuppressWarnings("SynchronizedMethod")
 class JdbcClient {
 
     private final Connection connection
@@ -49,7 +50,8 @@ class JdbcClient {
         this.connection = DriverManager.getConnection("jdbc:" + databaseType + "://" + dbHostString + "/" + databaseName, "", "")
     }
 
-    public List executeQuery(String query) {
+
+    synchronized List executeQuery(String query) {
         Statement statement
         ResultSet resultSet
         try {
@@ -89,7 +91,7 @@ class JdbcClient {
         return val
     }
 
-    public void execute(String query) {
+    synchronized void execute(String query) {
         Statement statement
         try {
             statement = connection.createStatement()
@@ -100,7 +102,7 @@ class JdbcClient {
         }
     }
 
-    public List<String> getColumnNames(String dataStoreName, String databaseName) {
+    List<String> getColumnNames(String dataStoreName, String databaseName) {
         String query = "select * from ${dataStoreName}.${databaseName} limit 1"
 
         List list = executeQuery(query)
@@ -110,7 +112,7 @@ class JdbcClient {
         list[0].keySet().asList()
     }
 
-    public void close() {
+    void close() {
         connection.close()
     }
 

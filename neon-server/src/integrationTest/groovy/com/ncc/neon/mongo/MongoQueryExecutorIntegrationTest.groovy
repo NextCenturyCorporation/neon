@@ -1,25 +1,26 @@
 package com.ncc.neon.mongo
+
 import com.mongodb.BasicDBObject
 import com.mongodb.util.JSON
 import com.ncc.neon.AbstractQueryExecutorIntegrationTest
-import com.ncc.neon.connect.ConnectionInfo
-import com.ncc.neon.session.ConnectionState
-import com.ncc.neon.connect.DataSources
 import com.ncc.neon.query.Query
 import com.ncc.neon.query.clauses.AndWhereClause
 import com.ncc.neon.query.clauses.DistanceUnit
 import com.ncc.neon.query.clauses.SingularWhereClause
 import com.ncc.neon.query.clauses.WithinDistanceClause
 import com.ncc.neon.query.filter.Filter
+import com.ncc.neon.query.mongo.MongoQueryExecutor
 import com.ncc.neon.util.LatLon
 import org.bson.types.ObjectId
 import org.junit.AfterClass
 import org.junit.BeforeClass
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.context.ContextConfiguration
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner
+
 /*
  * ************************************************************************
  * Copyright (c), 2013 Next Century Corporation. All Rights Reserved.
@@ -62,13 +63,12 @@ class MongoQueryExecutorIntegrationTest extends AbstractQueryExecutorIntegration
         deleteData()
     }
 
+    @Autowired
+    MongoQueryExecutor mongoQueryExecutor
+
     @Override
-    protected ConnectionState createConnectionState() {
-        def hostsString = System.getProperty("mongo.hosts", "localhost")
-        ConnectionState connectionState = new ConnectionState()
-        ConnectionInfo info = new ConnectionInfo(dataSource: DataSources.mongo, connectionUrl: hostsString)
-        connectionState.createConnection(info)
-        return connectionState
+    protected def getQueryExecutor(){
+        mongoQueryExecutor
     }
 
     @Override

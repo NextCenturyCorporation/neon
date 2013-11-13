@@ -1,5 +1,4 @@
 package com.ncc.neon.services
-
 import com.ncc.neon.config.field.ColumnMapping
 import com.ncc.neon.config.field.FieldConfigurationMapping
 import com.ncc.neon.config.field.WidgetDataSet
@@ -7,8 +6,10 @@ import com.ncc.neon.query.Query
 import com.ncc.neon.query.QueryExecutor
 import com.ncc.neon.query.QueryGroup
 import com.ncc.neon.query.QueryUtils
-import com.ncc.neon.query.filter.*
-import com.ncc.neon.session.ConnectionState
+import com.ncc.neon.query.filter.DataSet
+import com.ncc.neon.query.filter.Filter
+import com.ncc.neon.result.FieldNames
+import com.ncc.neon.session.QueryExecutorFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
 
@@ -42,10 +43,11 @@ import javax.ws.rs.core.MediaType
 class QueryService {
 
     @Autowired
-    ConnectionState connectionState
+    QueryExecutorFactory queryExecutorFactory
 
     @Autowired
     FieldConfigurationMapping configurationMapping
+
 
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
@@ -55,6 +57,7 @@ class QueryService {
                         @DefaultValue("false") @QueryParam("includefiltered") boolean includeFiltered,
                         @QueryParam("transform") String transformClassName,
                         @QueryParam("param") List<String> transformParams) {
+        QueryExecutor queryExecutor = queryExecutorFactory.create()
         return QueryUtils.wrapJsonInDataElement(queryExecutor.execute(query, includeFiltered), transformClassName, transformParams)
     }
 
@@ -66,50 +69,15 @@ class QueryService {
                              @DefaultValue("false") @QueryParam("includefiltered") boolean includeFiltered,
                              @QueryParam("transform") String transformClassName,
                              @QueryParam("param") List<String> transformParams) {
+        QueryExecutor queryExecutor = queryExecutorFactory.create()
         return QueryUtils.wrapJsonInDataElement(queryExecutor.execute(query, includeFiltered), transformClassName, transformParams)
-    }
-
-    @POST
-    @Consumes(MediaType.APPLICATION_JSON)
-    @Produces(MediaType.APPLICATION_JSON)
-    @Path("registerforfilterkey")
-    FilterEvent registerForFilterKey(DataSet dataSet) {
-        FilterKey filterKey = queryExecutor.registerForFilterKey(dataSet)
-        FilterEvent.fromFilterKey(filterKey)
-    }
-
-    @POST
-    @Path("addfilter")
-    @Consumes(MediaType.APPLICATION_JSON)
-    void addFilter(FilterContainer container) {
-        queryExecutor.addFilter(container.filterKey, container.filter)
-    }
-
-    @POST
-    @Consumes(MediaType.APPLICATION_JSON)
-    @Path("removefilter")
-    void removeFilter(FilterKey filterKey) {
-        queryExecutor.removeFilter(filterKey)
-    }
-
-    @POST
-    @Path("replacefilter")
-    @Consumes(MediaType.APPLICATION_JSON)
-    void replaceFilter(FilterContainer container) {
-        removeFilter(container.filterKey)
-        addFilter(container)
-    }
-
-    @POST
-    @Path("clearfilters")
-    void clearFilters() {
-        queryExecutor.clearFilters()
     }
 
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
     @Path("setselectionwhere")
     void setSelectionWhere(Filter filter) {
+        QueryExecutor queryExecutor = queryExecutorFactory.create()
         queryExecutor.setSelectionWhere(filter)
     }
 
@@ -117,6 +85,7 @@ class QueryService {
     @Consumes(MediaType.APPLICATION_JSON)
     @Path("setselectedids")
     void setSelectedIds(Collection<Object> ids) {
+        QueryExecutor queryExecutor = queryExecutorFactory.create()
         queryExecutor.setSelectedIds(ids)
     }
 
@@ -127,6 +96,7 @@ class QueryService {
     String getSelectionWhere(Filter filter,
                              @QueryParam("transform") String transformClassName,
                              @QueryParam("param") List<String> transformParams) {
+        QueryExecutor queryExecutor = queryExecutorFactory.create()
         return QueryUtils.wrapJsonInDataElement(queryExecutor.getSelectionWhere(filter), transformClassName, transformParams)
     }
 
@@ -134,6 +104,7 @@ class QueryService {
     @Consumes(MediaType.APPLICATION_JSON)
     @Path("addselectedids")
     void addSelectedIds(Collection<Object> ids) {
+        QueryExecutor queryExecutor = queryExecutorFactory.create()
         queryExecutor.addSelectedIds(ids)
     }
 
@@ -141,13 +112,31 @@ class QueryService {
     @Consumes(MediaType.APPLICATION_JSON)
     @Path("removeselectedids")
     void removeSelectedIds(Collection<Object> ids) {
+        QueryExecutor queryExecutor = queryExecutorFactory.create()
         queryExecutor.removeSelectedIds(ids)
     }
 
     @POST
     @Path("clearselection")
     void clearSelection() {
+        QueryExecutor queryExecutor = queryExecutorFactory.create()
         queryExecutor.clearSelection()
+    }
+
+    @GET
+    @Produces(MediaType.APPLICATION_JSON)
+    @Path("databasenames")
+    List<String> getDatabaseNames() {
+        QueryExecutor queryExecutor = queryExecutorFactory.create()
+        queryExecutor.showDatabases()
+    }
+
+    @POST
+    @Produces(MediaType.APPLICATION_JSON)
+    @Path("tablenames")
+    List<String> getTableNames(@FormParam("database") String database) {
+        QueryExecutor queryExecutor = queryExecutorFactory.create()
+        queryExecutor.showTables(database)
     }
 
     @GET
@@ -157,6 +146,7 @@ class QueryService {
                              @QueryParam("tableName") String tableName,
                              @QueryParam("widgetName") String widgetName) {
 
+        QueryExecutor queryExecutor = queryExecutorFactory.create()
         ColumnMapping mapping = getColumnMapping(databaseName, tableName, widgetName)
         def fieldNames = queryExecutor.getFieldNames(databaseName, tableName)
         return new FieldNames(fieldNames: fieldNames, metadata: mapping)
@@ -170,9 +160,6 @@ class QueryService {
         return new ColumnMapping()
     }
 
-    private QueryExecutor getQueryExecutor() {
-        connectionState.queryExecutor
-    }
 }
 
 

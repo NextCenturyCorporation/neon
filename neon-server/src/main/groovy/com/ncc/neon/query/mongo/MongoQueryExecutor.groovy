@@ -1,5 +1,4 @@
 package com.ncc.neon.query.mongo
-
 import com.mongodb.DB
 import com.mongodb.MongoClient
 import com.ncc.neon.query.*
@@ -9,9 +8,11 @@ import com.ncc.neon.query.filter.Filter
 import com.ncc.neon.query.filter.FilterKey
 import com.ncc.neon.query.filter.FilterState
 import com.ncc.neon.selection.SelectionManager
+import com.ncc.neon.session.ConnectionManager
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
-
+import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.stereotype.Component
 /*
  * ************************************************************************
  * Copyright (c), 2013 Next Century Corporation. All Rights Reserved.
@@ -38,18 +39,20 @@ import org.slf4j.LoggerFactory
 /**
  * Executes queries against a mongo data store
  */
+@Component
 class MongoQueryExecutor implements QueryExecutor {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(MongoQueryExecutor)
     private static final String ID_FIELD = "_id"
 
-    private final SelectionManager selectionManager = new SelectionManager()
-    private final FilterState filterState = new FilterState()
-    private final MongoClient mongo
+    @Autowired
+    private FilterState filterState
 
-    MongoQueryExecutor(MongoClient mongo) {
-        this.mongo = mongo
-    }
+    @Autowired
+    private SelectionManager selectionManager
+
+    @Autowired
+    private ConnectionManager connectionManager
 
     @Override
     QueryResult execute(Query query, boolean includedFiltered) {
@@ -172,5 +175,9 @@ class MongoQueryExecutor implements QueryExecutor {
     private final def createWhereClauseFromSelection = {
         def selectedIds = selectionManager.selectedIds
         return new SingularWhereClause(lhs: ID_FIELD, operator: 'in', rhs: selectedIds)
+    }
+
+    private MongoClient getMongo(){
+        connectionManager.client
     }
 }

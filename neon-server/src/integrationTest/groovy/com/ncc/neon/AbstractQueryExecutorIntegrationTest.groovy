@@ -1,5 +1,4 @@
 package com.ncc.neon
-import com.ncc.neon.session.ConnectionState
 import com.ncc.neon.query.NamedQuery
 import com.ncc.neon.query.Query
 import com.ncc.neon.query.QueryGroup
@@ -63,13 +62,7 @@ abstract class AbstractQueryExecutorIntegrationTest {
     /** a simple query that returns all of the data */
     static final ALL_DATA_QUERY = new Query(filter: ALL_DATA_FILTER)
 
-    private final ConnectionState connectionState
-
-    protected AbstractQueryExecutorIntegrationTest(){
-        connectionState = createConnectionState()
-    }
-
-    protected abstract ConnectionState createConnectionState()
+    protected abstract def getQueryExecutor()
 
     /**
      * Converts the database specific row to a map
@@ -592,11 +585,6 @@ abstract class AbstractQueryExecutorIntegrationTest {
      */
     private static def createFilterWithWhereClause(whereClause) {
         return new Filter(databaseName: DATABASE_NAME, tableName: TABLE_NAME, whereClause: whereClause)
-    }
-
-
-    protected def getQueryExecutor() {
-        return connectionState.queryExecutor
     }
 
 }

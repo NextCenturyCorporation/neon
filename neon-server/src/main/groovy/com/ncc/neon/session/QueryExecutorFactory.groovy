@@ -1,13 +1,9 @@
 package com.ncc.neon.session
-
-import com.ncc.neon.connect.Connection
-import com.ncc.neon.connect.ConnectionInfo
-import com.ncc.neon.connect.MongoConnection
-import com.ncc.neon.query.mongo.MongoQueryExecutor
 import com.ncc.neon.query.QueryExecutor
-import com.ncc.neon.connect.HiveConnection
-import com.ncc.neon.query.hive.HiveQueryExecutor
+import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.stereotype.Component
 
+import javax.annotation.Resource
 /*
  * ************************************************************************
  * Copyright (c), 2013 Next Century Corporation. All Rights Reserved.
@@ -37,17 +33,22 @@ import com.ncc.neon.query.hive.HiveQueryExecutor
 /**
  * Creates the appropriate query executor implementation from the current connection.
  */
-
+@Component
 class QueryExecutorFactory {
 
-    static QueryExecutor create(Connection connection, ConnectionInfo info) {
-        if (connection instanceof MongoConnection) {
-            return new MongoQueryExecutor(connection.connect(info))
-        }
-        if (connection instanceof HiveConnection) {
-            return new HiveQueryExecutor(connection, info)
-        }
+    @Resource
+    private QueryExecutor mongoQueryExecutor
 
-        throw new IllegalArgumentException("Unable to create database connection.")
+    @Resource
+    private QueryExecutor hiveQueryExecutor
+
+    @Autowired
+    private ConnectionManager connectionManager
+
+    QueryExecutor create() {
+        if(connectionManager.isConnectedToHive()){
+            return hiveQueryExecutor
+        }
+        return mongoQueryExecutor
     }
 }

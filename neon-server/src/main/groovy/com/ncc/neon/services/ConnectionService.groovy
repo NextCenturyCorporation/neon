@@ -1,12 +1,13 @@
 package com.ncc.neon.services
 
-import com.ncc.neon.session.ConnectionState
+import com.ncc.neon.connect.ConnectionInfo
+import com.ncc.neon.connect.DataSources
+import com.ncc.neon.session.ConnectionManager
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
 
 import javax.ws.rs.*
 import javax.ws.rs.core.MediaType
-
 /*
  * ************************************************************************
  * Copyright (c), 2013 Next Century Corporation. All Rights Reserved.
@@ -33,38 +34,31 @@ import javax.ws.rs.core.MediaType
  * @author tbrooks
  */
 
+/**
+ * Service creates connections to data sources such as mongo or hive.
+ */
+
 @Component
 @Path("/connectionservice")
 class ConnectionService {
 
     @Autowired
-    ConnectionState connectionState
+    ConnectionManager connectionManager
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     @Path("hostnames")
     List<String> getHostnames() {
-        return ["localhost"]
+        return [System.getProperty("mongo.hosts", "localhost")]
     }
 
     @POST
     @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
     @Path("connect")
     void connect(@FormParam("datastore") String datastore, @FormParam("hostname") String hostname) {
-        connectionState.createConnection(datastore, hostname)
+        ConnectionInfo info = new ConnectionInfo(dataSource: DataSources.valueOf(datastore.toLowerCase()), connectionUrl: hostname)
+        connectionManager.connect(info)
     }
 
-    @GET
-    @Produces(MediaType.APPLICATION_JSON)
-    @Path("databasenames")
-    List<String> getDatabaseNames() {
-        connectionState.queryExecutor.showDatabases()
-    }
 
-    @POST
-    @Produces(MediaType.APPLICATION_JSON)
-    @Path("tablenames")
-    List<String> getTableNames(@FormParam("database") String database) {
-        connectionState.queryExecutor.showTables(database)
-    }
 }

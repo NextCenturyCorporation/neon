@@ -1,6 +1,11 @@
 package com.ncc.neon.query.filter
 import com.ncc.neon.query.clauses.AndWhereClause
 import com.ncc.neon.query.clauses.WhereClause
+import org.springframework.context.annotation.Scope
+import org.springframework.context.annotation.ScopedProxyMode
+import org.springframework.stereotype.Component
+import org.springframework.web.context.WebApplicationContext
+
 /*
  * ************************************************************************
  * Copyright (c), 2013 Next Century Corporation. All Rights Reserved.
@@ -27,6 +32,8 @@ import com.ncc.neon.query.clauses.WhereClause
 /**
  * Stores any filters applied to the datasets
  */
+@Component
+@Scope(value = WebApplicationContext.SCOPE_SESSION, proxyMode = ScopedProxyMode.TARGET_CLASS)
 class FilterState implements Serializable {
 
     private static final long serialVersionUID = 5897358582328819569L

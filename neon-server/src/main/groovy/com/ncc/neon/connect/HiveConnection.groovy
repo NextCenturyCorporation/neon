@@ -1,6 +1,12 @@
 package com.ncc.neon.connect
-
 import com.ncc.neon.query.jdbc.JdbcClient
+import org.springframework.context.annotation.Scope
+import org.springframework.context.annotation.ScopedProxyMode
+import org.springframework.stereotype.Component
+import org.springframework.web.context.WebApplicationContext
+
+import javax.annotation.PreDestroy
+
 /*
  * ************************************************************************
  * Copyright (c), 2013 Next Century Corporation. All Rights Reserved.
@@ -27,24 +33,30 @@ import com.ncc.neon.query.jdbc.JdbcClient
  * @author tbrooks
  */
 
-class HiveConnection implements Connection{
+@Component
+@Scope(value = WebApplicationContext.SCOPE_SESSION, proxyMode = ScopedProxyMode.TARGET_CLASS)
+class HiveConnection implements Connection {
 
     JdbcClient client
 
-    HiveConnection(){
-        addShutdownHook{
+    HiveConnection() {
+        addShutdownHook {
             close()
         }
     }
 
     @Override
-    def connect(ConnectionInfo info){
-        client = new JdbcClient("org.apache.hive.jdbc.HiveDriver", "hive2", "default", info.connectionUrl)
+    def connect(ConnectionInfo info) {
+        if (!client) {
+            client = new JdbcClient("org.apache.hive.jdbc.HiveDriver", "hive2", "default", info.connectionUrl)
+        }
         return client
     }
 
+    @PreDestroy
     @Override
-    void close(){
+    void close() {
         client?.close()
+        client = null
     }
 }

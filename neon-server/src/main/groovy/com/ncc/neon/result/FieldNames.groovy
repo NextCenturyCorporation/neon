@@ -1,4 +1,4 @@
-package com.ncc.neon.services
+package com.ncc.neon.result
 
 import com.ncc.neon.config.field.ColumnMapping
 

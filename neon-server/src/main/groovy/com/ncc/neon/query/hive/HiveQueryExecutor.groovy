@@ -1,16 +1,18 @@
 package com.ncc.neon.query.hive
 
-import com.ncc.neon.connect.ConnectionInfo
-import com.ncc.neon.connect.HiveConnection
 import com.ncc.neon.query.*
 import com.ncc.neon.query.filter.DataSet
 import com.ncc.neon.query.filter.Filter
 import com.ncc.neon.query.filter.FilterKey
 import com.ncc.neon.query.filter.FilterState
+import com.ncc.neon.query.jdbc.JdbcClient
 import com.ncc.neon.query.jdbc.JdbcQueryResult
 import com.ncc.neon.selection.SelectionManager
+import com.ncc.neon.session.ConnectionManager
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
+import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.stereotype.Component
 
 import java.sql.SQLException
 
@@ -40,28 +42,26 @@ import java.sql.SQLException
  * @author tbrooks
  */
 
+@Component
 class HiveQueryExecutor implements QueryExecutor {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(HiveQueryExecutor)
 
-    private final SelectionManager selectionManager = new SelectionManager()
-    private final FilterState filterState = new FilterState()
-    private final HiveConnection hiveConnection
-    private final ConnectionInfo connectionInfo
+    @Autowired
+    private FilterState filterState
 
-    HiveQueryExecutor(HiveConnection hiveConnection, ConnectionInfo connectionInfo) {
-        this.hiveConnection = hiveConnection
-        this.connectionInfo = connectionInfo
-    }
+    @Autowired
+    private SelectionManager selectionManager
+
+    @Autowired
+    private ConnectionManager connectionManager
 
     @Override
     QueryResult execute(Query query, boolean includedFiltered) {
         String hiveQuery = createHiveQuery(query, includedFiltered)
         LOGGER.debug("Hive Query: {}", hiveQuery)
-
-        def jdbcClient = hiveConnection.connect(connectionInfo)
         List<Map> resultList = jdbcClient.executeQuery(hiveQuery)
-        jdbcClient.close()
+
         return new JdbcQueryResult(resultList: resultList)
     }
 
@@ -77,16 +77,13 @@ class HiveQueryExecutor implements QueryExecutor {
 
     @Override
     Collection<String> getFieldNames(String databaseName, String tableName) {
-        def jdbcClient = hiveConnection.connect(connectionInfo)
-        try{
+        try {
             def columns = jdbcClient.getColumnNames(databaseName, tableName)
             return columns
         }
-        catch(SQLException ex){
+        catch (SQLException ex) {
             LOGGER.error("Columns cannot be found ", ex)
             return []
-        }finally{
-            jdbcClient.close()
         }
     }
 
@@ -146,29 +143,23 @@ class HiveQueryExecutor implements QueryExecutor {
 
     @Override
     List<String> showDatabases() {
-        def jdbcClient = hiveConnection.connect(connectionInfo)
         LOGGER.debug("Executing Hive SHOW DATABASES")
         def dbs = jdbcClient.executeQuery("SHOW DATABASES").collect { Map<String, String> map ->
             map.get("database_name")
         }
-        jdbcClient.close()
+        //connectionManager.closeConnection()
         return dbs
     }
 
     @Override
     List<String> showTables(String dbName) {
-        def jdbcClient
-        try {
-            jdbcClient = hiveConnection.connect(connectionInfo)
-            LOGGER.debug("Executing Hive SHOW TABLES on database {}", dbName)
-            jdbcClient.execute("USE " + dbName)
-            return jdbcClient.executeQuery("SHOW TABLES").collect { Map<String, String> map ->
-                map.get("tab_name")
-            }
+
+        LOGGER.debug("Executing Hive SHOW TABLES on database {}", dbName)
+        jdbcClient.execute("USE " + dbName)
+        return jdbcClient.executeQuery("SHOW TABLES").collect { Map<String, String> map ->
+            map.get("tab_name")
         }
-        finally {
-            jdbcClient?.close()
-        }
+
     }
 
     private String createHiveQuery(Query query, boolean includeFiltered) {
@@ -177,5 +168,9 @@ class HiveQueryExecutor implements QueryExecutor {
             return conversionStrategy.convertQuery(query)
         }
         return conversionStrategy.convertQueryWithFilterState(query)
+    }
+
+    private JdbcClient getJdbcClient() {
+        connectionManager.client
     }
 }

@@ -1,5 +1,12 @@
 package com.ncc.neon.connect
 import com.mongodb.MongoClient
+import org.springframework.context.annotation.Scope
+import org.springframework.context.annotation.ScopedProxyMode
+import org.springframework.stereotype.Component
+import org.springframework.web.context.WebApplicationContext
+
+import javax.annotation.PreDestroy
+
 /*
  * ************************************************************************
  * Copyright (c), 2013 Next Century Corporation. All Rights Reserved.
@@ -26,6 +33,8 @@ import com.mongodb.MongoClient
  * @author tbrooks
  */
 
+@Component
+@Scope(value = WebApplicationContext.SCOPE_SESSION, proxyMode = ScopedProxyMode.TARGET_CLASS)
 class MongoConnection implements Connection{
 
     private MongoClient mongo
@@ -38,13 +47,17 @@ class MongoConnection implements Connection{
 
     @Override
     def connect(ConnectionInfo info){
-        mongo = new MongoClient(info.connectionUrl)
+        if(!mongo){
+            mongo = new MongoClient(info.connectionUrl)
+        }
         return mongo
     }
 
+    @PreDestroy
     @Override
     void close(){
         mongo?.close()
+        mongo = null
     }
 
 }

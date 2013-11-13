@@ -498,7 +498,7 @@ neon.query.registerForFilterKey = function(databaseName, tableName, successCallb
 
     return neon.util.ajaxUtils.doPostJSON(
         dataSet,
-        neon.query.queryUrl_('/services/queryservice/registerforfilterkey'),
+        neon.query.queryUrl_('/services/filterservice/registerforfilterkey'),
         {
             success: successCallback,
             error: errorCallback
@@ -524,7 +524,7 @@ neon.query.addFilter = function (filterKey, filter, successCallback, errorCallba
 
     return neon.util.ajaxUtils.doPostJSON(
         filterContainer,
-        neon.query.queryUrl_('/services/queryservice/addfilter'),
+        neon.query.queryUrl_('/services/filterservice/addfilter'),
         {
             success: successCallback,
             error: errorCallback
@@ -543,7 +543,7 @@ neon.query.addFilter = function (filterKey, filter, successCallback, errorCallba
 neon.query.removeFilter = function (filterKey, successCallback, errorCallback) {
     return neon.util.ajaxUtils.doPostJSON(
         filterKey,
-        neon.query.queryUrl_('/services/queryservice/removefilter'),
+        neon.query.queryUrl_('/services/filterservice/removefilter'),
         {
             success: successCallback,
             error: errorCallback
@@ -568,7 +568,7 @@ neon.query.replaceFilter = function (filterKey, filter, successCallback, errorCa
 
     return neon.util.ajaxUtils.doPostJSON(
         filterContainer,
-        neon.query.queryUrl_('/services/queryservice/replacefilter'),
+        neon.query.queryUrl_('/services/filterservice/replacefilter'),
         {
             success: successCallback,
             error: errorCallback
@@ -585,7 +585,7 @@ neon.query.replaceFilter = function (filterKey, filter, successCallback, errorCa
  */
 neon.query.clearFilters = function (successCallback, errorCallback) {
     return neon.util.ajaxUtils.doPost(
-        neon.query.queryUrl_('/services/queryservice/clearfilters'),
+        neon.query.queryUrl_('/services/filterservice/clearfilters'),
         {
             success: successCallback,
             error: errorCallback

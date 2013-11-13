@@ -1,13 +1,19 @@
 package com.ncc.neon.services
-import com.ncc.neon.language.QueryParser
-import com.ncc.neon.query.Query
-import com.ncc.neon.query.QueryUtils
-import com.ncc.neon.session.QueryExecutorFactory
+
+import com.ncc.neon.query.filter.DataSet
+import com.ncc.neon.query.filter.FilterContainer
+import com.ncc.neon.query.filter.FilterEvent
+import com.ncc.neon.query.filter.FilterKey
+import com.ncc.neon.query.filter.FilterState
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
 
-import javax.ws.rs.*
+import javax.ws.rs.Consumes
+import javax.ws.rs.POST
+import javax.ws.rs.Path
+import javax.ws.rs.Produces
 import javax.ws.rs.core.MediaType
+
 /*
  * ************************************************************************
  * Copyright (c), 2013 Next Century Corporation. All Rights Reserved.
@@ -34,26 +40,51 @@ import javax.ws.rs.core.MediaType
  * @author tbrooks
  */
 
+/**
+ * Service updates a user's filter state.
+ */
+
 @Component
-@Path("/languageservice")
-class LanguageService {
+@Path("/filterservice")
+class FilterService {
 
     @Autowired
-    QueryParser queryParser
-
-    @Autowired
-    QueryExecutorFactory queryExecutorFactory
+    FilterState filterState
 
     @POST
-    @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
+    @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-    @Path("query")
-    String executeQuery(@FormParam("text") String text) {
-        Query query = queryParser.parse(text)
-
-        return QueryUtils.wrapJsonInDataElement(queryExecutorFactory.create().execute(query, false))
+    @Path("registerforfilterkey")
+    FilterEvent registerForFilterKey(DataSet dataSet) {
+        FilterKey filterKey = new FilterKey(uuid: UUID.randomUUID(), dataSet: dataSet)
+        FilterEvent.fromFilterKey(filterKey)
     }
 
+    @POST
+    @Path("addfilter")
+    @Consumes(MediaType.APPLICATION_JSON)
+    void addFilter(FilterContainer container) {
+        filterState.addFilter(container.filterKey, container.filter)
+    }
+
+    @POST
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Path("removefilter")
+    void removeFilter(FilterKey filterKey) {
+        filterState.removeFilter(filterKey)
+    }
+
+    @POST
+    @Path("replacefilter")
+    @Consumes(MediaType.APPLICATION_JSON)
+    void replaceFilter(FilterContainer container) {
+        removeFilter(container.filterKey)
+        addFilter(container)
+    }
+
+    @POST
+    @Path("clearfilters")
+    void clearFilters() {
+        filterState.clearAllFilters()
+    }
 }
-
-

@@ -67,7 +67,7 @@ $(function () {
     }
 
     function populateDatabaseDropdown() {
-        neon.util.ajaxUtils.doGet(getConnectionServiceBaseUrl() + "/databasenames",
+        neon.util.ajaxUtils.doGet(neon.query.SERVER_URL + "/services/queryservice/databasenames",
             {
                 success: function (databaseNames) {
                     neon.wizard.populateDropdown('#database-select', databaseNames);
@@ -78,7 +78,7 @@ $(function () {
 
     function populateTableDropdown() {
         var selectedDatabase = $('#database-select option:selected');
-        neon.util.ajaxUtils.doPost(getConnectionServiceBaseUrl() + "/tablenames",
+        neon.util.ajaxUtils.doPost(neon.query.SERVER_URL + "/services/queryservice/tablenames",
             {
                 data: { database: selectedDatabase.val() },
                 success: function (tableNames) {
@@ -91,7 +91,7 @@ $(function () {
     }
 
     function getConnectionServiceBaseUrl(){
-        return neon.query.SERVER_URL + "/services/connectionservice"
+        return neon.query.SERVER_URL + "/services/connectionservice";
     }
 
     function selectDatabaseAndTable() {

@@ -1,11 +1,11 @@
 package com.ncc.neon.services
 
-import com.ncc.neon.session.ConnectionState
 import com.ncc.neon.query.Query
 import com.ncc.neon.query.QueryExecutor
 import com.ncc.neon.query.QueryResult
-import com.ncc.neon.query.filter.*
+import com.ncc.neon.query.filter.Filter
 import com.ncc.neon.query.transform.ValueStringReplaceTransform
+import com.ncc.neon.session.QueryExecutorFactory
 import groovy.mock.interceptor.MockFor
 import org.json.JSONObject
 import org.junit.Before
@@ -33,19 +33,14 @@ import org.junit.Test
  * OF NEXT CENTURY CORPORATION EXCEPT BY PRIOR WRITTEN PERMISSION AND WHEN
  * RECIPIENT IS UNDER OBLIGATION TO MAINTAIN SECRECY.
  */
+
 class QueryServiceTest {
 
-    private static final String UUID_STRING = "1af29529-86bb-4f2c-9928-7f4484b9cc49"
     private QueryService queryService
-    private FilterKey filterKey
-    private DataSet dataSet
 
     @Before
     void before() {
         queryService = new QueryService()
-        dataSet = new DataSet(databaseName: "testDB", tableName: "testTable")
-        filterKey = new FilterKey(uuid: UUID.fromString(UUID_STRING),
-                dataSet: dataSet)
     }
 
     @Test
@@ -74,54 +69,6 @@ class QueryServiceTest {
         assert array.length() == 2
         assertKeyValue(array, 0, "key1", 25)
         assertKeyValue(array, 1, "notReplaced", "abc")
-    }
-
-    @Test
-    void "register for filter key"() {
-        def queryExecutor = [registerForFilterKey: { ds ->
-            assert ds.is(dataSet)
-            return filterKey
-        }] as QueryExecutor
-        setQueryServiceConnection(queryExecutor)
-
-        FilterEvent event = queryService.registerForFilterKey(dataSet)
-        assert event.dataSet == dataSet
-        assert event.uuid == filterKey.uuid.toString()
-    }
-
-    @Test
-    void "add filter"() {
-        def filter = new Filter(databaseName: dataSet.databaseName, tableName: dataSet.tableName)
-        def queryExecutor = [addFilter: { k, f -> assert f.is(filter) }] as QueryExecutor
-        setQueryServiceConnection(queryExecutor)
-        FilterContainer container = new FilterContainer(filterKey: filterKey, filter: filter)
-        queryService.addFilter(container)
-    }
-
-    @Test
-    void "remove filter"() {
-        // arbitrary string (but constant for each test run)
-        def queryExecutorMock = new MockFor(QueryExecutor)
-        queryExecutorMock.demand.removeFilter { id -> assert id == filterKey }
-        def queryExecutor = queryExecutorMock.proxyInstance()
-        setQueryServiceConnection(queryExecutor)
-
-        queryService.removeFilter(filterKey)
-        queryExecutorMock.verify(queryExecutor)
-    }
-
-    @Test
-    void "replace filter"() {
-        // arbitrary string (but constant for each test run)
-        def filter = new Filter(databaseName: dataSet.databaseName, tableName: dataSet.tableName)
-        def queryExecutorMock = new MockFor(QueryExecutor)
-        queryExecutorMock.demand.removeFilter { key -> assert key == filterKey }
-        queryExecutorMock.demand.addFilter { key, f -> assert key == filterKey; f.is(filter)}
-        def queryExecutor = queryExecutorMock.proxyInstance()
-        setQueryServiceConnection(queryExecutor)
-
-        queryService.replaceFilter(new FilterContainer(filterKey: filterKey, filter: filter))
-        queryExecutorMock.verify(queryExecutor)
     }
 
     @Test
@@ -206,9 +153,7 @@ class QueryServiceTest {
     }
 
     private void setQueryServiceConnection(QueryExecutor executor) {
-        ConnectionState connectionState = new ConnectionState()
-        connectionState.queryExecutor = executor
-        queryService.connectionState = connectionState
+        queryService.queryExecutorFactory = [create: {executor} ] as QueryExecutorFactory
     }
 
     private static assertKeyValue(array, index, key, value) {

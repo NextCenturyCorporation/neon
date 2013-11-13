@@ -1,13 +1,13 @@
-package com.ncc.neon.services
-import com.ncc.neon.language.QueryParser
-import com.ncc.neon.query.Query
-import com.ncc.neon.query.QueryUtils
-import com.ncc.neon.session.QueryExecutorFactory
+package com.ncc.neon.session
+import com.ncc.neon.connect.ConnectionInfo
+import com.ncc.neon.connect.DataSources
+import com.ncc.neon.connect.HiveConnection
+import com.ncc.neon.connect.MongoConnection
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.context.annotation.Scope
+import org.springframework.context.annotation.ScopedProxyMode
 import org.springframework.stereotype.Component
-
-import javax.ws.rs.*
-import javax.ws.rs.core.MediaType
+import org.springframework.web.context.WebApplicationContext
 /*
  * ************************************************************************
  * Copyright (c), 2013 Next Century Corporation. All Rights Reserved.
@@ -35,25 +35,38 @@ import javax.ws.rs.core.MediaType
  */
 
 @Component
-@Path("/languageservice")
-class LanguageService {
+@Scope(value = WebApplicationContext.SCOPE_SESSION, proxyMode = ScopedProxyMode.TARGET_CLASS)
+class SessionConnection {
+
+    ConnectionInfo connectionInfo
 
     @Autowired
-    QueryParser queryParser
+    MongoConnection mongoConnection
 
     @Autowired
-    QueryExecutorFactory queryExecutorFactory
+    HiveConnection hiveConnection
 
-    @POST
-    @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
-    @Produces(MediaType.APPLICATION_JSON)
-    @Path("query")
-    String executeQuery(@FormParam("text") String text) {
-        Query query = queryParser.parse(text)
-
-        return QueryUtils.wrapJsonInDataElement(queryExecutorFactory.create().execute(query, false))
+    def getClient(){
+        if(!connectionInfo){
+            return
+        }
+        if(connectionInfo.dataSource == DataSources.hive){
+            return hiveConnection.connect(connectionInfo)
+        }
+        return mongoConnection.connect(connectionInfo)
     }
 
+    void setConnectionInfo(ConnectionInfo info){
+        this.connectionInfo = info
+    }
+
+    void closeConnection() {
+        if(connectionInfo.dataSource == DataSources.hive){
+            hiveConnection.close()
+        }
+        else{
+            mongoConnection.close()
+        }
+
+    }
 }
-
-

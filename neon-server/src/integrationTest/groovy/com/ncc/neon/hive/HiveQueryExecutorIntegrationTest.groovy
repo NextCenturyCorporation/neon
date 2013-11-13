@@ -2,9 +2,9 @@ package com.ncc.neon.hive
 
 import com.ncc.neon.AbstractQueryExecutorIntegrationTest
 import com.ncc.neon.connect.ConnectionInfo
-import com.ncc.neon.session.ConnectionState
 import com.ncc.neon.connect.DataSources
 import com.ncc.neon.connect.HiveConnection
+import com.ncc.neon.query.hive.HiveQueryExecutor
 import com.ncc.neon.query.jdbc.JdbcClient
 import org.apache.hadoop.conf.Configuration
 import org.apache.hadoop.fs.FileSystem
@@ -12,6 +12,7 @@ import org.apache.hadoop.fs.Path
 import org.junit.AfterClass
 import org.junit.BeforeClass
 import org.junit.runner.RunWith
+import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.context.ContextConfiguration
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner
@@ -66,12 +67,12 @@ class HiveQueryExecutorIntegrationTest extends AbstractQueryExecutorIntegrationT
         deleteData()
     }
 
+    @Autowired
+    HiveQueryExecutor hiveQueryExecutor
+
     @Override
-    protected ConnectionState createConnectionState() {
-        ConnectionState connectionState = new ConnectionState()
-        ConnectionInfo info = new ConnectionInfo(dataSource: DataSources.hive, connectionUrl: HiveIntegrationTestContext.HOST_STRING)
-        connectionState.createConnection(info)
-        return connectionState
+    protected def getQueryExecutor(){
+        hiveQueryExecutor
     }
 
     protected String getResultsJsonFolder() {
