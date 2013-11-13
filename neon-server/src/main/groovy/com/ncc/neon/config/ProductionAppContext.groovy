@@ -1,5 +1,6 @@
 package com.ncc.neon.config
 import com.ncc.neon.config.field.FieldConfigurationMapping
+import com.ncc.neon.metadata.MetadataConnection
 import org.codehaus.jackson.map.ObjectMapper
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -58,6 +59,11 @@ class ProductionAppContext {
             properties.load(new FileInputStream(override))
             environment.propertySources.addFirst(new PropertiesPropertySource("overrides", properties))
         }
+    }
+
+    @Bean
+    MetadataConnection metadataConnection(){
+        return new MetadataConnection(System.getProperty("mongo.hosts", "localhost"))
     }
 
     @Bean

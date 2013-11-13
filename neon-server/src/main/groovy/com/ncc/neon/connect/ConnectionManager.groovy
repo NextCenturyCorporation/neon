@@ -32,15 +32,16 @@ import org.springframework.stereotype.Component
 @Component
 class ConnectionManager {
 
-    private final MetadataConnection metadataConnection
     private final String defaultMongoUrl
+
+    @Autowired
+    MetadataConnection metadataConnection
 
     @Autowired
     SessionConnection sessionConnection
 
     ConnectionManager() {
         this.defaultMongoUrl = System.getProperty("mongo.hosts", "localhost")
-        this.metadataConnection = new MetadataConnection(defaultMongoUrl)
     }
 
     void connect(ConnectionInfo info) {
@@ -62,7 +63,4 @@ class ConnectionManager {
         sessionConnection.connectionInfo?.dataSource == DataSources.hive
     }
 
-    void closeConnection(){
-        sessionConnection.closeConnection()
-    }
 }

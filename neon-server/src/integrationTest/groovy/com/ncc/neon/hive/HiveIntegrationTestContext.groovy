@@ -1,6 +1,7 @@
 package com.ncc.neon.hive
 
 import com.ncc.neon.config.field.FieldConfigurationMapping
+import com.ncc.neon.metadata.MetadataConnection
 import org.springframework.beans.factory.config.CustomScopeConfigurer
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.ComponentScan
@@ -37,6 +38,11 @@ import org.springframework.context.support.SimpleThreadScope
 class HiveIntegrationTestContext {
 
     static final String HOST_STRING = System.getProperty("hive.host", "xdata2")
+
+    @Bean
+    MetadataConnection metadataConnection(){
+        return new MetadataConnection(System.getProperty("mongo.hosts", "localhost"))
+    }
 
     @Bean
     FieldConfigurationMapping configurationBundle(){

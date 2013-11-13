@@ -2,6 +2,7 @@ package com.ncc.neon.mongo
 import com.mongodb.MongoClient
 import com.ncc.neon.config.MongoConfigParser
 import com.ncc.neon.config.field.FieldConfigurationMapping
+import com.ncc.neon.metadata.MetadataConnection
 import org.springframework.beans.factory.config.CustomScopeConfigurer
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.ComponentScan
@@ -45,6 +46,11 @@ class MongoIntegrationTestContext {
         def hostsString = System.getProperty("mongo.hosts", "localhost")
         def serverAddresses = MongoConfigParser.createServerAddresses(hostsString)
         MONGO = new MongoClient(serverAddresses)
+    }
+
+    @Bean
+    MetadataConnection metadataConnection(){
+        return new MetadataConnection(System.getProperty("mongo.hosts", "localhost"))
     }
 
     @Bean

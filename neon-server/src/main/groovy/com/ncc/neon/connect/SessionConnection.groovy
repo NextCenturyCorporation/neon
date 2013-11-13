@@ -56,14 +56,4 @@ class SessionConnection {
     void setConnectionInfo(ConnectionInfo info){
         this.connectionInfo = info
     }
-
-    void closeConnection() {
-        if(connectionInfo.dataSource == DataSources.hive){
-            hiveConnection.close()
-        }
-        else{
-            mongoConnection.close()
-        }
-
-    }
 }
