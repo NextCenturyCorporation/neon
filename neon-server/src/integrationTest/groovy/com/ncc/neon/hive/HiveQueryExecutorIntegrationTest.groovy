@@ -60,6 +60,8 @@ class HiveQueryExecutorIntegrationTest extends AbstractQueryExecutorIntegrationT
         // make sure we clean up just in case something was left over
         deleteData()
         insertData()
+        HiveQueryExecutor.metaClass.getJdbcClient = { jdbcClient }
+
     }
 
     @AfterClass
