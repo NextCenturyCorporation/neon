@@ -2,7 +2,6 @@ package com.ncc.neon.services
 import com.ncc.neon.language.QueryParser
 import com.ncc.neon.query.Query
 import com.ncc.neon.query.QueryUtils
-import com.ncc.neon.session.QueryExecutorFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
 

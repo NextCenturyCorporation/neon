@@ -5,7 +5,6 @@ import com.ncc.neon.query.QueryExecutor
 import com.ncc.neon.query.QueryResult
 import com.ncc.neon.query.filter.Filter
 import com.ncc.neon.query.transform.ValueStringReplaceTransform
-import com.ncc.neon.session.QueryExecutorFactory
 import groovy.mock.interceptor.MockFor
 import org.json.JSONObject
 import org.junit.Before

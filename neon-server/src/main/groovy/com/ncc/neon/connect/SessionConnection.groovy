@@ -1,8 +1,5 @@
-package com.ncc.neon.session
-import com.ncc.neon.connect.ConnectionInfo
-import com.ncc.neon.connect.DataSources
-import com.ncc.neon.connect.HiveConnection
-import com.ncc.neon.connect.MongoConnection
+package com.ncc.neon.connect
+
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.annotation.Scope
 import org.springframework.context.annotation.ScopedProxyMode

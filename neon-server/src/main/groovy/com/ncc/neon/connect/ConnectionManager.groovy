@@ -1,9 +1,8 @@
-package com.ncc.neon.session
-import com.ncc.neon.query.QueryExecutor
+package com.ncc.neon.connect
+
+import com.ncc.neon.metadata.MetadataConnection
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
-
-import javax.annotation.Resource
 /*
  * ************************************************************************
  * Copyright (c), 2013 Next Century Corporation. All Rights Reserved.
@@ -30,25 +29,40 @@ import javax.annotation.Resource
  * @author tbrooks
  */
 
-/**
- * Creates the appropriate query executor implementation from the current connection.
- */
 @Component
-class QueryExecutorFactory {
+class ConnectionManager {
 
-    @Resource
-    private QueryExecutor mongoQueryExecutor
-
-    @Resource
-    private QueryExecutor hiveQueryExecutor
+    private final MetadataConnection metadataConnection
+    private final String defaultMongoUrl
 
     @Autowired
-    private ConnectionManager connectionManager
+    SessionConnection sessionConnection
 
-    QueryExecutor create() {
-        if(connectionManager.isConnectedToHive()){
-            return hiveQueryExecutor
+    ConnectionManager() {
+        this.defaultMongoUrl = System.getProperty("mongo.hosts", "localhost")
+        this.metadataConnection = new MetadataConnection(defaultMongoUrl)
+    }
+
+    void connect(ConnectionInfo info) {
+        if(info.dataSource == DataSources.mongo && info.connectionUrl == defaultMongoUrl){
+            sessionConnection.connectionInfo = null
+            return
         }
-        return mongoQueryExecutor
+        sessionConnection.connectionInfo = info
+    }
+
+    def getClient() {
+        if(!sessionConnection.connectionInfo){
+            return metadataConnection.client
+        }
+        return sessionConnection.getClient()
+    }
+
+    boolean isConnectedToHive() {
+        sessionConnection.connectionInfo?.dataSource == DataSources.hive
+    }
+
+    void closeConnection(){
+        sessionConnection.closeConnection()
     }
 }

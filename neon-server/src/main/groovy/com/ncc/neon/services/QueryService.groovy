@@ -9,7 +9,6 @@ import com.ncc.neon.query.QueryUtils
 import com.ncc.neon.query.filter.DataSet
 import com.ncc.neon.query.filter.Filter
 import com.ncc.neon.result.FieldNames
-import com.ncc.neon.session.QueryExecutorFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
 

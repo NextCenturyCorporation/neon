@@ -2,7 +2,7 @@ package com.ncc.neon.services
 
 import com.ncc.neon.connect.ConnectionInfo
 import com.ncc.neon.connect.DataSources
-import com.ncc.neon.session.ConnectionManager
+import com.ncc.neon.connect.ConnectionManager
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
 

@@ -8,7 +8,7 @@ import com.ncc.neon.query.filter.FilterState
 import com.ncc.neon.query.jdbc.JdbcClient
 import com.ncc.neon.query.jdbc.JdbcQueryResult
 import com.ncc.neon.selection.SelectionManager
-import com.ncc.neon.session.ConnectionManager
+import com.ncc.neon.connect.ConnectionManager
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired

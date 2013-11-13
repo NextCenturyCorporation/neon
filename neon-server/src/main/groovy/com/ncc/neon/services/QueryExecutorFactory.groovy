@@ -1,8 +1,11 @@
-package com.ncc.neon.connect
-import com.mongodb.MongoClient
-import com.ncc.neon.metadata.MetadataConnection
-import com.ncc.neon.metadata.store.MetadataRetriever
+package com.ncc.neon.services
+
+import com.ncc.neon.connect.ConnectionManager
+import com.ncc.neon.query.QueryExecutor
+import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
+
+import javax.annotation.Resource
 /*
  * ************************************************************************
  * Copyright (c), 2013 Next Century Corporation. All Rights Reserved.
@@ -29,18 +32,25 @@ import org.springframework.stereotype.Component
  * @author tbrooks
  */
 
+/**
+ * Creates the appropriate query executor implementation from the current connection.
+ */
 @Component
-class MetadataConnectionHolder {
+class QueryExecutorFactory {
 
-    final MongoClient mongoClient
-    final MetadataRetriever metadataRetriever
-    final String connectionUrl
+    @Resource
+    private QueryExecutor mongoQueryExecutor
 
-    public MetadataConnectionHolder(){
-        this.connectionUrl = System.getProperty("mongo.hosts", "localhost")
-        MetadataConnection connection = new MetadataConnection(connectionUrl)
-        this.mongoClient = connection.client
-        this.metadataRetriever = new MetadataRetriever(connection)
+    @Resource
+    private QueryExecutor hiveQueryExecutor
+
+    @Autowired
+    private ConnectionManager connectionManager
+
+    QueryExecutor create() {
+        if(connectionManager.isConnectedToHive()){
+            return hiveQueryExecutor
+        }
+        return mongoQueryExecutor
     }
-
 }
