@@ -140,7 +140,7 @@ abstract class AbstractQueryExecutorIntegrationTest {
 
     @After
     void after() {
-        queryExecutor.clearFilters()
+        queryExecutor.filterState.clearAllFilters()
     }
 
     @Test
@@ -272,14 +272,14 @@ abstract class AbstractQueryExecutorIntegrationTest {
         def dcStateFilter = createFilterWithWhereClause(new SingularWhereClause(lhs: 'state', operator: '=', rhs: 'DC'))
 
         // apply a filter and make sure only that data is returned
-        queryExecutor.addFilter(filterId, dcStateFilter)
+        queryExecutor.filterState.addFilter(filterId, dcStateFilter)
         def dcStateResult = queryExecutor.execute(ALL_DATA_QUERY, false)
         def dcStateRecords = rows(1, 2, 5)
         assertUnorderedQueryResult(dcStateRecords, dcStateResult)
 
         // apply another filter and make sure both are applied
         def salaryFilter = createFilterWithWhereClause(new SingularWhereClause(lhs: 'salary', operator: '>', rhs: 85000))
-        queryExecutor.addFilter(filterId, salaryFilter)
+        queryExecutor.filterState.addFilter(filterId, salaryFilter)
 
         def dcStateWithSalaryFilterRecords = rows(2, 5)
         def dcStateWithSalaryResult = queryExecutor.execute(ALL_DATA_QUERY, false)
@@ -293,12 +293,12 @@ abstract class AbstractQueryExecutorIntegrationTest {
         def filterId = new FilterKey(uuid, new DataSet(databaseName: DATABASE_NAME, tableName: TABLE_NAME))
 
         def dcStateFilter = createFilterWithWhereClause(new SingularWhereClause(lhs: 'state', operator: '=', rhs: 'DC'))
-        queryExecutor.addFilter(filterId, dcStateFilter)
+        queryExecutor.filterState.addFilter(filterId, dcStateFilter)
 
         def salaryFilter = createFilterWithWhereClause(new SingularWhereClause(lhs: 'salary', operator: '>', rhs: 85000))
-        queryExecutor.addFilter(filterId, salaryFilter)
+        queryExecutor.filterState.addFilter(filterId, salaryFilter)
 
-        queryExecutor.removeFilter(filterId)
+        queryExecutor.filterState.removeFilter(filterId)
         def allDataResult = queryExecutor.execute(ALL_DATA_QUERY, false)
         assertUnorderedQueryResult(getAllData(), allDataResult)
     }
@@ -310,7 +310,7 @@ abstract class AbstractQueryExecutorIntegrationTest {
         def dcStateFilter = createFilterWithWhereClause(new SingularWhereClause(lhs: 'state', operator: '=', rhs: 'DC'))
 
         // apply a filter, but execute the query that bypasses the filters, so all data should be returned
-        queryExecutor.addFilter(filterId, dcStateFilter)
+        queryExecutor.filterState.addFilter(filterId, dcStateFilter)
         def allDataResult = queryExecutor.execute(ALL_DATA_QUERY, true)
         assertUnorderedQueryResult(getAllData(), allDataResult)
     }
@@ -323,10 +323,10 @@ abstract class AbstractQueryExecutorIntegrationTest {
         def dcStateFilter = createFilterWithWhereClause(new SingularWhereClause(lhs: 'state', operator: '=', rhs: 'DC'))
 
         // addFilter is tested separately, so we can be confident the filter is added properly
-        queryExecutor.addFilter(filterId, dcStateFilter)
+        queryExecutor.filterState.addFilter(filterId, dcStateFilter)
 
         // clear the filters, and there should be no filters applied
-        queryExecutor.clearFilters()
+        queryExecutor.filterState.clearAllFilters()
 
         def result = queryExecutor.execute(ALL_DATA_QUERY, false)
 

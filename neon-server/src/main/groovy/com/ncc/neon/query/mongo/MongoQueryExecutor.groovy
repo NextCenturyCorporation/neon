@@ -1,14 +1,12 @@
 package com.ncc.neon.query.mongo
 import com.mongodb.DB
 import com.mongodb.MongoClient
+import com.ncc.neon.connect.ConnectionManager
 import com.ncc.neon.query.*
 import com.ncc.neon.query.clauses.SingularWhereClause
-import com.ncc.neon.query.filter.DataSet
 import com.ncc.neon.query.filter.Filter
-import com.ncc.neon.query.filter.FilterKey
 import com.ncc.neon.query.filter.FilterState
 import com.ncc.neon.selection.SelectionManager
-import com.ncc.neon.connect.ConnectionManager
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
@@ -89,26 +87,6 @@ class MongoQueryExecutor implements QueryExecutor {
         def collection = db.getCollection(tableName)
         def result = collection.findOne()
         return result?.keySet() ?: []
-    }
-
-    @Override
-    FilterKey registerForFilterKey(DataSet dataSet) {
-        new FilterKey(uuid: UUID.randomUUID(), dataSet: dataSet)
-    }
-
-    @Override
-    void addFilter(FilterKey filterKey, Filter filter) {
-        filterState.addFilter(filterKey, filter)
-    }
-
-    @Override
-    void removeFilter(FilterKey filterKey) {
-        filterState.removeFilter(filterKey)
-    }
-
-    @Override
-    void clearFilters() {
-        filterState.clearAllFilters()
     }
 
     @Override
