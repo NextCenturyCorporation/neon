@@ -40,8 +40,8 @@ import javax.ws.rs.core.MediaType
  */
 
 @Component
-@Path("/sessionstateservice")
-class SessionStateService {
+@Path("/widgetstateservice")
+class WidgetStateService {
 
     @Autowired
     WidgetStates widgetStates

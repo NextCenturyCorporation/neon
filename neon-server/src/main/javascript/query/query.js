@@ -745,7 +745,7 @@ neon.query.submitTextQuery = function(queryText, successCallback, errorCallback)
 neon.query.saveState = function(id, stateObject, successCallback, errorCallback) {
     var strObject = JSON.stringify(stateObject);
     return neon.util.ajaxUtils.doPost(
-        neon.query.queryUrl_('/services/sessionstateservice/savestate'),
+        neon.query.queryUrl_('/services/widgetstateservice/savestate'),
         {
             data: { clientId: id, state: strObject},
             success: successCallback,
@@ -765,7 +765,7 @@ neon.query.saveState = function(id, stateObject, successCallback, errorCallback)
 
 neon.query.getSavedState = function(id, successCallback) {
     return neon.util.ajaxUtils.doGet(
-        neon.query.queryUrl_('/services/sessionstateservice/restoreState?clientId=' + id),
+        neon.query.queryUrl_('/services/widgetstateservice/restoreState?clientId=' + id),
         {
             success: successCallback,
             error: function() {
