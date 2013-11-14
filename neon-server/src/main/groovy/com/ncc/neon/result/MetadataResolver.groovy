@@ -49,7 +49,7 @@ class MetadataResolver {
         return retriever.retrieve(query.databaseName, query.tableName, columns)
     }
 
-    ColumnMetadataList resolveQueryGroup(QueryGroup queryGroup) {
+    ColumnMetadataList resolveQuery(QueryGroup queryGroup) {
         def list = []
         queryGroup.namedQueries.each { NamedQuery nq ->
             ColumnMetadataList metadataList = resolveQuery(nq.query)

@@ -56,13 +56,7 @@ class QueryService {
                         @DefaultValue("false") @QueryParam("includefiltered") boolean includeFiltered,
                         @QueryParam("transform") String transformClassName,
                         @QueryParam("param") List<String> transformParams) {
-        QueryExecutor queryExecutor = queryExecutorFactory.create()
-        QueryResult queryResult = queryExecutor.execute(query, includeFiltered)
-        def columns = metadataResolver.resolveQuery(query)
-
-        AssembleClientData assembler = new AssembleClientData(queryResult: queryResult, metadataObject: columns,
-                transformClassName: transformClassName, transformParams: transformParams)
-        return assembler.createClientData()
+        return execute(query, includeFiltered, transformClassName, transformParams)
     }
 
     @POST
@@ -73,14 +67,19 @@ class QueryService {
                              @DefaultValue("false") @QueryParam("includefiltered") boolean includeFiltered,
                              @QueryParam("transform") String transformClassName,
                              @QueryParam("param") List<String> transformParams) {
+        return execute(query, includeFiltered, transformClassName, transformParams)
+    }
+
+    private String execute(def query, boolean includeFiltered, String transformClassName, List<String> transformParams) {
         QueryExecutor queryExecutor = queryExecutorFactory.create()
         QueryResult queryResult = queryExecutor.execute(query, includeFiltered)
-        def columns = metadataResolver.resolveQueryGroup(query)
+        def columns = metadataResolver.resolveQuery(query)
 
         AssembleClientData assembler = new AssembleClientData(queryResult: queryResult, metadataObject: columns,
                 transformClassName: transformClassName, transformParams: transformParams)
         return assembler.createClientData()
     }
+
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)

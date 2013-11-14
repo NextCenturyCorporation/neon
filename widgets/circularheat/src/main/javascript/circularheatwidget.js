@@ -78,8 +78,6 @@ neon.ready(function () {
     }
 
     function drawChart(queryResults) {
-        console.log(queryResults);
-
         var rawData = queryResults.data;
 
         var data = [];
