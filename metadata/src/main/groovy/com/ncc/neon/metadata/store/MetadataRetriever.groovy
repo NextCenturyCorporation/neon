@@ -1,9 +1,10 @@
 package com.ncc.neon.metadata.store
 import com.mongodb.*
 import com.ncc.neon.metadata.MetadataConnection
-import com.ncc.neon.metadata.model.dataset.ActiveDatasetData
-import com.ncc.neon.metadata.model.query.ColumnData
-import com.ncc.neon.metadata.model.widget.WidgetInitializationData
+import com.ncc.neon.metadata.model.dataset.WidgetAndDatasetMetadataList
+import com.ncc.neon.metadata.model.query.ColumnMetadata
+import com.ncc.neon.metadata.model.query.ColumnMetadataList
+import com.ncc.neon.metadata.model.widget.WidgetInitializationMetadata
 /*
  * ************************************************************************
  * Copyright (c), 2013 Next Century Corporation. All Rights Reserved.
@@ -39,29 +40,36 @@ class MetadataRetriever {
     private final MongoObjectConverter converter
     private final MetadataConnection connection
 
-    MetadataRetriever(MetadataConnection connection){
+    MetadataRetriever(MetadataConnection connection) {
         this.connection = connection
         this.converter = new MongoObjectConverter()
     }
 
-    List<WidgetInitializationData> retrieve(String widgetName){
+    WidgetInitializationMetadata retrieve(String widgetName) {
         DBCollection collection = getCollection("widget")
-        DBCursor cursor = collection.find(new BasicDBObject("widgetName", widgetName))
-        return getAllData(cursor)
+        DBObject object = collection.findOne(new BasicDBObject("widgetName", widgetName))
+        return converter.convertToObject(object)
     }
 
-
-    List<ColumnData> retrieve(String databaseName, String tableName){
+    ColumnMetadataList retrieve(String databaseName, String tableName, List<String> columnNames) {
         DBCollection collection = getCollection("column")
         DBCursor cursor = collection.find(new BasicDBObject(["databaseName": databaseName, "tableName": tableName]))
-        return getAllData(cursor)
+        List<ColumnMetadata> columnData = getAllData(cursor)
+        if (!columnNames) {
+            return new ColumnMetadataList(columnData)
+        }
+
+        def filteredColumnData = columnData.findAll {
+            columnNames.contains(it.columnName)
+        }
+        return new ColumnMetadataList(filteredColumnData)
 
     }
 
-    List<ActiveDatasetData> retrieve(String widgetName, String databaseName, String tableName){
+    WidgetAndDatasetMetadataList retrieve(String widgetName, String databaseName, String tableName) {
         DBCollection collection = getCollection("dataset")
         DBCursor cursor = collection.find(new BasicDBObject(["widgetName": widgetName, "databaseName": databaseName, "tableName": tableName]))
-        return getAllData(cursor)
+        return new WidgetAndDatasetMetadataList(getAllData(cursor))
 
     }
 

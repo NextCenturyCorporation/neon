@@ -1,6 +1,6 @@
 package com.ncc.neon.metadata.model.query
 
-import groovy.transform.ToString
+import groovy.transform.Immutable
 
 /*
  * ************************************************************************
@@ -28,22 +28,7 @@ import groovy.transform.ToString
  * @author tbrooks
  */
 
-/**
- * Default implementation of metadata about a column.
- */
-
-@ToString(includeNames = true)
-class DefaultColumnData implements ColumnData{
-
-    String databaseName
-    String tableName
-    String columnName
-    String columnType
-    boolean numeric
-    boolean geographical
-    boolean temporal
-    boolean categorical
-    boolean nullable
-    boolean heterogeneous
-
+@Immutable
+class ColumnMetadataList {
+    List<ColumnMetadata> dataSet
 }

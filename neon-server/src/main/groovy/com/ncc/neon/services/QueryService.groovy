@@ -2,12 +2,11 @@ package com.ncc.neon.services
 import com.ncc.neon.config.field.ColumnMapping
 import com.ncc.neon.config.field.FieldConfigurationMapping
 import com.ncc.neon.config.field.WidgetDataSet
-import com.ncc.neon.query.Query
-import com.ncc.neon.query.QueryExecutor
-import com.ncc.neon.query.QueryGroup
-import com.ncc.neon.query.QueryUtils
+import com.ncc.neon.query.*
 import com.ncc.neon.query.filter.DataSet
+import com.ncc.neon.result.AssembleClientData
 import com.ncc.neon.result.FieldNames
+import com.ncc.neon.result.MetadataResolver
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
 
@@ -46,6 +45,8 @@ class QueryService {
     @Autowired
     FieldConfigurationMapping configurationMapping
 
+    @Autowired
+    MetadataResolver metadataResolver
 
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
@@ -56,7 +57,12 @@ class QueryService {
                         @QueryParam("transform") String transformClassName,
                         @QueryParam("param") List<String> transformParams) {
         QueryExecutor queryExecutor = queryExecutorFactory.create()
-        return QueryUtils.wrapJsonInDataElement(queryExecutor.execute(query, includeFiltered), transformClassName, transformParams)
+        QueryResult queryResult = queryExecutor.execute(query, includeFiltered)
+        def columns = metadataResolver.resolveQuery(query)
+
+        AssembleClientData assembler = new AssembleClientData(queryResult: queryResult, metadataObject: columns,
+                transformClassName: transformClassName, transformParams: transformParams)
+        return assembler.createClientData()
     }
 
     @POST
@@ -68,7 +74,12 @@ class QueryService {
                              @QueryParam("transform") String transformClassName,
                              @QueryParam("param") List<String> transformParams) {
         QueryExecutor queryExecutor = queryExecutorFactory.create()
-        return QueryUtils.wrapJsonInDataElement(queryExecutor.execute(query, includeFiltered), transformClassName, transformParams)
+        QueryResult queryResult = queryExecutor.execute(query, includeFiltered)
+        def columns = metadataResolver.resolveQueryGroup(query)
+
+        AssembleClientData assembler = new AssembleClientData(queryResult: queryResult, metadataObject: columns,
+                transformClassName: transformClassName, transformParams: transformParams)
+        return assembler.createClientData()
     }
 
     @GET

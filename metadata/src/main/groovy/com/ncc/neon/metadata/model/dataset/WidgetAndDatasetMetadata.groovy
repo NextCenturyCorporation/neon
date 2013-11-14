@@ -1,5 +1,6 @@
-package com.ncc.neon.metadata.model.query
+package com.ncc.neon.metadata.model.dataset
 
+import groovy.transform.ToString
 /*
  * ************************************************************************
  * Copyright (c), 2013 Next Century Corporation. All Rights Reserved.
@@ -27,20 +28,14 @@ package com.ncc.neon.metadata.model.query
  */
 
 /**
- * Contains metadata about a column in a dataset.
+ * Contains metadata about the active data set.
  */
 
-interface ColumnData {
-
-    String getDatabaseName()
-    String getTableName()
-    String getColumnName()
-    String getColumnType()
-    boolean isNumeric()
-    boolean isGeographical()
-    boolean isTemporal()
-    boolean isCategorical()
-    boolean isNullable()
-    boolean isHeterogeneous()
-
+@ToString(includeNames = true)
+class WidgetAndDatasetMetadata {
+    String widgetName
+    String databaseName
+    String tableName
+    String elementId
+    String value
 }

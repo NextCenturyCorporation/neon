@@ -1,14 +1,14 @@
-package com.ncc.neon.services
-
-import com.ncc.neon.metadata.model.widget.WidgetInitializationMetadata
+package com.ncc.neon.result
+import com.ncc.neon.metadata.MetadataConnection
+import com.ncc.neon.metadata.model.query.ColumnMetadata
+import com.ncc.neon.metadata.model.query.ColumnMetadataList
 import com.ncc.neon.metadata.store.MetadataRetriever
-import com.ncc.neon.session.WidgetStates
+import com.ncc.neon.query.NamedQuery
+import com.ncc.neon.query.Query
+import com.ncc.neon.query.QueryGroup
+import com.ncc.neon.query.clauses.SelectClause
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
-
-import javax.ws.rs.*
-import javax.ws.rs.core.MediaType
-
 /*
  * ************************************************************************
  * Copyright (c), 2013 Next Century Corporation. All Rights Reserved.
@@ -34,45 +34,31 @@ import javax.ws.rs.core.MediaType
  * 
  * @author tbrooks
  */
-
-/**
- * Service for saving and restoring widget states from the user's session.
- */
-
 @Component
-@Path("/sessionstateservice")
-class SessionStateService {
+class MetadataResolver {
 
     @Autowired
-    WidgetStates widgetStates
+    MetadataConnection metadataConnection
 
-    @POST
-    @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
-    @Path("savestate")
-    void saveState(@FormParam("clientId") String clientId, @FormParam("state") String state) {
-        widgetStates.addWidgetState(clientId, state)
-    }
-
-    @GET
-    @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
-    @Produces(MediaType.APPLICATION_JSON)
-    @Path("restoreState")
-    String restoreState(@QueryParam("clientId") String clientId) {
-        def widgetState = widgetStates.getWidgetState(clientId)
-        if(widgetState){
-            return widgetState.state
-        }
-        throw new WebApplicationException(404)
-    }
-
-    @GET
-    @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
-    @Produces(MediaType.APPLICATION_JSON)
-    @Path("widgetinitialization")
-    String getWidgetInitialization(@QueryParam("widget") String widget) {
+    ColumnMetadataList resolveQuery(Query query) {
         MetadataRetriever retriever = new MetadataRetriever(metadataConnection)
-        WidgetInitializationMetadata data = retriever.retrieve(widget)
-        return data.initDataJson
+        List<String> columns = query.fields
+        if (query.fields == SelectClause.ALL_FIELDS) {
+            columns = []
+        }
+        return retriever.retrieve(query.databaseName, query.tableName, columns)
     }
 
+    ColumnMetadataList resolveQueryGroup(QueryGroup queryGroup) {
+        def list = []
+        queryGroup.each { NamedQuery nq ->
+            ColumnMetadataList metadataList = resolveQuery(nq.query)
+            metadataList.dataSet.each { ColumnMetadata metadata ->
+                if(!list.contains(metadata)){
+                    list << metadata
+                }
+            }
+        }
+        return new ColumnMetadataList(list)
+    }
 }

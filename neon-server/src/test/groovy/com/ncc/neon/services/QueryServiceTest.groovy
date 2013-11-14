@@ -1,11 +1,15 @@
 package com.ncc.neon.services
+
+import com.ncc.neon.metadata.model.query.ColumnMetadataList
 import com.ncc.neon.query.Query
 import com.ncc.neon.query.QueryExecutor
 import com.ncc.neon.query.QueryResult
 import com.ncc.neon.query.transform.ValueStringReplaceTransform
+import com.ncc.neon.result.MetadataResolver
 import org.json.JSONObject
 import org.junit.Before
 import org.junit.Test
+
 /*
  * ************************************************************************
  * Copyright (c), 2013 Next Century Corporation. All Rights Reserved.
@@ -36,6 +40,7 @@ class QueryServiceTest {
     @Before
     void before() {
         queryService = new QueryService()
+        queryService.metadataResolver = [resolveQuery: { new ColumnMetadataList([])}] as MetadataResolver
     }
 
     @Test
@@ -78,7 +83,7 @@ class QueryServiceTest {
     }
 
     private void setQueryServiceConnection(QueryExecutor executor) {
-        queryService.queryExecutorFactory = [create: {executor} ] as QueryExecutorFactory
+        queryService.queryExecutorFactory = [create: { executor }] as QueryExecutorFactory
     }
 
     private static assertKeyValue(array, index, key, value) {

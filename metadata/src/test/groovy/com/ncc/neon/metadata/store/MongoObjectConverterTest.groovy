@@ -1,6 +1,6 @@
 package com.ncc.neon.metadata.store
 
-import com.ncc.neon.metadata.model.widget.WidgetInitializationData
+import com.ncc.neon.metadata.model.widget.WidgetInitializationMetadata
 import org.junit.Test
 
 /*
@@ -31,7 +31,7 @@ import org.junit.Test
 
 class MongoObjectConverterTest {
 
-    private final WidgetInitializationData data = new WidgetInitializationData(widgetName: "widget", initDataJson: '{"hello": "world"}')
+    private final WidgetInitializationMetadata data = new WidgetInitializationMetadata(widgetName: "widget", initDataJson: '{"hello": "world"}')
 
     @Test
     void testConversion() {

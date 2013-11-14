@@ -1,6 +1,7 @@
-package com.ncc.neon.metadata.model.widget
+package com.ncc.neon.metadata.model.dataset
 
-import groovy.transform.ToString
+import groovy.transform.Immutable
+
 /*
  * ************************************************************************
  * Copyright (c), 2013 Next Century Corporation. All Rights Reserved.
@@ -27,12 +28,7 @@ import groovy.transform.ToString
  * @author tbrooks
  */
 
-/**
- * Metadata about a widget to be retrieved on initialization.
- */
-
-@ToString(includeNames = true)
-class WidgetInitializationData {
-    String widgetName
-    String initDataJson
+@Immutable
+class WidgetAndDatasetMetadataList {
+    List<WidgetAndDatasetMetadata> dataSet
 }

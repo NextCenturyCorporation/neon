@@ -1,5 +1,7 @@
 package com.ncc.neon.metadata.model.query
 
+import groovy.transform.ToString
+
 /*
  * ************************************************************************
  * Copyright (c), 2013 Next Century Corporation. All Rights Reserved.
@@ -27,14 +29,21 @@ package com.ncc.neon.metadata.model.query
  */
 
 /**
- * Possible types of a column. Used as constants.
+ * Default implementation of metadata about a column.
  */
 
-class ColumnTypes {
-    static final String STRING = "string"
-    static final String NUMBER = "number"
-    static final String DATE = "date"
-    static final String BOOLEAN = "boolean"
-    static final String MULTI = "multi"
-    static final String NULL = "null"
+@ToString(includeNames = true)
+class DefaultColumnMetadata implements ColumnMetadata{
+
+    String databaseName
+    String tableName
+    String columnName
+    String columnType
+    boolean numeric
+    boolean geographical
+    boolean temporal
+    boolean categorical
+    boolean nullable
+    boolean heterogeneous
+
 }

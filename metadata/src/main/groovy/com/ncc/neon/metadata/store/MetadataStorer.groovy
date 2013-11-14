@@ -4,9 +4,10 @@ import com.mongodb.DBCollection
 import com.mongodb.DBObject
 import com.mongodb.MongoClient
 import com.ncc.neon.metadata.MetadataConnection
-import com.ncc.neon.metadata.model.dataset.ActiveDatasetData
-import com.ncc.neon.metadata.model.query.DefaultColumnData
-import com.ncc.neon.metadata.model.widget.WidgetInitializationData
+import com.ncc.neon.metadata.model.dataset.WidgetAndDatasetMetadata
+import com.ncc.neon.metadata.model.query.DefaultColumnMetadata
+import com.ncc.neon.metadata.model.widget.WidgetInitializationMetadata
+
 /*
  * ************************************************************************
  * Copyright (c), 2013 Next Century Corporation. All Rights Reserved.
@@ -56,15 +57,15 @@ class MetadataStorer {
         }
     }
 
-    void store(WidgetInitializationData data) {
+    void store(WidgetInitializationMetadata data) {
         saveClosure("widget", data)
     }
 
-    void store(DefaultColumnData data) {
+    void store(DefaultColumnMetadata data) {
         saveClosure("column", data)
     }
 
-    void store(ActiveDatasetData data) {
+    void store(WidgetAndDatasetMetadata data) {
         saveClosure("dataset", data)
     }
 

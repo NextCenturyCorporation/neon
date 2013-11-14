@@ -1,4 +1,4 @@
-package com.ncc.neon.metadata.model.dataset
+package com.ncc.neon.metadata.model.widget
 
 import groovy.transform.ToString
 /*
@@ -28,13 +28,11 @@ import groovy.transform.ToString
  */
 
 /**
- * Contains metadata about the active data set.
+ * Metadata about a widget to be retrieved on initialization.
  */
 
 @ToString(includeNames = true)
-class ActiveDatasetData {
+class WidgetInitializationMetadata {
     String widgetName
-    String databaseName
-    String tableName
-    Map<String,String> data = [:]
+    String initDataJson
 }
