@@ -51,7 +51,7 @@ class MetadataResolver {
 
     ColumnMetadataList resolveQueryGroup(QueryGroup queryGroup) {
         def list = []
-        queryGroup.each { NamedQuery nq ->
+        queryGroup.namedQueries.each { NamedQuery nq ->
             ColumnMetadataList metadataList = resolveQuery(nq.query)
             metadataList.dataSet.each { ColumnMetadata metadata ->
                 if(!list.contains(metadata)){
