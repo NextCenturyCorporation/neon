@@ -93,7 +93,6 @@ class AssembleClientData {
     private JSONObject createColumnObject(ColumnMetadata column) {
         JSONObject object = new JSONObject()
         object.put("columnName", column.columnName)
-        object.put("columnType", column.columnType)
         column.properties.each { k, v ->
             if (v == true) {
                 object.put(k, v)

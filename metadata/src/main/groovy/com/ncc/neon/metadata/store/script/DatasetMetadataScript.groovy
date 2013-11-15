@@ -45,7 +45,7 @@ class DatasetMetadataScript {
     final MetadataStorer storer = new MetadataStorer(connection)
 
     @SuppressWarnings("ThrowRuntimeException")
-    void parseBundleSpec(){
+    void executeScript(){
         String text = DatasetMetadataScript.classLoader.getResourceAsStream("bundle.csv")?.text
         if(!text){
             throw new RuntimeException("bundle.csv does not exist")
@@ -106,6 +106,6 @@ class DatasetMetadataScript {
     public static void main(String [] args){
         DatasetMetadataScript script = new DatasetMetadataScript()
         script.clearer.dropDatasetTable()
-        script.parseBundleSpec()
+        script.executeScript()
     }
 }

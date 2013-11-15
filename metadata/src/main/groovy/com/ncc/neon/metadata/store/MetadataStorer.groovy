@@ -49,7 +49,7 @@ class MetadataStorer {
             DBObject document = converter.convertToMongo(data)
 
             MongoClient mongo = connection.client
-            DB database = mongo.getDB("metadata")
+            DB database = mongo.getDB(MetadataConstants.DATABASE)
             DBCollection widget = database.createCollection(name, null)
 
             widget.insert(document)
@@ -57,15 +57,15 @@ class MetadataStorer {
     }
 
     void store(WidgetInitializationMetadata data) {
-        saveClosure("widget", data)
+        saveClosure(MetadataConstants.WIDGET_TABLE, data)
     }
 
     void store(DefaultColumnMetadata data) {
-        saveClosure("column", data)
+        saveClosure(MetadataConstants.COLUMN_TABLE, data)
     }
 
     void store(WidgetAndDatasetMetadata data) {
-        saveClosure("dataset", data)
+        saveClosure(MetadataConstants.DATASET_TABLE, data)
     }
 
 }

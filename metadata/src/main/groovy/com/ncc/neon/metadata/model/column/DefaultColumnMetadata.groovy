@@ -38,11 +38,12 @@ class DefaultColumnMetadata implements ColumnMetadata{
     String databaseName
     String tableName
     String columnName
-    String columnType
     boolean numeric
-    boolean geographical
     boolean temporal
-    boolean categorical
+    boolean text
+    boolean logical
+    boolean object
+    boolean array
     boolean nullable
     boolean heterogeneous
 

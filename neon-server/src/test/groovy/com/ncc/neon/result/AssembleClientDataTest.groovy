@@ -3,7 +3,6 @@ package com.ncc.neon.result
 import com.ncc.neon.metadata.model.dataset.WidgetAndDatasetMetadata
 import com.ncc.neon.metadata.model.dataset.WidgetAndDatasetMetadataList
 import com.ncc.neon.metadata.model.column.ColumnMetadataList
-import com.ncc.neon.metadata.model.column.ColumnTypes
 import com.ncc.neon.metadata.model.column.DefaultColumnMetadata
 import com.ncc.neon.query.QueryResult
 import org.junit.Test
@@ -66,13 +65,13 @@ class AssembleClientDataTest {
 
     @Test
     void testColumnMetadata() {
-        def columnData = new ColumnMetadataList([new DefaultColumnMetadata(databaseName: "db", tableName: "table", categorical: true, columnName: "column1", columnType: ColumnTypes.STRING),
-                new DefaultColumnMetadata(databaseName: "db", tableName: "table", heterogeneous: true, columnName: "column2", columnType: ColumnTypes.MULTI)])
+        def columnData = new ColumnMetadataList([new DefaultColumnMetadata(databaseName: "db", tableName: "table", temporal: true, columnName: "column1"),
+                new DefaultColumnMetadata(databaseName: "db", tableName: "table", heterogeneous: true, columnName: "column2")])
 
         AssembleClientData clientData = new AssembleClientData()
         clientData.metadataObject = columnData
         clientData.queryResult = [toJson:{"[]"}] as QueryResult
 
-        assert "{\"data\":[],\"metadata\":[{\"categorical\":true,\"columnType\":\"string\",\"columnName\":\"column1\"},{\"columnType\":\"multi\",\"columnName\":\"column2\",\"heterogeneous\":true}]}" == clientData.createClientData()
+        assert "{\"data\":[],\"metadata\":[{\"temporal\":true,\"columnName\":\"column1\"},{\"columnName\":\"column2\",\"heterogeneous\":true}]}" == clientData.createClientData()
     }
 }

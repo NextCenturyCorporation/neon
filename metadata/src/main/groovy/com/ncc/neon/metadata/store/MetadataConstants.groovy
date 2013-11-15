@@ -32,5 +32,6 @@ class MetadataConstants {
     public static final String DATASET_TABLE = "dataset"
     public static final String WIDGET_TABLE = "widget"
     public static final String COLUMN_TABLE = "column"
+    public static final String VARIETY_TABLE = "variety"
 
 }
