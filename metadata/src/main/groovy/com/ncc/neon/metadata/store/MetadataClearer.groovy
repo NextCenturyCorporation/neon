@@ -1,6 +1,9 @@
-package com.ncc.neon.config.field
+package com.ncc.neon.metadata.store
 
-import groovy.transform.ToString
+import com.mongodb.DB
+import com.mongodb.DBCollection
+import com.mongodb.MongoClient
+import com.ncc.neon.metadata.MetadataConnection
 
 /*
  * ************************************************************************
@@ -28,16 +31,30 @@ import groovy.transform.ToString
  * @author tbrooks
  */
 
-/**
- * Maps column names that exist in the dataset to the desired selected value.
- */
-@ToString(includeNames = true)
-class ColumnMapping {
+class MetadataClearer {
 
-    Map<String, String> mapping = [:]
+    private final def dropClosure
 
-    void put(String columnName, String value) {
-        mapping.put(columnName, value)
+    MetadataClearer(MetadataConnection connection) {
+        dropClosure = { String tableName ->
+            MongoClient mongo = connection.client
+            DB database = mongo.getDB(MetadataConstants.DATABASE)
+            DBCollection collection = database.createCollection(tableName, null)
+            collection.drop()
+        }
+
+    }
+
+    void dropColumnTable() {
+        dropClosure(MetadataConstants.COLUMN_TABLE)
+    }
+
+    void dropWidgetTable() {
+        dropClosure(MetadataConstants.WIDGET_TABLE)
+    }
+
+    void dropDatasetTable() {
+        dropClosure(MetadataConstants.DATASET_TABLE)
     }
 
 }

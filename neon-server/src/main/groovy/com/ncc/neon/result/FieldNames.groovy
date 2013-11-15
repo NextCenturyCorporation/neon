@@ -1,7 +1,5 @@
 package com.ncc.neon.result
 
-import com.ncc.neon.config.field.ColumnMapping
-
 /*
  * ************************************************************************
  * Copyright (c), 2013 Next Century Corporation. All Rights Reserved.

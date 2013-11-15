@@ -46,13 +46,13 @@ class MetadataRetriever {
     }
 
     WidgetInitializationMetadata retrieve(String widgetName) {
-        DBCollection collection = getCollection("widget")
+        DBCollection collection = getCollection(MetadataConstants.WIDGET_TABLE)
         DBObject object = collection.findOne(new BasicDBObject("widgetName", widgetName))
         return converter.convertToObject(object)
     }
 
     ColumnMetadataList retrieve(String databaseName, String tableName, List<String> columnNames) {
-        DBCollection collection = getCollection("column")
+        DBCollection collection = getCollection(MetadataConstants.COLUMN_TABLE)
         DBCursor cursor = collection.find(new BasicDBObject(["databaseName": databaseName, "tableName": tableName]))
         List<ColumnMetadata> columnData = getAllData(cursor)
         if (!columnNames) {
@@ -66,8 +66,8 @@ class MetadataRetriever {
 
     }
 
-    WidgetAndDatasetMetadataList retrieve(String widgetName, String databaseName, String tableName) {
-        DBCollection collection = getCollection("dataset")
+    WidgetAndDatasetMetadataList retrieve(String databaseName, String tableName, String widgetName) {
+        DBCollection collection = getCollection(MetadataConstants.DATASET_TABLE)
         DBCursor cursor = collection.find(new BasicDBObject(["widgetName": widgetName, "databaseName": databaseName, "tableName": tableName]))
         return new WidgetAndDatasetMetadataList(getAllData(cursor))
 

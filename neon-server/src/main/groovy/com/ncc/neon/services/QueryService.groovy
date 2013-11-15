@@ -1,9 +1,10 @@
 package com.ncc.neon.services
-import com.ncc.neon.config.field.ColumnMapping
-import com.ncc.neon.config.field.FieldConfigurationMapping
-import com.ncc.neon.config.field.WidgetDataSet
-import com.ncc.neon.query.*
-import com.ncc.neon.query.filter.DataSet
+
+import com.ncc.neon.metadata.model.dataset.WidgetAndDatasetMetadataList
+import com.ncc.neon.query.Query
+import com.ncc.neon.query.QueryExecutor
+import com.ncc.neon.query.QueryGroup
+import com.ncc.neon.query.QueryResult
 import com.ncc.neon.result.AssembleClientData
 import com.ncc.neon.result.FieldNames
 import com.ncc.neon.result.MetadataResolver
@@ -12,6 +13,7 @@ import org.springframework.stereotype.Component
 
 import javax.ws.rs.*
 import javax.ws.rs.core.MediaType
+
 /*
  * ************************************************************************
  * Copyright (c), 2013 Next Century Corporation. All Rights Reserved.
@@ -41,9 +43,6 @@ class QueryService {
 
     @Autowired
     QueryExecutorFactory queryExecutorFactory
-
-    @Autowired
-    FieldConfigurationMapping configurationMapping
 
     @Autowired
     MetadataResolver metadataResolver
@@ -86,7 +85,7 @@ class QueryService {
     @Path("databasenames")
     List<String> getDatabaseNames() {
         QueryExecutor queryExecutor = queryExecutorFactory.create()
-        queryExecutor.showDatabases()
+        return queryExecutor.showDatabases()
     }
 
     @POST
@@ -94,7 +93,7 @@ class QueryService {
     @Path("tablenames")
     List<String> getTableNames(@FormParam("database") String database) {
         QueryExecutor queryExecutor = queryExecutorFactory.create()
-        queryExecutor.showTables(database)
+        return queryExecutor.showTables(database)
     }
 
     @GET
@@ -105,18 +104,11 @@ class QueryService {
                              @QueryParam("widgetName") String widgetName) {
 
         QueryExecutor queryExecutor = queryExecutorFactory.create()
-        ColumnMapping mapping = getColumnMapping(databaseName, tableName, widgetName)
         def fieldNames = queryExecutor.getFieldNames(databaseName, tableName)
-        return new FieldNames(fieldNames: fieldNames, metadata: mapping)
+        WidgetAndDatasetMetadataList metadata = metadataResolver.resolveQuery(databaseName, tableName, widgetName)
+        return AssembleClientData.createFieldNames(fieldNames, metadata)
     }
 
-    private ColumnMapping getColumnMapping(String databaseName, String tableName, String widgetName) {
-        if (widgetName) {
-            DataSet dataset = new DataSet(databaseName: databaseName, tableName: tableName)
-            return configurationMapping.get(new WidgetDataSet(dataSet: dataset, widgetName: widgetName))
-        }
-        return new ColumnMapping()
-    }
 
 }
 

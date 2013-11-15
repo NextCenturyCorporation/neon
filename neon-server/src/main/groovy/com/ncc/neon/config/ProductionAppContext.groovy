@@ -1,7 +1,6 @@
 package com.ncc.neon.config
-import com.ncc.neon.config.field.FieldConfigurationMapping
+
 import com.ncc.neon.metadata.MetadataConnection
-import org.codehaus.jackson.map.ObjectMapper
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
@@ -52,6 +51,7 @@ class ProductionAppContext {
     @PostConstruct
     @SuppressWarnings('JavaIoPackageAccess') // suppress to allow local file overrides
     def postConstruct() {
+        LOGGER.trace("In post construct")
         // TODO: NEON-89 Currently dev and production both use "production" as the environment (since we don't really have a production environment yet), which is why the override checks the user's home dir. In a real production environment, the file is likely to be somewhere else (such as /opt or /etc).  We can abstract this on a per environment basis.
         def override = new File(System.getProperty("user.home"), "neon/neon-override.properties")
         if (override.exists()) {
@@ -65,16 +65,4 @@ class ProductionAppContext {
     MetadataConnection metadataConnection(){
         return new MetadataConnection(System.getProperty("mongo.hosts", "localhost"))
     }
-
-    @Bean
-    FieldConfigurationMapping configurationBundle(){
-        String bundle = ProductionAppContext.getClassLoader().getResourceAsStream("config-bundle.json")?.text
-        if(!bundle){
-            LOGGER.info("No configuration bundle found.")
-            return new FieldConfigurationMapping()
-        }
-        ObjectMapper mapper = new ObjectMapper()
-        return mapper.readValue(bundle, FieldConfigurationMapping)
-    }
-
 }

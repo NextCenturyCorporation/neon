@@ -7,7 +7,6 @@ import com.ncc.neon.metadata.MetadataConnection
 import com.ncc.neon.metadata.model.dataset.WidgetAndDatasetMetadata
 import com.ncc.neon.metadata.model.query.DefaultColumnMetadata
 import com.ncc.neon.metadata.model.widget.WidgetInitializationMetadata
-
 /*
  * ************************************************************************
  * Copyright (c), 2013 Next Century Corporation. All Rights Reserved.

@@ -1,8 +1,4 @@
-package com.ncc.neon.config.field
-import org.codehaus.jackson.JsonProcessingException
-import org.codehaus.jackson.map.DeserializationContext
-import org.codehaus.jackson.map.KeyDeserializer
-import org.codehaus.jackson.map.ObjectMapper
+package com.ncc.neon.result
 
 /*
  * ************************************************************************
@@ -30,15 +26,10 @@ import org.codehaus.jackson.map.ObjectMapper
  * @author tbrooks
  */
 
-/**
- * Allows deserialization of a map key, necessary for Jackson with a complex type as a key in a map.
- */
+class ColumnMapping {
+    def mapping = [:]
 
-class WidgetDataSetKeyDeserializer extends KeyDeserializer{
-    private static final ObjectMapper MAPPER = new ObjectMapper()
-
-    @Override
-    Object deserializeKey(String key, DeserializationContext ctxt) throws IOException, JsonProcessingException {
-        MAPPER.readValue(key, WidgetDataSet)
+    void put(String columnName, String value) {
+        mapping.put(columnName, value)
     }
 }

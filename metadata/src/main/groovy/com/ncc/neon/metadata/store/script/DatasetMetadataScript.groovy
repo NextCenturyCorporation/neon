@@ -1,8 +1,10 @@
-package com.ncc.neon.config.field
-import com.ncc.neon.query.filter.DataSet
-import org.codehaus.jackson.map.ObjectMapper
-import org.slf4j.Logger
-import org.slf4j.LoggerFactory
+package com.ncc.neon.metadata.store.script
+
+import com.ncc.neon.metadata.MetadataConnection
+import com.ncc.neon.metadata.model.dataset.WidgetAndDatasetMetadata
+import com.ncc.neon.metadata.model.dataset.WidgetAndDatasetMetadataList
+import com.ncc.neon.metadata.store.MetadataClearer
+import com.ncc.neon.metadata.store.MetadataStorer
 /*
  * ************************************************************************
  * Copyright (c), 2013 Next Century Corporation. All Rights Reserved.
@@ -29,28 +31,31 @@ import org.slf4j.LoggerFactory
  * @author tbrooks
  */
 
-final class GenerateConfigBundleScript {
+/**
+ * This script inserts data into the dataset metadata table from the content of bundle.csv
+ * in src/main/resources. Eventually, this will be replaced by a UI that allows a user to configure
+ * their dataset configuration metadata.
+ */
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(GenerateConfigBundleScript)
-    private static final String BUNDLE_CSV_LOCATION = "config/bundle.csv"
-    private static final String OUTPUT_LOCATION = "build/config"
-    private static final String OUTPUT_FILE_NAME = "config-bundle.json"
+class DatasetMetadataScript {
 
-    private final FieldConfigurationMapping configurationMapping = new FieldConfigurationMapping()
+    private final List<WidgetAndDatasetMetadataList> metadataList = []
+    private final MetadataConnection connection = new MetadataConnection()
+    final MetadataClearer clearer = new MetadataClearer(connection)
+    final MetadataStorer storer = new MetadataStorer(connection)
 
-    @SuppressWarnings("JavaIoPackageAccess")
+    @SuppressWarnings("ThrowRuntimeException")
     void parseBundleSpec(){
-        File bundleSpec = new File(BUNDLE_CSV_LOCATION)
-        if(!bundleSpec.exists()){
-            LOGGER.info("${bundleSpec.absolutePath} does not exist; not generating any config bundle.")
-            return
+        String text = DatasetMetadataScript.classLoader.getResourceAsStream("bundle.csv")?.text
+        if(!text){
+            throw new RuntimeException("bundle.csv does not exist")
         }
-        readEachLine(bundleSpec)
+        readEachLine(text)
         outputFile()
     }
 
-    private void readEachLine(File bundleSpec) {
-        bundleSpec.eachLine { String line ->
+    private void readEachLine(String text) {
+        text.split("\n").each { String line ->
             if (shouldIgnoreLine(line)) {
                 return
             }
@@ -59,27 +64,22 @@ final class GenerateConfigBundleScript {
         }
     }
 
-    @SuppressWarnings("JavaIoPackageAccess")
     private void outputFile() {
-        ObjectMapper mapper = new ObjectMapper()
-        String json = mapper.writeValueAsString(configurationMapping)
-
-        new File(OUTPUT_LOCATION).mkdirs()
-        File file = new File("$OUTPUT_LOCATION/$OUTPUT_FILE_NAME")
-        file.text = json
-        LOGGER.info("Outputting config bundle to ${OUTPUT_LOCATION}")
+        metadataList.each {
+            storer.store(it)
+        }
     }
 
 
     private void populateConfigurationMapping(String[] dataArray) {
         validateLine(dataArray)
 
-        DataSet dataSet = new DataSet(databaseName: dataArray[0], tableName: dataArray[1])
-        WidgetDataSet widgetDataSet = new WidgetDataSet(widgetName: dataArray[2], dataSet: dataSet)
-
         def columnMap = parseColumnMap(dataArray[3])
 
-        configurationMapping.put(widgetDataSet, new ColumnMapping(mapping: columnMap))
+        columnMap.each{ k,v ->
+            WidgetAndDatasetMetadata metadata = new WidgetAndDatasetMetadata(databaseName: dataArray[0], tableName: dataArray[1], widgetName: dataArray[2], elementId: k, value: v)
+            metadataList << metadata
+        }
     }
 
     private def parseColumnMap(String mapString) {
@@ -97,9 +97,6 @@ final class GenerateConfigBundleScript {
         if (dataArray.length != 4) {
             throw new IllegalArgumentException("The spec file is malformed: ${dataArray}")
         }
-        if (!WidgetNames.contains(dataArray[2])) {
-            throw new IllegalArgumentException("There is an invalid widget name on this line: ${dataArray}")
-        }
     }
 
     private boolean shouldIgnoreLine(String line) {
@@ -107,8 +104,8 @@ final class GenerateConfigBundleScript {
     }
 
     public static void main(String [] args){
-        GenerateConfigBundleScript generator = new GenerateConfigBundleScript()
-        generator.parseBundleSpec()
+        DatasetMetadataScript script = new DatasetMetadataScript()
+        script.clearer.dropDatasetTable()
+        script.parseBundleSpec()
     }
-
 }

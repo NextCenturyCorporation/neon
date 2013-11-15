@@ -1,9 +1,5 @@
-package com.ncc.neon.config.field
-import org.codehaus.jackson.JsonGenerator
-import org.codehaus.jackson.JsonProcessingException
-import org.codehaus.jackson.map.JsonSerializer
-import org.codehaus.jackson.map.ObjectMapper
-import org.codehaus.jackson.map.SerializerProvider
+package com.ncc.neon.metadata.store
+
 /*
  * ************************************************************************
  * Copyright (c), 2013 Next Century Corporation. All Rights Reserved.
@@ -30,16 +26,11 @@ import org.codehaus.jackson.map.SerializerProvider
  * @author tbrooks
  */
 
-/**
- * Allows serialization of a map key, necessary for Jackson with a complex type as a key in a map.
- */
+class MetadataConstants {
 
-class WidgetDataSetKeySerializer extends JsonSerializer<WidgetDataSet> {
-    private static final ObjectMapper MAPPER = new ObjectMapper()
+    public static final String DATABASE = "metadata"
+    public static final String DATASET_TABLE = "dataset"
+    public static final String WIDGET_TABLE = "widget"
+    public static final String COLUMN_TABLE = "column"
 
-    @Override
-    void serialize(WidgetDataSet value, JsonGenerator jgen, SerializerProvider provider) throws IOException, JsonProcessingException {
-        String json = MAPPER.writeValueAsString(value)
-        jgen.writeFieldName(json)
-    }
 }

@@ -1,7 +1,7 @@
 package com.ncc.neon.mongo
+
 import com.mongodb.MongoClient
 import com.ncc.neon.config.MongoConfigParser
-import com.ncc.neon.config.field.FieldConfigurationMapping
 import com.ncc.neon.metadata.MetadataConnection
 import org.springframework.beans.factory.config.CustomScopeConfigurer
 import org.springframework.context.annotation.Bean
@@ -9,6 +9,7 @@ import org.springframework.context.annotation.ComponentScan
 import org.springframework.context.annotation.Configuration
 import org.springframework.context.annotation.Profile
 import org.springframework.context.support.SimpleThreadScope
+
 /*
  * ************************************************************************
  * Copyright (c), 2013 Next Century Corporation. All Rights Reserved.
@@ -49,18 +50,13 @@ class MongoIntegrationTestContext {
     }
 
     @Bean
-    MetadataConnection metadataConnection(){
+    MetadataConnection metadataConnection() {
         return new MetadataConnection(System.getProperty("mongo.hosts", "localhost"))
     }
 
     @Bean
-    FieldConfigurationMapping configurationBundle(){
-        return new FieldConfigurationMapping()
-    }
-
-    @Bean
     CustomScopeConfigurer scopeConfigurer() {
-        return new CustomScopeConfigurer(scopes: ["session":new SimpleThreadScope()])
+        return new CustomScopeConfigurer(scopes: ["session": new SimpleThreadScope()])
     }
 
 }

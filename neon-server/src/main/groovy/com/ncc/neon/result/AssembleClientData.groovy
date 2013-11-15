@@ -51,6 +51,15 @@ class AssembleClientData {
         return assemble(data, metadata)
     }
 
+    static FieldNames createFieldNames(Collection<String> names, WidgetAndDatasetMetadataList metadata){
+        ColumnMapping mapping = new ColumnMapping()
+        metadata.dataSet.each { WidgetAndDatasetMetadata data ->
+            mapping.put(data.elementId, data.value)
+        }
+
+        new FieldNames(fieldNames: names, metadata: mapping)
+    }
+
     private String handleMetadata(WidgetAndDatasetMetadataList data) {
         JSONArray array = new JSONArray()
 
