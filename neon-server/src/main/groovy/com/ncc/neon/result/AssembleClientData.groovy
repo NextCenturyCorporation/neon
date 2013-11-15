@@ -2,8 +2,8 @@ package com.ncc.neon.result
 
 import com.ncc.neon.metadata.model.dataset.WidgetAndDatasetMetadata
 import com.ncc.neon.metadata.model.dataset.WidgetAndDatasetMetadataList
-import com.ncc.neon.metadata.model.query.ColumnMetadata
-import com.ncc.neon.metadata.model.query.ColumnMetadataList
+import com.ncc.neon.metadata.model.column.ColumnMetadata
+import com.ncc.neon.metadata.model.column.ColumnMetadataList
 import com.ncc.neon.query.QueryResult
 import org.apache.commons.lang.math.NumberUtils
 import org.json.JSONArray

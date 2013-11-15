@@ -1,8 +1,8 @@
 package com.ncc.neon.result
 import com.ncc.neon.metadata.MetadataConnection
 import com.ncc.neon.metadata.model.dataset.WidgetAndDatasetMetadataList
-import com.ncc.neon.metadata.model.query.ColumnMetadata
-import com.ncc.neon.metadata.model.query.ColumnMetadataList
+import com.ncc.neon.metadata.model.column.ColumnMetadata
+import com.ncc.neon.metadata.model.column.ColumnMetadataList
 import com.ncc.neon.metadata.store.MetadataRetriever
 import com.ncc.neon.query.NamedQuery
 import com.ncc.neon.query.Query

@@ -1,4 +1,4 @@
-package com.ncc.neon.metadata.model.query
+package com.ncc.neon.metadata.model.column
 
 import groovy.transform.ToString
 

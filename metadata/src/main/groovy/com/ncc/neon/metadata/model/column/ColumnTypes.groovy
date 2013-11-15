@@ -1,4 +1,4 @@
-package com.ncc.neon.metadata.model.query
+package com.ncc.neon.metadata.model.column
 
 /*
  * ************************************************************************
@@ -27,20 +27,14 @@ package com.ncc.neon.metadata.model.query
  */
 
 /**
- * Contains metadata about a column in a dataset.
+ * Possible types of a column. Used as constants.
  */
 
-interface ColumnMetadata {
-
-    String getDatabaseName()
-    String getTableName()
-    String getColumnName()
-    String getColumnType()
-    boolean isNumeric()
-    boolean isGeographical()
-    boolean isTemporal()
-    boolean isCategorical()
-    boolean isNullable()
-    boolean isHeterogeneous()
-
+class ColumnTypes {
+    static final String STRING = "string"
+    static final String NUMBER = "number"
+    static final String DATE = "date"
+    static final String BOOLEAN = "boolean"
+    static final String MULTI = "multi"
+    static final String NULL = "null"
 }

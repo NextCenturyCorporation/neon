@@ -1,4 +1,6 @@
-package com.ncc.neon.metadata.model.query
+package com.ncc.neon.metadata.model.column
+
+import groovy.transform.Immutable
 
 /*
  * ************************************************************************
@@ -26,15 +28,7 @@ package com.ncc.neon.metadata.model.query
  * @author tbrooks
  */
 
-/**
- * Possible types of a column. Used as constants.
- */
-
-class ColumnTypes {
-    static final String STRING = "string"
-    static final String NUMBER = "number"
-    static final String DATE = "date"
-    static final String BOOLEAN = "boolean"
-    static final String MULTI = "multi"
-    static final String NULL = "null"
+@Immutable
+class ColumnMetadataList {
+    List<ColumnMetadata> dataSet
 }

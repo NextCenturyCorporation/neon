@@ -2,8 +2,8 @@ package com.ncc.neon.metadata.store
 import com.mongodb.*
 import com.ncc.neon.metadata.MetadataConnection
 import com.ncc.neon.metadata.model.dataset.WidgetAndDatasetMetadataList
-import com.ncc.neon.metadata.model.query.ColumnMetadata
-import com.ncc.neon.metadata.model.query.ColumnMetadataList
+import com.ncc.neon.metadata.model.column.ColumnMetadata
+import com.ncc.neon.metadata.model.column.ColumnMetadataList
 import com.ncc.neon.metadata.model.widget.WidgetInitializationMetadata
 /*
  * ************************************************************************

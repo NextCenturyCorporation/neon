@@ -1,6 +1,4 @@
-package com.ncc.neon.metadata.model.query
-
-import groovy.transform.Immutable
+package com.ncc.neon.metadata.model.column
 
 /*
  * ************************************************************************
@@ -28,7 +26,21 @@ import groovy.transform.Immutable
  * @author tbrooks
  */
 
-@Immutable
-class ColumnMetadataList {
-    List<ColumnMetadata> dataSet
+/**
+ * Contains metadata about a column in a dataset.
+ */
+
+interface ColumnMetadata {
+
+    String getDatabaseName()
+    String getTableName()
+    String getColumnName()
+    String getColumnType()
+    boolean isNumeric()
+    boolean isGeographical()
+    boolean isTemporal()
+    boolean isCategorical()
+    boolean isNullable()
+    boolean isHeterogeneous()
+
 }

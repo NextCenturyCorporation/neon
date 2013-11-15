@@ -5,7 +5,7 @@ import com.mongodb.DBObject
 import com.mongodb.MongoClient
 import com.ncc.neon.metadata.MetadataConnection
 import com.ncc.neon.metadata.model.dataset.WidgetAndDatasetMetadata
-import com.ncc.neon.metadata.model.query.DefaultColumnMetadata
+import com.ncc.neon.metadata.model.column.DefaultColumnMetadata
 import com.ncc.neon.metadata.model.widget.WidgetInitializationMetadata
 /*
  * ************************************************************************
