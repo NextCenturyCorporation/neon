@@ -45,9 +45,7 @@ neon.query.Query = function () {
 
     this.filter = new neon.query.Filter();
     this.fields = ['*'];
-
-    /*jshint expr: true */
-    this.includeFiltered_ = false;
+    this.disregardFilters_ = false;
 
     this.groupByClauses = [];
     this.isDistinct = false;
@@ -318,25 +316,13 @@ neon.query.Query.prototype.sortBy = function (fieldName, sortOrder) {
 
 /**
  * Indicates whether or not even data outside of the current filters should be returned
- * @method includeFiltered
- * @param {Boolean} includeFiltered true to include data outside of the current filters, false to just return
+ * @method disregardFilters
+ * @param {Boolean} includeFilteredOutData true to include data outside of the current filters, false to just return
  * the data matched by the current filters (defaults to false)
  * @return {neon.query.Query} This query object
  */
-neon.query.Query.prototype.includeFiltered = function (includeFiltered) {
-    this.includeFiltered_ = includeFiltered;
-    return this;
-};
-
-/**
- * Specifies a name of a transform to apply to the json before returning it from the query
- * @method transform
- * @param {String} transformName
- * @param {Array} [transformParams] If the transform takes any parameters, pass them in here
- * @return {neon.query.Query} This query object
- */
-neon.query.Query.prototype.transform = function (transformName, transformParams) {
-    this.filter.transform(transformName, transformParams);
+neon.query.Query.prototype.disregardFilters = function (includeFilteredOutData) {
+    this.disregardFilters_ = includeFilteredOutData;
     return this;
 };
 
@@ -420,7 +406,7 @@ neon.query.withinDistance = function (locationField, center, distance, distanceU
  */
 neon.query.getFieldNames = function (databaseName, tableName, widgetName, successCallback, errorCallback) {
     return neon.util.ajaxUtils.doGet(
-        neon.query.queryUrl_('/services/queryservice/fieldnames?databaseName=' + databaseName + '&tableName=' + tableName + '&widgetName=' + widgetName),
+        neon.query.serviceUrl('queryservice', 'fields', '?databaseName=' + databaseName + '&tableName=' + tableName + '&widgetName=' + widgetName),
         {
             success: successCallback,
             error: errorCallback
@@ -437,8 +423,7 @@ neon.query.getFieldNames = function (databaseName, tableName, widgetName, succes
  * @return {neon.util.AjaxRequest} The xhr request object
  */
 neon.query.executeQuery = function (query, successCallback, errorCallback) {
-    var transform = query.filter.transform_;
-    return neon.query.doExecuteQuery_(query, transform, successCallback, errorCallback, 'query');
+    return neon.query.executeQueryService_(query, successCallback, errorCallback, 'query');
 };
 
 /**
@@ -451,14 +436,13 @@ neon.query.executeQuery = function (query, successCallback, errorCallback) {
  * @return {neon.util.AjaxRequest} The xhr request object
  */
 neon.query.executeQueryGroup = function (queryGroup, successCallback, errorCallback) {
-    return neon.query.doExecuteQuery_(queryGroup, queryGroup.transform_, successCallback, errorCallback, 'querygroup');
+    return neon.query.executeQueryService_(queryGroup, successCallback, errorCallback, 'querygroup');
 };
 
-neon.query.doExecuteQuery_ = function (query, transform, successCallback, errorCallback, serviceName) {
-    var queryParams = neon.query.buildQueryParamsString_(query, transform);
+neon.query.executeQueryService_ = function (query, successCallback, errorCallback, serviceName) {
     return neon.util.ajaxUtils.doPostJSON(
         query,
-        neon.query.queryUrl_('/services/queryservice/' + serviceName + '?' + queryParams),
+        neon.query.serviceUrl('queryservice', serviceName),
         {
             success: successCallback,
             error: errorCallback
@@ -466,19 +450,6 @@ neon.query.doExecuteQuery_ = function (query, transform, successCallback, errorC
     );
 };
 
-
-neon.query.buildQueryParamsString_ = function (query, transform) {
-    var queryParams = 'includefiltered=' + query.includeFiltered_;
-    if (transform) {
-        queryParams += '&transform=' + transform.transformName;
-        if (transform.transformParams) {
-            transform.transformParams.forEach(function (param) {
-                queryParams += '&param=' + encodeURIComponent(param);
-            });
-        }
-    }
-    return queryParams;
-};
 
 /**
  * Registers for a filter key and fires the callback when complete
@@ -490,7 +461,7 @@ neon.query.buildQueryParamsString_ = function (query, transform) {
  * @return {neon.util.AjaxRequest} The xhr request object
  */
 
-neon.query.registerForFilterKey = function(databaseName, tableName, successCallback, errorCallback) {
+neon.query.registerForFilterKey = function (databaseName, tableName, successCallback, errorCallback) {
     var dataSet = {
         databaseName: databaseName,
         tableName: tableName
@@ -498,7 +469,7 @@ neon.query.registerForFilterKey = function(databaseName, tableName, successCallb
 
     return neon.util.ajaxUtils.doPostJSON(
         dataSet,
-        neon.query.queryUrl_('/services/filterservice/registerforfilterkey'),
+        neon.query.serviceUrl('filterservice', 'registerforfilterkey'),
         {
             success: successCallback,
             error: errorCallback
@@ -524,7 +495,7 @@ neon.query.addFilter = function (filterKey, filter, successCallback, errorCallba
 
     return neon.util.ajaxUtils.doPostJSON(
         filterContainer,
-        neon.query.queryUrl_('/services/filterservice/addfilter'),
+        neon.query.serviceUrl('filterservice', 'addfilter'),
         {
             success: successCallback,
             error: errorCallback
@@ -543,7 +514,7 @@ neon.query.addFilter = function (filterKey, filter, successCallback, errorCallba
 neon.query.removeFilter = function (filterKey, successCallback, errorCallback) {
     return neon.util.ajaxUtils.doPostJSON(
         filterKey,
-        neon.query.queryUrl_('/services/filterservice/removefilter'),
+        neon.query.serviceUrl('filterservice', 'removefilter'),
         {
             success: successCallback,
             error: errorCallback
@@ -568,7 +539,7 @@ neon.query.replaceFilter = function (filterKey, filter, successCallback, errorCa
 
     return neon.util.ajaxUtils.doPostJSON(
         filterContainer,
-        neon.query.queryUrl_('/services/filterservice/replacefilter'),
+        neon.query.serviceUrl('filterservice', 'replacefilter'),
         {
             success: successCallback,
             error: errorCallback
@@ -585,7 +556,7 @@ neon.query.replaceFilter = function (filterKey, filter, successCallback, errorCa
  */
 neon.query.clearFilters = function (successCallback, errorCallback) {
     return neon.util.ajaxUtils.doPost(
-        neon.query.queryUrl_('/services/filterservice/clearfilters'),
+        neon.query.serviceUrl('filterservice', 'clearfilters'),
         {
             success: successCallback,
             error: errorCallback
@@ -604,7 +575,7 @@ neon.query.clearFilters = function (successCallback, errorCallback) {
 neon.query.setSelectionWhere = function (filter, successCallback, errorCallback) {
     return neon.util.ajaxUtils.doPostJSON(
         filter,
-        neon.query.queryUrl_('/services/selectionservice/setselectionwhere'),
+        neon.query.serviceUrl('selectionservice', 'setselectionwhere'),
         {
             success: successCallback,
             error: errorCallback
@@ -621,13 +592,9 @@ neon.query.setSelectionWhere = function (filter, successCallback, errorCallback)
  * @return {neon.util.AjaxRequest} The xhr request object
  */
 neon.query.getSelectionWhere = function (filter, successCallback, errorCallback) {
-    var queryParams = '';
-    if (filter.transform_) {
-        queryParams += '?transform=' + filter.transform_;
-    }
     return neon.util.ajaxUtils.doPostJSON(
         filter,
-        neon.query.queryUrl_('/services/selectionservice/getselectionwhere' + queryParams),
+        neon.query.serviceUrl('selectionservice', 'getselectionwhere'),
         {
             success: successCallback,
             error: errorCallback
@@ -647,7 +614,7 @@ neon.query.getSelectionWhere = function (filter, successCallback, errorCallback)
 neon.query.setSelectedIds = function (ids, successCallback, errorCallback) {
     return neon.util.ajaxUtils.doPostJSON(
         ids,
-        neon.query.queryUrl_('/services/selectionservice/setselectedids'),
+        neon.query.serviceUrl('selectionservice', 'setselectedids'),
         {
             success: successCallback,
             error: errorCallback
@@ -667,7 +634,7 @@ neon.query.setSelectedIds = function (ids, successCallback, errorCallback) {
 neon.query.addSelectedIds = function (ids, successCallback, errorCallback) {
     return neon.util.ajaxUtils.doPostJSON(
         ids,
-        neon.query.queryUrl_('/services/selectionservice/addselectedids'),
+        neon.query.serviceUrl('selectionservice', 'addselectedids'),
         {
             success: successCallback,
             error: errorCallback
@@ -686,7 +653,7 @@ neon.query.addSelectedIds = function (ids, successCallback, errorCallback) {
 neon.query.removeSelectedIds = function (ids, successCallback, errorCallback) {
     return neon.util.ajaxUtils.doPostJSON(
         ids,
-        neon.query.queryUrl_('/services/selectionservice/removeselectedids'),
+        neon.query.serviceUrl('selectionservice', 'removeselectedids'),
         {
             success: successCallback,
             error: errorCallback
@@ -703,7 +670,7 @@ neon.query.removeSelectedIds = function (ids, successCallback, errorCallback) {
  */
 neon.query.clearSelection = function (successCallback, errorCallback) {
     return neon.util.ajaxUtils.doPost(
-        neon.query.queryUrl_('/services/selectionservice/clearselection'),
+        neon.query.serviceUrl('selectionservice', 'clearselection'),
         {
             success: successCallback,
             error: errorCallback
@@ -719,9 +686,9 @@ neon.query.clearSelection = function (successCallback, errorCallback) {
  * @param {Function} [errorCallback] The optional callback when an error occurs. This is a 3 parameter function that contains the xhr, a short error status and the full error message.
  * @return {neon.util.AjaxRequest} The xhr request object
  */
-neon.query.submitTextQuery = function(queryText, successCallback, errorCallback) {
+neon.query.submitTextQuery = function (queryText, successCallback, errorCallback) {
     return neon.util.ajaxUtils.doPost(
-        neon.query.queryUrl_('/services/languageservice/query'),
+        neon.query.serviceUrl('languageservice', 'query'),
         {
             data: { text: queryText },
             contentType: 'application/x-www-form-urlencoded; charset=UTF-8',
@@ -742,10 +709,10 @@ neon.query.submitTextQuery = function(queryText, successCallback, errorCallback)
  * @return {neon.util.AjaxRequest} The xhr request object
  */
 
-neon.query.saveState = function(id, stateObject, successCallback, errorCallback) {
+neon.query.saveState = function (id, stateObject, successCallback, errorCallback) {
     var strObject = JSON.stringify(stateObject);
     return neon.util.ajaxUtils.doPost(
-        neon.query.queryUrl_('/services/widgetstateservice/savestate'),
+        neon.query.serviceUrl('widgetstateservice', 'savestate'),
         {
             data: { clientId: id, state: strObject},
             success: successCallback,
@@ -763,20 +730,24 @@ neon.query.saveState = function(id, stateObject, successCallback, errorCallback)
  * @return {neon.util.AjaxRequest} The xhr request object
  */
 
-neon.query.getSavedState = function(id, successCallback) {
+neon.query.getSavedState = function (id, successCallback) {
     return neon.util.ajaxUtils.doGet(
-        neon.query.queryUrl_('/services/widgetstateservice/restoreState?clientId=' + id),
+        neon.query.serviceUrl('widgetstateservice', 'restoreState', '?clientId=' + id),
         {
             success: successCallback,
-            error: function() {
+            error: function () {
                 //Do nothing, the state does not exist.
             }
         }
     );
 };
 
-neon.query.queryUrl_ = function (path) {
-    return neon.query.SERVER_URL + path;
+neon.query.serviceUrl = function (servicePath, serviceName, queryParamsString) {
+    if (!queryParamsString) {
+        queryParamsString = '';
+    }
+
+    return neon.query.SERVER_URL + '/services/' + servicePath + '/' + serviceName + queryParamsString;
 };
 
 
@@ -852,80 +823,38 @@ neon.query.WithinDistanceClause = function (locationField, center, distance, dis
     this.distanceUnit = distanceUnit;
 };
 
-neon.query.Transform = function (transformName, transformParams) {
-    this.transformName = transformName;
-    this.transformParams = transformParams;
-};
-
 /**
  * A query group is one that encompasses multiple queries. The results of all queries in the group are
- * combined into a single json object (the resulting json object has one key for each of the queries where the
- * value of each key is the result of that query). The entire query result can also be sent to a transform
- * service to manipulate all of the results at once
+ * combined into a single json object.
  * @constructor
  * @class QueryGroup
  */
 neon.query.QueryGroup = function () {
-    this.namedQueries = [];
-
-    /*jshint expr: true */
-    this.transform_;
-    this.includeFiltered_ = false;
+    this.queries = [];
+    this.disregardFilters_ = false;
 };
 
 /**
  * Adds a query to execute as part of the query group
  * @method addQuery
- * @param {String} name The name associated with this query in the group (the name is used as the key in the resulting json)
  * @param {neon.query.Query} query The query to execute as part of the query group
  * @return {neon.query.QueryGroup} This object
  */
-neon.query.QueryGroup.prototype.addQuery = function (name, query) {
-    this.namedQueries.push(new neon.query.NamedQuery(name, query));
+neon.query.QueryGroup.prototype.addQuery = function (query) {
+    this.queries.push(query);
     return this;
 };
 
-// TODO: When NEON-170 is complete, update documentation indicating that individual query settings of transform are ignored
-/**
- * Sets the transform to execute on the results of the query group (individual query settings of transform are
- * ignored, and all queries in the group will use this value).
- * See {{#crossLink "neon.query.Query/transform"}}{{/crossLink}} for parameter details
- * @method transform
- * @param {String} transformName
- * @param {Array} transformParams
- * @return {neon.query.QueryGroup} This query group
- */
-neon.query.QueryGroup.prototype.transform = function (transformName, transformParams) {
-    this.transform_ = new neon.query.Transform(transformName, transformParams);
-    return this;
-};
-
-// TODO: When NEON-170 is complete, update documentation indicating that individual query settings of includedFiltered are ignored
 /**
  * Sets whether or not the results of the query should include data that is filtered out. When true,
- * all data, regardless of filters, will be included in the query (individual query settings of includeFiltered are
+ * all data, regardless of filters, will be included in the query (individual query settings of disregardFilters are
  * ignored, and all queries in the group will use this value).
- * See {{#crossLink "neon.query.Query/includeFiltered"}}{{/crossLink}} for parameter details
- * @method includeFiltered
- * @param {Boolean} includeFiltered
+ * See {{#crossLink "neon.query.Query/disregardFilters"}}{{/crossLink}} for parameter details
+ * @method disregardFilters
+ * @param {Boolean} includeFilteredOutData
  * @return {neon.query.QueryGroup} This query group
  */
-neon.query.QueryGroup.prototype.includeFiltered = function (includeFiltered) {
-    this.includeFiltered_ = includeFiltered;
+neon.query.QueryGroup.prototype.disregardFilters = function (includeFilteredOutData) {
+    this.disregardFilters_ = includeFilteredOutData;
     return this;
-};
-
-
-/**
- * A named query is one that is included as part of a query group. Each query is executed as part of the group, and
- * the name is used to indicate the json key to use for its results
- * @param name
- * @param query
- * @class NamedQuery
- * @constructor
- * @private
- */
-neon.query.NamedQuery = function (name, query) {
-    this.name = name;
-    this.query = query;
 };

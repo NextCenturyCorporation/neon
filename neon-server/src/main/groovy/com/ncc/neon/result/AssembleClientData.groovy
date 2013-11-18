@@ -1,13 +1,9 @@
 package com.ncc.neon.result
-
-import com.ncc.neon.metadata.model.dataset.WidgetAndDatasetMetadata
-import com.ncc.neon.metadata.model.dataset.WidgetAndDatasetMetadataList
 import com.ncc.neon.metadata.model.column.ColumnMetadata
 import com.ncc.neon.metadata.model.column.ColumnMetadataList
+import com.ncc.neon.metadata.model.dataset.WidgetAndDatasetMetadata
+import com.ncc.neon.metadata.model.dataset.WidgetAndDatasetMetadataList
 import com.ncc.neon.query.QueryResult
-import org.apache.commons.lang.math.NumberUtils
-import org.json.JSONArray
-import org.json.JSONObject
 /*
  * ************************************************************************
  * Copyright (c), 2013 Next Century Corporation. All Rights Reserved.
@@ -37,85 +33,47 @@ import org.json.JSONObject
 class AssembleClientData {
 
     QueryResult queryResult
-    def metadataObject
-    String transformClassName
-    List<String> transformParams
+    ColumnMetadataList columnMetadataList
+    WidgetAndDatasetMetadataList initDataList
 
-    String createClientData(){
-        String data = queryResult.toJson()
-        if (transformClassName) {
-            data = applyTransform(data)
-        }
-        String metadata = handleMetadata(metadataObject)
 
-        return assemble(data, metadata)
-    }
-
-    static FieldNames createFieldNames(Collection<String> names, WidgetAndDatasetMetadataList metadata){
-        ColumnMapping mapping = new ColumnMapping()
-        metadata.dataSet.each { WidgetAndDatasetMetadata data ->
-            mapping.put(data.elementId, data.value)
+    ClientData createClientData(){
+        Map<String, Map<String, Boolean>> metadata = createMetadata(columnMetadataList)
+        if(initDataList){
+            Map<String, String> idToColumn = createInitData()
+            return new InitializingClientData(data: queryResult.data, metadata: metadata, idToColumn: idToColumn)
         }
 
-        new FieldNames(fieldNames: names, metadata: mapping)
+        new ClientData(data: queryResult.data, metadata: metadata)
     }
 
-    private String handleMetadata(WidgetAndDatasetMetadataList data) {
-        JSONArray array = new JSONArray()
-
-        data.dataSet.each{ WidgetAndDatasetMetadata dataset ->
-            JSONObject object = createFieldMapping(dataset)
-            array.put(object)
+    Map<String, String> createInitData() {
+        Map initData = [:]
+        initDataList.dataSet.each { WidgetAndDatasetMetadata init ->
+            initData.put(init.elementId, init.value)
         }
-
-        return array.toString()
+        return initData
     }
 
-    private JSONObject createFieldMapping(WidgetAndDatasetMetadata widgetAndDatasetMetadata) {
-        JSONObject object = new JSONObject()
-        object.put("elementId", widgetAndDatasetMetadata.elementId)
-        object.put("value", widgetAndDatasetMetadata.value)
-
-        return object
-    }
-
-    private String handleMetadata(ColumnMetadataList data) {
-        JSONArray array = new JSONArray()
+    private Map<String, Map<String, Boolean>> createMetadata(ColumnMetadataList data) {
+        Map<String, Map<String, Boolean>> metadata = [:]
 
         data.dataSet.each{ ColumnMetadata column ->
-            JSONObject object = createColumnObject(column)
-            array.put(object)
+            Map map = createColumnMap(column)
+            metadata.put(column.columnName, map)
         }
 
-        return array.toString()
+        return metadata
     }
 
-    private JSONObject createColumnObject(ColumnMetadata column) {
-        JSONObject object = new JSONObject()
-        object.put("columnName", column.columnName)
+    private Map<String, Boolean> createColumnMap(ColumnMetadata column) {
+        Map<String, Boolean> map = [:]
         column.properties.each { k, v ->
             if (v == true) {
-                object.put(k, v)
+                map.put(k, v)
             }
         }
-        return object
-    }
-
-    private String assemble(String data, String metadata){
-        return "{\"data\":${data},\"metadata\":${metadata}}"
-    }
-
-    private def applyTransform(json) {
-        def transform = instantiateTransform()
-        return transform.apply(json)
-    }
-
-    private def instantiateTransform() {
-        def typedParams = transformParams.collect { NumberUtils.isNumber(it) ? NumberUtils.createNumber(it) : it }
-        def transformParamTypes = typedParams.collect { it.class }
-        def transformClass = AssembleClientData.classLoader.loadClass(transformClassName)
-        def constructor = transformClass.getConstructor(transformParamTypes as Class[])
-        return constructor.newInstance(typedParams as Object[])
+        return map
     }
 
 }

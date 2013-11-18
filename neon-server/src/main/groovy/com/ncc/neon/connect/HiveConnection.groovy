@@ -39,12 +39,6 @@ class HiveConnection implements Connection {
 
     JdbcClient client
 
-    HiveConnection() {
-        addShutdownHook {
-            close()
-        }
-    }
-
     @Override
     def connect(ConnectionInfo info) {
         if (!client) {

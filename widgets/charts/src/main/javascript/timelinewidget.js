@@ -140,7 +140,7 @@ neon.ready(function () {
     }
 
     function populateTimeGranularityDropdown() {
-        neon.dropdown.populateAttributeDropdowns({fieldNames: charts.Timeline.GRANULARITIES_}, "time-granularity", drawChart);
+        neon.dropdown.populateAttributeDropdowns({data: charts.Timeline.GRANULARITIES_}, "time-granularity", drawChart);
     }
 
     function buildStateObject(query) {

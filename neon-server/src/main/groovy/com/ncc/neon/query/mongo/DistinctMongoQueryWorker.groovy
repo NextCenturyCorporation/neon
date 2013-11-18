@@ -2,6 +2,7 @@ package com.ncc.neon.query.mongo
 
 import com.mongodb.MongoClient
 import com.ncc.neon.query.QueryResult
+import com.ncc.neon.query.TableQueryResult
 import com.ncc.neon.query.clauses.SelectClause
 import com.ncc.neon.query.clauses.SortClause
 import com.ncc.neon.query.clauses.SortOrder
@@ -40,7 +41,6 @@ class DistinctMongoQueryWorker extends AbstractMongoQueryWorker {
     private static final ASCENDING_STRING_COMPARATOR = { a, b -> a <=> b }
     private static final DESCENDING_STRING_COMPARATOR = { a, b -> b <=> a }
 
-
     DistinctMongoQueryWorker(MongoClient mongo) {
         super(mongo)
     }
@@ -59,8 +59,7 @@ class DistinctMongoQueryWorker extends AbstractMongoQueryWorker {
         // create a mapping of field to distinct values
         def distinctRows = distinct.collect { [(field): it] }
 
-
-        return new MongoQueryResult(mongoIterable: distinctRows)
+        return new TableQueryResult(distinctRows)
     }
 
     private List limitDistinctResults(MongoQuery mongoQuery, List distinct) {

@@ -1,8 +1,7 @@
-package com.ncc.neon.query
-
-import org.junit.Before
-import org.junit.Test
-
+package com.ncc.neon.query.jackson
+import org.bson.types.ObjectId
+import org.codehaus.jackson.Version
+import org.codehaus.jackson.map.module.SimpleModule
 /*
  * ************************************************************************
  * Copyright (c), 2013 Next Century Corporation. All Rights Reserved.
@@ -24,40 +23,17 @@ import org.junit.Test
  * PROPRIETARY AND CONFIDENTIAL TRADE SECRET MATERIAL NOT FOR DISCLOSURE OUTSIDE
  * OF NEXT CENTURY CORPORATION EXCEPT BY PRIOR WRITTEN PERMISSION AND WHEN
  * RECIPIENT IS UNDER OBLIGATION TO MAINTAIN SECRECY.
+ *
+ * 
+ * @author tbrooks
  */
 
-class QueryGroupResultTest {
+class NeonModule extends SimpleModule{
 
-    private static final def QUERY1_JSON = '[{"q1a":"v1a"},{"q1b":"v1b"}]'
-
-    private static final def QUERY2_JSON = '[{"q2a":"v2a"},{"q2b":"v2b"}]'
-
-    private static final def QUERY1_RESULT = createQueryResult(QUERY1_JSON)
-    private static final def QUERY2_RESULT = createQueryResult(QUERY2_JSON)
-
-    def queryGroupResult
-
-    @Before
-    void before() {
-        queryGroupResult = new QueryGroupResult()
-        queryGroupResult.namedResults.q1 = QUERY1_RESULT
-        queryGroupResult.namedResults.q2 = QUERY2_RESULT
-    }
-
-    @Test
-    void "convert query group to json"() {
-        def actual = queryGroupResult.toJson()
-        def expected = '{"q1":' + QUERY1_JSON + ',"q2":' + QUERY2_JSON + '}'
-
-        assert actual == expected
-    }
-
-    private static def createQueryResult(json) {
-        def result = [
-                toJson: { json }
-        ] as QueryResult
-        return result
-
+    NeonModule() {
+        super("NeonModule", Version.UNKNOWN_VERSION)
+        addSerializer(ObjectId, new ObjectIdSerializer())
+        addSerializer(Date, new DateSerializer())
     }
 
 }

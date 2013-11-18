@@ -1,5 +1,4 @@
 package com.ncc.neon
-import com.ncc.neon.query.NamedQuery
 import com.ncc.neon.query.Query
 import com.ncc.neon.query.QueryGroup
 import com.ncc.neon.query.clauses.*
@@ -9,7 +8,6 @@ import com.ncc.neon.query.filter.FilterKey
 import com.ncc.neon.util.AssertUtils
 import com.ncc.neon.util.DateUtils
 import org.json.JSONArray
-import org.json.JSONObject
 import org.junit.After
 import org.junit.Test
 /*
@@ -65,15 +63,6 @@ abstract class AbstractQueryExecutorIntegrationTest {
     protected abstract def getQueryExecutor()
 
     /**
-     * Converts the database specific row to a map
-     * @param row
-     * @return
-     */
-    protected def rowToMap(row) {
-        return row.row
-    }
-
-    /**
      * Gets the folder that the input json files are stored in. By defalut, the test-data
      * directory is used, but some databases (e.g. hive) will transform the data (such as by
      * removing nested fields) and put it i na folder it can use
@@ -112,24 +101,9 @@ abstract class AbstractQueryExecutorIntegrationTest {
         return data
     }
 
-    private static def jsonObjectToMap(jsonObject) {
-        def map = [:]
-        jsonObject.keys().each { key ->
-            def value = jsonObject.get(key)
-            if (key =~ DATE_FIELD_REGEX) {
-                map[key] = DateUtils.parseDate(value)
-            } else if (value instanceof JSONArray) {
-                map[key] = jsonArrayToList(value)
-            } else if (value instanceof JSONObject) {
-                map[key] = jsonObjectToMap(value)
-            } else {
-                map[key] = value
-            }
-        }
-        return map
-    }
+    protected abstract def jsonObjectToMap(jsonObject)
 
-    private static def jsonArrayToList(jsonArray) {
+    protected static def jsonArrayToList(jsonArray) {
         def list = []
         jsonArray.length().times { index ->
             def arrayVal = jsonArray.get(index)
@@ -147,19 +121,19 @@ abstract class AbstractQueryExecutorIntegrationTest {
     void "field names"() {
         def fieldNames = queryExecutor.getFieldNames(DATABASE_NAME, TABLE_NAME)
         def expected = getAllData()[0].keySet()
-        AssertUtils.assertEqualCollections(expected, fieldNames)
+        AssertUtils.assertEqualCollections(expected, fieldNames.data)
     }
 
     @Test
     void "field names without a table returns empty collection"(){
         def names = queryExecutor.getFieldNames(DATABASE_NAME, "zsz")
         assert names != null
-        assert !names
+        assert !names.data
     }
 
     @Test
     void "query all"() {
-        def result = queryExecutor.execute(ALL_DATA_QUERY, false)
+        def result = queryExecutor.execute(ALL_DATA_QUERY)
         assertUnorderedQueryResult(getAllData(), result)
     }
 
@@ -169,7 +143,7 @@ abstract class AbstractQueryExecutorIntegrationTest {
         def salaryAndStateClause = new AndWhereClause(whereClauses: [new SingularWhereClause(lhs: 'salary', operator: '>=', rhs: 100000), whereStateClause])
         def expected = rows(0, 2, 4)
         def query = createQueryWithWhereClause(salaryAndStateClause)
-        def result = queryExecutor.execute(query, false)
+        def result = queryExecutor.execute(query)
         assertUnorderedQueryResult(expected, result)
     }
 
@@ -184,7 +158,7 @@ abstract class AbstractQueryExecutorIntegrationTest {
         def result = queryExecutor.execute(new Query(filter: ALL_DATA_FILTER,
                 groupByClauses: [groupByStateClause, groupByCityClause],
                 aggregates: [salaryAggregateClause],
-                sortClauses: [sortByStateClause, sortByCityClause]), false)
+                sortClauses: [sortByStateClause, sortByCityClause]))
         assertOrderedQueryResult(expected, result)
     }
 
@@ -197,7 +171,7 @@ abstract class AbstractQueryExecutorIntegrationTest {
         def result = queryExecutor.execute(new Query(filter: ALL_DATA_FILTER,
                 groupByClauses: [groupByStateClause],
                 aggregates: [salaryAverageClause],
-                sortClauses: [sortByStateClause]), false)
+                sortClauses: [sortByStateClause]))
         assertOrderedQueryResult(expected, result)
     }
 
@@ -210,7 +184,7 @@ abstract class AbstractQueryExecutorIntegrationTest {
         def result = queryExecutor.execute(new Query(filter: ALL_DATA_FILTER,
                 groupByClauses: [groupByStateClause],
                 aggregates: [salaryMinClause],
-                sortClauses: [sortByStateClause]), false)
+                sortClauses: [sortByStateClause]))
         assertOrderedQueryResult(expected, result)
     }
 
@@ -223,7 +197,7 @@ abstract class AbstractQueryExecutorIntegrationTest {
         def result = queryExecutor.execute(new Query(filter: ALL_DATA_FILTER,
                 groupByClauses: [groupByStateClause],
                 aggregates: [salaryMaxClause],
-                sortClauses: [sortByStateClause]), false)
+                sortClauses: [sortByStateClause]))
         assertOrderedQueryResult(expected, result)
     }
 
@@ -237,7 +211,7 @@ abstract class AbstractQueryExecutorIntegrationTest {
         def result = queryExecutor.execute(new Query(filter: ALL_DATA_FILTER,
                 groupByClauses: [groupByStateClause],
                 aggregates: [countClause],
-                sortClauses: [sortByStateClause]), false)
+                sortClauses: [sortByStateClause]))
         assertOrderedQueryResult(expected, result)
     }
 
@@ -245,8 +219,7 @@ abstract class AbstractQueryExecutorIntegrationTest {
     @Test
     void "distinct"() {
         def expected = readJson('distinct.json')
-        def result = queryExecutor.execute(new Query(filter: ALL_DATA_FILTER, fields: ['state'], isDistinct: true),
-                false)
+        def result = queryExecutor.execute(new Query(filter: ALL_DATA_FILTER, fields: ['state'], isDistinct: true))
         assertUnorderedQueryResult(expected, result)
     }
 
@@ -260,8 +233,7 @@ abstract class AbstractQueryExecutorIntegrationTest {
                 fields: ['state'],
                 isDistinct: true,
                 sortClauses: [sortByStateClause],
-                limitClause: limitClause),
-                false)
+                limitClause: limitClause))
         assertOrderedQueryResult(expected, result)
     }
 
@@ -273,7 +245,7 @@ abstract class AbstractQueryExecutorIntegrationTest {
 
         // apply a filter and make sure only that data is returned
         queryExecutor.filterState.addFilter(filterId, dcStateFilter)
-        def dcStateResult = queryExecutor.execute(ALL_DATA_QUERY, false)
+        def dcStateResult = queryExecutor.execute(ALL_DATA_QUERY)
         def dcStateRecords = rows(1, 2, 5)
         assertUnorderedQueryResult(dcStateRecords, dcStateResult)
 
@@ -282,7 +254,7 @@ abstract class AbstractQueryExecutorIntegrationTest {
         queryExecutor.filterState.addFilter(filterId, salaryFilter)
 
         def dcStateWithSalaryFilterRecords = rows(2, 5)
-        def dcStateWithSalaryResult = queryExecutor.execute(ALL_DATA_QUERY, false)
+        def dcStateWithSalaryResult = queryExecutor.execute(ALL_DATA_QUERY)
         assertUnorderedQueryResult(dcStateWithSalaryFilterRecords, dcStateWithSalaryResult)
     }
 
@@ -299,7 +271,7 @@ abstract class AbstractQueryExecutorIntegrationTest {
         queryExecutor.filterState.addFilter(filterId, salaryFilter)
 
         queryExecutor.filterState.removeFilter(filterId)
-        def allDataResult = queryExecutor.execute(ALL_DATA_QUERY, false)
+        def allDataResult = queryExecutor.execute(ALL_DATA_QUERY)
         assertUnorderedQueryResult(getAllData(), allDataResult)
     }
 
@@ -311,7 +283,7 @@ abstract class AbstractQueryExecutorIntegrationTest {
 
         // apply a filter, but execute the query that bypasses the filters, so all data should be returned
         queryExecutor.filterState.addFilter(filterId, dcStateFilter)
-        def allDataResult = queryExecutor.execute(ALL_DATA_QUERY, true)
+        def allDataResult = queryExecutor.executeDisregardingFilters(ALL_DATA_QUERY)
         assertUnorderedQueryResult(getAllData(), allDataResult)
     }
 
@@ -328,7 +300,7 @@ abstract class AbstractQueryExecutorIntegrationTest {
         // clear the filters, and there should be no filters applied
         queryExecutor.filterState.clearAllFilters()
 
-        def result = queryExecutor.execute(ALL_DATA_QUERY, false)
+        def result = queryExecutor.execute(ALL_DATA_QUERY)
 
         assertUnorderedQueryResult(getAllData(), result)
     }
@@ -342,7 +314,7 @@ abstract class AbstractQueryExecutorIntegrationTest {
         def query = new Query(filter: new Filter(databaseName: DATABASE_NAME, tableName: TABLE_NAME),
                 groupByClauses: [groupByMonthClause], aggregates: [salaryAggregateClause], sortClauses: [sortByMonth])
 
-        def result = queryExecutor.execute(query, false)
+        def result = queryExecutor.execute(query)
         def expected = readJson('groupByMonth.json')
 
         assertOrderedQueryResult(expected, result)
@@ -354,7 +326,7 @@ abstract class AbstractQueryExecutorIntegrationTest {
         def query = createQueryWithWhereClause(whereLessThan)
 
         def expected = rows(3, 7)
-        def result = queryExecutor.execute(query, false)
+        def result = queryExecutor.execute(query)
         assertUnorderedQueryResult(expected, result)
     }
 
@@ -363,7 +335,7 @@ abstract class AbstractQueryExecutorIntegrationTest {
         def whereLessThanOrEqual = new SingularWhereClause(lhs: 'salary', operator: '<=', rhs: 60000)
         def query = createQueryWithWhereClause(whereLessThanOrEqual)
         def expected = rows(3, 7)
-        def result = queryExecutor.execute(query, false)
+        def result = queryExecutor.execute(query)
         assertUnorderedQueryResult(expected, result)
     }
 
@@ -373,7 +345,7 @@ abstract class AbstractQueryExecutorIntegrationTest {
         def query = createQueryWithWhereClause(whereGreaterThan)
         def expected = rows(2)
 
-        def result = queryExecutor.execute(query, false)
+        def result = queryExecutor.execute(query)
         assertUnorderedQueryResult(expected, result)
     }
 
@@ -382,7 +354,7 @@ abstract class AbstractQueryExecutorIntegrationTest {
         def whereGreaterThanOrEqual = new SingularWhereClause(lhs: 'salary', operator: '>=', rhs: 118000)
         def query = createQueryWithWhereClause(whereGreaterThanOrEqual)
         def expected = rows(2, 4)
-        def result = queryExecutor.execute(query, false)
+        def result = queryExecutor.execute(query)
         assertUnorderedQueryResult(expected, result)
     }
 
@@ -391,7 +363,7 @@ abstract class AbstractQueryExecutorIntegrationTest {
         def whereNotEqual = new SingularWhereClause(lhs: 'state', operator: '!=', rhs: 'VA')
         def query = createQueryWithWhereClause(whereNotEqual)
         def expected = rows(1, 2, 5, 6)
-        def result = queryExecutor.execute(query, false)
+        def result = queryExecutor.execute(query)
         assertUnorderedQueryResult(expected, result)
     }
 
@@ -400,7 +372,7 @@ abstract class AbstractQueryExecutorIntegrationTest {
         def whereIn = new SingularWhereClause(lhs: 'state', operator: 'in', rhs: ['MD', 'DC'])
         def query = createQueryWithWhereClause(whereIn)
         def expected = rows(1, 2, 5, 6)
-        def result = queryExecutor.execute(query, false)
+        def result = queryExecutor.execute(query)
         assertUnorderedQueryResult(expected, result)
     }
 
@@ -409,22 +381,15 @@ abstract class AbstractQueryExecutorIntegrationTest {
         def whereNotIn = new SingularWhereClause(lhs: 'state', operator: 'notin', rhs: ['VA', 'DC'])
         def query = createQueryWithWhereClause(whereNotIn)
         def expected = rows(6)
-        def result = queryExecutor.execute(query, false)
+        def result = queryExecutor.execute(query)
         assertUnorderedQueryResult(expected, result)
     }
 
     @Test
     void "query with limit"() {
-        def result = queryExecutor.execute(new Query(filter: ALL_DATA_FILTER, limitClause: new LimitClause(limit: 2)), false)
-
+        def result = queryExecutor.execute(new Query(filter: ALL_DATA_FILTER, limitClause: new LimitClause(limit: 2)))
         // should be limited to 2 results
-        def iterator = result.iterator()
-        assert iterator.hasNext()
-        iterator.next()
-        assert iterator.hasNext()
-        iterator.next()
-
-        assert !iterator.hasNext()
+        assert result.data.size == 2
     }
 
     // not every date operator combination is tested dates since the other query tests exercise the operators extensively
@@ -434,7 +399,7 @@ abstract class AbstractQueryExecutorIntegrationTest {
         def expected = readJson('dateGreaterThan.json')
         def whereGreaterThanOrEqualToDate = new SingularWhereClause(lhs: 'hiredate', operator: '>=', rhs: DateUtils.tryToParseDate("2012-09-15T00:00:00Z"))
         def query = createQueryWithWhereClause(whereGreaterThanOrEqualToDate)
-        def result = queryExecutor.execute(query, false)
+        def result = queryExecutor.execute(query)
         assertUnorderedQueryResult(expected, result)
     }
 
@@ -443,7 +408,7 @@ abstract class AbstractQueryExecutorIntegrationTest {
         def expected = rows(0)
         def whereEqualsDate = new SingularWhereClause(lhs: 'hiredate', operator: '=', rhs: DateUtils.tryToParseDate("2012-09-15T00:00:00Z"))
         def query = createQueryWithWhereClause(whereEqualsDate)
-        def result = queryExecutor.execute(query, false)
+        def result = queryExecutor.execute(query)
         assertOrderedQueryResult(expected, result)
     }
 
@@ -461,18 +426,13 @@ abstract class AbstractQueryExecutorIntegrationTest {
         def query3 = createQueryWithWhereClause(whereClause3)
 
         def queryGroup = new QueryGroup()
-        queryGroup.namedQueries << new NamedQuery(name: 'Virginia', query: query1)
-        queryGroup.namedQueries << new NamedQuery(name: 'Maryland', query: query2)
-        queryGroup.namedQueries << new NamedQuery(name: 'DistrictOfColumbia', query: query3)
+        queryGroup.queries << query1
+        queryGroup.queries << query2
+        queryGroup.queries << query3
 
-        // since these are not arrays/maps (which assertQueryResults expects),
-        // convert them to their raw json string forms and compare that way
-        def queryGroupResult = queryExecutor.execute(queryGroup, false)
-
-        // TODO: NEON-564 make timezones consistent (should be done by production code, not test)
-        def actualJson = new JSONObject(queryGroupResult.toJson()).toString().replaceAll("\\+0000", "Z")
-        def expectedJson = new JSONObject(AbstractQueryExecutorIntegrationTest.getResourceAsStream("/${resultsJsonFolder}queryGroup.json").text).toString()
-        assert actualJson == expectedJson
+        def expected = readJson('queryGroup.json')
+        def queryGroupResult = queryExecutor.execute(queryGroup)
+        assertOrderedQueryResult(expected, queryGroupResult)
     }
 
     @Test
@@ -480,7 +440,7 @@ abstract class AbstractQueryExecutorIntegrationTest {
         def fields = ["_id", "firstname", "lastname", "salary"]
         def query = new Query(filter: ALL_DATA_FILTER, fields: fields)
         def expected = getAllData().collect { it.subMap(fields) }
-        def result = queryExecutor.execute(query, false)
+        def result = queryExecutor.execute(query)
         assertUnorderedQueryResult(expected, result)
     }
 
@@ -493,7 +453,7 @@ abstract class AbstractQueryExecutorIntegrationTest {
         def query = new Query(filter: new Filter(databaseName: DATABASE_NAME, tableName: TABLE_NAME),
                 groupByClauses: [groupByMonthClause], aggregates: [salaryAggregateClause], sortClauses: [sortByMonth], fields: ["hire_month"])
 
-        def result = queryExecutor.execute(query, false)
+        def result = queryExecutor.execute(query)
         def expected = readJson('groupByMonth.json')
         assertOrderedQueryResult(expected, result)
     }
@@ -507,24 +467,24 @@ abstract class AbstractQueryExecutorIntegrationTest {
     }
 
     protected def assertQueryResult(expected, actual, ordered) {
-        def actualAsBasicTypes = convertResultsToBasicJavaTypes(actual)
-        assert expected.size() == actualAsBasicTypes.size()
+        def data = actual.data
+        assert expected.size() == data.size()
 
         // compare row by row for better error messages on failure
-        actualAsBasicTypes.eachWithIndex { row, index ->
+        data.eachWithIndex { map, index ->
             if (ordered) {
-                compareRowOrdered(expected[index], row, "Row ${index}")
+                compareRowOrdered(expected[index], map, "Row ${index}")
             } else {
-                compareRowUnordered(expected, row, "Could not find a match for row ${index}: ${row} in ${expected}")
+                compareRowUnordered(expected, map, "Could not find a match for row ${index}: ${map} in ${expected}")
             }
         }
     }
 
-    private static def compareRowOrdered(expectedRow, actualRow, message) {
+    private static void compareRowOrdered(expectedRow, actualRow, message) {
         assert expectedRow == actualRow: message
     }
 
-    private static def compareRowUnordered(expectedRows, actualRow, message) {
+    private static void compareRowUnordered(expectedRows, actualRow, message) {
         def match = false
         expectedRows.each { expectedRow ->
             if (!match && expectedRow == actualRow) {
@@ -532,27 +492,6 @@ abstract class AbstractQueryExecutorIntegrationTest {
             }
         }
         assert match: message
-    }
-
-    /**
-     * Converts an array of types that may have database specific types to basic java types. Note this
-     * uses the rowToMap function, and if that does not return a copy of the object, it will be modified
-     * @param data
-     * @return The converted data
-     * TODO: NEON-550 addresses moving this method to the query executor rather than the test
-     */
-    private def convertResultsToBasicJavaTypes(data) {
-        def converted = []
-        data.each { row ->
-            def rowAsMap = rowToMap(row)
-            rowAsMap.each { key, val ->
-                rowAsMap[key] = convertRowValueToBasicJavaType(val)
-            }
-            def map = [:]
-            map.putAll(rowAsMap)
-            converted << map
-        }
-        return converted
     }
 
     /**

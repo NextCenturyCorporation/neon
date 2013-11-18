@@ -1,6 +1,10 @@
-package com.ncc.neon.query.mongo
+package com.ncc.neon.query.jackson
 
-import com.mongodb.util.ObjectSerializer
+import org.codehaus.jackson.map.ObjectMapper
+import org.springframework.stereotype.Component
+
+import javax.ws.rs.ext.ContextResolver
+import javax.ws.rs.ext.Provider
 
 /*
  * ************************************************************************
@@ -23,18 +27,19 @@ import com.mongodb.util.ObjectSerializer
  * PROPRIETARY AND CONFIDENTIAL TRADE SECRET MATERIAL NOT FOR DISCLOSURE OUTSIDE
  * OF NEXT CENTURY CORPORATION EXCEPT BY PRIOR WRITTEN PERMISSION AND WHEN
  * RECIPIENT IS UNDER OBLIGATION TO MAINTAIN SECRECY.
+ *
+ * 
+ * @author tbrooks
  */
-class SimpleObjectIdSerializer implements ObjectSerializer {
+
+@Component
+@Provider
+class ObjectMapperProvider implements ContextResolver<ObjectMapper> {
 
     @Override
-    void serialize(Object obj, StringBuilder buf) {
-        buf.append("\"").append(obj.toString()).append("\"")
-    }
-
-    @Override
-    String serialize(Object obj) {
-        def builder = new StringBuilder()
-        serialize(obj, builder)
-        return builder.toString()
+    public ObjectMapper getContext(Class<?> type) {
+        ObjectMapper objectMapper = new ObjectMapper()
+        objectMapper.registerModule(new NeonModule())
+        return objectMapper
     }
 }

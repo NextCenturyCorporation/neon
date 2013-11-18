@@ -1,7 +1,7 @@
 package com.ncc.neon.services
 
 import com.ncc.neon.query.QueryExecutor
-import com.ncc.neon.query.QueryUtils
+import com.ncc.neon.query.QueryResult
 import com.ncc.neon.query.filter.Filter
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
@@ -10,7 +10,6 @@ import javax.ws.rs.Consumes
 import javax.ws.rs.POST
 import javax.ws.rs.Path
 import javax.ws.rs.Produces
-import javax.ws.rs.QueryParam
 import javax.ws.rs.core.MediaType
 
 /*
@@ -50,7 +49,7 @@ class SelectionService {
     @Consumes(MediaType.APPLICATION_JSON)
     @Path("setselectionwhere")
     void setSelectionWhere(Filter filter) {
-        QueryExecutor queryExecutor = queryExecutorFactory.create()
+        QueryExecutor queryExecutor = queryExecutorFactory.getExecutor()
         queryExecutor.setSelectionWhere(filter)
     }
 
@@ -58,7 +57,7 @@ class SelectionService {
     @Consumes(MediaType.APPLICATION_JSON)
     @Path("setselectedids")
     void setSelectedIds(Collection<Object> ids) {
-        QueryExecutor queryExecutor = queryExecutorFactory.create()
+        QueryExecutor queryExecutor = queryExecutorFactory.getExecutor()
         queryExecutor.setSelectedIds(ids)
     }
 
@@ -66,18 +65,16 @@ class SelectionService {
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     @Path("getselectionwhere")
-    String getSelectionWhere(Filter filter,
-                             @QueryParam("transform") String transformClassName,
-                             @QueryParam("param") List<String> transformParams) {
-        QueryExecutor queryExecutor = queryExecutorFactory.create()
-        return QueryUtils.wrapJsonInDataElement(queryExecutor.getSelectionWhere(filter), transformClassName, transformParams)
+    QueryResult getSelectionWhere(Filter filter) {
+        QueryExecutor queryExecutor = queryExecutorFactory.getExecutor()
+        return queryExecutor.getSelectionWhere(filter)
     }
 
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
     @Path("addselectedids")
     void addSelectedIds(Collection<Object> ids) {
-        QueryExecutor queryExecutor = queryExecutorFactory.create()
+        QueryExecutor queryExecutor = queryExecutorFactory.getExecutor()
         queryExecutor.addSelectedIds(ids)
     }
 
@@ -85,14 +82,14 @@ class SelectionService {
     @Consumes(MediaType.APPLICATION_JSON)
     @Path("removeselectedids")
     void removeSelectedIds(Collection<Object> ids) {
-        QueryExecutor queryExecutor = queryExecutorFactory.create()
+        QueryExecutor queryExecutor = queryExecutorFactory.getExecutor()
         queryExecutor.removeSelectedIds(ids)
     }
 
     @POST
     @Path("clearselection")
     void clearSelection() {
-        QueryExecutor queryExecutor = queryExecutorFactory.create()
+        QueryExecutor queryExecutor = queryExecutorFactory.getExecutor()
         queryExecutor.clearSelection()
     }
 }

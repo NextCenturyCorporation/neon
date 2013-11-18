@@ -70,7 +70,6 @@ class DatasetMetadataScript {
         }
     }
 
-
     private void populateConfigurationMapping(String[] dataArray) {
         validateLine(dataArray)
 

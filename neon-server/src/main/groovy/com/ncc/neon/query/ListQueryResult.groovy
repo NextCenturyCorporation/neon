@@ -1,4 +1,4 @@
-package com.ncc.neon.query.transform
+package com.ncc.neon.query
 
 /*
  * ************************************************************************
@@ -21,18 +21,19 @@ package com.ncc.neon.query.transform
  * PROPRIETARY AND CONFIDENTIAL TRADE SECRET MATERIAL NOT FOR DISCLOSURE OUTSIDE
  * OF NEXT CENTURY CORPORATION EXCEPT BY PRIOR WRITTEN PERMISSION AND WHEN
  * RECIPIENT IS UNDER OBLIGATION TO MAINTAIN SECRECY.
+ *
+ * 
+ * @author tbrooks
  */
 
-/**
- * An interface for applying a transform to a query result before returning it to the client.
- */
-interface JsonTransform {
+class ListQueryResult implements QueryResult{
+    List<String> data = []
 
-    /**
-     * Transforms the json input array and returns the output json representation
-     * @param inputJsonArray
-     * @return
-     */
-    String apply(inputJsonArray)
+    ListQueryResult(){
 
+    }
+
+    ListQueryResult(Collection<String> list){
+        data.addAll(list)
+    }
 }

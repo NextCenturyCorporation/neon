@@ -4,7 +4,6 @@ import com.ncc.neon.query.*
 import com.ncc.neon.query.filter.Filter
 import com.ncc.neon.query.filter.FilterState
 import com.ncc.neon.query.jdbc.JdbcClient
-import com.ncc.neon.query.jdbc.JdbcQueryResult
 import com.ncc.neon.selection.SelectionManager
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -53,33 +52,70 @@ class HiveQueryExecutor implements QueryExecutor {
     private ConnectionManager connectionManager
 
     @Override
-    QueryResult execute(Query query, boolean includedFiltered) {
-        String hiveQuery = createHiveQuery(query, includedFiltered)
+    QueryResult execute(Query query) {
+        HiveConversionStrategy conversionStrategy = new HiveConversionStrategy(filterState)
+        String hiveQuery = conversionStrategy.convertQueryWithFilterState(query)
         LOGGER.debug("Hive Query: {}", hiveQuery)
         List<Map> resultList = jdbcClient.executeQuery(hiveQuery)
-
-        return new JdbcQueryResult(resultList: resultList)
+        return new TableQueryResult(data: resultList)
     }
 
     @Override
-    QueryResult execute(QueryGroup query, boolean includeFiltered) {
-        QueryGroupResult queryGroupResult = new QueryGroupResult()
-        query.namedQueries.each {
-            def result = execute(it.query, includeFiltered)
-            queryGroupResult.namedResults[it.name] = result
+    QueryResult execute(QueryGroup query) {
+        TableQueryResult queryResult = new TableQueryResult()
+        query.queries.each {
+            def result = execute(it)
+            queryResult.data.addAll(result.data)
         }
-        return queryGroupResult
+        return queryResult
     }
 
     @Override
-    Collection<String> getFieldNames(String databaseName, String tableName) {
+    QueryResult executeDisregardingFilters(Query query) {
+        HiveConversionStrategy conversionStrategy = new HiveConversionStrategy(filterState)
+        String hiveQuery = conversionStrategy.convertQueryDisregardingFilters(query)
+        LOGGER.debug("Hive Query: {}", hiveQuery)
+        List<Map> resultList = jdbcClient.executeQuery(hiveQuery)
+        return new TableQueryResult(data: resultList)
+    }
+
+    @Override
+    QueryResult executeDisregardingFilters(QueryGroup query) {
+        TableQueryResult queryResult = new TableQueryResult()
+        query.queries.each {
+            def result = executeDisregardingFilters(it)
+            queryResult.data.addAll(result.data)
+        }
+        return queryResult
+    }
+
+    @Override
+    List<String> showDatabases() {
+        LOGGER.debug("Executing Hive SHOW DATABASES")
+        def dbs = jdbcClient.executeQuery("SHOW DATABASES").collect { Map<String, String> map ->
+            map.get("database_name")
+        }
+        return dbs
+    }
+
+    @Override
+    List<String> showTables(String dbName) {
+        LOGGER.debug("Executing Hive SHOW TABLES on database {}", dbName)
+        jdbcClient.execute("USE " + dbName)
+        return jdbcClient.executeQuery("SHOW TABLES").collect { Map<String, String> map ->
+            map.get("tab_name")
+        }
+    }
+
+    @Override
+    QueryResult getFieldNames(String databaseName, String tableName) {
         try {
             def columns = jdbcClient.getColumnNames(databaseName, tableName)
-            return columns
+            return new ListQueryResult(columns)
         }
         catch (SQLException ex) {
             LOGGER.error("Columns cannot be found ", ex)
-            return []
+            return new ListQueryResult()
         }
     }
 
@@ -115,35 +151,6 @@ class HiveQueryExecutor implements QueryExecutor {
     @Override
     QueryResult getSelectionWhere(Filter filter) {
         throw new UnsupportedOperationException("We can't set a selection through hive because we have not yet implemented the ID field")
-    }
-
-    @Override
-    List<String> showDatabases() {
-        LOGGER.debug("Executing Hive SHOW DATABASES")
-        def dbs = jdbcClient.executeQuery("SHOW DATABASES").collect { Map<String, String> map ->
-            map.get("database_name")
-        }
-        //connectionManager.closeConnection()
-        return dbs
-    }
-
-    @Override
-    List<String> showTables(String dbName) {
-
-        LOGGER.debug("Executing Hive SHOW TABLES on database {}", dbName)
-        jdbcClient.execute("USE " + dbName)
-        return jdbcClient.executeQuery("SHOW TABLES").collect { Map<String, String> map ->
-            map.get("tab_name")
-        }
-
-    }
-
-    private String createHiveQuery(Query query, boolean includeFiltered) {
-        HiveConversionStrategy conversionStrategy = new HiveConversionStrategy(filterState)
-        if (includeFiltered) {
-            return conversionStrategy.convertQuery(query)
-        }
-        return conversionStrategy.convertQueryWithFilterState(query)
     }
 
     private JdbcClient getJdbcClient() {

@@ -50,7 +50,7 @@ class SimpleMongoQueryWorker extends AbstractMongoQueryWorker {
         if (mongoQuery.query.limitClause) {
             results = results.limit(mongoQuery.query.limitClause.limit)
         }
-        return new MongoQueryResult(mongoIterable: results)
+        return new MongoQueryResult(results)
     }
 
     private DBCursor queryDB(MongoQuery query) {

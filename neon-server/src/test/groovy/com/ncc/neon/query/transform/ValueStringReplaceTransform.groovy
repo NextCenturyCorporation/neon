@@ -28,7 +28,7 @@ import org.json.JSONArray
 /**
  * A transform used for testing that can replaces the string values in json results
  */
-class ValueStringReplaceTransform implements JsonTransform {
+class ValueStringReplaceTransform {
 
     private final String replaceThis
     private final int replaceWith

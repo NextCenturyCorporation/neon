@@ -1,5 +1,4 @@
-package com.ncc.neon.query
-
+package com.ncc.neon.result
 /*
  * ************************************************************************
  * Copyright (c), 2013 Next Century Corporation. All Rights Reserved.
@@ -21,15 +20,13 @@ package com.ncc.neon.query
  * PROPRIETARY AND CONFIDENTIAL TRADE SECRET MATERIAL NOT FOR DISCLOSURE OUTSIDE
  * OF NEXT CENTURY CORPORATION EXCEPT BY PRIOR WRITTEN PERMISSION AND WHEN
  * RECIPIENT IS UNDER OBLIGATION TO MAINTAIN SECRECY.
+ *
+ * 
+ * @author tbrooks
  */
 
-/**
- * A container for a query and a name for the query. This is used for grouping queries to indicate which
- * results came from which query
- */
-class NamedQuery {
+class ClientData {
 
-    String name
-    Query query
-
+    List data = []
+    Map<String, Map<String, Boolean>> metadata = [:]
 }

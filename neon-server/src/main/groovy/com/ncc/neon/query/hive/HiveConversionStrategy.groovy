@@ -43,7 +43,7 @@ class HiveConversionStrategy {
         this.filterState = filterState
     }
 
-    String convertQuery(Query query, Closure additionalWhereClauseGenerator = null) {
+    String convertQueryDisregardingFilters(Query query, Closure additionalWhereClauseGenerator = null) {
         helpConvertQuery(query, false, additionalWhereClauseGenerator)
     }
 

@@ -47,7 +47,7 @@ class QueryExecutorFactory {
     @Autowired
     private ConnectionManager connectionManager
 
-    QueryExecutor create() {
+    QueryExecutor getExecutor() {
         if(connectionManager.isConnectedToHive()){
             return hiveQueryExecutor
         }

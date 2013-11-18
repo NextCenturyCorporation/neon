@@ -1,4 +1,8 @@
-package com.ncc.neon.query
+package com.ncc.neon.query.jackson
+import com.ncc.neon.util.DateUtils
+import org.codehaus.jackson.JsonGenerator
+import org.codehaus.jackson.map.JsonSerializer
+import org.codehaus.jackson.map.SerializerProvider
 /*
  * ************************************************************************
  * Copyright (c), 2013 Next Century Corporation. All Rights Reserved.
@@ -20,29 +24,15 @@ package com.ncc.neon.query
  * PROPRIETARY AND CONFIDENTIAL TRADE SECRET MATERIAL NOT FOR DISCLOSURE OUTSIDE
  * OF NEXT CENTURY CORPORATION EXCEPT BY PRIOR WRITTEN PERMISSION AND WHEN
  * RECIPIENT IS UNDER OBLIGATION TO MAINTAIN SECRECY.
+ *
+ * 
+ * @author tbrooks
  */
 
-class QueryGroupResult implements QueryResult {
-
-    /** a map of row names to the query results associated with that name */
-    final def namedResults = [:] as LinkedHashMap
+class DateSerializer extends JsonSerializer<Date> {
 
     @Override
-    String toJson() {
-        def builder = new StringBuilder()
-        builder.append("{")
-        namedResults.eachWithIndex { name, result, index ->
-            if (index > 0) {
-                builder.append(",")
-            }
-            builder.append('"').append(name).append('":').append(result.toJson())
-        }
-        builder.append("}")
-        return builder.toString()
-    }
-
-    @Override
-    Iterator<Row> iterator() {
-        throw new UnsupportedOperationException("Cannot iterate over a query group result")
+    void serialize(Date value, JsonGenerator generator, SerializerProvider provider){
+        generator.writeString(DateUtils.dateTimeToString(value))
     }
 }

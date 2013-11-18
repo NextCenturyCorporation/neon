@@ -1,8 +1,6 @@
 package com.ncc.neon.query.mongo
 
-import com.mongodb.util.JSONSerializers
 import org.bson.types.ObjectId
-
 /*
  * ************************************************************************
  * Copyright (c), 2013 Next Century Corporation. All Rights Reserved.
@@ -52,19 +50,6 @@ class MongoUtils {
             objectIds << toObjectId(it)
         }
         return objectIds
-    }
-
-    /**
-     * serializes the object to json
-     * @param object
-     * @return
-     */
-    static def serialize(object) {
-        // override the default serializers that use mongo nested bson syntax with field names that have $
-        def serializer = JSONSerializers.strict
-        serializer.addObjectSerializer(Date, new SimpleDateSerializer())
-        serializer.addObjectSerializer(ObjectId, new SimpleObjectIdSerializer())
-        return serializer.serialize(object)
     }
 
 }

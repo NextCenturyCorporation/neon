@@ -5,7 +5,6 @@
  */
 neon.query.Filter = function () {
     this.whereClause = undefined;
-    this.transform_ = undefined;
 };
 
 /**
@@ -50,16 +49,4 @@ neon.query.Filter.prototype.where = function () {
  */
 neon.query.Filter.prototype.withinDistance = function (locationField, center, distance, distanceUnit) {
     return this.where(neon.query.withinDistance(locationField, center, distance, distanceUnit));
-};
-
-/**
- * Specifies a name of a transform to apply to the json before returning it from the query
- * @method transform
- * @param {String} transformName
- * @param {Array} [transformParams]
- * @return {neon.query.Filter} This filter object
- */
-neon.query.Filter.prototype.transform = function (transformName, transformParams) {
-    this.transform_ = new neon.query.Transform(transformName, transformParams);
-    return this;
 };

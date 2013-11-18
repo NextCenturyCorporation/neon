@@ -27,13 +27,12 @@ neon.dropdown = (function () {
 
     function populateFieldValues(attributeValues, selectId) {
         var select = $('#' + selectId);
-        attributeValues.fieldNames.forEach(function (field) {
+        attributeValues.data.forEach(function (field) {
             select.append($('<option></option>').attr('value', field).text(field));
         });
 
-
-        if(attributeValues.metadata){
-            var initialField = attributeValues.metadata.mapping[selectId];
+        if(attributeValues.idToColumn){
+            var initialField = attributeValues.idToColumn[selectId];
             if(initialField){
                 setDropdownInitialValue(selectId, initialField);
                 select.change();
@@ -51,7 +50,7 @@ neon.dropdown = (function () {
         getFieldNamesFromDropdown: function (selectElementId) {
             var optionsSelector = $('#' + selectElementId + ' option');
             return {
-                fieldNames: $.map(optionsSelector, function (option) {
+                data: $.map(optionsSelector, function (option) {
                     if (!option.value) {
                         return null;
                     }
@@ -69,8 +68,8 @@ neon.dropdown = (function () {
                 select.change(onChange);
                 populateFieldValues(attributeValues, selectId);
             });
-            if(attributeValues.metadata){
-                if(_.keys(attributeValues.metadata.mapping).length > 0){
+            if(attributeValues.initColumns){
+                if(_.keys(attributeValues.idToColumn).length > 0){
                     onChange();
                 }
             }

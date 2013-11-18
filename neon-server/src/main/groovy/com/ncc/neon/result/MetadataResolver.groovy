@@ -1,10 +1,10 @@
 package com.ncc.neon.result
+
 import com.ncc.neon.metadata.MetadataConnection
 import com.ncc.neon.metadata.model.dataset.WidgetAndDatasetMetadataList
 import com.ncc.neon.metadata.model.column.ColumnMetadata
 import com.ncc.neon.metadata.model.column.ColumnMetadataList
 import com.ncc.neon.metadata.store.MetadataRetriever
-import com.ncc.neon.query.NamedQuery
 import com.ncc.neon.query.Query
 import com.ncc.neon.query.QueryGroup
 import com.ncc.neon.query.clauses.SelectClause
@@ -41,6 +41,11 @@ class MetadataResolver {
     @Autowired
     MetadataConnection metadataConnection
 
+    ColumnMetadataList resolveQuery(String databaseName, String tableName) {
+        MetadataRetriever retriever = new MetadataRetriever(metadataConnection)
+        return retriever.retrieve(databaseName, tableName, [])
+    }
+
     ColumnMetadataList resolveQuery(Query query) {
         MetadataRetriever retriever = new MetadataRetriever(metadataConnection)
         List<String> columns = query.fields
@@ -52,8 +57,8 @@ class MetadataResolver {
 
     ColumnMetadataList resolveQuery(QueryGroup queryGroup) {
         def list = []
-        queryGroup.namedQueries.each { NamedQuery nq ->
-            ColumnMetadataList metadataList = resolveQuery(nq.query)
+        queryGroup.queries.each { Query query ->
+            ColumnMetadataList metadataList = resolveQuery(query)
             metadataList.dataSet.each { ColumnMetadata metadata ->
                 if(!list.contains(metadata)){
                     list << metadata
@@ -63,7 +68,7 @@ class MetadataResolver {
         return new ColumnMetadataList(list)
     }
 
-    WidgetAndDatasetMetadataList resolveQuery(String databaseName, String tableName, String widgetName){
+    WidgetAndDatasetMetadataList getInitializationData(String databaseName, String tableName, String widgetName){
         MetadataRetriever retriever = new MetadataRetriever(metadataConnection)
         return retriever.retrieve(databaseName, tableName, widgetName)
     }

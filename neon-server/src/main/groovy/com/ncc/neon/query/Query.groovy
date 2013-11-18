@@ -33,7 +33,7 @@ import org.codehaus.jackson.annotate.JsonIgnoreProperties
  * The query is translated to a datastore specific operation which returns the appropriate data.
  */
 @ToString(includeNames = true)
-@JsonIgnoreProperties(value = ['includeFiltered_'])
+@JsonIgnoreProperties(value = ['disregardFilters_'])
 class Query {
 
     Filter filter

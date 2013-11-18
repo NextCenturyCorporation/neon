@@ -10,8 +10,11 @@ import com.ncc.neon.query.clauses.SingularWhereClause
 import com.ncc.neon.query.clauses.WithinDistanceClause
 import com.ncc.neon.query.filter.Filter
 import com.ncc.neon.query.mongo.MongoQueryExecutor
+import com.ncc.neon.util.DateUtils
 import com.ncc.neon.util.LatLon
 import org.bson.types.ObjectId
+import org.json.JSONArray
+import org.json.JSONObject
 import org.junit.AfterClass
 import org.junit.BeforeClass
 import org.junit.Test
@@ -87,6 +90,26 @@ class MongoQueryExecutorIntegrationTest extends AbstractQueryExecutorIntegration
         collection.ensureIndex(new BasicDBObject("location", "2dsphere"))
     }
 
+    @Override
+    protected def jsonObjectToMap(jsonObject) {
+        def map = [:]
+        jsonObject.keys().each { key ->
+            def value = jsonObject.get(key)
+            if (key =~ AbstractQueryExecutorIntegrationTest.DATE_FIELD_REGEX) {
+                map[key] = DateUtils.parseDate(value)
+            } else if (value instanceof JSONArray) {
+                map[key] = jsonArrayToList(value)
+            } else if (value instanceof JSONObject) {
+                map[key] = jsonObjectToMap(value)
+            } else if (value instanceof String && ObjectId.isValid(value)){
+                map[key] = new ObjectId(value)
+            } else {
+                map[key] = value
+            }
+        }
+        return map
+    }
+
     @SuppressWarnings('CoupledTestCase') // this method incorrectly throws this codenarc error
     private static def parseJSON(resourcePath) {
         return JSON.parse(MongoQueryExecutorIntegrationTest.getResourceAsStream(resourcePath).text)
@@ -108,7 +131,7 @@ class MongoQueryExecutorIntegrationTest extends AbstractQueryExecutorIntegration
         def expected = rows(2, 0)
         def query = new Query(filter: new Filter(databaseName: DATABASE_NAME, tableName: TABLE_NAME, whereClause: withinDistance))
 
-        def result = queryExecutor.execute(query, false)
+        def result = queryExecutor.execute(query)
         assertOrderedQueryResult(expected, result)
     }
 
@@ -125,7 +148,7 @@ class MongoQueryExecutorIntegrationTest extends AbstractQueryExecutorIntegration
         def whereClause = new AndWhereClause(whereClauses: [withinDistance, dcStateClause])
         def query = new Query(filter: new Filter(databaseName: DATABASE_NAME, tableName: TABLE_NAME, whereClause: whereClause))
 
-        def result = queryExecutor.execute(query, false)
+        def result = queryExecutor.execute(query)
         assertOrderedQueryResult(expected, result)
     }
 
@@ -172,7 +195,7 @@ class MongoQueryExecutorIntegrationTest extends AbstractQueryExecutorIntegration
         def result = queryExecutor.getSelectionWhere(ALL_DATA_FILTER)
 
         // no results should be returned from the selection query since the selection was cleared
-        assert !result.iterator().hasNext()
+        assert result.data.size() == 0
 
     }
 

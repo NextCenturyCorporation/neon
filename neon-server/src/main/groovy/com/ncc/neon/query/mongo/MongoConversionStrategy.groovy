@@ -46,7 +46,7 @@ class MongoConversionStrategy {
         this.filterState = filterState
     }
 
-    MongoQuery convertQuery(Query query, Closure additionalWhereClauseGenerator = null) {
+    MongoQuery convertQueryDisregardingFilters(Query query, Closure additionalWhereClauseGenerator = null) {
         helpConvertQuery(query, false, additionalWhereClauseGenerator)
     }
 

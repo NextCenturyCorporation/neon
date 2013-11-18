@@ -1,5 +1,4 @@
-package com.ncc.neon.result
-
+package com.ncc.neon.query
 /*
  * ************************************************************************
  * Copyright (c), 2013 Next Century Corporation. All Rights Reserved.
@@ -26,10 +25,18 @@ package com.ncc.neon.result
  * @author tbrooks
  */
 
-class ColumnMapping {
-    def mapping = [:]
+class TableQueryResult implements QueryResult{
 
-    void put(String columnName, String value) {
-        mapping.put(columnName, value)
+
+    List<Map<String, Object>> data = []
+
+    public TableQueryResult(){
+
+    }
+
+    public TableQueryResult(List<Map<String, Object>> table){
+        this.data = table
     }
 }
+
+

@@ -52,7 +52,7 @@ class AggregateMongoQueryWorker extends AbstractMongoQueryWorker {
         }
         LOGGER.debug("Executing aggregate query: {} -- {}", match, additionalClauses)
         def results = getCollection(mongoQuery).aggregate(match, additionalClauses as DBObject[]).results()
-        return new MongoQueryResult(mongoIterable: results)
+        return new MongoQueryResult(results)
     }
 
 }

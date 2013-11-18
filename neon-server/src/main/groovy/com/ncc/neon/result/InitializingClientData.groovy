@@ -1,9 +1,5 @@
-package com.ncc.neon.mongo
+package com.ncc.neon.result
 
-import com.ncc.neon.query.mongo.SimpleDateSerializer
-import org.junit.Test
-
-import java.text.SimpleDateFormat
 
 /*
  * ************************************************************************
@@ -26,18 +22,11 @@ import java.text.SimpleDateFormat
  * PROPRIETARY AND CONFIDENTIAL TRADE SECRET MATERIAL NOT FOR DISCLOSURE OUTSIDE
  * OF NEXT CENTURY CORPORATION EXCEPT BY PRIOR WRITTEN PERMISSION AND WHEN
  * RECIPIENT IS UNDER OBLIGATION TO MAINTAIN SECRECY.
+ *
+ * 
+ * @author tbrooks
  */
-class SimpleDateSerializerTest {
 
-    @Test
-    void testSerializeDate() {
-
-        def date = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss aa zzz", Locale.US).parse("2013-02-20 6:58:00 PM GMT")
-        def serialized = new SimpleDateSerializer().serialize(date)
-
-        // the date should be converted to ISO 8601 date format (with quotes around it since it used as a json string)
-        def expected = /"2013-02-20T18:58:00Z"/
-        assert expected == serialized
-
-    }
+class InitializingClientData extends ClientData {
+    Map<String, String> idToColumn = [:]
 }

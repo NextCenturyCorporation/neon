@@ -1,19 +1,19 @@
 package com.ncc.neon.services
-
+import com.ncc.neon.metadata.model.column.ColumnMetadataList
 import com.ncc.neon.metadata.model.dataset.WidgetAndDatasetMetadataList
 import com.ncc.neon.query.Query
 import com.ncc.neon.query.QueryExecutor
 import com.ncc.neon.query.QueryGroup
 import com.ncc.neon.query.QueryResult
 import com.ncc.neon.result.AssembleClientData
-import com.ncc.neon.result.FieldNames
+import com.ncc.neon.result.ClientData
+import com.ncc.neon.result.InitializingClientData
 import com.ncc.neon.result.MetadataResolver
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
 
 import javax.ws.rs.*
 import javax.ws.rs.core.MediaType
-
 /*
  * ************************************************************************
  * Copyright (c), 2013 Next Century Corporation. All Rights Reserved.
@@ -51,40 +51,48 @@ class QueryService {
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     @Path("query")
-    String executeQuery(Query query,
-                        @DefaultValue("false") @QueryParam("includefiltered") boolean includeFiltered,
-                        @QueryParam("transform") String transformClassName,
-                        @QueryParam("param") List<String> transformParams) {
-        return execute(query, includeFiltered, transformClassName, transformParams)
+    ClientData executeQuery(Query query) {
+        return execute(query)
     }
 
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     @Path("querygroup")
-    String executeQueryGroup(QueryGroup query,
-                             @DefaultValue("false") @QueryParam("includefiltered") boolean includeFiltered,
-                             @QueryParam("transform") String transformClassName,
-                             @QueryParam("param") List<String> transformParams) {
-        return execute(query, includeFiltered, transformClassName, transformParams)
+    ClientData executeQueryGroup(QueryGroup query) {
+        return execute(query)
     }
 
-    private String execute(def query, boolean includeFiltered, String transformClassName, List<String> transformParams) {
-        QueryExecutor queryExecutor = queryExecutorFactory.create()
-        QueryResult queryResult = queryExecutor.execute(query, includeFiltered)
-        def columns = metadataResolver.resolveQuery(query)
+    private ClientData execute(def query) {
+        QueryExecutor queryExecutor = queryExecutorFactory.getExecutor()
+        QueryResult queryResult = queryExecutor.execute(query)
+        ColumnMetadataList columnMetadataList = metadataResolver.resolveQuery(query)
 
-        AssembleClientData assembler = new AssembleClientData(queryResult: queryResult, metadataObject: columns,
-                transformClassName: transformClassName, transformParams: transformParams)
+        AssembleClientData assembler = new AssembleClientData(queryResult: queryResult, columnMetadataList: columnMetadataList)
         return assembler.createClientData()
     }
 
+    @GET
+    @Produces(MediaType.APPLICATION_JSON)
+    @Path("fields")
+    InitializingClientData getFields(@QueryParam("databaseName") String databaseName,
+                                     @QueryParam("tableName") String tableName,
+                                     @QueryParam("widgetName") String widgetName) {
+
+        QueryExecutor queryExecutor = queryExecutorFactory.getExecutor()
+        QueryResult queryResult = queryExecutor.getFieldNames(databaseName, tableName)
+        WidgetAndDatasetMetadataList metadata = metadataResolver.getInitializationData(databaseName, tableName, widgetName)
+        ColumnMetadataList columnMetadataList = metadataResolver.resolveQuery(databaseName, tableName)
+
+        AssembleClientData assembler = new AssembleClientData(queryResult: queryResult, columnMetadataList: columnMetadataList, initDataList: metadata)
+        return assembler.createClientData()
+    }
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     @Path("databasenames")
     List<String> getDatabaseNames() {
-        QueryExecutor queryExecutor = queryExecutorFactory.create()
+        QueryExecutor queryExecutor = queryExecutorFactory.getExecutor()
         return queryExecutor.showDatabases()
     }
 
@@ -92,24 +100,9 @@ class QueryService {
     @Produces(MediaType.APPLICATION_JSON)
     @Path("tablenames")
     List<String> getTableNames(@FormParam("database") String database) {
-        QueryExecutor queryExecutor = queryExecutorFactory.create()
+        QueryExecutor queryExecutor = queryExecutorFactory.getExecutor()
         return queryExecutor.showTables(database)
     }
-
-    @GET
-    @Produces(MediaType.APPLICATION_JSON)
-    @Path("fieldnames")
-    FieldNames getFieldNames(@QueryParam("databaseName") String databaseName,
-                             @QueryParam("tableName") String tableName,
-                             @QueryParam("widgetName") String widgetName) {
-
-        QueryExecutor queryExecutor = queryExecutorFactory.create()
-        def fieldNames = queryExecutor.getFieldNames(databaseName, tableName)
-        WidgetAndDatasetMetadataList metadata = metadataResolver.resolveQuery(databaseName, tableName, widgetName)
-        return AssembleClientData.createFieldNames(fieldNames, metadata)
-    }
-
-
 }
 
 

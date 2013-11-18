@@ -23,26 +23,51 @@
 package com.ncc.neon.query
 
 import com.ncc.neon.query.filter.Filter
+
 /**
  * Executes a query against a datastore
  */
 public interface QueryExecutor {
 
     /**
-     * Executes the query and returns the results in json
+     * Executes the query and returns the results
      * @param query
-     * @param includedFiltered includes all data, even those that have been removed by the currently applied filters
      * @return The result of the query
      */
-    QueryResult execute(Query query, boolean includedFiltered)
+    QueryResult execute(Query query)
 
     /**
-     * Executes a group of queries and returns the results as a single json object
+     * Executes a group of queries and returns the results
      * @param query
-     * @param includeFiltered
-     * @return
+     * @return The result of the queries appended together
      */
-    QueryResult execute(QueryGroup query, boolean includeFiltered)
+    QueryResult execute(QueryGroup query)
+
+
+    /**
+     * Executes the query and returns the results
+     * @param query
+     * @return The result of the query
+     */
+    QueryResult executeDisregardingFilters(Query query)
+
+    /**
+     * Executes a group of queries and returns the results
+     * @param query
+     * @return The result of the queries appended together
+     */
+    QueryResult executeDisregardingFilters(QueryGroup query)
+
+    /**
+     * @return Returns all the databases
+     */
+    List<String> showDatabases()
+
+    /**
+     * @param dbName The current database
+     * @return Returns all the table names within the current database
+     */
+    List<String> showTables(String dbName)
 
     /**
      * Gets the names of the fields in the specified dataset
@@ -50,7 +75,7 @@ public interface QueryExecutor {
      * @param tableName
      * @return
      */
-    Collection<String> getFieldNames(String databaseName, String tableName)
+    QueryResult getFieldNames(String databaseName, String tableName)
 
     /**
      * Sets the selection to be the items that match the filter
@@ -91,14 +116,5 @@ public interface QueryExecutor {
      */
     QueryResult getSelectionWhere(Filter filter)
 
-    /**
-     * @return Returns all the databases
-     */
-    List<String> showDatabases()
 
-    /**
-     * @param dbName The current database
-     * @return Returns all the table names
-     */
-    List<String> showTables(String dbName)
 }

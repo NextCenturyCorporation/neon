@@ -137,7 +137,6 @@ class ColumnMetadataScript {
         ColumnMetadataScript script = new ColumnMetadataScript()
         script.clearer.dropColumnTable()
         script.executeScript()
-
     }
 
 }

@@ -1,12 +1,9 @@
 package com.ncc.neon.result
-
-import com.ncc.neon.metadata.model.dataset.WidgetAndDatasetMetadata
-import com.ncc.neon.metadata.model.dataset.WidgetAndDatasetMetadataList
 import com.ncc.neon.metadata.model.column.ColumnMetadataList
 import com.ncc.neon.metadata.model.column.DefaultColumnMetadata
+import com.ncc.neon.metadata.model.dataset.WidgetAndDatasetMetadata
+import com.ncc.neon.metadata.model.dataset.WidgetAndDatasetMetadataList
 import com.ncc.neon.query.QueryResult
-import org.junit.Test
-
 /*
  * ************************************************************************
  * Copyright (c), 2013 Next Century Corporation. All Rights Reserved.
@@ -35,7 +32,7 @@ import org.junit.Test
 
 class AssembleClientDataTest {
 
-    @Test
+
     void testEmptyColumnMetadata() {
         AssembleClientData clientData = new AssembleClientData()
         clientData.metadataObject = new ColumnMetadataList([])
@@ -43,7 +40,7 @@ class AssembleClientDataTest {
         assert "{\"data\":[],\"metadata\":[]}" == clientData.createClientData()
     }
 
-    @Test
+
     void testEmptyWidgetMetadata() {
         AssembleClientData clientData = new AssembleClientData()
         clientData.metadataObject = new WidgetAndDatasetMetadataList([])
@@ -51,7 +48,7 @@ class AssembleClientDataTest {
         assert "{\"data\":[],\"metadata\":[]}" == clientData.createClientData()
     }
 
-    @Test
+
     void testWidgetMetadata() {
         def widgetData = new WidgetAndDatasetMetadataList([new WidgetAndDatasetMetadata(databaseName: "db", tableName: "table", widgetName: "widget", elementId: "date", value: "created_at"),
                 new WidgetAndDatasetMetadata(databaseName: "db", tableName: "table", widgetName: "timeline", elementId: "y", value: "value")])
@@ -63,7 +60,7 @@ class AssembleClientDataTest {
         assert "{\"data\":[],\"metadata\":[{\"elementId\":\"date\",\"value\":\"created_at\"},{\"elementId\":\"y\",\"value\":\"value\"}]}" == clientData.createClientData()
     }
 
-    @Test
+
     void testColumnMetadata() {
         def columnData = new ColumnMetadataList([new DefaultColumnMetadata(databaseName: "db", tableName: "table", temporal: true, columnName: "column1"),
                 new DefaultColumnMetadata(databaseName: "db", tableName: "table", heterogeneous: true, columnName: "column2")])

@@ -38,7 +38,7 @@ class MongoConvertQueryTest extends AbstractConversionTest {
     @Override
     protected def convertQuery(query) {
         MongoConversionStrategy conversionStrategy = new MongoConversionStrategy(filterState)
-        conversionStrategy.convertQuery(query)
+        conversionStrategy.convertQueryDisregardingFilters(query)
     }
 
     @Override

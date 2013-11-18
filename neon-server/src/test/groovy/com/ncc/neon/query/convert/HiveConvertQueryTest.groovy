@@ -37,7 +37,7 @@ class HiveConvertQueryTest extends AbstractConversionTest {
     @Override
     protected def convertQuery(query) {
         HiveConversionStrategy conversionStrategy = new HiveConversionStrategy(filterState)
-        conversionStrategy.convertQuery(query)
+        conversionStrategy.convertQueryDisregardingFilters(query)
     }
 
     @Override

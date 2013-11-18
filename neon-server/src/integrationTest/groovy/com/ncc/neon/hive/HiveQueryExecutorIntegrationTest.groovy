@@ -1,14 +1,16 @@
 package com.ncc.neon.hive
-
 import com.ncc.neon.AbstractQueryExecutorIntegrationTest
 import com.ncc.neon.connect.ConnectionInfo
 import com.ncc.neon.connect.DataSources
 import com.ncc.neon.connect.HiveConnection
 import com.ncc.neon.query.hive.HiveQueryExecutor
 import com.ncc.neon.query.jdbc.JdbcClient
+import com.ncc.neon.util.DateUtils
 import org.apache.hadoop.conf.Configuration
 import org.apache.hadoop.fs.FileSystem
 import org.apache.hadoop.fs.Path
+import org.json.JSONArray
+import org.json.JSONObject
 import org.junit.AfterClass
 import org.junit.BeforeClass
 import org.junit.runner.RunWith
@@ -18,7 +20,6 @@ import org.springframework.test.context.ContextConfiguration
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner
 
 import java.sql.Timestamp
-
 /*
  *
  *  ************************************************************************
@@ -79,6 +80,23 @@ class HiveQueryExecutorIntegrationTest extends AbstractQueryExecutorIntegrationT
 
     protected String getResultsJsonFolder() {
         return "hive-json/"
+    }
+
+    protected def jsonObjectToMap(jsonObject) {
+        def map = [:]
+        jsonObject.keys().each { key ->
+            def value = jsonObject.get(key)
+            if (key =~ AbstractQueryExecutorIntegrationTest.DATE_FIELD_REGEX) {
+                map[key] = DateUtils.parseDate(value)
+            } else if (value instanceof JSONArray) {
+                map[key] = jsonArrayToList(value)
+            } else if (value instanceof JSONObject) {
+                map[key] = jsonObjectToMap(value)
+            } else {
+                map[key] = value
+            }
+        }
+        return map
     }
 
     @SuppressWarnings('CoupledTestCase') // this method incorrectly throws this codenarc error

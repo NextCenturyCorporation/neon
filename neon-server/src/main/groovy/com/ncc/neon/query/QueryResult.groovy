@@ -25,13 +25,7 @@ package com.ncc.neon.query
 /**
  * The result of executing a query
  */
-public interface QueryResult extends Iterable<Row> {
+public interface QueryResult {
 
-    /**
-     * Converts the results of the query to JSON
-     * @return
-     */
-    String toJson()
-
-
+    def getData()
 }

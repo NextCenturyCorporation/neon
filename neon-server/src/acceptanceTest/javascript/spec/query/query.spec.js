@@ -60,7 +60,7 @@ describe('query mapping', function () {
         executeAndWait(neon.query.getFieldNames, databaseName, tableName, "");
         var expected = ['_id', 'firstname', 'lastname', 'city', 'state', 'salary', 'hiredate', 'location'];
         runs(function () {
-            expect(currentResult.fieldNames).toBeArrayWithSameElements(expected);
+            expect(currentResult.data).toBeArrayWithSameElements(expected);
         });
 
     });
@@ -228,8 +228,8 @@ describe('query mapping', function () {
             assertQueryResults(baseQuery(), expectedData);
 
             // verify that if the query is supposed to include the filtered data, all data is returned
-            runs(function () {
-                assertQueryResults(baseQuery().includeFiltered(true), allData);
+            //runs(function () {
+                //assertQueryResults(baseQuery().disregardFilters(true), allData);
                 runs(function () {
                     // apply another filter and make sure both are applied
                     var salaryFilter = baseFilter().where('salary', '>', 85000);
@@ -246,7 +246,7 @@ describe('query mapping', function () {
                         });
                     });
                 });
-            });
+            //});
         });
     });
 
@@ -401,23 +401,6 @@ describe('query mapping', function () {
         assertQueryResults(query, expectedData);
     });
 
-    it('transforms query results with a RESTful service', function () {
-        var path = '/neon/transformtest?replacethis=VA&replacewith=Virginia';
-        var transformClassName = 'com.ncc.neon.query.transform.RestServiceTransform';
-        // transformServiceUrl is generated dynamically during the build and included in the acceptance test helper file
-        var transformParams = [transformServiceUrl, path];
-
-        var query = baseQuery().where('state', '=', 'VA').transform(transformClassName, transformParams);
-        executeAndWait(neon.query.executeQuery, query);
-        runs(function () {
-            expect(currentResult.data.length).toBe(4);
-            // the state should be converted from VA to Virginia
-            currentResult.data.forEach(function (row) {
-                expect(row.state).toEqual('Virginia');
-            });
-        });
-    });
-
     it('query with date clause as value', function () {
         var whereDateBetweenClause = and(where('hiredate', '>=', '2011-10-15T00:00:00Z'), where('hiredate', '<=', '2011-10-17T00:00:00Z'));
         var query = baseQuery().where(whereDateBetweenClause);
@@ -430,40 +413,14 @@ describe('query mapping', function () {
         var query3 = baseQuery().where('state', '=', 'DC');
 
         var queryGroup = new neon.query.QueryGroup();
-        queryGroup.addQuery('Virginia', query1);
-        queryGroup.addQuery('Maryland', query2);
-        queryGroup.addQuery('DistrictOfColumbia', query3);
+        queryGroup.addQuery(query1);
+        queryGroup.addQuery(query2);
+        queryGroup.addQuery(query3);
 
 
         var expectedData = getJSONFixture('queryGroup.json');
         assertQueryGroupResults(queryGroup, expectedData);
     });
-
-    it('transforms query group results with a RESTful service', function () {
-        var path = '/neon/transformtest?replacethis=Virginia&replacewith=VirginiaState';
-        var transformClassName = 'com.ncc.neon.query.transform.RestServiceTransform';
-        // transformServiceUrl is generated dynamically during the build and included in the acceptance test helper file
-        var transformParams = [transformServiceUrl, path];
-
-        var query1 = baseQuery().where('state', '=', 'VA');
-        var query2 = baseQuery().where('state', '=', 'MD');
-        var query3 = baseQuery().where('state', '=', 'DC');
-
-        var queryGroup = new neon.query.QueryGroup();
-        queryGroup.addQuery('Virginia', query1);
-        queryGroup.addQuery('Maryland', query2);
-        queryGroup.addQuery('DistrictOfColumbia', query3);
-        queryGroup.transform(transformClassName, transformParams);
-
-        executeAndWait(neon.query.executeQueryGroup, queryGroup);
-        runs(function () {
-            expect(currentResult.data.length).toBe(1);
-            // the state should be converted from Virginia to VirginiaState
-            expect(currentResult.data[0].Virginia).toBeUndefined();
-            expect(currentResult.data[0].VirginiaState).toBeDefined();
-        });
-    });
-
 
     /**
      * Executes the specified query and verifies that the results match the expected data

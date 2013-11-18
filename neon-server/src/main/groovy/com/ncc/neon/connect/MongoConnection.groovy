@@ -39,12 +39,6 @@ class MongoConnection implements Connection{
 
     private MongoClient mongo
 
-    MongoConnection(){
-        addShutdownHook{
-            close()
-        }
-    }
-
     @Override
     def connect(ConnectionInfo info){
         if(!mongo){

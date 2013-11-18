@@ -53,46 +53,66 @@ class MongoQueryExecutor implements QueryExecutor {
     private ConnectionManager connectionManager
 
     @Override
-    QueryResult execute(Query query, boolean includedFiltered) {
-        MongoQuery mongoQuery = convertQueryIntoMongoQuery(query, includedFiltered)
+    QueryResult execute(Query query) {
         AbstractMongoQueryWorker worker = createMongoQueryWorker(query)
+        MongoConversionStrategy mongoConversionStrategy = new MongoConversionStrategy(filterState)
+        MongoQuery mongoQuery = mongoConversionStrategy.convertQueryWithFilterState(query)
         worker.executeQuery(mongoQuery)
     }
 
-    private AbstractMongoQueryWorker createMongoQueryWorker(Query query) {
-        if (query.isDistinct) {
-            LOGGER.debug("Using distinct mongo query worker")
-            return new DistinctMongoQueryWorker(mongo)
-        } else if (query.aggregates || query.groupByClauses) {
-            LOGGER.debug("Using aggregate mongo query worker")
-            return new AggregateMongoQueryWorker(mongo)
+    @Override
+    QueryResult execute(QueryGroup query) {
+        TableQueryResult queryResult = new TableQueryResult()
+        query.queries.each {
+            def result = execute(it)
+            queryResult.data.addAll(result.data)
         }
-        LOGGER.debug("Using simple mongo query worker")
-        return new SimpleMongoQueryWorker(mongo)
+        return queryResult
     }
 
     @Override
-    QueryResult execute(QueryGroup query, boolean includeFiltered) {
-        QueryGroupResult queryGroupResult = new QueryGroupResult()
-        query.namedQueries.each {
-            def result = execute(it.query, includeFiltered)
-            queryGroupResult.namedResults[it.name] = result
-        }
-        return queryGroupResult
+    QueryResult executeDisregardingFilters(Query query) {
+        AbstractMongoQueryWorker worker = createMongoQueryWorker(query)
+        MongoConversionStrategy mongoConversionStrategy = new MongoConversionStrategy(filterState)
+        MongoQuery mongoQuery = mongoConversionStrategy.convertQueryDisregardingFilters(query)
+        worker.executeQuery(mongoQuery)
     }
 
     @Override
-    Collection<String> getFieldNames(String databaseName, String tableName) {
+    QueryResult executeDisregardingFilters(QueryGroup query) {
+        TableQueryResult queryResult = new TableQueryResult()
+        query.queries.each {
+            def result = executeDisregardingFilters(it)
+            queryResult.data.addAll(result.data)
+        }
+        return queryResult
+    }
+
+    @Override
+    List<String> showDatabases() {
+        LOGGER.debug("Executing Mongo SHOW DATABASES")
+        mongo.databaseNames
+    }
+
+    @Override
+    List<String> showTables(String dbName) {
+        DB database = mongo.getDB(dbName)
+        LOGGER.info("Executing Mongo SHOW COLLECTIONS on database {}", dbName)
+        database.getCollectionNames().collect { it }
+    }
+
+    @Override
+    QueryResult getFieldNames(String databaseName, String tableName) {
         def db = mongo.getDB(databaseName)
         def collection = db.getCollection(tableName)
         def result = collection.findOne()
-        return result?.keySet() ?: []
+        return new ListQueryResult(result?.keySet() ?: [])
     }
 
     @Override
     void setSelectionWhere(Filter filter) {
-        def res = execute(QueryUtils.queryFromFilter(filter), false)
-        def ids = res.collect { it.getFieldValue(ID_FIELD) }
+        QueryResult result = execute(queryFromFilter(filter))
+        def ids = result.data.collect { it.get(ID_FIELD) }
         selectionManager.replaceSelectionWith(ids)
     }
 
@@ -119,35 +139,26 @@ class MongoQueryExecutor implements QueryExecutor {
     @Override
     QueryResult getSelectionWhere(Filter filter) {
         MongoConversionStrategy mongoConversionStrategy = new MongoConversionStrategy(filterState)
-        Query query = QueryUtils.queryFromFilter(filter)
-        MongoQuery mongoQuery = mongoConversionStrategy.convertQuery(query, createWhereClauseFromSelection)
+        Query query = queryFromFilter(filter)
+        MongoQuery mongoQuery = mongoConversionStrategy.convertQueryDisregardingFilters(query, createWhereClauseFromSelection)
         AbstractMongoQueryWorker worker = createMongoQueryWorker(query)
         worker.executeQuery(mongoQuery)
     }
 
-    @Override
-    List<String> showDatabases() {
-        LOGGER.debug("Executing Mongo SHOW DATABASES")
-        mongo.databaseNames
-    }
-
-    @Override
-    List<String> showTables(String dbName) {
-        DB database = mongo.getDB(dbName)
-        LOGGER.info("Executing Mongo SHOW COLLECTIONS on database {}", dbName)
-        database.getCollectionNames().collect { it }
+    private AbstractMongoQueryWorker createMongoQueryWorker(Query query) {
+        if (query.isDistinct) {
+            LOGGER.debug("Using distinct mongo query worker")
+            return new DistinctMongoQueryWorker(mongo)
+        } else if (query.aggregates || query.groupByClauses) {
+            LOGGER.debug("Using aggregate mongo query worker")
+            return new AggregateMongoQueryWorker(mongo)
+        }
+        LOGGER.debug("Using simple mongo query worker")
+        return new SimpleMongoQueryWorker(mongo)
     }
 
     private static def transformIdFields(Collection<Object> ids) {
         return MongoUtils.oidsToObjectIds(ids)
-    }
-
-    private MongoQuery convertQueryIntoMongoQuery(Query query, boolean includedFiltered) {
-        MongoConversionStrategy mongoConversionStrategy = new MongoConversionStrategy(filterState)
-        if (includedFiltered) {
-            return mongoConversionStrategy.convertQuery(query)
-        }
-        return mongoConversionStrategy.convertQueryWithFilterState(query)
     }
 
     private final def createWhereClauseFromSelection = {
@@ -157,5 +168,9 @@ class MongoQueryExecutor implements QueryExecutor {
 
     private MongoClient getMongo(){
         connectionManager.client
+    }
+
+    private def queryFromFilter(def filter) {
+        return new Query(filter: filter)
     }
 }

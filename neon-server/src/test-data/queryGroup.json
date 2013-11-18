@@ -1,112 +1,106 @@
-{
-    "Virginia": [
-        {
-            "_id": "5137b623a9f279d831b6fb86",
-            "firstname": "Bill",
-            "lastname": "Jones",
-            "city": "Arlington",
-            "state": "VA",
-            "salary": 100000,
-            "hiredate": "2012-09-15T00:00:00Z",
-            "location": {
-                "type": "Point",
-                "coordinates": [20.0 , 12.0]
-            }
-        },
-        {
-            "_id": "5137b623a9f279d831b6fb89",
-            "firstname": "Andrew",
-            "lastname": "Wilks",
-            "city": "Alexandria",
-            "state": "VA",
-            "salary": 55000,
-            "hiredate": "2013-01-10T00:00:00Z",
-            "location": {
-                "type": "Point",
-                "coordinates": [10.0, 7.0]
-            }
-        },
-        {
-            "_id": "5137b623a9f279d831b6fb8a",
-            "firstname": "Michelle",
-            "lastname": "Jackson",
-            "city": "Arlington",
-            "state": "VA",
-            "salary": 118000,
-            "hiredate": "2010-06-15T00:00:00Z",
-            "location": {
-                "type": "Point",
-                "coordinates": [12.0, 11.0]
-            }
-        },
-        {
-            "_id": "5137b623a9f279d831b6fb8d",
-            "firstname": "Fred",
-            "lastname": "Porter",
-            "city": "Arlington",
-            "state": "VA",
-            "salary": 60000,
-            "hiredate": "2012-02-21T00:00:00Z",
-            "location": {
-                "type": "Point",
-                "coordinates": [20.0, 25.0]
-            }
+[
+    {
+        "_id": "5137b623a9f279d831b6fb86",
+        "firstname": "Bill",
+        "lastname": "Jones",
+        "city": "Arlington",
+        "state": "VA",
+        "salary": 100000,
+        "hiredate": "2012-09-15T00:00:00Z",
+        "location": {
+            "type": "Point",
+            "coordinates": [20.0 , 12.0]
         }
-    ],
-    "Maryland": [
-        {
-            "_id": "5137b623a9f279d831b6fb8c",
-            "firstname": "Anthony",
-            "lastname": "Bowles",
-            "city": "Germantown",
-            "state": "MD",
-            "salary": 105000,
-            "hiredate": "2012-02-15T00:00:00Z",
-            "location": {
-                "type": "Point",
-                "coordinates": [11.0, -23.0]
-            }
+    },
+    {
+        "_id": "5137b623a9f279d831b6fb89",
+        "firstname": "Andrew",
+        "lastname": "Wilks",
+        "city": "Alexandria",
+        "state": "VA",
+        "salary": 55000,
+        "hiredate": "2013-01-10T00:00:00Z",
+        "location": {
+            "type": "Point",
+            "coordinates": [10.0, 7.0]
         }
-    ],
-    "DistrictOfColumbia": [
-        {
-            "_id": "5137b623a9f279d831b6fb87",
-            "firstname": "Tom",
-            "lastname": "Smith",
-            "city": "Washington",
-            "state": "DC",
-            "salary": 85000,
-            "hiredate": "2011-10-17T00:00:00Z",
-            "location": {
-                "type": "Point",
-                "coordinates": [25.0, 12.1]
-            }
-        },
-        {
-            "_id": "5137b623a9f279d831b6fb88",
-            "firstname": "Maggie",
-            "lastname": "Thomas",
-            "city": "Washington",
-            "state": "DC",
-            "salary": 175000,
-            "hiredate": "2011-10-15T00:00:00Z",
-            "location": {
-                "type": "Point",
-                "coordinates": [19.55, 11.92]
-            }
-        },
-        {
-            "_id": "5137b623a9f279d831b6fb8b",
-            "firstname": "Rodney",
-            "lastname": "Anderson",
-            "city": "Washington",
-            "state": "DC",
-            "salary": 88000,
-            "hiredate": "2012-10-30T00:00:00Z",
-            "location": {
-                "type": "Point",
-                "coordinates": [14.0, 22.0]
-            }
+    },
+    {
+        "_id": "5137b623a9f279d831b6fb8a",
+        "firstname": "Michelle",
+        "lastname": "Jackson",
+        "city": "Arlington",
+        "state": "VA",
+        "salary": 118000,
+        "hiredate": "2010-06-15T00:00:00Z",
+        "location": {
+            "type": "Point",
+            "coordinates": [12.0, 11.0]
         }
-    ]
-}
+    },
+    {
+        "_id": "5137b623a9f279d831b6fb8d",
+        "firstname": "Fred",
+        "lastname": "Porter",
+        "city": "Arlington",
+        "state": "VA",
+        "salary": 60000,
+        "hiredate": "2012-02-21T00:00:00Z",
+        "location": {
+            "type": "Point",
+            "coordinates": [20.0, 25.0]
+        }
+    },
+    {
+        "_id": "5137b623a9f279d831b6fb8c",
+        "firstname": "Anthony",
+        "lastname": "Bowles",
+        "city": "Germantown",
+        "state": "MD",
+        "salary": 105000,
+        "hiredate": "2012-02-15T00:00:00Z",
+        "location": {
+            "type": "Point",
+            "coordinates": [11.0, -23.0]
+        }
+    },
+    {
+        "_id": "5137b623a9f279d831b6fb87",
+        "firstname": "Tom",
+        "lastname": "Smith",
+        "city": "Washington",
+        "state": "DC",
+        "salary": 85000,
+        "hiredate": "2011-10-17T00:00:00Z",
+        "location": {
+            "type": "Point",
+            "coordinates": [25.0, 12.1]
+        }
+    },
+    {
+        "_id": "5137b623a9f279d831b6fb88",
+        "firstname": "Maggie",
+        "lastname": "Thomas",
+        "city": "Washington",
+        "state": "DC",
+        "salary": 175000,
+        "hiredate": "2011-10-15T00:00:00Z",
+        "location": {
+            "type": "Point",
+            "coordinates": [19.55, 11.92]
+        }
+    },
+    {
+        "_id": "5137b623a9f279d831b6fb8b",
+        "firstname": "Rodney",
+        "lastname": "Anderson",
+        "city": "Washington",
+        "state": "DC",
+        "salary": 88000,
+        "hiredate": "2012-10-30T00:00:00Z",
+        "location": {
+            "type": "Point",
+            "coordinates": [14.0, 22.0]
+        }
+    }
+]

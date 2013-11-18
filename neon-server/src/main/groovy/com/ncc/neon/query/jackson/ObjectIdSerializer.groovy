@@ -1,9 +1,8 @@
-package com.ncc.neon.mongo
-
-import com.ncc.neon.query.mongo.SimpleObjectIdSerializer
+package com.ncc.neon.query.jackson
 import org.bson.types.ObjectId
-import org.junit.Test
-
+import org.codehaus.jackson.JsonGenerator
+import org.codehaus.jackson.map.JsonSerializer
+import org.codehaus.jackson.map.SerializerProvider
 /*
  * ************************************************************************
  * Copyright (c), 2013 Next Century Corporation. All Rights Reserved.
@@ -25,16 +24,15 @@ import org.junit.Test
  * PROPRIETARY AND CONFIDENTIAL TRADE SECRET MATERIAL NOT FOR DISCLOSURE OUTSIDE
  * OF NEXT CENTURY CORPORATION EXCEPT BY PRIOR WRITTEN PERMISSION AND WHEN
  * RECIPIENT IS UNDER OBLIGATION TO MAINTAIN SECRECY.
+ *
+ * 
+ * @author tbrooks
  */
-class SimpleObjectIdSerializerTest {
 
-    @Test
-    void testSerializeObjectId() {
-        def oidString = "5137b623a9f279d831b6fb86"
-        def objectId = new ObjectId(oidString)
-        def expected = /"${oidString}"/
+class ObjectIdSerializer extends JsonSerializer<ObjectId> {
 
-        def serialized = new SimpleObjectIdSerializer().serialize(objectId)
-        assert expected == serialized
+    @Override
+    void serialize(ObjectId value, JsonGenerator generator, SerializerProvider provider){
+        generator.writeString(value.toString())
     }
 }

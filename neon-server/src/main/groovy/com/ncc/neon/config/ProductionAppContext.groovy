@@ -1,5 +1,4 @@
 package com.ncc.neon.config
-
 import com.ncc.neon.metadata.MetadataConnection
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
