@@ -78,6 +78,21 @@ neon.ready(function () {
     }
 
     function drawChart(queryResults) {
+        var data = createHeatChartData(queryResults);
+
+        d3.select('#circularheatchart')
+            .selectAll('svg')
+            .remove();
+
+        d3.select('#circularheatchart')
+            .selectAll('svg')
+            .data([data])
+            .enter()
+            .append('svg')
+            .call(chart);
+    }
+
+    function createHeatChartData(queryResults){
         var rawData = queryResults.data;
 
         var data = [];
@@ -90,16 +105,7 @@ neon.ready(function () {
             data[(element.day - 1) * HOURS_IN_DAY + element.hour] = element.count;
         });
 
-        d3.select('#circularheatchart')
-            .selectAll('svg')
-            .remove();
-
-        d3.select('#circularheatchart')
-            .selectAll('svg')
-            .data([data])
-            .enter()
-            .append('svg')
-            .call(chart);
+        return data;
     }
 
     function getDateField() {

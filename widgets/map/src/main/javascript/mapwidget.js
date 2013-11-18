@@ -25,6 +25,8 @@ neon.ready(function () {
     var databaseName;
     var tableName;
     var filterKey;
+    var map;
+
     var clientId = neon.eventing.messaging.getInstanceId();
 
     var options = ['latitude', 'longitude', 'color-by', 'size-by'];
@@ -33,8 +35,6 @@ neon.ready(function () {
         activeDatasetChanged: onActiveDatasetChanged,
         filtersChanged: onFiltersChanged
     });
-
-    var map;
 
     initialize();
     restoreState();
