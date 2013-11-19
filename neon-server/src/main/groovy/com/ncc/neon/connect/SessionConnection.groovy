@@ -45,7 +45,7 @@ class SessionConnection {
 
     def getClient(){
         if(!connectionInfo){
-            return
+            return null
         }
         if(connectionInfo.dataSource == DataSources.hive){
             return hiveConnection.connect(connectionInfo)

@@ -3,7 +3,8 @@ import com.ncc.neon.metadata.model.column.ColumnMetadataList
 import com.ncc.neon.metadata.model.column.DefaultColumnMetadata
 import com.ncc.neon.metadata.model.dataset.WidgetAndDatasetMetadata
 import com.ncc.neon.metadata.model.dataset.WidgetAndDatasetMetadataList
-import com.ncc.neon.query.QueryResult
+import com.ncc.neon.query.ListQueryResult
+import org.junit.Test
 /*
  * ************************************************************************
  * Copyright (c), 2013 Next Century Corporation. All Rights Reserved.
@@ -32,43 +33,60 @@ import com.ncc.neon.query.QueryResult
 
 class AssembleClientDataTest {
 
-
+    @Test
     void testEmptyColumnMetadata() {
-        AssembleClientData clientData = new AssembleClientData()
-        clientData.metadataObject = new ColumnMetadataList([])
-        clientData.queryResult = [toJson:{"[]"}] as QueryResult
-        assert "{\"data\":[],\"metadata\":[]}" == clientData.createClientData()
+        AssembleClientData assemble = new AssembleClientData()
+        assemble.columnMetadataList = new ColumnMetadataList([])
+        assemble.queryResult = new ListQueryResult()
+        ClientData clientData = assemble.createClientData()
+        assert clientData
+        assert !clientData.data
+        assert !clientData.metadata
     }
 
-
+    @Test
     void testEmptyWidgetMetadata() {
-        AssembleClientData clientData = new AssembleClientData()
-        clientData.metadataObject = new WidgetAndDatasetMetadataList([])
-        clientData.queryResult = [toJson:{"[]"}] as QueryResult
-        assert "{\"data\":[],\"metadata\":[]}" == clientData.createClientData()
+        AssembleClientData assemble = new AssembleClientData()
+        assemble.columnMetadataList = new ColumnMetadataList([])
+        assemble.queryResult = new ListQueryResult()
+        assemble.initDataList = new WidgetAndDatasetMetadataList([])
+        InitializingClientData clientData = assemble.createClientData()
+        assert clientData
+        assert !clientData.data
+        assert !clientData.metadata
+        assert !clientData.idToColumn
     }
 
+    @Test
+    void testColumnMetadata() {
+        def data = ["data1", "data2", "data3"]
 
+        AssembleClientData assemble = new AssembleClientData()
+        assemble.columnMetadataList = new ColumnMetadataList([new DefaultColumnMetadata(databaseName: "db", tableName: "table", temporal: true, columnName: "column1"),
+                new DefaultColumnMetadata(databaseName: "db", tableName: "table", heterogeneous: true, columnName: "column2")])
+        assemble.queryResult = new ListQueryResult(data)
+
+        ClientData clientData = assemble.createClientData()
+        assert clientData.data
+        assert clientData.data == data
+        assert clientData.metadata
+        assert clientData.metadata == [column1:[temporal:true], column2:[heterogeneous:true]]
+
+    }
+
+    @Test
     void testWidgetMetadata() {
         def widgetData = new WidgetAndDatasetMetadataList([new WidgetAndDatasetMetadata(databaseName: "db", tableName: "table", widgetName: "widget", elementId: "date", value: "created_at"),
                 new WidgetAndDatasetMetadata(databaseName: "db", tableName: "table", widgetName: "timeline", elementId: "y", value: "value")])
 
-        AssembleClientData clientData = new AssembleClientData()
-        clientData.metadataObject = widgetData
-        clientData.queryResult = [toJson:{"[]"}] as QueryResult
+        AssembleClientData assemble = new AssembleClientData()
+        assemble.columnMetadataList = new ColumnMetadataList([])
+        assemble.queryResult = new ListQueryResult()
+        assemble.initDataList = widgetData
 
-        assert "{\"data\":[],\"metadata\":[{\"elementId\":\"date\",\"value\":\"created_at\"},{\"elementId\":\"y\",\"value\":\"value\"}]}" == clientData.createClientData()
-    }
-
-
-    void testColumnMetadata() {
-        def columnData = new ColumnMetadataList([new DefaultColumnMetadata(databaseName: "db", tableName: "table", temporal: true, columnName: "column1"),
-                new DefaultColumnMetadata(databaseName: "db", tableName: "table", heterogeneous: true, columnName: "column2")])
-
-        AssembleClientData clientData = new AssembleClientData()
-        clientData.metadataObject = columnData
-        clientData.queryResult = [toJson:{"[]"}] as QueryResult
-
-        assert "{\"data\":[],\"metadata\":[{\"temporal\":true,\"columnName\":\"column1\"},{\"columnName\":\"column2\",\"heterogeneous\":true}]}" == clientData.createClientData()
+        InitializingClientData clientData = assemble.createClientData()
+        assert clientData.idToColumn
+        assert clientData.idToColumn.size() == 2
+        assert clientData.idToColumn == [date:"created_at", y:"value"]
     }
 }

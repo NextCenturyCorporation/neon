@@ -36,7 +36,6 @@ class AssembleClientData {
     ColumnMetadataList columnMetadataList
     WidgetAndDatasetMetadataList initDataList
 
-
     ClientData createClientData(){
         Map<String, Map<String, Boolean>> metadata = createMetadata(columnMetadataList)
         if(initDataList){
