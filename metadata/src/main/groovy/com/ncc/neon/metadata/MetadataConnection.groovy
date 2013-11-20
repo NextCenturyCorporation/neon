@@ -36,25 +36,19 @@ class MetadataConnection {
 
     private final MongoClient client
 
-    MetadataConnection(){
-        this.client = new MongoClient()
-        addShutdownHook()
-    }
-
-    MetadataConnection(String url){
-        this.client = new MongoClient(url)
-        addShutdownHook()
-    }
-
     MetadataConnection(MongoClient client){
         this.client = client
-        addShutdownHook()
-    }
-
-    private addShutdownHook(){
         addShutdownHook{
             close()
         }
+    }
+
+    MetadataConnection(){
+        this(new MongoClient())
+    }
+
+    MetadataConnection(String url){
+        this(new MongoClient(url))
     }
 
     MongoClient getClient(){

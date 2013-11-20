@@ -52,7 +52,7 @@ class QueryService {
     @Produces(MediaType.APPLICATION_JSON)
     @Path("query")
     ClientData executeQuery(Query query) {
-        return execute(query)
+        return execute(query, "execute")
     }
 
     @POST
@@ -60,16 +60,7 @@ class QueryService {
     @Produces(MediaType.APPLICATION_JSON)
     @Path("querygroup")
     ClientData executeQueryGroup(QueryGroup query) {
-        return execute(query)
-    }
-
-    private ClientData execute(def query) {
-        QueryExecutor queryExecutor = queryExecutorFactory.getExecutor()
-        QueryResult queryResult = queryExecutor.execute(query)
-        ColumnMetadataList columnMetadataList = metadataResolver.resolveQuery(query)
-
-        AssembleClientData assembler = new AssembleClientData(queryResult: queryResult, columnMetadataList: columnMetadataList)
-        return assembler.createClientData()
+        return execute(query, "execute")
     }
 
     @POST
@@ -77,7 +68,7 @@ class QueryService {
     @Produces(MediaType.APPLICATION_JSON)
     @Path("querydisregardfilters")
     ClientData executeQueryDisregardFilters(Query query) {
-        return executeDisregardFilters(query)
+        return execute(query, "executeDisregardingFilters")
     }
 
     @POST
@@ -85,16 +76,7 @@ class QueryService {
     @Produces(MediaType.APPLICATION_JSON)
     @Path("querygroupdisregardfilters")
     ClientData executeQueryGroupDisregardFilters(QueryGroup query) {
-        return executeDisregardFilters(query)
-    }
-
-    private ClientData executeDisregardFilters(def query) {
-        QueryExecutor queryExecutor = queryExecutorFactory.getExecutor()
-        QueryResult queryResult = queryExecutor.executeDisregardingFilters(query)
-        ColumnMetadataList columnMetadataList = metadataResolver.resolveQuery(query)
-
-        AssembleClientData assembler = new AssembleClientData(queryResult: queryResult, columnMetadataList: columnMetadataList)
-        return assembler.createClientData()
+        return execute(query, "executeDisregardingFilters")
     }
 
     @GET
@@ -127,6 +109,15 @@ class QueryService {
     List<String> getTableNames(@FormParam("database") String database) {
         QueryExecutor queryExecutor = queryExecutorFactory.getExecutor()
         return queryExecutor.showTables(database)
+    }
+
+    private final def execute = { query, methodName ->
+        QueryExecutor queryExecutor = queryExecutorFactory.getExecutor()
+        QueryResult queryResult = queryExecutor."${methodName}"(query)
+        ColumnMetadataList columnMetadataList = metadataResolver.resolveQuery(query)
+
+        AssembleClientData assembler = new AssembleClientData(queryResult: queryResult, columnMetadataList: columnMetadataList)
+        return assembler.createClientData()
     }
 }
 
