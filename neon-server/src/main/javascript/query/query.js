@@ -440,6 +440,10 @@ neon.query.executeQueryGroup = function (queryGroup, successCallback, errorCallb
 };
 
 neon.query.executeQueryService_ = function (query, successCallback, errorCallback, serviceName) {
+    if(query.disregardFilters_){
+        serviceName += "disregardfilters";
+    }
+
     return neon.util.ajaxUtils.doPostJSON(
         query,
         neon.query.serviceUrl('queryservice', serviceName),

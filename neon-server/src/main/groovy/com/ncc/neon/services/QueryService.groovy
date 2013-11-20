@@ -72,6 +72,31 @@ class QueryService {
         return assembler.createClientData()
     }
 
+    @POST
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    @Path("querydisregardfilters")
+    ClientData executeQueryDisregardFilters(Query query) {
+        return executeDisregardFilters(query)
+    }
+
+    @POST
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    @Path("querygroupdisregardfilters")
+    ClientData executeQueryGroupDisregardFilters(QueryGroup query) {
+        return executeDisregardFilters(query)
+    }
+
+    private ClientData executeDisregardFilters(def query) {
+        QueryExecutor queryExecutor = queryExecutorFactory.getExecutor()
+        QueryResult queryResult = queryExecutor.executeDisregardingFilters(query)
+        ColumnMetadataList columnMetadataList = metadataResolver.resolveQuery(query)
+
+        AssembleClientData assembler = new AssembleClientData(queryResult: queryResult, columnMetadataList: columnMetadataList)
+        return assembler.createClientData()
+    }
+
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     @Path("fields")

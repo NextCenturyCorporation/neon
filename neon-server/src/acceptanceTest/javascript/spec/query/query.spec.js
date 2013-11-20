@@ -228,8 +228,8 @@ describe('query mapping', function () {
             assertQueryResults(baseQuery(), expectedData);
 
             // verify that if the query is supposed to include the filtered data, all data is returned
-            //runs(function () {
-                //assertQueryResults(baseQuery().disregardFilters(true), allData);
+            runs(function () {
+                assertQueryResults(baseQuery().disregardFilters(true), allData);
                 runs(function () {
                     // apply another filter and make sure both are applied
                     var salaryFilter = baseFilter().where('salary', '>', 85000);
@@ -246,7 +246,7 @@ describe('query mapping', function () {
                         });
                     });
                 });
-            //});
+            });
         });
     });
 
