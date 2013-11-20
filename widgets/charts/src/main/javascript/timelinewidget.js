@@ -140,7 +140,8 @@ neon.ready(function () {
     }
 
     function populateTimeGranularityDropdown() {
-        neon.dropdown.populateAttributeDropdowns({data: charts.Timeline.GRANULARITIES_}, "time-granularity", drawChart);
+        var element = new neon.dropdown.Element("time-granularity");
+        neon.dropdown.populateAttributeDropdowns({data: charts.Timeline.GRANULARITIES_}, element, drawChart);
     }
 
     function buildStateObject(query) {
@@ -159,7 +160,8 @@ neon.ready(function () {
             neon.chartWidget.setFilterKey(data.filterKey);
             neon.chartWidget.setDatabaseName(data.filterKey.dataSet.databaseName);
             neon.chartWidget.setTableName(data.filterKey.dataSet.tableName);
-            neon.dropdown.populateAttributeDropdowns(data.columns, ['x', 'y'], drawChart);
+            var elements = [new neon.dropdown.Element("x", "temporal"), new neon.dropdown.Element("y", "numeric")];
+            neon.dropdown.populateAttributeDropdowns(data.columns, elements, drawChart);
             neon.dropdown.setDropdownInitialValue("x", data.xValue);
             neon.dropdown.setDropdownInitialValue("y", data.yValue);
             neon.dropdown.setDropdownInitialValue("time-granularity", data.timeGranularity);

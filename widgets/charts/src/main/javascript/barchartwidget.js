@@ -103,7 +103,9 @@ neon.ready(function () {
             neon.chartWidget.setFilterKey(data.filterKey);
             neon.chartWidget.setDatabaseName(data.filterKey.dataSet.databaseName);
             neon.chartWidget.setTableName(data.filterKey.dataSet.tableName);
-            neon.dropdown.populateAttributeDropdowns(data.columns, ['x', 'y'], drawChart);
+
+            var elements = [new neon.dropdown.Element("x", ["text", "numeric"]), new neon.dropdown.Element("y", "numeric")];
+            neon.dropdown.populateAttributeDropdowns(data.columns, elements, drawChart);
             neon.dropdown.setDropdownInitialValue("x", data.xValue);
             neon.dropdown.setDropdownInitialValue("y", data.yValue);
             neon.query.executeQuery(data.query, doDrawChart);

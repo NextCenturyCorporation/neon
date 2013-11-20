@@ -54,7 +54,8 @@ neon.ready(function () {
     }
 
     function populateSortFieldDropdown(data) {
-        neon.dropdown.populateAttributeDropdowns(data, 'sort-field', updateTable);
+        var element = new neon.dropdown.Element("sort-field");
+        neon.dropdown.populateAttributeDropdowns(data, element, updateTable);
         updateTable();
     }
 
@@ -158,7 +159,8 @@ neon.ready(function () {
             databaseName = data.databaseName;
             tableName = data.tableName;
             $('#limit').val(data.limitValue);
-            neon.dropdown.populateAttributeDropdowns(data.sortColumns, 'sort-field', updateTable);
+            var element = new neon.dropdown.Element("sort-field");
+            neon.dropdown.populateAttributeDropdowns(data.sortColumns, element, updateTable);
             neon.dropdown.setDropdownInitialValue("sort-field", data.sortValue);
             styleSortDirectionButtonFromValue(data.sortDirection);
             neon.query.executeQuery(data.query, populateTable);

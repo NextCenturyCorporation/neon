@@ -25,16 +25,28 @@ var neon = neon || {};
 
 neon.dropdown = (function () {
 
-    function populateFieldValues(attributeValues, selectId) {
-        var select = $('#' + selectId);
+    function populateFieldValues(attributeValues, element) {
+        var select = $('#' + element.id);
+
         attributeValues.data.forEach(function (field) {
-            select.append($('<option></option>').attr('value', field).text(field));
+            if(!element.metadata || !attributeValues.metadata){
+                select.append($('<option></option>').attr('value', field).text(field));
+            }
+            else if(attributeValues.metadata[field])
+            {
+                var metadataArray = Array.isArray(element.metadata) ? element.metadata : [element.metadata];
+                metadataArray.forEach(function(meta){
+                    if(attributeValues.metadata[field][meta]){
+                        select.append($('<option></option>').attr('value', field).text(field));
+                    }
+                });
+            }
         });
 
         if(attributeValues.idToColumn){
-            var initialField = attributeValues.idToColumn[selectId];
+            var initialField = attributeValues.idToColumn[element.id];
             if(initialField){
-                setDropdownInitialValue(selectId, initialField);
+                setDropdownInitialValue(element.id, initialField);
                 select.change();
             }
         }
@@ -59,14 +71,14 @@ neon.dropdown = (function () {
             };
         },
 
-        populateAttributeDropdowns: function (attributeValues, dropDownIds, onChange) {
-            var dropDownIdsArray = Array.isArray(dropDownIds) ? dropDownIds : [dropDownIds];
-            dropDownIdsArray.forEach(function (selectId) {
-                var select = $('#' + selectId);
+        populateAttributeDropdowns: function (attributeValues, dropDownElements, onChange) {
+            var dropDownIdsArray = Array.isArray(dropDownElements) ? dropDownElements : [dropDownElements];
+            dropDownIdsArray.forEach(function (element) {
+                var select = $('#' + element.id);
                 select.empty();
                 select.append($('<option></option>').attr('value', '').text('(Select Field)'));
                 select.change(onChange);
-                populateFieldValues(attributeValues, selectId);
+                populateFieldValues(attributeValues, element);
             });
             if(attributeValues.initColumns){
                 if(_.keys(attributeValues.idToColumn).length > 0){
@@ -76,3 +88,8 @@ neon.dropdown = (function () {
         }
     }
 })();
+
+neon.dropdown.Element = function(id, metadata){
+    this.id = id;
+    this.metadata = metadata;
+};

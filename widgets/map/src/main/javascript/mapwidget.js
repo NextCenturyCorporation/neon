@@ -168,7 +168,10 @@ neon.ready(function () {
     }
 
     function populateFromColumns(data) {
-        neon.dropdown.populateAttributeDropdowns(data, options, queryForMapData);
+        var elements = [new neon.dropdown.Element("latitude", "numeric"), new neon.dropdown.Element("longitude", "numeric"),
+            new neon.dropdown.Element("color-by", ["text", "numeric"]), new neon.dropdown.Element("size-by", "numeric")
+        ];
+        neon.dropdown.populateAttributeDropdowns(data, elements, queryForMapData);
     }
 
     function onFiltersChanged() {
@@ -242,7 +245,10 @@ neon.ready(function () {
             }
             databaseName = data.filterKey.dataSet.databaseName;
             tableName = data.filterKey.dataSet.tableName;
-            neon.dropdown.populateAttributeDropdowns(data.columns, options, queryForMapData);
+            var elements = [new neon.dropdown.Element("latitude", "numeric"), new neon.dropdown.Element("longitude", "numeric"),
+                new neon.dropdown.Element("color-by", ["text", "numeric"]), new neon.dropdown.Element("size-by", "numeric")
+            ];
+            neon.dropdown.populateAttributeDropdowns(data.columns, elements, queryForMapData);
             neon.dropdown.setDropdownInitialValue("latitude", data.selectedLatitude);
             neon.dropdown.setDropdownInitialValue("longitude", data.selectedLongitude);
             neon.dropdown.setDropdownInitialValue("color-by", data.selectedColorBy);

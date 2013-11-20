@@ -50,7 +50,8 @@ neon.ready(function () {
     }
 
     function populateFromColumns(data) {
-        neon.dropdown.populateAttributeDropdowns(data, 'date', queryForChartData);
+        var element = new neon.dropdown.Element("date", "temporal");
+        neon.dropdown.populateAttributeDropdowns(data, element, queryForChartData);
     }
 
     function queryForChartData() {
@@ -126,7 +127,8 @@ neon.ready(function () {
             filterKey = data.filterKey;
             databaseName = data.filterKey.dataSet.databaseName;
             tableName = data.filterKey.dataSet.tableName;
-            neon.dropdown.populateAttributeDropdowns(data.columns, 'date');
+            var element = new neon.dropdown.Element("date", "temporal");
+            neon.dropdown.populateAttributeDropdowns(data.columns, element, queryForChartData);
             neon.dropdown.setDropdownInitialValue("date", data.selectedField);
             neon.query.executeQuery(data.query, drawChart);
         });

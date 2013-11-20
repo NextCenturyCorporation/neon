@@ -25,13 +25,15 @@ var neon = neon || {};
 neon.chartWidget = (function (){
     var databaseName;
     var tableName;
+    var widgetName;
     var filterKey;
     var onChange;
 
-    function onActiveDatasetChanged(message, changeHandler, widgetName) {
+    function onActiveDatasetChanged(message, changeHandler, widget) {
         databaseName = message.database;
         tableName = message.table;
         onChange = changeHandler;
+        widgetName = widget;
 
         neon.query.registerForFilterKey(databaseName, tableName, function(filterResponse){
             filterKey = filterResponse;
@@ -40,7 +42,11 @@ neon.chartWidget = (function (){
     }
 
     function populateFromColumns(data) {
-        neon.dropdown.populateAttributeDropdowns(data, ['x', 'y'], onChange);
+        var elements = [new neon.dropdown.Element("x", "temporal"), new neon.dropdown.Element("y", "numeric")];
+        if(widgetName === neon.widget.BARCHART){
+            elements = [new neon.dropdown.Element("x", ["text", "numeric"]), new neon.dropdown.Element("y", "numeric")];
+        }
+        neon.dropdown.populateAttributeDropdowns(data, elements, onChange);
     }
 
     return {
