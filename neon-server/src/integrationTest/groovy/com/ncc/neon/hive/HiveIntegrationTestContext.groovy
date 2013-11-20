@@ -36,7 +36,7 @@ import org.springframework.context.support.SimpleThreadScope
 @Profile('hive-integrationtest')
 class HiveIntegrationTestContext {
 
-    static final String HOST_STRING = System.getProperty("hive.host", "xdata2")
+    static final String HOST_STRING = System.getProperty("hive.host", "localhost:10000")
 
     @Bean
     MetadataConnection metadataConnection(){

@@ -29,6 +29,15 @@ import org.springframework.stereotype.Component
  * @author tbrooks
  */
 
+/**
+ * This holds the connection information for the application.
+ *
+ * We have a connection to mongo per JVM for metadata. Users may also use that connection.
+ * We have a session connection per user for other connections. This allows one user to connect
+ * to hive and another to connect to mongo.
+ */
+
+
 @Component
 class ConnectionManager {
 
