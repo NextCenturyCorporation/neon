@@ -42,7 +42,7 @@ class SingularWhereClauseDeserializationTest {
     @Test
     void "boolean deserialization"(){
         SingularWhereClause deserialized = deserializeWithRhsOf(false)
-        assert deserialized.rhs == false
+        assert !deserialized.rhs
     }
 
     @Test
