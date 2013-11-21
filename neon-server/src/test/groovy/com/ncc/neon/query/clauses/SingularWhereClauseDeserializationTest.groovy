@@ -58,13 +58,12 @@ class SingularWhereClauseDeserializationTest {
     }
 
     private SingularWhereClause deserializeWithRhsOf(def rhs) {
-        SingularWhereClause singularWhereClause = new SingularWhereClause(lhs: "column", operator: "=", rhs: rhs)
         ObjectMapper objectMapper = new ObjectMapper()
+        SingularWhereClause singularWhereClause = new SingularWhereClause(rhs: rhs)
 
         def whereClauseString = objectMapper.writeValueAsString(singularWhereClause)
+        return objectMapper.readValue(whereClauseString, SingularWhereClause)
 
-        SingularWhereClause deserialized = objectMapper.readValue(whereClauseString, SingularWhereClause)
-        deserialized
     }
 
 }
