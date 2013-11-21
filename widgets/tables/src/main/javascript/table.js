@@ -156,7 +156,7 @@ tables.Table.createSlickgridColumns_ = function (columnNames) {
 
 tables.Table.defaultCellFormatter_ = function (row, cell, value, columnDef, dataContext) {
     // most of this taken from slick.grid.js defaultFormatter but modified to support nested objects
-    if (!value) {
+    if (value === null || value === undefined) {
         return "";
     }
 
