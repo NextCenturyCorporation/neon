@@ -8,7 +8,7 @@ dependencies {
     codenarc 'org.codenarc:CodeNarc:0.19'
 }
 
-codenarc.configFile = file("config/codenarc/rules.groovy")
+codenarc.configFile = file("${rootDir}/config/codenarc/rules.groovy")
 
 // configure codenarc for each of the source sets
 sourceSets.each { sourceSet ->

@@ -1,8 +1,8 @@
 // configures a basic project with groovy support and common plugins used by a groovy project
 apply plugin: 'groovy'
 apply plugin: 'jacoco'
-apply from: 'gradle/codenarc.gradle'
-apply from: 'gradle/jdepend.gradle'
+apply from: "${rootDir}/gradle/codenarc.gradle"
+apply from: "${rootDir}/gradle/jdepend.gradle"
 apply from: "${rootDir}/gradle/docs.gradle"
 
 repositories{

@@ -24,7 +24,7 @@ sourceSets {
 }
 
 
-apply from: 'gradle/groovy.gradle'
+apply from: "${rootDir}/gradle/groovy.gradle"
 apply plugin: 'jetty'
 
 // antlr plugin and configuration take from https://github.com/fraoch/antlr4-plugin/

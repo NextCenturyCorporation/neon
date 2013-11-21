@@ -1,11 +1,10 @@
-apply from: 'gradle/groovy.gradle'
+apply from: "${rootDir}/gradle/groovy.gradle"
 
 def mongoVersion = "2.11.3"
 
 repositories{
     mavenCentral()
 }
-
 
 dependencies{
     compile "org.mongodb:mongo-java-driver:$mongoVersion"
