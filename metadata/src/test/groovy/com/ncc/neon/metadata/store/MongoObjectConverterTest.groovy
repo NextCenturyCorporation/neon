@@ -2,7 +2,6 @@ package com.ncc.neon.metadata.store
 
 import com.ncc.neon.metadata.model.widget.WidgetInitializationMetadata
 import org.junit.Test
-
 /*
  * ************************************************************************
  * Copyright (c), 2013 Next Century Corporation. All Rights Reserved.
