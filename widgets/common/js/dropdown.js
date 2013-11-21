@@ -29,7 +29,7 @@ neon.dropdown = (function () {
         var select = $('#' + element.id);
 
         attributeValues.data.forEach(function (field) {
-            if(!element.metadata || !attributeValues.metadata){
+            if(!element.metadata || !attributeValues.metadata || $.isEmptyObject(attributeValues.metadata)){
                 select.append($('<option></option>').attr('value', field).text(field));
             }
             else if(attributeValues.metadata[field])

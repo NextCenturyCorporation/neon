@@ -40,10 +40,15 @@ class QueryValueDeserializer extends JsonDeserializer<Object> {
 
     @Override
     Object deserialize(JsonParser jp, DeserializationContext ctxt) throws IOException, JsonProcessingException {
+
         switch (jp.currentToken) {
             case JsonToken.VALUE_STRING:
                 // check if the string is a date, if not, fallback to plain string
-                return DateUtils.tryToParseDate(jp.text)
+                def obj = DateUtils.tryToParseDate(jp.text)
+                if (obj == "true" || obj == "false") {
+                    return Boolean.parseBoolean(obj)
+                }
+                return obj
             default:
                 return DEFAULT_SERIALIZER.deserialize(jp, ctxt)
         }
