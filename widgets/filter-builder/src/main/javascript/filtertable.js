@@ -133,6 +133,12 @@ neon.filterTable = (function () {
         if (filterData.value === '""') {
             filterData.value = "";
         }
+        if (filterData.value === 'false') {
+            filterData.value = false;
+        }
+        if (filterData.value === 'true') {
+            filterData.value = true;
+        }
     }
 
     function redrawFilterContentAndSaveState() {
