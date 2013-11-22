@@ -8,5 +8,6 @@ neon.widget = {
     TIMELINE: "Timeline",
     BARCHART: "Barchart",
     CIRCULAR_HEAT: "CircularHeat",
-    TABLE: "Table"
+    TABLE: "Table",
+    QUERY_BUILDER: "QueryBuilder"
 };

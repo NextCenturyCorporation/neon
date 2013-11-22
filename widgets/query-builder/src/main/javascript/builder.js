@@ -34,6 +34,13 @@ neon.queryBuilder = (function () {
     });
 
     function restoreState(){
+        neon.query.getWidgetInitialization(neon.widget.QUERY_BUILDER, function(data){
+            if(data){
+                $('#queryText').val(data.query);
+                submitQueryToServer();
+            }
+        });
+
         neon.query.getSavedState(clientId, function(data){
             $('#queryText').val(data);
             submitQueryToServer();

@@ -4,6 +4,7 @@ import com.ncc.neon.metadata.MetadataConnection
 import com.ncc.neon.metadata.model.dataset.WidgetAndDatasetMetadataList
 import com.ncc.neon.metadata.model.column.ColumnMetadata
 import com.ncc.neon.metadata.model.column.ColumnMetadataList
+import com.ncc.neon.metadata.model.widget.WidgetInitializationMetadata
 import com.ncc.neon.metadata.store.MetadataRetriever
 import com.ncc.neon.query.Query
 import com.ncc.neon.query.QueryGroup
@@ -71,5 +72,10 @@ class MetadataResolver {
     WidgetAndDatasetMetadataList getInitializationData(String databaseName, String tableName, String widgetName){
         MetadataRetriever retriever = new MetadataRetriever(metadataConnection)
         return retriever.retrieve(databaseName, tableName, widgetName)
+    }
+
+    WidgetInitializationMetadata getWidgetInitializationData(String widget) {
+        MetadataRetriever retriever = new MetadataRetriever(metadataConnection)
+        return retriever.retrieve(widget)
     }
 }

@@ -48,6 +48,10 @@ class MetadataRetriever {
     WidgetInitializationMetadata retrieve(String widgetName) {
         DBCollection collection = getCollection(MetadataConstants.WIDGET_TABLE)
         DBObject object = collection.findOne(new BasicDBObject("widgetName", widgetName))
+        if(!object){
+            return new WidgetInitializationMetadata(widgetName: widgetName)
+        }
+
         return converter.convertToObject(object)
     }
 
@@ -63,21 +67,18 @@ class MetadataRetriever {
             columnNames.contains(it.columnName)
         }
         return new ColumnMetadataList(filteredColumnData)
-
     }
 
     WidgetAndDatasetMetadataList retrieve(String databaseName, String tableName, String widgetName) {
         DBCollection collection = getCollection(MetadataConstants.DATASET_TABLE)
         DBCursor cursor = collection.find(new BasicDBObject(["widgetName": widgetName, "databaseName": databaseName, "tableName": tableName]))
         return new WidgetAndDatasetMetadataList(getAllData(cursor))
-
     }
 
     private DBCollection getCollection(String name) {
         MongoClient mongo = connection.client
         DB database = mongo.getDB("metadata")
-        DBCollection collection = database.createCollection(name, null)
-        collection
+        return database.createCollection(name, null)
     }
 
     private List getAllData(DBCursor cursor) {

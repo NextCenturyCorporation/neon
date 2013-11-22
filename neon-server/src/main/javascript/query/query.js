@@ -729,7 +729,7 @@ neon.query.saveState = function (id, stateObject, successCallback, errorCallback
 /**
  * Gets the current state that has been saved.
  * @method getSavedState
- * @param {String} id a unique identifier of a client widget
+ * @param {String} id an unique identifier of a client widget
  * @param {Function} successCallback The callback that contains the saved data.
  * @return {neon.util.AjaxRequest} The xhr request object
  */
@@ -742,6 +742,23 @@ neon.query.getSavedState = function (id, successCallback) {
             error: function () {
                 //Do nothing, the state does not exist.
             }
+        }
+    );
+};
+
+/**
+ * Gets widget initialization metadata.
+ * @method getWidgetInitialization
+ * @param {String} id an identifier of a widget, usually the widget name
+ * @param {Function} successCallback The callback that contains the saved data.
+ * @return {neon.util.AjaxRequest} The xhr request object
+ */
+
+neon.query.getWidgetInitialization = function (id, successCallback) {
+    return neon.util.ajaxUtils.doGet(
+        neon.query.serviceUrl('widgetstateservice', 'widgetinitialization', '?widget=' + id),
+        {
+            success: successCallback
         }
     );
 };

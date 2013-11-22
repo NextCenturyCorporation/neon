@@ -1,14 +1,12 @@
 package com.ncc.neon.services
 
-import com.ncc.neon.metadata.model.widget.WidgetInitializationMetadata
-import com.ncc.neon.metadata.store.MetadataRetriever
+import com.ncc.neon.result.MetadataResolver
 import com.ncc.neon.session.WidgetStates
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
 
 import javax.ws.rs.*
 import javax.ws.rs.core.MediaType
-
 /*
  * ************************************************************************
  * Copyright (c), 2013 Next Century Corporation. All Rights Reserved.
@@ -46,6 +44,9 @@ class WidgetStateService {
     @Autowired
     WidgetStates widgetStates
 
+    @Autowired
+    MetadataResolver metadataResolver
+
     @POST
     @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
     @Path("savestate")
@@ -70,8 +71,7 @@ class WidgetStateService {
     @Produces(MediaType.APPLICATION_JSON)
     @Path("widgetinitialization")
     String getWidgetInitialization(@QueryParam("widget") String widget) {
-        MetadataRetriever retriever = new MetadataRetriever(metadataConnection)
-        WidgetInitializationMetadata data = retriever.retrieve(widget)
+        def data = metadataResolver.getWidgetInitializationData(widget)
         return data.initDataJson
     }
 
