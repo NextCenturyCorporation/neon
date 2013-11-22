@@ -30,6 +30,10 @@ neon.ready(function () {
 
     function initialize() {
         neon.query.SERVER_URL = $("#neon-server").val();
+        neon.toggle.createOptionsPanel("#options-panel");
+        drawChart();
+        populateTimeGranularityDropdown();
+
         neon.eventing.messaging.registerForNeonEvents({
             activeDatasetChanged: function (message) {
                 neon.chartWidget.onActiveDatasetChanged(message, drawChart, neon.widget.TIMELINE);
@@ -38,10 +42,7 @@ neon.ready(function () {
         });
 
 
-        neon.toggle.createOptionsPanel("#options-panel");
-        populateTimeGranularityDropdown();
         configureButtons();
-        drawChart();
         restoreState();
     }
 

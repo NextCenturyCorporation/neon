@@ -31,6 +31,8 @@ neon.ready(function () {
     function initialize() {
         neon.query.SERVER_URL = $("#neon-server").val();
 
+        neon.toggle.createOptionsPanel("#options-panel");
+        drawChart();
         neon.eventing.messaging.registerForNeonEvents({
             activeDatasetChanged: function (message) {
                 neon.chartWidget.onActiveDatasetChanged(message, drawChart, neon.widget.BARCHART);
@@ -38,8 +40,6 @@ neon.ready(function () {
             filtersChanged: drawChart
         });
 
-        neon.toggle.createOptionsPanel("#options-panel");
-        drawChart();
         restoreState();
     }
 
