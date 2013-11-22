@@ -50,7 +50,11 @@ class JdbcClient {
         this.connection = DriverManager.getConnection("jdbc:" + databaseType + "://" + dbHostString + "/" + databaseName, "", "")
     }
 
-
+    /**
+     * Each jdbcClient instance is created per session,
+     * This method is synchronized because a user cannot perform multiple simultaneous queries
+     * without hive blowing up.
+     */
     synchronized List executeQuery(String query) {
         Statement statement
         ResultSet resultSet
@@ -91,6 +95,11 @@ class JdbcClient {
         return val
     }
 
+    /**
+     * Each jdbcClient instance is created per session,
+     * This method is synchronized because a user cannot perform multiple simultaneous queries
+     * without hive blowing up.
+     */
     synchronized void execute(String query) {
         Statement statement
         try {

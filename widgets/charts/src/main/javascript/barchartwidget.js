@@ -51,11 +51,11 @@ neon.ready(function () {
 
         var xAttr = neon.chartWidget.getXAttribute();
         var yAttr = neon.chartWidget.getYAttribute();
-
         if (!xAttr) {
             doDrawChart({data: []});
             return;
         }
+
 
         var query = new neon.query.Query()
             .selectFrom(neon.chartWidget.getDatabaseName(), neon.chartWidget.getTableName())
@@ -67,6 +67,7 @@ neon.ready(function () {
         else {
             query.aggregate(neon.query.COUNT, null, COUNT_FIELD_NAME);
         }
+
         var stateObject = buildStateObject(query);
         neon.query.executeQuery(query, doDrawChart);
         neon.query.saveState(clientId, stateObject);

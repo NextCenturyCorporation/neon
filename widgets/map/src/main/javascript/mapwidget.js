@@ -179,6 +179,7 @@ neon.ready(function () {
     }
 
     function queryForMapData() {
+        ensureMappings();
         if (!neon.mapWidgetUtils.latitudeAndLongitudeAreSelected()) {
             return;
         }
@@ -187,6 +188,18 @@ neon.ready(function () {
         var stateObject = buildStateObject(query);
         neon.query.executeQuery(query, redrawMapData);
         neon.query.saveState(clientId, stateObject);
+    }
+
+    function ensureMappings() {
+        map.latitudeMapping = neon.mapWidgetUtils.getLatitudeField();
+        map.longitudeMapping = neon.mapWidgetUtils.getLongitudeField();
+        if (neon.mapWidgetUtils.getSizeByField()) {
+            map.sizeMapping = neon.mapWidgetUtils.getSizeByField();
+        }
+        else {
+            map.sizeMapping = coreMap.Map.DEFAULT_SIZE_MAPPING;
+        }
+        map.categoryMapping = neon.mapWidgetUtils.getColorByField();
     }
 
     function buildQuery() {

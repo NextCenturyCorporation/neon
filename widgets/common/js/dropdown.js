@@ -43,13 +43,15 @@ neon.dropdown = (function () {
             }
         });
 
+        var onChangeNeeded = false;
         if(attributeValues.idToColumn){
             var initialField = attributeValues.idToColumn[element.id];
             if(initialField){
                 setDropdownInitialValue(element.id, initialField);
-                select.change();
+                onChangeNeeded = true;
             }
         }
+        return onChangeNeeded;
     }
 
     function setDropdownInitialValue (selectElementId, value) {
@@ -73,17 +75,19 @@ neon.dropdown = (function () {
 
         populateAttributeDropdowns: function (attributeValues, dropDownElements, onChange) {
             var dropDownIdsArray = Array.isArray(dropDownElements) ? dropDownElements : [dropDownElements];
+            var onChangedNeeded = false;
             dropDownIdsArray.forEach(function (element) {
                 var select = $('#' + element.id);
                 select.empty();
+                $('#'+ element.id +' option:selected').removeAttr("selected");
                 select.append($('<option></option>').attr('value', '').text('(Select Field)'));
                 select.change(onChange);
-                populateFieldValues(attributeValues, element);
-            });
-            if(attributeValues.initColumns){
-                if(_.keys(attributeValues.idToColumn).length > 0){
-                    onChange();
+                if(populateFieldValues(attributeValues, element)){
+                    onChangedNeeded = true;
                 }
+            });
+            if(onChangedNeeded){
+                onChange();
             }
         }
     }
