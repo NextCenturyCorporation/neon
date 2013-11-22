@@ -89,7 +89,7 @@ neon.ready(function () {
             }
         });
         neon.mapWidgetUtils.addDropdownChangeListener("color-by", function (value) {
-            map.colorMapping = value;
+            map.categoryMapping = value;
         });
     }
 

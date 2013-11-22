@@ -22,7 +22,7 @@
     <script src="js-lib/heatmap/heatmap-openlayers.js"></script>
     <script src="js/toggle.js"></script>
     <script src="js/dropdown.js"></script>
-    <script src="javascript/mapcore.js"></script>
+    <script src="javascript/coremap.js"></script>
     <!-- endbuild -->
 
     <!-- build:js js/mapwidgetutils.js -->

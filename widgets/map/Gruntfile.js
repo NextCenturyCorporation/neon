@@ -22,7 +22,7 @@ module.exports = function (grunt) {
                 stripBanners: true
             },
             nodeps: {
-                src: [src('mapcore.js')],
+                src: [src('coremap.js')],
                 dest: 'build/js-temp/<%= pkg.name %>.js'
             },
             dist: {

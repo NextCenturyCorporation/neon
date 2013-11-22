@@ -32,15 +32,15 @@ var coreMap = coreMap || {};
  * @param {Object} opts A collection of optional key/value pairs used for configuration parameters:
  * <ul>
  *     <li>data - An array of data to display in the map</li>
- *     <li>width - The width of the map.</li>
- *     <li>height - The height of the map.</li>
+ *     <li>width - The width of the map in pixels.</li>
+ *     <li>height - The height of the map in pixels.</li>
  *     <li>latitudeMapping {function | String} - A way to map the data element to latitude.
  *     This could be a string name for a simple mapping or a function for a more complex one.</li>
  *     <li>longitudeMapping {function | String} - A way to map the data element to longitude.
  *     This could be a string name for a simple mapping or a function for a more complex one.</li>
  *     <li>sizeMapping {function | String} - A way to map the data element to size.
  *     This could be a string name for a simple mapping or a function for a more complex one.</li>
- *     <li>colorMapping {function | String} - A way to map the data element to color.
+ *     <li>categoryMapping {function | String} - A way to map the data element to color.
  *     This could be a string name for a simple mapping or a function for a more complex one.</li>
  *
  * </ul>
@@ -78,7 +78,7 @@ coreMap.Map = function(elementId, opts){
     this.latitudeMapping = opts.latitudeMapping || coreMap.Map.DEFAULT_LATITUDE_MAPPING;
     this.longitudeMapping = opts.longitudeMapping || coreMap.Map.DEFAULT_LONGITUDE_MAPPING;
     this.sizeMapping = opts.sizeMapping || coreMap.Map.DEFAULT_SIZE_MAPPING;
-    this.colorMapping = opts.colorMapping;
+    this.categoryMapping = opts.categoryMapping;
 
     this.colorScale = d3.scale.category20();
     this.responsive = true;
@@ -352,7 +352,7 @@ coreMap.Map.prototype.calculateRadius = function(element){
  */
 
 coreMap.Map.prototype.calculateColor = function(element){
-    var category = this.getValueFromDataElement(this.colorMapping, element);
+    var category = this.getValueFromDataElement(this.categoryMapping, element);
 
     if(!category){
         return coreMap.Map.DEFAULT_COLOR;
