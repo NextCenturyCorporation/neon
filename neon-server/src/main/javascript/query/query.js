@@ -169,11 +169,6 @@ neon.query.KM = 'km';
  */
 neon.query.MILE = 'mile';
 
-
-// these ids are used for providing json args to the callback functions
-neon.query.TABLE_NAME_IDENTIFIER = 'tableName';
-neon.query.DATABASE_NAME_IDENTIFIER = 'databaseName';
-
 /**
  * Sets the *select* clause of the query to select data from the specified dataset
  * @method selectFrom
@@ -762,6 +757,61 @@ neon.query.getWidgetInitialization = function (id, successCallback) {
         }
     );
 };
+
+/**
+ * Connects a user to the given datastore.
+ * @method connectToDatastore
+ * @param {String} datastore The name of the datastore (e.g. mongo or hive)
+ * @param {String} hostname The connection url of the datastore
+ * @param {Function} successCallback Callback invoked on success
+ * @return {neon.util.AjaxRequest} The xhr request object
+ */
+
+neon.query.connectToDatastore = function (datastore, hostname, successCallback) {
+    return neon.util.ajaxUtils.doPost(
+        neon.query.serviceUrl('connectionservice', 'connect'),
+        {
+            data: { datastore: datastore, hostname: hostname },
+            success: successCallback
+        }
+    );
+};
+
+/**
+ * Gets the database names available for the current datastore
+ * @method getDatabaseNames
+ * @param {Function} successCallback The callback that contains the database names in an array.
+ * @return {neon.util.AjaxRequest} The xhr request object
+ */
+
+neon.query.getDatabaseNames = function (successCallback) {
+    return neon.util.ajaxUtils.doGet(
+        neon.query.serviceUrl('queryservice', 'databasenames'),
+        {
+            success: successCallback
+        }
+    );
+};
+
+/**
+ * Gets the tables names available for the current datastore and database
+ * @method getTableNames
+ * @param {String} databaseName The name of the database
+ * @param {Function} successCallback The callback that contains the table names in an array.
+ * @return {neon.util.AjaxRequest} The xhr request object
+ */
+
+neon.query.getTableNames = function (databaseName, successCallback) {
+    return neon.util.ajaxUtils.doPost(
+        neon.query.serviceUrl('queryservice', 'tablenames'),
+        {
+            data: { database: databaseName },
+            success: successCallback
+        }
+    );
+};
+
+
 
 neon.query.serviceUrl = function (servicePath, serviceName, queryParamsString) {
     if (!queryParamsString) {

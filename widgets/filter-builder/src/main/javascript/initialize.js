@@ -56,38 +56,27 @@ $(function () {
 
     function connectToDatastore() {
         $("#db-table").show();
-        var databaseSelectedOption = $('#datastore-select option:selected');
-        var hostnameSelector = $('#hostname-input');
-
-        neon.util.ajaxUtils.doPost(getConnectionServiceBaseUrl() + "/connect",
-            {
-                data: { datastore: databaseSelectedOption.val(), hostname: hostnameSelector.val() },
-                success: populateDatabaseDropdown
-            });
+        var databaseSelectedOption = $('#datastore-select option:selected').val();
+        var hostnameSelector = $('#hostname-input').val();
+        neon.query.connectToDatastore(databaseSelectedOption, hostnameSelector, populateDatabaseDropdown);
     }
 
     function populateDatabaseDropdown() {
-        neon.util.ajaxUtils.doGet(neon.query.SERVER_URL + "/services/queryservice/databasenames",
-            {
-                success: function (databaseNames) {
-                    neon.wizard.populateDropdown('#database-select', databaseNames);
-                    populateTableDropdown();
-                }
-            });
+        neon.query.getDatabaseNames(function (databaseNames) {
+
+            neon.wizard.populateDropdown('#database-select', databaseNames);
+            populateTableDropdown();
+        });
     }
 
     function populateTableDropdown() {
-        var selectedDatabase = $('#database-select option:selected');
-        neon.util.ajaxUtils.doPost(neon.query.SERVER_URL + "/services/queryservice/tablenames",
-            {
-                data: { database: selectedDatabase.val() },
-                success: function (tableNames) {
-                    neon.wizard.populateDropdown('#table-select', tableNames);
-                    neon.filterTable.setColumns([]);
-                    neon.filterTable.initializeFilterSection();
-                    neon.filterBuilderState.saveState();
-                }
-            });
+        var selectedDatabase = $('#database-select option:selected').val();
+        neon.query.getTableNames(selectedDatabase, function (tableNames) {
+            neon.wizard.populateDropdown('#table-select', tableNames);
+            neon.filterTable.setColumns([]);
+            neon.filterTable.initializeFilterSection();
+            neon.filterBuilderState.saveState();
+        });
     }
 
     function getConnectionServiceBaseUrl(){
