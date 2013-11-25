@@ -1,5 +1,6 @@
 package com.ncc.neon.selection
 
+import com.ncc.neon.query.filter.SelectionManager
 import com.ncc.neon.util.AssertUtils
 import org.junit.Before
 import org.junit.Test

@@ -1,4 +1,4 @@
-package com.ncc.neon.session
+package com.ncc.neon.state
 
 import org.junit.Test
 

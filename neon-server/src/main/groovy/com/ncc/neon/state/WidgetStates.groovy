@@ -1,7 +1,9 @@
-package com.ncc.neon.session
+package com.ncc.neon.state
 
-import org.junit.Test
-
+import org.springframework.context.annotation.Scope
+import org.springframework.context.annotation.ScopedProxyMode
+import org.springframework.stereotype.Component
+import org.springframework.web.context.WebApplicationContext
 
 /*
  * ************************************************************************
@@ -29,37 +31,34 @@ import org.junit.Test
  * @author tbrooks
  */
 
-class WidgetStateTest {
+/**
+ * Holds all the widget states in a user's session, and provides
+ * methods to access and update the states.
+ */
 
-    private static final String ID_1 = "1"
-    private static final String ID_2 = "2"
-    private static final String CONTENT_1 = "content1"
-    private static final String CONTENT_2 = "content2"
+@Component
+@Scope(value = WebApplicationContext.SCOPE_SESSION, proxyMode = ScopedProxyMode.TARGET_CLASS)
+class WidgetStates {
 
-    @Test
-    void "ids must be equal for WidgetStates to be equal"(){
-        WidgetState state1 = new WidgetState(ID_1, CONTENT_1)
-        WidgetState state2 = new WidgetState(ID_1, CONTENT_1)
+    private final Set<WidgetState> states = [] as Set
 
-        assert state1 == state2
+    void addWidgetState(String clientId, String json) {
+        if(!clientId){
+            return
+        }
 
-        state2 = new WidgetState(ID_1, CONTENT_2)
-
-        assert state1 == state2
+        WidgetState widgetState = new WidgetState(clientId, json)
+        states.remove(widgetState)
+        states.add(widgetState)
     }
 
-    @Test
-    void "if the ids are not equal the widget states are not equal"(){
-
-        WidgetState state1 = new WidgetState(ID_1, CONTENT_1)
-        WidgetState state2 = new WidgetState(ID_2, CONTENT_1)
-
-        assert state1 != state2
-
-        state2 = new WidgetState(ID_2, CONTENT_2)
-
-        assert state1 != state2
-
+    WidgetState getWidgetState(String clientId) {
+        states.find {
+            clientId == it.clientId
+        }
     }
 
+    void clearWidgetStates() {
+        states.clear()
+    }
 }

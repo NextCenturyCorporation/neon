@@ -1,7 +1,7 @@
 package com.ncc.neon.services
 
 import com.ncc.neon.result.MetadataResolver
-import com.ncc.neon.session.WidgetStates
+import com.ncc.neon.state.WidgetStates
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
 

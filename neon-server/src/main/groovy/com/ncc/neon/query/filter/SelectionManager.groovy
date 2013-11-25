@@ -1,4 +1,4 @@
-package com.ncc.neon.selection
+package com.ncc.neon.query.filter
 
 import org.springframework.context.annotation.Scope
 import org.springframework.context.annotation.ScopedProxyMode

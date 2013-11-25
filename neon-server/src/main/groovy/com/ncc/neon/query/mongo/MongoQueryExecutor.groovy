@@ -6,7 +6,7 @@ import com.ncc.neon.query.*
 import com.ncc.neon.query.clauses.SingularWhereClause
 import com.ncc.neon.query.filter.Filter
 import com.ncc.neon.query.filter.FilterState
-import com.ncc.neon.selection.SelectionManager
+import com.ncc.neon.query.filter.SelectionManager
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
