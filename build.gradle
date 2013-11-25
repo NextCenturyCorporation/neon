@@ -20,7 +20,7 @@ project(":neon-server").ext.logbackVersion = "1.0.13"
 project(":common").ext.logbackVersion = "1.0.13"
 
 //This must be a valid semantic version.
-def CURRENT_NEON_VERSION = "0.6.0"
+def CURRENT_NEON_VERSION = "0.7.0"
 version = CURRENT_NEON_VERSION
 
 configure(subprojects.findAll { it.name != 'common' && it.name != 'metadata'}) {
