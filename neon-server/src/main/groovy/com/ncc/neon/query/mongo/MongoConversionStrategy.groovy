@@ -6,6 +6,7 @@ import com.ncc.neon.query.Query
 import com.ncc.neon.query.clauses.AndWhereClause
 import com.ncc.neon.query.clauses.SelectClause
 import com.ncc.neon.query.filter.DataSet
+import com.ncc.neon.query.filter.Filter
 import com.ncc.neon.query.filter.FilterState
 
 /*
@@ -41,23 +42,25 @@ import com.ncc.neon.query.filter.FilterState
 class MongoConversionStrategy {
 
     private final FilterState filterState
+    private final FilterState selectionState
 
-    MongoConversionStrategy(FilterState filterState) {
+    MongoConversionStrategy(FilterState filterState, FilterState selectionState) {
         this.filterState = filterState
+        this.selectionState = selectionState
     }
 
-    MongoQuery convertQueryDisregardingFilters(Query query, Closure additionalWhereClauseGenerator = null) {
-        helpConvertQuery(query, false, additionalWhereClauseGenerator)
+    MongoQuery convertQueryDisregardingFilters(Query query) {
+        helpConvertQuery(query, false)
     }
 
-    MongoQuery convertQueryWithFilterState(Query query, Closure additionalWhereClauseGenerator = null) {
-        helpConvertQuery(query, true, additionalWhereClauseGenerator)
+    MongoQuery convertQueryWithFilterState(Query query) {
+        helpConvertQuery(query, true)
     }
 
-    private MongoQuery helpConvertQuery(Query query, boolean includeFiltersFromFilterState, Closure additionalWhereClauseGenerator) {
+    private MongoQuery helpConvertQuery(Query query, boolean includeFiltersFromFilterState) {
         MongoQuery mongoQuery = new MongoQuery(query: query)
         mongoQuery.selectParams = createSelectParams(query)
-        List whereClauses = assembleWhereClauses(query, additionalWhereClauseGenerator)
+        List whereClauses = assembleWhereClauses(query)
 
         if (includeFiltersFromFilterState) {
             whereClauses.addAll(createWhereClausesForFilters(query))
@@ -77,12 +80,9 @@ class MongoConversionStrategy {
         return MongoWhereClauseBuilder.build(new AndWhereClause(whereClauses: whereClauses))
     }
 
-    private static List assembleWhereClauses(Query query, Closure additionalWhereClauseGenerator) {
+    private static List assembleWhereClauses(Query query) {
         def whereClauses = []
 
-        if (additionalWhereClauseGenerator) {
-            whereClauses << additionalWhereClauseGenerator()
-        }
         if (query.filter.whereClause) {
             whereClauses << query.filter.whereClause
         }
@@ -91,7 +91,9 @@ class MongoConversionStrategy {
 
     private def createWhereClausesForFilters(query) {
         def whereClauses = []
-        def filters = filterState.getFiltersForDataset(new DataSet(databaseName: query.databaseName, tableName: query.tableName))
+        DataSet dataSet = new DataSet(databaseName: query.databaseName, tableName: query.tableName)
+        List<Filter> filters = filterState.getFiltersForDataset(dataSet)
+        filters.addAll(selectionState.getFiltersForDataset(dataSet))
         if (!filters.isEmpty()) {
             filters.each {
                 if (it.whereClause) {

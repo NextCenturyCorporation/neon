@@ -287,8 +287,6 @@ abstract class AbstractQueryExecutorIntegrationTest {
         assertUnorderedQueryResult(getAllData(), allDataResult)
     }
 
-
-
     @Test
     void "clear filters"() {
         def filterId = new FilterKey(UUID.randomUUID(), new DataSet(databaseName: DATABASE_NAME, tableName: TABLE_NAME))

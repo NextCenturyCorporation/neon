@@ -74,35 +74,27 @@ neon.eventing.publishing = (function () {
         },
         /**
          * Fires a selection changed event.
-         * See {{#crossLink "neon.query.Query/setSelectionWhere:method"}}{{/crossLink}}
-         * @method setSelectionWhere
+         * See {{#crossLink "neon.query.Query/addSelection:method"}}{{/crossLink}}
+         * @method addSelection
          */
-        setSelectionWhere: function(filter, successCallback, errorCallback){
-            neon.query.setSelectionWhere(filter, createChannelCallback(neon.eventing.channels.SELECTION_CHANGED, successCallback), errorCallback);
+        addSelection: function(filterKey, filter, successCallback, errorCallback){
+            neon.query.addSelection(filterKey, filter, createChannelCallback(neon.eventing.channels.SELECTION_CHANGED, successCallback), errorCallback);
         },
         /**
          * Fires a selection changed event.
-         * See {{#crossLink "neon.query.Query/setSelectedIds:method"}}{{/crossLink}}
-         * @method setSelectedIds
+         * See {{#crossLink "neon.query.Query/removeSelection:method"}}{{/crossLink}}
+         * @method removeSelection
          */
-        setSelectedIds: function(ids, successCallback, errorCallback){
-            neon.query.setSelectedIds(ids, createChannelCallback(neon.eventing.channels.SELECTION_CHANGED, successCallback), errorCallback);
+        removeSelection: function(filterKey, successCallback, errorCallback){
+            neon.query.removeSelection(filterKey, createChannelCallback(neon.eventing.channels.SELECTION_CHANGED, successCallback), errorCallback);
         },
         /**
          * Fires a selection changed event.
-         * See {{#crossLink "neon.query.Query/addSelectedIds:method"}}{{/crossLink}}
-         * @method addSelectedIds
+         * See {{#crossLink "neon.query.Query/replaceSelection:method"}}{{/crossLink}}
+         * @method replaceSelection
          */
-        addSelectedIds: function (ids, successCallback, errorCallback) {
-            neon.query.addSelectedIds(ids, createChannelCallback(neon.eventing.channels.SELECTION_CHANGED, successCallback), errorCallback);
-        },
-        /**
-         * Fires a selection changed event.
-         * See {{#crossLink "neon.query.Query/removeSelectedIds:method"}}{{/crossLink}}
-         * @method removeSelectedIds
-         */
-        removeSelectedIds: function (ids, successCallback, errorCallback) {
-            neon.query.removeSelectedIds(ids, createChannelCallback(neon.eventing.channels.SELECTION_CHANGED, successCallback), errorCallback);
+        replaceSelection: function (filterKey, filter, successCallback, errorCallback) {
+            neon.query.replaceSelection(filterKey, filter, createChannelCallback(neon.eventing.channels.SELECTION_CHANGED, successCallback), errorCallback);
         },
         /**
          * Fires a selection changed event.

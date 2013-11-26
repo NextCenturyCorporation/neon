@@ -102,46 +102,29 @@ describe('publishing events to OWF channels', function () {
         );
     });
 
-    it('should publish set selection by filter', function () {
+    it('should publish add selection', function () {
+        var filterKey = {
+            uuid: "84bc5064-c837-483b-8454-c8c72abe45f8",
+            dataSet: {
+                databaseName: databaseName,
+                tableName: tableName
+            }
+        };
         var filter = new neon.query.Filter().selectFrom(databaseName, tableName);
         testResultsPublishedToChannel(
             neon.eventing.channels.SELECTION_CHANGED,
-            neon.eventing.publishing.setSelectionWhere,
-            [filter],
-            'setSelectionWhere'
+            neon.eventing.publishing.addSelection,
+            [filterKey, filter],
+            'addSelection'
         );
     });
 
-    it('should publish set selection by ids', function () {
+    it('should publish remove selection', function () {
         testResultsPublishedToChannel(
             neon.eventing.channels.SELECTION_CHANGED,
-            neon.eventing.publishing.setSelectedIds,
-            [
-                ["id"]
-            ],
-            'setSelectedIds'
-        );
-    });
-
-    it('should publish add selection ids', function () {
-        testResultsPublishedToChannel(
-            neon.eventing.channels.SELECTION_CHANGED,
-            neon.eventing.publishing.addSelectedIds,
-            [
-                ["id"]
-            ],
-            'addSelectedIds'
-        );
-    });
-
-    it('should publish remove selection ids', function () {
-        testResultsPublishedToChannel(
-            neon.eventing.channels.SELECTION_CHANGED,
-            neon.eventing.publishing.removeSelectedIds,
-            [
-                ["id"]
-            ],
-            'removeSelectedIds'
+            neon.eventing.publishing.removeSelection,
+            ["filterId"],
+            'removeSelection'
         );
     });
 
@@ -149,9 +132,7 @@ describe('publishing events to OWF channels', function () {
         testResultsPublishedToChannel(
             neon.eventing.channels.SELECTION_CHANGED,
             neon.eventing.publishing.clearSelection,
-            [
-                ["id"]
-            ],
+            [],
             'clearSelection'
         );
     });

@@ -1,16 +1,17 @@
 package com.ncc.neon.query.hive
+
 import com.ncc.neon.connect.ConnectionManager
 import com.ncc.neon.query.*
-import com.ncc.neon.query.filter.Filter
 import com.ncc.neon.query.filter.FilterState
 import com.ncc.neon.query.jdbc.JdbcClient
-import com.ncc.neon.query.filter.SelectionManager
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
 
+import javax.annotation.Resource
 import java.sql.SQLException
+
 /*
  * ************************************************************************
  * Copyright (c), 2013 Next Century Corporation. All Rights Reserved.
@@ -42,18 +43,18 @@ class HiveQueryExecutor implements QueryExecutor {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(HiveQueryExecutor)
 
-    @Autowired
+    @Resource
     private FilterState filterState
 
-    @Autowired
-    private SelectionManager selectionManager
+    @Resource
+    private FilterState selectionState
 
     @Autowired
     private ConnectionManager connectionManager
 
     @Override
     QueryResult execute(Query query) {
-        HiveConversionStrategy conversionStrategy = new HiveConversionStrategy(filterState)
+        HiveConversionStrategy conversionStrategy = new HiveConversionStrategy(filterState, selectionState)
         String hiveQuery = conversionStrategy.convertQueryWithFilterState(query)
         LOGGER.debug("Hive Query: {}", hiveQuery)
         List<Map> resultList = jdbcClient.executeQuery(hiveQuery)
@@ -72,7 +73,7 @@ class HiveQueryExecutor implements QueryExecutor {
 
     @Override
     QueryResult executeDisregardingFilters(Query query) {
-        HiveConversionStrategy conversionStrategy = new HiveConversionStrategy(filterState)
+        HiveConversionStrategy conversionStrategy = new HiveConversionStrategy(filterState, selectionState)
         String hiveQuery = conversionStrategy.convertQueryDisregardingFilters(query)
         LOGGER.debug("Hive Query: {}", hiveQuery)
         List<Map> resultList = jdbcClient.executeQuery(hiveQuery)
@@ -117,40 +118,6 @@ class HiveQueryExecutor implements QueryExecutor {
             LOGGER.error("Columns cannot be found ", ex)
             return new ListQueryResult()
         }
-    }
-
-    @Override
-    void setSelectionWhere(Filter filter) {
-        throw new UnsupportedOperationException("We can't set a selection through hive because we have not yet implemented the ID field")
-    }
-
-    @Override
-    void setSelectedIds(Collection<Object> ids) {
-        LOGGER.warn("setting selected Ids will not have an effect because we have not yet implemented the ID field")
-        selectionManager.replaceSelectionWith(ids)
-    }
-
-    @Override
-    void addSelectedIds(Collection<Object> ids) {
-        LOGGER.warn("adding selected Ids will not have an effect because we have not yet implemented the ID field")
-        selectionManager.addIds(ids)
-    }
-
-    @Override
-    void removeSelectedIds(Collection<Object> ids) {
-        LOGGER.warn("removing selected Ids will not have an effect because we have not yet implemented the ID field")
-        selectionManager.removeIds(ids)
-    }
-
-    @Override
-    void clearSelection() {
-        LOGGER.warn("removing selected Ids will not have an effect because we have not yet implemented the ID field")
-        selectionManager.clear()
-    }
-
-    @Override
-    QueryResult getSelectionWhere(Filter filter) {
-        throw new UnsupportedOperationException("We can't set a selection through hive because we have not yet implemented the ID field")
     }
 
     private JdbcClient getJdbcClient() {

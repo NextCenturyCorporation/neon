@@ -1,17 +1,15 @@
 package com.ncc.neon.services
 
-import com.ncc.neon.query.QueryExecutor
-import com.ncc.neon.query.QueryResult
-import com.ncc.neon.query.filter.Filter
-import org.springframework.beans.factory.annotation.Autowired
+import com.ncc.neon.query.filter.FilterContainer
+import com.ncc.neon.query.filter.FilterKey
+import com.ncc.neon.query.filter.FilterState
 import org.springframework.stereotype.Component
 
+import javax.annotation.Resource
 import javax.ws.rs.Consumes
 import javax.ws.rs.POST
 import javax.ws.rs.Path
-import javax.ws.rs.Produces
 import javax.ws.rs.core.MediaType
-
 /*
  * ************************************************************************
  * Copyright (c), 2013 Next Century Corporation. All Rights Reserved.
@@ -42,54 +40,35 @@ import javax.ws.rs.core.MediaType
 @Path("/selectionservice")
 class SelectionService {
 
-    @Autowired
-    QueryExecutorFactory queryExecutorFactory
+    @Resource
+    FilterState selectionState
 
     @POST
+    @Path("addselection")
     @Consumes(MediaType.APPLICATION_JSON)
-    @Path("setselectionwhere")
-    void setSelectionWhere(Filter filter) {
-        QueryExecutor queryExecutor = queryExecutorFactory.getExecutor()
-        queryExecutor.setSelectionWhere(filter)
+    void addSelection(FilterContainer container) {
+        selectionState.addFilter(container.filterKey, container.filter)
     }
 
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
-    @Path("setselectedids")
-    void setSelectedIds(Collection<Object> ids) {
-        QueryExecutor queryExecutor = queryExecutorFactory.getExecutor()
-        queryExecutor.setSelectedIds(ids)
+    @Path("removeselection")
+    void removeSelection(FilterKey filterKey) {
+        selectionState.removeFilter(filterKey)
     }
 
     @POST
+    @Path("replaceselection")
     @Consumes(MediaType.APPLICATION_JSON)
-    @Produces(MediaType.APPLICATION_JSON)
-    @Path("getselectionwhere")
-    QueryResult getSelectionWhere(Filter filter) {
-        QueryExecutor queryExecutor = queryExecutorFactory.getExecutor()
-        return queryExecutor.getSelectionWhere(filter)
-    }
-
-    @POST
-    @Consumes(MediaType.APPLICATION_JSON)
-    @Path("addselectedids")
-    void addSelectedIds(Collection<Object> ids) {
-        QueryExecutor queryExecutor = queryExecutorFactory.getExecutor()
-        queryExecutor.addSelectedIds(ids)
-    }
-
-    @POST
-    @Consumes(MediaType.APPLICATION_JSON)
-    @Path("removeselectedids")
-    void removeSelectedIds(Collection<Object> ids) {
-        QueryExecutor queryExecutor = queryExecutorFactory.getExecutor()
-        queryExecutor.removeSelectedIds(ids)
+    void replaceSelection(FilterContainer container) {
+        removeSelection(container.filterKey)
+        addSelection(container)
     }
 
     @POST
     @Path("clearselection")
     void clearSelection() {
-        QueryExecutor queryExecutor = queryExecutorFactory.getExecutor()
-        queryExecutor.clearSelection()
+        selectionState.clearAllFilters()
     }
+
 }

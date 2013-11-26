@@ -1,13 +1,9 @@
 package com.ncc.neon.services
 
-import com.ncc.neon.query.filter.DataSet
-import com.ncc.neon.query.filter.FilterContainer
-import com.ncc.neon.query.filter.FilterEvent
-import com.ncc.neon.query.filter.FilterKey
-import com.ncc.neon.query.filter.FilterState
-import org.springframework.beans.factory.annotation.Autowired
+import com.ncc.neon.query.filter.*
 import org.springframework.stereotype.Component
 
+import javax.annotation.Resource
 import javax.ws.rs.Consumes
 import javax.ws.rs.POST
 import javax.ws.rs.Path
@@ -48,7 +44,7 @@ import javax.ws.rs.core.MediaType
 @Path("/filterservice")
 class FilterService {
 
-    @Autowired
+    @Resource
     FilterState filterState
 
     @POST

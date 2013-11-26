@@ -21,9 +21,6 @@
  * RECIPIENT IS UNDER OBLIGATION TO MAINTAIN SECRECY.
  */
 package com.ncc.neon.query
-
-import com.ncc.neon.query.filter.Filter
-
 /**
  * Executes a query against a datastore
  */
@@ -76,45 +73,5 @@ public interface QueryExecutor {
      * @return
      */
     QueryResult getFieldNames(String databaseName, String tableName)
-
-    /**
-     * Sets the selection to be the items that match the filter
-     * @param filter
-     */
-    void setSelectionWhere(Filter filter)
-
-    // the id is left as a generic Object since it may vary depending on the implementation. some datastores
-    // keep complex ids so we may not be able to create a single class/interface to accurately describe it
-
-    /**
-     * Sets the selection to those items with the specified ids
-     * @param ids
-     */
-    void setSelectedIds(Collection<Object> ids)
-
-    /**
-     * Adds the items with the specified ids to the current selection
-     * @param ids
-     */
-    void addSelectedIds(Collection<Object> ids)
-
-    /**
-     * Removes the items with the specified ids from the current selection
-     * @param ids
-     */
-    void removeSelectedIds(Collection<Object> ids)
-
-    /**
-     * Clears the current selection
-     */
-    void clearSelection()
-
-    /**
-     * Gets any selected items that are matched by this filter
-     * @param filter
-     * @return
-     */
-    QueryResult getSelectionWhere(Filter filter)
-
 
 }

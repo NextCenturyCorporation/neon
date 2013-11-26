@@ -564,17 +564,23 @@ neon.query.clearFilters = function (successCallback, errorCallback) {
 };
 
 /**
- * Sets the items that match the specified query to be selected
- * @method setSelectionWhere
- * @param {neon.query.Filter} filter The filter to match the items
- * @param {Function} successCallback The callback to execute when selection is completed
+ * Adds a selection to the data and fires the callback when complete
+ * @method addSelection
+ * @param {Object} filterKey The object returned when registering the filter must be used here
+ * @param {neon.query.Filter} filter The filter to be added
+ * @param {Function} successCallback The callback to fire when the selection is added
  * @param {Function} [errorCallback] The optional callback when an error occurs. This is a 3 parameter function that contains the xhr, a short error status and the full error message.
  * @return {neon.util.AjaxRequest} The xhr request object
  */
-neon.query.setSelectionWhere = function (filter, successCallback, errorCallback) {
+neon.query.addSelection = function (filterKey, filter, successCallback, errorCallback) {
+    var filterContainer = {
+        filterKey: filterKey,
+        filter: filter
+    };
+
     return neon.util.ajaxUtils.doPostJSON(
-        filter,
-        neon.query.serviceUrl('selectionservice', 'setselectionwhere'),
+        filterContainer,
+        neon.query.serviceUrl('selectionservice', 'addselection'),
         {
             success: successCallback,
             error: errorCallback
@@ -583,57 +589,17 @@ neon.query.setSelectionWhere = function (filter, successCallback, errorCallback)
 };
 
 /**
- * Gets the items that are selected and match this query
- * @method getSelectionWhere
- * @param {neon.query.Filter} filter The filter to match items
- * @param {Function} successCallback The callback to execute when the selected items have been retrieved
+ * Removes a selection from the data and fires the callback when complete
+ * @method removeSelection
+ * @param {Object} filterKey The object returned when registering for a key must be used here
+ * @param {Function} successCallback The callback to fire when the selection is removed
  * @param {Function} [errorCallback] The optional callback when an error occurs. This is a 3 parameter function that contains the xhr, a short error status and the full error message.
  * @return {neon.util.AjaxRequest} The xhr request object
  */
-neon.query.getSelectionWhere = function (filter, successCallback, errorCallback) {
+neon.query.removeSelection = function (filterKey, successCallback, errorCallback) {
     return neon.util.ajaxUtils.doPostJSON(
-        filter,
-        neon.query.serviceUrl('selectionservice', 'getselectionwhere'),
-        {
-            success: successCallback,
-            error: errorCallback
-        }
-    );
-};
-
-
-/**
- * Sets the items with the specified ids to be selected
- * @method setSelectedIds
- * @param {Array} ids An array of ids of items to select
- * @param {Function} successCallback The callback to execute when selection is completed
- * @param {Function} [errorCallback] The optional callback when an error occurs. This is a 3 parameter function that contains the xhr, a short error status and the full error message.
- * @return {neon.util.AjaxRequest} The xhr request object
- */
-neon.query.setSelectedIds = function (ids, successCallback, errorCallback) {
-    return neon.util.ajaxUtils.doPostJSON(
-        ids,
-        neon.query.serviceUrl('selectionservice', 'setselectedids'),
-        {
-            success: successCallback,
-            error: errorCallback
-        }
-
-    );
-};
-
-/**
- * Adds the items with the specified ids to the current selection
- * @method addSelectedIds
- * @param {Array} ids An array of ids of items to add to the selection
- * @param {Function} successCallback The callback to execute when selection is completed
- * @param {Function} [errorCallback] The optional callback when an error occurs. This is a 3 parameter function that contains the xhr, a short error status and the full error message.
- * @return {neon.util.AjaxRequest} The xhr request object
- */
-neon.query.addSelectedIds = function (ids, successCallback, errorCallback) {
-    return neon.util.ajaxUtils.doPostJSON(
-        ids,
-        neon.query.serviceUrl('selectionservice', 'addselectedids'),
+        filterKey,
+        neon.query.serviceUrl('selectionservice', 'removeselection'),
         {
             success: successCallback,
             error: errorCallback
@@ -642,17 +608,23 @@ neon.query.addSelectedIds = function (ids, successCallback, errorCallback) {
 };
 
 /**
- * Adds the items with the specified ids to the current selection
- * @method removeSelectedIds
- * @param {Array} ids An array of ids of items to add to the selection
- * @param {Function} successCallback The callback to execute when selection is completed
+ * Replaces a selection and fires the callback when complete
+ * @method replaceSelection
+ * @param {Object} filterKey The object returned when registering for a key must be used here
+ * @param {neon.query.Filter} filter The filter that is a replacement for the previous selection
+ * @param {Function} successCallback The callback to fire when the replacement is complete
  * @param {Function} [errorCallback] The optional callback when an error occurs. This is a 3 parameter function that contains the xhr, a short error status and the full error message.
  * @return {neon.util.AjaxRequest} The xhr request object
  */
-neon.query.removeSelectedIds = function (ids, successCallback, errorCallback) {
+neon.query.replaceSelection = function (filterKey, filter, successCallback, errorCallback) {
+    var filterContainer = {
+        filterKey: filterKey,
+        filter: filter
+    };
+
     return neon.util.ajaxUtils.doPostJSON(
-        ids,
-        neon.query.serviceUrl('selectionservice', 'removeselectedids'),
+        filterContainer,
+        neon.query.serviceUrl('selectionservice', 'replaceselection'),
         {
             success: successCallback,
             error: errorCallback
@@ -661,9 +633,9 @@ neon.query.removeSelectedIds = function (ids, successCallback, errorCallback) {
 };
 
 /**
- * Clears the current selection
+ * Removes all filters from the selection
  * @method clearSelection
- * @param {Function} successCallback The callback to execute when the selection is cleared
+ * @param {Function} successCallback The callback to fire when the selection is cleared
  * @param {Function} [errorCallback] The optional callback when an error occurs. This is a 3 parameter function that contains the xhr, a short error status and the full error message.
  * @return {neon.util.AjaxRequest} The xhr request object
  */
@@ -676,6 +648,7 @@ neon.query.clearSelection = function (successCallback, errorCallback) {
         }
     );
 };
+
 
 /**
  * Submits a text based query to the server.

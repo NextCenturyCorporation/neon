@@ -3,14 +3,13 @@ import com.mongodb.DB
 import com.mongodb.MongoClient
 import com.ncc.neon.connect.ConnectionManager
 import com.ncc.neon.query.*
-import com.ncc.neon.query.clauses.SingularWhereClause
-import com.ncc.neon.query.filter.Filter
 import com.ncc.neon.query.filter.FilterState
-import com.ncc.neon.query.filter.SelectionManager
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
+
+import javax.annotation.Resource
 /*
  * ************************************************************************
  * Copyright (c), 2013 Next Century Corporation. All Rights Reserved.
@@ -41,13 +40,12 @@ import org.springframework.stereotype.Component
 class MongoQueryExecutor implements QueryExecutor {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(MongoQueryExecutor)
-    private static final String ID_FIELD = "_id"
 
-    @Autowired
+    @Resource
     private FilterState filterState
 
-    @Autowired
-    private SelectionManager selectionManager
+    @Resource
+    private FilterState selectionState
 
     @Autowired
     private ConnectionManager connectionManager
@@ -55,7 +53,7 @@ class MongoQueryExecutor implements QueryExecutor {
     @Override
     QueryResult execute(Query query) {
         AbstractMongoQueryWorker worker = createMongoQueryWorker(query)
-        MongoConversionStrategy mongoConversionStrategy = new MongoConversionStrategy(filterState)
+        MongoConversionStrategy mongoConversionStrategy = new MongoConversionStrategy(filterState, selectionState)
         MongoQuery mongoQuery = mongoConversionStrategy.convertQueryWithFilterState(query)
         worker.executeQuery(mongoQuery)
     }
@@ -73,7 +71,7 @@ class MongoQueryExecutor implements QueryExecutor {
     @Override
     QueryResult executeDisregardingFilters(Query query) {
         AbstractMongoQueryWorker worker = createMongoQueryWorker(query)
-        MongoConversionStrategy mongoConversionStrategy = new MongoConversionStrategy(filterState)
+        MongoConversionStrategy mongoConversionStrategy = new MongoConversionStrategy(filterState, selectionState)
         MongoQuery mongoQuery = mongoConversionStrategy.convertQueryDisregardingFilters(query)
         worker.executeQuery(mongoQuery)
     }
@@ -109,42 +107,6 @@ class MongoQueryExecutor implements QueryExecutor {
         return new ListQueryResult(result?.keySet() ?: [])
     }
 
-    @Override
-    void setSelectionWhere(Filter filter) {
-        QueryResult result = execute(queryFromFilter(filter))
-        def ids = result.data.collect { it.get(ID_FIELD) }
-        selectionManager.replaceSelectionWith(ids)
-    }
-
-    @Override
-    void setSelectedIds(Collection<Object> ids) {
-        selectionManager.replaceSelectionWith(transformIdFields(ids))
-    }
-
-    @Override
-    void addSelectedIds(Collection<Object> ids) {
-        selectionManager.addIds(transformIdFields(ids))
-    }
-
-    @Override
-    void removeSelectedIds(Collection<Object> ids) {
-        selectionManager.removeIds(transformIdFields(ids))
-    }
-
-    @Override
-    void clearSelection() {
-        selectionManager.clear()
-    }
-
-    @Override
-    QueryResult getSelectionWhere(Filter filter) {
-        MongoConversionStrategy mongoConversionStrategy = new MongoConversionStrategy(filterState)
-        Query query = queryFromFilter(filter)
-        MongoQuery mongoQuery = mongoConversionStrategy.convertQueryDisregardingFilters(query, createWhereClauseFromSelection)
-        AbstractMongoQueryWorker worker = createMongoQueryWorker(query)
-        worker.executeQuery(mongoQuery)
-    }
-
     private AbstractMongoQueryWorker createMongoQueryWorker(Query query) {
         if (query.isDistinct) {
             LOGGER.debug("Using distinct mongo query worker")
@@ -157,20 +119,8 @@ class MongoQueryExecutor implements QueryExecutor {
         return new SimpleMongoQueryWorker(mongo)
     }
 
-    private static def transformIdFields(Collection<Object> ids) {
-        return MongoUtils.oidsToObjectIds(ids)
-    }
-
-    private final def createWhereClauseFromSelection = {
-        def selectedIds = selectionManager.selectedIds
-        return new SingularWhereClause(lhs: ID_FIELD, operator: 'in', rhs: selectedIds)
-    }
-
     private MongoClient getMongo(){
         connectionManager.client
     }
 
-    private def queryFromFilter(def filter) {
-        return new Query(filter: filter)
-    }
 }
