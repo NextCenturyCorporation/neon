@@ -2,9 +2,10 @@ package com.ncc.neon.query.hive
 
 import com.ncc.neon.query.Query
 import com.ncc.neon.query.clauses.*
+import com.ncc.neon.query.filter.DataSet
 import com.ncc.neon.query.filter.Filter
 import com.ncc.neon.query.filter.FilterState
-import com.ncc.neon.query.filter.DataSet
+import com.ncc.neon.query.filter.SelectionState
 
 /*
  * ************************************************************************
@@ -39,9 +40,9 @@ import com.ncc.neon.query.filter.DataSet
 class HiveConversionStrategy {
 
     private final FilterState filterState
-    private final FilterState selectionState
+    private final SelectionState selectionState
 
-    HiveConversionStrategy(FilterState filterState, FilterState selectionState) {
+    HiveConversionStrategy(FilterState filterState, SelectionState selectionState) {
         this.filterState = filterState
         this.selectionState = selectionState
     }

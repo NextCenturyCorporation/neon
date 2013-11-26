@@ -2,14 +2,15 @@ package com.ncc.neon.services
 
 import com.ncc.neon.query.filter.FilterContainer
 import com.ncc.neon.query.filter.FilterKey
-import com.ncc.neon.query.filter.FilterState
+import com.ncc.neon.query.filter.SelectionState
+import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
 
-import javax.annotation.Resource
 import javax.ws.rs.Consumes
 import javax.ws.rs.POST
 import javax.ws.rs.Path
 import javax.ws.rs.core.MediaType
+
 /*
  * ************************************************************************
  * Copyright (c), 2013 Next Century Corporation. All Rights Reserved.
@@ -40,8 +41,8 @@ import javax.ws.rs.core.MediaType
 @Path("/selectionservice")
 class SelectionService {
 
-    @Resource
-    FilterState selectionState
+    @Autowired
+    SelectionState selectionState
 
     @POST
     @Path("addselection")

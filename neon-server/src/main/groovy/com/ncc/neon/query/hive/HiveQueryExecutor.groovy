@@ -1,17 +1,15 @@
 package com.ncc.neon.query.hive
-
 import com.ncc.neon.connect.ConnectionManager
 import com.ncc.neon.query.*
 import com.ncc.neon.query.filter.FilterState
+import com.ncc.neon.query.filter.SelectionState
 import com.ncc.neon.query.jdbc.JdbcClient
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
 
-import javax.annotation.Resource
 import java.sql.SQLException
-
 /*
  * ************************************************************************
  * Copyright (c), 2013 Next Century Corporation. All Rights Reserved.
@@ -43,11 +41,11 @@ class HiveQueryExecutor implements QueryExecutor {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(HiveQueryExecutor)
 
-    @Resource
+    @Autowired
     private FilterState filterState
 
-    @Resource
-    private FilterState selectionState
+    @Autowired
+    private SelectionState selectionState
 
     @Autowired
     private ConnectionManager connectionManager

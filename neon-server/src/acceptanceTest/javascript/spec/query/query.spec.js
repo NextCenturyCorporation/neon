@@ -218,6 +218,104 @@ describe('query mapping', function () {
         });
     });
 
+    it('apply and remove selection', function () {
+        executeAndWait(neon.query.addSelection, filterKey, dcStateFilter);
+        runs(function () {
+            var expectedData = rows(1, 2, 5);
+            assertQueryResults(baseQuery(), expectedData);
+
+            // verify that if the query is supposed to include the filtered data, all data is returned
+            runs(function () {
+                assertQueryResults(baseQuery().disregardFilters(true), allData);
+                runs(function () {
+                    // apply another filter and make sure both are applied
+                    var salaryFilter = baseFilter().where('salary', '>', 85000);
+                    executeAndWait(neon.query.addSelection, filterKey, salaryFilter);
+                    runs(function () {
+                        expectedData = rows(2, 5);
+                        assertQueryResults(baseQuery(), expectedData);
+                        runs(function () {
+                            // remove the filter key and re-execute the query
+                            executeAndWait(neon.query.removeSelection, filterKey);
+                            runs(function () {
+                                assertQueryResults(baseQuery(), allData);
+                            });
+                        });
+                    });
+                });
+            });
+        });
+    });
+
+    it('clear selection', function () {
+        executeAndWait(neon.query.addSelection, filterKey, dcStateFilter);
+        runs(function () {
+            executeAndWait(neon.query.clearSelection);
+            runs(function () {
+                assertQueryResults(baseQuery(), allData);
+            });
+        });
+    });
+
+    it('replace selection', function () {
+        executeAndWait(neon.query.replaceSelection, filterKey, dcStateFilter);
+        runs(function () {
+            var expectedData = rows(1, 2, 5);
+            assertQueryResults(baseQuery(), expectedData);
+
+            runs(function () {
+                // replace filter and make sure new one is applied.
+                var salaryFilter = baseFilter().where('salary', '>', 85000);
+                executeAndWait(neon.query.replaceSelection, filterKey, salaryFilter);
+                runs(function () {
+                    expectedData = rows(0, 2, 4, 5, 6);
+                    assertQueryResults(baseQuery(), expectedData);
+                    runs(function () {
+                        // remove the filter key and re-execute the query
+                        executeAndWait(neon.query.removeSelection, filterKey);
+                        runs(function () {
+                            assertQueryResults(baseQuery(), allData);
+                        });
+                    });
+                });
+
+            });
+        });
+    });
+
+    it('replace filter and selection are independent', function () {
+        executeAndWait(neon.query.replaceFilter, filterKey, dcStateFilter);
+        runs(function () {
+            var expectedData = rows(1, 2, 5);
+            assertQueryResults(baseQuery(), expectedData);
+            runs(function () {
+                // replace filter and make sure new one is applied.
+                var salaryFilter = baseFilter().where('salary', '>', 85000);
+                executeAndWait(neon.query.replaceSelection, filterKey, salaryFilter);
+                runs(function () {
+                    expectedData = rows(2, 5);
+                    assertQueryResults(baseQuery(), expectedData);
+                    runs(function () {
+                        // remove the filter key from filters and re-execute the query
+                        executeAndWait(neon.query.removeSelection, filterKey);
+                        runs(function () {
+                            expectedData = rows(1, 2, 5);
+                            assertQueryResults(baseQuery(), expectedData);
+                            runs(function () {
+                                // remove the filter key from selection and re-execute the query
+                                executeAndWait(neon.query.removeFilter, filterKey);
+                                runs(function () {
+                                    assertQueryResults(baseQuery(), allData);
+                                });
+                            });
+                        });
+                    });
+                });
+
+            });
+        });
+    });
+
     it('save and restore state', function () {
         executeAndWait(neon.query.saveState, "clientId", "state");
         runs(function () {

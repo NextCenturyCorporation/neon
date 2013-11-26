@@ -8,6 +8,7 @@ import com.ncc.neon.query.clauses.SelectClause
 import com.ncc.neon.query.filter.DataSet
 import com.ncc.neon.query.filter.Filter
 import com.ncc.neon.query.filter.FilterState
+import com.ncc.neon.query.filter.SelectionState
 
 /*
  * ************************************************************************
@@ -42,9 +43,9 @@ import com.ncc.neon.query.filter.FilterState
 class MongoConversionStrategy {
 
     private final FilterState filterState
-    private final FilterState selectionState
+    private final SelectionState selectionState
 
-    MongoConversionStrategy(FilterState filterState, FilterState selectionState) {
+    MongoConversionStrategy(FilterState filterState, SelectionState selectionState) {
         this.filterState = filterState
         this.selectionState = selectionState
     }

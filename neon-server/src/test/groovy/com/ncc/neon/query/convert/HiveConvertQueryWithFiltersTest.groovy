@@ -1,8 +1,7 @@
 package com.ncc.neon.query.convert
 
-import com.ncc.neon.query.filter.FilterState
+import com.ncc.neon.query.filter.SelectionState
 import com.ncc.neon.query.hive.HiveConversionStrategy
-
 /*
  * ************************************************************************
  * Copyright (c), 2013 Next Century Corporation. All Rights Reserved.
@@ -37,7 +36,7 @@ class HiveConvertQueryWithFiltersTest extends HiveConvertQueryTest{
 
     @Override
     protected def convertQuery(query) {
-        HiveConversionStrategy conversionStrategy = new HiveConversionStrategy(filterState, new FilterState())
+        HiveConversionStrategy conversionStrategy = new HiveConversionStrategy(filterState, new SelectionState())
         conversionStrategy.convertQueryWithFilterState(query)
     }
 

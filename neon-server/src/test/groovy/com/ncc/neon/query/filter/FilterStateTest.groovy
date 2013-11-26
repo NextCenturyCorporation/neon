@@ -79,8 +79,8 @@ class FilterStateTest {
         List<Filter> filters = filterState.getFiltersForDataset(dataSet)
         assert filters
         assert filters.size() == 2
-        assert filters[0].whereClause == singularWhereClause1
-        assert filters[1].whereClause == singularWhereClause2
+        assert filters.find{ it.whereClause == singularWhereClause1}
+        assert filters.find{ it.whereClause == singularWhereClause2}
     }
 
     private void addBothWhereClausesToFilterStateWithDifferentKeys(SingularWhereClause where1, SingularWhereClause where2) {

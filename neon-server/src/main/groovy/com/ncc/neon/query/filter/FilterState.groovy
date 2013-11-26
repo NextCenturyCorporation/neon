@@ -1,11 +1,9 @@
 package com.ncc.neon.query.filter
-import com.ncc.neon.query.clauses.AndWhereClause
-import com.ncc.neon.query.clauses.WhereClause
+
 import org.springframework.context.annotation.Scope
 import org.springframework.context.annotation.ScopedProxyMode
 import org.springframework.stereotype.Component
 import org.springframework.web.context.WebApplicationContext
-
 /*
  * ************************************************************************
  * Copyright (c), 2013 Next Century Corporation. All Rights Reserved.
@@ -34,62 +32,24 @@ import org.springframework.web.context.WebApplicationContext
  */
 @Component
 @Scope(value = WebApplicationContext.SCOPE_SESSION, proxyMode = ScopedProxyMode.TARGET_CLASS)
-class FilterState implements Serializable {
+class FilterState {
 
-    private static final long serialVersionUID = 5897358582328819569L
-    private final Map<FilterKey, Filter> filters = [:]
+    FilterCache delegate = new FilterCache()
 
-    /**
-     * Clears all existing filters
-     */
-    void clearAllFilters() {
-        filters.clear()
-    }
-
-    /**
-     * Adds a filter to the filter state
-     * @param filterKey
-     * @param filter
-     * @return
-     */
     void addFilter(FilterKey filterKey, Filter filter) {
-        if(filters.containsKey(filterKey)){
-            Filter oldFilter = filters.get(filterKey)
-            filter.whereClause = determineFilterWhereClause(oldFilter, filter)
-        }
-
-        filters.put(filterKey, filter)
+        delegate.addFilter(filterKey, filter)
     }
 
-    private WhereClause determineFilterWhereClause(Filter oldFilter, Filter filter) {
-        if (oldFilter.whereClause) {
-            AndWhereClause andWhereClause = new AndWhereClause(whereClauses: [oldFilter.whereClause, filter.whereClause])
-            return andWhereClause
-        }
-        return filter.whereClause
-    }
-
-    /**
-     * Removes the filter
-     * @param id The id of the filter generated when adding it
-     * @return
-     */
     void removeFilter(FilterKey filterKey) {
-        filters.remove(filterKey)
+        delegate.removeFilter(filterKey)
     }
 
-    /**
-     * Gets any filters that are applied to the specified dataset
-     * @param dataset The current dataset
-     * @return A list of filters applied to that dataset
-     */
-    List<Filter> getFiltersForDataset(DataSet dataSet) {
-        def datasetFilters = []
-        filters.each {k,v ->
-            if(k.dataSet == dataSet){
-                datasetFilters << v
-            }
-        }
-        return datasetFilters
+    void clearAllFilters() {
+        delegate.clearAllFilters()
     }
+
+    List<Filter> getFiltersForDataset(DataSet dataSet) {
+        return delegate.getFiltersForDataset(dataSet)
+    }
+
 }
