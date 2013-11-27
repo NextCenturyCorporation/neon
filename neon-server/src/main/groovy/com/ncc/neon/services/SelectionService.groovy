@@ -37,6 +37,10 @@ import javax.ws.rs.core.MediaType
  * @author tbrooks
  */
 
+/**
+ * Service for working with a user's current selection.
+ */
+
 @Component
 @Path("/selectionservice")
 class SelectionService {
@@ -44,6 +48,11 @@ class SelectionService {
     @Autowired
     SelectionState selectionState
 
+    /**
+     * Add an additional selection
+     * @param container An object containing a filter key, a server generated identifier for a given widget instance,
+     * and a filter which contains information about the selection,
+     */
     @POST
     @Path("addselection")
     @Consumes(MediaType.APPLICATION_JSON)
@@ -51,6 +60,10 @@ class SelectionService {
         selectionState.addFilter(container.filterKey, container.filter)
     }
 
+    /**
+     * Remove the selection for the given widget instance, identified by the filterKey
+     * @param filterKey a server generated identifier for a given widget instance
+     */
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
     @Path("removeselection")
@@ -58,6 +71,11 @@ class SelectionService {
         selectionState.removeFilter(filterKey)
     }
 
+    /**
+     * Replace the selection for the given filter key. If none exists, this works the same as addSelection(container)
+     * @param container An object containing a filter key, a server generated identifier for a given widget instance,
+     * and a filter which contains information about the selection,
+     */
     @POST
     @Path("replaceselection")
     @Consumes(MediaType.APPLICATION_JSON)
@@ -66,6 +84,9 @@ class SelectionService {
         addSelection(container)
     }
 
+    /**
+     * Clears all selections.
+     */
     @POST
     @Path("clearselection")
     void clearSelection() {
