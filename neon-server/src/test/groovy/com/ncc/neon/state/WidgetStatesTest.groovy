@@ -69,21 +69,4 @@ class WidgetStatesTest {
         assert retrievedWidgetState.state == DIFFERENT_DATA
     }
 
-    @Test
-    void "clear data"() {
-        WidgetStates widgetStates = new WidgetStates()
-        widgetStates.addWidgetState("$CLIENT_ID 1", STATE_DATA)
-        widgetStates.addWidgetState("$CLIENT_ID 2", DIFFERENT_DATA)
-
-        assert !widgetStates.getWidgetState(CLIENT_ID)
-        assert widgetStates.getWidgetState("$CLIENT_ID 1")
-        assert widgetStates.getWidgetState("$CLIENT_ID 2")
-
-        widgetStates.clearWidgetStates()
-
-        assert !widgetStates.getWidgetState(CLIENT_ID)
-        assert !widgetStates.getWidgetState("$CLIENT_ID 1")
-        assert !widgetStates.getWidgetState("$CLIENT_ID 2")
-    }
-
 }

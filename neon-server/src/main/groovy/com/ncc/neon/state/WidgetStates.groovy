@@ -68,10 +68,4 @@ class WidgetStates {
         }
     }
 
-    /**
-     * Clears all widget states previously added.
-     */
-    void clearWidgetStates() {
-        states.clear()
-    }
 }
