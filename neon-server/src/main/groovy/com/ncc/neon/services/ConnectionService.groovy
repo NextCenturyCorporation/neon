@@ -52,6 +52,12 @@ class ConnectionService {
         return [System.getProperty("mongo.hosts", "localhost")]
     }
 
+    /**
+     * Attempt to establish a connection with a data source
+     * @param datastore The name of the data source, e.g. mongo or hive
+     * @param hostname the connection url for the data store, e.g. localhost
+     */
+
     @POST
     @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
     @Path("connect")

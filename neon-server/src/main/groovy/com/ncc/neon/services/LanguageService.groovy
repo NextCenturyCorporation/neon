@@ -35,6 +35,10 @@ import javax.ws.rs.core.MediaType
  * @author tbrooks
  */
 
+/**
+ * Service for querying generic data stores using a SQL-like query language
+ */
+
 @Component
 @Path("/languageservice")
 class LanguageService {
@@ -45,6 +49,11 @@ class LanguageService {
     @Autowired
     QueryExecutorFactory queryExecutorFactory
 
+    /**
+     * Executes a query using a TQL query.
+     * @param text The query string that will be parsed and converted into a query.
+     * @return The query result data
+     */
     @POST
     @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
     @Produces(MediaType.APPLICATION_JSON)

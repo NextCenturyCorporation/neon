@@ -1,4 +1,5 @@
 package com.ncc.neon.services
+
 import com.ncc.neon.metadata.model.column.ColumnMetadataList
 import com.ncc.neon.metadata.model.dataset.WidgetAndDatasetMetadataList
 import com.ncc.neon.query.Query
@@ -14,6 +15,7 @@ import org.springframework.stereotype.Component
 
 import javax.ws.rs.*
 import javax.ws.rs.core.MediaType
+
 /*
  * ************************************************************************
  * Copyright (c), 2013 Next Century Corporation. All Rights Reserved.
@@ -37,6 +39,10 @@ import javax.ws.rs.core.MediaType
  * RECIPIENT IS UNDER OBLIGATION TO MAINTAIN SECRECY.
  */
 
+/**
+ * Service for executing queries against an arbitrary data store.
+ */
+
 @Component
 @Path("/queryservice")
 class QueryService {
@@ -47,6 +53,12 @@ class QueryService {
     @Autowired
     MetadataResolver metadataResolver
 
+    /**
+     * Executes a query against the datastore the user is currently connected to.
+     * This takes into account the user's current filters and selection, so the results will be limited by these if they exist.
+     * @param query The neon representation of a query. This query is converted to a database specific query language.
+     * @return An object that contains the query result data and optional metadata about the query.
+     */
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
@@ -55,6 +67,12 @@ class QueryService {
         return execute(query, "execute")
     }
 
+    /**
+     * Executes a group of queries against the datastore the user is currently connected to.
+     * This takes into account the user's current filters and selection, so the results will be limited by these if they exist.
+     * @param query A collection of queries. The results of the queries will be appended together.
+     * @return An object that contains the query result data and optional metadata about the query.
+     */
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
@@ -63,6 +81,11 @@ class QueryService {
         return execute(query, "execute")
     }
 
+    /**
+     * Executes a query against the datastore the user is currently connected to ignoring the current filters and selection.
+     * @param query The neon representation of a query
+     * @return An object that contains the query result data and optional metadata about the query.
+     */
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
@@ -71,6 +94,11 @@ class QueryService {
         return execute(query, "executeDisregardingFilters")
     }
 
+    /**
+     * Executes a group of queries against the datastore the user is currently connected to ignoring the current filters and selection.
+     * @param query The neon representation of a query
+     * @return An object that contains the query result data and optional metadata about the query.
+     */
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
@@ -79,6 +107,15 @@ class QueryService {
         return execute(query, "executeDisregardingFilters")
     }
 
+    /**
+     * Get all the columns for tabular datasets.
+     * @param databaseName The database containing the data
+     * @param tableName The table containing the data
+     * @param widgetName The current widget name. If used, additional metadata may be passed down.
+     * @return An object that contains all the column names and metadata about the columns.
+     * Metadata includes element id -> field name mappings for automatic widget configuration and also type information
+     * about the columns which is useful for generic widgets to configure against.
+     */
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     @Path("fields")
@@ -95,6 +132,10 @@ class QueryService {
         return assembler.createClientData()
     }
 
+    /**
+     * Gets a list of all the databases for the current datastore
+     * @return The list of database names
+     */
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     @Path("databasenames")
@@ -103,6 +144,11 @@ class QueryService {
         return queryExecutor.showDatabases()
     }
 
+    /**
+     * Gets a list of all the tables
+     * @param database The database that contains the tables
+     * @return The list of table names
+     */
     @POST
     @Produces(MediaType.APPLICATION_JSON)
     @Path("tablenames")
