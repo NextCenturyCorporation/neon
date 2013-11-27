@@ -45,7 +45,7 @@ class WidgetStateServiceTest {
 
     @Test
     void "add and restore widget state"() {
-        service.saveState("id", "state");
+        service.saveState("id", "state")
         assert service.restoreState("id") == "state"
     }
 
