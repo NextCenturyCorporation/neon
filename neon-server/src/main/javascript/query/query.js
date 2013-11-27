@@ -435,7 +435,7 @@ neon.query.executeQueryGroup = function (queryGroup, successCallback, errorCallb
 };
 
 neon.query.executeQueryService_ = function (query, successCallback, errorCallback, serviceName) {
-    if(query.disregardFilters_){
+    if (query.disregardFilters_) {
         serviceName += "disregardfilters";
     }
 
@@ -706,7 +706,14 @@ neon.query.getSavedState = function (id, successCallback) {
     return neon.util.ajaxUtils.doGet(
         neon.query.serviceUrl('widgetstateservice', 'restoreState', '?clientId=' + id),
         {
-            success: successCallback,
+            success: function (data) {
+                if (!data) {
+                    return;
+                }
+                if (successCallback && typeof successCallback === 'function') {
+                    successCallback(data);
+                }
+            },
             error: function () {
                 //Do nothing, the state does not exist.
             }
@@ -783,7 +790,6 @@ neon.query.getTableNames = function (databaseName, successCallback) {
         }
     );
 };
-
 
 
 neon.query.serviceUrl = function (servicePath, serviceName, queryParamsString) {

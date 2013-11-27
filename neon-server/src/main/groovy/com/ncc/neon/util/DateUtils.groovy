@@ -35,7 +35,7 @@ class DateUtils {
     /**
      * Tries to parse the date string. If parsing fails, it returns the original text
      * @param dateString
-     * @return
+     * @return Either the parsed date or the original string
      * @see #parseDate(java.lang.String)
      */
     static def tryToParseDate(String dateString) {
