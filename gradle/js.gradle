@@ -94,6 +94,7 @@ task copyJsDocs(type: org.gradle.api.tasks.Copy) {
 
 task zipJsDocs(type: Zip) {
     description = 'Creates a zip file containing the javascript API documentation'
+    group = 'documentation'
     dependsOn 'copyJsDocs'
     zipDocs(copyJsDocs, zipJsDocs, project.buildDir)
 }

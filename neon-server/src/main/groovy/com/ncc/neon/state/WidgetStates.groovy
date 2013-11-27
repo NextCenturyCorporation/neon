@@ -32,8 +32,7 @@ import org.springframework.web.context.WebApplicationContext
  */
 
 /**
- * Holds all the widget states in a user's session, and provides
- * methods to access and update the states.
+ * A cache for all the widget states for a given user.
  */
 
 @Component
@@ -41,6 +40,12 @@ import org.springframework.web.context.WebApplicationContext
 class WidgetStates {
 
     private final Set<WidgetState> states = [] as Set
+
+    /**
+     * Creates a new widget state for the current user.
+     * @param clientId An identifier specified by the client. This is typically the widget name, e,g, "Map"
+     * @param json data that is stored that a widget can use to set it's state.
+     */
 
     void addWidgetState(String clientId, String json) {
         if(!clientId){
@@ -52,12 +57,20 @@ class WidgetStates {
         states.add(widgetState)
     }
 
+    /**
+     * Gets the widget state from the session
+     * @param clientId The clientId must match a previous addition
+     * @return the WidgetState or null if none is found.
+     */
     WidgetState getWidgetState(String clientId) {
         states.find {
             clientId == it.clientId
         }
     }
 
+    /**
+     * Clears all widget states previously added.
+     */
     void clearWidgetStates() {
         states.clear()
     }
