@@ -45,10 +45,6 @@ publishing {
             url "http://build-va/nexus/content/repositories/internal-releases"
         }
     }
-
-    publishNeonPublicationToMavenRepository.dependsOn 'verifyVersion', 'verifyMasterBranch'
-    publishBundlePublicationToMavenRepository.dependsOn 'verifyVersion', 'verifyMasterBranch'
-
 }
 
 task release(){
