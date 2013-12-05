@@ -31,8 +31,18 @@ import org.springframework.stereotype.Component
  * @author tbrooks
  */
 
+/**
+ * Parses a text query by invoking Antlr generated code.
+ */
+
 @Component
 class AntlrQueryParser implements QueryParser {
+
+    /**
+     * Create a Query object by parsing a text query
+     * @param text The text query
+     * @return A query object
+     */
 
     @Override
     Query parse(String text) {

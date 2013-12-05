@@ -24,6 +24,11 @@ import groovy.transform.ToString
  * OF NEXT CENTURY CORPORATION EXCEPT BY PRIOR WRITTEN PERMISSION AND WHEN
  * RECIPIENT IS UNDER OBLIGATION TO MAINTAIN SECRECY.
  */
+
+/**
+ * Group by a specified field
+ */
+
 @ToString(includeNames = true)
 class GroupByFieldClause implements GroupByClause {
 

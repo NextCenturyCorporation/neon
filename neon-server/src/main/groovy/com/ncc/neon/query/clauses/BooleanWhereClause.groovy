@@ -24,6 +24,11 @@ import groovy.transform.ToString
  * OF NEXT CENTURY CORPORATION EXCEPT BY PRIOR WRITTEN PERMISSION AND WHEN
  * RECIPIENT IS UNDER OBLIGATION TO MAINTAIN SECRECY.
  */
+
+/**
+ * A list of where clauses with a boolean operator (either 'and' or 'or')
+ */
+
 @ToString(includeNames = true)
 class BooleanWhereClause implements WhereClause, Serializable {
 

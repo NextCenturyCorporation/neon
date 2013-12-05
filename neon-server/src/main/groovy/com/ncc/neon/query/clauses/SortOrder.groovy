@@ -25,6 +25,11 @@ import org.codehaus.jackson.map.annotate.JsonDeserialize
  * OF NEXT CENTURY CORPORATION EXCEPT BY PRIOR WRITTEN PERMISSION AND WHEN
  * RECIPIENT IS UNDER OBLIGATION TO MAINTAIN SECRECY.
  */
+
+/**
+ * Ascending or descending enumeration
+ */
+
 @JsonDeserialize(using = SortOrderDeserializer)
 enum SortOrder {
 

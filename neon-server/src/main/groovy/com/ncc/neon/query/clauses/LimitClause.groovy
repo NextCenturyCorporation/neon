@@ -24,8 +24,9 @@ import groovy.transform.ToString
  * OF NEXT CENTURY CORPORATION EXCEPT BY PRIOR WRITTEN PERMISSION AND WHEN
  * RECIPIENT IS UNDER OBLIGATION TO MAINTAIN SECRECY.
  */
+
 /**
- * A query clause to limit the number of results returned by the query
+ * Limit a query to a specified number of results
  */
 @ToString(includeNames = true)
 class LimitClause {

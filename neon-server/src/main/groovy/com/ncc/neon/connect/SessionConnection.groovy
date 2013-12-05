@@ -31,6 +31,10 @@ import org.springframework.web.context.WebApplicationContext
  * @author tbrooks
  */
 
+/**
+ * Holds which data store the user is connected to in his or her session
+ */
+
 @Component
 @Scope(value = WebApplicationContext.SCOPE_SESSION, proxyMode = ScopedProxyMode.TARGET_CLASS)
 class SessionConnection {
@@ -43,6 +47,11 @@ class SessionConnection {
     @Autowired
     HiveConnection hiveConnection
 
+    /**
+     * Gets the appropriate client based on the current connection
+     * @return the client or null if no connection has been set.
+     */
+
     def getClient(){
         if(!connectionInfo){
             return null
@@ -53,7 +62,4 @@ class SessionConnection {
         return mongoConnection.connect(connectionInfo)
     }
 
-    void setConnectionInfo(ConnectionInfo info){
-        this.connectionInfo = info
-    }
 }

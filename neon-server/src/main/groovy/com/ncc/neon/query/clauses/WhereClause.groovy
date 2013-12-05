@@ -25,6 +25,13 @@ import org.codehaus.jackson.annotate.JsonTypeInfo
  * OF NEXT CENTURY CORPORATION EXCEPT BY PRIOR WRITTEN PERMISSION AND WHEN
  * RECIPIENT IS UNDER OBLIGATION TO MAINTAIN SECRECY.
  */
+
+/**
+ * Marker interface just to give context that implementors are WhereClauses.
+ * Also provides JSON metadata to determine which implementation to use
+ */
+
+
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.PROPERTY, property = "type")
 @JsonSubTypes([
     @JsonSubTypes.Type(value = SingularWhereClause, name = 'where'),
@@ -33,9 +40,4 @@ import org.codehaus.jackson.annotate.JsonTypeInfo
     @JsonSubTypes.Type(value =  OrWhereClause, name =  'or')
 ])
 public interface WhereClause {
-
-    // marker interface just to give context to the users of it that they will be dealing with WhereClauses.
-    // also provides JSON metadata to determine which implementation to map to
-
-
 }

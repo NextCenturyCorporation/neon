@@ -24,6 +24,11 @@ import groovy.transform.ToString
  * OF NEXT CENTURY CORPORATION EXCEPT BY PRIOR WRITTEN PERMISSION AND WHEN
  * RECIPIENT IS UNDER OBLIGATION TO MAINTAIN SECRECY.
  */
+
+/**
+ * A clause which has a field name and order (ascending or descending)
+ */
+
 @ToString(includeNames = true)
 class SortClause {
 

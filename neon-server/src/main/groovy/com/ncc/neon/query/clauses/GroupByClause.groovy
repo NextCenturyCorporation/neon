@@ -26,15 +26,15 @@ import org.codehaus.jackson.annotate.JsonTypeInfo
  * RECIPIENT IS UNDER OBLIGATION TO MAINTAIN SECRECY.
  */
 
+/**
+ * Marker interface just to give context that implementors are GroupByClauses.
+ * Also provides JSON metadata to determine which implementation to use
+ */
+
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.PROPERTY, property = "type")
 @JsonSubTypes([
 @JsonSubTypes.Type(value = GroupByFieldClause, name = 'single'),
 @JsonSubTypes.Type(value =  GroupByFunctionClause, name =  'function')
 ])
 public interface GroupByClause {
-
-    // marker interface just to give context to the users of it that they will be dealing with GroupByClauses.
-    // also provides JSON metadata to determine which implementation to map to
-
-
 }

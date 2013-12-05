@@ -31,8 +31,7 @@ import org.apache.commons.lang.math.NumberUtils
  */
 
 /**
- * This listens to the grammar being parsed. Invoke createQuery()
- * after kicking off the antlr parsing to create a new Query object from the parsed text.
+ * This class listens when a text query is being parsed.
  */
 
 class QueryCreator extends NeonBaseListener {
@@ -46,6 +45,11 @@ class QueryCreator extends NeonBaseListener {
     private final List<AggregateClause> aggregates = []
     private final List<GroupByClause> groupByClauses = []
     private final List<String> fields = []
+
+    /**
+     * Invoke this method to create a query object after parsing a query with antlr
+     * @return a query object
+     */
 
     Query createQuery() {
         Query query = new Query()

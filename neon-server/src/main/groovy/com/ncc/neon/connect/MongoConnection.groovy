@@ -33,11 +33,21 @@ import javax.annotation.PreDestroy
  * @author tbrooks
  */
 
+/**
+ * Holds a connection to mongo
+ */
+
 @Component
 @Scope(value = WebApplicationContext.SCOPE_SESSION, proxyMode = ScopedProxyMode.TARGET_CLASS)
 class MongoConnection implements Connection{
 
     private MongoClient mongo
+
+    /**
+     * Connect to mongo based on the url
+     * @param info object that contains the url
+     * @return the client which is used access mongo.
+     */
 
     @Override
     def connect(ConnectionInfo info){
@@ -46,6 +56,11 @@ class MongoConnection implements Connection{
         }
         return mongo
     }
+
+    /**
+     * Close the connection to mongo. This happens automatically when the session
+     * becomes invalid.
+     */
 
     @PreDestroy
     @Override

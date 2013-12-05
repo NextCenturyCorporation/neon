@@ -25,6 +25,11 @@ import groovy.transform.ToString
  * RECIPIENT IS UNDER OBLIGATION TO MAINTAIN SECRECY.
  */
 
+/**
+ * The select clause of a query. The default is * meaning all fields,
+ * but fields can be specified in a list.
+ */
+
 @ToString(includeNames = true)
 class SelectClause {
 

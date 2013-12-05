@@ -32,6 +32,10 @@ import javax.ws.rs.core.Response
  * @author tbrooks
  */
 
+/**
+ * Enables Cross Origin Resource Sharing (CORS)
+ */
+
 class CorsFilter implements ContainerResponseFilter{
 
     @Override

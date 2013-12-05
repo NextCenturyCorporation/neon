@@ -47,6 +47,10 @@ class QueryExecutorFactory {
     @Autowired
     private ConnectionManager connectionManager
 
+    /**
+     * Gets the query executor based on the connection
+     * @return the appropriate query executor
+     */
     QueryExecutor getExecutor() {
         if(connectionManager.isConnectedToHive()){
             return hiveQueryExecutor

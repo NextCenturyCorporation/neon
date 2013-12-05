@@ -53,6 +53,11 @@ class ConnectionManager {
         this.defaultMongoUrl = System.getProperty("mongo.hosts", "localhost")
     }
 
+    /**
+     * Sets which datastore to which the application is connected
+     * @param info The connection information for the connection
+     */
+
     void connect(ConnectionInfo info) {
         if(info.dataSource == DataSources.mongo && info.connectionUrl == defaultMongoUrl){
             sessionConnection.connectionInfo = null
@@ -61,12 +66,22 @@ class ConnectionManager {
         sessionConnection.connectionInfo = info
     }
 
+    /**
+     * Gets a connection client, the object that has access the datastore.
+     * @return the connection client
+     */
+
     def getClient() {
         if(!sessionConnection.connectionInfo){
             return metadataConnection.client
         }
         return sessionConnection.getClient()
     }
+
+    /**
+     * Determines whether we are connected to hive.
+     * @return true if we are connected to hive.
+     */
 
     boolean isConnectedToHive() {
         sessionConnection.connectionInfo?.dataSource == DataSources.hive

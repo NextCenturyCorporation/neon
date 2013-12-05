@@ -24,11 +24,12 @@ import groovy.transform.ToString
  * OF NEXT CENTURY CORPORATION EXCEPT BY PRIOR WRITTEN PERMISSION AND WHEN
  * RECIPIENT IS UNDER OBLIGATION TO MAINTAIN SECRECY.
  */
+
+/**
+ * This class does not have an additional implementation from the super class,
+ * but its type is used by jackson
+ */
+
 @ToString(includeSuper = true, includeNames = true)
 class AggregateClause extends FieldFunction {
-
-    // this class does not have additional functionality from its parent class, but
-    // it is declared as a separate class because its class type determines how it
-    // is processed
-
 }

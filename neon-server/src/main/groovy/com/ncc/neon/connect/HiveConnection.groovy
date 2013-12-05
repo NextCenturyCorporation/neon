@@ -33,11 +33,21 @@ import javax.annotation.PreDestroy
  * @author tbrooks
  */
 
+/**
+ * Holds a connection to hive
+ */
+
 @Component
 @Scope(value = WebApplicationContext.SCOPE_SESSION, proxyMode = ScopedProxyMode.TARGET_CLASS)
 class HiveConnection implements Connection {
 
     JdbcClient client
+
+    /**
+     * Connect to hive based on the url
+     * @param info object that contains the url
+     * @return the client which is used access hive.
+     */
 
     @Override
     def connect(ConnectionInfo info) {
@@ -46,6 +56,11 @@ class HiveConnection implements Connection {
         }
         return client
     }
+
+    /**
+     * Close the connection to hive. This happens automatically when the session
+     * becomes invalid.
+     */
 
     @PreDestroy
     @Override

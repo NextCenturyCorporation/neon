@@ -26,6 +26,11 @@ import org.codehaus.jackson.map.annotate.JsonDeserialize
  * OF NEXT CENTURY CORPORATION EXCEPT BY PRIOR WRITTEN PERMISSION AND WHEN
  * RECIPIENT IS UNDER OBLIGATION TO MAINTAIN SECRECY.
  */
+
+/**
+ * A where clause which has a column name, operator, and value
+ */
+
 @ToString(includeNames = true)
 class SingularWhereClause implements WhereClause, Serializable {
 

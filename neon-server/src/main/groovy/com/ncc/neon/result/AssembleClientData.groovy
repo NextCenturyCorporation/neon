@@ -30,11 +30,19 @@ import com.ncc.neon.query.QueryResult
  * @author tbrooks
  */
 
+/**
+ * Creates a client data object out of a query result and metadata.
+ */
+
 class AssembleClientData {
 
     QueryResult queryResult
     ColumnMetadataList columnMetadataList
     WidgetAndDatasetMetadataList initDataList
+
+    /**
+     * @return The query results and metadata packaged in an object
+     */
 
     ClientData createClientData(){
         Map<String, Map<String, Boolean>> metadata = createMetadata(columnMetadataList)
@@ -46,7 +54,7 @@ class AssembleClientData {
         new ClientData(data: queryResult.data, metadata: metadata)
     }
 
-    Map<String, String> createInitData() {
+    private Map<String, String> createInitData() {
         Map initData = [:]
         initDataList.dataSet.each { WidgetAndDatasetMetadata init ->
             initData.put(init.elementId, init.value)

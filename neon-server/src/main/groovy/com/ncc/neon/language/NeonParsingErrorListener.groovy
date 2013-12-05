@@ -34,6 +34,10 @@ import org.antlr.v4.runtime.misc.Nullable
  * @author tbrooks
  */
 
+/**
+ * Throws a parsing exception if parsing fails.
+ */
+
 class NeonParsingErrorListener implements ANTLRErrorListener {
 
 

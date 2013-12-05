@@ -25,6 +25,10 @@ package com.ncc.neon.result
  * @author tbrooks
  */
 
+/**
+ * Holds a tabular list of data and metadata regarding type information
+ */
+
 class ClientData {
 
     List data = []

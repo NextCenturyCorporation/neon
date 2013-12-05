@@ -24,12 +24,13 @@ import groovy.transform.ToString
  * OF NEXT CENTURY CORPORATION EXCEPT BY PRIOR WRITTEN PERMISSION AND WHEN
  * RECIPIENT IS UNDER OBLIGATION TO MAINTAIN SECRECY.
  */
+
+/**
+ * This class does not have an additional implementation from the super class,
+ * but its type is used by jackson
+ */
+
 @ToString(includeSuper = true, includeNames = true)
 class OrWhereClause extends BooleanWhereClause {
-
-    // this doesn't do anything specific but is a separate class to indicate to the
-    // query builder what operation to perform
-
     private static final long serialVersionUID = 7228009458740671210L
-
 }

@@ -36,16 +36,36 @@ import org.springframework.stereotype.Component
  * 
  * @author tbrooks
  */
+
+/**
+ * Integration point between metadata and neon.
+ * Provides methods to get the appropriate metadata.
+ */
+
 @Component
 class MetadataResolver {
 
     @Autowired
     MetadataConnection metadataConnection
 
+    /**
+     * Gets all column data for a given dataset
+     * @param databaseName The database name
+     * @param tableName The table name
+     * @return The column metadata
+     */
+
     ColumnMetadataList resolveQuery(String databaseName, String tableName) {
         MetadataRetriever retriever = new MetadataRetriever(metadataConnection)
         return retriever.retrieve(databaseName, tableName, [])
     }
+
+    /**
+     * Gets column data based on fields from the query.
+     * @param databaseName The database name
+     * @param tableName The table name
+     * @return The column metadata
+     */
 
     ColumnMetadataList resolveQuery(Query query) {
         MetadataRetriever retriever = new MetadataRetriever(metadataConnection)
@@ -55,6 +75,13 @@ class MetadataResolver {
         }
         return retriever.retrieve(query.databaseName, query.tableName, columns)
     }
+
+    /**
+     * Gets column data based on fields from the query group
+     * @param databaseName The database name
+     * @param tableName The table name
+     * @return The column metadata
+     */
 
     ColumnMetadataList resolveQuery(QueryGroup queryGroup) {
         def list = []
@@ -69,10 +96,24 @@ class MetadataResolver {
         return new ColumnMetadataList(list)
     }
 
+    /**
+     * Gets metadata for mapping element ids to column names
+     * @param databaseName The database name
+     * @param tableName The table name
+     * @param widgetName An identifier for the widget
+     * @return The metadata
+     */
+
     WidgetAndDatasetMetadataList getInitializationData(String databaseName, String tableName, String widgetName){
         MetadataRetriever retriever = new MetadataRetriever(metadataConnection)
         return retriever.retrieve(databaseName, tableName, widgetName)
     }
+
+    /**
+     * Gets initialization data based on a client id
+     * @param widget The identifier for the client
+     * @return The initialization data.
+     */
 
     WidgetInitializationMetadata getWidgetInitializationData(String widget) {
         MetadataRetriever retriever = new MetadataRetriever(metadataConnection)

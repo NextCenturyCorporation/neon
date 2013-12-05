@@ -27,6 +27,10 @@ import groovy.transform.Canonical
  * @author tbrooks
  */
 
+/**
+ * Contains connection information to a data source.
+ */
+
 @Canonical
 class ConnectionInfo {
 

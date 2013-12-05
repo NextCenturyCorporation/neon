@@ -26,6 +26,10 @@ import org.joda.time.format.ISODateTimeFormat
  * OF NEXT CENTURY CORPORATION EXCEPT BY PRIOR WRITTEN PERMISSION AND WHEN
  * RECIPIENT IS UNDER OBLIGATION TO MAINTAIN SECRECY.
  */
+
+/**
+ * Converts dates to strings and visa-versa
+ */
 class DateUtils {
 
     private static final def DATE_PARSER = ISODateTimeFormat.dateTimeParser().withZoneUTC()
