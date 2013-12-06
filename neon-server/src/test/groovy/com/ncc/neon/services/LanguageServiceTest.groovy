@@ -1,15 +1,11 @@
 package com.ncc.neon.services
-
 import com.ncc.neon.language.QueryParser
 import com.ncc.neon.query.Query
-import com.ncc.neon.query.QueryOptions
+import com.ncc.neon.query.QueryExecutor
 import com.ncc.neon.query.QueryResult
-import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.stereotype.Component
-
-import javax.ws.rs.*
-import javax.ws.rs.core.MediaType
-
+import com.ncc.neon.query.TableQueryResult
+import org.junit.Before
+import org.junit.Test
 /*
  * ************************************************************************
  * Copyright (c), 2013 Next Century Corporation. All Rights Reserved.
@@ -36,34 +32,24 @@ import javax.ws.rs.core.MediaType
  * @author tbrooks
  */
 
-/**
- * Service for querying generic data stores using a SQL-like query language
- */
+class LanguageServiceTest {
 
-@Component
-@Path("/languageservice")
-class LanguageService {
+    private LanguageService languageService
 
-    @Autowired
-    QueryParser queryParser
+    @Before
+    void before() {
+        languageService = new LanguageService()
+        QueryExecutor executor = [execute: { query, options -> new TableQueryResult([["key1": "val1"], ["key2": 2]]) }] as QueryExecutor
+        languageService.queryExecutorFactory = [getExecutor: { executor }] as QueryExecutorFactory
 
-    @Autowired
-    QueryExecutorFactory queryExecutorFactory
+        QueryParser queryParser = [parse: { new Query() }] as QueryParser
+        languageService.queryParser = queryParser
+    }
 
-    /**
-     * Executes a query using a TQL query.
-     * @param text The query string that will be parsed and converted into a query.
-     * @return The query result data
-     */
-    @POST
-    @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
-    @Produces(MediaType.APPLICATION_JSON)
-    @Path("query")
-    QueryResult executeQuery(@FormParam("text") String text) {
-        Query query = queryParser.parse(text)
-        return queryExecutorFactory.getExecutor().execute(query, QueryOptions.FILTERED_DATA)
+    @Test
+    void "execute query"() {
+        QueryResult result = languageService.executeQuery("queryText")
+        assert result.data
     }
 
 }
-
-
