@@ -1,6 +1,7 @@
 package com.ncc.neon
 import com.ncc.neon.query.Query
 import com.ncc.neon.query.QueryGroup
+import com.ncc.neon.query.QueryOptions
 import com.ncc.neon.query.clauses.*
 import com.ncc.neon.query.filter.DataSet
 import com.ncc.neon.query.filter.Filter
@@ -133,7 +134,7 @@ abstract class AbstractQueryExecutorIntegrationTest {
 
     @Test
     void "query all"() {
-        def result = queryExecutor.execute(ALL_DATA_QUERY)
+        def result = queryExecutor.execute(ALL_DATA_QUERY, QueryOptions.FILTERED_DATA)
         assertUnorderedQueryResult(getAllData(), result)
     }
 
@@ -143,7 +144,7 @@ abstract class AbstractQueryExecutorIntegrationTest {
         def salaryAndStateClause = new AndWhereClause(whereClauses: [new SingularWhereClause(lhs: 'salary', operator: '>=', rhs: 100000), whereStateClause])
         def expected = rows(0, 2, 4)
         def query = createQueryWithWhereClause(salaryAndStateClause)
-        def result = queryExecutor.execute(query)
+        def result = queryExecutor.execute(query, QueryOptions.FILTERED_DATA)
         assertUnorderedQueryResult(expected, result)
     }
 
@@ -158,7 +159,7 @@ abstract class AbstractQueryExecutorIntegrationTest {
         def result = queryExecutor.execute(new Query(filter: ALL_DATA_FILTER,
                 groupByClauses: [groupByStateClause, groupByCityClause],
                 aggregates: [salaryAggregateClause],
-                sortClauses: [sortByStateClause, sortByCityClause]))
+                sortClauses: [sortByStateClause, sortByCityClause]), QueryOptions.FILTERED_DATA)
         assertOrderedQueryResult(expected, result)
     }
 
@@ -171,7 +172,7 @@ abstract class AbstractQueryExecutorIntegrationTest {
         def result = queryExecutor.execute(new Query(filter: ALL_DATA_FILTER,
                 groupByClauses: [groupByStateClause],
                 aggregates: [salaryAverageClause],
-                sortClauses: [sortByStateClause]))
+                sortClauses: [sortByStateClause]), QueryOptions.FILTERED_DATA)
         assertOrderedQueryResult(expected, result)
     }
 
@@ -184,7 +185,7 @@ abstract class AbstractQueryExecutorIntegrationTest {
         def result = queryExecutor.execute(new Query(filter: ALL_DATA_FILTER,
                 groupByClauses: [groupByStateClause],
                 aggregates: [salaryMinClause],
-                sortClauses: [sortByStateClause]))
+                sortClauses: [sortByStateClause]), QueryOptions.FILTERED_DATA)
         assertOrderedQueryResult(expected, result)
     }
 
@@ -197,7 +198,7 @@ abstract class AbstractQueryExecutorIntegrationTest {
         def result = queryExecutor.execute(new Query(filter: ALL_DATA_FILTER,
                 groupByClauses: [groupByStateClause],
                 aggregates: [salaryMaxClause],
-                sortClauses: [sortByStateClause]))
+                sortClauses: [sortByStateClause]), QueryOptions.FILTERED_DATA)
         assertOrderedQueryResult(expected, result)
     }
 
@@ -211,7 +212,7 @@ abstract class AbstractQueryExecutorIntegrationTest {
         def result = queryExecutor.execute(new Query(filter: ALL_DATA_FILTER,
                 groupByClauses: [groupByStateClause],
                 aggregates: [countClause],
-                sortClauses: [sortByStateClause]))
+                sortClauses: [sortByStateClause]), QueryOptions.FILTERED_DATA)
         assertOrderedQueryResult(expected, result)
     }
 
@@ -219,7 +220,7 @@ abstract class AbstractQueryExecutorIntegrationTest {
     @Test
     void "distinct"() {
         def expected = readJson('distinct.json')
-        def result = queryExecutor.execute(new Query(filter: ALL_DATA_FILTER, fields: ['state'], isDistinct: true))
+        def result = queryExecutor.execute(new Query(filter: ALL_DATA_FILTER, fields: ['state'], isDistinct: true), QueryOptions.FILTERED_DATA)
         assertUnorderedQueryResult(expected, result)
     }
 
@@ -233,7 +234,7 @@ abstract class AbstractQueryExecutorIntegrationTest {
                 fields: ['state'],
                 isDistinct: true,
                 sortClauses: [sortByStateClause],
-                limitClause: limitClause))
+                limitClause: limitClause), QueryOptions.FILTERED_DATA)
         assertOrderedQueryResult(expected, result)
     }
 
@@ -245,7 +246,7 @@ abstract class AbstractQueryExecutorIntegrationTest {
 
         // apply a filter and make sure only that data is returned
         queryExecutor.filterState.addFilter(filterId, dcStateFilter)
-        def dcStateResult = queryExecutor.execute(ALL_DATA_QUERY)
+        def dcStateResult = queryExecutor.execute(ALL_DATA_QUERY, QueryOptions.FILTERED_DATA)
         def dcStateRecords = rows(1, 2, 5)
         assertUnorderedQueryResult(dcStateRecords, dcStateResult)
 
@@ -254,7 +255,7 @@ abstract class AbstractQueryExecutorIntegrationTest {
         queryExecutor.filterState.addFilter(filterId, salaryFilter)
 
         def dcStateWithSalaryFilterRecords = rows(2, 5)
-        def dcStateWithSalaryResult = queryExecutor.execute(ALL_DATA_QUERY)
+        def dcStateWithSalaryResult = queryExecutor.execute(ALL_DATA_QUERY, QueryOptions.FILTERED_DATA)
         assertUnorderedQueryResult(dcStateWithSalaryFilterRecords, dcStateWithSalaryResult)
     }
 
@@ -271,7 +272,7 @@ abstract class AbstractQueryExecutorIntegrationTest {
         queryExecutor.filterState.addFilter(filterId, salaryFilter)
 
         queryExecutor.filterState.removeFilter(filterId)
-        def allDataResult = queryExecutor.execute(ALL_DATA_QUERY)
+        def allDataResult = queryExecutor.execute(ALL_DATA_QUERY, QueryOptions.FILTERED_DATA)
         assertUnorderedQueryResult(getAllData(), allDataResult)
     }
 
@@ -283,7 +284,7 @@ abstract class AbstractQueryExecutorIntegrationTest {
 
         // apply a filter, but execute the query that bypasses the filters, so all data should be returned
         queryExecutor.filterState.addFilter(filterId, dcStateFilter)
-        def allDataResult = queryExecutor.executeDisregardingFilters(ALL_DATA_QUERY)
+        def allDataResult = queryExecutor.execute(ALL_DATA_QUERY, QueryOptions.ALL_DATA)
         assertUnorderedQueryResult(getAllData(), allDataResult)
     }
 
@@ -298,7 +299,7 @@ abstract class AbstractQueryExecutorIntegrationTest {
         // clear the filters, and there should be no filters applied
         queryExecutor.filterState.clearAllFilters()
 
-        def result = queryExecutor.execute(ALL_DATA_QUERY)
+        def result = queryExecutor.execute(ALL_DATA_QUERY, QueryOptions.FILTERED_DATA)
 
         assertUnorderedQueryResult(getAllData(), result)
     }
@@ -312,7 +313,7 @@ abstract class AbstractQueryExecutorIntegrationTest {
         def query = new Query(filter: new Filter(databaseName: DATABASE_NAME, tableName: TABLE_NAME),
                 groupByClauses: [groupByMonthClause], aggregates: [salaryAggregateClause], sortClauses: [sortByMonth])
 
-        def result = queryExecutor.execute(query)
+        def result = queryExecutor.execute(query, QueryOptions.FILTERED_DATA)
         def expected = readJson('groupByMonth.json')
 
         assertOrderedQueryResult(expected, result)
@@ -324,7 +325,7 @@ abstract class AbstractQueryExecutorIntegrationTest {
         def query = createQueryWithWhereClause(whereLessThan)
 
         def expected = rows(3, 7)
-        def result = queryExecutor.execute(query)
+        def result = queryExecutor.execute(query, QueryOptions.FILTERED_DATA)
         assertUnorderedQueryResult(expected, result)
     }
 
@@ -333,7 +334,7 @@ abstract class AbstractQueryExecutorIntegrationTest {
         def whereLessThanOrEqual = new SingularWhereClause(lhs: 'salary', operator: '<=', rhs: 60000)
         def query = createQueryWithWhereClause(whereLessThanOrEqual)
         def expected = rows(3, 7)
-        def result = queryExecutor.execute(query)
+        def result = queryExecutor.execute(query, QueryOptions.FILTERED_DATA)
         assertUnorderedQueryResult(expected, result)
     }
 
@@ -343,7 +344,7 @@ abstract class AbstractQueryExecutorIntegrationTest {
         def query = createQueryWithWhereClause(whereGreaterThan)
         def expected = rows(2)
 
-        def result = queryExecutor.execute(query)
+        def result = queryExecutor.execute(query, QueryOptions.FILTERED_DATA)
         assertUnorderedQueryResult(expected, result)
     }
 
@@ -352,7 +353,7 @@ abstract class AbstractQueryExecutorIntegrationTest {
         def whereGreaterThanOrEqual = new SingularWhereClause(lhs: 'salary', operator: '>=', rhs: 118000)
         def query = createQueryWithWhereClause(whereGreaterThanOrEqual)
         def expected = rows(2, 4)
-        def result = queryExecutor.execute(query)
+        def result = queryExecutor.execute(query, QueryOptions.FILTERED_DATA)
         assertUnorderedQueryResult(expected, result)
     }
 
@@ -361,7 +362,7 @@ abstract class AbstractQueryExecutorIntegrationTest {
         def whereNotEqual = new SingularWhereClause(lhs: 'state', operator: '!=', rhs: 'VA')
         def query = createQueryWithWhereClause(whereNotEqual)
         def expected = rows(1, 2, 5, 6)
-        def result = queryExecutor.execute(query)
+        def result = queryExecutor.execute(query, QueryOptions.FILTERED_DATA)
         assertUnorderedQueryResult(expected, result)
     }
 
@@ -370,7 +371,7 @@ abstract class AbstractQueryExecutorIntegrationTest {
         def whereIn = new SingularWhereClause(lhs: 'state', operator: 'in', rhs: ['MD', 'DC'])
         def query = createQueryWithWhereClause(whereIn)
         def expected = rows(1, 2, 5, 6)
-        def result = queryExecutor.execute(query)
+        def result = queryExecutor.execute(query, QueryOptions.FILTERED_DATA)
         assertUnorderedQueryResult(expected, result)
     }
 
@@ -379,13 +380,13 @@ abstract class AbstractQueryExecutorIntegrationTest {
         def whereNotIn = new SingularWhereClause(lhs: 'state', operator: 'notin', rhs: ['VA', 'DC'])
         def query = createQueryWithWhereClause(whereNotIn)
         def expected = rows(6)
-        def result = queryExecutor.execute(query)
+        def result = queryExecutor.execute(query, QueryOptions.FILTERED_DATA)
         assertUnorderedQueryResult(expected, result)
     }
 
     @Test
     void "query with limit"() {
-        def result = queryExecutor.execute(new Query(filter: ALL_DATA_FILTER, limitClause: new LimitClause(limit: 2)))
+        def result = queryExecutor.execute(new Query(filter: ALL_DATA_FILTER, limitClause: new LimitClause(limit: 2)), QueryOptions.FILTERED_DATA)
         // should be limited to 2 results
         assert result.data.size == 2
     }
@@ -397,7 +398,7 @@ abstract class AbstractQueryExecutorIntegrationTest {
         def expected = readJson('dateGreaterThan.json')
         def whereGreaterThanOrEqualToDate = new SingularWhereClause(lhs: 'hiredate', operator: '>=', rhs: DateUtils.tryToParseDate("2012-09-15T00:00:00Z"))
         def query = createQueryWithWhereClause(whereGreaterThanOrEqualToDate)
-        def result = queryExecutor.execute(query)
+        def result = queryExecutor.execute(query, QueryOptions.FILTERED_DATA)
         assertUnorderedQueryResult(expected, result)
     }
 
@@ -406,7 +407,7 @@ abstract class AbstractQueryExecutorIntegrationTest {
         def expected = rows(0)
         def whereEqualsDate = new SingularWhereClause(lhs: 'hiredate', operator: '=', rhs: DateUtils.tryToParseDate("2012-09-15T00:00:00Z"))
         def query = createQueryWithWhereClause(whereEqualsDate)
-        def result = queryExecutor.execute(query)
+        def result = queryExecutor.execute(query, QueryOptions.FILTERED_DATA)
         assertOrderedQueryResult(expected, result)
     }
 
@@ -429,7 +430,7 @@ abstract class AbstractQueryExecutorIntegrationTest {
         queryGroup.queries << query3
 
         def expected = readJson('queryGroup.json')
-        def queryGroupResult = queryExecutor.execute(queryGroup)
+        def queryGroupResult = queryExecutor.execute(queryGroup, QueryOptions.FILTERED_DATA)
         assertOrderedQueryResult(expected, queryGroupResult)
     }
 
@@ -438,7 +439,7 @@ abstract class AbstractQueryExecutorIntegrationTest {
         def fields = ["_id", "firstname", "lastname", "salary"]
         def query = new Query(filter: ALL_DATA_FILTER, fields: fields)
         def expected = getAllData().collect { it.subMap(fields) }
-        def result = queryExecutor.execute(query)
+        def result = queryExecutor.execute(query, QueryOptions.FILTERED_DATA)
         assertUnorderedQueryResult(expected, result)
     }
 
@@ -451,7 +452,7 @@ abstract class AbstractQueryExecutorIntegrationTest {
         def query = new Query(filter: new Filter(databaseName: DATABASE_NAME, tableName: TABLE_NAME),
                 groupByClauses: [groupByMonthClause], aggregates: [salaryAggregateClause], sortClauses: [sortByMonth], fields: ["hire_month"])
 
-        def result = queryExecutor.execute(query)
+        def result = queryExecutor.execute(query, QueryOptions.FILTERED_DATA)
         def expected = readJson('groupByMonth.json')
         assertOrderedQueryResult(expected, result)
     }

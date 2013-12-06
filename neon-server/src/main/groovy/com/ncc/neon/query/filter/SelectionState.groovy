@@ -34,22 +34,8 @@ import org.springframework.web.context.WebApplicationContext
 @Component
 @Scope(value = WebApplicationContext.SCOPE_SESSION, proxyMode = ScopedProxyMode.TARGET_CLASS)
 class SelectionState {
-    FilterCache delegate = new FilterCache()
 
-    void addFilter(FilterKey filterKey, Filter filter) {
-        delegate.addFilter(filterKey, filter)
-    }
-
-    void removeFilter(FilterKey filterKey) {
-        delegate.removeFilter(filterKey)
-    }
-
-    void clearAllFilters() {
-        delegate.clearAllFilters()
-    }
-
-    List<Filter> getFiltersForDataset(DataSet dataSet) {
-        return delegate.getFiltersForDataset(dataSet)
-    }
+    @Delegate
+    final FilterCache delegate = new FilterCache()
 
 }

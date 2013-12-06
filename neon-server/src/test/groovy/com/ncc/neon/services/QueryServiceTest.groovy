@@ -41,7 +41,7 @@ class QueryServiceTest {
     @Before
     void before() {
         queryService = new QueryService()
-        QueryExecutor executor = [execute: { new TableQueryResult([["key1": "val1"], ["key2": 2]]) }] as QueryExecutor
+        QueryExecutor executor = [execute: { query, options -> new TableQueryResult([["key1": "val1"], ["key2": 2]]) }] as QueryExecutor
         queryService.queryExecutorFactory = [getExecutor: { executor }] as QueryExecutorFactory
 
         def metadata = [new DefaultColumnMetadata(columnName: "key1", text: true), new DefaultColumnMetadata(columnName: "key2", numeric: true)]

@@ -50,36 +50,18 @@ class MongoQueryExecutor implements QueryExecutor {
     private ConnectionManager connectionManager
 
     @Override
-    QueryResult execute(Query query) {
+    QueryResult execute(Query query, QueryOptions options) {
         AbstractMongoQueryWorker worker = createMongoQueryWorker(query)
-        MongoConversionStrategy mongoConversionStrategy = new MongoConversionStrategy(filterState, selectionState)
-        MongoQuery mongoQuery = mongoConversionStrategy.convertQueryWithFilterState(query)
+        MongoConversionStrategy mongoConversionStrategy = new MongoConversionStrategy(filterState: filterState, selectionState: selectionState)
+        MongoQuery mongoQuery = mongoConversionStrategy.convertQuery(query, options)
         worker.executeQuery(mongoQuery)
     }
 
     @Override
-    QueryResult execute(QueryGroup query) {
+    QueryResult execute(QueryGroup queryGroup, QueryOptions options) {
         TableQueryResult queryResult = new TableQueryResult()
-        query.queries.each {
-            def result = execute(it)
-            queryResult.data.addAll(result.data)
-        }
-        return queryResult
-    }
-
-    @Override
-    QueryResult executeDisregardingFilters(Query query) {
-        AbstractMongoQueryWorker worker = createMongoQueryWorker(query)
-        MongoConversionStrategy mongoConversionStrategy = new MongoConversionStrategy(filterState, selectionState)
-        MongoQuery mongoQuery = mongoConversionStrategy.convertQueryDisregardingFilters(query)
-        worker.executeQuery(mongoQuery)
-    }
-
-    @Override
-    QueryResult executeDisregardingFilters(QueryGroup query) {
-        TableQueryResult queryResult = new TableQueryResult()
-        query.queries.each {
-            def result = executeDisregardingFilters(it)
+        queryGroup.queries.each {
+            def result = execute(it, options)
             queryResult.data.addAll(result.data)
         }
         return queryResult

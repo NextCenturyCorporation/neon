@@ -1,5 +1,6 @@
 package com.ncc.neon.query.convert
 import com.mongodb.BasicDBObject
+import com.ncc.neon.query.QueryOptions
 import com.ncc.neon.query.filter.SelectionState
 import com.ncc.neon.query.mongo.MongoConversionStrategy
 /*
@@ -36,8 +37,8 @@ class MongoConvertQueryTest extends AbstractConversionTest {
 
     @Override
     protected def convertQuery(query) {
-        MongoConversionStrategy conversionStrategy = new MongoConversionStrategy(filterState, new SelectionState())
-        conversionStrategy.convertQueryDisregardingFilters(query)
+        MongoConversionStrategy conversionStrategy = new MongoConversionStrategy(filterState: filterState, selectionState: new SelectionState())
+        conversionStrategy.convertQuery(query, QueryOptions.ALL_DATA)
     }
 
     @Override

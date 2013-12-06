@@ -1,14 +1,15 @@
 package com.ncc.neon.query.mongo
-
 import com.mongodb.BasicDBObject
 import com.mongodb.DBObject
 import com.ncc.neon.query.Query
+import com.ncc.neon.query.QueryOptions
 import com.ncc.neon.query.clauses.AndWhereClause
 import com.ncc.neon.query.clauses.SelectClause
 import com.ncc.neon.query.filter.DataSet
 import com.ncc.neon.query.filter.Filter
 import com.ncc.neon.query.filter.FilterState
 import com.ncc.neon.query.filter.SelectionState
+import groovy.transform.Immutable
 
 /*
  * ************************************************************************
@@ -39,67 +40,51 @@ import com.ncc.neon.query.filter.SelectionState
 /**
  * Converts a Query object into a BasicDbObject
  */
-
+@Immutable
 class MongoConversionStrategy {
 
     private final FilterState filterState
     private final SelectionState selectionState
 
-    MongoConversionStrategy(FilterState filterState, SelectionState selectionState) {
-        this.filterState = filterState
-        this.selectionState = selectionState
-    }
+    /**
+     * Converts a query object into an object that we can more easily use to execute mongo queries
+     * @param query The query object to convert
+     * @param options Determines whether we should include filters or selection
+     * @return A MongoQuery object that we can use for mongo queries.
+     */
 
-    MongoQuery convertQueryDisregardingFilters(Query query) {
-        helpConvertQuery(query, false)
-    }
-
-    MongoQuery convertQueryWithFilterState(Query query) {
-        helpConvertQuery(query, true)
-    }
-
-    private MongoQuery helpConvertQuery(Query query, boolean includeFiltersFromFilterState) {
+    MongoQuery convertQuery(Query query, QueryOptions options) {
         MongoQuery mongoQuery = new MongoQuery(query: query)
         mongoQuery.selectParams = createSelectParams(query)
-        List whereClauses = assembleWhereClauses(query)
-
-        if (includeFiltersFromFilterState) {
-            whereClauses.addAll(createWhereClausesForFilters(query))
-        }
-
-        mongoQuery.whereClauseParams = createWhereClauseParams(whereClauses)
+        List whereClauses = collectWhereClauses(query, options)
+        mongoQuery.whereClauseParams = buildMongoWhereClause(whereClauses)
         return mongoQuery
     }
 
-    private static DBObject createWhereClauseParams(List whereClauses) {
-        if (!whereClauses) {
-            return new BasicDBObject()
-        }
-        if (whereClauses.size() == 1) {
-            return MongoWhereClauseBuilder.build(whereClauses[0])
-        }
-        return MongoWhereClauseBuilder.build(new AndWhereClause(whereClauses: whereClauses))
-    }
-
-    private static List assembleWhereClauses(Query query) {
+    private List collectWhereClauses(Query query, QueryOptions options) {
         def whereClauses = []
 
         if (query.filter.whereClause) {
             whereClauses << query.filter.whereClause
         }
+        DataSet dataSet = new DataSet(databaseName: query.databaseName, tableName: query.tableName)
+        if (!options.disregardFilters) {
+            whereClauses.addAll(createWhereClausesForFilters(dataSet, filterState))
+        }
+        if (!options.disregardSelection) {
+            whereClauses.addAll(createWhereClausesForFilters(dataSet, selectionState))
+        }
+
         return whereClauses
     }
 
-    private def createWhereClausesForFilters(query) {
+    private static def createWhereClausesForFilters(DataSet dataSet, def filterCache) {
         def whereClauses = []
-        DataSet dataSet = new DataSet(databaseName: query.databaseName, tableName: query.tableName)
-        List<Filter> filters = filterState.getFiltersForDataset(dataSet)
-        filters.addAll(selectionState.getFiltersForDataset(dataSet))
-        if (!filters.isEmpty()) {
-            filters.each {
-                if (it.whereClause) {
-                    whereClauses << it.whereClause
-                }
+
+        List<Filter> filters = filterCache.getFiltersForDataset(dataSet)
+        filters.each {
+            if (it.whereClause) {
+                whereClauses << it.whereClause
             }
         }
         return whereClauses
@@ -115,6 +100,16 @@ class MongoConversionStrategy {
         }
 
         return params
+    }
+
+    private static DBObject buildMongoWhereClause(List whereClauses) {
+        if (!whereClauses) {
+            return new BasicDBObject()
+        }
+        if (whereClauses.size() == 1) {
+            return MongoWhereClauseBuilder.build(whereClauses[0])
+        }
+        return MongoWhereClauseBuilder.build(new AndWhereClause(whereClauses: whereClauses))
     }
 
 }

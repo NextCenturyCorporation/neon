@@ -1,9 +1,8 @@
-package com.ncc.neon.query.filter
+package com.ncc.neon.query
 
-import org.springframework.context.annotation.Scope
-import org.springframework.context.annotation.ScopedProxyMode
-import org.springframework.stereotype.Component
-import org.springframework.web.context.WebApplicationContext
+import org.junit.Test
+
+
 /*
  * ************************************************************************
  * Copyright (c), 2013 Next Century Corporation. All Rights Reserved.
@@ -25,14 +24,24 @@ import org.springframework.web.context.WebApplicationContext
  * PROPRIETARY AND CONFIDENTIAL TRADE SECRET MATERIAL NOT FOR DISCLOSURE OUTSIDE
  * OF NEXT CENTURY CORPORATION EXCEPT BY PRIOR WRITTEN PERMISSION AND WHEN
  * RECIPIENT IS UNDER OBLIGATION TO MAINTAIN SECRECY.
+ *
+ * 
+ * @author tbrooks
  */
 
-/**
- * Stores any filters applied to the datasets
- */
-@Component
-@Scope(value = WebApplicationContext.SCOPE_SESSION, proxyMode = ScopedProxyMode.TARGET_CLASS)
-class FilterState {
-    @Delegate
-    final FilterCache delegate = new FilterCache()
+class QueryOptionsTest {
+
+    @Test
+    void "all data" (){
+        QueryOptions options = QueryOptions.ALL_DATA
+        assert options.disregardFilters
+        assert options.disregardSelection
+    }
+
+    @Test
+    void "filtered and selected data" (){
+        QueryOptions options = QueryOptions.FILTERED_AND_SELECTED_DATA
+        assert !options.disregardFilters
+        assert !options.disregardSelection
+    }
 }

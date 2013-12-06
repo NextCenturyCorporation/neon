@@ -1,12 +1,12 @@
 package com.ncc.neon.query.hive
-
 import com.ncc.neon.query.Query
+import com.ncc.neon.query.QueryOptions
 import com.ncc.neon.query.clauses.*
 import com.ncc.neon.query.filter.DataSet
 import com.ncc.neon.query.filter.Filter
 import com.ncc.neon.query.filter.FilterState
 import com.ncc.neon.query.filter.SelectionState
-
+import groovy.transform.Immutable
 /*
  * ************************************************************************
  * Copyright (c), 2013 Next Century Corporation. All Rights Reserved.
@@ -37,32 +37,21 @@ import com.ncc.neon.query.filter.SelectionState
  * Converts a Query object into a hive based query.
  */
 
+@Immutable
 class HiveConversionStrategy {
 
     private final FilterState filterState
     private final SelectionState selectionState
 
-    HiveConversionStrategy(FilterState filterState, SelectionState selectionState) {
-        this.filterState = filterState
-        this.selectionState = selectionState
-    }
-
-    String convertQueryDisregardingFilters(Query query) {
-        helpConvertQuery(query, false)
-    }
-
-    String convertQueryWithFilterState(Query query) {
-        helpConvertQuery(query, true)
-    }
-
-    private String helpConvertQuery(Query query, boolean includeFiltersFromFilterState) {
+    String convertQuery(Query query, QueryOptions queryOptions) {
         StringBuilder builder = new StringBuilder()
         applySelectFromStatement(builder, query)
-        applyWhereStatement(builder, query, includeFiltersFromFilterState)
+        applyWhereStatement(builder, query, queryOptions)
         applyGroupByStatement(builder, query)
         applySortByStatement(builder, query)
         applyLimitStatement(builder, query)
         return builder.toString()
+
     }
 
     private static void applySelectFromStatement(StringBuilder builder, Query query) {
@@ -98,21 +87,46 @@ class HiveConversionStrategy {
         groupBy instanceof GroupByFieldClause ? escapeFieldName(groupBy.field) : functionToString(groupBy)
     }
 
-
     private static String functionToString(FieldFunction fieldFunction) {
         return "${fieldFunction.operation}(${escapeFieldName(fieldFunction.field)}) as ${fieldFunction.name}"
     }
 
-    private void applyWhereStatement(StringBuilder builder, Query query, boolean includeFiltersFromFilterState) {
-        List whereClauses = assembleWhereClauses(query)
-        if (includeFiltersFromFilterState) {
-            whereClauses.addAll(createWhereClausesForFilters(query))
-        }
+    private void applyWhereStatement(StringBuilder builder, Query query, QueryOptions queryOptions) {
+        List whereClauses = collectWhereClauses(query, queryOptions)
+
         HiveWhereClause clause = createWhereClauseParams(whereClauses)
         if (clause) {
             builder << " where " << clause.toString()
         }
+    }
 
+    private List collectWhereClauses(Query query, QueryOptions options) {
+        def whereClauses = []
+
+        if (query.filter.whereClause) {
+            whereClauses << query.filter.whereClause
+        }
+        DataSet dataSet = new DataSet(databaseName: query.databaseName, tableName: query.tableName)
+        if (!options.disregardFilters) {
+            whereClauses.addAll(createWhereClausesForFilters(dataSet, filterState))
+        }
+        if (!options.disregardSelection) {
+            whereClauses.addAll(createWhereClausesForFilters(dataSet, selectionState))
+        }
+
+        return whereClauses
+    }
+
+    private static def createWhereClausesForFilters(DataSet dataSet, def filterCache) {
+        def whereClauses = []
+
+        List<Filter> filters = filterCache.getFiltersForDataset(dataSet)
+        filters.each {
+            if (it.whereClause) {
+                whereClauses << it.whereClause
+            }
+        }
+        return whereClauses
     }
 
     private static void applyGroupByStatement(StringBuilder builder, Query query) {
@@ -139,31 +153,6 @@ class HiveConversionStrategy {
         }
     }
 
-    private static List assembleWhereClauses(Query query) {
-        def whereClauses = []
-
-        if (query.filter.whereClause) {
-            whereClauses << query.filter.whereClause
-        }
-        return whereClauses
-    }
-
-    private def createWhereClausesForFilters(query) {
-        def whereClauses = []
-        DataSet dataSet = new DataSet(databaseName: query.databaseName, tableName: query.tableName)
-        List<Filter> filters = filterState.getFiltersForDataset(dataSet)
-        filters.addAll(selectionState.getFiltersForDataset(dataSet))
-        if (!filters.isEmpty()) {
-            filters.each {
-                if (it.whereClause) {
-                    whereClauses << it.whereClause
-                }
-            }
-        }
-        return whereClauses
-    }
-
-
     private static HiveWhereClause createWhereClauseParams(List whereClauses) {
         if (!whereClauses) {
             return null
@@ -173,4 +162,5 @@ class HiveConversionStrategy {
         }
         return new HiveWhereClause(whereClause: new AndWhereClause(whereClauses: whereClauses))
     }
+
 }

@@ -1,5 +1,6 @@
 package com.ncc.neon.query.convert
 
+import com.ncc.neon.query.QueryOptions
 import com.ncc.neon.query.filter.SelectionState
 import com.ncc.neon.query.hive.HiveConversionStrategy
 /*
@@ -36,8 +37,8 @@ class HiveConvertQueryWithFiltersTest extends HiveConvertQueryTest{
 
     @Override
     protected def convertQuery(query) {
-        HiveConversionStrategy conversionStrategy = new HiveConversionStrategy(filterState, new SelectionState())
-        conversionStrategy.convertQueryWithFilterState(query)
+        HiveConversionStrategy conversionStrategy = new HiveConversionStrategy(filterState: filterState, selectionState: new SelectionState())
+        conversionStrategy.convertQuery(query, QueryOptions.FILTERED_DATA)
     }
 
     @Override

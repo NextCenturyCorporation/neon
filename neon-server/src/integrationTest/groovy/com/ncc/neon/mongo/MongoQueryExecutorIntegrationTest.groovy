@@ -4,6 +4,7 @@ import com.mongodb.BasicDBObject
 import com.mongodb.util.JSON
 import com.ncc.neon.AbstractQueryExecutorIntegrationTest
 import com.ncc.neon.query.Query
+import com.ncc.neon.query.QueryOptions
 import com.ncc.neon.query.clauses.AndWhereClause
 import com.ncc.neon.query.clauses.DistanceUnit
 import com.ncc.neon.query.clauses.SingularWhereClause
@@ -131,7 +132,7 @@ class MongoQueryExecutorIntegrationTest extends AbstractQueryExecutorIntegration
         def expected = rows(2, 0)
         def query = new Query(filter: new Filter(databaseName: DATABASE_NAME, tableName: TABLE_NAME, whereClause: withinDistance))
 
-        def result = queryExecutor.execute(query)
+        def result = queryExecutor.execute(query, QueryOptions.FILTERED_DATA)
         assertOrderedQueryResult(expected, result)
     }
 
@@ -148,7 +149,7 @@ class MongoQueryExecutorIntegrationTest extends AbstractQueryExecutorIntegration
         def whereClause = new AndWhereClause(whereClauses: [withinDistance, dcStateClause])
         def query = new Query(filter: new Filter(databaseName: DATABASE_NAME, tableName: TABLE_NAME, whereClause: whereClause))
 
-        def result = queryExecutor.execute(query)
+        def result = queryExecutor.execute(query, QueryOptions.FILTERED_DATA)
         assertOrderedQueryResult(expected, result)
     }
 

@@ -51,38 +51,19 @@ class HiveQueryExecutor implements QueryExecutor {
     private ConnectionManager connectionManager
 
     @Override
-    QueryResult execute(Query query) {
-        HiveConversionStrategy conversionStrategy = new HiveConversionStrategy(filterState, selectionState)
-        String hiveQuery = conversionStrategy.convertQueryWithFilterState(query)
+    QueryResult execute(Query query, QueryOptions options) {
+        HiveConversionStrategy conversionStrategy = new HiveConversionStrategy(filterState: filterState, selectionState: selectionState)
+        String hiveQuery = conversionStrategy.convertQuery(query, options)
         LOGGER.debug("Hive Query: {}", hiveQuery)
         List<Map> resultList = jdbcClient.executeQuery(hiveQuery)
         return new TableQueryResult(data: resultList)
     }
 
     @Override
-    QueryResult execute(QueryGroup query) {
+    QueryResult execute(QueryGroup queryGroup, QueryOptions options) {
         TableQueryResult queryResult = new TableQueryResult()
-        query.queries.each {
-            def result = execute(it)
-            queryResult.data.addAll(result.data)
-        }
-        return queryResult
-    }
-
-    @Override
-    QueryResult executeDisregardingFilters(Query query) {
-        HiveConversionStrategy conversionStrategy = new HiveConversionStrategy(filterState, selectionState)
-        String hiveQuery = conversionStrategy.convertQueryDisregardingFilters(query)
-        LOGGER.debug("Hive Query: {}", hiveQuery)
-        List<Map> resultList = jdbcClient.executeQuery(hiveQuery)
-        return new TableQueryResult(data: resultList)
-    }
-
-    @Override
-    QueryResult executeDisregardingFilters(QueryGroup query) {
-        TableQueryResult queryResult = new TableQueryResult()
-        query.queries.each {
-            def result = executeDisregardingFilters(it)
+        queryGroup.queries.each {
+            def result = execute(it, options)
             queryResult.data.addAll(result.data)
         }
         return queryResult

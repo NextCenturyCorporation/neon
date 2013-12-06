@@ -22,38 +22,25 @@
  */
 package com.ncc.neon.query
 /**
- * Executes a query against a datastore
+ * Executes a query against a generic data source
  */
 public interface QueryExecutor {
 
     /**
-     * Executes the query and returns the results
-     * @param query
-     * @return The result of the query
+     * Executes a query against a generic data source given the current filter and selection state.
+     * @param query An object that represents the query we wish to execute
+     * @param options Determines if we should include filters or selection in the query execution
+     * @return An object containing the results of the query
      */
-    QueryResult execute(Query query)
+    QueryResult execute(Query query, QueryOptions options)
 
     /**
-     * Executes a group of queries and returns the results
-     * @param query
-     * @return The result of the queries appended together
+     * Executes a group of queries against a generic data source given the current filter and selection state.
+     * @param query A group of query objects
+     * @param options Determines if we should include filters or selection in the query execution
+     * @return An object containing the results of the query
      */
-    QueryResult execute(QueryGroup query)
-
-
-    /**
-     * Executes the query and returns the results
-     * @param query
-     * @return The result of the query
-     */
-    QueryResult executeDisregardingFilters(Query query)
-
-    /**
-     * Executes a group of queries and returns the results
-     * @param query
-     * @return The result of the queries appended together
-     */
-    QueryResult executeDisregardingFilters(QueryGroup query)
+    QueryResult execute(QueryGroup queryGroup, QueryOptions options)
 
     /**
      * @return Returns all the databases

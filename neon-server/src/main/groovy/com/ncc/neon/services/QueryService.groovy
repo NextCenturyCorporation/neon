@@ -5,6 +5,7 @@ import com.ncc.neon.metadata.model.dataset.WidgetAndDatasetMetadataList
 import com.ncc.neon.query.Query
 import com.ncc.neon.query.QueryExecutor
 import com.ncc.neon.query.QueryGroup
+import com.ncc.neon.query.QueryOptions
 import com.ncc.neon.query.QueryResult
 import com.ncc.neon.result.AssembleClientData
 import com.ncc.neon.result.ClientData
@@ -54,8 +55,8 @@ class QueryService {
     MetadataResolver metadataResolver
 
     /**
-     * Executes a query against the datastore the user is currently connected to.
-     * This takes into account the user's current filters and selection, so the results will be limited by these if they exist.
+     * Executes a query against the data source the user is currently connected to.
+     * This takes into account the user's current filters so the results will be limited by these if they exist.
      * @param query The neon representation of a query. This query is converted to a database specific query language.
      * @return An object that contains the query result data and optional metadata about the query.
      */
@@ -64,12 +65,12 @@ class QueryService {
     @Produces(MediaType.APPLICATION_JSON)
     @Path("query")
     ClientData executeQuery(Query query) {
-        return execute(query, "execute")
+        return execute(query, QueryOptions.FILTERED_DATA)
     }
 
     /**
-     * Executes a group of queries against the datastore the user is currently connected to.
-     * This takes into account the user's current filters and selection, so the results will be limited by these if they exist.
+     * Executes a group of queries against the data source the user is currently connected to.
+     * This takes into account the user's current filters so the results will be limited by these if they exist.
      * @param query A collection of queries. The results of the queries will be appended together.
      * @return An object that contains the query result data and optional metadata about the query.
      */
@@ -78,11 +79,40 @@ class QueryService {
     @Produces(MediaType.APPLICATION_JSON)
     @Path("querygroup")
     ClientData executeQueryGroup(QueryGroup query) {
-        return execute(query, "execute")
+        return execute(query, QueryOptions.FILTERED_DATA)
     }
 
     /**
-     * Executes a query against the datastore the user is currently connected to ignoring the current filters and selection.
+     * Executes a query for selected items against the data source the user is currently connected to.
+     * This takes into account the user's current filters so the results will be limited by these if they exist.
+     * @param query The neon representation of a query. This query is converted to a database specific query language.
+     * @return An object that contains the query result data and optional metadata about the query.
+     */
+    @POST
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    @Path("querywithselectiononly")
+    ClientData executeQueryWithSelectionOnly(Query query) {
+        return execute(query, QueryOptions.FILTERED_AND_SELECTED_DATA)
+    }
+
+    /**
+     * Executes a group of queries for selected items against the data source the user is currently connected to.
+     * This takes into account the user's current filters so the results will be limited by these if they exist.
+     * @param query A collection of queries. The results of the queries will be appended together.
+     * @return An object that contains the query result data and optional metadata about the query.
+     */
+    @POST
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    @Path("querygroupwithselectiononly")
+    ClientData executeQueryGroupWithSelectionOnly(QueryGroup query) {
+        return execute(query, QueryOptions.FILTERED_AND_SELECTED_DATA)
+    }
+
+
+    /**
+     * Executes a query against the data source the user is currently connected to ignoring the current filters and selection.
      * @param query The neon representation of a query
      * @return An object that contains the query result data and optional metadata about the query.
      */
@@ -91,11 +121,11 @@ class QueryService {
     @Produces(MediaType.APPLICATION_JSON)
     @Path("querydisregardfilters")
     ClientData executeQueryDisregardFilters(Query query) {
-        return execute(query, "executeDisregardingFilters")
+        return execute(query, QueryOptions.ALL_DATA)
     }
 
     /**
-     * Executes a group of queries against the datastore the user is currently connected to ignoring the current filters and selection.
+     * Executes a group of queries against the data source the user is currently connected to ignoring the current filters and selection.
      * @param query The neon representation of a query
      * @return An object that contains the query result data and optional metadata about the query.
      */
@@ -104,7 +134,7 @@ class QueryService {
     @Produces(MediaType.APPLICATION_JSON)
     @Path("querygroupdisregardfilters")
     ClientData executeQueryGroupDisregardFilters(QueryGroup query) {
-        return execute(query, "executeDisregardingFilters")
+        return execute(query, QueryOptions.ALL_DATA)
     }
 
     /**
@@ -157,9 +187,9 @@ class QueryService {
         return queryExecutor.showTables(database)
     }
 
-    private final def execute = { query, methodName ->
+    private final def execute = { def query, QueryOptions options ->
         QueryExecutor queryExecutor = queryExecutorFactory.getExecutor()
-        QueryResult queryResult = queryExecutor."${methodName}"(query)
+        QueryResult queryResult = queryExecutor.execute(query, options)
         ColumnMetadataList columnMetadataList = metadataResolver.resolveQuery(query)
 
         AssembleClientData assembler = new AssembleClientData(queryResult: queryResult, columnMetadataList: columnMetadataList)

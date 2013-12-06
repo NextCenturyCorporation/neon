@@ -41,11 +41,10 @@ neon.query.SERVER_URL = 'http://localhost:8080/neon';
  * @constructor
  */
 neon.query.Query = function () {
-
-
     this.filter = new neon.query.Filter();
     this.fields = ['*'];
     this.disregardFilters_ = false;
+    this.selectionOnly_ = false;
 
     this.groupByClauses = [];
     this.isDistinct = false;
@@ -308,16 +307,36 @@ neon.query.Query.prototype.sortBy = function (fieldName, sortOrder) {
     return this;
 };
 
+/**
+ * Sets the query mode to return all data. This ignores the current filters and selection.
+ * @method allDataMode
+ * @return {neon.query.Query} This query for method chaining
+ */
+neon.query.Query.prototype.allDataMode = function () {
+    this.disregardFilters_ = true;
+    this.selectionOnly_ = false;
+    return this;
+};
 
 /**
- * Indicates whether or not even data outside of the current filters should be returned
- * @method disregardFilters
- * @param {Boolean} includeFilteredOutData true to include data outside of the current filters, false to just return
- * the data matched by the current filters (defaults to false)
- * @return {neon.query.Query} This query object
+ * Sets the query mode to return all data. This applies the current filters and ignores the selection.
+ * @method filteredMode
+ * @return {neon.query.Query} This query for method chaining
  */
-neon.query.Query.prototype.disregardFilters = function (includeFilteredOutData) {
-    this.disregardFilters_ = includeFilteredOutData;
+neon.query.Query.prototype.filteredMode = function () {
+    this.disregardFilters_ = false;
+    this.selectionOnly_ = false;
+    return this;
+};
+
+/**
+ * Sets the query mode to return just the current selection. Selected items will be returned after the current filters are applied.
+ * @method selectionMode
+ * @return {neon.query.Query} This query for method chaining
+ */
+neon.query.Query.prototype.selectionMode = function () {
+    this.disregardFilters_ = false;
+    this.selectionOnly_ = true;
     return this;
 };
 
@@ -435,7 +454,10 @@ neon.query.executeQueryGroup = function (queryGroup, successCallback, errorCallb
 };
 
 neon.query.executeQueryService_ = function (query, successCallback, errorCallback, serviceName) {
-    if (query.disregardFilters_) {
+    if(query.selectionOnly_){
+        serviceName += "withselectiononly";
+    }
+    else if (query.disregardFilters_) {
         serviceName += "disregardfilters";
     }
 
@@ -791,7 +813,6 @@ neon.query.getTableNames = function (databaseName, successCallback) {
     );
 };
 
-
 neon.query.serviceUrl = function (servicePath, serviceName, queryParamsString) {
     if (!queryParamsString) {
         queryParamsString = '';
@@ -799,7 +820,6 @@ neon.query.serviceUrl = function (servicePath, serviceName, queryParamsString) {
 
     return neon.query.SERVER_URL + '/services/' + servicePath + '/' + serviceName + queryParamsString;
 };
-
 
 /**
  * A generic function that can be applied to a field (on the server side). For example, this could be an aggregation
@@ -871,40 +891,4 @@ neon.query.WithinDistanceClause = function (locationField, center, distance, dis
     this.center = center;
     this.distance = distance;
     this.distanceUnit = distanceUnit;
-};
-
-/**
- * A query group is one that encompasses multiple queries. The results of all queries in the group are
- * combined into a single json object.
- * @constructor
- * @class QueryGroup
- */
-neon.query.QueryGroup = function () {
-    this.queries = [];
-    this.disregardFilters_ = false;
-};
-
-/**
- * Adds a query to execute as part of the query group
- * @method addQuery
- * @param {neon.query.Query} query The query to execute as part of the query group
- * @return {neon.query.QueryGroup} This object
- */
-neon.query.QueryGroup.prototype.addQuery = function (query) {
-    this.queries.push(query);
-    return this;
-};
-
-/**
- * Sets whether or not the results of the query should include data that is filtered out. When true,
- * all data, regardless of filters, will be included in the query (individual query settings of disregardFilters are
- * ignored, and all queries in the group will use this value).
- * See {{#crossLink "neon.query.Query/disregardFilters"}}{{/crossLink}} for parameter details
- * @method disregardFilters
- * @param {Boolean} includeFilteredOutData
- * @return {neon.query.QueryGroup} This query group
- */
-neon.query.QueryGroup.prototype.disregardFilters = function (includeFilteredOutData) {
-    this.disregardFilters_ = includeFilteredOutData;
-    return this;
 };

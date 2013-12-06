@@ -4,6 +4,8 @@ import com.ncc.neon.query.clauses.AndWhereClause
 import com.ncc.neon.query.clauses.WhereClause
 import org.jboss.netty.util.internal.ConcurrentHashMap
 
+import java.util.concurrent.ConcurrentMap
+
 /*
  * ************************************************************************
  * Copyright (c), 2013 Next Century Corporation. All Rights Reserved.
@@ -32,8 +34,7 @@ import org.jboss.netty.util.internal.ConcurrentHashMap
 
 class FilterCache {
     //I'm using methods from the implementation so this makes the type more explicit.
-    @SuppressWarnings("ImplementationAsType")
-    private final ConcurrentHashMap<FilterKey, Filter> filters = [:] as ConcurrentHashMap
+    private final ConcurrentMap<FilterKey, Filter> filters = [:] as ConcurrentHashMap
 
     /**
      * Clears all existing filters

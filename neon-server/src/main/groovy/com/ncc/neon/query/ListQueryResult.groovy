@@ -26,6 +26,10 @@ package com.ncc.neon.query
  * @author tbrooks
  */
 
+/**
+ * Query results as a list of string values
+ */
+
 class ListQueryResult implements QueryResult{
     List<String> data = []
 
