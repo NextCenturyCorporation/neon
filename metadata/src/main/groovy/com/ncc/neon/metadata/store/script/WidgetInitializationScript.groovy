@@ -33,9 +33,9 @@ import com.ncc.neon.metadata.store.MetadataStorer
 
 class WidgetInitializationScript {
 
-    private final MetadataConnection connection = new MetadataConnection()
-    private final MetadataClearer clearer = new MetadataClearer(connection)
-    private final MetadataStorer storer = new MetadataStorer(connection)
+    final MetadataConnection connection = new MetadataConnection()
+    final MetadataClearer clearer = new MetadataClearer(connection)
+    final MetadataStorer storer = new MetadataStorer(connection)
 
     void executeScript(){
         WidgetInitializationMetadata widgetInitializationMetadata = new WidgetInitializationMetadata()
