@@ -26,6 +26,7 @@
     <script src="js-lib/slickgrid/slick.dataview.js"></script>
     <script src="js-lib/mergesort/merge-sort.js"></script>
     <script src="js-lib/slickgrid/plugins/slick.autotooltips.js"></script>
+    <script src="js-lib/slickgrid/plugins/slick.rowselectionmodel.js"></script>
     <script src="js-lib/bootstrap/bootstrap.min.js"></script>
     <script src="js/toggle.js"></script>
     <script src="js/dropdown.js"></script>

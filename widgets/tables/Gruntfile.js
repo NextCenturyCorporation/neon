@@ -32,6 +32,7 @@ module.exports = function (grunt) {
                         lib('slickgrid/slick.core.js'),
                         lib('slickgrid/slick.grid.js'),
                         lib('slickgrid/slick.dataview.js'),
+                        lib('slickgrid/plugins/slick.rowselectionmdoel.js'),
                         lib('slickgrid/plugins/slick.autotooltips.js'),
                         lib('mergesort/merge-sort.js'),
                         lib('bootstrap/bootstrap.min.js'),

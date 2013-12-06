@@ -50,3 +50,8 @@
 #sort-ascending, #sort-descending {
     border-color: #e6e6e6;
 }
+
+.slick-row .selected{
+    background-color: black;
+    color: white;
+}

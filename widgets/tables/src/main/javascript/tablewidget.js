@@ -27,6 +27,7 @@ neon.ready(function () {
     var databaseName;
     var tableName;
     var table;
+    var filterKey;
 
     var clientId = neon.eventing.messaging.getInstanceId();
 
@@ -50,6 +51,10 @@ neon.ready(function () {
     function populateInitialData(message) {
         databaseName = message.database;
         tableName = message.table;
+
+        neon.query.registerForFilterKey(databaseName, tableName, function (filterResponse) {
+            filterKey = filterResponse;
+        });
         neon.query.getFieldNames(databaseName, tableName, neon.widget.TABLE, populateSortFieldDropdown);
     }
 
@@ -100,7 +105,11 @@ neon.ready(function () {
         }
     }
 
-    function updateTable() {
+    function updateTable(message, sender) {
+        if (!sender && sender === neon.eventing.messaging.getIframeId()) {
+            return;
+        }
+
         var query = new neon.query.Query().selectFrom(databaseName, tableName);
         applyLimit(query);
         applySort(query);
@@ -125,10 +134,39 @@ neon.ready(function () {
             query.sortBy(sortField, sortDirection);
         }
     }
-
     function populateTable(data) {
-        table = new tables.Table('#table', {data: data.data}).draw();
+        var options = createOptions(data);
+        table = new tables.Table('#table', options).draw().registerSelectionListener(onSelection);
         sizeTableToRemainingSpace();
+    }
+
+    function createOptions(data){
+        var _id = "_id";
+        var has_id = true;
+
+        _.each(data.data, function(element){
+            if(!(_.has(element, _id))){
+                has_id = false;
+            }
+        });
+
+        var options = {data: data.data};
+
+        if(has_id){
+            options.id = _id;
+        }
+        return options;
+    }
+
+    function onSelection(idField, rows){
+        var values = [];
+        _.each(rows, function(row){
+            values.push(row[idField]);
+        });
+
+        var filterClause = neon.query.where(idField, "in", values);
+        var filter = new neon.query.Filter().selectFrom(databaseName, tableName).where(filterClause);
+        neon.eventing.publishing.replaceSelection(filterKey, filter);
     }
 
     function sizeTableToRemainingSpace() {
@@ -144,6 +182,7 @@ neon.ready(function () {
 
     function buildStateObject(query) {
         return {
+            filterKey: filterKey,
             databaseName: databaseName,
             tableName: tableName,
             limitValue: $('#limit').val(),
@@ -156,6 +195,7 @@ neon.ready(function () {
 
     function restoreState() {
         neon.query.getSavedState(clientId, function (data) {
+            filterKey = data.filterKey;
             databaseName = data.databaseName;
             tableName = data.tableName;
             $('#limit').val(data.limitValue);
