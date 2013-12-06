@@ -116,6 +116,7 @@ abstract class AbstractQueryExecutorIntegrationTest {
     @After
     void after() {
         queryExecutor.filterState.clearAllFilters()
+        queryExecutor.selectionState.clearAllFilters()
     }
 
     @Test
@@ -455,6 +456,71 @@ abstract class AbstractQueryExecutorIntegrationTest {
         def result = queryExecutor.execute(query, QueryOptions.FILTERED_DATA)
         def expected = readJson('groupByMonth.json')
         assertOrderedQueryResult(expected, result)
+    }
+
+    @Test
+    void "add selection"() {
+        UUID uuid = UUID.randomUUID()
+        def filterId = new FilterKey(uuid, new DataSet(databaseName: DATABASE_NAME, tableName: TABLE_NAME))
+        def dcStateFilter = createFilterWithWhereClause(new SingularWhereClause(lhs: 'state', operator: '=', rhs: 'DC'))
+
+        // apply a selection and make sure only that data is returned
+        queryExecutor.selectionState.addFilter(filterId, dcStateFilter)
+        def dcStateResult = queryExecutor.execute(ALL_DATA_QUERY, QueryOptions.FILTERED_AND_SELECTED_DATA)
+        def dcStateRecords = rows(1, 2, 5)
+        assertUnorderedQueryResult(dcStateRecords, dcStateResult)
+
+        // apply a filter and make sure both are applied
+        def salaryFilter = createFilterWithWhereClause(new SingularWhereClause(lhs: 'salary', operator: '>', rhs: 85000))
+        queryExecutor.filterState.addFilter(filterId, salaryFilter)
+
+        def dcStateWithSalaryFilterRecords = rows(2, 5)
+        def dcStateWithSalaryResult = queryExecutor.execute(ALL_DATA_QUERY, QueryOptions.FILTERED_AND_SELECTED_DATA)
+        assertUnorderedQueryResult(dcStateWithSalaryFilterRecords, dcStateWithSalaryResult)
+    }
+
+    @Test
+    void "remove selection"() {
+        // add some filters that can be removed (the add filters are tested separately)
+        UUID uuid = UUID.randomUUID()
+        def filterId = new FilterKey(uuid, new DataSet(databaseName: DATABASE_NAME, tableName: TABLE_NAME))
+
+        def dcStateFilter = createFilterWithWhereClause(new SingularWhereClause(lhs: 'state', operator: '=', rhs: 'DC'))
+        queryExecutor.selectionState.addFilter(filterId, dcStateFilter)
+
+        def salaryFilter = createFilterWithWhereClause(new SingularWhereClause(lhs: 'salary', operator: '>', rhs: 85000))
+        queryExecutor.selectionState.addFilter(filterId, salaryFilter)
+
+        queryExecutor.selectionState.removeFilter(filterId)
+        def allDataResult = queryExecutor.execute(ALL_DATA_QUERY, QueryOptions.FILTERED_AND_SELECTED_DATA)
+        assertUnorderedQueryResult(getAllData(), allDataResult)
+    }
+
+    @Test
+    void "ignore selection"() {
+        UUID uuid = UUID.randomUUID()
+        def filterId = new FilterKey(uuid, new DataSet(databaseName: DATABASE_NAME, tableName: TABLE_NAME))
+        def dcStateFilter = createFilterWithWhereClause(new SingularWhereClause(lhs: 'state', operator: '=', rhs: 'DC'))
+
+        // apply a filter, but execute the query that bypasses the filters, so all data should be returned
+        queryExecutor.selectionState.addFilter(filterId, dcStateFilter)
+        def allDataResult = queryExecutor.execute(ALL_DATA_QUERY, QueryOptions.ALL_DATA)
+        assertUnorderedQueryResult(getAllData(), allDataResult)
+    }
+
+    @Test
+    void "clear selection"() {
+        def filterId = new FilterKey(UUID.randomUUID(), new DataSet(databaseName: DATABASE_NAME, tableName: TABLE_NAME))
+        def dcStateFilter = createFilterWithWhereClause(new SingularWhereClause(lhs: 'state', operator: '=', rhs: 'DC'))
+
+        // addFilter is tested separately, so we can be confident the filter is added properly
+        queryExecutor.selectionState.addFilter(filterId, dcStateFilter)
+
+        // clear the filters, and there should be no filters applied
+        queryExecutor.selectionState.clearAllFilters()
+
+        def result = queryExecutor.execute(ALL_DATA_QUERY, QueryOptions.FILTERED_AND_SELECTED_DATA)
+        assertUnorderedQueryResult(getAllData(), result)
     }
 
     protected def assertOrderedQueryResult(expected, actual) {
