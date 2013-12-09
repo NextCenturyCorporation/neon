@@ -34,5 +34,5 @@ import org.springframework.web.context.WebApplicationContext
 @Scope(value = WebApplicationContext.SCOPE_SESSION, proxyMode = ScopedProxyMode.TARGET_CLASS)
 class FilterState {
     @Delegate
-    final FilterCache delegate = new FilterCache()
+    FilterCache delegate = new FilterCache()
 }

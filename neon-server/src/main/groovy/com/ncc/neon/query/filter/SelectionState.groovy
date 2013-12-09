@@ -36,6 +36,6 @@ import org.springframework.web.context.WebApplicationContext
 class SelectionState {
 
     @Delegate
-    final FilterCache delegate = new FilterCache()
+    FilterCache delegate = new FilterCache()
 
 }
