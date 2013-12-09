@@ -36,6 +36,8 @@ var graphs = graphs || {};
  *     by the edge list to indicate what nodes are linked. Defaults to `id`</li>
  *     <li>x (optional) - The attribute in the data that contains the x position of the node - defaults to `x`</li>
  *     <li>y (optional) - The attribute in the data that contains the y position of the node - defaults to `y`</li>
+ *     <li>radius (optional) - The default radius of a node in pixels. If not defined, a pre-configured default
+ *     will be used</li>
  * </ul>
  *
  *
@@ -67,6 +69,7 @@ graphs.Graph = function (graphSelector, opts) {
     this.xAttr_ = opts.x || "x";
     this.yAttr_ = opts.y || "y";
     this.id_ = opts.id || "id";
+    this.nodeRadius_ = opts.radius || 6;
     this.svg_ = undefined;
     this.nodes_ = undefined;
     this.edges_ = undefined;
@@ -195,7 +198,7 @@ graphs.Graph.prototype.drawNodes_ = function (nodes) {
         );
     g.append("circle")
         .attr("class", "node")
-        .attr("r", 6);
+        .attr("r", this.nodeRadius_);
 
     this.nodes_.exit().remove();
 
