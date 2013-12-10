@@ -1,0 +1,40 @@
+<html>
+<head>
+    <title>Network Graph Example</title>
+
+    <link rel="stylesheet" type="text/css" href="css/graph.css">
+
+    <script src="../js-lib/d3/d3.v3.min.js"></script>
+    <script src="../js-lib/jquery/jquery-1.10.1.min.js"></script>
+    <script src="../javascript/graph.js"></script>
+
+</head>
+<body>
+
+<div id="graph" style="width:1200px; height:900px;">
+</div>
+
+<script>
+    var nodes = [
+        {"id": 0, "xPos": 960, "yPos": 320},
+        {"id": 1, "xPos": 513, "yPos": 335},
+        {"id": 2, "xPos": 557, "yPos": 454},
+        {"id": 3, "xPos": 506, "yPos": 642},
+        {"id": 4, "xPos": 547, "yPos": 660},
+        {"id": 5, "xPos": 695, "yPos": 705}
+    ];
+
+    var edges = [
+        {"source": 1, "target": 0},
+        {"source": 2, "target": 0},
+        {"source": 3, "target": 4}
+    ];
+
+    var opts = {x:"xPos",y:"yPos"};
+    var graph = new graphs.Graph("#graph", opts);
+    graph.draw(nodes, edges);
+
+</script>
+
+</body>
+</html>
