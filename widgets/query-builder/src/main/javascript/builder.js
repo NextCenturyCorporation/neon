@@ -35,7 +35,7 @@ neon.queryBuilder = (function () {
 
     function restoreState(){
         neon.query.getWidgetInitialization(neon.widget.QUERY_BUILDER, function(data){
-            if(data){
+            if(data && data.query){
                 $('#queryText').val(data.query);
                 submitQueryToServer();
             }
