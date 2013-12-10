@@ -18,15 +18,14 @@ neon.tableState = (function () {
         neon.activeDataset.setTableName(data.tableName);
     }
 
-    function setSortDropdown(data) {
-        var element = new neon.dropdown.Element("sort-field");
-        neon.dropdown.populateAttributeDropdowns(data.sortColumns, element, updateTable);
-        neon.dropdown.setDropdownInitialValue("sort-field", data.sortValue);
-    }
+
 
     function restoreTableState(data, restoreStateCallback){
+        if(!data){
+            return;
+        }
+
         setActiveDataset(data);
-        setSortDropdown(data);
         $('#limit').val(data.limitValue);
 
         if(restoreStateCallback && typeof restoreStateCallback === 'function'){

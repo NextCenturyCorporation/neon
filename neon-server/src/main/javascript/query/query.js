@@ -605,7 +605,8 @@ neon.query.addSelection = function (filterKey, filter, successCallback, errorCal
         neon.query.serviceUrl('selectionservice', 'addselection'),
         {
             success: successCallback,
-            error: errorCallback
+            error: errorCallback,
+            global: false
         }
     );
 };
@@ -624,7 +625,8 @@ neon.query.removeSelection = function (filterKey, successCallback, errorCallback
         neon.query.serviceUrl('selectionservice', 'removeselection'),
         {
             success: successCallback,
-            error: errorCallback
+            error: errorCallback,
+            global: false
         }
     );
 };
@@ -649,7 +651,8 @@ neon.query.replaceSelection = function (filterKey, filter, successCallback, erro
         neon.query.serviceUrl('selectionservice', 'replaceselection'),
         {
             success: successCallback,
-            error: errorCallback
+            error: errorCallback,
+            global: false
         }
     );
 };
@@ -666,7 +669,8 @@ neon.query.clearSelection = function (successCallback, errorCallback) {
         neon.query.serviceUrl('selectionservice', 'clearselection'),
         {
             success: successCallback,
-            error: errorCallback
+            error: errorCallback,
+            global: false
         }
     );
 };

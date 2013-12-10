@@ -227,6 +227,7 @@ tables.Table.prototype.registerSelectionListener = function(callback){
         });
         callback(me.idField_, selectedRowData);
     });
+    return this;
 };
 
 tables.Table.prototype.addSortSupport_ = function () {

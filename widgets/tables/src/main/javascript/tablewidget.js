@@ -24,19 +24,16 @@
 neon.ready(function () {
     neon.query.SERVER_URL = $("#neon-server").val();
 
-    var databaseName;
-    var tableName;
     var table;
-    var filterKey;
-
-    var clientId = neon.eventing.messaging.getInstanceId();
+    var query;
+    var state = neon.activeDataset;
 
     initialize();
-
     function initialize(){
         neon.eventing.messaging.registerForNeonEvents({
-            activeDatasetChanged: populateInitialData,
-            filtersChanged: updateTable
+            activeDatasetChanged: onActiveDatasetChanged,
+            filtersChanged: updateTable,
+            selectionChanged: onSelectionChanged
         });
 
         neon.toggle.createOptionsPanel("#options-panel", "table-options");
@@ -46,22 +43,6 @@ neon.ready(function () {
 
         $(window).resize(sizeTableToRemainingSpace);
         sizeTableToRemainingSpace();
-    }
-
-    function populateInitialData(message) {
-        databaseName = message.database;
-        tableName = message.table;
-
-        neon.query.registerForFilterKey(databaseName, tableName, function (filterResponse) {
-            filterKey = filterResponse;
-        });
-        neon.query.getFieldNames(databaseName, tableName, neon.widget.TABLE, populateSortFieldDropdown);
-    }
-
-    function populateSortFieldDropdown(data) {
-        var element = new neon.dropdown.Element("sort-field");
-        neon.dropdown.populateAttributeDropdowns(data, element, updateTable);
-        updateTable();
     }
 
     function getSortField() {
@@ -105,23 +86,17 @@ neon.ready(function () {
         }
     }
 
-    function updateTable(message, sender) {
-        if (!sender && sender === neon.eventing.messaging.getIframeId()) {
-            return;
-        }
-
-        var query = new neon.query.Query().selectFrom(databaseName, tableName);
+    function updateTable() {
+        query = new neon.query.Query().selectFrom(state.getDatabaseName(), state.getTableName());
         applyLimit(query);
         applySort(query);
 
-        var stateObject = buildStateObject(query);
         neon.query.executeQuery(query, populateTable);
-        neon.query.saveState(clientId, stateObject);
+        neon.tableState.saveState(query);
     }
 
     function applyLimit(query) {
         var limitVal = $('#limit').val();
-        // make sure there is a value - it could be empty (no limit) which is valid
         if (limitVal) {
             query.limit(parseInt(limitVal));
         }
@@ -164,13 +139,17 @@ neon.ready(function () {
             values.push(row[idField]);
         });
 
-        var filterClause = neon.query.where(idField, "in", values);
-        var filter = new neon.query.Filter().selectFrom(databaseName, tableName).where(filterClause);
-        neon.eventing.publishing.replaceSelection(filterKey, filter);
+        if(values.length > 0){
+            var filterClause = neon.query.where(idField, "in", values);
+            var filter = new neon.query.Filter().selectFrom(state.getDatabaseName(), state.getTableName()).where(filterClause);
+            neon.eventing.publishing.replaceSelection(state.getFilterKey(), filter);
+        }
+        else{
+            neon.eventing.publishing.removeSelection(state.getFilterKey());
+        }
     }
 
     function sizeTableToRemainingSpace() {
-        // table may not be drawn yet
         if (table) {
             table.refreshLayout();
         }
@@ -180,30 +159,34 @@ neon.ready(function () {
         $('#limit').change(updateTable);
     }
 
-    function buildStateObject(query) {
-        return {
-            filterKey: filterKey,
-            databaseName: databaseName,
-            tableName: tableName,
-            limitValue: $('#limit').val(),
-            sortColumns: neon.dropdown.getFieldNamesFromDropdown("sort-field"),
-            sortValue: getSortField(),
-            sortDirection: $('#sort-direction').val(),
-            query: query
-        };
+    function onSelectionChanged(message, sender){
+        if (sender === neon.eventing.messaging.getIframeId()) {
+            neon.tableState.saveState(query, table.table_.getSelectedRows());
+        }
+    }
+
+    function onActiveDatasetChanged(message) {
+        state.setActiveDataset(message);
+        state.getFieldNamesForDataset(neon.widget.TABLE, populateSortFieldDropdown);
+        updateTable();
+    }
+
+    function populateSortFieldDropdown(data) {
+        var element = new neon.dropdown.Element("sort-field");
+        neon.dropdown.populateAttributeDropdowns(data, element, updateTable);
     }
 
     function restoreState() {
-        neon.query.getSavedState(clientId, function (data) {
-            filterKey = data.filterKey;
-            databaseName = data.databaseName;
-            tableName = data.tableName;
-            $('#limit').val(data.limitValue);
+        neon.tableState.restoreState(function(data){
+            query = data.query;
             var element = new neon.dropdown.Element("sort-field");
             neon.dropdown.populateAttributeDropdowns(data.sortColumns, element, updateTable);
             neon.dropdown.setDropdownInitialValue("sort-field", data.sortValue);
             styleSortDirectionButtonFromValue(data.sortDirection);
-            neon.query.executeQuery(data.query, populateTable);
+            neon.query.executeQuery(query, function(queryResults){
+                populateTable(queryResults);
+                table.table_.setSelectedRows(data.selectedRows);
+            });
         });
     }
 

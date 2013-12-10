@@ -2,8 +2,8 @@ package com.ncc.neon.query.filter
 
 import com.ncc.neon.query.clauses.AndWhereClause
 import com.ncc.neon.query.clauses.WhereClause
-import org.jboss.netty.util.internal.ConcurrentHashMap
 
+import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.ConcurrentMap
 
 /*
