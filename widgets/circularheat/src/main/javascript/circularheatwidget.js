@@ -125,6 +125,9 @@ neon.ready(function () {
     function restoreState() {
         neon.query.getSavedState(clientId, function (data) {
             filterKey = data.filterKey;
+            if(!filterKey){
+                return;
+            }
             databaseName = data.filterKey.dataSet.databaseName;
             tableName = data.filterKey.dataSet.tableName;
             var element = new neon.dropdown.Element("date", "temporal");
