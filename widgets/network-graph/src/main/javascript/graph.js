@@ -29,7 +29,8 @@ var graphs = graphs || {};
  * Creates a new graph/network display component
  * @namespace graphs
  * @class Graph
- * @param {String} graphSelector The selector for the component in which the graph will be drawn
+ * @param {String} graphSelector The selector for the component in which the graph will be drawn. This should
+ * be a container element (e.g. a div), not the drawing element (e.g. svg/canvas).
  * @param {Object} opts A collection of key/value pairs used for configuration parameters.
  * <ul>
  *     <li>id (optional) - The attribute in the data that contains a unique id for the node. This is used
@@ -87,7 +88,7 @@ graphs.Graph = function (graphSelector, opts) {
  * Draws a graph with the specified nodes and edges. The nodes are an array of objects with a list of x/y coordinates
  * and a node id. The edge list is just a list of node id's as a source/target json pair. See the example documentation
  * at the top of this class for how to create and draw a graph
- * @param {Array} nodes An array of node obecets. The nodes just need attributes for x/y/id
+ * @param {Array} nodes An array of node objects. The nodes just need attributes for x/y/id
  * @param {Array} edgeList
  * @method
  */
@@ -115,27 +116,26 @@ graphs.Graph.prototype.draw = function (nodes, edgeList) {
 graphs.Graph.prototype.buildNodeInfoMap_ = function (nodes) {
     var me = this;
     var map = {};
-    nodes.forEach(function (d) {
+    nodes.forEach(function (node) {
         var nodeInfo = {};
-        nodeInfo.node = d;
+        nodeInfo.node = node;
         nodeInfo.translate = [0, 0];
-        map[d[me.id_]] = nodeInfo;
+        map[node[me.id_]] = nodeInfo;
     });
     return map;
 };
 
 graphs.Graph.prototype.initSvg_ = function () {
     if (!this.svg_) {
-        var me = this;
         this.svg_ = d3.select(this.graphSelector_).append("svg")
             .attr("width", this.width_).attr("height", this.height_)
             .append("g")
             // add semantic zooming behavior - adapted from http://bl.ocks.org/mbostock/3680957
             .call(d3.behavior.zoom()
                 .x(this.x_).y(this.y_).scaleExtent([1, 8])
-                .on("zoom", function () {
-                    me.zoom_.call(me);
-                }));
+                .on("zoom",
+                    $.proxy(this.zoom_, this)
+                ));
 
         // intercepts mouse events for zooming
         this.svg_.append("rect").attr("class", "overlay").attr("width", this.width_).attr("height", this.height_);
@@ -150,9 +150,9 @@ graphs.Graph.prototype.drawEdges_ = function (edgeList) {
 graphs.Graph.prototype.mapEdgeListIdsToNodes_ = function (edgeList) {
     var me = this;
     var edgeNodes = [];
-    edgeList.forEach(function (d) {
-        var sourceNode = me.nodeInfo_[d.source].node;
-        var targetNode = me.nodeInfo_[d.target].node;
+    edgeList.forEach(function (edge) {
+        var sourceNode = me.nodeInfo_[edge.source].node;
+        var targetNode = me.nodeInfo_[edge.target].node;
         edgeNodes.push({ source: sourceNode, target: targetNode});
     });
     return edgeNodes;
@@ -160,22 +160,20 @@ graphs.Graph.prototype.mapEdgeListIdsToNodes_ = function (edgeList) {
 
 graphs.Graph.prototype.drawSVGEdges_ = function (edgeNodes) {
     var me = this;
-    this.edges_ = this.svg_.append("g")
-        .selectAll(".edge")
-        .data(edgeNodes);
+    this.edges_ = this.svg_.selectAll(".edge").data(edgeNodes);
     this.edges_.enter().append("line")
         .attr("class", "edge")
-        .attr("x1", function (d) {
-            return d.source[me.xAttr_];
+        .attr("x1", function (edge) {
+            return edge.source[me.xAttr_];
         })
-        .attr("y1", function (d) {
-            return d.source[me.yAttr_];
+        .attr("y1", function (edge) {
+            return edge.source[me.yAttr_];
         })
-        .attr("x2", function (d) {
-            return d.target[me.xAttr_];
+        .attr("x2", function (edge) {
+            return edge.target[me.xAttr_];
         })
-        .attr("y2", function (d) {
-            return d.target[me.yAttr_];
+        .attr("y2", function (edge) {
+            return edge.target[me.yAttr_];
         });
     this.edges_.exit().remove();
 
@@ -183,20 +181,18 @@ graphs.Graph.prototype.drawSVGEdges_ = function (edgeNodes) {
 
 graphs.Graph.prototype.drawNodes_ = function (nodes) {
     var me = this;
-    this.nodes_ = this.svg_.selectAll("circle").data(nodes);
-    // put the nodes in a group so we can just drag the whole group
-    var g = this.nodes_.enter().append("g")
-        .attr("transform", function (d) {
-            return me.transform_.call(me, d);
+    this.nodes_ = this.svg_.selectAll(".node").data(nodes);
+    this.nodes_.enter().append("circle")
+        .attr("transform", function (node) {
+            return me.transform_.call(me, node);
         })
         .call(
             d3.behavior.drag()
-                .on('drag', function (node) {
+                .on("drag", function (node) {
                     me.dragNode_.call(me, node, d3.select(this));
                     me.dragNodeEdges_.call(me, node);
                 })
-        );
-    g.append("circle")
+        )
         .attr("class", "node")
         .attr("r", this.nodeRadius_);
 
@@ -204,12 +200,12 @@ graphs.Graph.prototype.drawNodes_ = function (nodes) {
 
 };
 
-graphs.Graph.prototype.dragNode_ = function (node, nodeGroup) {
+graphs.Graph.prototype.dragNode_ = function (node, svgNode) {
     var me = this;
     node[this.xAttr_] += d3.event.dx / this.scale_;
     node[this.yAttr_] += d3.event.dy / this.scale_;
-    nodeGroup.attr("transform", function (d) {
-        return me.transform_.call(me, d);
+    svgNode.attr("transform", function (node) {
+        return me.transform_.call(me, node);
     });
 };
 
@@ -244,33 +240,33 @@ graphs.Graph.prototype.getTranslation_ = function (node) {
 graphs.Graph.prototype.zoom_ = function () {
     var me = this;
     this.nodes_.attr("transform",
-        function (d) {
-            return me.transform_.call(me, d);
+        function (node) {
+            return me.transform_.call(me, node);
         }
     );
 
     this.edges_
-        .attr("x1", function (d) {
-            return me.getTranslation_(d.source)[0];
+        .attr("x1", function (edge) {
+            return me.getTranslation_(edge.source)[0];
         })
-        .attr("y1", function (d) {
-            return me.getTranslation_(d.source)[1];
+        .attr("y1", function (edge) {
+            return me.getTranslation_(edge.source)[1];
         })
-        .attr("x2", function (d) {
-            return me.getTranslation_(d.target)[0];
+        .attr("x2", function (edge) {
+            return me.getTranslation_(edge.target)[0];
         })
-        .attr("y2", function (d) {
-            return me.getTranslation_(d.target)[1];
+        .attr("y2", function (edge) {
+            return me.getTranslation_(edge.target)[1];
         });
 
 };
 
-graphs.Graph.prototype.transform_ = function (d) {
+graphs.Graph.prototype.transform_ = function (node) {
     if (d3.event && d3.event.type === "zoom") {
         this.scale_ = d3.event.scale;
     }
-    var translate = [this.x_(d[this.xAttr_]), this.y_(d[this.yAttr_])];
-    var nodeId = d[this.id_];
+    var translate = [this.x_(node[this.xAttr_]), this.y_(node[this.yAttr_])];
+    var nodeId = node[this.id_];
     var nodeTranslate = this.nodeInfo_[nodeId].translate;
     nodeTranslate[0] = translate[0];
     nodeTranslate[1] = translate[1];
