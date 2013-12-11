@@ -95,14 +95,14 @@ neon.ready(function () {
         neon.tableState.saveState(query);
     }
 
-    function applyLimit(query) {
+    function applyLimit() {
         var limitVal = $('#limit').val();
         if (limitVal) {
             query.limit(parseInt(limitVal));
         }
     }
 
-    function applySort(query) {
+    function applySort() {
         var sortField = getSortField();
         if (sortField) {
             var sortDirection = $('#sort-direction').val();
