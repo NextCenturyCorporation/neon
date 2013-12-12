@@ -18,8 +18,6 @@ neon.tableState = (function () {
         neon.activeDataset.setTableName(data.tableName);
     }
 
-
-
     function restoreTableState(data, restoreStateCallback){
         if(!data){
             return;

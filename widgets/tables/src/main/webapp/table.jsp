@@ -34,8 +34,11 @@
     <script src="javascript/table.js"></script>
     <!-- endbuild -->
 
-    <!-- build:js js/tablewidget.js -->
+    <!-- build:js js/state.js -->
     <script src="javascript/state.js"></script>
+    <!-- endbuild -->
+
+    <!-- build:js js/tablewidget.js -->
     <script src="javascript/tablewidget.js"></script>
     <!-- endbuild -->
 

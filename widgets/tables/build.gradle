@@ -4,4 +4,7 @@ war {
     from("${jsSrcDir}/tablewidget.js") {
         into 'js'
     }
+    from("${jsSrcDir}/state.js") {
+        into 'js'
+    }
 }
