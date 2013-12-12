@@ -104,6 +104,7 @@ dependencies {
     }
     compile 'commons-lang:commons-lang:2.6'
     compile 'org.json:json:20090211'
+    compile 'com.mchange:c3p0:0.9.5-pre6'
     compile('org.apache.hive:hive-jdbc:0.11.0') {
         exclude group: 'org.mortbay.jetty'
         // we already include slf4j
