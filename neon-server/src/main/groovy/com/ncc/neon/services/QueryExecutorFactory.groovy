@@ -1,6 +1,7 @@
 package com.ncc.neon.services
 
 import com.ncc.neon.connect.ConnectionManager
+import com.ncc.neon.connect.DataSources
 import com.ncc.neon.query.QueryExecutor
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
@@ -52,7 +53,7 @@ class QueryExecutorFactory {
      * @return the appropriate query executor
      */
     QueryExecutor getExecutor() {
-        if(connectionManager.isConnectedToHive()){
+        if(connectionManager.getCurrentConnectionInfo().dataSource == DataSources.hive){
             return hiveQueryExecutor
         }
         return mongoQueryExecutor

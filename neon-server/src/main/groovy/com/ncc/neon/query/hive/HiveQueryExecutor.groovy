@@ -3,7 +3,7 @@ import com.ncc.neon.connect.ConnectionManager
 import com.ncc.neon.query.*
 import com.ncc.neon.query.filter.FilterState
 import com.ncc.neon.query.filter.SelectionState
-import com.ncc.neon.query.jdbc.JdbcClient
+import com.ncc.neon.connect.JdbcClient
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
@@ -100,6 +100,6 @@ class HiveQueryExecutor implements QueryExecutor {
     }
 
     private JdbcClient getJdbcClient() {
-        connectionManager.client
+        connectionManager.getConnectionClient()
     }
 }

@@ -1,4 +1,8 @@
 package com.ncc.neon.config
+
+import com.ncc.neon.connect.ConnectionInfo
+import com.ncc.neon.connect.ConnectionManager
+import com.ncc.neon.connect.DataSources
 import com.ncc.neon.metadata.MetadataConnection
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -60,8 +64,18 @@ class ProductionAppContext {
         }
     }
 
+
     @Bean
-    MetadataConnection metadataConnection(){
-        return new MetadataConnection(System.getProperty("mongo.hosts", "localhost"))
+    ConnectionManager connectionManagerBean(){
+        ConnectionManager manager = new ConnectionManager()
+        String host = System.getProperty("mongo.hosts", "localhost")
+        manager.initConnectionManager(new ConnectionInfo(DataSources.mongo, host))
+        return manager
+    }
+
+    @Bean
+    MetadataConnection metadataConnectionBean(){
+        ConnectionManager bean = connectionManagerBean()
+        return new MetadataConnection(bean.connectionClient.getMongo())
     }
 }

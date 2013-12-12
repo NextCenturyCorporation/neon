@@ -1,11 +1,7 @@
 package com.ncc.neon.connect
-import com.ncc.neon.query.jdbc.JdbcClient
-import org.springframework.context.annotation.Scope
-import org.springframework.context.annotation.ScopedProxyMode
-import org.springframework.stereotype.Component
-import org.springframework.web.context.WebApplicationContext
 
-import javax.annotation.PreDestroy
+import java.sql.Connection
+import java.sql.DriverManager
 
 /*
  * ************************************************************************
@@ -33,39 +29,25 @@ import javax.annotation.PreDestroy
  * @author tbrooks
  */
 
-/**
- * Holds a connection to hive
- */
+@SuppressWarnings('ClassForName')
+class JdbcConnectionClientFactory implements ConnectionClientFactory{
 
-@Component
-@Scope(value = WebApplicationContext.SCOPE_SESSION, proxyMode = ScopedProxyMode.TARGET_CLASS)
-class HiveConnection implements Connection {
+    private final String databaseType
+    private final String databaseName
 
-    JdbcClient client
-
-    /**
-     * Connect to hive based on the url
-     * @param info object that contains the url
-     * @return the client which is used access hive.
-     */
-
-    @Override
-    def connect(ConnectionInfo info) {
-        if (!client) {
-            client = new JdbcClient("org.apache.hive.jdbc.HiveDriver", "hive2", "default", info.connectionUrl)
-        }
-        return client
+    public JdbcConnectionClientFactory(String driverName, String databaseType, String databaseName){
+        this.databaseType = databaseType
+        this.databaseName = databaseName
+        Class.forName(driverName)
     }
 
-    /**
-     * Close the connection to hive. This happens automatically when the session
-     * becomes invalid.
-     */
-
-    @PreDestroy
     @Override
-    void close() {
-        client?.close()
-        client = null
+    ConnectionClient createConnectionClient(ConnectionInfo info) {
+        if(info.dataSource != DataSources.hive){
+            throw new NeonConnectionException("JDBC clients should only be created for jdbc connections")
+        }
+
+        Connection connection = DriverManager.getConnection("jdbc:" + databaseType + "://" + info.connectionUrl + "/" + databaseName, "", "")
+        return new JdbcClient(connection)
     }
 }

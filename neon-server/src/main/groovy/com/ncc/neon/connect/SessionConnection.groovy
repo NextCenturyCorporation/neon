@@ -1,6 +1,5 @@
 package com.ncc.neon.connect
 
-import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.annotation.Scope
 import org.springframework.context.annotation.ScopedProxyMode
 import org.springframework.stereotype.Component
@@ -40,26 +39,5 @@ import org.springframework.web.context.WebApplicationContext
 class SessionConnection {
 
     ConnectionInfo connectionInfo
-
-    @Autowired
-    MongoConnection mongoConnection
-
-    @Autowired
-    HiveConnection hiveConnection
-
-    /**
-     * Gets the appropriate client based on the current connection
-     * @return the client or null if no connection has been set.
-     */
-
-    def getClient(){
-        if(!connectionInfo){
-            return null
-        }
-        if(connectionInfo.dataSource == DataSources.hive){
-            return hiveConnection.connect(connectionInfo)
-        }
-        return mongoConnection.connect(connectionInfo)
-    }
 
 }
