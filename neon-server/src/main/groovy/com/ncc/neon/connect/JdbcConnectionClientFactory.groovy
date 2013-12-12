@@ -1,7 +1,6 @@
 package com.ncc.neon.connect
 
-import java.sql.Connection
-import java.sql.DriverManager
+import com.mchange.v2.c3p0.ComboPooledDataSource
 
 /*
  * ************************************************************************
@@ -29,16 +28,18 @@ import java.sql.DriverManager
  * @author tbrooks
  */
 
-@SuppressWarnings('ClassForName')
 class JdbcConnectionClientFactory implements ConnectionClientFactory{
 
+    private final ComboPooledDataSource dataSource
     private final String databaseType
     private final String databaseName
 
     public JdbcConnectionClientFactory(String driverName, String databaseType, String databaseName){
         this.databaseType = databaseType
         this.databaseName = databaseName
-        Class.forName(driverName)
+
+        this.dataSource = new ComboPooledDataSource()
+        this.dataSource.setDriverClass(driverName)
     }
 
     @Override
@@ -46,8 +47,8 @@ class JdbcConnectionClientFactory implements ConnectionClientFactory{
         if(info.dataSource != DataSources.hive){
             throw new NeonConnectionException("JDBC clients should only be created for jdbc connections")
         }
+        dataSource.setJdbcUrl("jdbc:${databaseType}://${info.connectionUrl}/${databaseName}")
 
-        Connection connection = DriverManager.getConnection("jdbc:" + databaseType + "://" + info.connectionUrl + "/" + databaseName, "", "")
-        return new JdbcClient(connection)
+        return new JdbcClient(dataSource.getConnection("",""))
     }
 }
