@@ -32,7 +32,9 @@ import org.springframework.web.context.WebApplicationContext
  */
 @Component
 @Scope(value = WebApplicationContext.SCOPE_SESSION, proxyMode = ScopedProxyMode.TARGET_CLASS)
-class FilterState {
+class FilterState implements Serializable{
+    private static final long serialVersionUID = 7307506929923060807L
+
     @Delegate
     FilterCache delegate = new FilterCache()
 }

@@ -32,8 +32,9 @@ import groovy.transform.Canonical
  */
 
 @Canonical
-class ConnectionInfo {
+class ConnectionInfo implements Serializable{
 
+    private static final long serialVersionUID = 9021933027104002635L
     DataSources dataSource
     String connectionUrl
     Map<String, String> options = [:]

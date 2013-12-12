@@ -32,8 +32,8 @@ import java.util.concurrent.ConcurrentMap
  * @author tbrooks
  */
 
-class FilterCache {
-    //I'm using methods from the implementation so this makes the type more explicit.
+class FilterCache implements Serializable{
+    private static final long serialVersionUID = - 4017268491878023244L
     private final ConcurrentMap<FilterKey, Filter> filters = [:] as ConcurrentHashMap
 
     /**

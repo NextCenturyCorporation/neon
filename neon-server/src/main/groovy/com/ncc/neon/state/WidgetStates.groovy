@@ -37,8 +37,9 @@ import org.springframework.web.context.WebApplicationContext
 
 @Component
 @Scope(value = WebApplicationContext.SCOPE_SESSION, proxyMode = ScopedProxyMode.TARGET_CLASS)
-class WidgetStates {
+class WidgetStates implements Serializable{
 
+    private static final long serialVersionUID = 1132538732735250627L
     private final Set<WidgetState> states = [] as Set
 
     /**
