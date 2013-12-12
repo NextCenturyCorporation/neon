@@ -1,9 +1,5 @@
 package com.ncc.neon.connect
 
-import org.junit.Before
-import org.junit.Test
-
-
 /*
  * ************************************************************************
  * Copyright (c), 2013 Next Century Corporation. All Rights Reserved.
@@ -30,26 +26,9 @@ import org.junit.Test
  * @author tbrooks
  */
 
-class SessionConnectionTest {
+class NeonConnectionException extends RuntimeException{
 
-    private SessionConnection sessionConnection
-
-    @Before
-    void setup() {
-        MongoConnection mongo = [connect: {"mongo"}] as MongoConnection
-        HiveConnection hive = [connect: {"hive"}] as HiveConnection
-
-        sessionConnection = new SessionConnection(mongoConnection: mongo, hiveConnection: hive)
-    }
-
-    @Test
-    void testGetClient(){
-        assert !sessionConnection.getClient()
-
-        sessionConnection.setConnectionInfo(new ConnectionInfo(dataSource: DataSources.hive))
-        assert sessionConnection.getClient() == "hive"
-
-        sessionConnection.setConnectionInfo(new ConnectionInfo(dataSource: DataSources.mongo))
-        assert sessionConnection.getClient() == "mongo"
+    public NeonConnectionException(String message){
+        super(message)
     }
 }

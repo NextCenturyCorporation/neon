@@ -1,15 +1,5 @@
-package com.ncc.neon.hive
-
-import com.ncc.neon.connect.ConnectionManager
-import com.ncc.neon.metadata.MetadataConnection
-import com.ncc.neon.mongo.MongoIntegrationTestContext
-import org.springframework.beans.factory.config.CustomScopeConfigurer
-import org.springframework.context.annotation.Bean
-import org.springframework.context.annotation.ComponentScan
-import org.springframework.context.annotation.Configuration
-import org.springframework.context.annotation.Profile
-import org.springframework.context.support.SimpleThreadScope
-
+package com.ncc.neon.connect
+import com.mongodb.MongoClient
 /*
  * ************************************************************************
  * Copyright (c), 2013 Next Century Corporation. All Rights Reserved.
@@ -31,29 +21,37 @@ import org.springframework.context.support.SimpleThreadScope
  * PROPRIETARY AND CONFIDENTIAL TRADE SECRET MATERIAL NOT FOR DISCLOSURE OUTSIDE
  * OF NEXT CENTURY CORPORATION EXCEPT BY PRIOR WRITTEN PERMISSION AND WHEN
  * RECIPIENT IS UNDER OBLIGATION TO MAINTAIN SECRECY.
+ *
+ * 
+ * @author tbrooks
  */
 
-@Configuration
-@ComponentScan(basePackages = ['com.ncc.neon'])
-@Profile('hive-integrationtest')
-class HiveIntegrationTestContext {
+/**
+ * Holds a connection to mongo
+ */
 
-    static final String HOST_STRING = System.getProperty("hive.host", "localhost:10000")
+class MongoConnectionClient implements ConnectionClient{
 
-    @Bean
-    ConnectionManager connectionManagerBean(){
-        return new ConnectionManager()
+    private MongoClient mongo
+
+    public MongoConnectionClient(ConnectionInfo info){
+        if(info.dataSource != DataSources.mongo){
+            throw new NeonConnectionException("Mongo clients should only be created for mongo connections")
+        }
+        mongo = new MongoClient(info.connectionUrl)
     }
 
-    @Bean
-    MetadataConnection metadataConnection(){
-        return new MetadataConnection(MongoIntegrationTestContext.MONGO)
+    MongoClient getMongo(){
+        return mongo
     }
 
-    @Bean
-    CustomScopeConfigurer scopeConfigurer() {
-        return new CustomScopeConfigurer(scopes: ["session":new SimpleThreadScope()])
+    /**
+     * Close the connection to mongo.
+     */
+    @Override
+    void close(){
+        mongo?.close()
+        mongo = null
     }
-
 
 }

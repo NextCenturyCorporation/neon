@@ -26,23 +26,6 @@ package com.ncc.neon.connect
  * @author tbrooks
  */
 
-/**
- * A Connection is a way to connect to a datastore technology.
- * For example, connect to mongo, or hive.
- */
-
-public interface Connection extends Closeable{
-
-    /**
-     * @param info Parameters needed to connect to a db
-     * @return Returns a client connection
-     */
-    def connect(ConnectionInfo info)
-
-    /**
-     * Close the connection. Since connections open os resources,
-     * this should be called before the application exits.
-     */
-    void close()
+public interface ConnectionClient extends Closeable {
 
 }

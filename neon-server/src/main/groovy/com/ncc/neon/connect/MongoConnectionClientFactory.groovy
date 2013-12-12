@@ -1,11 +1,4 @@
 package com.ncc.neon.connect
-import com.mongodb.MongoClient
-import org.springframework.context.annotation.Scope
-import org.springframework.context.annotation.ScopedProxyMode
-import org.springframework.stereotype.Component
-import org.springframework.web.context.WebApplicationContext
-
-import javax.annotation.PreDestroy
 
 /*
  * ************************************************************************
@@ -33,40 +26,10 @@ import javax.annotation.PreDestroy
  * @author tbrooks
  */
 
-/**
- * Holds a connection to mongo
- */
-
-@Component
-@Scope(value = WebApplicationContext.SCOPE_SESSION, proxyMode = ScopedProxyMode.TARGET_CLASS)
-class MongoConnection implements Connection{
-
-    private MongoClient mongo
-
-    /**
-     * Connect to mongo based on the url
-     * @param info object that contains the url
-     * @return the client which is used access mongo.
-     */
+class MongoConnectionClientFactory implements ConnectionClientFactory{
 
     @Override
-    def connect(ConnectionInfo info){
-        if(!mongo){
-            mongo = new MongoClient(info.connectionUrl)
-        }
-        return mongo
+    ConnectionClient createConnectionClient(ConnectionInfo info) {
+        return new MongoConnectionClient(info)
     }
-
-    /**
-     * Close the connection to mongo. This happens automatically when the session
-     * becomes invalid.
-     */
-
-    @PreDestroy
-    @Override
-    void close(){
-        mongo?.close()
-        mongo = null
-    }
-
 }

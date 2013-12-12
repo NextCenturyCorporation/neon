@@ -1,8 +1,5 @@
 package com.ncc.neon.connect
-
-import com.ncc.neon.metadata.MetadataConnection
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.stereotype.Component
 /*
  * ************************************************************************
  * Copyright (c), 2013 Next Century Corporation. All Rights Reserved.
@@ -37,54 +34,53 @@ import org.springframework.stereotype.Component
  * to hive and another to connect to mongo.
  */
 
-
-@Component
 class ConnectionManager {
 
-    private final String defaultMongoUrl
-
-    @Autowired
-    MetadataConnection metadataConnection
+    private final Map<ConnectionInfo, ConnectionClientFactory> connectionCache = [:]
 
     @Autowired
     SessionConnection sessionConnection
 
-    ConnectionManager() {
-        this.defaultMongoUrl = System.getProperty("mongo.hosts", "localhost")
-    }
-
-    /**
-     * Sets which datastore to which the application is connected
-     * @param info The connection information for the connection
-     */
-
     void connect(ConnectionInfo info) {
-        if(info.dataSource == DataSources.mongo && info.connectionUrl == defaultMongoUrl){
-            sessionConnection.connectionInfo = null
-            return
-        }
         sessionConnection.connectionInfo = info
-    }
-
-    /**
-     * Gets a connection client, the object that has access the datastore.
-     * @return the connection client
-     */
-
-    def getClient() {
-        if(!sessionConnection.connectionInfo){
-            return metadataConnection.client
+        if (!connectionCache.containsKey(info)) {
+            connectionCache.put(info, createClientFactory(info))
         }
-        return sessionConnection.getClient()
     }
 
-    /**
-     * Determines whether we are connected to hive.
-     * @return true if we are connected to hive.
-     */
-
-    boolean isConnectedToHive() {
-        sessionConnection.connectionInfo?.dataSource == DataSources.hive
+    void initConnectionManager(ConnectionInfo info){
+        connectionCache.clear()
+        if(info){
+            connectionCache.put(info, createClientFactory(info))
+        }
     }
 
+    ConnectionClient getConnectionClient(){
+        return createConnectionClient(getCurrentConnectionInfo())
+    }
+
+    ConnectionInfo getCurrentConnectionInfo(){
+        if(connectionCache.size() == 0){
+            throw new NeonConnectionException("No known connections exist")
+        }
+        if(connectionCache.size() == 1){
+            return connectionCache.keySet().iterator().next()
+        }
+        return sessionConnection.connectionInfo
+    }
+
+    private ConnectionClient createConnectionClient(ConnectionInfo info) {
+        ConnectionClientFactory factory = connectionCache.get(info)
+        return factory.createConnectionClient(info)
+    }
+
+    private ConnectionClientFactory createClientFactory(ConnectionInfo connectionInfo) {
+        if (connectionInfo.dataSource == DataSources.mongo) {
+            return new MongoConnectionClientFactory()
+        }
+        if (connectionInfo.dataSource == DataSources.hive) {
+            return new JdbcConnectionClientFactory("org.apache.hive.jdbc.HiveDriver", "hive2", "default")
+        }
+        throw new NeonConnectionException("There must be a data source to which to connect.")
+    }
 }

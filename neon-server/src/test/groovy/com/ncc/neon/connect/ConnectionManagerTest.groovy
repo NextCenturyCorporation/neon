@@ -1,10 +1,7 @@
 package com.ncc.neon.connect
 
-import com.ncc.neon.metadata.MetadataConnection
 import org.junit.Before
 import org.junit.Test
-
-
 /*
  * ************************************************************************
  * Copyright (c), 2013 Next Century Corporation. All Rights Reserved.
@@ -38,39 +35,32 @@ class ConnectionManagerTest {
     @Before
     void setup(){
         connectionManager = new ConnectionManager()
-        connectionManager.sessionConnection = new SessionConnection(hiveConnection: [connect: {"hive connection"}] as HiveConnection)
-        connectionManager.metadataConnection = [getClient: {null}] as MetadataConnection
+        connectionManager.sessionConnection = new SessionConnection()
+    }
+
+    @Test(expected = NeonConnectionException)
+    void "no connections set throws an exception"() {
+        connectionManager.getCurrentConnectionInfo()
+    }
+
+    @Test(expected = NeonConnectionException)
+    void "invalid connection info throws exception"() {
+        connectionManager.connect(new ConnectionInfo())
+        connectionManager.getCurrentConnectionInfo()
     }
 
     @Test
-    void testConnectToMongo() {
-        ConnectionInfo info = new ConnectionInfo(dataSource: DataSources.mongo)
-        connectionManager.connect(info)
-        assert !connectionManager.isConnectedToHive()
-    }
+    void "connecting to data sources returns the last one established"() {
+        ConnectionInfo mongo = new ConnectionInfo(dataSource: DataSources.mongo)
+        connectionManager.connect(mongo)
+        assert connectionManager.getCurrentConnectionInfo() == mongo
 
-    @Test
-    void testConnectToHive() {
-        ConnectionInfo info = new ConnectionInfo(dataSource: DataSources.hive)
-        connectionManager.connect(info)
-        assert connectionManager.isConnectedToHive()
-    }
+        ConnectionInfo hive = new ConnectionInfo(dataSource: DataSources.hive)
+        connectionManager.connect(hive)
+        assert connectionManager.getCurrentConnectionInfo() == hive
 
-    @Test
-    void testConnectToDefaultMongo() {
-        String url = System.getProperty("mongo.hosts", "localhost")
-        ConnectionInfo info = new ConnectionInfo(dataSource: DataSources.mongo, connectionUrl: url)
-        connectionManager.connect(info)
-        assert !connectionManager.isConnectedToHive()
-        assert !connectionManager.sessionConnection.connectionInfo
-    }
-
-    @Test
-    void testGetClient() {
-        assert !connectionManager.getClient()
-        ConnectionInfo info = new ConnectionInfo(dataSource: DataSources.hive)
-        connectionManager.connect(info)
-        assert connectionManager.getClient() == "hive connection"
+        connectionManager.connect(mongo)
+        assert connectionManager.getCurrentConnectionInfo() == mongo
     }
 
 }

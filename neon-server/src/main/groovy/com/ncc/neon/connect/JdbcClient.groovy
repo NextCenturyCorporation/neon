@@ -1,4 +1,4 @@
-package com.ncc.neon.query.jdbc
+package com.ncc.neon.connect
 
 import org.joda.time.DateTime
 import org.joda.time.DateTimeZone
@@ -34,20 +34,13 @@ import java.sql.*
  * Wrapper for JDBC API
  */
 //We have to suppress this warning in order to load the the JDBC driver via DriverManager. See NEON-459
-@SuppressWarnings('ClassForName')
 @SuppressWarnings("SynchronizedMethod")
-class JdbcClient {
+class JdbcClient implements ConnectionClient{
 
-    private final Connection connection
-    String databaseType
-    String dbHostString
+    private Connection connection
 
-    JdbcClient(String driverName, String databaseType, String databaseName, String dbHostString) {
-        this.databaseType = databaseType
-        this.dbHostString = dbHostString
-
-        Class.forName(driverName)
-        this.connection = DriverManager.getConnection("jdbc:" + databaseType + "://" + dbHostString + "/" + databaseName, "", "")
+    JdbcClient(Connection connection) {
+        this.connection = connection
     }
 
     /**
@@ -121,8 +114,10 @@ class JdbcClient {
         list[0].keySet().asList()
     }
 
+    @Override
     void close() {
-        connection.close()
+        connection?.close()
+        connection = null
     }
 
 }

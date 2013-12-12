@@ -1,10 +1,8 @@
 package com.ncc.neon.hive
+
 import com.ncc.neon.AbstractQueryExecutorIntegrationTest
-import com.ncc.neon.connect.ConnectionInfo
-import com.ncc.neon.connect.DataSources
-import com.ncc.neon.connect.HiveConnection
+import com.ncc.neon.connect.*
 import com.ncc.neon.query.hive.HiveQueryExecutor
-import com.ncc.neon.query.jdbc.JdbcClient
 import com.ncc.neon.util.DateUtils
 import org.apache.hadoop.conf.Configuration
 import org.apache.hadoop.fs.FileSystem
@@ -20,6 +18,7 @@ import org.springframework.test.context.ContextConfiguration
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner
 
 import java.sql.Timestamp
+
 /*
  *
  *  ************************************************************************
@@ -57,7 +56,9 @@ class HiveQueryExecutorIntegrationTest extends AbstractQueryExecutorIntegrationT
 
     @BeforeClass
     static void beforeClass() {
-        jdbcClient = new HiveConnection().connect(new ConnectionInfo(connectionUrl: HiveIntegrationTestContext.HOST_STRING, dataSource: DataSources.hive))
+        ConnectionInfo info = new ConnectionInfo(connectionUrl: HiveIntegrationTestContext.HOST_STRING, dataSource: DataSources.hive)
+        ConnectionClientFactory factory = new JdbcConnectionClientFactory("org.apache.hive.jdbc.HiveDriver", "hive2", "default")
+        jdbcClient = factory.createConnectionClient(info)
         // make sure we clean up just in case something was left over
         deleteData()
         insertData()

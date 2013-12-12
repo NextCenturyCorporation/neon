@@ -1,5 +1,4 @@
 package com.ncc.neon.mongo
-
 import com.mongodb.BasicDBObject
 import com.mongodb.util.JSON
 import com.ncc.neon.AbstractQueryExecutorIntegrationTest
@@ -24,7 +23,6 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.context.ContextConfiguration
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner
-
 /*
  * ************************************************************************
  * Copyright (c), 2013 Next Century Corporation. All Rights Reserved.
@@ -60,11 +58,13 @@ class MongoQueryExecutorIntegrationTest extends AbstractQueryExecutorIntegration
     @BeforeClass
     static void beforeClass() {
         insertData()
+        MongoQueryExecutor.metaClass.getMongo = { MongoIntegrationTestContext.MONGO }
     }
 
     @AfterClass
     static void afterClass() {
         deleteData()
+        MongoQueryExecutor.metaClass = null
     }
 
     @Autowired

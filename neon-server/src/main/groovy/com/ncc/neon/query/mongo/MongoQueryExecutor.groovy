@@ -101,7 +101,7 @@ class MongoQueryExecutor implements QueryExecutor {
     }
 
     private MongoClient getMongo(){
-        connectionManager.client
+        connectionManager.getConnectionClient().getMongo()
     }
 
 }
