@@ -179,13 +179,16 @@ neon.ready(function () {
     function restoreState() {
         neon.tableState.restoreState(function(data){
             query = data.query;
-            var element = new neon.dropdown.Element("sort-field");
-            neon.dropdown.populateAttributeDropdowns(data.sortColumns, element, updateTable);
+            if(data.sortColumns){
+                populateSortFieldDropdown(data.sortColumns);
+            }
             neon.dropdown.setDropdownInitialValue("sort-field", data.sortValue);
             styleSortDirectionButtonFromValue(data.sortDirection);
             neon.query.executeQuery(query, function(queryResults){
                 populateTable(queryResults);
-                table.table_.setSelectedRows(data.selectedRows);
+                if(data.selectedRows){
+                    table.table_.setSelectedRows(data.selectedRows);
+                }
             });
         });
     }

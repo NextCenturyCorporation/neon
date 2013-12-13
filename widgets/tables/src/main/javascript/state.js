@@ -6,8 +6,8 @@ neon.tableState = (function () {
     function getSavedState(restoreStateCallback){
         neon.ready(function(){
             clientId = neon.eventing.messaging.getInstanceId();
-            neon.query.getSavedState(clientId, function(data){
-                restoreTableState(data, restoreStateCallback);
+            neon.query.getSavedState(clientId, function(state){
+                restoreTableState(state, restoreStateCallback);
             });
         });
     }
@@ -19,7 +19,7 @@ neon.tableState = (function () {
     }
 
     function restoreTableState(data, restoreStateCallback){
-        if(!data){
+        if(!data || !data.query){
             return;
         }
 
