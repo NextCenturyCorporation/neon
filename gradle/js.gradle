@@ -1,4 +1,5 @@
 import org.apache.tools.ant.filters.ReplaceTokens
+import org.apache.tools.ant.taskdefs.condition.Os
 import com.ncc.common.GruntTask
 
 apply from: "${rootDir}/gradle/docs.gradle"
@@ -16,6 +17,8 @@ project.ext {
     jsDependenciesOutputDir = file("${dependenciesDir}/js")
     cssDependenciesOutputDir = file("${dependenciesDir}/css")
     imgDependenciesOutputDir = file("${dependenciesDir}/img")
+
+    npmExecutable = Os.isFamily(Os.FAMILY_WINDOWS) ? "npm.cmd" : "npm"
 }
 
 task gruntjs(type: GruntTask) {
@@ -33,7 +36,7 @@ task installGruntDeps(type: Exec) {
     dependsOn 'createPackageJson'
     inputs.file "${projectDir}/package.json"
     outputs.dir "${projectDir}/node_modules"
-    commandLine "npm", "install"
+    commandLine npmExecutable, "install"
 }
 
 task createPackageJson(type: Copy) {
