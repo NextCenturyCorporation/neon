@@ -7,11 +7,27 @@ repositories {
     mavenCentral()
 }
 
+buildscript {
+  repositories {
+    mavenCentral()
+  }
+  dependencies {
+    classpath 'org.hidetake:gradle-ssh-plugin:0.2.0'
+  }
+}
+
 // task groupings we add
 def DEPLOY_GROUP = 'deploy'
 
+// neon server to deploy to. may be remote or local, depending on the remote configuration
 def neonServer = (hasProperty('NEON_SERVER') ? NEON_SERVER : System.env.NEON_SERVER) ?: '/opt/owf/apache-tomcat-7.0.21'
 def neonServerWebapps = neonServer + '/webapps'
+def remoteHost = hasProperty('host') ? host : ''
+def remoteUser = hasProperty('user') ? user : ''
+
+// the type of authentication not being used is left as null
+def remotePassword = hasProperty('password') ? password : null
+def sshIdentity = hasProperty('sshKeyFile') ? sshKeyFile : null
 
 // the neon-server is just output as neon.js for simpler referencing
 project(":neon-server").ext.outfile = 'neon'
@@ -27,6 +43,7 @@ configure(subprojects.findAll { it.name != 'common' && it.name != 'metadata'}) {
     version = CURRENT_NEON_VERSION
 
     apply plugin: 'war'
+    apply plugin: 'ssh'
     apply from: "${rootDir}/gradle/js.gradle"
 
     repositories {
@@ -85,6 +102,33 @@ configure(subprojects.findAll { it.name != 'common' && it.name != 'metadata'}) {
 
         doLast {
             println "Copying $war.archivePath to $neonServerWebapps/${war.baseName}.war"
+        }
+    }
+
+    ssh {
+        config(StrictHostKeyChecking: 'no')
+    }
+    remotes {
+        neon {
+           host = remoteHost
+           user = remoteUser
+           password = remotePassword
+           identity = file(sshIdentity)
+        }
+    }
+
+    task 'deployToRemoteTomcat'(type: SshTask) {
+        dependsOn war
+        description = "Copies the project's war file to the neon server tomcat webapps dir on a remote serer"
+        group = DEPLOY_GROUP
+        doFirst {
+		if (!remoteHost || !remoteUser || !(remotePassword || sshIdentity)) {
+	          throw new GradleException("Must specify -Phost=<host>, -Puser=<user> and -Ppassword=<password> properties to deploy to a remote server")
+                }
+        }
+        session(remotes.neon) {
+            execute("rm -rf ${neonServerWebapps}/${war.baseName} ${neonServerWebapps}/${war.baseName}.war")
+            put(war.archivePath.absolutePath,"${neonServerWebapps}/${war.baseName}.war")
         }
     }
 
