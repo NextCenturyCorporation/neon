@@ -75,7 +75,7 @@ task jsDocs(type: Exec) {
             into temporaryDir
         }
     }
-    commandLine "${projectDir}/node_modules/.bin/yuidoc", "-c", "$temporaryDir/yuidoc.json"
+    commandLine "${projectDir}/node_modules/.bin/yuidoc", "-c", "$temporaryDir/yuidoc.json", "--lint"
 
     // copy the images after the yuidoc tasks runs because the yuidoc task will delete the output directory
     // these files are needed for the final docs output since they will be referenced in the html output
