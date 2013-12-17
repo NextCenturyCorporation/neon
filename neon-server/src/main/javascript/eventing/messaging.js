@@ -34,7 +34,7 @@ neon.eventing.messaging = (function () {
     /**
      * Gets the id of the iframe in which this widget exists
      * @method getIframeId
-     * @returns the iframe id
+     * @return the iframe id
      */
     function getIframeId() {
         return OWF.getIframeId();
@@ -43,7 +43,7 @@ neon.eventing.messaging = (function () {
     /**
      * Returns a uniqueId for a widget for this session.
      * @method getInstanceId
-     * @returns A unique identifier for this widget.
+     * @return A unique identifier for this widget.
      */
 
     function getInstanceId() {
