@@ -27,7 +27,7 @@ def remoteUser = hasProperty('user') ? user : ''
 
 // the type of authentication not being used is left as null
 def remotePassword = hasProperty('password') ? password : null
-def sshIdentity = hasProperty('sshKeyFile') ? sshKeyFile : null
+def sshIdentity = hasProperty('sshKeyFile') ? file(sshKeyFile) : null
 
 // the neon-server is just output as neon.js for simpler referencing
 project(":neon-server").ext.outfile = 'neon'
@@ -113,7 +113,7 @@ configure(subprojects.findAll { it.name != 'common' && it.name != 'metadata'}) {
            host = remoteHost
            user = remoteUser
            password = remotePassword
-           identity = file(sshIdentity)
+           identity = sshIdentity
         }
     }
 
