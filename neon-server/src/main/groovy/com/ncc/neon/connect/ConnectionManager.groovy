@@ -1,5 +1,9 @@
 package com.ncc.neon.connect
 import org.springframework.beans.factory.annotation.Autowired
+
+import java.util.concurrent.ConcurrentHashMap
+import java.util.concurrent.ConcurrentMap
+
 /*
  * ************************************************************************
  * Copyright (c), 2013 Next Century Corporation. All Rights Reserved.
@@ -28,24 +32,18 @@ import org.springframework.beans.factory.annotation.Autowired
 
 /**
  * This holds the connection information for the application.
- *
- * We have a connection to mongo per JVM for metadata. Users may also use that connection.
- * We have a session connection per user for other connections. This allows one user to connect
- * to hive and another to connect to mongo.
  */
 
 class ConnectionManager {
 
-    private final Map<ConnectionInfo, ConnectionClientFactory> connectionCache = [:]
+    private final ConcurrentMap<ConnectionInfo, ConnectionClientFactory> connectionCache = [:] as ConcurrentHashMap
 
     @Autowired
     SessionConnection sessionConnection
 
     void connect(ConnectionInfo info) {
         sessionConnection.connectionInfo = info
-        if (!connectionCache.containsKey(info)) {
-            connectionCache.put(info, createClientFactory(info))
-        }
+        connectionCache.putIfAbsent(info, createClientFactory(info))
     }
 
     void initConnectionManager(ConnectionInfo info){

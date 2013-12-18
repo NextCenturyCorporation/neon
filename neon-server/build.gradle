@@ -48,7 +48,7 @@ buildscript {
     }
     dependencies {
         classpath 'org.mongodb:mongo-java-driver:2.11.3'
-        classpath ':antlr4-plugin:0.1'
+        classpath ':antlr4-plugin:0.1.1'
     }
 }
 

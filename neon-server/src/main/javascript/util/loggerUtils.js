@@ -65,8 +65,10 @@ neon.util.loggerUtils = (function(){
 
     /**
      * Creates a log4javascript logger
-     * @param name The name of the logger
-     * @returns {Object} a log4javascript logger
+     * @method getLogger
+     * @param {String} name The name of the logger
+     * @return {Object} a log4javascript logger
+     *
      */
     function getLogger(name){
         return log4javascript.getLogger(name);

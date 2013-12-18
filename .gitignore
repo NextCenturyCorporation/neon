@@ -17,6 +17,7 @@ buildSrc/build
 buildSrc/.gradle
 gradle.properties
 bundle.csv
+reports
 
 # intellij files
 .idea

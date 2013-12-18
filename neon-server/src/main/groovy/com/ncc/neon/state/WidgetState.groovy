@@ -36,9 +36,8 @@ import groovy.transform.Immutable
 
 @EqualsAndHashCode(includes = "clientId")
 @Immutable
-class WidgetState implements Serializable{
+class WidgetState{
 
-    private static final long serialVersionUID = - 7684346842507057451L
     String clientId
     String state
 

@@ -100,6 +100,6 @@ class HiveQueryExecutor implements QueryExecutor {
     }
 
     private JdbcClient getJdbcClient() {
-        connectionManager.getConnectionClient()
+        connectionManager.connectionClient
     }
 }

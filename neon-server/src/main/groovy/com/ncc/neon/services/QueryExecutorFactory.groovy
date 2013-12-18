@@ -53,7 +53,7 @@ class QueryExecutorFactory {
      * @return the appropriate query executor
      */
     QueryExecutor getExecutor() {
-        if(connectionManager.getCurrentConnectionInfo().dataSource == DataSources.hive){
+        if(connectionManager.currentConnectionInfo.dataSource == DataSources.hive){
             return hiveQueryExecutor
         }
         return mongoQueryExecutor

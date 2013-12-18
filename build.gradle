@@ -7,11 +7,27 @@ repositories {
     mavenCentral()
 }
 
+buildscript {
+  repositories {
+    mavenCentral()
+  }
+  dependencies {
+    classpath 'org.hidetake:gradle-ssh-plugin:0.2.0'
+  }
+}
+
 // task groupings we add
 def DEPLOY_GROUP = 'deploy'
 
+// neon server to deploy to. may be remote or local, depending on the remote configuration
 def neonServer = (hasProperty('NEON_SERVER') ? NEON_SERVER : System.env.NEON_SERVER) ?: '/opt/owf/apache-tomcat-7.0.21'
 def neonServerWebapps = neonServer + '/webapps'
+def remoteHost = hasProperty('host') ? host : ''
+def remoteUser = hasProperty('user') ? user : ''
+
+// the type of authentication not being used is left as null
+def remotePassword = hasProperty('password') ? password : null
+def sshIdentity = hasProperty('sshKeyFile') ? file(sshKeyFile) : null
 
 // the neon-server is just output as neon.js for simpler referencing
 project(":neon-server").ext.outfile = 'neon'
@@ -27,6 +43,7 @@ configure(subprojects.findAll { it.name != 'common' && it.name != 'metadata'}) {
     version = CURRENT_NEON_VERSION
 
     apply plugin: 'war'
+    apply plugin: 'ssh'
     apply from: "${rootDir}/gradle/js.gradle"
 
     repositories {
@@ -60,13 +77,20 @@ configure(subprojects.findAll { it.name != 'common' && it.name != 'metadata'}) {
 
     enableJSResourceFiltering(project, project.war)
 
-    // concat can be run either standalone or through gruntjs ,so add the dependency to both
-    project.getTasksByName('concatjs', false).each { task ->
-        task.dependsOn 'copyCommon'
-    }
+    def jsFiles = fileTree(jsSrcDir).include("**/*.js") +
+            fileTree(jsLibDir).include("**/*.js") +
+            fileTree(jsDependenciesOutputDir).include("**/*.js") +
+            fileTree("src/test/javascript").include("**/*.js")
 
-    project.getTasksByName('gruntjs', false).each { task ->
-        task.dependsOn 'copyCommon'
+    // ensure that javascript tasks are properly configured to copy dependencies, but to only run when
+    // they actually change. note: we don't just attach to all GruntTask types because the acceptance test is a
+    // bit different and it's not just dependent on javascript changes
+    ['concatjs','gruntjs'].each { name ->
+        project.getTasksByName(name, false).each { task ->
+            task.dependsOn 'copyCommon'
+            task.inputs.files { jsFiles }
+            task.outputs.file { jsOutputFile }
+        }
     }
 
     task('deployToTomcat', type: Copy) {
@@ -85,6 +109,33 @@ configure(subprojects.findAll { it.name != 'common' && it.name != 'metadata'}) {
 
         doLast {
             println "Copying $war.archivePath to $neonServerWebapps/${war.baseName}.war"
+        }
+    }
+
+    ssh {
+        config(StrictHostKeyChecking: 'no')
+    }
+    remotes {
+        neon {
+           host = remoteHost
+           user = remoteUser
+           password = remotePassword
+           identity = sshIdentity
+        }
+    }
+
+    task 'deployToRemoteTomcat'(type: SshTask) {
+        dependsOn war
+        description = "Copies the project's war file to the neon server tomcat webapps dir on a remote serer"
+        group = DEPLOY_GROUP
+        doFirst {
+		if (!remoteHost || !remoteUser || !(remotePassword || sshIdentity)) {
+	          throw new GradleException("Must specify -Phost=<host>, -Puser=<user> and either -Ppassword=<password> or -PsshKeyFile=<ssh-key-file-path> properties to deploy to a remote server")
+                }
+        }
+        session(remotes.neon) {
+            execute("rm -rf ${neonServerWebapps}/${war.baseName} ${neonServerWebapps}/${war.baseName}.war")
+            put(war.archivePath.absolutePath,"${neonServerWebapps}/${war.baseName}.war")
         }
     }
 
