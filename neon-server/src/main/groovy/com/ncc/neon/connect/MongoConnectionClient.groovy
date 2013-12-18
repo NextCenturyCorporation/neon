@@ -35,9 +35,6 @@ class MongoConnectionClient implements ConnectionClient{
     private MongoClient mongo
 
     public MongoConnectionClient(ConnectionInfo info){
-        if(info.dataSource != DataSources.mongo){
-            throw new NeonConnectionException("Mongo clients should only be created for mongo connections")
-        }
         mongo = new MongoClient(info.connectionUrl)
     }
 

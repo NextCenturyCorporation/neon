@@ -44,11 +44,7 @@ class JdbcConnectionClientFactory implements ConnectionClientFactory{
 
     @Override
     ConnectionClient createConnectionClient(ConnectionInfo info) {
-        if(info.dataSource != DataSources.hive){
-            throw new NeonConnectionException("JDBC clients should only be created for jdbc connections")
-        }
         dataSource.setJdbcUrl("jdbc:${databaseType}://${info.connectionUrl}/${databaseName}")
-
         return new JdbcClient(dataSource.getConnection("",""))
     }
 }
