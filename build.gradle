@@ -77,13 +77,20 @@ configure(subprojects.findAll { it.name != 'common' && it.name != 'metadata'}) {
 
     enableJSResourceFiltering(project, project.war)
 
-    // concat can be run either standalone or through gruntjs ,so add the dependency to both
-    project.getTasksByName('concatjs', false).each { task ->
-        task.dependsOn 'copyCommon'
-    }
+    def jsFiles = fileTree(jsSrcDir).include("**/*.js") +
+            fileTree(jsLibDir).include("**/*.js") +
+            fileTree(jsDependenciesOutputDir).include("**/*.js") +
+            fileTree("src/test/javascript").include("**/*.js")
 
-    project.getTasksByName('gruntjs', false).each { task ->
-        task.dependsOn 'copyCommon'
+    // ensure that javascript tasks are properly configured to copy dependencies, but to only run when
+    // they actually change. note: we don't just attach to all GruntTask types because the acceptance test is a
+    // bit different and it's not just dependent on javascript changes
+    ['concatjs','gruntjs'].each { name ->
+        project.getTasksByName(name, false).each { task ->
+            task.dependsOn 'copyCommon'
+            task.inputs.files { jsFiles }
+            task.outputs.file { jsOutputFile }
+        }
     }
 
     task('deployToTomcat', type: Copy) {
