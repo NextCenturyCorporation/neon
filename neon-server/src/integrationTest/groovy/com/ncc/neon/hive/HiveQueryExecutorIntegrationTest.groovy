@@ -110,7 +110,7 @@ class HiveQueryExecutorIntegrationTest extends AbstractQueryExecutorIntegrationT
 
         File testDataFile = new File(HiveQueryExecutorIntegrationTest.getResource("/hive-csv/data.csv").toURI())
         File fieldsFile = new File(HiveQueryExecutorIntegrationTest.getResource("/hive-csv/fields.csv").toURI())
-        def destFolder = "/tmp/neonintegrationtest-${new Random().nextInt(Integer.MAX_VALUE)}/"
+        def destFolder = "${hdfsUrl}/tmp/neonintegrationtest-${new Random().nextInt(Integer.MAX_VALUE)}/"
         def destFolderPath = new Path(destFolder)
         fileSystem.mkdirs(destFolderPath)
         fileSystem.deleteOnExit(destFolderPath)
