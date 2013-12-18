@@ -20,25 +20,39 @@
  * OF NEXT CENTURY CORPORATION EXCEPT BY PRIOR WRITTEN PERMISSION AND WHEN
  * RECIPIENT IS UNDER OBLIGATION TO MAINTAIN SECRECY.
  */
-.overlay {
-    fill: none;
-    pointer-events: all;
-}
 
-.axis path,
-.axis line {
-    fill: none;
-    stroke: #000;
-    shape-rendering: crispEdges;
-}
+neon.ready(function () {
+    neon.query.SERVER_URL = $("#neon-server").val();
 
-.edge {
-    stroke: #999;
-}
+    fetchData();
 
-.graph {
-	background-color: #c3c3c3;
-	width:800px; 
-	height:600px;
-}
+    function fetchData() {
+        var query = new neon.query.Query().selectFrom('test', 'graph');
 
+        neon.query.executeQuery(query, displayGraph);
+    }
+
+    function displayGraph(data) {
+        // translate and scale gephi layout data to html positions
+        // Note: the translation and scale values may need adjustment        
+        var nodeArr = $.map(data.data[0].nodes, function(val, index) {
+
+            function transAndScale(val) {
+                return (val + 600)/2;
+            }
+
+            return {
+                id: val.id,
+                x: transAndScale(val.x),
+                y: transAndScale(val.y),
+                label: val.label,
+                size: val.size
+            };
+        });
+
+        // draw the graph
+        var opts = {"x":"x","y":"y"};
+        var graph = new graphs.Graph("#graph", opts);
+        graph.draw(nodeArr, data.data[0].edges);       
+    }
+});

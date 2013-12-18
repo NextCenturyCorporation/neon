@@ -17,14 +17,15 @@
     <!-- build:js js/network-graph.js -->
     <script src="js-lib/d3/d3.v3.min.js"></script>
     <script src="javascript/graph.js"></script>
+    <script src="javascript/graphwidget.js"></script>
     <!-- endbuild -->
+
+
 </head>
 <body>
 <neon:hidden-neon-server/>
 
 <div id="graph">
 </div>
-
-
 </body>
 </html>

@@ -21,6 +21,7 @@
  * RECIPIENT IS UNDER OBLIGATION TO MAINTAIN SECRECY.
  */
 #graph {
-    width: 1200px;
-    height: 900px;
+    width: 900px;
+    height: 600px;
+    background-color: #c3c3c3
 }
