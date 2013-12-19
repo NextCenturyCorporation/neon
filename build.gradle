@@ -23,8 +23,11 @@ def DEPLOY_GROUP = 'deploy'
 def neonServer = (hasProperty('NEON_SERVER') ? NEON_SERVER : System.env.NEON_SERVER) ?: '/opt/owf/apache-tomcat-7.0.21'
 def neonServerWebapps = neonServer + '/webapps'
 
+// these is set to empty string, not null, when not provided. otherwise the ssh task will choke
+def remoteUser = hasProperty('user') ? user : ''
+
+// these are set to null since the ssh task expects them not to be set if they are not being used
 def remoteHost = hasProperty('host') ? host : null
-def remoteUser = hasProperty('user') ? user : null
 def remotePassword = hasProperty('password') ? password : null
 def sshIdentity = hasProperty('sshKeyFile') ? file(sshKeyFile) : null
 
