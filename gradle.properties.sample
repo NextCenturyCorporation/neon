@@ -13,3 +13,11 @@ hive.host=localhost:10000
 
 # configure port to run neon server during acceptance test
 acceptanceTest.port=10102
+
+# remote tomcat deployment
+host=sometomcathost
+user=myusername
+sshKeyFile=/path/to/sshkeyfile
+
+# optionally if you don't have an ssh key file you can put the password in here
+# password=sshpassword
