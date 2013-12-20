@@ -7,11 +7,10 @@ import akka.util.duration._
 import bootstrap._
 import assertions._
 
-class SimpleScenario extends Simulation {
+class DatabaseScenario extends Simulation {
 
-  val scn = scenario("My Simple Scenario")
-    .exec(http("Neon Field Names")
-    .get("http://localhost:11402/neon/services/queryservice/fields?databaseName=mydb&tableName=sample&widgetName="))
+  val scn = scenario("Query for databases")
+    .exec(http("Get Database Names").get("http://localhost:11402/neon/services/queryservice/databasenames"))
 
   setUp(scn.users(2))
 }
