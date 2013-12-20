@@ -28,17 +28,12 @@ dependencies {
 }
 
 task gatling(dependsOn: 'concurrencyTestWar') << {
-    logger.lifecycle(" ---- Executing all Gatling scenarios from: ${sourceSets.concurrencyTest.output.classesDir} ----")
     sourceSets.concurrencyTest.output.classesDir.eachFileRecurse { file ->
         if (file.isFile()) {
             //Remove the full path, .class and replace / with a .
-            logger.debug("Tranformed file ${file} into")
             def gatlingScenarioClass = (file.getPath() - (sourceSets.concurrencyTest.output.classesDir.getPath() + File.separator) - '.class')
                     .replace(File.separator, '.')
-
-            logger.debug("Tranformed file ${file} into scenario class ${gatlingScenarioClass}")
             javaexec {
-                // I do not use this so
                 main = 'com.excilys.ebi.gatling.app.Gatling'
                 classpath = sourceSets.concurrencyTest.output + sourceSets.concurrencyTest.runtimeClasspath
                 args  '-sbf',
@@ -50,8 +45,6 @@ task gatling(dependsOn: 'concurrencyTestWar') << {
             }
         }
     }
-
-    logger.lifecycle(" ---- Done executing all Gatling scenarios ----")
 }
 
 task concurrencyTestWar(type: org.gradle.api.plugins.jetty.JettyRunWar) {
