@@ -1,0 +1,63 @@
+apply plugin: 'scala'
+
+def concurrencyTestSourceDir = 'src/concurrencyTest/scala'
+def concurrencyTestPort = 11402
+
+repositories {
+    mavenCentral()
+    maven { url "http://repository.excilys.com/content/groups/public" }
+}
+
+configurations {
+    concurrencyTestCompile
+    concurrencyTestRuntime { extendsFrom concurrencyTestCompile }
+}
+
+sourceSets {
+    concurrencyTest {
+        scala.srcDir file(concurrencyTestSourceDir)
+        compileClasspath = configurations.concurrencyTestCompile
+        runtimeClasspath = output + compileClasspath + configurations.concurrencyTestRuntime
+    }
+}
+
+dependencies {
+    compile 'org.scala-lang:scala-library:2.10.3'
+    concurrencyTestCompile("com.excilys.ebi.gatling.highcharts:gatling-charts-highcharts:1.5.3")
+    concurrencyTestRuntime "com.excilys.ebi.gatling:gatling-app:1.5.3"
+}
+
+task gatling(dependsOn: 'concurrencyTestWar') << {
+    logger.lifecycle(" ---- Executing all Gatling scenarios from: ${sourceSets.concurrencyTest.output.classesDir} ----")
+    sourceSets.concurrencyTest.output.classesDir.eachFileRecurse { file ->
+        if (file.isFile()) {
+            //Remove the full path, .class and replace / with a .
+            logger.debug("Tranformed file ${file} into")
+            def gatlingScenarioClass = (file.getPath() - (sourceSets.concurrencyTest.output.classesDir.getPath() + File.separator) - '.class')
+                    .replace(File.separator, '.')
+
+            logger.debug("Tranformed file ${file} into scenario class ${gatlingScenarioClass}")
+            javaexec {
+                // I do not use this so
+                main = 'com.excilys.ebi.gatling.app.Gatling'
+                classpath = sourceSets.concurrencyTest.output + sourceSets.concurrencyTest.runtimeClasspath
+                args  '-sbf',
+                        sourceSets.concurrencyTest.output.classesDir,
+                        '-s',
+                        gatlingScenarioClass,
+                        '-rf',
+                        'build/reports/gatling'
+            }
+        }
+    }
+
+    logger.lifecycle(" ---- Done executing all Gatling scenarios ----")
+}
+
+task concurrencyTestWar(type: org.gradle.api.plugins.jetty.JettyRunWar) {
+    dependsOn 'compileConcurrencyTestScala'
+    daemon = true
+    httpPort = concurrencyTestPort
+    stopPort = httpPort + 2
+    stopKey = 'stop'
+}

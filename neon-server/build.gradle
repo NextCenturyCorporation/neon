@@ -30,6 +30,7 @@ apply plugin: 'jetty'
 // antlr plugin and configuration take from https://github.com/fraoch/antlr4-plugin/
 apply plugin: 'antlr4'
 apply from: "${rootDir}/gradle/release.gradle"
+apply from: "${rootDir}/gradle/gatling.gradle"
 
 sourceCompatibility = 1.7
 

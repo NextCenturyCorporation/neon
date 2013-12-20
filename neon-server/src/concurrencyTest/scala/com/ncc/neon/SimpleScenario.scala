@@ -10,8 +10,8 @@ import assertions._
 class SimpleScenario extends Simulation {
 
   val scn = scenario("My Simple Scenario")
-    .exec(http("My favorite search engine")
-    .get("http://www.google.com"))
+    .exec(http("Neon Field Names")
+    .get("http://localhost:11402/neon/services/queryservice/fields?databaseName=mydb&tableName=sample&widgetName="))
 
   setUp(scn.users(2))
 }
