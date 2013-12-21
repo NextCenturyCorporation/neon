@@ -88,11 +88,11 @@ class MongoWhereClauseBuilder {
             }
         }
         def dbObject = new BasicDBObject('$' + opName, clauses)
-        appendGeospatialClausesToBooleanClause(booleanClause, dbObject, geospatialClauses)
+        appendGeospatialClausesToBooleanClause(dbObject, geospatialClauses)
         return dbObject
     }
 
-    private static def appendGeospatialClausesToBooleanClause(booleanClause, dbObject, geospatialClauses) {
+    private static def appendGeospatialClausesToBooleanClause(dbObject, geospatialClauses) {
         geospatialClauses.each {
             dbObject.putAll(it)
         }
