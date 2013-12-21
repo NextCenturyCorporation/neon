@@ -1,6 +1,5 @@
 package com.ncc.neon.query.mongo
 import com.mongodb.BasicDBObject
-import com.ncc.neon.query.InvalidQueryException
 import com.ncc.neon.query.clauses.AndWhereClause
 import com.ncc.neon.query.clauses.OrWhereClause
 import com.ncc.neon.query.clauses.SingularWhereClause
@@ -77,7 +76,6 @@ class MongoWhereClauseBuilder {
     }
 
     private static def buildBooleanClause(booleanClause, opName) {
-        // TODO: NEON-422 Mongo has a bug such that it can't use geospatial clauses in AND or OR operators - https://jira.mongodb.org/browse/SERVER-4572. AND can be partially used by putting the geospatial clause outside the rest of them (as long as the location field is not used inside the AND query as well)
         def geospatialClauses = []
         def clauses = []
 
@@ -96,9 +94,6 @@ class MongoWhereClauseBuilder {
 
     private static def appendGeospatialClausesToBooleanClause(booleanClause, dbObject, geospatialClauses) {
         geospatialClauses.each {
-            if (booleanClause instanceof OrWhereClause) {
-                throw new InvalidQueryException('MongoDB does not support geospatial queries in OR operators. See https://jira.mongodb.org/browse/SERVER-4572 for details')
-            }
             dbObject.putAll(it)
         }
     }
