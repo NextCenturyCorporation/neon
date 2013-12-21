@@ -75,8 +75,7 @@ describe('query mapping', function () {
         var expected = [];
         allData.forEach(function (row) {
             var expectedRow = {};
-            // the _id field is always included
-            // TODO: NEON-75 id field issues. this field may not always be named _id
+            // the _id field is always included from mongo
             expectedRow._id = row._id;
             fields.forEach(function (field) {
                 expectedRow[field] = row[field];
