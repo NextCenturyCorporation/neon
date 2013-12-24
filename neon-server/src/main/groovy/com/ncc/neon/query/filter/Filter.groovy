@@ -1,9 +1,6 @@
 package com.ncc.neon.query.filter
-
 import com.ncc.neon.query.clauses.WhereClause
 import groovy.transform.ToString
-import org.codehaus.jackson.annotate.JsonIgnoreProperties
-
 /*
  * ************************************************************************
  * Copyright (c), 2013 Next Century Corporation. All Rights Reserved.
@@ -31,7 +28,6 @@ import org.codehaus.jackson.annotate.JsonIgnoreProperties
  * A filter is applied to a DataSet and can contain a whereClause
  */
 @ToString(includeNames = true)
-@JsonIgnoreProperties(value = ['transform_'])
 class Filter implements Serializable {
 
     private static final long serialVersionUID = 7238913369114626126L
