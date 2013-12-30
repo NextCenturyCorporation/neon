@@ -161,13 +161,8 @@ configure(subprojects.findAll { it.name != 'common' && it.name != 'metadata'}) {
     }
 }
 
-task copyCommonToAllProjects() {
-    def projects = project.getAllprojects().findAll { it.getTasksByName("copyCommon", false) }
-    def tasks = projects.collect { it.tasks.copyCommon}
-}
-
 task jettyRunAll(type: com.ncc.common.JettyRunAll) {
-    dependsOn ':neon-server:concatjs', 'copyCommonToAllProjects'
+    dependsOn ':neon-server:concatjs'
     ssl = true
     keystorePath = this.class.getResource("/keystore").file
     keystorePassword = "neon"

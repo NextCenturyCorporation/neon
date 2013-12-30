@@ -64,8 +64,13 @@ task stopGatlingJetty(type: org.gradle.api.plugins.jetty.JettyStop){
 
 }
 
+task copyConcurrencyWebapp(type: Copy){
+    from 'src/concurrencyTest/webapp'
+    into "${buildDir}/tmp/concurrencyTestWar/webapp"
+}
+
 task concurrencyTestWar(type: org.gradle.api.plugins.jetty.JettyRunWar) {
-    dependsOn 'compileConcurrencyTestScala'
+    dependsOn 'compileConcurrencyTestScala', 'copyConcurrencyWebapp'
     group = GATLING_GROUP
     daemon = true
     httpPort = concurrencyTestPort
