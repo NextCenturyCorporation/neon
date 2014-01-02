@@ -19,15 +19,21 @@
  * PROPRIETARY AND CONFIDENTIAL TRADE SECRET MATERIAL NOT FOR DISCLOSURE OUTSIDE
  * OF NEXT CENTURY CORPORATION EXCEPT BY PRIOR WRITTEN PERMISSION AND WHEN
  * RECIPIENT IS UNDER OBLIGATION TO MAINTAIN SECRECY.
+ * 
+ * @author dflynt
  */
 
+/*
+* This function demonstrates retrieving and displaying graph which has layout
+* coordinates.
+*/
 neon.ready(function () {
     neon.query.SERVER_URL = $("#neon-server").val();
 
     fetchData();
 
     function fetchData() {
-        var query = new neon.query.Query().selectFrom('test', 'graph');
+        var query = new neon.query.Query().selectFrom('test', 'vastcell');
 
         neon.query.executeQuery(query, displayGraph);
     }
