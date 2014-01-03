@@ -412,6 +412,12 @@ describe('query mapping', function () {
         });
     });
 
+    it('query with offset', function () {
+        var query = baseQuery().sortBy('salary', neon.query.ASCENDING).offset(4);
+        var expectedData = getJSONFixture('offset.json');
+        assertQueryResults(query, expectedData);
+    });
+
     it('query near location', function () {
         var center = new neon.util.LatLon(11.95, 19.5);
         var query = baseQuery().withinDistance('location', center, 35, neon.query.MILE);

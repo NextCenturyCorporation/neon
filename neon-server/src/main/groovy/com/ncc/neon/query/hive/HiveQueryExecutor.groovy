@@ -55,7 +55,8 @@ class HiveQueryExecutor implements QueryExecutor {
         HiveConversionStrategy conversionStrategy = new HiveConversionStrategy(filterState: filterState, selectionState: selectionState)
         String hiveQuery = conversionStrategy.convertQuery(query, options)
         LOGGER.debug("Hive Query: {}", hiveQuery)
-        List<Map> resultList = jdbcClient.executeQuery(hiveQuery)
+        int offset = query.offsetClause ? query.offsetClause.offset : 0
+        List<Map> resultList = jdbcClient.executeQuery(hiveQuery, offset)
         return new TableQueryResult(data: resultList)
     }
 

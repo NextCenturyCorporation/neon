@@ -283,6 +283,18 @@ neon.query.Query.prototype.limit = function (limit) {
 };
 
 /**
+ * Specifies an offset to start the results from. This can be used in combination with limit for pagination
+ * @method offset
+ * @param {int} offset The number of rows to skip in the results
+ * @return {neon.query.Query} This query object
+ */
+neon.query.Query.prototype.offset = function (offset) {
+    this.offsetClause = new neon.query.OffsetClause(offset);
+    return this;
+};
+
+
+/**
  *
  * Configures the query results to be sorted by the specified field(s). To sort by multiple fields, repeat the
  * 2 parameters multiple times
@@ -888,6 +900,11 @@ neon.query.SortClause = function (fieldName, sortOrder) {
 neon.query.LimitClause = function (limit) {
     this.limit = limit;
 };
+
+neon.query.OffsetClause = function (offset) {
+    this.offset = offset;
+};
+
 
 neon.query.WithinDistanceClause = function (locationField, center, distance, distanceUnit) {
     this.type = 'withinDistance';

@@ -41,6 +41,7 @@ class QueryCreator extends NeonBaseListener {
     private String databaseName = ""
     private WhereClause whereClause
     private LimitClause limitClause
+    private OffsetClause offsetClause
     private final List<SortClause> sortClauses = []
     private final List<AggregateClause> aggregates = []
     private final List<GroupByClause> groupByClauses = []
@@ -60,6 +61,9 @@ class QueryCreator extends NeonBaseListener {
         }
         if (limitClause) {
             query.limitClause = limitClause
+        }
+        if ( offsetClause ) {
+            query.offsetClause = offsetClause
         }
         query.sortClauses = sortClauses
         query.aggregates = aggregates
@@ -181,5 +185,14 @@ class QueryCreator extends NeonBaseListener {
             clause.limit = Integer.valueOf(ctx.WHOLE_NUMBER().text)
         }
         limitClause = clause
+    }
+
+    @Override
+    void exitOffset(NeonParser.OffsetContext ctx) {
+        OffsetClause clause = new OffsetClause()
+        if ( ctx.WHOLE_NUMBER())  {
+            clause.offset = Integer.valueOf(ctx.WHOLE_NUMBER().text)
+        }
+        offsetClause = clause
     }
 }

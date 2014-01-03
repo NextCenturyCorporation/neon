@@ -55,18 +55,20 @@ class DistinctMongoQueryWorker extends AbstractMongoQueryWorker {
         def distinct = getCollection(mongoQuery).distinct(field, mongoQuery.whereClauseParams)
 
         sortDistinctResults(mongoQuery, distinct, field)
-        distinct = limitDistinctResults(mongoQuery, distinct)
+        distinct = limitSkipDistinctResults(mongoQuery, distinct)
         // create a mapping of field to distinct values
         def distinctRows = distinct.collect { [(field): it] }
 
         return new TableQueryResult(distinctRows)
     }
 
-    private List limitDistinctResults(MongoQuery mongoQuery, List distinct) {
-        if (mongoQuery.query.limitClause) {
-            return distinct[0..<mongoQuery.query.limitClause.limit]
-        }
-        return distinct
+    private List limitSkipDistinctResults(MongoQuery mongoQuery, List distinct) {
+        int listSize = distinct.size()
+        int startIndex = mongoQuery.query.offsetClause ? mongoQuery.query.offsetClause.offset : 0
+        int endIndex = mongoQuery.query.limitClause ? Math.min(listSize,(startIndex + mongoQuery.query.limitClause.limit)) : listSize
+
+        // only copy the sublist if we're not returning the whole list to avoid an unnecessary copy
+        return (startIndex > 0 || endIndex < listSize) ? distinct[startIndex..<endIndex] : distinct
     }
 
     private void sortDistinctResults(MongoQuery mongoQuery, List distinct, String distinctFieldName) {

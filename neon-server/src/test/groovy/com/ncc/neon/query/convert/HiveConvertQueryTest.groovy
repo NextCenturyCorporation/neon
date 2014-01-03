@@ -63,6 +63,13 @@ class HiveConvertQueryTest extends AbstractConversionTest {
     }
 
     @Override
+    protected void assertQueryWithOffsetClause(query) {
+        // OFFSET is not actually implemented in Hive, so it is not included in the query. We handle this within neon
+        assertStandardHiveQLStatement(query)
+    }
+
+
+    @Override
     protected void assertQueryWithDistinctClause(query) {
         assert query.toLowerCase() == "select DISTINCT * from ${DATABASE_NAME}.${TABLE_NAME}".toLowerCase()
     }
@@ -86,6 +93,7 @@ class HiveConvertQueryTest extends AbstractConversionTest {
     protected void assertQueryWithEmptyFilter(query) {
         assertStandardHiveQLStatement(query)
     }
+
 
     @Override
     protected void assertSelectClausePopulated(query) {
