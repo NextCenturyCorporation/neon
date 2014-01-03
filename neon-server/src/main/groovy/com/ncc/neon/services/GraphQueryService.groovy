@@ -199,19 +199,25 @@ class GraphQueryService {
         return queryExecutor.showTables(database)
     }
 
-    private QueryResult layout(QueryResult queryResult) {
-        // structure in Mongo (for now) is: [{"nodes":[{}, {}, ...]}, {"edges":[{}, {}, ...]}]
+    private void runYifanLayout(GraphModel graphModel) {
+        //Run AppLayout for 100 passes - The layout always takes the current visible view
+        YifanHuLayout layout = new YifanHuLayout(null, new StepDisplacement(1f))
+        layout.setGraphModel(graphModel)
+        layout.resetPropertiesValues()
+        layout.setOptimalDistance(200f)
+
+        layout.initAlgo()
+        for (int i = 0; i < 100 && layout.canAlgo(); i++) {
+            layout.goAlgo()
+        }
+        layout.endAlgo()
+    }
+
+    private void importGraph(ImportController importController, Workspace workspace,
+                             QueryResult queryResult) {
+        // structure in MongoDB (for now) is: [{"nodes":[{}, {}, ...]}, {"edges":[{}, {}, ...]}]
         List<Map<String, Object>> nodeList = queryResult.data.head().get("nodes")
         List<Map<String, Object>> edgeList = queryResult.data.head().get("edges")
-
-        //Init a project - and therefore a workspace
-        ProjectController pc = Lookup.getDefault().lookup(ProjectController.class)
-        pc.newProject()
-        Workspace workspace = pc.getCurrentWorkspace()
-
-        //Get models and controllers for this new workspace
-        GraphModel graphModel = Lookup.getDefault().lookup(GraphController.class).getModel()
-        ImportController importController = Lookup.getDefault().lookup(ImportController.class)
 
         // Init ImporterBuilder with nodes and edges collections
         ImporterBuilderJava importerBuilder = new ImporterBuilderJava()
@@ -224,19 +230,9 @@ class GraphQueryService {
         container = importController.importSpigot(importer)
         container.getLoader().setEdgeDefault(EdgeDefault.DIRECTED)
         importController.process(container, new DefaultProcessor(), workspace)
+    }
 
-        //Run AppLayout for 100 passes - The layout always takes the current visible view
-        YifanHuLayout layout = new YifanHuLayout(null, new StepDisplacement(1f))
-        layout.setGraphModel(graphModel)
-        layout.resetPropertiesValues()
-        layout.setOptimalDistance(200f)
-
-        layout.initAlgo()
-        for (int i = 0; i < 100 && layout.canAlgo(); i++) {
-            layout.goAlgo()
-        }
-        layout.endAlgo()
-
+    private QueryResult getLayoutResults(Workspace workspace) {
         ExporterJava ej = new ExporterJava()
         ej.setWorkspace(workspace)
         ej.execute()
@@ -247,13 +243,29 @@ class GraphQueryService {
         new TableQueryResult(data:layoutResult)
     }
 
+    private QueryResult layout(QueryResult queryResult) {
+        //Init a project - and therefore a workspace
+        ProjectController pc = Lookup.getDefault().lookup(ProjectController)
+        pc.newProject()
+        Workspace workspace = pc.getCurrentWorkspace()
+
+        //Get models and controllers for this new workspace
+        GraphModel graphModel = Lookup.getDefault().lookup(GraphController).getModel()
+        ImportController importController = Lookup.getDefault().lookup(ImportController)
+
+        importGraph importController, workspace, queryResult
+        runYifanLayout graphModel
+
+        getLayoutResults(workspace)
+    }
+
 
     private final def execute = { def query, QueryOptions options ->
         QueryExecutor queryExecutor = queryExecutorFactory.getExecutor()
         QueryResult queryResult = queryExecutor.execute(query, options)
 
         // layout the graph
-        QueryResult layoutResult = layout(queryResult);
+        QueryResult layoutResult = layout(queryResult)
         ColumnMetadataList columnMetadataList = metadataResolver.resolveQuery(query)
 
         AssembleClientData assembler = new AssembleClientData(queryResult: layoutResult, columnMetadataList: columnMetadataList)
