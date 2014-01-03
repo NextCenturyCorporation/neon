@@ -36,9 +36,9 @@
     stroke: #999;
 }
 
-.graph {
+#graph {
 	background-color: #c3c3c3;
-	width:800px; 
-	height:600px;
+	width:1080px;
+	height:720px;
 }
 

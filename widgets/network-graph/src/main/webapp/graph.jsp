@@ -9,7 +9,6 @@
 
     <link rel="stylesheet" type="text/css" href="<neon:neon-url/>/css/neon.css">
     <link rel="stylesheet" type="text/css" href="css/graph.css">
-    <link rel="stylesheet" type="text/css" href="css/graphwidget.css">
 
     <script src="<neon:owf-url/>/js/owf-widget.js"></script>
     <script src="<neon:neon-url/>/js/neon.js"></script>
