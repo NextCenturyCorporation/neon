@@ -26,7 +26,7 @@ import groovy.transform.ToString
  */
 
 /**
- * Limit a query to a specified number of results
+ * Limit a query to a specified number of results. This can be combined with an offset to paginate queries.
  */
 @ToString(includeNames = true)
 class LimitClause {

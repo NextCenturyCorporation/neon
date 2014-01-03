@@ -52,6 +52,9 @@ public class NeonBaseListener implements NeonListener {
 	@Override public void enterGroupClause(NeonParser.GroupClauseContext ctx) { }
 	@Override public void exitGroupClause(NeonParser.GroupClauseContext ctx) { }
 
+	@Override public void enterOffset(NeonParser.OffsetContext ctx) { }
+	@Override public void exitOffset(NeonParser.OffsetContext ctx) { }
+
 	@Override public void enterFunctionName(NeonParser.FunctionNameContext ctx) { }
 	@Override public void exitFunctionName(NeonParser.FunctionNameContext ctx) { }
 

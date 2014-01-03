@@ -49,6 +49,9 @@ public interface NeonListener extends ParseTreeListener {
 	void enterGroupClause(NeonParser.GroupClauseContext ctx);
 	void exitGroupClause(NeonParser.GroupClauseContext ctx);
 
+	void enterOffset(NeonParser.OffsetContext ctx);
+	void exitOffset(NeonParser.OffsetContext ctx);
+
 	void enterFunctionName(NeonParser.FunctionNameContext ctx);
 	void exitFunctionName(NeonParser.FunctionNameContext ctx);
 

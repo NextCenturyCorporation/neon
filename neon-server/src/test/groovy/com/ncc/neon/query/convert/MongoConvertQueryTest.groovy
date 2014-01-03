@@ -41,6 +41,10 @@ class MongoConvertQueryTest extends AbstractConversionTest {
         conversionStrategy.convertQuery(query, QueryOptions.ALL_DATA)
     }
 
+    // For many of these query clause tests, the conversion strategy does not need to do anything so it just asserts
+    // the "standard query asserts." This is because the mongo query worker classes handle the actual clauses and
+    // attach them to the dbcursors.
+
     @Override
     void assertSimplestConvertQuery(query) {
         standardQueryAsserts(query)
@@ -58,6 +62,11 @@ class MongoConvertQueryTest extends AbstractConversionTest {
 
     @Override
     protected void assertQueryWithLimitClause(query) {
+        standardQueryAsserts(query)
+    }
+
+    @Override
+    protected void assertQueryWithOffsetClause(query) {
         standardQueryAsserts(query)
     }
 

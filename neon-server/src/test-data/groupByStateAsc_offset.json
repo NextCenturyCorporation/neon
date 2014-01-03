@@ -1,0 +1,17 @@
+[
+
+    {
+        "_id": {
+            "state": "MD"
+        },
+        "state": "MD",
+        "counter": 1
+    },
+    {
+        "_id": {
+            "state": "VA"
+        },
+        "state": "VA",
+        "counter": 4
+    }
+]

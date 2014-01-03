@@ -45,6 +45,7 @@ abstract class AbstractConversionTest {
     protected static final String FIELD_NAME = "field"
     protected static final String FIELD_NAME_2 = "field2"
     protected static final int LIMIT_AMOUNT = 5
+    protected static final int SKIP_AMOUNT = 2
 
     protected FilterState filterState
     private Filter simpleFilter
@@ -106,6 +107,14 @@ abstract class AbstractConversionTest {
     }
 
     @Test
+    void "test offset clause populated"(){
+        givenQueryHasSkipClause()
+        def query = convertQuery(simpleQuery)
+        assertQueryWithOffsetClause(query)
+    }
+
+
+    @Test
     void "test distinct clause populated"(){
         givenQueryHasDistinctClause()
         def query = convertQuery(simpleQuery)
@@ -144,6 +153,8 @@ abstract class AbstractConversionTest {
     protected abstract void assertQueryWithSortClause(query)
 
     protected abstract void assertQueryWithLimitClause(query)
+
+    protected abstract void assertQueryWithOffsetClause(query)
 
     protected abstract void assertQueryWithDistinctClause(query)
 
@@ -186,6 +197,10 @@ abstract class AbstractConversionTest {
 
     private void givenQueryHasLimitClause() {
         simpleQuery.limitClause = new LimitClause(limit: LIMIT_AMOUNT)
+    }
+
+    private void givenQueryHasSkipClause() {
+        simpleQuery.offsetClause = new OffsetClause(offset: SKIP_AMOUNT)
     }
 
     private void givenQueryHasDistinctClause() {
