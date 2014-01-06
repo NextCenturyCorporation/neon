@@ -323,6 +323,13 @@ abstract class AbstractQueryExecutorIntegrationTest {
         assertOrderedQueryResult(expected, result)
     }
 
+    @Test
+    void "offset greater than total number of results"() {
+        def offsetClause = new OffsetClause(offset: 100)
+        def result = queryExecutor.execute(new Query(filter: ALL_DATA_FILTER, offsetClause: offsetClause),
+                QueryOptions.FILTERED_DATA)
+        assert result.data.isEmpty()
+    }
 
 
     @Test

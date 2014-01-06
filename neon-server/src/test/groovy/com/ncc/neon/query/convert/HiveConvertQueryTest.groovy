@@ -64,7 +64,9 @@ class HiveConvertQueryTest extends AbstractConversionTest {
 
     @Override
     protected void assertQueryWithOffsetClause(query) {
-        // OFFSET is not actually implemented in Hive, so it is not included in the query. We handle this within neon
+        // OFFSET is not actually implemented in Hive, so it is not included in the query. Neon will adjust the
+        // query to include enough results to get the offset and then manually advance the cursor to the correct
+        // position.
         assertStandardHiveQLStatement(query)
     }
 
