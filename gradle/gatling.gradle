@@ -29,34 +29,37 @@ dependencies {
     concurrencyTestRuntime "com.excilys.ebi.gatling:gatling-app:1.5.3"
 }
 
-task gatling{
+task gatling {
     dependsOn 'stopGatlingJetty'
     group = GATLING_GROUP
     description = "Runs all gatling tests against a jetty server."
 }
 
-task runGatlingTests(dependsOn: 'concurrencyTestWar') << {
+task runGatlingTests() {
+    dependsOn 'concurrencyTestWar'
     group = GATLING_GROUP
-    sourceSets.concurrencyTest.output.classesDir.eachFileRecurse { file ->
-        if (file.isFile()) {
-            //Remove the full path, .class and replace / with a .
-            def gatlingScenarioClass = (file.getPath() - (sourceSets.concurrencyTest.output.classesDir.getPath() + File.separator) - '.class')
-                    .replace(File.separator, '.')
-            javaexec {
-                main = 'com.excilys.ebi.gatling.app.Gatling'
-                classpath = sourceSets.concurrencyTest.output + sourceSets.concurrencyTest.runtimeClasspath
-                args  '-sbf',
-                        sourceSets.concurrencyTest.output.classesDir,
-                        '-s',
-                        gatlingScenarioClass,
-                        '-rf',
-                        'build/reports/gatling'
+    doLast {
+        sourceSets.concurrencyTest.output.classesDir.eachFileRecurse { file ->
+            if (file.isFile()) {
+                //Remove the full path, .class and replace / with a .
+                def gatlingScenarioClass = (file.getPath() - (sourceSets.concurrencyTest.output.classesDir.getPath() + File.separator) - '.class')
+                        .replace(File.separator, '.')
+                javaexec {
+                    main = 'com.excilys.ebi.gatling.app.Gatling'
+                    classpath = sourceSets.concurrencyTest.output + sourceSets.concurrencyTest.runtimeClasspath
+                    args '-sbf',
+                            sourceSets.concurrencyTest.output.classesDir,
+                            '-s',
+                            gatlingScenarioClass,
+                            '-rf',
+                            'build/reports/gatling'
+                }
             }
         }
     }
 }
 
-task stopGatlingJetty(type: org.gradle.api.plugins.jetty.JettyStop){
+task stopGatlingJetty(type: org.gradle.api.plugins.jetty.JettyStop) {
     dependsOn 'runGatlingTests'
     group = GATLING_GROUP
     stopKey = 'stop'
@@ -64,13 +67,13 @@ task stopGatlingJetty(type: org.gradle.api.plugins.jetty.JettyStop){
 
 }
 
-task copyConcurrencyWebapp(type: Copy){
+task copyConcurrencyWebapp(type: Copy) {
     from 'src/concurrencyTest/webapp'
     into "${buildDir}/tmp/concurrencyTestWar/webapp"
 }
 
 task concurrencyTestWar(type: org.gradle.api.plugins.jetty.JettyRunWar) {
-    dependsOn 'compileConcurrencyTestScala', 'copyConcurrencyWebapp'
+    dependsOn 'compileConcurrencyTestScala'
     group = GATLING_GROUP
     daemon = true
     httpPort = concurrencyTestPort
@@ -78,8 +81,14 @@ task concurrencyTestWar(type: org.gradle.api.plugins.jetty.JettyRunWar) {
     stopKey = 'stop'
 }
 
+task insertDataIntoMongo(type: com.ncc.neon.data.MongoDataInserter) {}
+task deleteDataFromMongo(type: com.ncc.neon.data.MongoDataDeleter) {}
+task insertDataIntoHive(type: com.ncc.neon.data.HiveDataInserter) {}
+task deleteDataFromHive(type: com.ncc.neon.data.HiveDataDeleter) {}
+
 
 import org.gradle.api.plugins.jetty.internal.Monitor
+
 concurrencyTestWar.doLast {
     /**
      * THIS IS A WORKAROUND! THE CURRENT VERSION OF THIS TASK DOESN'T START A WATCHER IN DAEMON MODE

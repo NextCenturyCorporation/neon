@@ -1,19 +1,22 @@
-var databaseName = 'acceptanceTest';
+var databaseName = 'neonintegrationtest';
 var tableName = 'records';
 var filterKey;
 
 $(function(){
+    var where = neon.query.where;
+    var or = neon.query.or;
+
     neon.query.SERVER_URL = "http://localhost:11402/neon";
     neon.query.registerForFilterKey(databaseName, tableName, function (filterResponse) {
         filterKey = filterResponse;
     });
 
     $('#mongo').click(function(){
-        alert('mongo');
+        neon.query.connectToDatastore("mongo", "localhost");
     });
 
     $('#hive').click(function(){
-        alert('hive');
+        neon.query.connectToDatastore("hive", "xdata2");
     });
 
     $('#all-query').click(function(){
@@ -42,7 +45,10 @@ $(function(){
 
     $('#add-filter').click(function(){
         var filter =  new neon.query.Filter().selectFrom(databaseName, tableName);
+        var whereStateClause = or(where('state', '=', 'VA'), where('state', '=', 'DC'));
+        filter.where(whereStateClause);
         neon.query.addFilter(filterKey, filter);
+
     });
 
     $('#remove-filter').click(function(){
@@ -52,6 +58,8 @@ $(function(){
 
     $('#add-selection').click(function(){
         var selection =  new neon.query.Filter().selectFrom(databaseName, tableName);
+        var salaryAndStateClause = where('salary', '<=', 100000);
+        selection.where(salaryAndStateClause);
         neon.query.addSelection(filterKey, selection);
     });
 
