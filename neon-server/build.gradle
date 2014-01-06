@@ -292,7 +292,6 @@ task stopTransformJetty(type: org.gradle.api.plugins.jetty.JettyStop){
     stopKey = 'stop'
 }
 
-
 task acceptanceTest{
     dependsOn 'stopAcceptanceTestJetty'
 }
@@ -334,7 +333,6 @@ task generateHiveJson {
     }
 }
 
-
 task generateHiveCSV {
     def outputDir = "${testDataDir}/hive-csv"
     def inputFile = new File(testDataDir, 'data.json')
@@ -369,7 +367,6 @@ def getMongo() {
     }
     return mongoInstance
 }
-
 
 import org.gradle.api.plugins.jetty.internal.Monitor
 [transformTestWebService, acceptanceTestWar]*.doLast {
