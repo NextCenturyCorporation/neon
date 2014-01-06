@@ -57,17 +57,19 @@ class HiveDataInserter extends DefaultTask{
 
         def tableScript = createTableScript(fieldsFile, destFolder)
 
-        Connection connection = createConnection()
+        def dataSource = new ComboPooledDataSource()
+        Connection connection = createConnection(dataSource)
         execute(connection, "create database ${DATABASE_NAME}")
         execute(connection, tableScript)
         connection.close()
+        dataSource.close()
     }
 
-    Connection createConnection() {
+    Connection createConnection(dataSource) {
         def driverName = "org.apache.hive.jdbc.HiveDriver"
         def databaseType = "hive2"
         def databaseName = "default"
-        def dataSource = new ComboPooledDataSource()
+
         dataSource.setDriverClass(driverName)
         dataSource.setJdbcUrl("jdbc:${databaseType}://xdata2:10000/${databaseName}")
         return dataSource.getConnection("","")

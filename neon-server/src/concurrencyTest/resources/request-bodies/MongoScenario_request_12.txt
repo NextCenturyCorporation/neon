@@ -1,0 +1,1 @@
+{"filter":{"databaseName":"concurrencytest","tableName":"records"},"fields":["*"],"disregardFilters_":false,"selectionOnly_":true,"groupByClauses":[],"isDistinct":false,"aggregates":[],"sortClauses":[]}

@@ -33,7 +33,7 @@ import org.gradle.api.tasks.TaskAction
 
 class MongoDataInserter extends DefaultTask{
 
-    static final String DATABASE_NAME = "concurrencyTest"
+    static final String DATABASE_NAME = "concurrencytest"
     static final String TABLE_NAME = "records"
     static final ALL_DATA_FILENAME = 'data.json'
 

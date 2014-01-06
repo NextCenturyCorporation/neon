@@ -32,7 +32,7 @@ import org.gradle.api.tasks.TaskAction
  */
 
 class MongoDataDeleter extends DefaultTask {
-    static final String DATABASE_NAME = "concurrencyTest"
+    static final String DATABASE_NAME = "concurrencytest"
 
     @TaskAction
     void run(){

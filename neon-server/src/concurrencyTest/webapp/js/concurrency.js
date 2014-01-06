@@ -1,4 +1,4 @@
-var databaseName = 'neonintegrationtest';
+var databaseName = 'concurrencytest';
 var tableName = 'records';
 var filterKey;
 

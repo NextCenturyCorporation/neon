@@ -52,7 +52,9 @@ task runGatlingTests() {
                             '-s',
                             gatlingScenarioClass,
                             '-rf',
-                            'build/reports/gatling'
+                            'build/reports/gatling',
+                            '-bf',
+                            'src/concurrencyTest/resources/request-bodies'
                 }
             }
         }
