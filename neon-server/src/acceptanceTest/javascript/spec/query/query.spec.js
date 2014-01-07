@@ -72,13 +72,16 @@ describe('query mapping', function () {
 
     it('select subset of fields from result', function () {
         var fields = ['firstname', 'lastname'];
-        var expected = [''];
+        var expected = [];
         allData.forEach(function (row) {
             var expectedRow = {};
             // the _id field is always included from mongo
             expectedRow._id = row._id;
             fields.forEach(function (field) {
-                expectedRow[field] = row[field];
+                // some rows do not have all fields, so skip those
+                if ( row[field] ) {
+                    expectedRow[field] = row[field];
+                }
             });
             expected.push(expectedRow);
         });
