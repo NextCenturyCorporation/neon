@@ -50,6 +50,9 @@ class SimpleMongoQueryWorker extends AbstractMongoQueryWorker {
         if (mongoQuery.query.limitClause) {
             results = results.limit(mongoQuery.query.limitClause.limit)
         }
+        if (mongoQuery.query.offsetClause) {
+            results = results.skip(mongoQuery.query.offsetClause.offset)
+        }
         return new MongoQueryResult(results)
     }
 

@@ -47,6 +47,9 @@ class AggregateMongoQueryWorker extends AbstractMongoQueryWorker {
         if (mongoQuery.query.sortClauses) {
             additionalClauses << new BasicDBObject('$sort', createSortDBObject(mongoQuery.query.sortClauses))
         }
+        if (mongoQuery.query.offsetClause) {
+            additionalClauses << new BasicDBObject('$skip',mongoQuery.query.offsetClause.offset)
+        }
         if (mongoQuery.query.limitClause) {
             additionalClauses << new BasicDBObject('$limit', mongoQuery.query.limitClause.limit)
         }

@@ -57,6 +57,10 @@ repositories {
     maven {
         url 'https://repository.cloudera.com/artifactory/public'
     }
+
+    flatDir {
+        dirs 'lib'
+    }
 }
 
 project.ext {
@@ -85,6 +89,11 @@ configurations {
 }
 
 dependencies {
+    // gephi toolkit and necessary libraries for gephi plugins
+    compile 'org.gephi:gephi-toolkit:0.8.7'
+    compile 'com.nextcentury:com-nextcentury-importerjava:'
+    compile 'com.nextcentury:com-nextcentury-exporterjava:'
+
     compile 'com.sun.jersey:jersey-servlet:1.15'
     compile 'com.sun.jersey:jersey-core:1.15'
     compile 'com.sun.jersey:jersey-client:1.15'
@@ -112,6 +121,8 @@ dependencies {
         exclude module: 'slf4j-log4j12'
     }
     compile project(":metadata")
+
+
 
     providedCompile 'javax.servlet:javax.servlet-api:3.0.1'
 
@@ -281,7 +292,6 @@ task stopTransformJetty(type: org.gradle.api.plugins.jetty.JettyStop){
     stopKey = 'stop'
 }
 
-
 task acceptanceTest{
     dependsOn 'stopAcceptanceTestJetty'
 }
@@ -323,7 +333,6 @@ task generateHiveJson {
     }
 }
 
-
 task generateHiveCSV {
     def outputDir = "${testDataDir}/hive-csv"
     def inputFile = new File(testDataDir, 'data.json')
@@ -358,7 +367,6 @@ def getMongo() {
     }
     return mongoInstance
 }
-
 
 import org.gradle.api.plugins.jetty.internal.Monitor
 [transformTestWebService, acceptanceTestWar]*.doLast {

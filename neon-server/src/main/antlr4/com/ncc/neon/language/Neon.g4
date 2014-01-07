@@ -32,7 +32,8 @@ simpleWhereClause : STRING operator (WHOLE_NUMBER | NUMBER | STRING);
 additionalClauses
      : sort
      | group
-     | limit;
+     | limit
+     | offset;
 
 operator  : GT
           | GTE
@@ -64,6 +65,8 @@ functionName: 'first'
 
 limit: LIMIT WHOLE_NUMBER;
 
+offset: OFFSET WHOLE_NUMBER;
+
 // lexer rules
 GT: '>';
 GTE: '>=';
@@ -78,6 +81,7 @@ FROM: 'FROM' | 'from';
 WHERE: 'WHERE' | 'where';
 GROUP: 'GROUP BY' | 'group by';
 LIMIT: 'LIMIT' | 'limit';
+OFFSET: 'OFFSET' | 'offset';
 SORT: 'SORT BY' | 'sort by';
 SORT_DIRECTION : 'ASC'
                | 'asc'

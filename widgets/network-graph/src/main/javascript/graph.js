@@ -272,4 +272,3 @@ graphs.Graph.prototype.transform_ = function (node) {
     nodeTranslate[1] = translate[1];
     return "translate(" + nodeTranslate + ")";
 };
-

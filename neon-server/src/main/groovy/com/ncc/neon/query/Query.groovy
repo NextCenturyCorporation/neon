@@ -43,6 +43,7 @@ class Query {
     List<GroupByClause> groupByClauses = []
     List<SortClause> sortClauses = []
     LimitClause limitClause
+    OffsetClause offsetClause
 
     def getDatabaseName() {
         filter.databaseName

@@ -1,4 +1,5 @@
 package com.ncc.neon
+
 import com.ncc.neon.query.Query
 import com.ncc.neon.query.QueryGroup
 import com.ncc.neon.query.QueryOptions
@@ -11,6 +12,7 @@ import com.ncc.neon.util.DateUtils
 import org.json.JSONArray
 import org.junit.After
 import org.junit.Test
+
 /*
  * ************************************************************************
  * Copyright (c), 2013 Next Century Corporation. All Rights Reserved.
@@ -219,6 +221,38 @@ abstract class AbstractQueryExecutorIntegrationTest {
 
 
     @Test
+    void "group by count with limit"() {
+        def groupByStateClause = new GroupByFieldClause(field: 'state')
+        def sortByStateClause = new SortClause(fieldName: 'state', sortOrder: SortOrder.ASCENDING)
+        def limitClause = new LimitClause(limit: 2)
+        def countClause = new AggregateClause(name: 'counter', operation: 'count', field: '*')
+        def expected = readJson('groupByStateAsc_limit.json')
+        def result = queryExecutor.execute(new Query(filter: ALL_DATA_FILTER,
+                groupByClauses: [groupByStateClause],
+                aggregates: [countClause],
+                limitClause: limitClause,
+                sortClauses: [sortByStateClause]), QueryOptions.FILTERED_DATA)
+        assertOrderedQueryResult(expected, result)
+    }
+
+    @Test
+    void "group by count with offset"() {
+        def groupByStateClause = new GroupByFieldClause(field: 'state')
+        def sortByStateClause = new SortClause(fieldName: 'state', sortOrder: SortOrder.ASCENDING)
+        def offsetClause = new OffsetClause(offset: 1)
+        def countClause = new AggregateClause(name: 'counter', operation: 'count', field: '*')
+        def expected = readJson('groupByStateAsc_offset.json')
+        def result = queryExecutor.execute(new Query(filter: ALL_DATA_FILTER,
+                groupByClauses: [groupByStateClause],
+                aggregates: [countClause],
+                offsetClause: offsetClause,
+                sortClauses: [sortByStateClause]), QueryOptions.FILTERED_DATA)
+        assertOrderedQueryResult(expected, result)
+    }
+
+
+
+    @Test
     void "distinct"() {
         def expected = readJson('distinct.json')
         def result = queryExecutor.execute(new Query(filter: ALL_DATA_FILTER, fields: ['state'], isDistinct: true), QueryOptions.FILTERED_DATA)
@@ -238,6 +272,65 @@ abstract class AbstractQueryExecutorIntegrationTest {
                 limitClause: limitClause), QueryOptions.FILTERED_DATA)
         assertOrderedQueryResult(expected, result)
     }
+
+    @Test
+    void "distinct with offset"() {
+        def expected = readJson('distinct_offset.json')
+        def offsetClause = new OffsetClause(offset: 2)
+        // sort so the order is known
+        def sortByStateClause = new SortClause(fieldName: 'state', sortOrder: SortOrder.ASCENDING)
+        def result = queryExecutor.execute(new Query(filter: ALL_DATA_FILTER,
+                fields: ['state'],
+                isDistinct: true,
+                sortClauses: [sortByStateClause],
+                offsetClause: offsetClause), QueryOptions.FILTERED_DATA)
+        assertOrderedQueryResult(expected, result)
+    }
+
+    @Test
+    void "distinct with offset and limit"() {
+        def expected = readJson('distinct_offset_limit.json')
+        def offsetClause = new OffsetClause(offset: 1)
+        def limitClause = new LimitClause(limit: 1)
+
+        // sort so the order is known
+        def sortByStateClause = new SortClause(fieldName: 'state', sortOrder: SortOrder.ASCENDING)
+        def result = queryExecutor.execute(new Query(filter: ALL_DATA_FILTER,
+                fields: ['state'],
+                isDistinct: true,
+                sortClauses: [sortByStateClause],
+                offsetClause: offsetClause,
+                limitClause: limitClause), QueryOptions.FILTERED_DATA)
+        assertOrderedQueryResult(expected, result)
+    }
+
+    @Test
+    void "distinct with offset and limit more than remaining elements"() {
+        def expected = readJson('distinct_offset_limit_morethanmax.json')
+        def offsetClause = new OffsetClause(offset: 1)
+
+        // the actual number elements available is less than 10
+        def limitClause = new LimitClause(limit: 10)
+
+        // sort so the order is known
+        def sortByStateClause = new SortClause(fieldName: 'state', sortOrder: SortOrder.ASCENDING)
+        def result = queryExecutor.execute(new Query(filter: ALL_DATA_FILTER,
+                fields: ['state'],
+                isDistinct: true,
+                sortClauses: [sortByStateClause],
+                offsetClause: offsetClause,
+                limitClause: limitClause), QueryOptions.FILTERED_DATA)
+        assertOrderedQueryResult(expected, result)
+    }
+
+    @Test
+    void "offset greater than total number of results"() {
+        def offsetClause = new OffsetClause(offset: 100)
+        def result = queryExecutor.execute(new Query(filter: ALL_DATA_FILTER, offsetClause: offsetClause),
+                QueryOptions.FILTERED_DATA)
+        assert result.data.isEmpty()
+    }
+
 
     @Test
     void "add filter"() {
@@ -391,6 +484,19 @@ abstract class AbstractQueryExecutorIntegrationTest {
         // should be limited to 2 results
         assert result.data.size == 2
     }
+
+    @Test
+    void "query with offset"() {
+        def expected = readJson('offset.json')
+        def offsetClause = new OffsetClause(offset: 4)
+        // sort so the order is known
+        def sortBySalaryClause = new SortClause(fieldName: 'salary', sortOrder: SortOrder.ASCENDING)
+        def result = queryExecutor.execute(new Query(filter: ALL_DATA_FILTER,
+                sortClauses: [sortBySalaryClause],
+                offsetClause: offsetClause), QueryOptions.FILTERED_DATA)
+        assertOrderedQueryResult(expected, result)
+    }
+
 
     // not every date operator combination is tested dates since the other query tests exercise the operators extensively
 
