@@ -41,10 +41,12 @@ class HiveDataInserter extends DefaultTask{
     static final String TABLE_NAME = "records"
     private static final def FIELD_TYPES = [_id: "string", firstname: "string", lastname: "string", city: "string", state: "string", salary: "int", hiredate: "timestamp"]
 
+    String host = "xdata2:10000"
+    String hdfsUrl = "hdfs://xdata2:8020"
+
     @TaskAction
     void run(){
         Configuration conf = new Configuration()
-        def hdfsUrl = "hdfs://xdata2:8020"
         conf.set("fs.defaultFS", hdfsUrl)
         FileSystem fileSystem = FileSystem.get(conf)
 
@@ -71,7 +73,7 @@ class HiveDataInserter extends DefaultTask{
         def databaseName = "default"
 
         dataSource.setDriverClass(driverName)
-        dataSource.setJdbcUrl("jdbc:${databaseType}://xdata2:10000/${databaseName}")
+        dataSource.setJdbcUrl("jdbc:${databaseType}://${host}/${databaseName}")
         return dataSource.getConnection("","")
     }
 

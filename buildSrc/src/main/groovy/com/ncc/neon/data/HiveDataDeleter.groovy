@@ -36,6 +36,8 @@ class HiveDataDeleter extends DefaultTask {
     static final String DATABASE_NAME = "concurrencytest"
     static final String TABLE_NAME = "records"
 
+    String host = "xdata2:10000"
+
     @TaskAction
     void run(){
         def dataSource = new ComboPooledDataSource()
@@ -51,7 +53,7 @@ class HiveDataDeleter extends DefaultTask {
         def databaseType = "hive2"
         def databaseName = "default"
         dataSource.setDriverClass(driverName)
-        dataSource.setJdbcUrl("jdbc:${databaseType}://xdata2:10000/${databaseName}")
+        dataSource.setJdbcUrl("jdbc:${databaseType}://${host}/${databaseName}")
         return dataSource.getConnection("","")
     }
 

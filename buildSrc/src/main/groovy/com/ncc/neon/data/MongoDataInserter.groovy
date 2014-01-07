@@ -37,9 +37,11 @@ class MongoDataInserter extends DefaultTask{
     static final String TABLE_NAME = "records"
     static final ALL_DATA_FILENAME = 'data.json'
 
+    String host = "localhost"
+
     @TaskAction
     void run(){
-        def db = new MongoClient().getDB(DATABASE_NAME)
+        def db = new MongoClient(host).getDB(DATABASE_NAME)
         def collection = db.getCollection(TABLE_NAME)
         def dbList = parseJSON("/mongo-json/${ALL_DATA_FILENAME}")
         collection.insert(dbList)
