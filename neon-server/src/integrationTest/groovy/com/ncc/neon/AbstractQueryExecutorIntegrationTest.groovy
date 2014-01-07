@@ -663,7 +663,8 @@ abstract class AbstractQueryExecutorIntegrationTest {
         data.eachWithIndex { map, index ->
             // our expected data is json based. fixed-schema databases will have null values for those fields in
             // the actual data, so remove them to make it easier to compare
-            def cleanedRow = map.findAll { it.value }
+            // but don't remove the _id field. that is expected in all mongo rows (and it may be empty for aggregations)
+            def cleanedRow = map.findAll { it.value || it.key == '_id'}
             if (ordered) {
                 compareRowOrdered(expected[index], cleanedRow, "Row ${index}")
             } else {
