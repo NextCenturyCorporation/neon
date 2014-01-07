@@ -174,7 +174,7 @@ class QueryCreator extends NeonBaseListener {
         // count can take all fields a field name so check for that specially
         aggregateClause.operation = ctx.functionName()?.text ?: ctx.count()?.text
         aggregateClause.field = ctx.STRING()?.text ?: ctx.ALL_FIELDS()?.text
-        aggregateClause.name = "${aggregateClause.operation}(${ctx.STRING()})"
+        aggregateClause.name = "${aggregateClause.operation}(${aggregateClause.field})"
         aggregates << aggregateClause
     }
 
