@@ -276,27 +276,25 @@ def getAcceptanceTestServicePort() {
     return getAcceptanceTestPort() + 4
 }
 
-task stopAcceptanceTestJetty{
-    dependsOn 'stopAcceptanceTestWar', 'stopTransformJetty'
-}
 
 task stopAcceptanceTestWar(type: org.gradle.api.plugins.jetty.JettyStop){
-    dependsOn 'runAcceptanceTests', 'acceptanceTestWar'
     stopPort = getAcceptanceTestPort() + 2
     stopKey = 'stop'
 }
 
 task stopTransformJetty(type: org.gradle.api.plugins.jetty.JettyStop){
-    dependsOn 'runAcceptanceTests', 'transformTestWebService'
     stopPort = getAcceptanceTestServicePort() + 2
     stopKey = 'stop'
 }
 
-task acceptanceTest{
-    dependsOn 'stopAcceptanceTestJetty'
+task afterAcceptanceTest{
+    dependsOn 'stopAcceptanceTestWar', 'stopTransformJetty'
+    doLast{
+        deleteAcceptanceTestData()
+    }
 }
 
-task runAcceptanceTests(type: GruntTask) {
+task acceptanceTest(type: GruntTask) {
     dependsOn 'assemble', 'acceptanceTestWar', 'generateMongoJson', 'transformTestWebService'
     group = TEST_GROUP
     gruntArgs "jasmine:acceptance", "--outfile=${jsOutputFile}"
@@ -308,11 +306,7 @@ task runAcceptanceTests(type: GruntTask) {
     }
 }
 
-gradle.taskGraph.afterTask { task ->
-    if (task == acceptanceTest) {
-        deleteAcceptanceTestData()
-    }
-}
+acceptanceTest.finalizedBy afterAcceptanceTest
 
 task generateMongoJson {
     def outputDir = "${testDataDir}/mongo-json"

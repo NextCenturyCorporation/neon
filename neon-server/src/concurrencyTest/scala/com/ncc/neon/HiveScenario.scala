@@ -64,7 +64,7 @@ class HiveScenario extends Simulation {
     .headers(headers_4)
     .fileBody("HiveScenario_request_8.txt")
   )
-    .pause(20)
+    .pause(25)
     .exec(http("request_9")
     .post("/neon/services/queryservice/querywithselectiononly")
     .headers(headers_4)

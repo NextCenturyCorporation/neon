@@ -77,7 +77,7 @@ task concurrencyTestWar(type: org.gradle.api.plugins.jetty.JettyRunWar) {
 }
 
 task insertDataIntoMongo(type: com.ncc.neon.data.MongoDataInserter) {
-    dependsOn 'deleteDataFromMongoBeforeInsert'
+    dependsOn 'deleteDataFromMongoBeforeInsert', 'generateMongoJson'
     host = getMongoHost()
 }
 task deleteDataFromMongoBeforeInsert(type: com.ncc.neon.data.MongoDataDeleter) {
@@ -85,7 +85,7 @@ task deleteDataFromMongoBeforeInsert(type: com.ncc.neon.data.MongoDataDeleter) {
 }
 
 task insertDataIntoHive(type: com.ncc.neon.data.HiveDataInserter) {
-    dependsOn 'deleteDataFromHiveBeforeInsert'
+    dependsOn 'deleteDataFromHiveBeforeInsert', 'generateHiveCSV', 'generateHiveJson'
     host = getHiveHost()
     hdfsUrl = getHdfsUrl()
 }
@@ -113,7 +113,6 @@ task deleteDataFromMongo(type: com.ncc.neon.data.MongoDataDeleter) {
 task deleteDataFromHive(type: com.ncc.neon.data.HiveDataDeleter) {
     host = getHiveHost()
 }
-
 
 def getMongoHost() {
     return project.hasProperty("mongo.hosts") ? getProperty("mongo.hosts") : "localhost"
