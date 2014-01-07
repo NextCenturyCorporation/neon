@@ -1,1 +1,0 @@
-{"databaseName":"concurrencytest","tableName":"records"}
