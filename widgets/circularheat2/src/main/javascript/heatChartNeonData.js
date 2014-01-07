@@ -9,6 +9,21 @@ var HeatChartNeonData = (function () {
 
     	initialize();
 
+    	/** Database with time data. */
+        // TODO: Don't hard code this
+        var databaseName = "sampleDB";
+
+        /** Database table/collection with time data. */
+        // TODO: Don't hard code this
+        var tableName = "sampleTable";
+
+        /** Column/field with time data */
+        // TODO: Don't hard code this
+        var dateField = "time"; 
+
+        /** The key to filter that this chart is applying to the global data set */
+        var filterKey;
+
     	/** Object for doing time computations */
 		var _time = new HeatChartTime();
 
@@ -22,9 +37,15 @@ var HeatChartNeonData = (function () {
 
 	        neon.query.SERVER_URL = "https://localhost:9443/neon"/* TODO: $("#neon-server").val()*/;
 
-	        neon.eventing.messaging.registerForNeonEvents({
-	            activeDatasetChanged: onDatasetChanged,
-	            filtersChanged: onFiltersChanged
+	        neon.ready(function() {
+		        neon.eventing.messaging.registerForNeonEvents({
+		            activeDatasetChanged: onDatasetChanged,
+		            filtersChanged: onFiltersChanged
+		        });
+		        // TODO: Shouldn't be able to do this next line until a dataset announces itself.
+	        	neon.query.registerForFilterKey(databaseName, tableName, function (filterResponse) {
+            		filterKey = filterResponse;
+        		});
 	        });
 	    }
 
@@ -107,6 +128,20 @@ var HeatChartNeonData = (function () {
 	        return chunks;
 	    }
 
+	    /**
+	     * Apply a filter to the global data set to restrict data to data that occurrred within the
+	     * time of the chart
+	     * @param {Date} start the starting time of the chart
+	     * @param {Date} end the ending time of the chart
+	     */
+	    function filterTimeRange(start, end) {
+	        var startClause = neon.query.where(dateField, ">=", start);
+    	    var endClause = neon.query.where(dateField, "<=", end);
+        	var filterClause = neon.query.and(startClause, endClause);
+            var filter = new neon.query.Filter().selectFrom(databaseName, tableName).where(filterClause);;
+            //neon.eventing.publishing.replaceFilter(filterKey, filter);
+	    }
+
 		return {
 
 			/**
@@ -120,14 +155,25 @@ var HeatChartNeonData = (function () {
 			 *	errorCallback - the callback to use to indicate an unsuccesful fetch.  The first argument is a string describing the error encountered.
 			 */
 			fetch: function(options) {
-				// TODO: Filter to specific date range
-				var date = options.date || new Date(2013, 0);
-				var mode = options.mode || 'year';
-			    var clientId = neon.eventing.messaging.getInstanceId();
-			    var stateObject = this._GET(date, mode, updateDataCallback, errorCallback);
-			    if (stateObject) {
-		        	neon.query.saveState(clientId, stateObject);
-		        }
+				if (!filterKey) {
+					var chartData = this;
+					// Neon not setup yet.  Need to wait and reinitiate fetch once neon is setup.
+					//neon.ready(function() {
+					//	chartData.fetch(options);
+					//});
+				}
+				else {
+					// TODO: Filter to specific date range
+					var date = options.date || new Date(2013, 0);
+					var mode = options.mode || 'year';
+			    	var endpoints = _time.computeChartEnds(date, mode);
+					filterTimeRange(endpoints[0], endpoints[1]);
+				    var clientId = neon.eventing.messaging.getInstanceId();
+				    var stateObject = this._GET(date, mode, updateDataCallback, errorCallback);
+				    if (stateObject) {
+			        	neon.query.saveState(clientId, stateObject);
+			        }
+			    }
 			},
 
 			/**
@@ -163,8 +209,6 @@ var HeatChartNeonData = (function () {
 			 * @return neon state object to be used to save the state
 			 */
 			_GET: function(date, mode, successCallback, errorCallback) {
-				// TODO: Don't have dateField hard coded
-		        var dateField = 'time';
 	        	// TODO: Filter out data beyond date range
 	        	var columnGrouping;
 	        	var rowGrouping;
@@ -195,8 +239,6 @@ var HeatChartNeonData = (function () {
 		        		break;
 		    	}
 
-		        var databaseName = "sampleDB";
-		        var tableName = "sampleTable";
 		        var query = new neon.query.Query()
 		            .selectFrom(databaseName, tableName)
 		            .groupBy(columnGrouping, rowGrouping)
