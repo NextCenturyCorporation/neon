@@ -13,6 +13,9 @@ public interface NeonListener extends ParseTreeListener {
 	void enterSort(NeonParser.SortContext ctx);
 	void exitSort(NeonParser.SortContext ctx);
 
+	void enterCount(NeonParser.CountContext ctx);
+	void exitCount(NeonParser.CountContext ctx);
+
 	void enterFieldList(NeonParser.FieldListContext ctx);
 	void exitFieldList(NeonParser.FieldListContext ctx);
 

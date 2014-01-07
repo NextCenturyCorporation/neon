@@ -16,6 +16,9 @@ public class NeonBaseListener implements NeonListener {
 	@Override public void enterSort(NeonParser.SortContext ctx) { }
 	@Override public void exitSort(NeonParser.SortContext ctx) { }
 
+	@Override public void enterCount(NeonParser.CountContext ctx) { }
+	@Override public void exitCount(NeonParser.CountContext ctx) { }
+
 	@Override public void enterFieldList(NeonParser.FieldListContext ctx) { }
 	@Override public void exitFieldList(NeonParser.FieldListContext ctx) { }
 

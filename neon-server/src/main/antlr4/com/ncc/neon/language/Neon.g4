@@ -15,8 +15,6 @@ selectFields
     : ALL_FIELDS
     | fieldList;
 
-ALL_FIELDS : '*';
-
 fieldList : STRING (',' STRING)*;
 
 where: WHERE whereClause;
@@ -53,19 +51,24 @@ group: GROUP groupClause (',' groupClause)*;
 
 groupClause: STRING | function;
 
-function: functionName '(' STRING ')';
+// count is handled separately because it can take '*' as input
+function: functionName '(' STRING ')' | count '(' ALL_FIELDS ')';
 
 functionName: 'first'
             | 'last'
             | 'max'
-            | 'count'
+            | count
             | 'min'
             | 'avg'
             | 'sum';
 
+count: 'count';
+
 limit: LIMIT WHOLE_NUMBER;
 
 offset: OFFSET WHOLE_NUMBER;
+
+ALL_FIELDS : '*';
 
 // lexer rules
 GT: '>';
