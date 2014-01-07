@@ -30,12 +30,10 @@ var HeatChartNeonData = (function () {
 
 		function onFiltersChanged(message) {
 			// TODO: Handle filter change
-	        alert("Filters changed");
 	    }
 
 	    function onDatasetChanged(message) {
 	    	// TODO: Handle dataset change
-	    	alert("Dataset changed");
 	    	fetch();
 	        // databaseName = message.database;
 	        // tableName = message.table;
