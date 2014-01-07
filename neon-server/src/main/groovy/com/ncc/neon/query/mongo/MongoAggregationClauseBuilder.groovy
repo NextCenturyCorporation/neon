@@ -87,9 +87,7 @@ class MongoAggregationClauseBuilder {
             lhs = '$sum'
             rhs = createSumRhs(field)
         }
-        def dbObj = new BasicDBObject(lhs, rhs)
-        println "dbObj = ${dbObj}"
-        return dbObj
+        return new BasicDBObject(lhs, rhs)
     }
 
     private static def createSumRhs(field) {
