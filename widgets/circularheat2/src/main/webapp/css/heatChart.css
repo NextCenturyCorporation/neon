@@ -1,0 +1,35 @@
+/* Additional css for testing purposes */
+#baseDate
+{
+	position: absolute;
+	right: 0;
+	top: 0;
+}
+
+#chart svg
+{
+	width: 650px;
+	height: 650px;
+}
+
+#chart
+{
+	width: 300px;
+	height: 300px;
+}
+
+#chart .labels
+{
+	fill: #000;
+	letter-spacing: 0px;
+}
+
+#chart .labels.segment
+{
+	font-size: 12px;
+}
+
+#chart path
+{
+	stroke-width: 0.5px;
+}
