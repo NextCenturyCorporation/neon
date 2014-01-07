@@ -99,5 +99,5 @@ class MongoScenario extends Simulation {
     .fileBody("MongoScenario_request_17.txt")
   )
 
-  setUp(scn.users(10).ramp(10).protocolConfig(httpConf))
+  setUp(scn.users(10).ramp(5).protocolConfig(httpConf))
 }
