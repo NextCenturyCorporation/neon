@@ -226,7 +226,7 @@ neon.ready(function () {
             query.aggregate(neon.query.SUM, sizeByField, sizeByField);
         }
         else {
-            query.aggregate(neon.query.COUNT, null, coreMap.Map.DEFAULT_SIZE_MAPPING);
+            query.aggregate(neon.query.COUNT, '*', coreMap.Map.DEFAULT_SIZE_MAPPING);
         }
     }
 

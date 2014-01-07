@@ -70,7 +70,7 @@ neon.ready(function () {
             .selectFrom(databaseName, tableName)
             .groupBy(groupByDayClause, groupByHourClause)
             .where(dateField, '!=', null)
-            .aggregate(neon.query.COUNT, null, 'count');
+            .aggregate(neon.query.COUNT, '*', 'count');
 
         var stateObject = buildStateObject(dateField, query);
 

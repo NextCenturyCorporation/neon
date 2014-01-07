@@ -32,11 +32,13 @@ import org.gradle.api.tasks.TaskAction
  */
 
 class MongoDataDeleter extends DefaultTask {
-    static final String DATABASE_NAME = "concurrencyTest"
+    static final String DATABASE_NAME = "concurrencytest"
+    String host = "localhost"
+
 
     @TaskAction
     void run(){
-        def db = new MongoClient().getDB(DATABASE_NAME)
+        def db = new MongoClient(host).getDB(DATABASE_NAME)
         db.dropDatabase()
     }
 }

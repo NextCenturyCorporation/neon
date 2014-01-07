@@ -72,7 +72,7 @@ describe('query mapping', function () {
 
     it('select subset of fields from result', function () {
         var fields = ['firstname', 'lastname'];
-        var expected = [];
+        var expected = [''];
         allData.forEach(function (row) {
             var expectedRow = {};
             // the _id field is always included from mongo
@@ -141,10 +141,26 @@ describe('query mapping', function () {
         var query = baseQuery()
             .groupBy('state')
             .sortBy('state', neon.query.ASCENDING)
-            .aggregate(neon.query.COUNT, null, 'counter');
+            .aggregate(neon.query.COUNT, '*', 'counter');
         var expectedData = getJSONFixture('groupByStateAsc_count.json');
         assertQueryResults(query, expectedData);
     });
+
+    it('count all fields', function () {
+        var query = baseQuery()
+            .aggregate(neon.query.COUNT, '*', 'counter');
+        var expectedData = getJSONFixture('count.json');
+        assertQueryResults(query, expectedData);
+    });
+
+    it('count field with missing value', function () {
+        // lastname has one record with no data, so count should return 1 less value
+        var query = baseQuery()
+            .aggregate(neon.query.COUNT, 'lastname', 'counter');
+        var expectedData = getJSONFixture('count_missing_field.json');
+        assertQueryResults(query, expectedData);
+    });
+
 
     it('distinct fields', function () {
         var query = baseQuery().distinct().withFields('state').limit(2).sortBy('state', neon.query.ASCENDING);

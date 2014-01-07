@@ -33,24 +33,27 @@ import com.mchange.v2.c3p0.ComboPooledDataSource
  */
 
 class HiveDataDeleter extends DefaultTask {
-    static final String DATABASE_NAME = "concurrencyTest"
+    static final String DATABASE_NAME = "concurrencytest"
     static final String TABLE_NAME = "records"
+
+    String host = "xdata2:10000"
 
     @TaskAction
     void run(){
-        Connection connection = createConnection()
+        def dataSource = new ComboPooledDataSource()
+        Connection connection = createConnection(dataSource)
         execute(connection, "drop table if exists ${DATABASE_NAME}.${TABLE_NAME}")
         execute(connection, "drop database if exists ${DATABASE_NAME}")
         connection.close()
+        dataSource.close()
     }
 
-    Connection createConnection() {
+    Connection createConnection(dataSource) {
         def driverName = "org.apache.hive.jdbc.HiveDriver"
         def databaseType = "hive2"
         def databaseName = "default"
-        def dataSource = new ComboPooledDataSource()
         dataSource.setDriverClass(driverName)
-        dataSource.setJdbcUrl("jdbc:${databaseType}://xdata2:10000/${databaseName}")
+        dataSource.setJdbcUrl("jdbc:${databaseType}://${host}/${databaseName}")
         return dataSource.getConnection("","")
     }
 
