@@ -89,7 +89,7 @@ neon.ready(function () {
             query.aggregate(neon.query.SUM, yAttr, yAttr);
         }
         else {
-            query.aggregate(neon.query.COUNT, null, COUNT_FIELD_NAME);
+            query.aggregate(neon.query.COUNT, '*', COUNT_FIELD_NAME);
         }
         var stateObject = buildStateObject(query);
         neon.query.executeQuery(query, doDrawChart);

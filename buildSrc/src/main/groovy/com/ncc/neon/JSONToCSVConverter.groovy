@@ -36,38 +36,61 @@ class JSONToCSVConverter {
      *
      * @param jsonText
      * @param outputCsvFile
-     * @param outputFieldsField
-     * @param excludes A set of fields to exclude
+     * @param outputFieldsFile
+     * @param excludes Any fields to exclude from the resulting csv
      */
     static convertToCSV(jsonText, outputCsvFile, outputFieldsFile, excludes = [] as Set) {
-        def map = ([:] as LinkedHashMap).withDefault { [] }
+        def (fields, rows) = parseJson(jsonText, excludes)
+        writeCSV(outputCsvFile, fields, rows)
+        writeFieldsFile(outputFieldsFile, fields)
+    }
+
+    private static def parseJson(jsonText, excludes) {
+        def fields = [] as LinkedHashSet
+        def rows = []
+
         def jsonArray = new JSONArray(jsonText)
         jsonArray.length().times { index ->
+            def row = [:]
             def jsonObject = jsonArray.get(index)
             jsonObject.keys().each { key ->
                 if (!excludes.contains(key)) {
-                    map[key] << jsonObject.get(key)
+                    row[key] = jsonObject.get(key)
+                    fields << key
                 }
             }
+            rows << row
         }
+        return [fields, rows]
+
+    }
+
+    private static void writeCSV(outputCsvFile, fields, rows) {
         outputCsvFile.parentFile.mkdirs()
         outputCsvFile.withWriter { w ->
-            jsonArray.length().times { rowIndex ->
-                def row = []
-                map.keySet().each { field ->
-                    def val = map[field][rowIndex]
-                    if (field =~ DATE_REGEX) {
-                        val = val.replaceAll("T", " ").replaceAll("Z", "")
+            // since this data comes from json, each row may have different row keys so normalize here by adding
+            // empty values for keys that this row did not have
+            rows.each { row ->
+                def rowWithEmptyValues = []
+                fields.each { field ->
+                    def val = row[field] ?: ''
+                    if (val) {
+                        if (field =~ DATE_REGEX) {
+                            val = val.replaceAll("T", " ").replaceAll("Z", "")
+                        }
                     }
-                    row << val
+                    rowWithEmptyValues << val
                 }
-                w.println(row.join(","))
+                w.println(rowWithEmptyValues.join(","))
             }
-        }
-        outputFieldsFile.withWriter { w ->
-            // use print not println since we're just going to read/parse the text and we don't want any new lines
-            w.print map.keySet().join(",")
         }
     }
 
+
+    private static void writeFieldsFile(outputFieldsFile, fields) {
+        outputFieldsFile.withWriter { w ->
+            // use print not println since we're just going to read/parse the text and we don't want any new lines
+            w.print fields.join(",")
+        }
+    }
 }
