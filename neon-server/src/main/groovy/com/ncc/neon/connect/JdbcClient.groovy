@@ -62,7 +62,7 @@ class JdbcClient implements ConnectionClient {
         ResultSet resultSet
         try {
             statement = connection.createStatement()
-            resultSet = statement.executeQuery(modifyQueryString(query, offset))
+            resultSet = statement.executeQuery(addOffsetToLimitQuery(query, offset))
             return createMappedValuesFromResultSet(resultSet, offset)
         }
         finally {
@@ -80,9 +80,9 @@ class JdbcClient implements ConnectionClient {
      * @param offset
      * @return
      */
-    private static String modifyQueryString(String query, int offset) {
+    private static String addOffsetToLimitQuery(String query, int offset) {
         if (offset > 0) {
-            // replace the limit X clause with limi X+offset so we can still return the correct number
+            // replace the limit X clause with limit X+offset so we can still return the correct number
             // of records
             def matcher = (query =~ LIMIT_REGEX)
             if (matcher) {
