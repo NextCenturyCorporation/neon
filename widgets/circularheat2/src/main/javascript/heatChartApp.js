@@ -33,7 +33,7 @@ var HeatChartApp = (function () {
 			execute("year5");
 		});
 
-		var chartTime = new HeatChartTime();
+		var chartTime = new HeatChartTime(date);
 		var chartWidget = new HeatChartWidget();
 		var chartData = (dataInject == undefined) ? new HeatChartData() : dataInject;
 		chartData.setUpdateCallback(update);

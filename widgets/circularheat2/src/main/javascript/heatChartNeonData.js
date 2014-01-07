@@ -9,14 +9,13 @@ var HeatChartNeonData = (function () {
 
     	initialize();
 
-    	/**
-    	 * Callback to call if new data is recieved from backend server.
-    	 */
+    	/** Object for doing time computations */
+		var _time = new HeatChartTime();
+
+    	/** Callback to call if new data is recieved from backend server. */
     	var updateDataCallback;
 
-    	/**
-    	  * Callback to call if error occurs in asynchronous processing
-    	  */
+    	/** Callback to call if error occurs in asynchronous processing */
     	var errorCallback;
 
 	    function initialize() {
@@ -30,10 +29,12 @@ var HeatChartNeonData = (function () {
 	    }
 
 		function onFiltersChanged(message) {
+			// TODO: Handle filter change
 	        alert("Filters changed");
 	    }
 
 	    function onDatasetChanged(message) {
+	    	// TODO: Handle dataset change
 	    	alert("Dataset changed");
 	    	fetch();
 	        // databaseName = message.database;
@@ -46,20 +47,58 @@ var HeatChartNeonData = (function () {
 
 
 
-	    function translateData(queryResults) {
+	    function postProcessResults(queryResults, mode, baseDate) {
+
+	    	var modeInfo = _time.getMode(mode);
+
 	        var rawData = queryResults.data;
 
 	        var chunks = [];
 
 	        _.each(rawData, function (element) {
-	            chunks[(element.day-1) * 12 + element.month] = {
-	            	title: 'Hi',
+	        	// TODO: Handle more than just 'year' mode
+	        	var chunk;
+	        	var timeTitle;
+				switch (mode) {
+					case "hour":
+						chunk = element.minute + modeInfo.columns * element.second;
+						timeTitle = (new Date(baseDate.getFullYear(), baseDate.getMonth(), baseDate.getDate(), 
+							baseDate.getHours(), element.minute, element.second, 0)).toString();
+						break;
+					case "day":
+						chunk = element.hour + modeInfo.columns * element.minute;
+						timeTitle = (new Date(baseDate.getFullYear(), baseDate.getMonth(), baseDate.getDate(), 
+							element.hour, element.minute, 0, 0)).toString();
+						break;
+					case "week":
+						chunk = (element.day - 1) + modeInfo.columns * element.hour;
+						timeTitle = (new Date(baseDate.getFullYear(), baseDate.getMonth(), element.day, 
+							element.hour, 0, 0, 0)).toString();
+						break;
+					case "month":
+						chunk = (element.day - 1) + modeInfo.columns * element.hour;
+						timeTitle = (new Date(baseDate.getFullYear(), baseDate.getMonth(), element.day, 
+							element.hour, 0, 0, 0)).toString();
+						break;
+					case "year":
+						chunk = (element.month-1) + modeInfo.columns * (element.day-1);
+						timeTitle = (new Date(baseDate.getFullYear(), element.month-1, element.day, 0, 0, 0, 0)).toString();
+						break;
+					case "year5":
+						chunk = (element.year-baseDate.getFullYear()+2) + modeInfo.columns * (element.month-1);
+						timeTitle = (new Date(element.year, element.month-1, 1, 0, 0, 0, 0)).toString();
+						break;
+
+				}
+	            chunks[chunk] = {
+	            	title: timeTitle,
 	            	value: element.count
 	            }
 	        });
 
 	        // Any chunks that were left undefined need to be defined as 0 counts.
-	        for(var i=0; i<12*31; ++i) {
+	        var numChunks = modeInfo.columns * modeInfo.rows;
+	        for(var i=0; i<numChunks; ++i) {
 	        	if (!chunks[i]) {
 	        		chunks[i] = {
 	        			title: '',
@@ -83,9 +122,11 @@ var HeatChartNeonData = (function () {
 			 *	errorCallback - the callback to use to indicate an unsuccesful fetch.  The first argument is a string describing the error encountered.
 			 */
 			fetch: function(options) {
-
+				// TODO: Filter to specific date range
+				var date = options.date || new Date(2013, 0);
+				var mode = options.mode || 'year';
 			    var clientId = neon.eventing.messaging.getInstanceId();
-			    var stateObject = this._GET(null, null, updateDataCallback, errorCallback);
+			    var stateObject = this._GET(date, mode, updateDataCallback, errorCallback);
 			    if (stateObject) {
 		        	neon.query.saveState(clientId, stateObject);
 		        }
@@ -96,13 +137,7 @@ var HeatChartNeonData = (function () {
 			 * @param {function} callback callback to call.  Will pass array of time chunk data as first argument.
 			 */
 			setUpdateCallback: function(callback) {
-	        	// Need a function that translates Neon data into time chunks which is what heat map is expecting.
-	        	updateDataCallback = function(queryResults) {
-        			var chunks = translateData(queryResults);
-		        	if (typeof callback === 'function') {
-        				callback(chunks);
-        			}
-	        	};
+	        	updateDataCallback = callback;
 			},
 
 			/**
@@ -130,20 +165,56 @@ var HeatChartNeonData = (function () {
 			 * @return neon state object to be used to save the state
 			 */
 			_GET: function(date, mode, successCallback, errorCallback) {
+				// TODO: Don't have dateField hard coded
 		        var dateField = 'time';
-		        var mode = 'year';
-		        var groupByMonthClause = new neon.query.GroupByFunctionClause(neon.query.HOUR, dateField, 'month');
-		        var groupByDayClause = new neon.query.GroupByFunctionClause(neon.query.DAY, dateField, 'day');
+	        	// TODO: Filter out data beyond date range
+	        	var columnGrouping;
+	        	var rowGrouping;
+	        	switch (mode) {
+	        		case 'hour':
+		        		columnGrouping = new neon.query.GroupByFunctionClause(neon.query.MINUTE, dateField, 'minute');
+		        		rowGrouping = new neon.query.GroupByFunctionClause(neon.query.SECOND, dateField, 'second');
+		        		break;
+	        		case 'day':
+		        		columnGrouping = new neon.query.GroupByFunctionClause(neon.query.HOUR, dateField, 'hour');
+		        		rowGrouping = new neon.query.GroupByFunctionClause(neon.query.MINUTE, dateField, 'minute');
+		        		break;
+	        		case 'week':
+		        		columnGrouping = new neon.query.GroupByFunctionClause('dayOfWeek', dateField, 'day');
+		        		rowGrouping = new neon.query.GroupByFunctionClause(neon.query.HOUR, dateField, 'hour');
+		        		break;
+	        		case 'month':
+		        		columnGrouping = new neon.query.GroupByFunctionClause(neon.query.DAY, dateField, 'day');
+		        		rowGrouping = new neon.query.GroupByFunctionClause(neon.query.HOUR, dateField, 'hour');
+		        		break;
+	        		case 'year':
+		        		columnGrouping = new neon.query.GroupByFunctionClause(neon.query.MONTH, dateField, 'month');
+		        		rowGrouping = new neon.query.GroupByFunctionClause(neon.query.DAY, dateField, 'day');
+		        		break;
+	        		case 'year5':
+		        		columnGrouping = new neon.query.GroupByFunctionClause(neon.query.YEAR, dateField, 'year');
+		        		rowGrouping = new neon.query.GroupByFunctionClause(neon.query.MONTH, dateField, 'month');
+		        		break;
+		    	}
 
 		        var databaseName = "sampleDB";
 		        var tableName = "sampleTable";
 		        var query = new neon.query.Query()
 		            .selectFrom(databaseName, tableName)
-		            .groupBy(groupByMonthClause, groupByDayClause)
+		            .groupBy(columnGrouping, rowGrouping)
 		            .where(dateField, '!=', null)
 		            .aggregate(neon.query.COUNT, null, 'count');
 
 		        var stateObject /* TODO: = buildStateObject(dateField, query)*/;
+
+		        // Post-processing requires the mode, so we setup a callback that passes the mode along with
+		        // the query results.
+		        successCallback = function(queryResults) {
+        			var chunks = postProcessResults(queryResults, mode, date);
+		        	if (typeof updateDataCallback === 'function') {
+        				updateDataCallback(chunks);
+        			}
+		        };
 
 		        neon.query.executeQuery(query, successCallback, errorCallback);
 		        return stateObject;

@@ -32,25 +32,13 @@
  
     <script type="text/javascript">
         $(document).ready(function() {
-            dataInject = new HeatChartNeonData();
-            // dataInject._GET = function(date, mode, successCallback, failureCallback) {
-            //     results = {
-            //         data: []
-            //     };
-            //     for(var month=0; month<12;++month) {
-            //         for(var day=0; day<31; ++day) {
-            //             results.data[month*31+day] = {
-            //                 month: month,
-            //                 day: day+1,
-            //                 count: day
-            //             };
-            //         }
-            //     }
-            //     setTimeout(function(){
-            //         successCallback(results);
-            //     }, 0);
-            // };
-            var heatChart = new HeatChartApp("year", new Date(2013, 0) ,dataInject);  
+
+            // TODO: Think we need to be waiting on OWF.ready somewhere, because we get an error if we
+            // execute this block to quickly
+            window.setTimeout(function() {
+                dataInject = new HeatChartNeonData();
+                var heatChart = new HeatChartApp("year", new Date(2013, 0) ,dataInject);  
+            }, 1000);
         });
     </script>
   

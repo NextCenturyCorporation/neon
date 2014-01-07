@@ -1,6 +1,7 @@
 var HeatChartTime = (function () {
 
-	var time = function() {
+	var time = function(baseDate) {
+		baseDate = baseDate || new Date();
 
 		var _MONTHS_SHORT = ['JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN', 'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC'],
 
@@ -87,7 +88,7 @@ var HeatChartTime = (function () {
 				columns: 5,
 				rowLabels: _MONTHS_SHORT,
 				columnLabels: (function() {
-					var baseYear = new Date().getFullYear(),
+					var baseYear = baseDate.getFullYear(),
 						labels = [];
 
 					labels.push(baseYear - 2);
@@ -110,6 +111,31 @@ var HeatChartTime = (function () {
 
 			getDayOfWeekLabel: function(day) {
 				return _DAYS_SHORT[day];
+			},
+
+			/**
+			  * Return a pretty label for the day of the month (e.g. 1st, 15th, 22nd, ...).
+			  * @param the day of the month (1-31)
+			  */
+			getDayOfMonthLabel: function(day) {
+				switch(day) {
+					case 1: case 21: case 31:
+						return day+"st";
+					case 2: case 22:
+						return day+"nd";
+					case 3: case 23:
+						return day+"rd";
+					default:
+						return day+"th";
+				}
+			}, 
+
+			/**
+			 * Return the minutes padded with a 0 if necessary to be used in time labels like 12:02.
+			 * @param the minute into the hour
+			 */
+			getMinuteLabel: function(minute) {
+				return (minute<10 ? '0' : '') + minute;
 			},
 
 			getMode: function(mode) {
