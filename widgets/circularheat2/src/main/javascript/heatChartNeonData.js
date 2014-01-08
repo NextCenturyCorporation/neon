@@ -38,10 +38,10 @@ var HeatChartNeonData = (function () {
 	        neon.query.SERVER_URL = "https://localhost:9443/neon"/* TODO: $("#neon-server").val()*/;
 
 	        neon.ready(function() {
-		        neon.eventing.messaging.registerForNeonEvents({
-		            activeDatasetChanged: onDatasetChanged,
-		            filtersChanged: onFiltersChanged
-		        });
+	        neon.eventing.messaging.registerForNeonEvents({
+	            activeDatasetChanged: onDatasetChanged,
+	            filtersChanged: onFiltersChanged
+	        });
 		        // TODO: Shouldn't be able to do this next line until a dataset announces itself.
 	        	neon.query.registerForFilterKey(databaseName, tableName, function (filterResponse) {
             		filterKey = filterResponse;
@@ -155,14 +155,7 @@ var HeatChartNeonData = (function () {
 			 *	errorCallback - the callback to use to indicate an unsuccesful fetch.  The first argument is a string describing the error encountered.
 			 */
 			fetch: function(options) {
-				if (!filterKey) {
-					var chartData = this;
-					// Neon not setup yet.  Need to wait and reinitiate fetch once neon is setup.
-					//neon.ready(function() {
-					//	chartData.fetch(options);
-					//});
-				}
-				else {
+				if (filterKey) {
 					// TODO: Filter to specific date range
 					var date = options.date || new Date(2013, 0);
 					var mode = options.mode || 'year';
@@ -173,7 +166,7 @@ var HeatChartNeonData = (function () {
 				    if (stateObject) {
 			        	neon.query.saveState(clientId, stateObject);
 			        }
-			    }
+				}
 			},
 
 			/**
@@ -243,7 +236,7 @@ var HeatChartNeonData = (function () {
 		            .selectFrom(databaseName, tableName)
 		            .groupBy(columnGrouping, rowGrouping)
 		            .where(dateField, '!=', null)
-		            .aggregate(neon.query.COUNT, null, 'count');
+		            .aggregate(neon.query.COUNT, '*', 'count');
 
 		        var stateObject /* TODO: = buildStateObject(dateField, query)*/;
 
