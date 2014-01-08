@@ -57,7 +57,7 @@ task gatling {
 
 task copyConcurrencyWebapp(type: Copy) {
     from 'src/concurrencyTest/webapp'
-    into "${buildDir}/tmp/concurrencyTestWar/webapp"
+    into "${buildDir}/tmp/concurrencyRecorder/webapp"
 }
 
 task concurrencyRecorder(type: org.gradle.api.plugins.jetty.JettyRunWar) {

@@ -122,8 +122,6 @@ dependencies {
     }
     compile project(":metadata")
 
-
-
     providedCompile 'javax.servlet:javax.servlet-api:3.0.1'
 
     runtime 'cglib:cglib:2.2.2'
