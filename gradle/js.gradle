@@ -19,7 +19,7 @@ project.ext {
     imgDependenciesOutputDir = file("${dependenciesDir}/img")
 
     npmExecutable = Os.isFamily(Os.FAMILY_WINDOWS) ? "npm.cmd" : "npm"
-	yuidocExecutable = Os.isFamily(Os.FAMILY_WINDOWS) ? "yuidoc.cmd" : "yuidoc"	
+    yuidocExecutable = Os.isFamily(Os.FAMILY_WINDOWS) ? "yuidoc.cmd" : "yuidoc"
 }
 
 task gruntjs(type: GruntTask) {
@@ -56,7 +56,7 @@ task createPackageJson(type: Copy) {
 task jsDocs {
     description = 'Creates the javascript API documentation.'
     group = "Documentation"
-	
+
     // replace the tokens in the yuidoc descriptor file
     doFirst {
         new File(jsDocDir).mkdirs()
@@ -69,31 +69,31 @@ task jsDocs {
                 filter(ReplaceTokens, tokens: [
                         projectDir: projectDir.absolutePath,
                         libraryName: libraryName.toString(),
-                        outDir: jsDocDir.toString().replace("\\","/")
+                        outDir: jsDocDir.toString().replace("\\", "/")
                 ]
                 )
             }
             into temporaryDir
         }
     }
-	doLast {
-		def baseArgs = ["${projectDir}/node_modules/.bin/${yuidocExecutable}","-c","$temporaryDir/yuidoc.json"]
-	
-		// first validate the docs tags
-		exec { commandLine (baseArgs + "--lint") }
-			
-		// then create the docs
-		exec { commandLine baseArgs }
-    
-		// copy the images after the yuidoc tasks runs because the yuidoc task will delete the output directory
-		// these files are needed for the final docs output since they will be referenced in the html output
-		copy {
-			from("${rootDir}/yuidoc") {
-				include('images/*')
-			}
-			into jsDocDir
-		}
-	}
+    doLast {
+        def baseArgs = ["${projectDir}/node_modules/.bin/${yuidocExecutable}", "-c", "$temporaryDir/yuidoc.json"]
+
+        // first validate the docs tags
+        exec { commandLine(baseArgs + "--lint") }
+
+        // then create the docs
+        exec { commandLine baseArgs }
+
+        // copy the images after the yuidoc tasks runs because the yuidoc task will delete the output directory
+        // these files are needed for the final docs output since they will be referenced in the html output
+        copy {
+            from("${rootDir}/yuidoc") {
+                include('images/*')
+            }
+            into jsDocDir
+        }
+    }
 }
 
 task copyJsDocs(type: org.gradle.api.tasks.Copy) {
