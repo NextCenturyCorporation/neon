@@ -1,9 +1,9 @@
 var HeatChartWidget = (function () {
 
 
-	var widget = function(heatChartChannel) {
+	var widget = function(inHeatChartChannel) {
 
-		var heatChartChannel = heatChartChannel || "com.nextcentury.everest.heatchart";
+		var heatChartChannel = inHeatChartChannel || "com.nextcentury.everest.heatchart";
 
 		//The Following functions are helper functions designed to get date ranges to send for 
 		//OWF eventing.
@@ -70,7 +70,7 @@ var HeatChartWidget = (function () {
 				} else {
 					checkOWF = function(message) {
 						console.log("OWF Eventing API is not accessible.  The following was not published: ");
-					}
+					};
 				}
 				switch (mode) {
 					case "hour":
@@ -97,7 +97,7 @@ var HeatChartWidget = (function () {
 							endTime: getLastDateOfYear(baseDate)
 						}));
 						break;
-				};
+				}
 			}
 
 		};

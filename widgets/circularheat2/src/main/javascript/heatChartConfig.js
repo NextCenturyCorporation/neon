@@ -10,6 +10,6 @@ var HeatChartConfig = HeatChartConfig || {};
 
 	HeatChartConfig.get = function() {
 		return config;
-	}
+	};
 
 }());

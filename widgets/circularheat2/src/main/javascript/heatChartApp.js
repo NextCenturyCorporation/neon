@@ -1,8 +1,9 @@
 var HeatChartApp = (function () {
 
+
 	/**
 	 * Creates a circular heat chart widget
-	 * @constructor
+	 * @const
 	 * @param {string} startingMode the units of time to display on the chart (e.g. day, month, year).  For a comprehensive list
 	 * refer to the name field of the objects in the _MODES list in heatChartTime.js.
 	 * @param {Date} date optional, where to point the chart at.  Default is current time.
@@ -35,7 +36,7 @@ var HeatChartApp = (function () {
 
 		var chartTime = new HeatChartTime(date);
 		var chartWidget = new HeatChartWidget();
-		var chartData = (dataInject == undefined) ? new HeatChartData() : dataInject;
+		var chartData = (dataInject === undefined) ? new HeatChartData() : dataInject;
 		chartData.setUpdateCallback(update);
 		chartData.setErrorCallback(reportError);
 
@@ -46,9 +47,10 @@ var HeatChartApp = (function () {
 
 		var chart = {};
 
-		/**
+		/** 
 		 * A callback to call when the chart data is updated.  Useful if containing object wants to react or monitor data.
 		 * Callback should expect an array of time chunk data as first argument.
+		 * @property {function} updateListener
 		 */
 		var updateListener;
 
@@ -56,12 +58,13 @@ var HeatChartApp = (function () {
 
 		/**
 		 * Changes the mode of a given chart.
+		 * @method execute
 		 * @param mode {string} new mode (e.g. year, day, ...)
 		 * @param updateCallback optional callback on what to do once new data is collected.  Default is to call update(), but
 		 * if further processing of data must be done before the chart should be updated, this is the extension point to do that.
 		 */
 		function execute(mode) {
-			updateMode(mode)
+			updateMode(mode);
 			updateModeButtons(mode);
 			fetch();
 		}
@@ -165,12 +168,12 @@ var HeatChartApp = (function () {
 					d3.select("#yearButton").text(baseYear);
 					break;
 
-			};
+			}
 
 			d3.select("#baseDate").text("Context Date: " + baseDate.toString());
 			chartWidget.publishDateRange(CHART_MODE.name, baseDate);
 
-		};
+		}
 
 		function createHeatChart(time_chunks) {
 			var me = this;
@@ -186,10 +189,9 @@ var HeatChartApp = (function () {
 			// CHART_MODE.rows + 1 due to the size of the innerRadius
 			var segHeight = chartWidth / (CHART_MODE.rows + 1);
 
-			var innerRadius;
-			segHeight < 10 ? innerRadius = 10 : innerRadius = segHeight;
+			var innerRadius = segHeight < 10 ? 10 : segHeight;
 
-			chart = new circularHeatChart()
+			chart = circularHeatChart()
 				.range(["white", CHART_MODE.color])
 				.radialLabels(CHART_MODE.rowLabels)
 				.segmentLabels(CHART_MODE.columnLabels)
@@ -242,7 +244,7 @@ var HeatChartApp = (function () {
 				}
 			});
 
-		};
+		}
 
 		function handleDrillDown(cellDate) {
 			baseDate = new Date(cellDate);
@@ -256,8 +258,8 @@ var HeatChartApp = (function () {
 
 				case "day":
 					execute("hour");
-					break
-;
+					break;
+
 				case "week":
 					execute("day");
 					break;
@@ -273,22 +275,23 @@ var HeatChartApp = (function () {
 				case "year5":
 					execute("year");
 					break;
-			};
+			}
 
 			chartWidget.publishDateRange(CHART_MODE.name, baseDate);
-		};
+		}
 
 		return {
 
 			/**
 			 * Registers a callback to be called when chart data changes (whether initiated externally or internally).
 			 * Useful if containing object wants to react or monitor data.
-		 	 * Can register only one callback.  Subsequent calls will replace callback from previous calls.
-		 	 * Callback should expect first argument to be an array of objects of the form
+			 * Can register only one callback.  Subsequent calls will replace callback from previous calls.
+			 * Callback should expect first argument to be an array of objects of the form
 			 * {
 			 *		title: human readable representation the date of this segment of the chart
 			 *		value: value to be represented in this segment of the chart
 			 * }
+			 * @method setUpdateListener
 			 */
 			setUpdateListener: function(callback) {
 				updateListener = callback;
@@ -298,6 +301,7 @@ var HeatChartApp = (function () {
 			 * Resets the chart to display a certain range of the data.  Will query the server for data if necessary.
 			 * @param date {integer} start of the chart in milliseconds
 			 * @param mode {string} time range to cover
+			 * @method setChartRange
 			 */
 			setChartRange: function(date, mode) {
 				if (date) {
@@ -306,7 +310,7 @@ var HeatChartApp = (function () {
 
 				execute(mode);				
 			}
-		}
+		};
 
 	};
 

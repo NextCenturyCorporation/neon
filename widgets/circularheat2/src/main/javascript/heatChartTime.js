@@ -114,9 +114,10 @@ var HeatChartTime = (function () {
 			},
 
 			/**
-			  * Return a pretty label for the day of the month (e.g. 1st, 15th, 22nd, ...).
-			  * @param the day of the month (1-31)
-			  */
+			 * Return a pretty label for the day of the month (e.g. 1st, 15th, 22nd, ...).
+			 * @param the day of the month (1-31)
+			 * @method getDayOfMonthLabel
+			 */
 			getDayOfMonthLabel: function(day) {
 				switch(day) {
 					case 1: case 21: case 31:
@@ -133,6 +134,7 @@ var HeatChartTime = (function () {
 			/**
 			 * Return the minutes padded with a 0 if necessary to be used in time labels like 12:02.
 			 * @param the minute into the hour
+			 * @method getMinuteLabel
 			 */
 			getMinuteLabel: function(minute) {
 				return (minute<10 ? '0' : '') + minute;
@@ -192,6 +194,7 @@ var HeatChartTime = (function () {
 			 * @param date {Date} a date that must appear in the chart
 			 * @param mode {string} the scope of the chart (e.g. year, month, hour)
 			 * @return an array of two Date objects, the start and the end of the chart
+			 * @method computeChartEnds
 			 */
 			computeChartEnds: function(date, mode) {
 				date = new Date(date); // Just in case date was in number format
