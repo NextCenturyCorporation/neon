@@ -73,7 +73,7 @@ class JSONToCSVConverter {
             rows.each { row ->
                 def rowWithEmptyValues = []
                 fields.each { field ->
-                    def val = row[field] ?: ''
+                    def val = row[field] ?: '\\N'
                     if (val) {
                         if (field =~ DATE_REGEX) {
                             val = val.replaceAll("T", " ").replaceAll("Z", "")

@@ -171,10 +171,10 @@ class QueryCreator extends NeonBaseListener {
     @Override
     void exitFunction(NeonParser.FunctionContext ctx) {
         AggregateClause aggregateClause = new AggregateClause()
-        aggregateClause.operation = ctx.functionName().text
-        aggregateClause.field = ctx.STRING().text
-        aggregateClause.name = "${ctx.functionName().text}Of${ctx.STRING()}"
-
+        // count can take all fields a field name so check for that specially
+        aggregateClause.operation = ctx.functionName()?.text ?: ctx.count()?.text
+        aggregateClause.field = ctx.STRING()?.text ?: ctx.ALL_FIELDS()?.text
+        aggregateClause.name = "${aggregateClause.operation}(${aggregateClause.field})"
         aggregates << aggregateClause
     }
 

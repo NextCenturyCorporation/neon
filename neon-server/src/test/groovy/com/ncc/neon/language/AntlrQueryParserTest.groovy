@@ -111,8 +111,40 @@ class AntlrQueryParserTest {
 
         assert actual.aggregates
         assert actual.aggregates.size() == 1
-        assert actual.aggregates[0].name == "sumOffield2"
+        assert actual.aggregates[0].name == "sum(field2)"
         assert actual.aggregates[0].operation == "sum"
+        assert actual.aggregates[0].field == "field2"
+    }
+
+    @Test
+    void "count all fields"() {
+        Query actual = parser.parse("use db; select * from table group by field, count(*) sort by field;")
+
+        assertSortClauseSetProperly(actual)
+        assert actual.groupByClauses
+        assert actual.groupByClauses.size() == 1
+        assert actual.groupByClauses[0].field == "field"
+
+        assert actual.aggregates
+        assert actual.aggregates.size() == 1
+        assert actual.aggregates[0].name == "count(*)"
+        assert actual.aggregates[0].operation == "count"
+        assert actual.aggregates[0].field == "*"
+    }
+
+    @Test
+    void "count named field"() {
+        Query actual = parser.parse("use db; select * from table group by field, count(field2) sort by field;")
+
+        assertSortClauseSetProperly(actual)
+        assert actual.groupByClauses
+        assert actual.groupByClauses.size() == 1
+        assert actual.groupByClauses[0].field == "field"
+
+        assert actual.aggregates
+        assert actual.aggregates.size() == 1
+        assert actual.aggregates[0].name == "count(field2)"
+        assert actual.aggregates[0].operation == "count"
         assert actual.aggregates[0].field == "field2"
     }
 

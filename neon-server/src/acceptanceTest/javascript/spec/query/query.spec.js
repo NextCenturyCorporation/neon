@@ -131,6 +131,16 @@ describe('query mapping', function () {
     });
 
 
+    it('group by with generated aggregate field name', function () {
+        var query = baseQuery()
+            .groupBy('state')
+            .sortBy('state', neon.query.ASCENDING)
+            .aggregate(neon.query.MAX, 'salary');
+        var expectedData = getJSONFixture('groupByStateAsc_maxSalary_generated_field_name.json');
+        assertQueryResults(query, expectedData);
+    });
+
+
     it('group by min', function () {
         var query = baseQuery()
             .groupBy('state')
