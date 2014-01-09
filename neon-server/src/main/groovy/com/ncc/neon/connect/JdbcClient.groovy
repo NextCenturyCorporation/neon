@@ -44,6 +44,9 @@ class JdbcClient implements ConnectionClient {
     /** used to match the limit clause */
     private static final def LIMIT_REGEX = /(?i)(LIMIT\s+)(\d+)/
 
+    /** matches fields that are escaped because they start with a special character */
+    private static final def ESCAPED_FIELD_REGEX = /`(.*)`/
+
     private Connection connection
 
     JdbcClient(Connection connection) {
@@ -103,7 +106,9 @@ class JdbcClient implements ConnectionClient {
             while (resultSet.next()) {
                 def result = [:]
                 for (ii in 1..columnCount) {
-                    result[metadata.getColumnName(ii)] = getValue(metadata, resultSet, ii)
+                    // NEON-895/SHARK-211 specifies that escape characters are not properly removed.
+                    String columnName = metadata.getColumnName(ii).replaceAll(ESCAPED_FIELD_REGEX, '$1')
+                    result[columnName] = getValue(metadata, resultSet, ii)
                 }
                 resultList.add(result)
             }

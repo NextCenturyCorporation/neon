@@ -34,7 +34,7 @@ class JdbcConnectionClientFactory implements ConnectionClientFactory{
     private final String databaseType
     private final String databaseName
 
-    public JdbcConnectionClientFactory(String driverName, String databaseType, String databaseName){
+    public JdbcConnectionClientFactory(String driverName, String databaseType, String databaseName = "default"){
         this.databaseType = databaseType
         this.databaseName = databaseName
 

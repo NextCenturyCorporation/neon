@@ -115,11 +115,15 @@ dependencies {
     compile 'commons-lang:commons-lang:2.6'
     compile 'org.json:json:20090211'
     compile 'com.mchange:c3p0:0.9.5-pre6'
-    compile('org.apache.hive:hive-jdbc:0.11.0') {
+    compile('org.apache.hive:hive-jdbc:0.10.0') {
         exclude group: 'org.mortbay.jetty'
         // we already include slf4j
         exclude module: 'slf4j-log4j12'
     }
+    compile 'commons-daemon:commons-daemon:1.0.5'
+    compile 'org.apache.hadoop:hadoop-common:2.0.0-cdh4.3.0'
+    compile 'org.apache.hadoop:hadoop-hdfs:2.0.0-cdh4.3.0'
+
     compile project(":metadata")
 
     providedCompile 'javax.servlet:javax.servlet-api:3.0.1'
@@ -130,11 +134,6 @@ dependencies {
     testCompile 'commons-collections:commons-collections:3.2.1'
     testCompile 'commons-io:commons-io:2.4'
     testCompile "org.springframework:spring-test:$springVersion"
-
-    // commons-daemon 1.0.3 throws a bad organisation error (directory structure and pom don't match), so use a different version
-    integrationTestCompile 'commons-daemon:commons-daemon:1.0.5'
-    integrationTestCompile 'org.apache.hadoop:hadoop-common:2.0.0-cdh4.3.0'
-    integrationTestCompile 'org.apache.hadoop:hadoop-hdfs:2.0.0-cdh4.3.0'
 
     integrationTestCompile sourceSets.main.output
     integrationTestCompile sourceSets.test.output
