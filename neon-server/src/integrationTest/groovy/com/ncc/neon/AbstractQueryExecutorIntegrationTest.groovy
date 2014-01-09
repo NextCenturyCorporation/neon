@@ -646,6 +646,19 @@ abstract class AbstractQueryExecutorIntegrationTest {
         assertUnorderedQueryResult(getAllData(), result)
     }
 
+    @Test
+    void "show databases"(){
+        def dbs = queryExecutor.showDatabases()
+        assert dbs.contains(DATABASE_NAME)
+    }
+
+    @Test
+    void "show tables"(){
+        def tables = queryExecutor.showTables(DATABASE_NAME)
+        assert tables.contains(TABLE_NAME)
+    }
+
+
     protected def assertOrderedQueryResult(expected, actual) {
         assertQueryResult(expected, actual, true)
     }
