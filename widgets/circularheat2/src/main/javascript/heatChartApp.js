@@ -41,7 +41,7 @@ var HeatChartApp = (function () {
 		chartData.setErrorCallback(reportError);
 
 
-		var CHART_MODE = {};
+		var CHART_MODE = !!startingMode ? chartTime.getMode(startingMode) : {};
 
 		var baseDate = date || new Date();
 

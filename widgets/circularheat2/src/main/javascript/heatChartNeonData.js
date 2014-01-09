@@ -8,25 +8,20 @@ var HeatChartNeonData = (function () {
 	 */
 	var data = function(time) {
 
-		initialize();
-
 		/** Database with time data. 
 		 * @property {string} databaseName 
 		 */
-		// TODO: Don't hard code this
-		var databaseName = "sampleDB";
+		var databaseName;
 
 		/** Database table/collection with time data. 
 		 * @property {string} tableName
 		 */
-		// TODO: Don't hard code this
-		var tableName = "sampleTable";
+		var tableName;
 
 		/** Column/field with time data 
 		 * @property {string} dateField
 		 */
-		// TODO: Don't hard code this
-		var dateField = "time"; 
+		var dateField; 
 
 		/** The key to filter that this chart is applying to the global data set 
 		 * @property filterKey
@@ -48,34 +43,48 @@ var HeatChartNeonData = (function () {
 		 */
 		var errorCallback;
 
+		/** The date used the last time data was fetched.
+		 * @property {Date} lastDate
+		 */
+		var lastDate;
+
+		/** The mode used the last time data was fetched.
+		 * @property {string} lastMode
+		 */
+		var lastMode;
+
+		initialize();
+
 		function initialize() {
 
 			neon.query.SERVER_URL = "https://localhost:9443/neon"/* TODO: $("#neon-server").val()*/;
 
 			neon.ready(function() {
-			neon.eventing.messaging.registerForNeonEvents({
-				activeDatasetChanged: onDatasetChanged,
-				filtersChanged: onFiltersChanged
-			});
-				// TODO: Shouldn't be able to do this next line until a dataset announces itself.
-				neon.query.registerForFilterKey(databaseName, tableName, function (filterResponse) {
-					filterKey = filterResponse;
+				neon.eventing.messaging.registerForNeonEvents({
+					activeDatasetChanged: onDatasetChanged,
+					filtersChanged: onFiltersChanged
 				});
 			});
 		}
 
 		function onFiltersChanged(message) {
 			// TODO: Handle filter change
+			pub._GET(lastDate, lastMode, updateDataCallback, errorCallback);
 		}
 
 		function onDatasetChanged(message) {
-			// TODO: Handle dataset change
-			fetch();
-			// databaseName = message.database;
-			// tableName = message.table;
-			// neon.query.registerForFilterKey(databaseName, tableName, function (filterResponse) {
-			//     filterKey = filterResponse;
-			// });
+			filterKey = null;
+			databaseName = message.database;
+			tableName = message.table;
+			neon.query.registerForFilterKey(databaseName, tableName, function (filterResponse) {
+				filterKey = filterResponse;
+				ready = true;
+			});
+
+			// TODO: Handle getting field name from dropdown
+			window.setTimeout(function() {
+				pub.setDateField('time');
+			}, 2000);
 			// neon.query.getFieldNames(databaseName, tableName, neon.widget.CIRCULAR_HEAT, populateFromColumns);
 		}
 
@@ -151,18 +160,18 @@ var HeatChartNeonData = (function () {
 		 * @method filterTimeRange
 		 */
 		function filterTimeRange(start, end) {
-			var startClause = neon.query.where(dateField, ">=", start);
-			var endClause = neon.query.where(dateField, "<=", end);
+			var startClause = neon.query.where(dateField, ">=", start.toJSON());
+			var endClause = neon.query.where(dateField, "<=", end.toJSON());
 			var filterClause = neon.query.and(startClause, endClause);
 			var filter = new neon.query.Filter().selectFrom(databaseName, tableName).where(filterClause);
-			//neon.eventing.publishing.replaceFilter(filterKey, filter);
+			neon.eventing.publishing.replaceFilter(filterKey, filter);
 		}
 
-		return {
+		var pub = {
 
 			/**
 			 * Retrieve the desired data set from the server.
-			 * @param options {map} set of modifiers to affect this fetch.  Possible options are:
+			 * @param {map} [options] set of modifiers to affect this fetch.  Possible options are:
 			 *	feedType - (e.g. alpha-report, assertion, or rawfeed)
 			 *  mode - the amount of time the chart is displaying (e.g. year, month, hour ...)
 			 *	date - the starting date of the chart (or any date of interest, the time period displayed on the chart will include that date)
@@ -172,10 +181,15 @@ var HeatChartNeonData = (function () {
 			 * @method fetch
 			 */
 			fetch: function(options) {
+				options = options || {};
+				var successCallback = options.successCallback || updateDataCallback;
+				var failCallback = options.errorCallback || errorCallback;
+				var date = options.date || lastDate;
+				lastDate = date;
+				var mode = options.mode || lastMode;
+				lastMode = mode;
+
 				if (filterKey) {
-					// TODO: Filter to specific date range
-					var date = options.date || new Date(2013, 0);
-					var mode = options.mode || 'year';
 					var endpoints = _time.computeChartEnds(date, mode);
 					filterTimeRange(endpoints[0], endpoints[1]);
 					var clientId = neon.eventing.messaging.getInstanceId();
@@ -211,6 +225,16 @@ var HeatChartNeonData = (function () {
 			},
 
 			/**
+			 * Define the field in the database table that holds the date.  Once set, this will populate the chart.
+			 * @param {string} column name of date
+			 * @method setDateField
+			 */
+			setDateField: function(inDateField) {
+				dateField = inDateField;
+				this._GET(lastDate, lastMode, updateDataCallback, errorCallback);
+			},
+
+			/**
 			 * Make the Neon calls to retrieve the desired data
 			 * @param {Date} date a date to show on the chart.  date in combination with mode determines where the chart starts and ends. All that is
 			 *		guaranteed is that date will be somewhere on the visible chart.
@@ -223,58 +247,68 @@ var HeatChartNeonData = (function () {
 			 * @private
 			 */
 			_GET: function(date, mode, successCallback, errorCallback) {
-				// TODO: Filter out data beyond date range
-				var columnGrouping;
-				var rowGrouping;
-				switch (mode) {
-					case 'hour':
-						columnGrouping = new neon.query.GroupByFunctionClause(neon.query.MINUTE, dateField, 'minute');
-						rowGrouping = new neon.query.GroupByFunctionClause(neon.query.SECOND, dateField, 'second');
-						break;
-					case 'day':
-						columnGrouping = new neon.query.GroupByFunctionClause(neon.query.HOUR, dateField, 'hour');
-						rowGrouping = new neon.query.GroupByFunctionClause(neon.query.MINUTE, dateField, 'minute');
-						break;
-					case 'week':
-						columnGrouping = new neon.query.GroupByFunctionClause('dayOfWeek', dateField, 'day');
-						rowGrouping = new neon.query.GroupByFunctionClause(neon.query.HOUR, dateField, 'hour');
-						break;
-					case 'month':
-						columnGrouping = new neon.query.GroupByFunctionClause(neon.query.DAY, dateField, 'day');
-						rowGrouping = new neon.query.GroupByFunctionClause(neon.query.HOUR, dateField, 'hour');
-						break;
-					case 'year':
-						columnGrouping = new neon.query.GroupByFunctionClause(neon.query.MONTH, dateField, 'month');
-						rowGrouping = new neon.query.GroupByFunctionClause(neon.query.DAY, dateField, 'day');
-						break;
-					case 'year5':
-						columnGrouping = new neon.query.GroupByFunctionClause(neon.query.YEAR, dateField, 'year');
-						rowGrouping = new neon.query.GroupByFunctionClause(neon.query.MONTH, dateField, 'month');
-						break;
-				}
-
-				var query = new neon.query.Query()
-					.selectFrom(databaseName, tableName)
-					.groupBy(columnGrouping, rowGrouping)
-					.where(dateField, '!=', null)
-					.aggregate(neon.query.COUNT, '*', 'count');
-
-				var stateObject /* TODO: = buildStateObject(dateField, query)*/;
-
-				// Post-processing requires the mode, so we setup a callback that passes the mode along with
-				// the query results.
-				successCallback = function(queryResults) {
-					var chunks = postProcessResults(queryResults, mode, date);
-					if (typeof updateDataCallback === 'function') {
-						updateDataCallback(chunks);
+				var stateObject = null;
+				if (filterKey) {
+					var columnGrouping;
+					var rowGrouping;
+					switch (mode) {
+						case 'hour':
+							columnGrouping = new neon.query.GroupByFunctionClause(neon.query.MINUTE, dateField, 'minute');
+							rowGrouping = new neon.query.GroupByFunctionClause(neon.query.SECOND, dateField, 'second');
+							break;
+						case 'day':
+							columnGrouping = new neon.query.GroupByFunctionClause(neon.query.HOUR, dateField, 'hour');
+							rowGrouping = new neon.query.GroupByFunctionClause(neon.query.MINUTE, dateField, 'minute');
+							break;
+						case 'week':
+							columnGrouping = new neon.query.GroupByFunctionClause('dayOfWeek', dateField, 'day');
+							rowGrouping = new neon.query.GroupByFunctionClause(neon.query.HOUR, dateField, 'hour');
+							break;
+						case 'month':
+							columnGrouping = new neon.query.GroupByFunctionClause(neon.query.DAY, dateField, 'day');
+							rowGrouping = new neon.query.GroupByFunctionClause(neon.query.HOUR, dateField, 'hour');
+							break;
+						case 'year':
+							columnGrouping = new neon.query.GroupByFunctionClause(neon.query.MONTH, dateField, 'month');
+							rowGrouping = new neon.query.GroupByFunctionClause(neon.query.DAY, dateField, 'day');
+							break;
+						case 'year5':
+							columnGrouping = new neon.query.GroupByFunctionClause(neon.query.YEAR, dateField, 'year');
+							rowGrouping = new neon.query.GroupByFunctionClause(neon.query.MONTH, dateField, 'month');
+							break;
 					}
-				};
 
-				neon.query.executeQuery(query, successCallback, errorCallback);
+					var endpoints = _time.computeChartEnds(date, mode);
+					var startClause = neon.query.where(dateField, ">=", endpoints[0].toJSON());
+					var endClause = neon.query.where(dateField, "<=", endpoints[1].toJSON());
+					var filterClause = neon.query.and(startClause, endClause);
+
+					var query = new neon.query.Query()
+						.selectFrom(databaseName, tableName)
+						.groupBy(columnGrouping, rowGrouping)
+						.where(filterClause)
+						.aggregate(neon.query.COUNT, '*', 'count');
+
+					// TODO: Implement state
+					// stateObject = buildStateObject(dateField, query);
+
+					// Post-processing requires the mode, so we setup a callback that passes the mode along with
+					// the query results.
+					successCallback = function(queryResults) {
+						var chunks = postProcessResults(queryResults, mode, date);
+						if (typeof updateDataCallback === 'function') {
+							updateDataCallback(chunks);
+						}
+					};
+
+					neon.query.executeQuery(query, successCallback, errorCallback);
+				}
 				return stateObject;
 			}
 
 		};
+
+		return pub;
 
 	};
 

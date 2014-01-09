@@ -32,14 +32,14 @@
  
     <script type="text/javascript">
         $(document).ready(function() {
-
-            // TODO: Think we need to be waiting on OWF.ready somewhere, because we get an error if we
-            // execute this block to quickly
-            window.setTimeout(function() {
-                dataInject = new HeatChartNeonData();
-                var heatChart = new HeatChartApp("year", new Date(2013, 0) ,dataInject);  
-            }, 1000);
-        });
+        dataInject = new HeatChartNeonData();
+        var heatChart = new HeatChartApp('year', new Date(2013, 0) ,dataInject);  
+        // Simulate someone using a dropdown to select the date field
+        // TODO: Do a real field drop-down
+        window.setTimeout(function() {
+            dataInject.setDateField('time');
+        }, 2000);
+    });
     </script>
   
 </head>
