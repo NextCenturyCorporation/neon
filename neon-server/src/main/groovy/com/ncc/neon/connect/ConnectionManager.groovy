@@ -77,7 +77,7 @@ class ConnectionManager {
             return new MongoConnectionClientFactory()
         }
         if (connectionInfo.dataSource == DataSources.hive) {
-            return new JdbcConnectionClientFactory("org.apache.hadoop.hive.jdbc.HiveDriver", "hive")
+            return new JdbcConnectionClientFactory("org.apache.hive.jdbc.HiveDriver", "hive2")
         }
         throw new NeonConnectionException("There must be a data source to which to connect.")
     }
