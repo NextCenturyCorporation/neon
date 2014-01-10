@@ -23,7 +23,7 @@ $(function(){
         var query =  new neon.query.Query().selectFrom(databaseName, tableName);
         query.allDataMode();
         neon.query.executeQuery(query, function(data){
-            displayResults(JSON.stringify(data.data));
+            displayResults(JSON.stringify(data));
         });
     });
 
@@ -31,7 +31,7 @@ $(function(){
         var query =  new neon.query.Query().selectFrom(databaseName, tableName);
         query.filteredMode();
         neon.query.executeQuery(query, function(data){
-            displayResults(JSON.stringify(data.data));
+            displayResults(JSON.stringify(data));
         });
     });
 
@@ -39,7 +39,7 @@ $(function(){
         var query =  new neon.query.Query().selectFrom(databaseName, tableName);
         query.selectionMode();
         neon.query.executeQuery(query, function(data){
-            displayResults(JSON.stringify(data.data));
+            displayResults(JSON.stringify(data));
         });
     });
 

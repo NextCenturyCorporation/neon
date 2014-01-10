@@ -35,9 +35,11 @@ task gatling {
     doLast {
         sourceSets.concurrencyTest.output.classesDir.eachFileRecurse { file ->
             if (file.isFile()) {
-                //Remove the full path, .class and replace / with a .
-                def gatlingScenarioClass = (file.getPath() - (sourceSets.concurrencyTest.output.classesDir.getPath() + File.separator) - '.class')
-                        .replace(File.separator, '.')
+                if(containsExcludedNames(file)){
+                    return
+                }
+                def gatlingScenarioClass = getFullyQualifiedClassName(file)
+
                 javaexec {
                     main = 'com.excilys.ebi.gatling.app.Gatling'
                     classpath = sourceSets.concurrencyTest.output + sourceSets.concurrencyTest.runtimeClasspath
@@ -55,13 +57,28 @@ task gatling {
     }
 }
 
+def containsExcludedNames(File file){
+    def excludes = ["Responses", "Headers"]
+    boolean excludeFound = false
+    excludes.each {
+        if(file.name.contains(it)){
+            excludeFound = true
+        }
+    }
+    return excludeFound
+}
+
+def getFullyQualifiedClassName(File file){
+    (file.getPath() - (sourceSets.concurrencyTest.output.classesDir.getPath() + File.separator) - '.class').replace(File.separator, '.')
+}
+
 task copyConcurrencyWebapp(type: Copy) {
     from 'src/concurrencyTest/webapp'
     into "${buildDir}/tmp/concurrencyRecorder/webapp"
 }
 
 task concurrencyRecorder(type: org.gradle.api.plugins.jetty.JettyRunWar) {
-    dependsOn 'compileConcurrencyTestScala', 'copyConcurrencyWebapp'
+    dependsOn 'clean', 'compileConcurrencyTestScala', 'copyConcurrencyWebapp'
     group = GATLING_GROUP
     daemon = false
     httpPort = concurrencyTestPort
