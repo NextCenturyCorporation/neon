@@ -138,7 +138,14 @@ dependencies {
 
     // commons-daemon 1.0.3 throws a bad organisation error (directory structure and pom don't match), so use a different version
     compile 'commons-daemon:commons-daemon:1.0.5'
-    compile 'org.apache.hadoop:hadoop-common:2.0.0-cdh4.3.0'
+    compile('org.apache.hadoop:hadoop-common:2.0.0-cdh4.3.0') {
+        exclude group: 'org.mortbay.jetty'
+        exclude group: 'javax.servlet'
+        exclude group: 'javax.servlet.jsp'
+        exclude module: 'jasper-compiler'
+        exclude module: 'jasper-runtime'
+    }
+
     compile 'jline:jline:0.9.94'
     compile 'com.googlecode.javaewah:JavaEWAH:0.3.2'
     compile 'javolution:javolution:5.5.1'
@@ -150,13 +157,20 @@ dependencies {
     compile 'org.datanucleus:datanucleus-rdbms:3.2.1'
     compile 'javax.jdo:jdo2-api:2.3-ec'
     compile 'org.apache.derby:derby:10.4.2.0'
-    compile 'org.apache.thrift:libfb303:0.9.0'
+    compile ('org.apache.thrift:libfb303:0.9.0'){
+        exclude group: 'javax.servlet'
+    }
     compile 'org.apache.thrift:libthrift:0.9.0'
-    compile 'org.apache.zookeeper:zookeeper:3.4.3'
+    compile('org.apache.zookeeper:zookeeper:3.4.3') {
+        exclude group: 'javax.servlet'
+    }
     compile 'com.google.code.tempus-fugit:tempus-fugit:1.1'
 
-
-    integrationTestCompile'org.apache.hadoop:hadoop-hdfs:2.0.0-cdh4.3.0'
+    integrationTestCompile('org.apache.hadoop:hadoop-hdfs:2.0.0-cdh4.3.0') {
+        exclude group: 'javax.servlet'
+        exclude group: 'javax.servlet.jsp'
+        exclude module: 'jasper-runtime'
+    }
 
 
     compile project(":metadata")
@@ -177,6 +191,7 @@ dependencies {
     antlr4 'org.antlr:antlr4-runtime:4.0'
     antlr4 'org.antlr:antlr-runtime:3.5'
     antlr4 'org.antlr:ST4:4.0.7'
+
 }
 
 war {
@@ -309,19 +324,19 @@ def getAcceptanceTestServicePort() {
 }
 
 
-task stopAcceptanceTestWar(type: org.gradle.api.plugins.jetty.JettyStop){
+task stopAcceptanceTestWar(type: org.gradle.api.plugins.jetty.JettyStop) {
     stopPort = getAcceptanceTestPort() + 2
     stopKey = 'stop'
 }
 
-task stopTransformJetty(type: org.gradle.api.plugins.jetty.JettyStop){
+task stopTransformJetty(type: org.gradle.api.plugins.jetty.JettyStop) {
     stopPort = getAcceptanceTestServicePort() + 2
     stopKey = 'stop'
 }
 
-task afterAcceptanceTest{
+task afterAcceptanceTest {
     dependsOn 'stopAcceptanceTestWar', 'stopTransformJetty'
-    doLast{
+    doLast {
         deleteAcceptanceTestData()
     }
 }
@@ -395,6 +410,7 @@ def getMongo() {
 }
 
 import org.gradle.api.plugins.jetty.internal.Monitor
+
 [transformTestWebService, acceptanceTestWar]*.doLast {
     /**
      * THIS IS A WORKAROUND! THE CURRENT VERSION OF THIS TASK DOESN'T START A WATCHER IN DAEMON MODE
