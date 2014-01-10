@@ -106,8 +106,7 @@ class JdbcClient implements ConnectionClient {
             while (resultSet.next()) {
                 def result = [:]
                 for (ii in 1..columnCount) {
-                    // NEON-895/SHARK-211 specifies that escape characters are not properly removed.
-                    String columnName = metadata.getColumnName(ii).replaceAll(ESCAPED_FIELD_REGEX, '$1')
+                    String columnName = metadata.getColumnName(ii)
                     result[columnName] = getValue(metadata, resultSet, ii)
                 }
                 resultList.add(result)
