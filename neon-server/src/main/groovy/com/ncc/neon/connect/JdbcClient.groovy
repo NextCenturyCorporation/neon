@@ -44,9 +44,6 @@ class JdbcClient implements ConnectionClient {
     /** used to match the limit clause */
     private static final def LIMIT_REGEX = /(?i)(LIMIT\s+)(\d+)/
 
-    /** matches fields that are escaped because they start with a special character */
-    private static final def ESCAPED_FIELD_REGEX = /`(.*)`/
-
     private Connection connection
 
     JdbcClient(Connection connection) {
