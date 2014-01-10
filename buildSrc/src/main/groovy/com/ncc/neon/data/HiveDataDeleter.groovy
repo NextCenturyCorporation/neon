@@ -36,7 +36,7 @@ class HiveDataDeleter extends DefaultTask {
     static final String DATABASE_NAME = "concurrencytest"
     static final String TABLE_NAME = "records"
 
-    String host = "xdata2:10000"
+    String host = "shark:10000"
 
     @TaskAction
     void run(){

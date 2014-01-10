@@ -16,7 +16,7 @@
     <tr>
         <td>Connection</td>
         <td><button id="mongo">Mongo@localhost</button></td>
-        <td><button id="hive">Hive@xdata2</button></td>
+        <td><button id="hive">Hive@shark</button></td>
     </tr>
     <tr>
         <td>Query</td>

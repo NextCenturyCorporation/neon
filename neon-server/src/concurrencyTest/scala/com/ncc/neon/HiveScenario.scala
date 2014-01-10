@@ -1,4 +1,5 @@
 package com.ncc.neon
+
 import com.excilys.ebi.gatling.core.Predef._
 import com.excilys.ebi.gatling.http.Predef._
 import com.excilys.ebi.gatling.jdbc.Predef._
@@ -17,14 +18,14 @@ class HiveScenario extends Simulation {
     .connection("keep-alive")
     .userAgentHeader("Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:23.0) Gecko/20100101 Firefox/23.0")
 
-  val headers_4 = Map(
+  val default_header = Map(
     "Cache-Control" -> """no-cache""",
     "Content-Type" -> """application/json; charset=UTF-8""",
     "Pragma" -> """no-cache""",
     "X-Requested-With" -> """XMLHttpRequest"""
   )
 
-  val headers_5 = Map(
+  val connect_header = Map(
     "Accept" -> """*/*""",
     "Cache-Control" -> """no-cache""",
     "Content-Type" -> """application/x-www-form-urlencoded; charset=UTF-8""",
@@ -36,62 +37,62 @@ class HiveScenario extends Simulation {
   val scn = scenario("Hive under 10 concurrent users")
     .exec(http("Register for a filter key")
     .post("/neon/services/filterservice/registerforfilterkey")
-    .headers(headers_4)
+    .headers(default_header)
     .fileBody("HiveScenario_request_4.txt")
   )
     .pause(2)
     .exec(http("Connect to Hive")
     .post("/neon/services/connectionservice/connect")
-    .headers(headers_5)
+    .headers(connect_header)
     .param("datastore", "hive")
-    .param("hostname", "xdata2")
+    .param("hostname", "shark")
   )
     .pause(5)
     .exec(http("Query for all data")
     .post("/neon/services/queryservice/querydisregardfilters")
-    .headers(headers_4)
+    .headers(default_header)
     .fileBody("HiveScenario_request_6.txt")
   )
     .pause(2)
     .exec(http("Add a filter")
     .post("/neon/services/filterservice/addfilter")
-    .headers(headers_4)
+    .headers(default_header)
     .fileBody("HiveScenario_request_7.txt")
   )
     .pause(1)
     .exec(http("Add a selection")
     .post("/neon/services/selectionservice/addselection")
-    .headers(headers_4)
+    .headers(default_header)
     .fileBody("HiveScenario_request_8.txt")
   )
     .pause(25)
     .exec(http("Query for the selection")
     .post("/neon/services/queryservice/querywithselectiononly")
-    .headers(headers_4)
+    .headers(default_header)
     .fileBody("HiveScenario_request_9.txt")
   )
     .pause(2)
     .exec(http("Remove the filter")
     .post("/neon/services/filterservice/removefilter")
-    .headers(headers_4)
+    .headers(default_header)
     .fileBody("HiveScenario_request_10.txt")
   )
     .pause(20)
     .exec(http("Query for filtered data")
     .post("/neon/services/queryservice/query")
-    .headers(headers_4)
+    .headers(default_header)
     .fileBody("HiveScenario_request_11.txt")
   )
     .pause(2)
     .exec(http("Remove the selection")
     .post("/neon/services/selectionservice/removeselection")
-    .headers(headers_4)
+    .headers(default_header)
     .fileBody("HiveScenario_request_12.txt")
   )
     .pause(20)
     .exec(http("Query for selection after it was removed")
     .post("/neon/services/queryservice/querywithselectiononly")
-    .headers(headers_4)
+    .headers(default_header)
     .fileBody("HiveScenario_request_13.txt")
   )
 

@@ -57,7 +57,7 @@ class HiveQueryExecutorIntegrationTest extends AbstractQueryExecutorIntegrationT
     @BeforeClass
     static void beforeClass() {
         ConnectionInfo info = new ConnectionInfo(connectionUrl: HiveIntegrationTestContext.HOST_STRING, dataSource: DataSources.hive)
-        ConnectionClientFactory factory = new JdbcConnectionClientFactory("org.apache.hive.jdbc.HiveDriver", "hive2", "default")
+        ConnectionClientFactory factory = new JdbcConnectionClientFactory("org.apache.hive.jdbc.HiveDriver", "hive2")
         jdbcClient = factory.createConnectionClient(info)
         // make sure we clean up just in case something was left over
         deleteData()

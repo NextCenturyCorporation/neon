@@ -16,7 +16,7 @@ $(function(){
     });
 
     $('#hive').click(function(){
-        neon.query.connectToDatastore("hive", "xdata2");
+        neon.query.connectToDatastore("hive", "shark");
     });
 
     $('#all-query').click(function(){

@@ -103,7 +103,8 @@ class JdbcClient implements ConnectionClient {
             while (resultSet.next()) {
                 def result = [:]
                 for (ii in 1..columnCount) {
-                    result[metadata.getColumnName(ii)] = getValue(metadata, resultSet, ii)
+                    String columnName = metadata.getColumnName(ii)
+                    result[columnName] = getValue(metadata, resultSet, ii)
                 }
                 resultList.add(result)
             }
