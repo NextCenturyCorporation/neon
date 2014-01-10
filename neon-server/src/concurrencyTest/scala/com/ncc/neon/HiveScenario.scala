@@ -45,7 +45,7 @@ class HiveScenario extends Simulation {
     .post("/neon/services/connectionservice/connect")
     .headers(connect_header)
     .param("datastore", "hive")
-    .param("hostname", "xdata2")
+    .param("hostname", "shark")
   )
     .pause(5)
     .exec(http("Query for all data")
