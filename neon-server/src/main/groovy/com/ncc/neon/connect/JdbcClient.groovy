@@ -35,8 +35,6 @@ import java.sql.*
 /**
  * Wrapper for JDBC API
  */
-//We have to suppress this warning in order to load the the JDBC driver via DriverManager. See NEON-459
-@SuppressWarnings("SynchronizedMethod")
 class JdbcClient implements ConnectionClient {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(JdbcClient)
@@ -57,7 +55,7 @@ class JdbcClient implements ConnectionClient {
      * @param offset An optional number of rows to skip in the result set. This is provided as a parameter to
      * execute query since not all JDBC drivers (namely hive) support doing this as part of the query
      */
-    synchronized List executeQuery(String query, int offset = 0) {
+    List executeQuery(String query, int offset = 0) {
         Statement statement
         ResultSet resultSet
         try {
@@ -169,10 +167,8 @@ class JdbcClient implements ConnectionClient {
 
     /**
      * Each jdbcClient instance is created per session,
-     * This method is synchronized because a user cannot perform multiple simultaneous queries
-     * without hive blowing up.
      */
-    synchronized void execute(String query) {
+    void execute(String query) {
         Statement statement
         try {
             statement = connection.createStatement()
