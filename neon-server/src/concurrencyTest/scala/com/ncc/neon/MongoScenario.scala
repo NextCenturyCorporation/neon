@@ -9,6 +9,7 @@ import bootstrap._
 import assertions._
 import Headers._
 import Responses._
+import Requests._
 
 class MongoScenario extends Simulation {
 
@@ -27,7 +28,7 @@ class MongoScenario extends Simulation {
     .exec(http("Register for filter key")
     .post("/neon/services/filterservice/registerforfilterkey")
     .headers(json_header)
-    .fileBody("MongoScenario_request_5.txt")
+    .body(connect_request)
   )
     .pause(2)
     .exec(http("Connect to Mongo")
@@ -53,21 +54,21 @@ class MongoScenario extends Simulation {
     .post("/neon/services/queryservice/querydisregardfilters")
     .headers(json_header)
     .fileBody("MongoScenario_request_10.txt")
-    .check(bodyString.is(all_data))
+    .check(bodyString.is(mongo_all_data))
   )
     .pause(1)
     .exec(http("Query for filtered data")
     .post("/neon/services/queryservice/query")
     .headers(json_header)
     .fileBody("MongoScenario_request_11.txt")
-    .check(bodyString.is(filtered_data))
+    .check(bodyString.is(mongo_filtered_data))
   )
     .pause(1)
     .exec(http("Query for selection")
     .post("/neon/services/queryservice/querywithselectiononly")
     .headers(json_header)
     .fileBody("MongoScenario_request_12.txt")
-    .check(bodyString.is(selection_data))
+    .check(bodyString.is(mongo_selection_data))
   )
     .pause(1)
     .exec(http("Remove selection")
@@ -86,14 +87,14 @@ class MongoScenario extends Simulation {
     .post("/neon/services/queryservice/querywithselectiononly")
     .headers(json_header)
     .fileBody("MongoScenario_request_15.txt")
-    .check(bodyString.is(all_data))
+    .check(bodyString.is(mongo_all_data))
   )
     .pause(1)
     .exec(http("Query for filtered data after the filter was removed")
     .post("/neon/services/queryservice/query")
     .headers(json_header)
     .fileBody("MongoScenario_request_16.txt")
-    .check(bodyString.is(all_data))
+    .check(bodyString.is(mongo_all_data))
   )
 
   setUp(scn.users(12).ramp(3).protocolConfig(httpConf))
