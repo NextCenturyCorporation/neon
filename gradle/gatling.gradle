@@ -32,33 +32,33 @@ dependencies {
 task gatling {
     dependsOn 'concurrencyTestWar', 'insertDataIntoMongo', 'insertDataIntoHive'
     group = GATLING_GROUP
+
     doLast {
         sourceSets.concurrencyTest.output.classesDir.eachFileRecurse { file ->
-            if (file.isFile()) {
-                if(containsExcludedNames(file)){
-                    return
-                }
-                def gatlingScenarioClass = getFullyQualifiedClassName(file)
+            if(!file.isFile() || containsExcludedNames(file)){
+                return
+            }
+            def gatlingScenarioClass = getFullyQualifiedClassName(file)
 
-                javaexec {
-                    main = 'com.excilys.ebi.gatling.app.Gatling'
-                    classpath = sourceSets.concurrencyTest.output + sourceSets.concurrencyTest.runtimeClasspath
-                    args '-sbf',
-                            sourceSets.concurrencyTest.output.classesDir,
-                            '-s',
-                            gatlingScenarioClass,
-                            '-rf',
-                            'build/reports/gatling',
-                            '-bf',
-                            'src/concurrencyTest/resources/request-bodies'
-                }
+            javaexec {
+                main = 'com.excilys.ebi.gatling.app.Gatling'
+                classpath = sourceSets.concurrencyTest.output + sourceSets.concurrencyTest.runtimeClasspath
+                jvmArgs = createJvmArgs()
+                args '-sbf',
+                        sourceSets.concurrencyTest.output.classesDir,
+                        '-s',
+                        gatlingScenarioClass,
+                        '-rf',
+                        'build/reports/gatling',
+                        '-bf',
+                        'src/concurrencyTest/resources/request-bodies'
             }
         }
     }
 }
 
 def containsExcludedNames(File file){
-    def excludes = ["Responses", "Headers"]
+    def excludes = ["Headers", "Responses", "Requests"]
     boolean excludeFound = false
     excludes.each {
         if(file.name.contains(it)){
@@ -70,6 +70,12 @@ def containsExcludedNames(File file){
 
 def getFullyQualifiedClassName(File file){
     (file.getPath() - (sourceSets.concurrencyTest.output.classesDir.getPath() + File.separator) - '.class').replace(File.separator, '.')
+}
+
+def createJvmArgs(){
+    String mongoHost = "-Dmongo.host=${getMongoHost()}"
+    String hiveHost = "-Dhive.host=${getHiveHost()}"
+    return [mongoHost, hiveHost]
 }
 
 task copyConcurrencyWebapp(type: Copy) {
