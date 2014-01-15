@@ -86,6 +86,8 @@ configurations {
 
     acceptanceTestCompile { extendsFrom testCompile }
     acceptanceTestRuntime { extendsFrom testCompile, testRuntime }
+
+    compile.exclude module: 'commons-logging'
 }
 
 dependencies {
@@ -104,6 +106,8 @@ dependencies {
     compile "org.springframework:spring-web:$springVersion"
     compile 'joda-time:joda-time:2.1'
     compile 'org.slf4j:slf4j-api:1.7.2'
+    compile 'org.slf4j:jcl-over-slf4j:1.7.2'
+
     compile "ch.qos.logback:logback-core:$logbackVersion"
     compile "ch.qos.logback:logback-classic:$logbackVersion"
     compile "com.google.guava:guava:14.0.1"
@@ -115,14 +119,65 @@ dependencies {
     compile 'commons-lang:commons-lang:2.6'
     compile 'org.json:json:20090211'
     compile 'com.mchange:c3p0:0.9.5-pre6'
-    compile('org.apache.hive:hive-jdbc:0.11.0') {
+
+    // these libraries are needed for the patched version of hive that we use
+    compile ':hive-hbase-handler:0.11.0-shark-SNAPSHOT'
+    compile ':hive-beeline:0.11.0-shark-SNAPSHOT'
+    compile ':hive-exec:0.11.0-shark-SNAPSHOT'
+    compile ':hcatalog-pig-adapter:0.11.0-shark-SNAPSHOT'
+    compile ':hive-contrib:0.11.0-shark-SNAPSHOT'
+    compile ':hive-jdbc:0.11.0-shark-SNAPSHOT'
+    compile ':webhcat:0.11.0-shark-SNAPSHOT'
+    compile ':hive-metastore:0.11.0-shark-SNAPSHOT'
+    compile ':hcatalog-core:0.11.0-shark-SNAPSHOT'
+    compile ':hive-cli:0.11.0-shark-SNAPSHOT'
+    compile ':hcatalog-server-extensions:0.11.0-shark-SNAPSHOT'
+    compile ':hive-hwi:0.11.0-shark-SNAPSHOT'
+    compile ':hive-shims:0.11.0-shark-SNAPSHOT'
+    compile ':hive-service:0.11.0-shark-SNAPSHOT'
+    compile ':hive-testutils:0.11.0-shark-SNAPSHOT'
+    compile ':webhcat-java-client:0.11.0-shark-SNAPSHOT'
+    compile ':hive-common:0.11.0-shark-SNAPSHOT'
+    compile ':hive-serde:0.11.0-shark-SNAPSHOT'
+
+    // commons-daemon 1.0.3 throws a bad organisation error (directory structure and pom don't match), so use a different version
+    compile 'commons-daemon:commons-daemon:1.0.5'
+    compile('org.apache.hadoop:hadoop-common:2.0.0-cdh4.3.0') {
         exclude group: 'org.mortbay.jetty'
-        // we already include slf4j
-        exclude module: 'slf4j-log4j12'
+        exclude group: 'javax.servlet'
+        exclude group: 'javax.servlet.jsp'
+        exclude module: 'jasper-compiler'
+        exclude module: 'jasper-runtime'
     }
+
+    compile 'jline:jline:0.9.94'
+    compile 'com.googlecode.javaewah:JavaEWAH:0.3.2'
+    compile 'javolution:javolution:5.5.1'
+    compile 'com.github.stephenc.high-scale-lib:high-scale-lib:1.1.1'
+    compile 'com.yammer.metrics:metrics-core:2.1.2'
+    compile 'commons-dbcp:commons-dbcp:1.4'
+    compile 'org.datanucleus:datanucleus-api-jdo:3.2.1'
+    compile 'org.datanucleus:datanucleus-core:3.2.1'
+    compile 'org.datanucleus:datanucleus-rdbms:3.2.1'
+    compile 'javax.jdo:jdo2-api:2.3-ec'
+    compile 'org.apache.derby:derby:10.4.2.0'
+    compile ('org.apache.thrift:libfb303:0.9.0'){
+        exclude group: 'javax.servlet'
+    }
+    compile 'org.apache.thrift:libthrift:0.9.0'
+    compile('org.apache.zookeeper:zookeeper:3.4.3') {
+        exclude group: 'javax.servlet'
+    }
+    compile 'com.google.code.tempus-fugit:tempus-fugit:1.1'
+
+    integrationTestCompile('org.apache.hadoop:hadoop-hdfs:2.0.0-cdh4.3.0') {
+        exclude group: 'javax.servlet'
+        exclude group: 'javax.servlet.jsp'
+        exclude module: 'jasper-runtime'
+    }
+
+
     compile project(":metadata")
-
-
 
     providedCompile 'javax.servlet:javax.servlet-api:3.0.1'
 
@@ -132,11 +187,6 @@ dependencies {
     testCompile 'commons-collections:commons-collections:3.2.1'
     testCompile 'commons-io:commons-io:2.4'
     testCompile "org.springframework:spring-test:$springVersion"
-
-    // commons-daemon 1.0.3 throws a bad organisation error (directory structure and pom don't match), so use a different version
-    integrationTestCompile 'commons-daemon:commons-daemon:1.0.5'
-    integrationTestCompile 'org.apache.hadoop:hadoop-common:2.0.0-cdh4.3.0'
-    integrationTestCompile 'org.apache.hadoop:hadoop-hdfs:2.0.0-cdh4.3.0'
 
     integrationTestCompile sourceSets.main.output
     integrationTestCompile sourceSets.test.output
@@ -276,28 +326,25 @@ def getAcceptanceTestServicePort() {
     return getAcceptanceTestPort() + 4
 }
 
-task stopAcceptanceTestJetty{
-    dependsOn 'stopAcceptanceTestWar', 'stopTransformJetty'
-}
 
-task stopAcceptanceTestWar(type: org.gradle.api.plugins.jetty.JettyStop){
-    dependsOn 'runAcceptanceTests', 'acceptanceTestWar'
+task stopAcceptanceTestWar(type: org.gradle.api.plugins.jetty.JettyStop) {
     stopPort = getAcceptanceTestPort() + 2
     stopKey = 'stop'
 }
 
-task stopTransformJetty(type: org.gradle.api.plugins.jetty.JettyStop){
-    dependsOn 'runAcceptanceTests', 'transformTestWebService'
+task stopTransformJetty(type: org.gradle.api.plugins.jetty.JettyStop) {
     stopPort = getAcceptanceTestServicePort() + 2
     stopKey = 'stop'
 }
 
-
-task acceptanceTest{
-    dependsOn 'stopAcceptanceTestJetty'
+task afterAcceptanceTest {
+    dependsOn 'stopAcceptanceTestWar', 'stopTransformJetty'
+    doLast {
+        deleteAcceptanceTestData()
+    }
 }
 
-task runAcceptanceTests(type: GruntTask) {
+task acceptanceTest(type: GruntTask) {
     dependsOn 'assemble', 'acceptanceTestWar', 'generateMongoJson', 'transformTestWebService'
     group = TEST_GROUP
     gruntArgs "jasmine:acceptance", "--outfile=${jsOutputFile}"
@@ -309,11 +356,7 @@ task runAcceptanceTests(type: GruntTask) {
     }
 }
 
-gradle.taskGraph.afterTask { task ->
-    if (task == acceptanceTest) {
-        deleteAcceptanceTestData()
-    }
-}
+acceptanceTest.finalizedBy afterAcceptanceTest
 
 task generateMongoJson {
     def outputDir = "${testDataDir}/mongo-json"
@@ -333,7 +376,6 @@ task generateHiveJson {
         new HiveJSONGenerator().generateJson(testDataDir, outputDir)
     }
 }
-
 
 task generateHiveCSV {
     def outputDir = "${testDataDir}/hive-csv"
@@ -370,8 +412,8 @@ def getMongo() {
     return mongoInstance
 }
 
-
 import org.gradle.api.plugins.jetty.internal.Monitor
+
 [transformTestWebService, acceptanceTestWar]*.doLast {
     /**
      * THIS IS A WORKAROUND! THE CURRENT VERSION OF THIS TASK DOESN'T START A WATCHER IN DAEMON MODE

@@ -35,6 +35,9 @@ import org.slf4j.LoggerFactory
  * @author tbrooks
  */
 
+/**
+ * Used to execute a "distinct" query (returns distinct field values) against mongo
+ */
 class DistinctMongoQueryWorker extends AbstractMongoQueryWorker {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(DistinctMongoQueryWorker)

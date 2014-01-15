@@ -2,9 +2,24 @@ apply plugin: 'groovy'
 
 repositories {
     mavenCentral()
+    maven {
+        url 'https://repository.cloudera.com/artifactory/public'
+    }
 }
 dependencies {
     compile localGroovy()
     compile 'org.json:json:20090211'
+    compile 'org.mongodb:mongo-java-driver:2.11.3'
+    compile 'commons-daemon:commons-daemon:1.0.5'
+    compile 'org.apache.hadoop:hadoop-common:2.0.0-cdh4.3.0'
+    compile 'org.apache.hadoop:hadoop-hdfs:2.0.0-cdh4.3.0'
+    compile 'joda-time:joda-time:2.1'
+    compile 'com.mchange:c3p0:0.9.5-pre6'
+    compile('org.apache.hive:hive-jdbc:0.11.0') {
+        exclude group: 'org.mortbay.jetty'
+        // we already include slf4j
+        exclude module: 'slf4j-log4j12'
+    }
+
 }
 

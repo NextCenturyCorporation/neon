@@ -129,7 +129,7 @@ abstract class AbstractQueryExecutorIntegrationTest {
     }
 
     @Test
-    void "field names without a table returns empty collection"(){
+    void "field names without a table returns empty collection"() {
         def names = queryExecutor.getFieldNames(DATABASE_NAME, "zsz")
         assert names != null
         assert !names.data
@@ -205,7 +205,23 @@ abstract class AbstractQueryExecutorIntegrationTest {
         assertOrderedQueryResult(expected, result)
     }
 
+    @Test
+    void "count all fields"() {
+        def countClause = new AggregateClause(name: 'counter', operation: 'count', field: '*')
+        def result = queryExecutor.execute(new Query(filter: ALL_DATA_FILTER,
+                aggregates: [countClause]), QueryOptions.FILTERED_DATA)
+        def expected = readJson('count.json')
+        assertOrderedQueryResult(expected, result)
+    }
 
+    @Test
+    void "count field with missing value"() {
+        def countClause = new AggregateClause(name: 'counter', operation: 'count', field: 'lastname')
+        def result = queryExecutor.execute(new Query(filter: ALL_DATA_FILTER,
+                aggregates: [countClause]), QueryOptions.FILTERED_DATA)
+        def expected = readJson('count_missing_field.json')
+        assertOrderedQueryResult(expected, result)
+    }
     @Test
     void "group by count"() {
         def groupByStateClause = new GroupByFieldClause(field: 'state')
@@ -249,8 +265,6 @@ abstract class AbstractQueryExecutorIntegrationTest {
                 sortClauses: [sortByStateClause]), QueryOptions.FILTERED_DATA)
         assertOrderedQueryResult(expected, result)
     }
-
-
 
     @Test
     void "distinct"() {
@@ -323,6 +337,13 @@ abstract class AbstractQueryExecutorIntegrationTest {
         assertOrderedQueryResult(expected, result)
     }
 
+    @Test
+    void "offset greater than total number of results"() {
+        def offsetClause = new OffsetClause(offset: 100)
+        def result = queryExecutor.execute(new Query(filter: ALL_DATA_FILTER, offsetClause: offsetClause),
+                QueryOptions.FILTERED_DATA)
+        assert result.data.isEmpty()
+    }
 
 
     @Test
@@ -490,7 +511,6 @@ abstract class AbstractQueryExecutorIntegrationTest {
         assertOrderedQueryResult(expected, result)
     }
 
-
     // not every date operator combination is tested dates since the other query tests exercise the operators extensively
 
     @Test
@@ -538,7 +558,11 @@ abstract class AbstractQueryExecutorIntegrationTest {
     void "select a subset of fields"() {
         def fields = ["_id", "firstname", "lastname", "salary"]
         def query = new Query(filter: ALL_DATA_FILTER, fields: fields)
-        def expected = getAllData().collect { it.subMap(fields) }
+        // one of the lastname values is not in the raw json, so don't include it in
+        // the expected data
+        def expected = getAllData().collect { row ->
+            row.subMap(fields.findAll { row[it] })
+        }
         def result = queryExecutor.execute(query, QueryOptions.FILTERED_DATA)
         assertUnorderedQueryResult(expected, result)
     }
@@ -622,6 +646,19 @@ abstract class AbstractQueryExecutorIntegrationTest {
         assertUnorderedQueryResult(getAllData(), result)
     }
 
+    @Test
+    void "show databases"(){
+        def dbs = queryExecutor.showDatabases()
+        assert dbs.contains(DATABASE_NAME)
+    }
+
+    @Test
+    void "show tables"(){
+        def tables = queryExecutor.showTables(DATABASE_NAME)
+        assert tables.contains(TABLE_NAME)
+    }
+
+
     protected def assertOrderedQueryResult(expected, actual) {
         assertQueryResult(expected, actual, true)
     }
@@ -636,10 +673,14 @@ abstract class AbstractQueryExecutorIntegrationTest {
 
         // compare row by row for better error messages on failure
         data.eachWithIndex { map, index ->
+            // our expected data is json based. fixed-schema databases will have null values for those fields in
+            // the actual data, so remove them to make it easier to compare
+            // but don't remove the _id field. that is expected in all mongo rows (and it may be empty for aggregations)
+            def cleanedRow = map.findAll { it.value || it.key == '_id'}
             if (ordered) {
-                compareRowOrdered(expected[index], map, "Row ${index}")
+                compareRowOrdered(expected[index], cleanedRow, "Row ${index}")
             } else {
-                compareRowUnordered(expected, map, "Could not find a match for row ${index}: ${map} in ${expected}")
+                compareRowUnordered(expected, cleanedRow, "Could not find a match for row ${index}: ${cleanedRow} in ${expected}")
             }
         }
     }

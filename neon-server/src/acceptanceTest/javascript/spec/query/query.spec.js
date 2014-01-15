@@ -78,7 +78,10 @@ describe('query mapping', function () {
             // the _id field is always included from mongo
             expectedRow._id = row._id;
             fields.forEach(function (field) {
-                expectedRow[field] = row[field];
+                // some rows do not have all fields, so skip those
+                if ( row[field] ) {
+                    expectedRow[field] = row[field];
+                }
             });
             expected.push(expectedRow);
         });
@@ -128,6 +131,16 @@ describe('query mapping', function () {
     });
 
 
+    it('group by with generated aggregate field name', function () {
+        var query = baseQuery()
+            .groupBy('state')
+            .sortBy('state', neon.query.ASCENDING)
+            .aggregate(neon.query.MAX, 'salary');
+        var expectedData = getJSONFixture('groupByStateAsc_maxSalary_generated_field_name.json');
+        assertQueryResults(query, expectedData);
+    });
+
+
     it('group by min', function () {
         var query = baseQuery()
             .groupBy('state')
@@ -141,10 +154,26 @@ describe('query mapping', function () {
         var query = baseQuery()
             .groupBy('state')
             .sortBy('state', neon.query.ASCENDING)
-            .aggregate(neon.query.COUNT, null, 'counter');
+            .aggregate(neon.query.COUNT, '*', 'counter');
         var expectedData = getJSONFixture('groupByStateAsc_count.json');
         assertQueryResults(query, expectedData);
     });
+
+    it('count all fields', function () {
+        var query = baseQuery()
+            .aggregate(neon.query.COUNT, '*', 'counter');
+        var expectedData = getJSONFixture('count.json');
+        assertQueryResults(query, expectedData);
+    });
+
+    it('count field with missing value', function () {
+        // lastname has one record with no data, so count should return 1 less value
+        var query = baseQuery()
+            .aggregate(neon.query.COUNT, 'lastname', 'counter');
+        var expectedData = getJSONFixture('count_missing_field.json');
+        assertQueryResults(query, expectedData);
+    });
+
 
     it('distinct fields', function () {
         var query = baseQuery().distinct().withFields('state').limit(2).sortBy('state', neon.query.ASCENDING);

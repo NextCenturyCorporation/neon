@@ -3,6 +3,7 @@ package com.ncc.neon.query.mongo
 import com.mongodb.BasicDBObject
 import com.ncc.neon.query.clauses.GroupByFieldClause
 import com.ncc.neon.query.clauses.GroupByFunctionClause
+import com.ncc.neon.query.clauses.SelectClause
 
 /*
  * ************************************************************************
@@ -84,8 +85,36 @@ class MongoAggregationClauseBuilder {
         // count is implemented as sum with a value of 1
         if (function == 'count') {
             lhs = '$sum'
-            rhs = 1
+            rhs = createSumRhs(field)
         }
         return new BasicDBObject(lhs, rhs)
+    }
+
+    private static def createSumRhs(field) {
+        // when a specified field name is specified in the count, the count is the number of rows where that field
+        // is not null
+        if (field != SelectClause.ALL_FIELDS[0]) {
+            return createDBObjectTOCountNonNullValues(field)
+        }
+        // otherwise just return the raw count
+        return 1
+
+    }
+
+    private static def createDBObjectTOCountNonNullValues(field) {
+        // this method is a little confusing but required for the mongo pipeline, but each step is documented below:
+
+        // compare the field to null (either it's null or doesn't exist). if this returns true, return null,
+        // otherwise return the original field value (as long as that value is not null, that's all that matters)
+        def ifNull = new BasicDBObject('$ifNull',['$'+field,null])
+
+        // now compare that previous value (which is either null or the original field value) against null. if
+        // it is not equal to null, this condition will return true. if it is null, this condition returns false
+        def notNull = new BasicDBObject('$ne', [null,ifNull])
+
+        // if the final value is not null, add 1 to the field, otherwise don't count it
+        def conditionalCount = [notNull, 1, 0]
+        return new BasicDBObject('$cond', conditionalCount)
+
     }
 }

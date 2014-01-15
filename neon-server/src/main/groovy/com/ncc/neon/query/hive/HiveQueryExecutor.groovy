@@ -1,4 +1,5 @@
 package com.ncc.neon.query.hive
+
 import com.ncc.neon.connect.ConnectionManager
 import com.ncc.neon.query.*
 import com.ncc.neon.query.filter.FilterState
@@ -10,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
 
 import java.sql.SQLException
+
 /*
  * ************************************************************************
  * Copyright (c), 2013 Next Century Corporation. All Rights Reserved.
@@ -52,46 +54,54 @@ class HiveQueryExecutor implements QueryExecutor {
 
     @Override
     QueryResult execute(Query query, QueryOptions options) {
+        return runAndRelease { client -> doExecuteQuery(client, query, options) }
+    }
+
+    private QueryResult doExecuteQuery(JdbcClient client, Query query, QueryOptions options) {
         HiveConversionStrategy conversionStrategy = new HiveConversionStrategy(filterState: filterState, selectionState: selectionState)
         String hiveQuery = conversionStrategy.convertQuery(query, options)
         LOGGER.debug("Hive Query: {}", hiveQuery)
         int offset = query.offsetClause ? query.offsetClause.offset : 0
-        List<Map> resultList = jdbcClient.executeQuery(hiveQuery, offset)
+        List<Map> resultList = client.executeQuery(hiveQuery, offset)
         return new TableQueryResult(data: resultList)
     }
 
     @Override
     QueryResult execute(QueryGroup queryGroup, QueryOptions options) {
-        TableQueryResult queryResult = new TableQueryResult()
-        queryGroup.queries.each {
-            def result = execute(it, options)
-            queryResult.data.addAll(result.data)
+        return runAndRelease { client ->
+            TableQueryResult queryResult = new TableQueryResult()
+            queryGroup.queries.each {
+                def result = doExecuteQuery(client, it, options)
+                queryResult.data.addAll(result.data)
+            }
+            return queryResult
         }
-        return queryResult
     }
 
     @Override
     List<String> showDatabases() {
         LOGGER.debug("Executing Hive SHOW DATABASES")
-        def dbs = jdbcClient.executeQuery("SHOW DATABASES").collect { Map<String, String> map ->
-            map.get("database_name")
+        return runAndRelease { client ->
+            client.executeQuery("SHOW DATABASES").collect { Map<String, String> map ->
+                map.get("database_name")
+            }
         }
-        return dbs
     }
 
     @Override
     List<String> showTables(String dbName) {
         LOGGER.debug("Executing Hive SHOW TABLES on database {}", dbName)
-        jdbcClient.execute("USE " + dbName)
-        return jdbcClient.executeQuery("SHOW TABLES").collect { Map<String, String> map ->
-            map.get("tab_name")
+        return runAndRelease { client ->
+            client.executeQuery("SHOW TABLES IN " + dbName).collect { Map<String, String> map ->
+                map.get("tab_name")
+            }
         }
     }
 
     @Override
     QueryResult getFieldNames(String databaseName, String tableName) {
         try {
-            def columns = jdbcClient.getColumnNames(databaseName, tableName)
+            def columns = runAndRelease { client -> client.getColumnNames(databaseName, tableName) }
             return new ListQueryResult(columns)
         }
         catch (SQLException ex) {
@@ -101,6 +111,24 @@ class HiveQueryExecutor implements QueryExecutor {
     }
 
     private JdbcClient getJdbcClient() {
-        connectionManager.connectionClient
+        return connectionManager.connectionClient
+    }
+
+    /**
+     * Runs the closure containing a query to run and releases the connection back into the pool
+     * @param query
+     */
+    private def runAndRelease(Closure query) {
+        // use the explicit getter here to make it clear since the getter actually will grab a connection
+        // from the pool
+        def client = getJdbcClient()
+        try {
+
+            return query.call(client)
+        }
+        finally {
+            // neon uses connection pooling, so all this does is release it back into the pool
+            client?.close()
+        }
     }
 }

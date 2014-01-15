@@ -29,48 +29,63 @@ dependencies {
     concurrencyTestRuntime "com.excilys.ebi.gatling:gatling-app:1.5.3"
 }
 
-task gatling{
-    dependsOn 'stopGatlingJetty'
+task gatling {
+    dependsOn 'concurrencyTestWar', 'insertDataIntoMongo', 'insertDataIntoHive'
     group = GATLING_GROUP
-    description = "Runs all gatling tests against a jetty server."
-}
+    doLast {
+        sourceSets.concurrencyTest.output.classesDir.eachFileRecurse { file ->
+            if (file.isFile()) {
+                if(containsExcludedNames(file)){
+                    return
+                }
+                def gatlingScenarioClass = getFullyQualifiedClassName(file)
 
-task runGatlingTests(dependsOn: 'concurrencyTestWar') << {
-    group = GATLING_GROUP
-    sourceSets.concurrencyTest.output.classesDir.eachFileRecurse { file ->
-        if (file.isFile()) {
-            //Remove the full path, .class and replace / with a .
-            def gatlingScenarioClass = (file.getPath() - (sourceSets.concurrencyTest.output.classesDir.getPath() + File.separator) - '.class')
-                    .replace(File.separator, '.')
-            javaexec {
-                main = 'com.excilys.ebi.gatling.app.Gatling'
-                classpath = sourceSets.concurrencyTest.output + sourceSets.concurrencyTest.runtimeClasspath
-                args  '-sbf',
-                        sourceSets.concurrencyTest.output.classesDir,
-                        '-s',
-                        gatlingScenarioClass,
-                        '-rf',
-                        'build/reports/gatling'
+                javaexec {
+                    main = 'com.excilys.ebi.gatling.app.Gatling'
+                    classpath = sourceSets.concurrencyTest.output + sourceSets.concurrencyTest.runtimeClasspath
+                    args '-sbf',
+                            sourceSets.concurrencyTest.output.classesDir,
+                            '-s',
+                            gatlingScenarioClass,
+                            '-rf',
+                            'build/reports/gatling',
+                            '-bf',
+                            'src/concurrencyTest/resources/request-bodies'
+                }
             }
         }
     }
 }
 
-task stopGatlingJetty(type: org.gradle.api.plugins.jetty.JettyStop){
-    dependsOn 'runGatlingTests'
-    group = GATLING_GROUP
-    stopKey = 'stop'
-    stopPort = concurrencyTestPort + 2
-
+def containsExcludedNames(File file){
+    def excludes = ["Responses", "Headers"]
+    boolean excludeFound = false
+    excludes.each {
+        if(file.name.contains(it)){
+            excludeFound = true
+        }
+    }
+    return excludeFound
 }
 
-task copyConcurrencyWebapp(type: Copy){
+def getFullyQualifiedClassName(File file){
+    (file.getPath() - (sourceSets.concurrencyTest.output.classesDir.getPath() + File.separator) - '.class').replace(File.separator, '.')
+}
+
+task copyConcurrencyWebapp(type: Copy) {
     from 'src/concurrencyTest/webapp'
-    into "${buildDir}/tmp/concurrencyTestWar/webapp"
+    into "${buildDir}/tmp/concurrencyRecorder/webapp"
+}
+
+task concurrencyRecorder(type: org.gradle.api.plugins.jetty.JettyRunWar) {
+    dependsOn 'clean', 'concurrencyTestClasses', 'copyConcurrencyWebapp'
+    group = GATLING_GROUP
+    daemon = false
+    httpPort = concurrencyTestPort
 }
 
 task concurrencyTestWar(type: org.gradle.api.plugins.jetty.JettyRunWar) {
-    dependsOn 'compileConcurrencyTestScala', 'copyConcurrencyWebapp'
+    dependsOn 'concurrencyTestClasses'
     group = GATLING_GROUP
     daemon = true
     httpPort = concurrencyTestPort
@@ -78,8 +93,58 @@ task concurrencyTestWar(type: org.gradle.api.plugins.jetty.JettyRunWar) {
     stopKey = 'stop'
 }
 
+task insertDataIntoMongo(type: com.ncc.neon.data.MongoDataInserter) {
+    dependsOn 'deleteDataFromMongoBeforeInsert', 'generateMongoJson'
+    host = getMongoHost()
+}
+task deleteDataFromMongoBeforeInsert(type: com.ncc.neon.data.MongoDataDeleter) {
+    host = getMongoHost()
+}
+
+task insertDataIntoHive(type: com.ncc.neon.data.HiveDataInserter) {
+    dependsOn 'deleteDataFromHiveBeforeInsert', 'generateHiveCSV', 'generateHiveJson'
+    host = getHiveHost()
+    hdfsUrl = getHdfsUrl()
+}
+task deleteDataFromHiveBeforeInsert(type: com.ncc.neon.data.HiveDataDeleter) {
+    host = getHiveHost()
+}
+
+task afterGatlingTest{
+    group = GATLING_GROUP
+    dependsOn 'stopGatlingJetty', 'deleteDataFromMongo', 'deleteDataFromHive'
+}
+
+gatling.finalizedBy afterGatlingTest
+
+task stopGatlingJetty(type: org.gradle.api.plugins.jetty.JettyStop) {
+    group = GATLING_GROUP
+    stopKey = 'stop'
+    stopPort = concurrencyTestPort + 2
+}
+
+task deleteDataFromMongo(type: com.ncc.neon.data.MongoDataDeleter) {
+    host = getMongoHost()
+}
+
+task deleteDataFromHive(type: com.ncc.neon.data.HiveDataDeleter) {
+    host = getHiveHost()
+}
+
+def getMongoHost() {
+    return project.hasProperty("mongo.hosts") ? getProperty("mongo.hosts") : "localhost"
+}
+
+def getHiveHost() {
+    return project.hasProperty("hive.host") ? getProperty("hive.host") : "localhost:10000"
+}
+
+def getHdfsUrl() {
+    return project.hasProperty("hdfs.url") ? getProperty("hdfs.url") : "hdfs://localhost:8020"
+}
 
 import org.gradle.api.plugins.jetty.internal.Monitor
+
 concurrencyTestWar.doLast {
     /**
      * THIS IS A WORKAROUND! THE CURRENT VERSION OF THIS TASK DOESN'T START A WATCHER IN DAEMON MODE
@@ -94,3 +159,4 @@ concurrencyTestWar.doLast {
         monitor.start();
     }
 }
+

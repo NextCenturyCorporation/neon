@@ -54,26 +54,33 @@ class HiveQueryExecutorIntegrationTest extends AbstractQueryExecutorIntegrationT
     /** a separate connection used for inserting/deleting test data */
     private static JdbcClient jdbcClient
 
+    private static final ConnectionInfo CONNECTION_INFO = new ConnectionInfo(connectionUrl: HiveIntegrationTestContext.HOST_STRING, dataSource: DataSources.hive)
+    private static final ConnectionClientFactory CONNECTION_FACTORY = new JdbcConnectionClientFactory("org.apache.hive.jdbc.HiveDriver", "hive2")
+
     @BeforeClass
     static void beforeClass() {
-        ConnectionInfo info = new ConnectionInfo(connectionUrl: HiveIntegrationTestContext.HOST_STRING, dataSource: DataSources.hive)
-        ConnectionClientFactory factory = new JdbcConnectionClientFactory("org.apache.hive.jdbc.HiveDriver", "hive2", "default")
-        jdbcClient = factory.createConnectionClient(info)
+        jdbcClient = CONNECTION_FACTORY.createConnectionClient(CONNECTION_INFO)
+
         // make sure we clean up just in case something was left over
         deleteData()
         insertData()
-        HiveQueryExecutor.metaClass.getJdbcClient = { jdbcClient }
-
     }
 
     @AfterClass
     static void afterClass() {
         deleteData()
-        HiveQueryExecutor.metaClass = null
+        CONNECTION_FACTORY.dataSource?.close()
     }
 
-    @Autowired
     HiveQueryExecutor hiveQueryExecutor
+
+
+    @SuppressWarnings("JUnitPublicNonTestMethod")
+    @Autowired
+    void setHiveQueryExecutor(HiveQueryExecutor hiveQueryExecutor) {
+        this.hiveQueryExecutor = hiveQueryExecutor
+        this.hiveQueryExecutor.connectionManager.connect(CONNECTION_INFO)
+    }
 
     @Override
     protected def getQueryExecutor(){

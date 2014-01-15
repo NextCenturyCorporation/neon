@@ -28,23 +28,34 @@ import com.mchange.v2.c3p0.ComboPooledDataSource
  * @author tbrooks
  */
 
-class JdbcConnectionClientFactory implements ConnectionClientFactory{
+class JdbcConnectionClientFactory implements ConnectionClientFactory {
 
-    private final ComboPooledDataSource dataSource
+    private ComboPooledDataSource dataSource
     private final String databaseType
-    private final String databaseName
+    private final String driverName
+    private final Object lock = new Object()
 
-    public JdbcConnectionClientFactory(String driverName, String databaseType, String databaseName){
+    public JdbcConnectionClientFactory(String driverName, String databaseType) {
+        this.driverName = driverName
         this.databaseType = databaseType
-        this.databaseName = databaseName
-
-        this.dataSource = new ComboPooledDataSource()
-        this.dataSource.setDriverClass(driverName)
     }
 
     @Override
     ConnectionClient createConnectionClient(ConnectionInfo info) {
-        dataSource.setJdbcUrl("jdbc:${databaseType}://${info.connectionUrl}/${databaseName}")
-        return new JdbcClient(dataSource.getConnection("",""))
+        // the data source is created lazily because ConnectionManager.connect calls
+        // connectionCache.put(info,createClientFactory) as part of its connect method, so a new instance of
+        // this class will be created even if it already exists in the map. initializing the pool when this connection
+        // is actually used prevents multiple pools to the same connection from being instantiated
+
+        // because of the lazy initialization, we need to synchronize on the creation of the data source to avoid
+        // possibly creating it twice
+        synchronized (lock) {
+            if (!dataSource) {
+                this.dataSource = new ComboPooledDataSource()
+                this.dataSource.setDriverClass(driverName)
+                this.dataSource.setJdbcUrl("jdbc:${databaseType}://${info.connectionUrl}")
+            }
+        }
+        return new JdbcClient(dataSource.getConnection("", ""))
     }
 }
