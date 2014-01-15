@@ -86,6 +86,8 @@ configurations {
 
     acceptanceTestCompile { extendsFrom testCompile }
     acceptanceTestRuntime { extendsFrom testCompile, testRuntime }
+
+    compile.exclude module: 'commons-logging'
 }
 
 dependencies {
@@ -104,6 +106,8 @@ dependencies {
     compile "org.springframework:spring-web:$springVersion"
     compile 'joda-time:joda-time:2.1'
     compile 'org.slf4j:slf4j-api:1.7.2'
+    compile 'org.slf4j:jcl-over-slf4j:1.7.2'
+
     compile "ch.qos.logback:logback-core:$logbackVersion"
     compile "ch.qos.logback:logback-classic:$logbackVersion"
     compile "com.google.guava:guava:14.0.1"
@@ -191,7 +195,6 @@ dependencies {
     antlr4 'org.antlr:antlr4-runtime:4.0'
     antlr4 'org.antlr:antlr-runtime:3.5'
     antlr4 'org.antlr:ST4:4.0.7'
-
 }
 
 war {
