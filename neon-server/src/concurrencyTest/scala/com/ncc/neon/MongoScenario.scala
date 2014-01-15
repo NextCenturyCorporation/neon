@@ -21,6 +21,8 @@ class MongoScenario extends Simulation {
     .connection("keep-alive")
     .userAgentHeader("Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:23.0) Gecko/20100101 Firefox/23.0")
 
+  val mongoHost = System.getProperty("mongo.host")
+
   val scn = scenario("Mongo under 10 concurrent users")
     .exec(http("Register for filter key")
     .post("/neon/services/filterservice/registerforfilterkey")
@@ -32,7 +34,7 @@ class MongoScenario extends Simulation {
     .post("/neon/services/connectionservice/connect")
     .headers(connect_header)
     .param("datastore", "mongo")
-    .param("hostname", "xdata1")
+    .param("hostname", mongoHost)
   )
     .pause(2)
     .exec(http("Add Filter")

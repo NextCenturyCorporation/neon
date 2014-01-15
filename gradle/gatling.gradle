@@ -32,6 +32,7 @@ dependencies {
 task gatling {
     dependsOn 'concurrencyTestWar', 'insertDataIntoMongo', 'insertDataIntoHive'
     group = GATLING_GROUP
+
     doLast {
         sourceSets.concurrencyTest.output.classesDir.eachFileRecurse { file ->
             if (file.isFile()) {
@@ -43,6 +44,7 @@ task gatling {
                 javaexec {
                     main = 'com.excilys.ebi.gatling.app.Gatling'
                     classpath = sourceSets.concurrencyTest.output + sourceSets.concurrencyTest.runtimeClasspath
+                    jvmArgs = createJvmArgs()
                     args '-sbf',
                             sourceSets.concurrencyTest.output.classesDir,
                             '-s',
@@ -70,6 +72,13 @@ def containsExcludedNames(File file){
 
 def getFullyQualifiedClassName(File file){
     (file.getPath() - (sourceSets.concurrencyTest.output.classesDir.getPath() + File.separator) - '.class').replace(File.separator, '.')
+}
+
+def createJvmArgs(){
+    String mongoHost = "-Dmongo.host=${getMongoHost()}"
+    String hiveHost = "-Dhive.host=${getHiveHost()}"
+
+    return [mongoHost, hiveHost]
 }
 
 task copyConcurrencyWebapp(type: Copy) {
