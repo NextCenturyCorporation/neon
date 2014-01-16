@@ -19,8 +19,6 @@
  * PROPRIETARY AND CONFIDENTIAL TRADE SECRET MATERIAL NOT FOR DISCLOSURE OUTSIDE
  * OF NEXT CENTURY CORPORATION EXCEPT BY PRIOR WRITTEN PERMISSION AND WHEN
  * RECIPIENT IS UNDER OBLIGATION TO MAINTAIN SECRECY.
- *
- * @author dflynt
  */
 
 package com.ncc.neon.services
@@ -86,13 +84,13 @@ class GraphQueryService {
      * @param query A collection of queries. The results of the queries will be appended together.
      * @return An object that contains the query result data and optional metadata about the query.
      */
-//    @POST
-//    @Consumes(MediaType.APPLICATION_JSON)
-//    @Produces(MediaType.APPLICATION_JSON)
-//    @Path("querygroup")
-//    ClientData executeQueryGroup(QueryGroup query) {
-//        return execute(query, QueryOptions.FILTERED_DATA)
-//    }
+    @POST
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    @Path("querygroup")
+    ClientData executeQueryGroup(QueryGroup query) {
+        return execute(query, QueryOptions.FILTERED_DATA)
+    }
 
     /**
      * Executes a query for selected items against the data source the user is currently connected to.
@@ -215,27 +213,24 @@ class GraphQueryService {
 
     private void importGraph(ImportController importController, Workspace workspace,
                              QueryResult queryResult) {
-        // structure in MongoDB (for now) is: [{"nodes":[{}, {}, ...]}, {"edges":[{}, {}, ...]}]
-        List<Map<String, Object>> nodeList = queryResult.data.head().get("nodes")
-        List<Map<String, Object>> edgeList = queryResult.data.head().get("edges")
 
         // Init ImporterBuilder with nodes and edges collections
+        // structure in MongoDB (for now) is: [{"nodes":[{}, {}, ...]}, {"edges":[{}, {}, ...]}]
         ImporterBuilderJava importerBuilder = new ImporterBuilderJava()
-        importerBuilder.setEdges(edgeList)
-        importerBuilder.setNodes(nodeList)
+        importerBuilder.setEdges(queryResult.data.head().get("edges"))
+        importerBuilder.setNodes(queryResult.data.head().get("nodes"))
         SpigotImporter importer = importerBuilder.buildImporter()
 
         //Import graph
-        Container container
-        container = importController.importSpigot(importer)
+        Container container = importController.importSpigot(importer)
         container.getLoader().setEdgeDefault(EdgeDefault.DIRECTED)
         importController.process(container, new DefaultProcessor(), workspace)
     }
 
     private QueryResult getLayoutResults(Workspace workspace) {
-        ExporterJava ej = new ExporterJava()
-        ej.setWorkspace(workspace)
-        ej.execute()
+        ExporterJava exporter = new ExporterJava()
+        exporter.setWorkspace(workspace)
+        exporter.execute()
 
         def layoutResult = []
         def graph = [nodes:ej.nodeList, edges:ej.edgeList]
@@ -243,11 +238,10 @@ class GraphQueryService {
         new TableQueryResult(data:layoutResult)
     }
 
-    private QueryResult layout(QueryResult queryResult) {
-        //Init a project - and therefore a workspace
-        ProjectController pc = Lookup.getDefault().lookup(ProjectController)
-        pc.newProject()
-        Workspace workspace = pc.getCurrentWorkspace()
+    private QueryResult layoutGraph(QueryResult queryResult) {
+        ProjectController projectController = Lookup.getDefault().lookup(ProjectController)
+        projectController.newProject()
+        Workspace workspace = projectController.getCurrentWorkspace()
 
         //Get models and controllers for this new workspace
         GraphModel graphModel = Lookup.getDefault().lookup(GraphController).getModel()
@@ -265,7 +259,7 @@ class GraphQueryService {
         QueryResult queryResult = queryExecutor.execute(query, options)
 
         // layout the graph
-        QueryResult layoutResult = layout(queryResult)
+        QueryResult layoutResult = layoutGraph(queryResult)
         ColumnMetadataList columnMetadataList = metadataResolver.resolveQuery(query)
 
         AssembleClientData assembler = new AssembleClientData(queryResult: layoutResult, columnMetadataList: columnMetadataList)

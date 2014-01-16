@@ -1,7 +1,6 @@
 package com.ncc.neon.connect
 
 import com.mchange.v2.c3p0.ComboPooledDataSource
-
 /*
  * ************************************************************************
  * Copyright (c), 2013 Next Century Corporation. All Rights Reserved.
@@ -51,11 +50,18 @@ class JdbcConnectionClientFactory implements ConnectionClientFactory {
         // possibly creating it twice
         synchronized (lock) {
             if (!dataSource) {
-                this.dataSource = new ComboPooledDataSource()
-                this.dataSource.setDriverClass(driverName)
-                this.dataSource.setJdbcUrl("jdbc:${databaseType}://${info.connectionUrl}")
+                configureConnectionPool(info)
             }
         }
         return new JdbcClient(dataSource.getConnection("", ""))
+    }
+
+    private void configureConnectionPool(ConnectionInfo info) {
+        this.dataSource = new ComboPooledDataSource()
+        this.dataSource.setDriverClass(driverName)
+        this.dataSource.setJdbcUrl("jdbc:${databaseType}://${info.connectionUrl}")
+        addShutdownHook {
+            dataSource.close()
+        }
     }
 }

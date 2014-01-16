@@ -37,9 +37,20 @@ import org.springframework.web.context.WebApplicationContext
 
 @Component
 @Scope(value = WebApplicationContext.SCOPE_SESSION, proxyMode = ScopedProxyMode.TARGET_CLASS)
-class WidgetStates{
+class WidgetStates implements Serializable{
 
-    private final Set<WidgetState> states = [] as Set
+    private static final long serialVersionUID = - 5362959301029628371L
+
+    // the states are transient because we don't actually want to save them between user sessions
+    private transient Set<WidgetState> states
+
+    WidgetStates() {
+        initEmptyStates()
+    }
+
+    private void initEmptyStates() {
+        states = [] as Set
+    }
 
     /**
      * Creates a new widget state for the current user.
@@ -67,5 +78,12 @@ class WidgetStates{
             clientId == it.clientId
         }
     }
+
+    @SuppressWarnings("UnusedPrivateMethod") // needed for deserialization
+    private void readObject(ObjectInputStream input) throws IOException, ClassNotFoundException {
+        input.defaultReadObject()
+        initEmptyStates()
+    }
+
 
 }

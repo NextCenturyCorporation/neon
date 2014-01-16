@@ -65,7 +65,7 @@ neon.ready(function () {
     fetchData();
 
     function fetchData() {
-        var query = new neon.query.Query().selectFrom('test', 'vastcell');
+        var query = new neon.query.Query().selectFrom('test', 'cpan');
 
         neon.query.executeGraphQuery(query, displayGraph);
     }
