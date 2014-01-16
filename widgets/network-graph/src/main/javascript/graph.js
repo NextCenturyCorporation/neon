@@ -239,13 +239,13 @@ graphs.Graph.prototype.getTranslation_ = function (node) {
 
 graphs.Graph.prototype.zoom_ = function () {
     var me = this;
-    this.nodes_.attr("transform",
+    me.nodes_.attr("transform",
         function (node) {
             return me.transform_.call(me, node);
         }
     );
 
-    this.edges_
+    me.edges_
         .attr("x1", function (edge) {
             return me.getTranslation_(edge.source)[0];
         })
