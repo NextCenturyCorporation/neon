@@ -36,6 +36,7 @@ class HiveDataDeleter extends DefaultTask {
     static final String DATABASE_NAME = "concurrencytest"
     static final String TABLE_NAME = "records"
 
+    // default value. build will override this
     String host = "shark:10000"
 
     @TaskAction
@@ -51,9 +52,8 @@ class HiveDataDeleter extends DefaultTask {
     Connection createConnection(dataSource) {
         def driverName = "org.apache.hive.jdbc.HiveDriver"
         def databaseType = "hive2"
-        def databaseName = "default"
         dataSource.setDriverClass(driverName)
-        dataSource.setJdbcUrl("jdbc:${databaseType}://${host}/${databaseName}")
+        dataSource.setJdbcUrl("jdbc:${databaseType}://${host}/")
         return dataSource.getConnection("","")
     }
 
