@@ -1,1 +1,0 @@
-{"filterKey":{"uuid":"bd3fa931-39bb-4b9a-8179-f6ddda213339","dataSet":{"databaseName":"concurrencytest","tableName":"records"}},"filter":{"whereClause":{"type":"where","lhs":"salary","operator":"<=","rhs":100000},"databaseName":"concurrencytest","tableName":"records"}}

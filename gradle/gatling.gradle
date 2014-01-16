@@ -49,9 +49,7 @@ task gatling {
                         '-s',
                         gatlingScenarioClass,
                         '-rf',
-                        'build/reports/gatling',
-                        '-bf',
-                        'src/concurrencyTest/resources/request-bodies'
+                        'build/reports/gatling'
             }
         }
     }
