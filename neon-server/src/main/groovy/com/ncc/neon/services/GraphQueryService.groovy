@@ -233,7 +233,7 @@ class GraphQueryService {
         exporter.execute()
 
         def layoutResult = []
-        def graph = [nodes:ej.nodeList, edges:ej.edgeList]
+        def graph = [nodes:exporter.nodeList, edges:exporter.edgeList]
         layoutResult.push graph
         new TableQueryResult(data:layoutResult)
     }
