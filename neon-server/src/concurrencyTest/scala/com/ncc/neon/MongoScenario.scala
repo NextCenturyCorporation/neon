@@ -11,16 +11,17 @@ import Headers._
 import Responses._
 import Requests._
 
+
 class MongoScenario extends Simulation {
 
   val httpConf = httpConfig
     .baseURL("http://localhost:11402")
-    .disableFollowRedirect
     .acceptHeader("application/json, text/javascript, */*; q=0.01")
     .acceptEncodingHeader("gzip, deflate")
     .acceptLanguageHeader("en-US,en;q=0.5")
     .connection("keep-alive")
     .userAgentHeader("Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:23.0) Gecko/20100101 Firefox/23.0")
+
 
   val mongoHost = System.getProperty("mongo.host")
   val serviceRoot = "/neon/services/"
@@ -29,12 +30,12 @@ class MongoScenario extends Simulation {
     .exec(http("Register for filter key")
     .post(serviceRoot + "filterservice/registerforfilterkey")
     .headers(json_header)
-    .body(connect_request)
+    .body(filter_key_request)
   )
     .pause(2)
     .exec(http("Connect to Mongo")
     .post(serviceRoot + "connectionservice/connect")
-    .headers(connect_header)
+    .headers(form_header)
     .param("datastore", "mongo")
     .param("hostname", mongoHost)
   )
@@ -99,4 +100,5 @@ class MongoScenario extends Simulation {
   )
 
   setUp(scn.users(12).ramp(3).protocolConfig(httpConf))
+
 }

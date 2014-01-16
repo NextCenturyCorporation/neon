@@ -2,7 +2,7 @@ package com.ncc.neon
 
 object Requests {
 
-  val connect_request = """{"databaseName":"concurrencytest","tableName":"records"}"""
+  val filter_key_request = """{"databaseName":"concurrencytest","tableName":"records"}"""
 
   val all_data_query = """{"filter":{"databaseName":"concurrencytest","tableName":"records"},"fields":["*"],"disregardFilters_":true,"selectionOnly_":false,"groupByClauses":[],"isDistinct":false,"aggregates":[],"sortClauses":[]}"""
 
