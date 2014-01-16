@@ -89,7 +89,7 @@ neon.ready(function () {
         });
 
         // draw the graph
-        var opts = {"x":"x","y":"y"};
+        var opts = {"xPos":"x","yPos":"y"};
         var graph = new graphs.Graph("#graph", opts);
         graph.draw(nodeArr, data.data[0].edges);       
     }

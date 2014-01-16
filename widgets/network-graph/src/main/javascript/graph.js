@@ -45,12 +45,12 @@ var graphs = graphs || {};
  * @constructor
  * @example
  *    var nodes = [
- *                  {"id": 0, "xPos": 960, "yPos": 320},
- *                  {"id": 1, "xPos": 513, "yPos": 335},
- *                  {"id": 2, "xPos": 557, "yPos": 454},
- *                  {"id": 3, "xPos": 506, "yPos": 642},
- *                  {"id": 4, "xPos": 547, "yPos": 660},
- *                  {"id": 5, "xPos": 695, "yPos": 705}
+ *                  {"id": 0, "xPosition": 960, "yPosition": 320},
+ *                  {"id": 1, "xPosition": 513, "yPosition": 335},
+ *                  {"id": 2, "xPosition": 557, "yPosition": 454},
+ *                  {"id": 3, "xPosition": 506, "yPosition": 642},
+ *                  {"id": 4, "xPosition": 547, "yPosition": 660},
+ *                  {"id": 5, "xPosition": 695, "yPosition": 705}
  *                ];
  *
  *     var edges = [
@@ -59,7 +59,7 @@ var graphs = graphs || {};
  *                  {"source": 3, "target": 4}
  *                 ];
  *
- *     var opts = {"x":"xPos","y":"yPos"};
+ *     var opts = {"xPos":"xPosition","yPos":"yPosition"};
  *
  *     var graph = new graphs.Graph("#graph", opts);
  *     graph.draw(nodes, edges);
@@ -67,15 +67,15 @@ var graphs = graphs || {};
 graphs.Graph = function (graphSelector, opts) {
 
     this.graphSelector_ = graphSelector;
-    this.xAttr_ = opts.x || "x";
-    this.yAttr_ = opts.y || "y";
+    this.xAttr_ = opts.xPos || "xPos";
+    this.yAttr_ = opts.yPos || "yPos";
     this.id_ = opts.id || "id";
     this.nodeRadius_ = opts.radius || 6;
     this.svg_ = undefined;
     this.nodes_ = undefined;
     this.edges_ = undefined;
-    this.x_ = undefined;
-    this.y_ = undefined;
+    this.xPos_ = undefined;
+    this.yPos_ = undefined;
     this.height_ = 0;
     this.width_ = 0;
 
@@ -99,8 +99,8 @@ graphs.Graph.prototype.draw = function (nodes, edgeList) {
     this.width_ = graph.width();
     this.height_ = graph.height();
 
-    this.x_ = d3.scale.linear().domain([0, this.width_]).range([0, this.width_]);
-    this.y_ = d3.scale.linear().domain([0, this.height_]).range([0, this.height_]);
+    this.xPos_ = d3.scale.linear().domain([0, this.width_]).range([0, this.width_]);
+    this.yPos_ = d3.scale.linear().domain([0, this.height_]).range([0, this.height_]);
 
     this.initSvg_();
 
@@ -132,7 +132,7 @@ graphs.Graph.prototype.initSvg_ = function () {
             .append("g")
             // add semantic zooming behavior - adapted from http://bl.ocks.org/mbostock/3680957
             .call(d3.behavior.zoom()
-                .x(this.x_).y(this.y_).scaleExtent([1, 8])
+                .x(this.xPos_).y(this.yPos_).scaleExtent([1, 8])
                 .on("zoom",
                     $.proxy(this.zoom_, this)
                 ));
@@ -265,7 +265,7 @@ graphs.Graph.prototype.transform_ = function (node) {
     if (d3.event && d3.event.type === "zoom") {
         this.scale_ = d3.event.scale;
     }
-    var translate = [this.x_(node[this.xAttr_]), this.y_(node[this.yAttr_])];
+    var translate = [this.xPos_(node[this.xAttr_]), this.yPos_(node[this.yAttr_])];
     var nodeId = node[this.id_];
     var nodeTranslate = this.nodeInfo_[nodeId].translate;
     nodeTranslate[0] = translate[0];
