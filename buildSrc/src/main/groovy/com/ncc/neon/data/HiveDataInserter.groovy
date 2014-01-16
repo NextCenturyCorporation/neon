@@ -41,6 +41,7 @@ class HiveDataInserter extends DefaultTask{
     static final String TABLE_NAME = "records"
     private static final def FIELD_TYPES = [_id: "string", firstname: "string", lastname: "string", city: "string", state: "string", salary: "int", hiredate: "timestamp"]
 
+    // default values. build will override these
     String host = "shark:10000"
     String hdfsUrl = "hdfs://shark:8020"
 

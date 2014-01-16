@@ -33,6 +33,8 @@ import org.gradle.api.tasks.TaskAction
 
 class MongoDataDeleter extends DefaultTask {
     static final String DATABASE_NAME = "concurrencytest"
+
+    // default value. build will override this
     String host = "localhost"
 
 

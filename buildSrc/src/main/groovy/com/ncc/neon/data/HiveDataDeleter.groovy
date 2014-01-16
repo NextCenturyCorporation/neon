@@ -36,6 +36,7 @@ class HiveDataDeleter extends DefaultTask {
     static final String DATABASE_NAME = "concurrencytest"
     static final String TABLE_NAME = "records"
 
+    // default value. build will override this
     String host = "shark:10000"
 
     @TaskAction

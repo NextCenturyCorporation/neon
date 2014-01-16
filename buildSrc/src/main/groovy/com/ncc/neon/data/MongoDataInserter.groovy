@@ -37,6 +37,7 @@ class MongoDataInserter extends DefaultTask{
     static final String TABLE_NAME = "records"
     static final ALL_DATA_FILENAME = 'data.json'
 
+    // default value. build will override this
     String host = "localhost"
 
     @TaskAction
