@@ -70,10 +70,9 @@ class HiveDataInserter extends DefaultTask{
     Connection createConnection(dataSource) {
         def driverName = "org.apache.hive.jdbc.HiveDriver"
         def databaseType = "hive2"
-        def databaseName = "default"
 
         dataSource.setDriverClass(driverName)
-        dataSource.setJdbcUrl("jdbc:${databaseType}://${host}/${databaseName}")
+        dataSource.setJdbcUrl("jdbc:${databaseType}://${host}/")
         return dataSource.getConnection("","")
     }
 
