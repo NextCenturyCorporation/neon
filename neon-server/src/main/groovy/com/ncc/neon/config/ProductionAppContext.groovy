@@ -76,6 +76,6 @@ class ProductionAppContext {
     @Bean
     MetadataConnection metadataConnectionBean(){
         ConnectionManager bean = connectionManagerBean()
-        return new MetadataConnection(bean.connectionClient.getMongo())
+        return new MetadataConnection(bean.defaultConnectionClient.getMongo())
     }
 }

@@ -41,6 +41,10 @@ class ConnectionManager {
     @Autowired
     SessionConnection sessionConnection
 
+    /** the default connection used if the session is not explicitly connected to one */
+    private ConnectionInfo defaultConnection
+
+
     void connect(ConnectionInfo info) {
         sessionConnection.connectionInfo = info
         connectionCache.putIfAbsent(info, createClientFactory(info))
@@ -51,20 +55,24 @@ class ConnectionManager {
         if(info){
             connectionCache.put(info, createClientFactory(info))
         }
+        defaultConnection = info
+
     }
 
     ConnectionClient getConnectionClient(){
         return createConnectionClient(getCurrentConnectionInfo())
     }
 
+    ConnectionClient getDefaultConnectionClient() {
+        return createConnectionClient(defaultConnection)
+    }
+
     ConnectionInfo getCurrentConnectionInfo(){
-        if(connectionCache.size() == 0){
-            throw new NeonConnectionException("No known connections exist")
+        ConnectionInfo connection = sessionConnection.connectionInfo ?: defaultConnection
+        if ( !connection ) {
+            throw new NeonConnectionException("No default or session connections exist")
         }
-        if(connectionCache.size() == 1){
-            return connectionCache.keySet().iterator().next()
-        }
-        return sessionConnection.connectionInfo
+        return connection
     }
 
     private ConnectionClient createConnectionClient(ConnectionInfo info) {
