@@ -32,4 +32,5 @@ class DatabaseScenario extends Simulation {
 
 
   setUp(scn.users(2).protocolConfig(httpConf))
+  assertThat(global.failedRequests.count.is(0))
 }

@@ -128,4 +128,5 @@ class MongoAndHiveMix extends Simulation {
   )
 
   setUp(scn.users(10).ramp(5).protocolConfig(httpConf))
+  assertThat(global.failedRequests.count.is(0))
 }

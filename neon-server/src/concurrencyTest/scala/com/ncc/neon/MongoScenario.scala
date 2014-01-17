@@ -100,5 +100,5 @@ class MongoScenario extends Simulation {
   )
 
   setUp(scn.users(12).ramp(3).protocolConfig(httpConf))
-
+  assertThat(global.failedRequests.count.is(0))
 }
