@@ -5,6 +5,10 @@ import com.ncc.neon.connect.ConnectionManager
 import com.ncc.neon.query.*
 import com.ncc.neon.query.filter.FilterState
 import com.ncc.neon.query.filter.SelectionState
+import com.ncc.neon.transform.NeonTransformException
+import com.ncc.neon.query.Transform
+import com.ncc.neon.transform.Transformer
+import com.ncc.neon.transform.TransformerRegistry
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
@@ -41,6 +45,9 @@ class MongoQueryExecutor implements QueryExecutor {
     private static final Logger LOGGER = LoggerFactory.getLogger(MongoQueryExecutor)
 
     @Autowired
+    TransformerRegistry registry
+
+    @Autowired
     private FilterState filterState
 
     @Autowired
@@ -54,7 +61,21 @@ class MongoQueryExecutor implements QueryExecutor {
         AbstractMongoQueryWorker worker = createMongoQueryWorker(query)
         MongoConversionStrategy mongoConversionStrategy = new MongoConversionStrategy(filterState: filterState, selectionState: selectionState)
         MongoQuery mongoQuery = mongoConversionStrategy.convertQuery(query, options)
-        worker.executeQuery(mongoQuery)
+        QueryResult queryResult = worker.executeQuery(mongoQuery)
+        return transform(query.transform, queryResult)
+    }
+
+    QueryResult transform(Transform transform, QueryResult queryResult) {
+        if(!transform || !transform.transformName){
+            return queryResult
+        }
+
+        Transformer transformer = registry.getTransformer(transform.transformName)
+        if(!transformer){
+            throw new NeonTransformException("Transform ${transform.transformName} does not exist.")
+        }
+
+        return transformer.convert(queryResult, transform)
     }
 
     @Override

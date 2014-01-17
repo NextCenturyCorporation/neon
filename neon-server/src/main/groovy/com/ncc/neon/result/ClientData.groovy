@@ -31,6 +31,6 @@ package com.ncc.neon.result
 
 class ClientData {
 
-    List data = []
+    def data = []
     Map<String, Map<String, Boolean>> metadata = [:]
 }

@@ -1,3 +1,5 @@
+//Used for recording gatling tests.
+
 var databaseName = 'concurrencytest';
 var tableName = 'records';
 var filterKey;

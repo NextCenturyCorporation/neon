@@ -34,6 +34,7 @@
         <td><button id="add-selection">Add Selection</button></td>
         <td><button id="remove-selection">Remove Selection</button></td>
     </tr>
+
 </table>
 
 <div id="results"></div>
