@@ -23,7 +23,7 @@ class MongoScenario extends Simulation {
     .userAgentHeader("Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:23.0) Gecko/20100101 Firefox/23.0")
 
 
-  val mongoHost = System.getProperty("mongo.host")
+  val mongoHost = System.getProperty("mongo.hosts")
   val serviceRoot = "/neon/services/"
 
   val scn = scenario("Mongo under 10 concurrent users")

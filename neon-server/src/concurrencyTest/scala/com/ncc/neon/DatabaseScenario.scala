@@ -32,5 +32,4 @@ class DatabaseScenario extends Simulation {
 
 
   setUp(scn.users(2).protocolConfig(httpConf))
-
 }

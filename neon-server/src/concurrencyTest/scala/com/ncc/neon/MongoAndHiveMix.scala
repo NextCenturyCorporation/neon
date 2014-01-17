@@ -23,7 +23,7 @@ class MongoAndHiveMix extends Simulation {
     .userAgentHeader("Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:23.0) Gecko/20100101 Firefox/23.0")
 
   val hiveHost = System.getProperty("hive.host")
-  val mongoHost = System.getProperty("mongo.host")
+  val mongoHost = System.getProperty("mongo.hosts")
   val serviceRoot = "/neon/services/"
 
   val scn = scenario("Query both mongo and hive")
@@ -128,5 +128,4 @@ class MongoAndHiveMix extends Simulation {
   )
 
   setUp(scn.users(10).ramp(5).protocolConfig(httpConf))
-
 }

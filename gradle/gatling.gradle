@@ -1,3 +1,5 @@
+import org.apache.tools.ant.filters.ReplaceTokens
+
 apply plugin: 'scala'
 apply plugin: 'jetty'
 
@@ -43,7 +45,7 @@ task gatling {
             javaexec {
                 main = 'com.excilys.ebi.gatling.app.Gatling'
                 classpath = sourceSets.concurrencyTest.output + sourceSets.concurrencyTest.runtimeClasspath
-                jvmArgs = createJvmArgs()
+                systemProperties = createSystemProperties()
                 args '-sbf',
                         sourceSets.concurrencyTest.output.classesDir,
                         '-s',
@@ -70,10 +72,11 @@ def getFullyQualifiedClassName(File file){
     (file.getPath() - (sourceSets.concurrencyTest.output.classesDir.getPath() + File.separator) - '.class').replace(File.separator, '.')
 }
 
-def createJvmArgs(){
-    String mongoHost = "-Dmongo.host=${getMongoHost()}"
-    String hiveHost = "-Dhive.host=${getHiveHost()}"
-    return [mongoHost, hiveHost]
+def createSystemProperties(){
+    return [
+        "mongo.hosts" : getMongoHosts(),
+        "hive.host" : getHiveHost()
+    ]
 }
 
 task copyConcurrencyWebapp(type: Copy) {
@@ -95,14 +98,24 @@ task concurrencyTestWar(type: org.gradle.api.plugins.jetty.JettyRunWar) {
     httpPort = concurrencyTestPort
     stopPort = httpPort + 2
     stopKey = 'stop'
+    jettyConfig = new File(sourceSets.concurrencyTest.output.resourcesDir, 'jetty-config.xml')
+
+}
+
+processConcurrencyTestResources {
+    from(sourceSets.concurrencyTest.resources.srcDirs) {
+        filter(ReplaceTokens, tokens: [
+                "mongo.hosts": getMongoHosts()
+        ])
+    }
 }
 
 task insertDataIntoMongo(type: com.ncc.neon.data.MongoDataInserter) {
     dependsOn 'deleteDataFromMongoBeforeInsert', 'generateMongoJson'
-    host = getMongoHost()
+    host = getMongoHosts()
 }
 task deleteDataFromMongoBeforeInsert(type: com.ncc.neon.data.MongoDataDeleter) {
-    host = getMongoHost()
+    host = getMongoHosts()
 }
 
 task insertDataIntoHive(type: com.ncc.neon.data.HiveDataInserter) {
@@ -128,14 +141,14 @@ task stopGatlingJetty(type: org.gradle.api.plugins.jetty.JettyStop) {
 }
 
 task deleteDataFromMongo(type: com.ncc.neon.data.MongoDataDeleter) {
-    host = getMongoHost()
+    host = getMongoHosts()
 }
 
 task deleteDataFromHive(type: com.ncc.neon.data.HiveDataDeleter) {
     host = getHiveHost()
 }
 
-def getMongoHost() {
+def getMongoHosts() {
     return project.hasProperty("mongo.hosts") ? getProperty("mongo.hosts") : "localhost"
 }
 
