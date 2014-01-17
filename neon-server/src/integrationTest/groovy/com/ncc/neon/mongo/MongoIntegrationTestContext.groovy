@@ -3,6 +3,7 @@ import com.mongodb.MongoClient
 import com.ncc.neon.config.MongoConfigParser
 import com.ncc.neon.connect.ConnectionManager
 import com.ncc.neon.metadata.MetadataConnection
+import com.ncc.neon.transform.TransformerRegistry
 import org.springframework.beans.factory.config.CustomScopeConfigurer
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.ComponentScan
@@ -63,4 +64,8 @@ class MongoIntegrationTestContext {
         return new CustomScopeConfigurer(scopes: ["session": new SimpleThreadScope()])
     }
 
+    @Bean
+    TransformerRegistry transformerRegistry(){
+        new TransformerRegistry()
+    }
 }

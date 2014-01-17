@@ -66,13 +66,14 @@ class MongoQueryExecutor implements QueryExecutor {
     }
 
     QueryResult transform(Transform transform, QueryResult queryResult) {
-        if(!transform || !transform.transformName){
+        if(!transform){
             return queryResult
         }
 
-        Transformer transformer = registry.getTransformer(transform.transformName)
+        String transformName = transform.transformName
+        Transformer transformer = registry.getTransformer(transformName)
         if(!transformer){
-            throw new NeonTransformException("Transform ${transform.transformName} does not exist.")
+            throw new NeonTransformException("Transform ${transformName} does not exist.")
         }
 
         return transformer.convert(queryResult, transform)
