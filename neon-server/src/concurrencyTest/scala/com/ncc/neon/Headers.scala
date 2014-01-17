@@ -9,7 +9,7 @@ object Headers {
     "X-Requested-With" -> """XMLHttpRequest"""
   )
 
-  val connect_header = Map(
+  val form_header = Map(
     "Accept" -> """*/*""",
     "Cache-Control" -> """no-cache""",
     "Content-Type" -> """application/x-www-form-urlencoded; charset=UTF-8""",

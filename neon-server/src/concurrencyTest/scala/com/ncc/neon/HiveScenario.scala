@@ -21,6 +21,7 @@ class HiveScenario extends Simulation {
     .connection("keep-alive")
     .userAgentHeader("Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:23.0) Gecko/20100101 Firefox/23.0")
 
+
   val hiveHost = System.getProperty("hive.host")
   val serviceRoot = "/neon/services/"
 
@@ -28,12 +29,12 @@ class HiveScenario extends Simulation {
     .exec(http("Register for a filter key")
     .post(serviceRoot + "filterservice/registerforfilterkey")
     .headers(json_header)
-    .body(connect_request)
+    .body(filter_key_request)
   )
     .pause(2)
     .exec(http("Connect to Hive")
     .post(serviceRoot + "connectionservice/connect")
-    .headers(connect_header)
+    .headers(form_header)
     .param("datastore", "hive")
     .param("hostname", hiveHost)
   )
@@ -91,4 +92,5 @@ class HiveScenario extends Simulation {
   )
 
   setUp(scn.users(10).ramp(5).protocolConfig(httpConf))
+
 }
