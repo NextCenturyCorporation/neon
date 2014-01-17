@@ -16,7 +16,7 @@
         </encoder>
     </appender>
 
-    <logger name="com.excilys.ebi.gatling.http" level="DEBUG"/>
+    <logger name="com.excilys.ebi.gatling.http" level="INFO"/>
 
     <root level="ALL">
         <appender-ref ref="CONSOLE"/>
