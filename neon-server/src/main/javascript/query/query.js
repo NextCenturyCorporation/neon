@@ -51,6 +51,7 @@ neon.query.Query = function () {
     this.aggregates = [];
     this.sortClauses = [];
     this.limitClause = undefined;
+    this.transform = undefined;
 };
 
 /**
@@ -318,6 +319,17 @@ neon.query.Query.prototype.sortBy = function (fieldName, sortOrder) {
         var order = list[i + 1];
         this.sortClauses.push(new neon.query.SortClause(field, order));
     }
+    return this;
+};
+
+/**
+ * Adds a transform to this query
+ * @method setTransform
+ * @param {neon.query.Transform} transformObj a transform to be applied to the data
+ * @return {neon.query.Query} This query object
+ */
+neon.query.Query.prototype.setTransform = function(transformObj){
+    this.transform = transformObj;
     return this;
 };
 
