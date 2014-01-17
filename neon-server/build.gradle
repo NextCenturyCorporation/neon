@@ -121,22 +121,13 @@ dependencies {
     compile 'com.mchange:c3p0:0.9.5-pre6'
 
     // these libraries are needed for the patched version of hive that we use
-    compile ':hive-hbase-handler:0.11.0-shark-SNAPSHOT'
-    compile ':hive-beeline:0.11.0-shark-SNAPSHOT'
     compile ':hive-exec:0.11.0-shark-SNAPSHOT'
-    compile ':hcatalog-pig-adapter:0.11.0-shark-SNAPSHOT'
     compile ':hive-contrib:0.11.0-shark-SNAPSHOT'
     compile ':hive-jdbc:0.11.0-shark-SNAPSHOT'
-    compile ':webhcat:0.11.0-shark-SNAPSHOT'
     compile ':hive-metastore:0.11.0-shark-SNAPSHOT'
-    compile ':hcatalog-core:0.11.0-shark-SNAPSHOT'
     compile ':hive-cli:0.11.0-shark-SNAPSHOT'
-    compile ':hcatalog-server-extensions:0.11.0-shark-SNAPSHOT'
-    compile ':hive-hwi:0.11.0-shark-SNAPSHOT'
     compile ':hive-shims:0.11.0-shark-SNAPSHOT'
     compile ':hive-service:0.11.0-shark-SNAPSHOT'
-    compile ':hive-testutils:0.11.0-shark-SNAPSHOT'
-    compile ':webhcat-java-client:0.11.0-shark-SNAPSHOT'
     compile ':hive-common:0.11.0-shark-SNAPSHOT'
     compile ':hive-serde:0.11.0-shark-SNAPSHOT'
 
