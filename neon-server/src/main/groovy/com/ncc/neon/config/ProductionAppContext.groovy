@@ -1,9 +1,10 @@
 package com.ncc.neon.config
-
 import com.ncc.neon.connect.ConnectionInfo
 import com.ncc.neon.connect.ConnectionManager
 import com.ncc.neon.connect.DataSources
 import com.ncc.neon.metadata.MetadataConnection
+import com.ncc.neon.transform.Transformer
+import com.ncc.neon.transform.TransformerRegistry
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
@@ -78,4 +79,17 @@ class ProductionAppContext {
         ConnectionManager bean = connectionManagerBean()
         return new MetadataConnection(bean.defaultConnectionClient.getMongo())
     }
+
+    @Bean
+    TransformerRegistry transformerRegistry(){
+        TransformerRegistry registry = new TransformerRegistry()
+        List<Transformer> registeredTransformers = []
+        registeredTransformers.each { Transformer transformer ->
+            registry.register(transformer.name, transformer)
+        }
+        return registry
+    }
+
+
+
 }

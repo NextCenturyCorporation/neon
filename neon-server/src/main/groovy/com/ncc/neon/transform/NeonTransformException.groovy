@@ -1,7 +1,8 @@
-package com.ncc.neon.result
+package com.ncc.neon.transform
+
 /*
  * ************************************************************************
- * Copyright (c), 2013 Next Century Corporation. All Rights Reserved.
+ * Copyright (c), 2014 Next Century Corporation. All Rights Reserved.
  *
  * This software code is the exclusive property of Next Century Corporation and is
  * protected by United States and International laws relating to the protection
@@ -25,12 +26,9 @@ package com.ncc.neon.result
  * @author tbrooks
  */
 
-/**
- * Holds a tabular list of data and metadata regarding type information
- */
+class NeonTransformException extends RuntimeException{
 
-class ClientData {
-
-    def data = []
-    Map<String, Map<String, Boolean>> metadata = [:]
+    NeonTransformException(String message){
+        super(message)
+    }
 }

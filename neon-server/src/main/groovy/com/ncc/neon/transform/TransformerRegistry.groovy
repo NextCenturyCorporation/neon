@@ -1,7 +1,7 @@
-package com.ncc.neon.result
+package com.ncc.neon.transform
 /*
  * ************************************************************************
- * Copyright (c), 2013 Next Century Corporation. All Rights Reserved.
+ * Copyright (c), 2014 Next Century Corporation. All Rights Reserved.
  *
  * This software code is the exclusive property of Next Century Corporation and is
  * protected by United States and International laws relating to the protection
@@ -25,12 +25,14 @@ package com.ncc.neon.result
  * @author tbrooks
  */
 
-/**
- * Holds a tabular list of data and metadata regarding type information
- */
+class TransformerRegistry {
+    private final Map<String, Transformer> registry = [:]
 
-class ClientData {
+    void register(String name, Transformer transformer){
+        registry.put(name, transformer)
+    }
 
-    def data = []
-    Map<String, Map<String, Boolean>> metadata = [:]
+    Transformer getTransformer(String transformName){
+        registry.get(transformName)
+    }
 }

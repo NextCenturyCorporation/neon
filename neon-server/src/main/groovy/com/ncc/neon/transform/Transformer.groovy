@@ -1,7 +1,9 @@
-package com.ncc.neon.result
+package com.ncc.neon.transform
+import com.ncc.neon.query.QueryResult
+import com.ncc.neon.query.Transform
 /*
  * ************************************************************************
- * Copyright (c), 2013 Next Century Corporation. All Rights Reserved.
+ * Copyright (c), 2014 Next Century Corporation. All Rights Reserved.
  *
  * This software code is the exclusive property of Next Century Corporation and is
  * protected by United States and International laws relating to the protection
@@ -25,12 +27,10 @@ package com.ncc.neon.result
  * @author tbrooks
  */
 
-/**
- * Holds a tabular list of data and metadata regarding type information
- */
+interface Transformer {
 
-class ClientData {
+    QueryResult convert(QueryResult queryResult, Transform transform)
 
-    def data = []
-    Map<String, Map<String, Boolean>> metadata = [:]
+    String getName()
+
 }

@@ -5,6 +5,10 @@ import com.ncc.neon.query.*
 import com.ncc.neon.query.filter.FilterState
 import com.ncc.neon.query.filter.SelectionState
 import com.ncc.neon.connect.JdbcClient
+import com.ncc.neon.transform.NeonTransformException
+import com.ncc.neon.query.Transform
+import com.ncc.neon.transform.Transformer
+import com.ncc.neon.transform.TransformerRegistry
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
@@ -44,6 +48,9 @@ class HiveQueryExecutor implements QueryExecutor {
     private static final Logger LOGGER = LoggerFactory.getLogger(HiveQueryExecutor)
 
     @Autowired
+    TransformerRegistry registry
+
+    @Autowired
     private FilterState filterState
 
     @Autowired
@@ -54,16 +61,30 @@ class HiveQueryExecutor implements QueryExecutor {
 
     @Override
     QueryResult execute(Query query, QueryOptions options) {
-        return runAndRelease { client -> doExecuteQuery(client, query, options) }
+        return runAndRelease { client -> executeQuery(client, query, options) }
     }
 
-    private QueryResult doExecuteQuery(JdbcClient client, Query query, QueryOptions options) {
+    private QueryResult executeQuery(JdbcClient client, Query query, QueryOptions options) {
         HiveConversionStrategy conversionStrategy = new HiveConversionStrategy(filterState: filterState, selectionState: selectionState)
         String hiveQuery = conversionStrategy.convertQuery(query, options)
         LOGGER.debug("Hive Query: {}", hiveQuery)
         int offset = query.offsetClause ? query.offsetClause.offset : 0
         List<Map> resultList = client.executeQuery(hiveQuery, offset)
-        return new TableQueryResult(data: resultList)
+        QueryResult result = new TableQueryResult(data: resultList)
+        return transform(query.transform, result)
+    }
+
+    QueryResult transform(Transform transform, QueryResult queryResult) {
+        if(!transform || !transform.transformName){
+            return queryResult
+        }
+
+        Transformer transformer = registry.getTransformer(transform.transformName)
+        if(!transformer){
+            throw new NeonTransformException("Transform ${transform.transformName} does not exist.")
+        }
+
+        return transformer.convert(queryResult, transform)
     }
 
     @Override
@@ -71,7 +92,7 @@ class HiveQueryExecutor implements QueryExecutor {
         return runAndRelease { client ->
             TableQueryResult queryResult = new TableQueryResult()
             queryGroup.queries.each {
-                def result = doExecuteQuery(client, it, options)
+                def result = executeQuery(client, it, options)
                 queryResult.data.addAll(result.data)
             }
             return queryResult
