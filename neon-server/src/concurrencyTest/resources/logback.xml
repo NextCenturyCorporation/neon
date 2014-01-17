@@ -16,9 +16,7 @@
         </encoder>
     </appender>
 
-
-    <!-- Uncomment for logging ALL HTTP request and responses -->
-    <logger name="com.excilys.ebi.gatling.http" level="TRACE"/>
+    <logger name="com.excilys.ebi.gatling.http" level="DEBUG"/>
 
     <root level="ALL">
         <appender-ref ref="CONSOLE"/>
