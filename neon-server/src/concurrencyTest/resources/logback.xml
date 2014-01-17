@@ -1,13 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <configuration>
 
-    <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
-        <encoder>
-            <pattern>%d{HH:mm:ss.SSS} [%-5level] %logger{15} - %msg%n%rEx</pattern>
-            <immediateFlush>false</immediateFlush>
-        </encoder>
-    </appender>
-
     <appender name="FILE" class="ch.qos.logback.core.FileAppender">
         <file>gatling.log</file>
         <encoder>
@@ -16,10 +9,9 @@
         </encoder>
     </appender>
 
-    <logger name="com.excilys.ebi.gatling.http" level="INFO"/>
+    <logger name="com.excilys.ebi.gatling.http" level="DEBUG"/>
 
     <root level="ALL">
-        <appender-ref ref="CONSOLE"/>
         <appender-ref ref="FILE"/>
     </root>
 
