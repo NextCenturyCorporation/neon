@@ -2,6 +2,7 @@ package com.ncc.neon.mongo
 import com.mongodb.BasicDBObject
 import com.mongodb.util.JSON
 import com.ncc.neon.AbstractQueryExecutorIntegrationTest
+import com.ncc.neon.connect.NeonConnectionException
 import com.ncc.neon.query.Query
 import com.ncc.neon.query.QueryOptions
 import com.ncc.neon.query.clauses.AndWhereClause
@@ -151,6 +152,12 @@ class MongoQueryExecutorIntegrationTest extends AbstractQueryExecutorIntegration
 
         def result = queryExecutor.execute(query, QueryOptions.FILTERED_DATA)
         assertOrderedQueryResult(expected, result)
+    }
+
+    @Test(expected = NeonConnectionException)
+    void "exception thrown rather than trying to create an empty database"() {
+        def query = new Query(filter: new Filter(databaseName: "nonexistentdb", tableName: "nonexistentable"))
+        queryExecutor.execute(query, QueryOptions.FILTERED_DATA)
     }
 
 }
