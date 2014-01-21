@@ -41,6 +41,8 @@ project(":common").ext.logbackVersion = "1.0.13"
 def CURRENT_NEON_VERSION = "0.7.0"
 version = CURRENT_NEON_VERSION
 
+project(":common").version = CURRENT_NEON_VERSION
+project(":metadata").version = CURRENT_NEON_VERSION
 configure(subprojects.findAll { it.name != 'common' && it.name != 'metadata'}) {
     version = CURRENT_NEON_VERSION
 
