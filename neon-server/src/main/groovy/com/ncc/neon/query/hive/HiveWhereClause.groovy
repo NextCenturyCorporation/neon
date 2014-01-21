@@ -36,13 +36,14 @@ import org.joda.time.format.DateTimeFormatter
 import org.joda.time.format.DateTimeFormatterBuilder
 
 /**
- * Utility class for rendering Hive WHERE clauses
+ * Utility class for creating Hive WHERE clauses
  */
 class HiveWhereClause {
 
     private WhereClause whereClause
 
-    private StringBuilder stringBuilder
+    // used to build up the text of the where clause when toString is called
+    private final StringBuilder stringBuilder = new StringBuilder()
 
     private static final DateTimeFormatter HIVE_DATETIME_FORMATTER = createHiveDateTimeFormat()
 
@@ -59,11 +60,10 @@ class HiveWhereClause {
 
     @Override
     public String toString() {
-        stringBuilder = new StringBuilder()
-
         renderClause(whereClause)
-
-        return stringBuilder.toString()
+        String clause = stringBuilder.toString()
+        stringBuilder.length = 0
+        return clause
     }
 
     private String renderClause(SingularWhereClause clause) {
