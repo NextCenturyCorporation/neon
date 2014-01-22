@@ -30,8 +30,7 @@ publishing {
     publications {
         neon(MavenPublication) {
             artifactId 'neon'
-            project(":neon-server").tasks.war.baseName = "neon"
-            artifact project(":neon-server").tasks.war
+            artifact project(":neon").tasks.war
 
         }
         bundle(MavenPublication){
@@ -128,9 +127,8 @@ task copyWarsIntoInstaller(type: Copy) {
     }
 
     rename { fileName ->
-        def baseName = fileName.substring(0, fileName.lastIndexOf("-"))
-        baseName = (baseName == "neon-server") ? "neon" : baseName
-        return "${baseName}.war"
+        // strip off the version number
+        return "${fileName.substring(0, fileName.lastIndexOf('-'))}.war"
     }
 }
 

@@ -16,6 +16,10 @@ buildscript {
   }
 }
 
+project.ext {
+    logbackVersion = "1.0.13"
+}
+
 // task groupings we add
 def DEPLOY_GROUP = 'deploy'
 
@@ -31,12 +35,6 @@ def remoteHost = hasProperty('host') ? host : ''
 def remotePassword = hasProperty('password') ? password : null
 def sshIdentity = hasProperty('sshKeyFile') ? file(sshKeyFile) : null
 
-// the neon-server is just output as neon.js for simpler referencing
-project(":neon-server").ext.outfile = 'neon'
-project(":neon-server").ext.neonServer = neonServer
-project(":neon-server").ext.logbackVersion = "1.0.13"
-project(":common").ext.logbackVersion = "1.0.13"
-
 //This must be a valid semantic version.
 def CURRENT_NEON_VERSION = "0.7.0"
 version = CURRENT_NEON_VERSION
@@ -48,6 +46,7 @@ configure(subprojects.findAll { it.name != 'common' && it.name != 'metadata'}) {
 
     apply plugin: 'war'
     apply plugin: 'ssh'
+
     apply from: "${rootDir}/gradle/js.gradle"
 
     repositories {
@@ -164,14 +163,14 @@ configure(subprojects.findAll { it.name != 'common' && it.name != 'metadata'}) {
 }
 
 task jettyRunAll(type: com.ncc.common.JettyRunAll) {
-    dependsOn ':neon-server:concatjs'
+    dependsOn ':neon:concatjs'
     ssl = true
     keystorePath = this.class.getResource("/keystore").file
     keystorePassword = "neon"
     port = ssl ? 9443 : 9000
 
 
-    def serverProject = project(":neon-server")
+    def serverProject = project(":neon")
     def serverProjectName = serverProject.name
     serverProject.sourceSets.main.runtimeClasspath += files("${serverProject.buildDir}/config")
 

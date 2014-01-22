@@ -1,5 +1,8 @@
 include 'neon-server', 'common', 'filter-builder', 'query-builder', 'charts', 'tables', 'circularheat', 'circularheat2', 'map', 'metadata', 'network-graph'
 
+// the neon-server project is just output as neon.js/neon.war for simpler referencing
+project(":neon-server").name = 'neon'
+
 def widgetsDir = file('widgets')
 widgetsDir.eachDir {
     // there could be common directories that are not projects

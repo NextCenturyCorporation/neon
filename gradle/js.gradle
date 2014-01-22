@@ -8,8 +8,7 @@ project.ext {
     jsDocDir = "${project.docsDir}/jsdocs"
     jsSrcDir = 'src/main/javascript'
     jsLibDir = 'src/main/js-lib'
-    def filePrefix = project.hasProperty('outfile') ? project.outfile : project.name
-    combinedJsFileName = "${filePrefix}.js"
+    combinedJsFileName = "${project.name}.js"
     jsOutputFile = "${buildDir}/js/${combinedJsFileName}"
 
     // where javascript/css dependencies from other projects are copied
