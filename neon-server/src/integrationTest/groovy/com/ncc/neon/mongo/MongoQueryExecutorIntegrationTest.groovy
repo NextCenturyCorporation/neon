@@ -1,6 +1,5 @@
 package com.ncc.neon.mongo
-import com.mongodb.BasicDBObject
-import com.mongodb.util.JSON
+
 import com.ncc.neon.AbstractQueryExecutorIntegrationTest
 import com.ncc.neon.connect.NeonConnectionException
 import com.ncc.neon.query.Query
@@ -58,13 +57,11 @@ class MongoQueryExecutorIntegrationTest extends AbstractQueryExecutorIntegration
 
     @BeforeClass
     static void beforeClass() {
-        insertData()
         MongoQueryExecutor.metaClass.getMongo = { MongoIntegrationTestContext.MONGO }
     }
 
     @AfterClass
     static void afterClass() {
-        deleteData()
         MongoQueryExecutor.metaClass = null
     }
 
@@ -82,14 +79,6 @@ class MongoQueryExecutorIntegrationTest extends AbstractQueryExecutorIntegration
             return val.toString()
         }
         return super.convertRowValueToBasicJavaType(val)
-    }
-
-    static void insertData() {
-        def db = MongoIntegrationTestContext.MONGO.getDB(DATABASE_NAME)
-        def collection = db.getCollection(TABLE_NAME)
-        def dbList = parseJSON("/mongo-json/${ALL_DATA_FILENAME}")
-        collection.insert(dbList)
-        collection.ensureIndex(new BasicDBObject("location", "2dsphere"))
     }
 
     @Override
@@ -110,16 +99,6 @@ class MongoQueryExecutorIntegrationTest extends AbstractQueryExecutorIntegration
             }
         }
         return map
-    }
-
-    @SuppressWarnings('CoupledTestCase') // this method incorrectly throws this codenarc error
-    private static def parseJSON(resourcePath) {
-        return JSON.parse(MongoQueryExecutorIntegrationTest.getResourceAsStream(resourcePath).text)
-    }
-
-    private static void deleteData() {
-        def db = MongoIntegrationTestContext.MONGO.getDB(DATABASE_NAME)
-        db.dropDatabase()
     }
 
     @Test

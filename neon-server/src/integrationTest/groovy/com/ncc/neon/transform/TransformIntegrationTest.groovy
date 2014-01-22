@@ -1,7 +1,5 @@
 package com.ncc.neon.transform
 
-import com.mongodb.BasicDBObject
-import com.mongodb.util.JSON
 import com.ncc.neon.IntegrationTestContext
 import com.ncc.neon.mongo.MongoIntegrationTestContext
 import com.ncc.neon.query.Query
@@ -17,7 +15,6 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.context.ContextConfiguration
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner
-
 /*
  * ************************************************************************
  * Copyright (c), 2014 Next Century Corporation. All Rights Reserved.
@@ -71,31 +68,11 @@ class TransformIntegrationTest {
     @BeforeClass
     static void beforeClass() {
         MongoQueryExecutor.metaClass.getMongo = { MongoIntegrationTestContext.MONGO }
-        insertData()
     }
 
     @AfterClass
     static void afterClass() {
-        deleteData()
         MongoQueryExecutor.metaClass = null
-    }
-
-    static void insertData() {
-        def db = MongoIntegrationTestContext.MONGO.getDB(DATABASE_NAME)
-        def collection = db.getCollection(TABLE_NAME)
-        def dbList = parseJSON("/mongo-json/${ALL_DATA_FILENAME}")
-        collection.insert(dbList)
-        collection.ensureIndex(new BasicDBObject("location", "2dsphere"))
-    }
-
-    @SuppressWarnings('CoupledTestCase') // this method incorrectly throws this codenarc error
-    private static def parseJSON(resourcePath) {
-        return JSON.parse(TransformIntegrationTest.getResourceAsStream(resourcePath).text)
-    }
-
-    private static void deleteData() {
-        def db = MongoIntegrationTestContext.MONGO.getDB(DATABASE_NAME)
-        db.dropDatabase()
     }
 
     @Test(expected = NeonTransformException)

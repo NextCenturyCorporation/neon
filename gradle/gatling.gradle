@@ -127,6 +127,15 @@ task deleteDataFromHiveBeforeInsert(type: com.ncc.neon.data.HiveDataDeleter) {
     host = getHiveHost()
 }
 
+task deleteDataFromMongo(type: com.ncc.neon.data.MongoDataDeleter) {
+    host = getMongoHosts()
+}
+
+task deleteDataFromHive(type: com.ncc.neon.data.HiveDataDeleter) {
+    host = getHiveHost()
+}
+
+
 task afterGatlingTest{
     group = GATLING_GROUP
     dependsOn 'stopGatlingJetty', 'deleteDataFromMongo', 'deleteDataFromHive'
@@ -140,13 +149,7 @@ task stopGatlingJetty(type: org.gradle.api.plugins.jetty.JettyStop) {
     stopPort = concurrencyTestPort + 2
 }
 
-task deleteDataFromMongo(type: com.ncc.neon.data.MongoDataDeleter) {
-    host = getMongoHosts()
-}
 
-task deleteDataFromHive(type: com.ncc.neon.data.HiveDataDeleter) {
-    host = getHiveHost()
-}
 
 def getMongoHosts() {
     return project.hasProperty("mongo.hosts") ? getProperty("mongo.hosts") : "localhost"

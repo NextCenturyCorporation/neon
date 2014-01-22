@@ -33,18 +33,18 @@ import com.mchange.v2.c3p0.ComboPooledDataSource
  */
 
 class HiveDataDeleter extends DefaultTask {
-    static final String DATABASE_NAME = "concurrencytest"
-    static final String TABLE_NAME = "records"
 
     // default value. build will override this
     String host = "shark:10000"
+    String databaseName = "concurrencytest"
+    String tableName = "records"
 
     @TaskAction
     void run(){
         def dataSource = new ComboPooledDataSource()
         Connection connection = createConnection(dataSource)
-        execute(connection, "drop table if exists ${DATABASE_NAME}.${TABLE_NAME}")
-        execute(connection, "drop database if exists ${DATABASE_NAME}")
+        execute(connection, "drop table if exists ${databaseName}.${tableName}")
+        execute(connection, "drop database if exists ${databaseName}")
         connection.close()
         dataSource.close()
     }

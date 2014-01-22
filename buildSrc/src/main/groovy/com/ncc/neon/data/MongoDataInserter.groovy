@@ -33,19 +33,20 @@ import org.gradle.api.tasks.TaskAction
 
 class MongoDataInserter extends DefaultTask{
 
-    static final String DATABASE_NAME = "concurrencytest"
-    static final String TABLE_NAME = "records"
     static final ALL_DATA_FILENAME = 'data.json'
 
     // default value. build will override this
     String host = "localhost"
+    String databaseName = "concurrencytest"
+    String tableName = "records"
 
     @TaskAction
     void run(){
-        def db = new MongoClient(host).getDB(DATABASE_NAME)
-        def collection = db.getCollection(TABLE_NAME)
+        def db = new MongoClient(host).getDB(databaseName)
+        def collection = db.getCollection(tableName)
         def dbList = parseJSON("/mongo-json/${ALL_DATA_FILENAME}")
         collection.insert(dbList)
+        collection.ensureIndex(new BasicDBObject("location", "2dsphere"))
     }
 
     private static def parseJSON(resourcePath) {
