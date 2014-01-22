@@ -3,6 +3,8 @@ import com.mongodb.MongoClient
 import com.ncc.neon.config.MongoConfigParser
 import com.ncc.neon.connect.ConnectionManager
 import com.ncc.neon.metadata.MetadataConnection
+import com.ncc.neon.transform.SalaryTransformer
+import com.ncc.neon.transform.Transformer
 import com.ncc.neon.transform.TransformerRegistry
 import org.springframework.beans.factory.config.CustomScopeConfigurer
 import org.springframework.context.annotation.Bean
@@ -66,6 +68,11 @@ class MongoIntegrationTestContext {
 
     @Bean
     TransformerRegistry transformerRegistry(){
-        new TransformerRegistry()
+        TransformerRegistry registry = new TransformerRegistry()
+        List<Transformer> registeredTransformers = [new SalaryTransformer()]
+        registeredTransformers.each { Transformer transformer ->
+            registry.register(transformer.name, transformer)
+        }
+        return registry
     }
 }

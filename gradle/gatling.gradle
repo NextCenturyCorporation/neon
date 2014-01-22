@@ -135,7 +135,6 @@ task deleteDataFromHive(type: com.ncc.neon.data.HiveDataDeleter) {
     host = getHiveHost()
 }
 
-
 task afterGatlingTest{
     group = GATLING_GROUP
     dependsOn 'stopGatlingJetty', 'deleteDataFromMongo', 'deleteDataFromHive'
