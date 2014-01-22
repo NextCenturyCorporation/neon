@@ -19,7 +19,6 @@ sourceSets {
     acceptanceTest
 }
 
-
 apply from: "${rootDir}/gradle/groovy.gradle"
 apply plugin: 'jetty'
 
@@ -188,14 +187,6 @@ dependencies {
     antlr4 'org.antlr:antlr4-runtime:4.0'
     antlr4 'org.antlr:antlr-runtime:3.5'
     antlr4 'org.antlr:ST4:4.0.7'
-}
-
-war {
-    baseName = "neon"
-    from(jsOutputFile) {
-        into 'js'
-    }
-
 }
 
 antlr4 {
