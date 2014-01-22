@@ -50,8 +50,6 @@ class JdbcClient implements ConnectionClient {
 
     /**
      * Each jdbcClient instance is created per session,
-     * This method is synchronized because a user cannot perform multiple simultaneous queries
-     * without hive blowing up.
      * @param offset An optional number of rows to skip in the result set. This is provided as a parameter to
      * execute query since not all JDBC drivers (namely hive) support doing this as part of the query
      */
@@ -179,14 +177,15 @@ class JdbcClient implements ConnectionClient {
         }
     }
 
-    List<String> getColumnNames(String dataStoreName, String databaseName) {
-        String query = "select * from ${dataStoreName}.${databaseName} limit 1"
+    List<String> getColumnNames(String databaseName, String tableName) {
+        def columns = []
+        ResultSet rs = connection.metaData.getColumns(null, databaseName, tableName, null)
 
-        List list = executeQuery(query)
-        if (!list) {
-            return []
+        while (rs.next()) {
+            // column 4 is the column name
+            columns << rs.getString(4)
         }
-        list[0].keySet().asList()
+        return columns
     }
 
     @Override

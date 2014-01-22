@@ -37,12 +37,14 @@ import java.sql.Statement
  */
 
 class HiveDataInserter extends DefaultTask{
-    static final String DATABASE_NAME = "concurrencytest"
-    static final String TABLE_NAME = "records"
     private static final def FIELD_TYPES = [_id: "string", firstname: "string", lastname: "string", city: "string", state: "string", salary: "int", hiredate: "timestamp"]
 
+    // default values. build will override these
     String host = "shark:10000"
     String hdfsUrl = "hdfs://shark:8020"
+
+    String databaseName = "concurrencytest"
+    String tableName = "records"
 
     @TaskAction
     void run(){
@@ -61,7 +63,7 @@ class HiveDataInserter extends DefaultTask{
 
         def dataSource = new ComboPooledDataSource()
         Connection connection = createConnection(dataSource)
-        execute(connection, "create database ${DATABASE_NAME}")
+        execute(connection, "create database ${databaseName}")
         execute(connection, tableScript)
         connection.close()
         dataSource.close()
@@ -70,10 +72,9 @@ class HiveDataInserter extends DefaultTask{
     Connection createConnection(dataSource) {
         def driverName = "org.apache.hive.jdbc.HiveDriver"
         def databaseType = "hive2"
-        def databaseName = "default"
 
         dataSource.setDriverClass(driverName)
-        dataSource.setJdbcUrl("jdbc:${databaseType}://${host}/${databaseName}")
+        dataSource.setJdbcUrl("jdbc:${databaseType}://${host}/")
         return dataSource.getConnection("","")
     }
 
@@ -94,7 +95,7 @@ class HiveDataInserter extends DefaultTask{
     }
 
 
-    private static def createTableScript(fieldsFile, destFolder) {
+    private def createTableScript(fieldsFile, destFolder) {
         def fields = fieldsFile.text.split(",").collect { field ->
             // fields staring with _ need to be escaped, otherwise not extra characters necessary
             def escapeChar = field.startsWith("_") ? '`' : ""
@@ -108,13 +109,13 @@ class HiveDataInserter extends DefaultTask{
         }.join(",")
 
         def script = new StringBuilder()
-        script.append("create external table ${DATABASE_NAME}.${TABLE_NAME} (")
+        script.append("create external table ${databaseName}.${tableName} (")
         script.append(fields)
         script.append(") row format delimited fields terminated by ',' location '${destFolder}'")
         return script.toString()
     }
 
-    private static void copyTestDataFile(fileSystem, testDataFile, destFolder) {
+    private void copyTestDataFile(fileSystem, testDataFile, destFolder) {
         def src = new Path(testDataFile.absolutePath)
         def destName = "${destFolder}concurrencytest.txt"
         def dest = new Path(destName)

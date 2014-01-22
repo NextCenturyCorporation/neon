@@ -1,8 +1,4 @@
-import com.mongodb.BasicDBObject
-import com.mongodb.MongoClient
-import com.mongodb.util.JSON
 import org.json.JSONArray
-
 import static com.ncc.neon.AcceptanceTestJSHelperGenerator.*
 import com.ncc.neon.HiveJSONGenerator
 import com.ncc.neon.MongoJSONGenerator
@@ -107,6 +103,7 @@ dependencies {
     compile 'joda-time:joda-time:2.1'
     compile 'org.slf4j:slf4j-api:1.7.2'
     compile 'org.slf4j:jcl-over-slf4j:1.7.2'
+    compile 'org.slf4j:log4j-over-slf4j:1.7.2'
 
     compile "ch.qos.logback:logback-core:$logbackVersion"
     compile "ch.qos.logback:logback-classic:$logbackVersion"
@@ -121,22 +118,13 @@ dependencies {
     compile 'com.mchange:c3p0:0.9.5-pre6'
 
     // these libraries are needed for the patched version of hive that we use
-    compile ':hive-hbase-handler:0.11.0-shark-SNAPSHOT'
-    compile ':hive-beeline:0.11.0-shark-SNAPSHOT'
     compile ':hive-exec:0.11.0-shark-SNAPSHOT'
-    compile ':hcatalog-pig-adapter:0.11.0-shark-SNAPSHOT'
     compile ':hive-contrib:0.11.0-shark-SNAPSHOT'
     compile ':hive-jdbc:0.11.0-shark-SNAPSHOT'
-    compile ':webhcat:0.11.0-shark-SNAPSHOT'
     compile ':hive-metastore:0.11.0-shark-SNAPSHOT'
-    compile ':hcatalog-core:0.11.0-shark-SNAPSHOT'
     compile ':hive-cli:0.11.0-shark-SNAPSHOT'
-    compile ':hcatalog-server-extensions:0.11.0-shark-SNAPSHOT'
-    compile ':hive-hwi:0.11.0-shark-SNAPSHOT'
     compile ':hive-shims:0.11.0-shark-SNAPSHOT'
     compile ':hive-service:0.11.0-shark-SNAPSHOT'
-    compile ':hive-testutils:0.11.0-shark-SNAPSHOT'
-    compile ':webhcat-java-client:0.11.0-shark-SNAPSHOT'
     compile ':hive-common:0.11.0-shark-SNAPSHOT'
     compile ':hive-serde:0.11.0-shark-SNAPSHOT'
 
@@ -148,6 +136,9 @@ dependencies {
         exclude group: 'javax.servlet.jsp'
         exclude module: 'jasper-compiler'
         exclude module: 'jasper-runtime'
+        // using log4j-over-slf4j
+        exclude module: 'log4j'
+        exclude module: 'slf4j-log4j12'
     }
 
     compile 'jline:jline:0.9.94'
@@ -167,6 +158,10 @@ dependencies {
     compile 'org.apache.thrift:libthrift:0.9.0'
     compile('org.apache.zookeeper:zookeeper:3.4.3') {
         exclude group: 'javax.servlet'
+        // using log4j-over-slf4j
+        exclude module: 'log4j'
+        exclude module: 'slf4j-log4j12'
+
     }
     compile 'com.google.code.tempus-fugit:tempus-fugit:1.1'
 
@@ -174,6 +169,9 @@ dependencies {
         exclude group: 'javax.servlet'
         exclude group: 'javax.servlet.jsp'
         exclude module: 'jasper-runtime'
+        // using log4j-over-slf4j
+        exclude module: 'log4j'
+        exclude module: 'slf4j-log4j12'
     }
 
 
@@ -245,7 +243,7 @@ test {
 }
 
 task integrationTest(type: Test) {
-    dependsOn 'integrationTestClasses', 'generateMongoJson', 'generateHiveCSV', 'generateHiveJson'
+    dependsOn 'integrationTestClasses', 'insertMongoDataIntegrationTest', 'insertHiveDataIntegrationTest'
 
     testClassesDir = sourceSets.integrationTest.output.classesDir
     classpath = sourceSets.integrationTest.runtimeClasspath
@@ -259,6 +257,45 @@ task integrationTest(type: Test) {
     props['integration.test'] = true
     systemProperties props
 }
+
+task insertMongoDataIntegrationTest(type: com.ncc.neon.data.MongoDataInserter) {
+    dependsOn 'deleteMongoDataIntegrationTestBeforeInsert', 'generateMongoJson'
+    host = getMongoHosts()
+    databaseName = 'neonintegrationtest'
+}
+task deleteMongoDataIntegrationTestBeforeInsert(type: com.ncc.neon.data.MongoDataDeleter) {
+    host = getMongoHosts()
+    databaseName = 'neonintegrationtest'
+}
+
+task insertHiveDataIntegrationTest(type: com.ncc.neon.data.HiveDataInserter) {
+    dependsOn 'deleteHiveDataIntegrationTestBeforeInsert', 'generateHiveCSV', 'generateHiveJson'
+    host = getHiveHost()
+    hdfsUrl = getHdfsUrl()
+    databaseName = 'neonintegrationtest'
+}
+task deleteHiveDataIntegrationTestBeforeInsert(type: com.ncc.neon.data.HiveDataDeleter) {
+    host = getHiveHost()
+    databaseName = 'neonintegrationtest'
+}
+
+task afterIntegrationTest{
+    dependsOn 'deleteMongoDataIntegrationTest', 'deleteHiveDataIntegrationTest'
+}
+
+integrationTest.finalizedBy afterIntegrationTest
+
+
+task deleteMongoDataIntegrationTest(type: com.ncc.neon.data.MongoDataDeleter) {
+    host = getMongoHosts()
+    databaseName = 'neonintegrationtest'
+}
+
+task deleteHiveDataIntegrationTest(type: com.ncc.neon.data.HiveDataDeleter) {
+    host = getHiveHost()
+    databaseName = 'neonintegrationtest'
+}
+
 
 task jacocoFullTestReport(type: JacocoReport) {
     dependsOn integrationTest
@@ -326,7 +363,6 @@ def getAcceptanceTestServicePort() {
     return getAcceptanceTestPort() + 4
 }
 
-
 task stopAcceptanceTestWar(type: org.gradle.api.plugins.jetty.JettyStop) {
     stopPort = getAcceptanceTestPort() + 2
     stopKey = 'stop'
@@ -337,23 +373,29 @@ task stopTransformJetty(type: org.gradle.api.plugins.jetty.JettyStop) {
     stopKey = 'stop'
 }
 
+task insertMongoDataAcceptanceTest(type: com.ncc.neon.data.MongoDataInserter) {
+    dependsOn 'deleteMongoDataAcceptanceTestBeforeInsert', 'generateMongoJson'
+    host = getMongoHosts()
+    databaseName = 'acceptanceTest'
+}
+task deleteMongoDataAcceptanceTestBeforeInsert(type: com.ncc.neon.data.MongoDataDeleter) {
+    host = getMongoHosts()
+    databaseName = 'acceptanceTest'
+}
+
+task deleteMongoDataAcceptanceTest(type: com.ncc.neon.data.MongoDataDeleter) {
+    host = getMongoHosts()
+    databaseName = 'acceptanceTest'
+}
+
 task afterAcceptanceTest {
-    dependsOn 'stopAcceptanceTestWar', 'stopTransformJetty'
-    doLast {
-        deleteAcceptanceTestData()
-    }
+    dependsOn 'stopAcceptanceTestWar', 'stopTransformJetty', 'deleteMongoDataAcceptanceTest'
 }
 
 task acceptanceTest(type: GruntTask) {
-    dependsOn 'assemble', 'acceptanceTestWar', 'generateMongoJson', 'transformTestWebService'
+    dependsOn 'assemble', 'acceptanceTestWar', 'insertMongoDataAcceptanceTest', 'transformTestWebService'
     group = TEST_GROUP
     gruntArgs "jasmine:acceptance", "--outfile=${jsOutputFile}"
-
-    doFirst {
-        // just in case any data got left around in the event that a cleanup failed, delete the data before inserting it
-        deleteAcceptanceTestData()
-        insertAcceptanceTestData()
-    }
 }
 
 acceptanceTest.finalizedBy afterAcceptanceTest
@@ -390,26 +432,6 @@ task generateHiveCSV {
                 new File("${outputDir}/fields.csv"),
                 ['location'] as Set)
     }
-}
-
-def insertAcceptanceTestData() {
-    def db = getMongo().getDB("acceptanceTest")
-    def collection = db.getCollection("records")
-    def dbList = JSON.parse(new File(testDataDir, '/mongo-json/data.json').text)
-    collection.insert(dbList)
-    collection.ensureIndex(new BasicDBObject("location", "2dsphere"))
-}
-
-def deleteAcceptanceTestData() {
-    def db = getMongo().getDB("acceptanceTest")
-    db.dropDatabase()
-}
-
-def getMongo() {
-    if (!mongoInstance) {
-        mongoInstance = new MongoClient(getMongoHosts())
-    }
-    return mongoInstance
 }
 
 import org.gradle.api.plugins.jetty.internal.Monitor

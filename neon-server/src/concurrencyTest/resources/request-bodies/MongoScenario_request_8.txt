@@ -1,1 +1,0 @@
-{"filterKey":{"uuid":"3b738f31-7114-48ac-a4dd-5a8f6385e4f5","dataSet":{"databaseName":"concurrencytest","tableName":"records"}},"filter":{"whereClause":{"type":"or","whereClauses":[{"type":"where","lhs":"state","operator":"=","rhs":"VA"},{"type":"where","lhs":"state","operator":"=","rhs":"DC"}]},"databaseName":"concurrencytest","tableName":"records"}}

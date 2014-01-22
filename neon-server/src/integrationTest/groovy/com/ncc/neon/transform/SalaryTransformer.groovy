@@ -1,13 +1,12 @@
-package com.ncc.neon.query
+package com.ncc.neon.transform
 
-import com.ncc.neon.query.clauses.*
-import com.ncc.neon.query.filter.Filter
-import groovy.transform.ToString
-import org.codehaus.jackson.annotate.JsonIgnoreProperties
+import com.ncc.neon.query.QueryResult
+import com.ncc.neon.query.TableQueryResult
+import com.ncc.neon.query.Transform
 
 /*
  * ************************************************************************
- * Copyright (c), 2013 Next Century Corporation. All Rights Reserved.
+ * Copyright (c), 2014 Next Century Corporation. All Rights Reserved.
  *
  * This software code is the exclusive property of Next Century Corporation and is
  * protected by United States and International laws relating to the protection
@@ -26,32 +25,24 @@ import org.codehaus.jackson.annotate.JsonIgnoreProperties
  * PROPRIETARY AND CONFIDENTIAL TRADE SECRET MATERIAL NOT FOR DISCLOSURE OUTSIDE
  * OF NEXT CENTURY CORPORATION EXCEPT BY PRIOR WRITTEN PERMISSION AND WHEN
  * RECIPIENT IS UNDER OBLIGATION TO MAINTAIN SECRECY.
+ *
+ * 
+ * @author tbrooks
  */
 
-/**
- * A query stores a filter for selecting data and optional aggregation methods for grouping the data.
- * The query is translated to a data source specific operation which returns the appropriate data.
- */
-@ToString(includeNames = true)
-@JsonIgnoreProperties(value = ['disregardFilters_', 'selectionOnly_'])
-class Query {
+class SalaryTransformer implements Transformer{
 
-    Filter filter
-    boolean isDistinct = false
-    List<String> fields = SelectClause.ALL_FIELDS
-    List<AggregateClause> aggregates = []
-    List<GroupByClause> groupByClauses = []
-    List<SortClause> sortClauses = []
-    LimitClause limitClause
-    OffsetClause offsetClause
-    Transform transform
-
-    def getDatabaseName() {
-        filter.databaseName
+    @Override
+    QueryResult convert(QueryResult queryResult, Transform transform) {
+        List<Map<String,Object>> data = queryResult.data
+        data.each { Map<String,Object> rows ->
+            rows.put("salary", rows.get("salary") * 1.1)
+        }
+        return new TableQueryResult(data)
     }
 
-    def getTableName() {
-        filter.tableName
+    @Override
+    String getName() {
+        return SalaryTransformer.name
     }
-
 }
