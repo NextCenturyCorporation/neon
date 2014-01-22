@@ -110,7 +110,6 @@ graphs.Graph.prototype.draw = function (nodes, edgeList) {
     // draw the edges first so they show up below the nodes
     this.drawEdges_(edgeList);
     this.drawNodes_(nodes);
-
 };
 
 graphs.Graph.prototype.buildNodeInfoMap_ = function (nodes) {
@@ -126,20 +125,24 @@ graphs.Graph.prototype.buildNodeInfoMap_ = function (nodes) {
 };
 
 graphs.Graph.prototype.initSvg_ = function () {
-    if (!this.svg_) {
-        this.svg_ = d3.select(this.graphSelector_).append("svg")
-            .attr("width", this.width_).attr("height", this.height_)
-            .append("g")
-            // add semantic zooming behavior - adapted from http://bl.ocks.org/mbostock/3680957
-            .call(d3.behavior.zoom()
-                .x(this.xPos_).y(this.yPos_).scaleExtent([1, 8])
-                .on("zoom",
-                    $.proxy(this.zoom_, this)
-                ));
+    // reset svg so that draw can be called multiple times with new edges and nodes.
+    // only the last draw operation remains.  In other words, the effect of calling
+    // graph.draw() multiple times is not additive.
+    d3.select("svg").remove();
+    this.svg_ = undefined;
 
-        // intercepts mouse events for zooming
-        this.svg_.append("rect").attr("class", "overlay").attr("width", this.width_).attr("height", this.height_);
-    }
+    this.svg_ = d3.select(this.graphSelector_).append("svg")
+        .attr("width", this.width_).attr("height", this.height_)
+        .append("g")
+        // add semantic zooming behavior - adapted from http://bl.ocks.org/mbostock/3680957
+        .call(d3.behavior.zoom()
+            .x(this.xPos_).y(this.yPos_).scaleExtent([1, 8])
+            .on("zoom",
+                $.proxy(this.zoom_, this)
+            ));
+
+    // intercepts mouse events for zooming
+    this.svg_.append("rect").attr("class", "overlay").attr("width", this.width_).attr("height", this.height_);
 };
 
 graphs.Graph.prototype.drawEdges_ = function (edgeList) {
