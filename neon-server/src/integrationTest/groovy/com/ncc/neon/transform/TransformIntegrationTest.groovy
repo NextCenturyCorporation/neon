@@ -53,9 +53,6 @@ class TransformIntegrationTest {
 
     static final String TABLE_NAME = 'records'
 
-    /** the name of the file that contains all of the data used for the test */
-    static final ALL_DATA_FILENAME = 'data.json'
-
     /** a filter that just includes all of the data (no WHERE clause) */
     static final Filter ALL_DATA_FILTER = new Filter(databaseName: DATABASE_NAME, tableName: TABLE_NAME)
 
