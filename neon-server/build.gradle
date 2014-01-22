@@ -87,11 +87,6 @@ configurations {
 }
 
 dependencies {
-    // gephi toolkit and necessary libraries for gephi plugins
-    compile 'org.gephi:gephi-toolkit:0.8.7'
-    compile 'com.nextcentury:com-nextcentury-importerjava:'
-    compile 'com.nextcentury:com-nextcentury-exporterjava:'
-
     compile 'com.sun.jersey:jersey-servlet:1.15'
     compile 'com.sun.jersey:jersey-core:1.15'
     compile 'com.sun.jersey:jersey-client:1.15'
