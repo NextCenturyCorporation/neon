@@ -1,8 +1,10 @@
-package com.ncc.neon.hive
+package com.ncc.neon
 
 import com.ncc.neon.connect.ConnectionManager
 import com.ncc.neon.metadata.MetadataConnection
 import com.ncc.neon.mongo.MongoIntegrationTestContext
+import com.ncc.neon.transform.SalaryTransformer
+import com.ncc.neon.transform.Transformer
 import com.ncc.neon.transform.TransformerRegistry
 import org.springframework.beans.factory.config.CustomScopeConfigurer
 import org.springframework.context.annotation.Bean
@@ -36,8 +38,8 @@ import org.springframework.context.support.SimpleThreadScope
 
 @Configuration
 @ComponentScan(basePackages = ['com.ncc.neon'])
-@Profile('hive-integrationtest')
-class HiveIntegrationTestContext {
+@Profile('integrationtest')
+class IntegrationTestContext {
 
     static final String HOST_STRING = System.getProperty("hive.host", "localhost:10000")
 
@@ -58,7 +60,12 @@ class HiveIntegrationTestContext {
 
     @Bean
     TransformerRegistry transformerRegistry(){
-        new TransformerRegistry()
+        TransformerRegistry registry = new TransformerRegistry()
+        List<Transformer> registeredTransformers = [new SalaryTransformer()]
+        registeredTransformers.each { Transformer transformer ->
+            registry.register(transformer.name, transformer)
+        }
+        return registry
     }
 
 }

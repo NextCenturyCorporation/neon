@@ -1,6 +1,7 @@
 package com.ncc.neon.hive
 
 import com.ncc.neon.AbstractQueryExecutorIntegrationTest
+import com.ncc.neon.IntegrationTestContext
 import com.ncc.neon.connect.*
 import com.ncc.neon.query.hive.HiveQueryExecutor
 import com.ncc.neon.util.DateUtils
@@ -45,8 +46,8 @@ import java.sql.Timestamp
  */
 
 @RunWith(SpringJUnit4ClassRunner)
-@ContextConfiguration(classes = HiveIntegrationTestContext)
-@ActiveProfiles("hive-integrationtest")
+@ContextConfiguration(classes = IntegrationTestContext)
+@ActiveProfiles("integrationtest")
 class HiveQueryExecutorIntegrationTest extends AbstractQueryExecutorIntegrationTest {
 
     private static final def FIELD_TYPES = [_id: "string", firstname: "string", lastname: "string", city: "string", state: "string", salary: "int", hiredate: "timestamp"]
@@ -54,7 +55,7 @@ class HiveQueryExecutorIntegrationTest extends AbstractQueryExecutorIntegrationT
     /** a separate connection used for inserting/deleting test data */
     private static JdbcClient jdbcClient
 
-    private static final ConnectionInfo CONNECTION_INFO = new ConnectionInfo(connectionUrl: HiveIntegrationTestContext.HOST_STRING, dataSource: DataSources.hive)
+    private static final ConnectionInfo CONNECTION_INFO = new ConnectionInfo(connectionUrl: IntegrationTestContext.HOST_STRING, dataSource: DataSources.hive)
     private static final ConnectionClientFactory CONNECTION_FACTORY = new JdbcConnectionClientFactory("org.apache.hive.jdbc.HiveDriver", "hive2")
 
     @BeforeClass

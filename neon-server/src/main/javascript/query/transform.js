@@ -11,7 +11,7 @@ neon.query.Transform = function (name) {
 
 /**
  * Allows one to parameterize a transform.
- * @param {Array} params Parameters to set on the transform.
+ * @param {Object} params Parameters to set on the transform.
  * @return {neon.query.Transform} A instance of the transform for method chaining
  * @method parameterizeTransforms
  */
