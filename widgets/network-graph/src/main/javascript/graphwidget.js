@@ -19,41 +19,7 @@
  * PROPRIETARY AND CONFIDENTIAL TRADE SECRET MATERIAL NOT FOR DISCLOSURE OUTSIDE
  * OF NEXT CENTURY CORPORATION EXCEPT BY PRIOR WRITTEN PERMISSION AND WHEN
  * RECIPIENT IS UNDER OBLIGATION TO MAINTAIN SECRECY.
- * 
- * @author dflynt
  */
-
-
-/**
- * Executes the specified query and fires the callback when complete
- * @method executeQuery
- * @param {neon.query.Query} query the query to execute
- * @param {Function} successCallback The callback to fire when the query successfully completes
- * @param {Function} [errorCallback] The optional callback when an error occurs. This is a 3 parameter function that contains the xhr, a short error status and the full error message.
- * @return {neon.util.AjaxRequest} The xhr request object
- */
-neon.query.executeGraphQuery = function (query, successCallback, errorCallback) {
-    return neon.query.executeGraphQueryService_(query, successCallback, errorCallback, 'query');
-};
-
-neon.query.executeGraphQueryService_ = function (query, successCallback, errorCallback, serviceName) {
-    if(query.selectionOnly_){
-        serviceName += "withselectiononly";
-    }
-    else if (query.disregardFilters_) {
-        serviceName += "disregardfilters";
-    }
-
-    return neon.util.ajaxUtils.doPostJSON(
-        query,
-        neon.query.serviceUrl('graphqueryservice', serviceName),
-        {
-            success: successCallback,
-            error: errorCallback
-        }
-    );
-};
-
 
 /*
 * This function demonstrates retrieving and displaying graph which has layout
@@ -67,7 +33,7 @@ neon.ready(function () {
     function fetchData() {
         var query = new neon.query.Query().selectFrom('test', 'cpan');
 
-        neon.query.executeGraphQuery(query, displayGraph);
+        neon.query.executeQuery(query, displayGraph);
     }
 
     function displayGraph(data) {
