@@ -16,6 +16,10 @@ buildscript {
   }
 }
 
+project.ext {
+    logbackVersion = "1.0.13"
+}
+
 // task groupings we add
 def DEPLOY_GROUP = 'deploy'
 
@@ -30,9 +34,6 @@ def remoteHost = hasProperty('host') ? host : ''
 // these are set to null since the ssh task expects them not to be set if they are not being used
 def remotePassword = hasProperty('password') ? password : null
 def sshIdentity = hasProperty('sshKeyFile') ? file(sshKeyFile) : null
-
-project(":neon").ext.logbackVersion = "1.0.13"
-project(":common").ext.logbackVersion = "1.0.13"
 
 //This must be a valid semantic version.
 def CURRENT_NEON_VERSION = "0.7.0"
