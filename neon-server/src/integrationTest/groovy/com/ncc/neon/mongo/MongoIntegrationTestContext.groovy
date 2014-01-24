@@ -71,7 +71,7 @@ class MongoIntegrationTestContext {
         TransformerRegistry registry = new TransformerRegistry()
         List<Transformer> registeredTransformers = [new SalaryTransformer()]
         registeredTransformers.each { Transformer transformer ->
-            registry.register(transformer.name, transformer)
+            registry.register(transformer)
         }
         return registry
     }

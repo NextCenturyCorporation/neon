@@ -5,7 +5,7 @@ import com.ncc.neon.connect.ConnectionManager
 import com.ncc.neon.query.*
 import com.ncc.neon.query.filter.FilterState
 import com.ncc.neon.query.filter.SelectionState
-import com.ncc.neon.transform.NeonTransformException
+import com.ncc.neon.transform.TransformerNotFoundException
 import com.ncc.neon.query.Transform
 import com.ncc.neon.transform.Transformer
 import com.ncc.neon.transform.TransformerRegistry
@@ -73,10 +73,10 @@ class MongoQueryExecutor implements QueryExecutor {
         String transformName = transform.transformName
         Transformer transformer = registry.getTransformer(transformName)
         if(!transformer){
-            throw new NeonTransformException("Transform ${transformName} does not exist.")
+            throw new TransformerNotFoundException("Transform ${transformName} does not exist.")
         }
 
-        return transformer.convert(queryResult, transform)
+        return transformer.convert(queryResult, transform.params)
     }
 
     @Override

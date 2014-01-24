@@ -85,7 +85,7 @@ class ProductionAppContext {
         TransformerRegistry registry = new TransformerRegistry()
         List<Transformer> registeredTransformers = []
         registeredTransformers.each { Transformer transformer ->
-            registry.register(transformer.name, transformer)
+            registry.register(transformer)
         }
         return registry
     }

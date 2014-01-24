@@ -25,11 +25,16 @@ package com.ncc.neon.transform
  * @author tbrooks
  */
 
+/**
+ * Holds all the transformer implementations. A transformer must be registered
+ * so that it can be looked up by QueryExecutors.
+ */
+
 class TransformerRegistry {
     private final Map<String, Transformer> registry = [:]
 
-    void register(String name, Transformer transformer){
-        registry.put(name, transformer)
+    void register(Transformer transformer){
+        registry.put(transformer.name, transformer)
     }
 
     Transformer getTransformer(String transformName){

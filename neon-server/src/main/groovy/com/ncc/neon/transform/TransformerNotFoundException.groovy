@@ -26,9 +26,13 @@ package com.ncc.neon.transform
  * @author tbrooks
  */
 
-class NeonTransformException extends RuntimeException{
+/**
+ * Thrown when a transform name does not match any transformers in the TransformerRegistry
+ */
 
-    NeonTransformException(String message){
+class TransformerNotFoundException extends RuntimeException{
+
+    TransformerNotFoundException(String message){
         super(message)
     }
 }

@@ -71,7 +71,7 @@ class TransformIntegrationTest {
         MongoQueryExecutor.metaClass = null
     }
 
-    @Test(expected = NeonTransformException)
+    @Test(expected = TransformerNotFoundException)
     void "bad transform throws exception"(){
         Query query = new Query(filter: ALL_DATA_FILTER, transform: BAD_TRANSFORM)
         mongoQueryExecutor.execute(query, QueryOptions.FILTERED_DATA)
