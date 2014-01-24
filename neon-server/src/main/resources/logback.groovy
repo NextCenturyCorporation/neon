@@ -67,7 +67,7 @@ if (!test) {
     }
 }
 
-logger("com.ncc.neon", WARN)  // set to INFO to turn on query logging
+logger("com.ncc.neon", WARN)  // set to DEBUG to turn on query logging
 
 if (test) {
     root(WARN, ["CONSOLE"])
