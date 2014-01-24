@@ -19,13 +19,15 @@ sourceSets {
     acceptanceTest
 }
 
-apply from: "${rootDir}/gradle/groovy.gradle"
 apply plugin: 'jetty'
 
 // antlr plugin and configuration take from https://github.com/fraoch/antlr4-plugin/
 apply plugin: 'antlr4'
+apply from: "${rootDir}/gradle/groovy.gradle"
 apply from: "${rootDir}/gradle/release.gradle"
 apply from: "${rootDir}/gradle/gatling.gradle"
+apply from: "${rootDir}/gradle/sharedDependencies.gradle"
+
 
 sourceCompatibility = 1.7
 
@@ -43,7 +45,6 @@ buildscript {
         }
     }
     dependencies {
-        classpath 'org.mongodb:mongo-java-driver:2.11.3'
         classpath ':antlr4-plugin:0.1.1'
     }
 }
@@ -54,7 +55,7 @@ repositories {
     }
 
     flatDir {
-        dirs 'lib'
+        dirs '../lib'
     }
 }
 
@@ -92,9 +93,7 @@ dependencies {
     compile 'com.sun.jersey:jersey-server:1.15'
     compile 'com.sun.jersey:jersey-json:1.15'
     compile 'com.sun.jersey.contribs:jersey-spring:1.15'
-    compile 'org.mongodb:mongo-java-driver:2.11.3'
     compile "org.springframework:spring-web:$springVersion"
-    compile 'joda-time:joda-time:2.1'
     compile 'org.slf4j:slf4j-api:1.7.2'
     compile 'org.slf4j:jcl-over-slf4j:1.7.2'
     compile 'org.slf4j:log4j-over-slf4j:1.7.2'
@@ -108,22 +107,8 @@ dependencies {
         exclude module: 'groovy'
     }
     compile 'commons-lang:commons-lang:2.6'
-    compile 'org.json:json:20090211'
-    compile 'com.mchange:c3p0:0.9.5-pre6'
 
-    // these libraries are needed for the patched version of hive that we use
-    compile ':hive-exec:0.11.0-shark-SNAPSHOT'
-    compile ':hive-contrib:0.11.0-shark-SNAPSHOT'
-    compile ':hive-jdbc:0.11.0-shark-SNAPSHOT'
-    compile ':hive-metastore:0.11.0-shark-SNAPSHOT'
-    compile ':hive-cli:0.11.0-shark-SNAPSHOT'
-    compile ':hive-shims:0.11.0-shark-SNAPSHOT'
-    compile ':hive-service:0.11.0-shark-SNAPSHOT'
-    compile ':hive-common:0.11.0-shark-SNAPSHOT'
-    compile ':hive-serde:0.11.0-shark-SNAPSHOT'
 
-    // commons-daemon 1.0.3 throws a bad organisation error (directory structure and pom don't match), so use a different version
-    compile 'commons-daemon:commons-daemon:1.0.5'
     compile('org.apache.hadoop:hadoop-common:2.0.0-cdh4.3.0') {
         exclude group: 'org.mortbay.jetty'
         exclude group: 'javax.servlet'
@@ -167,7 +152,6 @@ dependencies {
         exclude module: 'log4j'
         exclude module: 'slf4j-log4j12'
     }
-
 
     compile project(":metadata")
 
