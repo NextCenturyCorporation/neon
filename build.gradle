@@ -36,7 +36,7 @@ def remotePassword = hasProperty('password') ? password : null
 def sshIdentity = hasProperty('sshKeyFile') ? file(sshKeyFile) : null
 
 //This must be a valid semantic version.
-def CURRENT_NEON_VERSION = "0.8.0"
+def CURRENT_NEON_VERSION = "0.7.0"
 version = CURRENT_NEON_VERSION
 
 project(":common").version = CURRENT_NEON_VERSION
