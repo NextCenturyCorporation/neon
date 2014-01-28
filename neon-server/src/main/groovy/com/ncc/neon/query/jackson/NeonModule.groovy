@@ -31,7 +31,7 @@ import org.codehaus.jackson.map.module.SimpleModule
 class NeonModule extends SimpleModule{
 
     NeonModule() {
-        super("NeonModule", Version.UNKNOWN_VERSION)
+        super("NeonModule", Version.unknownVersion())
         addSerializer(ObjectId, new ObjectIdSerializer())
         addSerializer(Date, new DateSerializer())
     }
