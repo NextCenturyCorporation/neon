@@ -15,8 +15,8 @@
  */
 
 package com.ncc.neon.transform
-
-import com.ncc.neon.mongo.MongoIntegrationTestContext
+import com.ncc.neon.IntegrationTestContext
+import com.ncc.neon.mongo.MongoTestUtils
 import com.ncc.neon.query.Query
 import com.ncc.neon.query.QueryOptions
 import com.ncc.neon.query.Transform
@@ -27,14 +27,11 @@ import org.junit.BeforeClass
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.context.ContextConfiguration
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner
 
-
 @RunWith(SpringJUnit4ClassRunner)
-@ContextConfiguration(classes = MongoIntegrationTestContext)
-@ActiveProfiles("mongo-integrationtest")
+@ContextConfiguration(classes = IntegrationTestContext)
 class TransformIntegrationTest {
 
     @Autowired
@@ -55,7 +52,7 @@ class TransformIntegrationTest {
 
     @BeforeClass
     static void beforeClass() {
-        MongoQueryExecutor.metaClass.getMongo = { MongoIntegrationTestContext.MONGO }
+        MongoQueryExecutor.metaClass.getMongo = { MongoTestUtils.mongoClient }
     }
 
     @AfterClass

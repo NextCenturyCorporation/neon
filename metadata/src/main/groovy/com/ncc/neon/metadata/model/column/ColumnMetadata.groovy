@@ -16,24 +16,25 @@
 
 package com.ncc.neon.metadata.model.column
 
-
+import groovy.transform.ToString
 
 /**
- * Contains metadata about a column in a dataset.
+ * Metadata about a column.
  */
 
-interface ColumnMetadata {
+@ToString(includeNames = true)
+class ColumnMetadata {
 
-    String getDatabaseName()
-    String getTableName()
-    String getColumnName()
-    boolean isNumeric()
-    boolean isTemporal()
-    boolean isText()
-    boolean isLogical()
-    boolean isObject()
-    boolean isArray()
-    boolean isNullable()
-    boolean isHeterogeneous()
+    String databaseName
+    String tableName
+    String columnName
+    boolean numeric
+    boolean temporal
+    boolean text
+    boolean logical
+    boolean object
+    boolean array
+    boolean nullable
+    boolean heterogeneous
 
 }

@@ -35,10 +35,6 @@ abstract class AbstractMongoQueryWorker {
 
     protected AbstractMongoQueryWorker(MongoClient mongo) {
         this.mongo = mongo
-        // TODO: NEON-900 and NEON-939 require us to make this fix in here since the metadata connection is always attempted, but we can move it after those issues are fixed
-        // this is done in the query worker as opposed to the connection client because there may be cases in
-        // the connection client (currently in the metadata) where we don't want to throw an error, rather we do
-        // want to create the empty database
         preventEmptyDBCreation()
     }
 

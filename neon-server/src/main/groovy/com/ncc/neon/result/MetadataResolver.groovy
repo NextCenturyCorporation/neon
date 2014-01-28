@@ -16,18 +16,20 @@
 
 package com.ncc.neon.result
 
-import com.ncc.neon.metadata.MetadataConnection
-import com.ncc.neon.metadata.model.dataset.WidgetAndDatasetMetadataList
 import com.ncc.neon.metadata.model.column.ColumnMetadata
 import com.ncc.neon.metadata.model.column.ColumnMetadataList
+import com.ncc.neon.metadata.model.dataset.WidgetAndDatasetMetadataList
 import com.ncc.neon.metadata.model.widget.WidgetInitializationMetadata
-import com.ncc.neon.metadata.store.MetadataRetriever
+import com.ncc.neon.metadata.store.InMemoryMetadata
 import com.ncc.neon.query.Query
 import com.ncc.neon.query.QueryGroup
 import com.ncc.neon.query.clauses.SelectClause
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
 
+import javax.annotation.PostConstruct
 
 /**
  * Integration point between metadata and neon.
@@ -37,8 +39,25 @@ import org.springframework.stereotype.Component
 @Component
 class MetadataResolver {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(MetadataResolver)
+    private static final METADATA_FILE_NAME = "Metadata.groovy"
+
     @Autowired
-    MetadataConnection metadataConnection
+    InMemoryMetadata metadata
+
+    @SuppressWarnings("JavaIoPackageAccess") // metadata is loaded from a file on the classpath
+    @PostConstruct
+    void loadMetadata() {
+        URL url = getClass().getResource("/${METADATA_FILE_NAME}")
+        if ( url ) {
+            File file = new File(url.toURI())
+            LOGGER.info("Loading metadata from ${file}")
+            metadata.load(file)
+        }
+        else {
+            LOGGER.info("No ${METADATA_FILE_NAME} file found on classpath")
+        }
+    }
 
     /**
      * Gets all column data for a given dataset
@@ -48,8 +67,7 @@ class MetadataResolver {
      */
 
     ColumnMetadataList resolveQuery(String databaseName, String tableName) {
-        MetadataRetriever retriever = new MetadataRetriever(metadataConnection)
-        return retriever.retrieve(databaseName, tableName, [])
+        return metadata.retrieve(databaseName, tableName, [] as Set)
     }
 
     /**
@@ -60,12 +78,11 @@ class MetadataResolver {
      */
 
     ColumnMetadataList resolveQuery(Query query) {
-        MetadataRetriever retriever = new MetadataRetriever(metadataConnection)
         List<String> columns = query.fields
         if (query.fields == SelectClause.ALL_FIELDS) {
             columns = []
         }
-        return retriever.retrieve(query.databaseName, query.tableName, columns)
+        return metadata.retrieve(query.databaseName, query.tableName, columns as Set)
     }
 
     /**
@@ -80,7 +97,7 @@ class MetadataResolver {
         queryGroup.queries.each { Query query ->
             ColumnMetadataList metadataList = resolveQuery(query)
             metadataList.dataSet.each { ColumnMetadata metadata ->
-                if(!list.contains(metadata)){
+                if (!list.contains(metadata)) {
                     list << metadata
                 }
             }
@@ -96,9 +113,8 @@ class MetadataResolver {
      * @return The metadata
      */
 
-    WidgetAndDatasetMetadataList getInitializationData(String databaseName, String tableName, String widgetName){
-        MetadataRetriever retriever = new MetadataRetriever(metadataConnection)
-        return retriever.retrieve(databaseName, tableName, widgetName)
+    WidgetAndDatasetMetadataList getInitializationData(String databaseName, String tableName, String widgetName) {
+        return metadata.retrieve(databaseName, tableName, widgetName)
     }
 
     /**
@@ -108,7 +124,6 @@ class MetadataResolver {
      */
 
     WidgetInitializationMetadata getWidgetInitializationData(String widget) {
-        MetadataRetriever retriever = new MetadataRetriever(metadataConnection)
-        return retriever.retrieve(widget)
+        return metadata.retrieve(widget)
     }
 }

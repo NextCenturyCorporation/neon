@@ -17,7 +17,7 @@
 package com.ncc.neon.services
 
 import com.ncc.neon.metadata.model.column.ColumnMetadataList
-import com.ncc.neon.metadata.model.column.DefaultColumnMetadata
+import com.ncc.neon.metadata.model.column.ColumnMetadata
 import com.ncc.neon.query.Query
 import com.ncc.neon.query.QueryExecutor
 import com.ncc.neon.query.QueryGroup
@@ -39,7 +39,7 @@ class QueryServiceTest {
         QueryExecutor executor = [execute: { query, options -> new TableQueryResult([["key1": "val1"], ["key2": 2]]) }] as QueryExecutor
         queryService.queryExecutorFactory = [getExecutor: { executor }] as QueryExecutorFactory
 
-        def metadata = [new DefaultColumnMetadata(columnName: "key1", text: true), new DefaultColumnMetadata(columnName: "key2", numeric: true)]
+        def metadata = [new ColumnMetadata(columnName: "key1", text: true), new ColumnMetadata(columnName: "key2", numeric: true)]
         queryService.metadataResolver = [resolveQuery: { new ColumnMetadataList(metadata) }] as MetadataResolver
     }
 

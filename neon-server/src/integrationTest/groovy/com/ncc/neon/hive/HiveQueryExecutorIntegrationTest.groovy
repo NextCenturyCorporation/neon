@@ -26,7 +26,6 @@ import org.junit.AfterClass
 import org.junit.BeforeClass
 import org.junit.runner.RunWith
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.context.ContextConfiguration
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner
 
@@ -34,7 +33,6 @@ import java.sql.Timestamp
 
 @RunWith(SpringJUnit4ClassRunner)
 @ContextConfiguration(classes = IntegrationTestContext)
-@ActiveProfiles("integrationtest")
 class HiveQueryExecutorIntegrationTest extends AbstractQueryExecutorIntegrationTest {
 
     private static final String HOST_STRING = System.getProperty("hive.host", "localhost:10000")

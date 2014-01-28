@@ -47,7 +47,6 @@ apply from: "${rootDir}/gradle/sharedDependencies.gradle"
 sourceCompatibility = 1.7
 
 def TEST_GROUP = JavaBasePlugin.VERIFICATION_GROUP
-def springVersion = "3.2.1.RELEASE"
 
 buildscript {
     repositories {

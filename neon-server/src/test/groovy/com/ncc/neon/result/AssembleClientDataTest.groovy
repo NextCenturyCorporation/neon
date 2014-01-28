@@ -15,8 +15,9 @@
  */
 
 package com.ncc.neon.result
+
 import com.ncc.neon.metadata.model.column.ColumnMetadataList
-import com.ncc.neon.metadata.model.column.DefaultColumnMetadata
+import com.ncc.neon.metadata.model.column.ColumnMetadata
 import com.ncc.neon.metadata.model.dataset.WidgetAndDatasetMetadata
 import com.ncc.neon.metadata.model.dataset.WidgetAndDatasetMetadataList
 import com.ncc.neon.query.ListQueryResult
@@ -54,8 +55,8 @@ class AssembleClientDataTest {
         def data = ["data1", "data2", "data3"]
 
         AssembleClientData assemble = new AssembleClientData()
-        assemble.columnMetadataList = new ColumnMetadataList([new DefaultColumnMetadata(databaseName: "db", tableName: "table", temporal: true, columnName: "column1"),
-                new DefaultColumnMetadata(databaseName: "db", tableName: "table", heterogeneous: true, columnName: "column2")])
+        assemble.columnMetadataList = new ColumnMetadataList([new ColumnMetadata(databaseName: "db", tableName: "table", temporal: true, columnName: "column1"),
+                new ColumnMetadata(databaseName: "db", tableName: "table", heterogeneous: true, columnName: "column2")])
         assemble.queryResult = new ListQueryResult(data)
 
         ClientData clientData = assemble.createClientData()

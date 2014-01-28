@@ -34,6 +34,7 @@ buildscript {
 
 project.ext {
     logbackVersion = "1.0.13"
+    springVersion = "3.2.1.RELEASE"
 }
 
 // task groupings we add

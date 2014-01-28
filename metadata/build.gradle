@@ -15,13 +15,26 @@
  */
 
 apply from: "${rootDir}/gradle/groovy.gradle"
+apply from: "${rootDir}/gradle/sharedDependencies.gradle"
 
-def mongoVersion = "2.11.3"
-
-repositories{
+repositories {
     mavenCentral()
 }
 
-dependencies{
-    compile "org.mongodb:mongo-java-driver:$mongoVersion"
+dependencies {
+    compile "org.springframework:spring-context:$springVersion"
+}
+
+task generateMongoDatabaseMetadata(type: org.gradle.api.tasks.JavaExec) {
+    main = "com.ncc.neon.metadata.store.script.MongoColumnMetadataScript"
+    args = [checkAndGetProperty("metadataDatabase"),
+            checkAndGetProperty("metadataTable"),
+            checkAndGetProperty("metadataOutputFile"),
+            checkAndGetProperty("metadataHost"),
+            checkAndGetProperty("metadataPort")].findAll()
+    classpath = sourceSets.main.runtimeClasspath
+}
+
+private String checkAndGetProperty(String property) {
+    return project.hasProperty(property) ? project.getProperty(property) : null
 }

@@ -15,10 +15,10 @@
  */
 
 package com.ncc.neon.config
+
 import com.ncc.neon.connect.ConnectionInfo
 import com.ncc.neon.connect.ConnectionManager
 import com.ncc.neon.connect.DataSources
-import com.ncc.neon.metadata.MetadataConnection
 import com.ncc.neon.transform.Transformer
 import com.ncc.neon.transform.TransformerRegistry
 import org.slf4j.Logger
@@ -32,7 +32,6 @@ import org.springframework.core.env.Environment
 import org.springframework.core.env.PropertiesPropertySource
 
 import javax.annotation.PostConstruct
-
 
 /**
  * Spring bean configuration to use in production
@@ -62,7 +61,7 @@ class ProductionAppContext {
 
 
     @Bean
-    ConnectionManager connectionManagerBean(){
+    ConnectionManager connectionManagerBean() {
         ConnectionManager manager = new ConnectionManager()
         String host = System.getProperty("mongo.hosts", "localhost")
         manager.initConnectionManager(new ConnectionInfo(DataSources.mongo, host))
@@ -70,13 +69,7 @@ class ProductionAppContext {
     }
 
     @Bean
-    MetadataConnection metadataConnectionBean(){
-        ConnectionManager bean = connectionManagerBean()
-        return new MetadataConnection(bean.defaultConnectionClient.getMongo())
-    }
-
-    @Bean
-    TransformerRegistry transformerRegistry(){
+    TransformerRegistry transformerRegistry() {
         TransformerRegistry registry = new TransformerRegistry()
         List<Transformer> registeredTransformers = []
         registeredTransformers.each { Transformer transformer ->
@@ -84,7 +77,6 @@ class ProductionAppContext {
         }
         return registry
     }
-
 
 
 }
