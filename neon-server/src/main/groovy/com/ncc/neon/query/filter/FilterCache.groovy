@@ -1,14 +1,10 @@
 package com.ncc.neon.query.filter
-
+import com.ncc.neon.cache.ImmutableValueCache
 import com.ncc.neon.query.clauses.AndWhereClause
 import com.ncc.neon.query.clauses.WhereClause
-
-import java.util.concurrent.ConcurrentHashMap
-import java.util.concurrent.ConcurrentMap
-
 /*
  * ************************************************************************
- * Copyright (c), 2013 Next Century Corporation. All Rights Reserved.
+ * Copyright (c), 2014 Next Century Corporation. All Rights Reserved.
  *
  * This software code is the exclusive property of Next Century Corporation and is
  * protected by United States and International laws relating to the protection
@@ -32,15 +28,14 @@ import java.util.concurrent.ConcurrentMap
  * @author tbrooks
  */
 
-class FilterCache implements Serializable{
-    private static final long serialVersionUID = - 4017268491878023244L
-    private final ConcurrentMap<FilterKey, Filter> filters = [:] as ConcurrentHashMap
+class FilterCache extends ImmutableValueCache<FilterKey, Filter> implements Serializable{
+    private static final long serialVersionUID = - 5911927417066895555L
 
     /**
      * Clears all existing filters
      */
     void clearAllFilters() {
-        filters.clear()
+        cache.clear()
     }
 
     /**
@@ -50,10 +45,10 @@ class FilterCache implements Serializable{
      * @return
      */
     void addFilter(FilterKey filterKey, Filter filter) {
-        def oldFilter = filters.putIfAbsent(filterKey, filter)
+        def oldFilter = add(filterKey, filter)
         if(oldFilter){
             filter.whereClause = determineFilterWhereClause(oldFilter, filter)
-            filters.replace(filterKey, filter)
+            replace(filterKey, filter)
         }
     }
 
@@ -71,7 +66,7 @@ class FilterCache implements Serializable{
      * @return
      */
     void removeFilter(FilterKey filterKey) {
-        filters.remove(filterKey)
+        remove(filterKey)
     }
 
     /**
@@ -80,13 +75,11 @@ class FilterCache implements Serializable{
      * @return A list of filters applied to that dataset
      */
     List<Filter> getFiltersForDataset(DataSet dataSet) {
-        def datasetFilters = []
-        filters.each {k,v ->
+        return cache.findResults {k,v ->
             if(k.dataSet == dataSet){
-                datasetFilters << v
+                return v
             }
         }
-        return datasetFilters
     }
 
 }
