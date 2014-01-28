@@ -1,14 +1,12 @@
 package com.ncc.neon.services
-
 import com.ncc.neon.connect.ConnectionInfo
-import com.ncc.neon.connect.DataSources
 import com.ncc.neon.connect.ConnectionManager
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
 
 import javax.ws.rs.*
 import javax.ws.rs.core.MediaType
-
+import javax.ws.rs.core.Response
 /*
  * ************************************************************************
  * Copyright (c), 2013 Next Century Corporation. All Rights Reserved.
@@ -53,19 +51,18 @@ class ConnectionService {
         return [System.getProperty("mongo.hosts", "localhost")]
     }
 
-    /**
-     * Attempt to establish a connection with a data source
-     * @param datastore The name of the data source, e.g. mongo or hive
-     * @param hostname the connection url for the data store, e.g. localhost
-     */
-
-    @POST
-    @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
-    @Path("connect")
-    void connect(@FormParam("datastore") String datastore, @FormParam("hostname") String hostname) {
-        ConnectionInfo info = new ConnectionInfo(dataSource: DataSources.valueOf(datastore.toLowerCase()), connectionUrl: hostname)
-        connectionManager.connect(info)
+    @GET
+    @Produces(MediaType.APPLICATION_JSON)
+    @Path("{id}")
+    ConnectionInfo getConnectionById(@PathParam("id") String id){
+        connectionManager.getConnectionById(id)
     }
 
+    @POST
+    @Consumes(MediaType.APPLICATION_JSON)
+    Response createConnection(ConnectionInfo info){
+        String id = connectionManager.connect(info)
+        Response.created(URI.create("${id}")).build()
+    }
 
 }

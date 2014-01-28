@@ -1,4 +1,6 @@
 package com.ncc.neon.connect
+
+import com.ncc.neon.cache.ImmutableValueCache
 import org.springframework.beans.factory.annotation.Autowired
 
 import java.util.concurrent.ConcurrentHashMap
@@ -37,6 +39,7 @@ import java.util.concurrent.ConcurrentMap
 class ConnectionManager {
 
     private final ConcurrentMap<ConnectionInfo, ConnectionClientFactory> connectionCache = [:] as ConcurrentHashMap
+    private final ImmutableValueCache<String, ConnectionInfo> connections = new ImmutableValueCache<String, ConnectionInfo>()
 
     @Autowired
     SessionConnection sessionConnection
@@ -45,9 +48,14 @@ class ConnectionManager {
     private ConnectionInfo defaultConnection
 
 
+    ConnectionInfo getConnectionById(String connectionId) {
+        return connections.get(connectionId)
+    }
+
     void connect(ConnectionInfo info) {
         sessionConnection.connectionInfo = info
         connectionCache.putIfAbsent(info, createClientFactory(info))
+        connections.add("${info.dataSource.name()}@${info.connectionUrl}", info)
     }
 
     void initConnectionManager(ConnectionInfo info){
@@ -89,4 +97,5 @@ class ConnectionManager {
         }
         throw new NeonConnectionException("There must be a data source to which to connect.")
     }
+
 }
