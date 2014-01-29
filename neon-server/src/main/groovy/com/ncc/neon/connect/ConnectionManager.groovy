@@ -37,7 +37,6 @@ class ConnectionManager {
 
     private final ImmutableValueCache<String, ConnectionInfo> connections = new ImmutableValueCache()
     private final ImmutableValueCache<String, ConnectionClientFactory> factoryCache = new ImmutableValueCache()
-    private final ImmutableValueCache<String, ConnectionClient> clientCache = new ImmutableValueCache()
 
     ConnectionClientFactory mongoConnectionFactory = new MongoConnectionClientFactory()
     ConnectionClientFactory hiveConnectionFactory = new JdbcConnectionClientFactory("org.apache.hive.jdbc.HiveDriver", "hive2")
@@ -72,13 +71,7 @@ class ConnectionManager {
             throw new NeonConnectionException("Connection to ${connectionId} was never established.")
         }
 
-        ConnectionClient client = clientCache.get(connectionId)
-        if(!client){
-            client = factory.createConnectionClient(connections.get(connectionId))
-            clientCache.put(connectionId, client)
-        }
-
-        return client
+        return factory.createConnectionClient(connections.get(connectionId))
     }
 
     private String createIdFromInfo(ConnectionInfo info) {
