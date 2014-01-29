@@ -30,10 +30,10 @@ import com.ncc.neon.query.TableQueryResult
 class SalaryTransformer implements Transformer{
 
     @Override
-    QueryResult convert(QueryResult queryResult, def params) {
+    QueryResult convert(QueryResult queryResult, def salaryMultiplier) {
         List<Map<String,Object>> data = queryResult.data
         data.each { Map<String,Object> rows ->
-            rows.put("salary", rows.get("salary") * 1.1)
+            rows['salary'] = rows['salary'] * salaryMultiplier
         }
         return new TableQueryResult(data)
     }

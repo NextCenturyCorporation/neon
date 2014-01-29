@@ -55,7 +55,7 @@ class TransformIntegrationTest {
     /** a filter that just includes all of the data (no WHERE clause) */
     static final Filter ALL_DATA_FILTER = new Filter(databaseName: DATABASE_NAME, tableName: TABLE_NAME)
 
-    static final Transform TRANSFORM = new Transform(transformName: SalaryTransformer.name)
+    static final Transform TRANSFORM = new Transform(transformName: SalaryTransformer.name, params: 1.1)
     static final Transform BAD_TRANSFORM = new Transform(transformName: "blah")
 
     /** a simple query that returns all of the data */
