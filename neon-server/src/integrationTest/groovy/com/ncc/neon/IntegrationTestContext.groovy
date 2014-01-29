@@ -51,7 +51,7 @@ class IntegrationTestContext {
 
     @Bean
     CustomScopeConfigurer scopeConfigurer() {
-        return new CustomScopeConfigurer(scopes: ["session":new SimpleThreadScope()])
+        return new CustomScopeConfigurer(scopes: ["session": new SimpleThreadScope(), "request": new SimpleThreadScope()])
     }
 
     @Bean

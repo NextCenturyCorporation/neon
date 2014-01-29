@@ -68,7 +68,8 @@ class HiveQueryExecutorIntegrationTest extends AbstractQueryExecutorIntegrationT
     @Autowired
     void setHiveQueryExecutor(HiveQueryExecutor hiveQueryExecutor) {
         this.hiveQueryExecutor = hiveQueryExecutor
-        this.hiveQueryExecutor.connectionManager.connect(CONNECTION_INFO)
+        String connectionId = this.hiveQueryExecutor.connectionManager.connect(CONNECTION_INFO)
+        this.hiveQueryExecutor.connectionManager.currentRequestConnection.connectionId = connectionId
     }
 
     @Override

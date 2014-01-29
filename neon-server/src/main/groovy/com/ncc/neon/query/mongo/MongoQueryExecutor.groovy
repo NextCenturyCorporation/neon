@@ -123,7 +123,7 @@ class MongoQueryExecutor implements QueryExecutor {
     }
 
     private MongoClient getMongo(){
-        connectionManager.getConnectionClient().getMongo()
+        connectionManager.currentConnectionClient.getMongo()
     }
 
 }

@@ -1,5 +1,6 @@
 package com.ncc.neon.connect
 import com.ncc.neon.cache.ImmutableValueCache
+import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
 
 /*
@@ -36,10 +37,13 @@ class ConnectionManager {
 
     private final ImmutableValueCache<String, ConnectionInfo> connections = new ImmutableValueCache()
     private final ImmutableValueCache<String, ConnectionClientFactory> factoryCache = new ImmutableValueCache()
+    private final ImmutableValueCache<String, ConnectionClient> clientCache = new ImmutableValueCache()
 
     ConnectionClientFactory mongoConnectionFactory = new MongoConnectionClientFactory()
     ConnectionClientFactory hiveConnectionFactory = new JdbcConnectionClientFactory("org.apache.hive.jdbc.HiveDriver", "hive2")
 
+    @Autowired
+    CurrentRequestConnection currentRequestConnection
 
     ConnectionInfo getConnectionById(String connectionId) {
         return connections.get(connectionId)
@@ -58,13 +62,23 @@ class ConnectionManager {
         return connectionId
     }
 
-    ConnectionClient getConnectionClient(String connectionId){
+    ConnectionClient getCurrentConnectionClient(){
+        return getConnectionClient(currentRequestConnection.connectionId)
+    }
+
+    private ConnectionClient getConnectionClient(String connectionId){
         ConnectionClientFactory factory = factoryCache.get(connectionId)
         if(!factory){
             throw new NeonConnectionException("Connection to ${connectionId} was never established.")
         }
 
-        return factory.createConnectionClient(connections.get(connectionId))
+        ConnectionClient client = clientCache.get(connectionId)
+        if(!client){
+            client = factory.createConnectionClient(connections.get(connectionId))
+            clientCache.put(connectionId, client)
+        }
+
+        return client
     }
 
     private String createIdFromInfo(ConnectionInfo info) {

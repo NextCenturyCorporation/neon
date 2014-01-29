@@ -63,9 +63,9 @@ class QueryService {
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-    @Path("query")
-    ClientData executeQuery(Query query) {
-        return execute(query, QueryOptions.FILTERED_DATA)
+    @Path("{connectionId}/query")
+    ClientData executeQuery(@PathParam("connectionId") String connectionId, Query query) {
+        return execute(connectionId, query, QueryOptions.FILTERED_DATA)
     }
 
     /**
@@ -77,9 +77,9 @@ class QueryService {
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-    @Path("querygroup")
-    ClientData executeQueryGroup(QueryGroup query) {
-        return execute(query, QueryOptions.FILTERED_DATA)
+    @Path("{connectionId}/querygroup")
+    ClientData executeQueryGroup(@PathParam("connectionId") String connectionId, QueryGroup query) {
+        return execute(connectionId, query, QueryOptions.FILTERED_DATA)
     }
 
     /**
@@ -91,9 +91,9 @@ class QueryService {
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-    @Path("querywithselectiononly")
-    ClientData executeQueryWithSelectionOnly(Query query) {
-        return execute(query, QueryOptions.FILTERED_AND_SELECTED_DATA)
+    @Path("{connectionId}/querywithselectiononly")
+    ClientData executeQueryWithSelectionOnly(@PathParam("connectionId") String connectionId, Query query) {
+        return execute(connectionId, query, QueryOptions.FILTERED_AND_SELECTED_DATA)
     }
 
     /**
@@ -105,9 +105,9 @@ class QueryService {
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-    @Path("querygroupwithselectiononly")
-    ClientData executeQueryGroupWithSelectionOnly(QueryGroup query) {
-        return execute(query, QueryOptions.FILTERED_AND_SELECTED_DATA)
+    @Path("{connectionId}/querygroupwithselectiononly")
+    ClientData executeQueryGroupWithSelectionOnly(@PathParam("connectionId") String connectionId, QueryGroup query) {
+        return execute(connectionId, query, QueryOptions.FILTERED_AND_SELECTED_DATA)
     }
 
 
@@ -119,9 +119,9 @@ class QueryService {
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-    @Path("querydisregardfilters")
-    ClientData executeQueryDisregardFilters(Query query) {
-        return execute(query, QueryOptions.ALL_DATA)
+    @Path("{connectionId}/querydisregardfilters")
+    ClientData executeQueryDisregardFilters(@PathParam("connectionId") String connectionId, Query query) {
+        return execute(connectionId, query, QueryOptions.ALL_DATA)
     }
 
     /**
@@ -132,9 +132,9 @@ class QueryService {
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-    @Path("querygroupdisregardfilters")
-    ClientData executeQueryGroupDisregardFilters(QueryGroup query) {
-        return execute(query, QueryOptions.ALL_DATA)
+    @Path("{connectionId}/querygroupdisregardfilters")
+    ClientData executeQueryGroupDisregardFilters(@PathParam("connectionId") String connectionId, QueryGroup query) {
+        return execute(connectionId, query, QueryOptions.ALL_DATA)
     }
 
     /**
@@ -148,12 +148,13 @@ class QueryService {
      */
     @GET
     @Produces(MediaType.APPLICATION_JSON)
-    @Path("fields")
-    InitializingClientData getFields(@QueryParam("databaseName") String databaseName,
+    @Path("{connectionId}/fields")
+    InitializingClientData getFields(@PathParam("connectionId") String connectionId,
+                                     @QueryParam("databaseName") String databaseName,
                                      @QueryParam("tableName") String tableName,
                                      @QueryParam("widgetName") String widgetName) {
 
-        QueryExecutor queryExecutor = queryExecutorFactory.getExecutor()
+        QueryExecutor queryExecutor = queryExecutorFactory.getExecutor(connectionId)
         QueryResult queryResult = queryExecutor.getFieldNames(databaseName, tableName)
         WidgetAndDatasetMetadataList metadata = metadataResolver.getInitializationData(databaseName, tableName, widgetName)
         ColumnMetadataList columnMetadataList = metadataResolver.resolveQuery(databaseName, tableName)
@@ -168,9 +169,9 @@ class QueryService {
      */
     @GET
     @Produces(MediaType.APPLICATION_JSON)
-    @Path("databasenames")
-    List<String> getDatabaseNames() {
-        QueryExecutor queryExecutor = queryExecutorFactory.getExecutor()
+    @Path("{connectionId}/databasenames")
+    List<String> getDatabaseNames(@PathParam("connectionId") String connectionId) {
+        QueryExecutor queryExecutor = queryExecutorFactory.getExecutor(connectionId)
         return queryExecutor.showDatabases()
     }
 
@@ -181,14 +182,14 @@ class QueryService {
      */
     @POST
     @Produces(MediaType.APPLICATION_JSON)
-    @Path("tablenames")
-    List<String> getTableNames(@FormParam("database") String database) {
-        QueryExecutor queryExecutor = queryExecutorFactory.getExecutor()
+    @Path("{connectionId}/tablenames")
+    List<String> getTableNames(@PathParam("connectionId") String connectionId, @FormParam("database") String database) {
+        QueryExecutor queryExecutor = queryExecutorFactory.getExecutor(connectionId)
         return queryExecutor.showTables(database)
     }
 
-    private final def execute = { def query, QueryOptions options ->
-        QueryExecutor queryExecutor = queryExecutorFactory.getExecutor()
+    private final def execute = { String connectionId, def query, QueryOptions options ->
+        QueryExecutor queryExecutor = queryExecutorFactory.getExecutor(connectionId)
         QueryResult queryResult = queryExecutor.execute(query, options)
         ColumnMetadataList columnMetadataList = metadataResolver.resolveQuery(query)
 

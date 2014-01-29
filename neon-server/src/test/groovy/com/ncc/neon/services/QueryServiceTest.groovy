@@ -50,7 +50,7 @@ class QueryServiceTest {
 
     @Test
     void "execute query"() {
-        ClientData clientData = queryService.executeQuery(new Query())
+        ClientData clientData = queryService.executeQuery("", new Query())
         assert clientData.data
         assert clientData.data == [["key1": "val1"], ["key2": 2]]
 
@@ -61,7 +61,7 @@ class QueryServiceTest {
     @Test
     void "execute query group"() {
         QueryGroup queryGroup = new QueryGroup(queries: [new Query()])
-        ClientData clientData = queryService.executeQueryGroup(queryGroup)
+        ClientData clientData = queryService.executeQueryGroup("", queryGroup)
         assert clientData.data
         assert clientData.data == [["key1": "val1"], ["key2": 2]]
 

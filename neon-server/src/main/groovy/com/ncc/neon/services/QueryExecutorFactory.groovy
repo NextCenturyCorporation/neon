@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
 
 import javax.annotation.Resource
+
 /*
  * ************************************************************************
  * Copyright (c), 2013 Next Century Corporation. All Rights Reserved.
@@ -52,8 +53,9 @@ class QueryExecutorFactory {
      * Gets the query executor based on the connection
      * @return the appropriate query executor
      */
-    QueryExecutor getExecutor() {
-        if(connectionManager.currentConnectionInfo.dataSource == DataSources.hive){
+    QueryExecutor getExecutor(String connectionId) {
+        connectionManager.currentRequestConnection.connectionId = connectionId
+        if (connectionManager.getConnectionById(connectionId).dataSource == DataSources.hive) {
             return hiveQueryExecutor
         }
         return mongoQueryExecutor

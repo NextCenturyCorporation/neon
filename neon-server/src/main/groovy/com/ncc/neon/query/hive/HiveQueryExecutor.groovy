@@ -133,7 +133,7 @@ class HiveQueryExecutor implements QueryExecutor {
     }
 
     private JdbcClient getJdbcClient() {
-        return connectionManager.connectionClient
+        return connectionManager.currentConnectionClient
     }
 
     /**

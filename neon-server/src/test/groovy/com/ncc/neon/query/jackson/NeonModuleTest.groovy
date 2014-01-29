@@ -77,11 +77,9 @@ class NeonModuleTest {
 
         String serialize = mapper.writeValueAsString(connectionInfo)
         ConnectionInfo info = mapper.readValue(serialize, ConnectionInfo)
-        println serialize
+
         assert connectionInfo == info
     }
-
-
 
     private MongoQueryResult createMongoQueryResult(ObjectId objectId, Date date) {
         DBObject object = new BasicDBObject()
