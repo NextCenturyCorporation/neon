@@ -1,10 +1,6 @@
 package com.ncc.neon.connect
-
 import com.ncc.neon.cache.ImmutableValueCache
-import org.springframework.beans.factory.annotation.Autowired
-
-import java.util.concurrent.ConcurrentHashMap
-import java.util.concurrent.ConcurrentMap
+import org.springframework.stereotype.Component
 
 /*
  * ************************************************************************
@@ -35,67 +31,53 @@ import java.util.concurrent.ConcurrentMap
 /**
  * This holds the connection information for the application.
  */
-
+@Component
 class ConnectionManager {
 
-    private final ConcurrentMap<ConnectionInfo, ConnectionClientFactory> connectionCache = [:] as ConcurrentHashMap
-    private final ImmutableValueCache<String, ConnectionInfo> connections = new ImmutableValueCache<String, ConnectionInfo>()
+    private final ImmutableValueCache<String, ConnectionInfo> connections = new ImmutableValueCache()
+    private final ImmutableValueCache<String, ConnectionClientFactory> factoryCache = new ImmutableValueCache()
 
-    @Autowired
-    SessionConnection sessionConnection
-
-    /** the default connection used if the session is not explicitly connected to one */
-    private ConnectionInfo defaultConnection
+    ConnectionClientFactory mongoConnectionFactory = new MongoConnectionClientFactory()
+    ConnectionClientFactory hiveConnectionFactory = new JdbcConnectionClientFactory("org.apache.hive.jdbc.HiveDriver", "hive2")
 
 
     ConnectionInfo getConnectionById(String connectionId) {
         return connections.get(connectionId)
     }
 
-    void connect(ConnectionInfo info) {
-        sessionConnection.connectionInfo = info
-        connectionCache.putIfAbsent(info, createClientFactory(info))
-        connections.add("${info.dataSource.name()}@${info.connectionUrl}", info)
+    /**
+     * Registers a connection resource with the application.
+     * @param info Fully identifies the connection information
+     * @return A key that identifies this connection resource.
+     */
+
+    String connect(ConnectionInfo info) {
+        String connectionId = createIdFromInfo(info)
+        connections.put(connectionId, info)
+        factoryCache.put(connectionId, createClientFactory(info))
+        return connectionId
     }
 
-    void initConnectionManager(ConnectionInfo info){
-        connectionCache.clear()
-        if(info){
-            connectionCache.put(info, createClientFactory(info))
+    ConnectionClient getConnectionClient(String connectionId){
+        ConnectionClientFactory factory = factoryCache.get(connectionId)
+        if(!factory){
+            throw new NeonConnectionException("Connection to ${connectionId} was never established.")
         }
-        defaultConnection = info
 
+        return factory.createConnectionClient(connections.get(connectionId))
     }
 
-    ConnectionClient getConnectionClient(){
-        return createConnectionClient(getCurrentConnectionInfo())
-    }
-
-    ConnectionClient getDefaultConnectionClient() {
-        return createConnectionClient(defaultConnection)
-    }
-
-    ConnectionInfo getCurrentConnectionInfo(){
-        ConnectionInfo connection = sessionConnection.connectionInfo ?: defaultConnection
-        if ( !connection ) {
-            throw new NeonConnectionException("No default or session connections exist")
-        }
-        return connection
-    }
-
-    private ConnectionClient createConnectionClient(ConnectionInfo info) {
-        ConnectionClientFactory factory = connectionCache.get(info)
-        return factory.createConnectionClient(info)
+    private String createIdFromInfo(ConnectionInfo info) {
+        return "${info.dataSource?.name()}@${info.connectionUrl}"
     }
 
     private ConnectionClientFactory createClientFactory(ConnectionInfo connectionInfo) {
         if (connectionInfo.dataSource == DataSources.mongo) {
-            return new MongoConnectionClientFactory()
+            return mongoConnectionFactory
         }
         if (connectionInfo.dataSource == DataSources.hive) {
-            return new JdbcConnectionClientFactory("org.apache.hive.jdbc.HiveDriver", "hive2")
+            return hiveConnectionFactory
         }
         throw new NeonConnectionException("There must be a data source to which to connect.")
     }
-
 }

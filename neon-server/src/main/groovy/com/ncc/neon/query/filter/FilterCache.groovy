@@ -45,7 +45,7 @@ class FilterCache extends ImmutableValueCache<FilterKey, Filter> implements Seri
      * @return
      */
     void addFilter(FilterKey filterKey, Filter filter) {
-        def oldFilter = add(filterKey, filter)
+        def oldFilter = put(filterKey, filter)
         if(oldFilter){
             filter.whereClause = determineFilterWhereClause(oldFilter, filter)
             replace(filterKey, filter)

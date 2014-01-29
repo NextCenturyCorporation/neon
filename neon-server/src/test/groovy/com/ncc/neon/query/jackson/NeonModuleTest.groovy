@@ -1,6 +1,8 @@
 package com.ncc.neon.query.jackson
 import com.mongodb.BasicDBObject
 import com.mongodb.DBObject
+import com.ncc.neon.connect.ConnectionInfo
+import com.ncc.neon.connect.DataSources
 import com.ncc.neon.query.TableQueryResult
 import com.ncc.neon.query.mongo.MongoQueryResult
 import com.ncc.neon.util.DateUtils
@@ -36,7 +38,7 @@ import org.junit.Test
 class NeonModuleTest {
 
     @Test
-    void testObjectMappingSerialization(){
+    void "serialize mongo query result"(){
         def objectIdString = "51b0dc351cb440575f11c68a"
 
         ObjectMapperProvider provider = new ObjectMapperProvider()
@@ -51,7 +53,7 @@ class NeonModuleTest {
     }
 
     @Test
-    void testObjectMapping(){
+    void "serialize and then deserialize ObjectId and Date"(){
         def objectIdString = "51b0dc351cb440575f11c68a"
         def objectId = new ObjectId(objectIdString)
         def date = new Date()
@@ -65,6 +67,21 @@ class NeonModuleTest {
 
         assertTableQueryValues(tqResult, objectIdString, date)
     }
+
+    @Test
+    void "serialize and then deserialize ConnectionInfo"(){
+        def connectionInfo = new ConnectionInfo(dataSource: DataSources.mongo, connectionUrl: "localhost")
+
+        ObjectMapperProvider provider = new ObjectMapperProvider()
+        ObjectMapper mapper = provider.getContext(NeonModuleTest)
+
+        String serialize = mapper.writeValueAsString(connectionInfo)
+        ConnectionInfo info = mapper.readValue(serialize, ConnectionInfo)
+        println serialize
+        assert connectionInfo == info
+    }
+
+
 
     private MongoQueryResult createMongoQueryResult(ObjectId objectId, Date date) {
         DBObject object = new BasicDBObject()

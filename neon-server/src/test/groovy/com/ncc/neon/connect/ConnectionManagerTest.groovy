@@ -31,36 +31,39 @@ import org.junit.Test
 class ConnectionManagerTest {
 
     private ConnectionManager connectionManager
+    private final def fakeMongoConnectionClient = {"mongo"} as ConnectionClient
+    private final def fakeHiveConnectionClient = {"hive"} as ConnectionClient
+
 
     @Before
     void setup(){
         connectionManager = new ConnectionManager()
-        connectionManager.sessionConnection = new SessionConnection()
+
+        connectionManager.mongoConnectionFactory = { fakeMongoConnectionClient } as ConnectionClientFactory
+        connectionManager.hiveConnectionFactory = { fakeHiveConnectionClient } as ConnectionClientFactory
     }
 
     @Test(expected = NeonConnectionException)
     void "no connections set throws an exception"() {
-        connectionManager.getCurrentConnectionInfo()
+        connectionManager.getConnectionClient("")
     }
 
     @Test(expected = NeonConnectionException)
     void "invalid connection info throws exception"() {
-        connectionManager.connect(new ConnectionInfo())
-        connectionManager.getCurrentConnectionInfo()
+        ConnectionInfo info = new ConnectionInfo()
+        connectionManager.connect(info)
+        connectionManager.getConnectionClient(info)
     }
 
     @Test
-    void "connecting to data sources returns the last one established"() {
+    void "connecting to data sources"() {
         ConnectionInfo mongo = new ConnectionInfo(dataSource: DataSources.mongo)
-        connectionManager.connect(mongo)
-        assert connectionManager.getCurrentConnectionInfo() == mongo
+        String id = connectionManager.connect(mongo)
+        assert connectionManager.getConnectionClient(id) == fakeMongoConnectionClient
 
         ConnectionInfo hive = new ConnectionInfo(dataSource: DataSources.hive)
-        connectionManager.connect(hive)
-        assert connectionManager.getCurrentConnectionInfo() == hive
-
-        connectionManager.connect(mongo)
-        assert connectionManager.getCurrentConnectionInfo() == mongo
+        id = connectionManager.connect(hive)
+        assert connectionManager.getConnectionClient(id) == fakeHiveConnectionClient
     }
 
 }

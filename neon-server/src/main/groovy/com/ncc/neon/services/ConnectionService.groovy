@@ -1,4 +1,5 @@
 package com.ncc.neon.services
+
 import com.ncc.neon.connect.ConnectionInfo
 import com.ncc.neon.connect.ConnectionManager
 import org.springframework.beans.factory.annotation.Autowired
@@ -7,6 +8,7 @@ import org.springframework.stereotype.Component
 import javax.ws.rs.*
 import javax.ws.rs.core.MediaType
 import javax.ws.rs.core.Response
+
 /*
  * ************************************************************************
  * Copyright (c), 2013 Next Century Corporation. All Rights Reserved.
@@ -38,7 +40,7 @@ import javax.ws.rs.core.Response
  */
 
 @Component
-@Path("/connectionservice")
+@Path("/connections")
 class ConnectionService {
 
     @Autowired
@@ -48,19 +50,26 @@ class ConnectionService {
     @Produces(MediaType.APPLICATION_JSON)
     @Path("hostnames")
     List<String> getHostnames() {
-        return [System.getProperty("mongo.hosts", "localhost")]
+        String mongo = System.getProperty("mongo.hosts", "localhost")
+        String hive = System.getProperty("hive.host")
+
+        def names = [mongo]
+        if (hive) {
+            names << hive
+        }
+        return names
     }
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     @Path("{id}")
-    ConnectionInfo getConnectionById(@PathParam("id") String id){
+    ConnectionInfo getConnectionById(@PathParam("id") String id) {
         connectionManager.getConnectionById(id)
     }
 
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
-    Response createConnection(ConnectionInfo info){
+    Response createConnection(ConnectionInfo info) {
         String id = connectionManager.connect(info)
         Response.created(URI.create("${id}")).build()
     }

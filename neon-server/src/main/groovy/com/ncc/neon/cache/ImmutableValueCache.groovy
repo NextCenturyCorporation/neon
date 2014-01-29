@@ -46,7 +46,7 @@ class ImmutableValueCache<Key,Value> {
      *
      **/
 
-    Value add(Key key, Value value){
+    Value put(Key key, Value value){
         return cache.putIfAbsent(key, value)
     }
 
@@ -61,8 +61,6 @@ class ImmutableValueCache<Key,Value> {
     Value replace(Key key, Value value){
         return cache.replace(key, value)
     }
-
-
 
     ConcurrentMap<Key,Value> getCache(){
         return cache
