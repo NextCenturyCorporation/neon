@@ -1,39 +1,50 @@
 ## Overview
-The neon framework provides a SQL-like query language that can be used by javascript frameworks to execute queries
-  against different types of databases. The queries are executed on the server, and neon translates its query language
-  into database specific queries.
+Neon is a technology-agnostic composition framework for data and visualizations in a common browser-based display and interaction environment.  It facilitates the development of rich data exploration applications through domain-specific combinations of generic, reusable components.
 
-Neon also provides an interaction framework that allows different visualizations (widgets) to communicate with one
-   another. For example, selecting a point on a map widget might select that point in a table.
+Neon consists of two components:
+* The Data Access API is a database-agnostic abstraction layer for executing queries using a SQL-like language. This allows developers to focus on developing their applications without getting bogged down by the database-specific constructs.  Neon queries can be specified through a JavaScript library or RESTful endpoints, which provides maximum flexibility for developers.
+* The Interaction API provides a way for disparate components to communicate with each other about user actions so that developers can orchestrate complex, interactive visualizations using components that are completely decoupled from each other.
 
+## External Dependencies
+In order to build Neon from source, you must install:
 
-## Building neon
+* MongoDB
+  Mongo is one of the database systems that Neon supports. Mongo (version 2.4+ is required) can be downloaded at the following link: http://www.mongodb.org/downloads.
+* Nodejs/npm
+  Node.js and npm are used to build the javascript code
+  Instructions for installing nodejs (version 0.10.17+ is required) can be found at the following link: https://github.com/joyent/node/wiki/Installing-Node.js-via-package-manager.
+  Instructions for installing npm (version 1.3.10+ is required) can be found at the following link:
+  https://github.com/isaacs/npm.
 
-Neon contains a mix of groovy and javascript code and uses different build tools for the different languages:
+## Building Neon
 
-* gradle (or gradlew) can be used to build the groovy code
-* npm/nodejs/grunt are used to build the javascript code
-* the gradle build files provide wrapper tasks for executing grunt tasks
+Once the external dependencies are installed, one may build Neon with:
 
-### setup instructions for npm/nodejs (Ubuntu)
+   gradlew clean build
 
-* install nodejs - [https://github.com/joyent/node/wiki/Installing-Node.js-via-package-manager](https://github.com/joyent/node/wiki/Installing-Node.js-via-package-manager) and npm [https://github.com/isaacs/npm](https://github.com/isaacs/npm)
-* update npm to the latest version by running `sudo npm -g update npm`
+This task compiles the source code, runs the unit tests, and builds war files for deployment.
 
-### Test tasks
+### Testing Neon
 
-Several tasks exist for running tests:
+Neon is extensively tested. The following gradle tasks can be invoked for additional testing beyond the unit tests:
 
-* test - runs groovy unit tests
-* integrationTest - runs groovy integration tests (requires mongodb and/or hive). Note: To run mongo only tests, use the flag `-DintegrationTest.single=Mongo` or `-DintegrationTest.single=Hive` for hive tests only
-* acceptanceTest - runs end to end acceptance tests (requires mongodb)
-* gruntjs runs all javascript verification tasks - unit test, jshint, etc
+* gradlew acceptanceTest - (requires mongodb) Runs end-to-end acceptance tests. One must create a gradle.properties file that has a mongo.hosts property that points to his or her mongo instance. See gradle.properties.sample for an example.
+* gradlew integrationTest - (requires mongodb and shark) Runs integration tests against the existing data sources. In addition to the mongo.hosts property, one must set the hdfs.url and hive.host properties. Installation for shark can be found here: https://github.com/amplab/shark/wiki
+* gradlew gatling - (requires mongodb and shark) Runs multi-user concurrency tests.
 
+## Deploying Neon
 
-note: all projects share a common javascript configuration, so the package.json file is dynamically generated from the package.json.template in the top level neon folder
+Building neon will create neon.war, which hosts the Data Access and Integration APIs as well as a war for each widget. The widgets are visualizations that make use of the Neon APIs.
+One may deploy neon.war and the widget war files to their favorite application server. One must set the NEON_SERVER property in gradle.properties to the location of that server. Then invoke the following command to deploy the wars:
 
-## Project structure
+   gradlew deployToTomcat
 
-The neon project is broken down into several sub projects. The neon-server subproject includes the neon server and its client API.
+## Documentation
+Neon contains groovy and javascript API documentation, which can be generated by gradle tasks.
 
-Each widget is a separate subproject which is stored in the widgets folder.
+* gradlew groovydoc - Creates the groovy API documentation at /neon-server/build/docs/javadocs/index.html
+* gradlew jsDocs - Creates the javascript API documentation at /neon-server/build/docs/jsdocs/index.html
+
+## Additional Information
+
+Email: neon-support@nextcentury.com
