@@ -37,8 +37,6 @@ import org.springframework.context.support.SimpleThreadScope
 @Profile('integrationtest')
 class IntegrationTestContext {
 
-    static final String HOST_STRING = System.getProperty("hive.host", "localhost:10000")
-
     @Bean
     ConnectionManager connectionManagerBean(){
         return new ConnectionManager()

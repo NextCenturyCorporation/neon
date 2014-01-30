@@ -23,7 +23,7 @@ project.ext {
 // task groupings we add
 def DEPLOY_GROUP = 'deploy'
 
-// neon server to deploy to. may be remote or local, depending on the remote configuration
+// nego server to deploy to. may be remote or local, depending on the remote configuration
 def neonServer = (hasProperty('NEON_SERVER') ? NEON_SERVER : System.env.NEON_SERVER) ?: '/opt/owf/apache-tomcat-7.0.21'
 def neonServerWebapps = neonServer + '/webapps'
 
