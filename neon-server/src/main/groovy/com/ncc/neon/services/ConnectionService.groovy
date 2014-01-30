@@ -66,6 +66,13 @@ class ConnectionService {
         connectionManager.getConnectionById(id)
     }
 
+    @DELETE
+    @Path("{id}")
+    void removeConnection(@PathParam("id") String id) {
+        connectionManager.removeConnection(id)
+    }
+
+
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
     Response createConnection(ConnectionInfo info) {

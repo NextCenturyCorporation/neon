@@ -60,6 +60,12 @@ class ConnectionManager {
         return connectionId
     }
 
+    void removeConnection(String connectionId) {
+        connections.remove(connectionId)
+        factoryCache.remove(connectionId)
+    }
+
+
     ConnectionClient getCurrentConnectionClient(){
         return getConnectionClient(currentRequestConnection.connectionId)
     }
@@ -86,4 +92,5 @@ class ConnectionManager {
         }
         throw new NeonConnectionException("There must be a data source to which to connect.")
     }
+
 }
