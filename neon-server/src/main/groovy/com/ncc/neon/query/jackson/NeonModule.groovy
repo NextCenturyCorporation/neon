@@ -25,7 +25,6 @@ import org.codehaus.jackson.map.module.SimpleModule
  * RECIPIENT IS UNDER OBLIGATION TO MAINTAIN SECRECY.
  *
  * 
- * @author tbrooks
  */
 
 class NeonModule extends SimpleModule{

@@ -26,7 +26,6 @@ import com.ncc.neon.query.hive.HiveConversionStrategy
  * RECIPIENT IS UNDER OBLIGATION TO MAINTAIN SECRECY.
  *
  * 
- * @author tbrooks
  */
 
 /*

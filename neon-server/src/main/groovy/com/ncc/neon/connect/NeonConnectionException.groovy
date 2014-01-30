@@ -23,7 +23,6 @@ package com.ncc.neon.connect
  * RECIPIENT IS UNDER OBLIGATION TO MAINTAIN SECRECY.
  *
  * 
- * @author tbrooks
  */
 
 class NeonConnectionException extends RuntimeException{

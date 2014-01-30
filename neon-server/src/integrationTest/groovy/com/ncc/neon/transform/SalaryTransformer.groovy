@@ -24,7 +24,6 @@ import com.ncc.neon.query.TableQueryResult
  * RECIPIENT IS UNDER OBLIGATION TO MAINTAIN SECRECY.
  *
  * 
- * @author tbrooks
  */
 
 class SalaryTransformer implements Transformer{

@@ -22,7 +22,6 @@ package com.ncc.neon.taglib;
  * RECIPIENT IS UNDER OBLIGATION TO MAINTAIN SECRECY.
  *
  * 
- * @author tbrooks
  */
 
 import com.ncc.neon.NeonPropertiesLoader;

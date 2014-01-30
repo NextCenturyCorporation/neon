@@ -22,7 +22,6 @@ package com.ncc.neon;
  * RECIPIENT IS UNDER OBLIGATION TO MAINTAIN SECRECY.
  *
  * 
- * @author tbrooks
  */
 
 import org.slf4j.Logger;

@@ -45,10 +45,13 @@ import java.sql.Timestamp
 @ActiveProfiles("integrationtest")
 class HiveQueryExecutorIntegrationTest extends AbstractQueryExecutorIntegrationTest {
 
+    private static final String HOST_STRING = System.getProperty("hive.host", "localhost:10000")
+
+
     /** a separate connection used for inserting/deleting test data */
     private static JdbcClient jdbcClient
 
-    private static final ConnectionInfo CONNECTION_INFO = new ConnectionInfo(connectionUrl: IntegrationTestContext.HOST_STRING, dataSource: DataSources.hive)
+    private static final ConnectionInfo CONNECTION_INFO = new ConnectionInfo(connectionUrl: HOST_STRING, dataSource: DataSources.hive)
     private static final ConnectionClientFactory CONNECTION_FACTORY = new JdbcConnectionClientFactory("org.apache.hive.jdbc.HiveDriver", "hive2")
 
     @BeforeClass

@@ -31,7 +31,6 @@ import org.antlr.v4.runtime.misc.Nullable
  * RECIPIENT IS UNDER OBLIGATION TO MAINTAIN SECRECY.
  *
  * 
- * @author tbrooks
  */
 
 /**

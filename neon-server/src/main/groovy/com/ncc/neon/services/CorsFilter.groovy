@@ -29,7 +29,6 @@ import javax.ws.rs.core.Response
  * RECIPIENT IS UNDER OBLIGATION TO MAINTAIN SECRECY.
  *
  * 
- * @author tbrooks
  */
 
 /**

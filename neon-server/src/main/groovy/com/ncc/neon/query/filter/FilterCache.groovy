@@ -25,7 +25,6 @@ import com.ncc.neon.query.clauses.WhereClause
  * RECIPIENT IS UNDER OBLIGATION TO MAINTAIN SECRECY.
  *
  * 
- * @author tbrooks
  */
 
 class FilterCache extends ImmutableValueCache<FilterKey, Filter> implements Serializable{
