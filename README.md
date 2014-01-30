@@ -24,7 +24,7 @@ Once the external dependencies are installed, one may build Neon with:
 
 This task compiles the source code, runs the unit tests, executes static code quality checks, and builds war files for deployment.
 
-### Testing Neon
+## Testing Neon
 
 Neon is extensively tested. The following gradle tasks can be invoked for additional testing beyond the unit tests:
 
