@@ -22,7 +22,7 @@ Once the external dependencies are installed, one may build Neon with:
 
    gradlew clean build
 
-This task compiles the source code, runs the unit tests, and builds war files for deployment.
+This task compiles the source code, runs the unit tests, executes static code quality checks, and builds war files for deployment.
 
 ### Testing Neon
 
