@@ -26,7 +26,6 @@ import com.ncc.neon.query.mongo.MongoConversionStrategy
  * RECIPIENT IS UNDER OBLIGATION TO MAINTAIN SECRECY.
  *
  * 
- * @author tbrooks
  */
 
 /*

@@ -29,7 +29,6 @@ import org.junit.Test
  * RECIPIENT IS UNDER OBLIGATION TO MAINTAIN SECRECY.
  *
  * 
- * @author tbrooks
  */
 
 class LanguageServiceTest {

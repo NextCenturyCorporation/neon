@@ -28,7 +28,6 @@ import org.springframework.stereotype.Component
  * RECIPIENT IS UNDER OBLIGATION TO MAINTAIN SECRECY.
  *
  * 
- * @author tbrooks
  */
 
 /**

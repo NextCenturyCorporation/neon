@@ -24,7 +24,6 @@ package com.ncc.neon.result
  * RECIPIENT IS UNDER OBLIGATION TO MAINTAIN SECRECY.
  *
  * 
- * @author tbrooks
  */
 
 /**

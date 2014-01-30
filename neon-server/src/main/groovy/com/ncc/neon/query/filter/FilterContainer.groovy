@@ -24,7 +24,6 @@ import groovy.transform.ToString
  * RECIPIENT IS UNDER OBLIGATION TO MAINTAIN SECRECY.
  *
  * 
- * @author tbrooks
  */
 
 @ToString(includeNames = true)

@@ -27,7 +27,6 @@ import java.util.concurrent.ConcurrentMap
  * RECIPIENT IS UNDER OBLIGATION TO MAINTAIN SECRECY.
  *
  * 
- * @author tbrooks
  */
 
 /**

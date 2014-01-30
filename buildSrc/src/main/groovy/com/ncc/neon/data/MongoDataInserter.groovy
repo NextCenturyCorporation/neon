@@ -28,7 +28,6 @@ import org.gradle.api.tasks.TaskAction
  * RECIPIENT IS UNDER OBLIGATION TO MAINTAIN SECRECY.
  *
  * 
- * @author tbrooks
  */
 
 class MongoDataInserter extends DefaultTask{

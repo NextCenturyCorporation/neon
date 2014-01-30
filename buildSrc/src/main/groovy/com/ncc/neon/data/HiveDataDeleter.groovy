@@ -30,7 +30,6 @@ import com.mchange.v2.c3p0.ComboPooledDataSource
  * RECIPIENT IS UNDER OBLIGATION TO MAINTAIN SECRECY.
  *
  * 
- * @author tbrooks
  */
 
 class HiveDataDeleter extends DefaultTask {

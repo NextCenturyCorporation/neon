@@ -24,7 +24,6 @@ import groovy.transform.Canonical
  * RECIPIENT IS UNDER OBLIGATION TO MAINTAIN SECRECY.
  *
  * 
- * @author tbrooks
  */
 
 /**

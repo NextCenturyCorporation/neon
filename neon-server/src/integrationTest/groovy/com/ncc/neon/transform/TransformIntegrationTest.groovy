@@ -37,7 +37,6 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner
  * RECIPIENT IS UNDER OBLIGATION TO MAINTAIN SECRECY.
  *
  * 
- * @author tbrooks
  */
 
 @RunWith(SpringJUnit4ClassRunner)

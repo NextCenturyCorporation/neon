@@ -33,7 +33,6 @@ import java.sql.Statement
  * RECIPIENT IS UNDER OBLIGATION TO MAINTAIN SECRECY.
  *
  * 
- * @author tbrooks
  */
 
 class HiveDataInserter extends DefaultTask{
