@@ -23,7 +23,6 @@ package com.ncc.neon.transform
  * RECIPIENT IS UNDER OBLIGATION TO MAINTAIN SECRECY.
  *
  * 
- * @author tbrooks
  */
 
 /**

@@ -30,7 +30,6 @@ import org.slf4j.LoggerFactory
  * RECIPIENT IS UNDER OBLIGATION TO MAINTAIN SECRECY.
  *
  * 
- * @author tbrooks
  */
 
 class AggregateMongoQueryWorker extends AbstractMongoQueryWorker {

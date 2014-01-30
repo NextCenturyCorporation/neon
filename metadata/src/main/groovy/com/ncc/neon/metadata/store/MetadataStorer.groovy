@@ -30,7 +30,6 @@ import com.ncc.neon.metadata.model.widget.WidgetInitializationMetadata
  * RECIPIENT IS UNDER OBLIGATION TO MAINTAIN SECRECY.
  *
  * 
- * @author tbrooks
  */
 
 /**

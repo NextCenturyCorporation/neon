@@ -131,7 +131,7 @@ dependencies {
     compile 'org.datanucleus:datanucleus-rdbms:3.2.1'
     compile 'javax.jdo:jdo2-api:2.3-ec'
     compile 'org.apache.derby:derby:10.4.2.0'
-    compile ('org.apache.thrift:libfb303:0.9.0'){
+    compile('org.apache.thrift:libfb303:0.9.0') {
         exclude group: 'javax.servlet'
     }
     compile 'org.apache.thrift:libthrift:0.9.0'
@@ -213,7 +213,16 @@ test {
 }
 
 task integrationTest(type: Test) {
-    dependsOn 'integrationTestClasses', 'insertMongoDataIntegrationTest', 'insertHiveDataIntegrationTest'
+    dependsOn 'integrationTestClasses'
+
+    // TODO: NEON-960 workaround
+    if (isMongoOnly()) {
+        dependsOn 'insertMongoDataIntegrationTest'
+    } else if (isHiveOnly()) {
+        dependsOn 'insertHiveDataIntegrationTest'
+    } else {
+        dependsOn 'insertMongoDataIntegrationTest', 'insertHiveDataIntegrationTest'
+    }
 
     testClassesDir = sourceSets.integrationTest.output.classesDir
     classpath = sourceSets.integrationTest.runtimeClasspath
@@ -228,11 +237,23 @@ task integrationTest(type: Test) {
     systemProperties props
 }
 
+// TODO: NEON-960 The isXXXOnly are workarounds for NEON-960
+def isMongoOnly() {
+    // all other non-hive/shark tests require mongo
+    def integrationTestSingle = System.getProperty("integrationTest.single")
+    return integrationTestSingle && !integrationTestSingle.toLowerCase().contains("hive")
+}
+
+def isHiveOnly() {
+    return System.getProperty("integrationTest.single")?.toLowerCase()?.contains("hive")
+}
+
 task insertMongoDataIntegrationTest(type: com.ncc.neon.data.MongoDataInserter) {
     dependsOn 'deleteMongoDataIntegrationTestBeforeInsert', 'generateMongoJson'
     host = getMongoHosts()
     databaseName = 'neonintegrationtest'
 }
+
 task deleteMongoDataIntegrationTestBeforeInsert(type: com.ncc.neon.data.MongoDataDeleter) {
     host = getMongoHosts()
     databaseName = 'neonintegrationtest'
@@ -244,13 +265,23 @@ task insertHiveDataIntegrationTest(type: com.ncc.neon.data.HiveDataInserter) {
     hdfsUrl = getHdfsUrl()
     databaseName = 'neonintegrationtest'
 }
+
 task deleteHiveDataIntegrationTestBeforeInsert(type: com.ncc.neon.data.HiveDataDeleter) {
     host = getHiveHost()
     databaseName = 'neonintegrationtest'
 }
 
-task afterIntegrationTest{
-    dependsOn 'deleteMongoDataIntegrationTest', 'deleteHiveDataIntegrationTest'
+task afterIntegrationTest {
+    // TODO: NEON-960 workaround
+    if ( isMongoOnly() ) {
+        dependsOn 'deleteMongoDataIntegrationTest'
+    }
+    else if ( isHiveOnly()) {
+        dependsOn 'deleteHiveDataIntegrationTest'
+    }
+    else {
+        dependsOn 'deleteMongoDataIntegrationTest', 'deleteHiveDataIntegrationTest'
+    }
 }
 
 integrationTest.finalizedBy afterIntegrationTest

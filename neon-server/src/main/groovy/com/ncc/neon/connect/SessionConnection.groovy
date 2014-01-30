@@ -27,7 +27,6 @@ import org.springframework.web.context.WebApplicationContext
  * RECIPIENT IS UNDER OBLIGATION TO MAINTAIN SECRECY.
  *
  * 
- * @author tbrooks
  */
 
 /**

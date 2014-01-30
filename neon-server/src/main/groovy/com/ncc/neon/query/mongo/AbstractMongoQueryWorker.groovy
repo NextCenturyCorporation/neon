@@ -29,7 +29,6 @@ import com.ncc.neon.query.QueryResult
  * RECIPIENT IS UNDER OBLIGATION TO MAINTAIN SECRECY.
  *
  * 
- * @author tbrooks
  */
 
 /**

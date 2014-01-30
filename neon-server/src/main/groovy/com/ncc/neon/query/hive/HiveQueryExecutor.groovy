@@ -39,7 +39,6 @@ import java.sql.SQLException
  * RECIPIENT IS UNDER OBLIGATION TO MAINTAIN SECRECY.
  *
  * 
- * @author tbrooks
  */
 
 @Component

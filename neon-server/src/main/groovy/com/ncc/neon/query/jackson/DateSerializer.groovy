@@ -26,7 +26,6 @@ import org.codehaus.jackson.map.SerializerProvider
  * RECIPIENT IS UNDER OBLIGATION TO MAINTAIN SECRECY.
  *
  * 
- * @author tbrooks
  */
 
 class DateSerializer extends JsonSerializer<Date> {
