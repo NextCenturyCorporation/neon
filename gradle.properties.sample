@@ -1,23 +1,23 @@
-#Version for releases
-version=0.4.3
-
-# note that have tests take a long time so -DintegrationTest.single=Mongo can be added to the jvmargs to run only mongo tests
+# Gradle will run more smoothly with these arguments
 org.gradle.jvmargs=-Xmx1024m -XX:MaxPermSize=256m
 org.gradle.daemon=true
+
+# Path to a tomcat or other application server.
 NEON_SERVER=/my/tomcat/path/apache-tomcat-7.0.39
 
-# configuration for mongo and hive/hdfs
+# Configuration for Mongo
 mongo.hosts=localhost
+
+# Configuration for Shark
 hdfs.url=hdfs://localhost:8020
 hive.host=localhost:10000
 
-# configure port to run neon server during acceptance test
+# Change the port for acceptance tests
 acceptanceTest.port=10102
 
-# remote tomcat deployment
+# Remote application server deployment
 host=sometomcathost
 user=myusername
 sshKeyFile=/path/to/sshkeyfile
-
-# optionally if you don't have an ssh key file you can put the password in here
+# Optionally if you don't have an ssh key file you can put the password in here
 # password=sshpassword
