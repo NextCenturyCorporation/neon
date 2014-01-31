@@ -25,7 +25,7 @@ Neon contains a mix of groovy and javascript code and uses different build tools
 Several tasks exist for running tests:
 
 * test - runs groovy unit tests
-* integrationTest - runs groovy integration tests (requires mongodb and/or hive). Note: To run mongo only tests, use the flag `-DintegrationTest.single=Mongo` or `-DintegrationTest.single=Hive` for hive tests only
+* integrationTest - runs groovy integration tests (requires mongodb and/or shark). Note: To run mongo only tests, use the flag `-DintegrationTest.single=Mongo` or `-DintegrationTest.single=Hive` for shark tests only
 * acceptanceTest - runs end to end acceptance tests (requires mongodb)
 * gruntjs runs all javascript verification tasks - unit test, jshint, etc
 
