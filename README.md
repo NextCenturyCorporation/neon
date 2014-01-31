@@ -51,4 +51,6 @@ Email: neon-support@nextcentury.com
 
 Wiki: [Neon Developer's Guide](https://github.com/NextCenturyCorporation/neon/wiki)
 
+Website: [Neon Framework Website](http://neonframework.org)
+
 Copyright 2013 Next Century Corporation
