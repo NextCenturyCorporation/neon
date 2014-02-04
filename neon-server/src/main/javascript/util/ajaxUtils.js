@@ -119,6 +119,17 @@ neon.util.ajaxUtils = (function(){
     }
 
     /**
+     * Makes an ajax DELETE request
+     * @method doDelete
+     * @param {String} url The url to get
+     * @param {Object} opts See {{#crossLink "neon.util.ajaxUtils/doAjaxRequest"}}{{/crossLink}}
+     * @return {neon.util.AjaxRequest} The xhr request object
+     */
+    function doDelete(url, opts) {
+        return doAjaxRequest('DELETE', url, opts);
+    }
+
+    /**
      * Sets the callbacks to be called when ajax requests start/stop. This is a good place to
      * setup the display/hiding of "working" indicators
      * @method setStartStopCallbacks
@@ -153,6 +164,7 @@ neon.util.ajaxUtils = (function(){
         doPost: doPost,
         doPostJSON: doPostJSON,
         doGet: doGet,
+        doDelete: doDelete,
         setStartStopCallbacks: setStartStopCallbacks,
         useDefaultStartStopCallbacks: useDefaultStartStopCallbacks
     };

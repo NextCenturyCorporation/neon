@@ -8,6 +8,12 @@ neon.query.Connection = function(datastore, hostname){
     this.connectionUrl = hostname;
 };
 
+/**
+ * Set a connection id on the Connection.
+ * @method setConnectionId
+ * @param {String} id The id to set.
+ */
+
 neon.query.Connection.prototype.setConnectionId = function(id){
     this.connectionId = id;
 };
@@ -16,24 +22,49 @@ neon.query.Connection.prototype.setConnectionId = function(id){
 /**
  * Connects a user to the given datastore.
  * @method connectToDatastore
- * @param {String} datastore The name of the datastore (e.g. mongo or hive)
- * @param {String} hostname The connection url of the datastore
- * @param {Function} successCallback Callback invoked on success
+ * @param {neon.query.Connection} connection The connection information
+ * @param {Function} successCallback Callback invoked on success. The function has one parameter, the connectionId.
  * @return {neon.util.AjaxRequest} The xhr request object
  */
 
-neon.query.connectToDatastore = function (datastore, hostname, successCallback) {
-    return neon.util.ajaxUtils.doPost(
-        neon.query.serviceUrl('connections', ''),
+neon.query.connectToDatastore = function (connection, successCallback) {
+
+    return neon.util.ajaxUtils.doPostJSON(connection,
+        neon.query.SERVER_URL + '/services/connections',
         {
-            data: { dataSource: datastore, connectionUrl: hostname },
             success: successCallback
         }
     );
 };
 
+/**
+ * Get the existing connection from Neon.
+ * @param {String} connectionId The key that identifies the connection resource.
+ * @param {Function} successCallback  Callback invoked on success
+ * @returns {neon.util.AjaxRequest} The xhr request object
+ */
 
+neon.query.getConnection = function(connectionId, successCallback) {
+    return neon.util.ajaxUtils.doGet(
+        neon.query.serviceUrl('connections', connectionId),
+        {
+            success: successCallback
+        }
+    );
+};
 
-neon.query.removeConnection = function() {
+/**
+ * Removes an existing connection from Neon.
+ * @param {String} connectionId The key that identifies the connection resource.
+ * @param {Function} successCallback  Callback invoked on success
+ * @returns {neon.util.AjaxRequest} The xhr request object
+ */
 
+neon.query.removeConnection = function(connectionId, successCallback) {
+    return neon.util.ajaxUtils.doDelete(
+        neon.query.serviceUrl('connections', connectionId),
+        {
+            success: successCallback
+        }
+    );
 };
