@@ -62,7 +62,7 @@ interface Metadata {
      * @param databseName
      * @param tableName
      */
-    void clearColumnMetadata(String databseName, String tableName);
+    void clearColumnMetadata(String databseName, String tableName)
 
     /**
      * Stores information about default field values for widgets for a given dataset. This is useful for

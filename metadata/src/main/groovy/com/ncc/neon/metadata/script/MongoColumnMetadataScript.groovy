@@ -44,6 +44,7 @@ class MongoColumnMetadataScript {
      * args[3] = (Optional) The host of the mongo instance (defaults to localhost)
      * args[4] = (Optional) The port of the mongo instance (defaults to 27017)
      */
+    @SuppressWarnings('JavaIoPackageAccess') // this is run as a standalone script that accesses the file system
     public static void main(String[] args) {
         String database = args[0]
         String table = args[1]

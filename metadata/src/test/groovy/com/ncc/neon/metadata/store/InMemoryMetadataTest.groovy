@@ -41,12 +41,13 @@ class InMemoryMetadataTest {
     private static final String ELEMENT_ID2 = "element2"
     private static final String VALUE_1 = "value1"
     private static final String VALUE_2 = "value2"
-    private static String INIT_JSON = '{"key":"value"}'
+    private static final String INIT_JSON = '{"key":"value"}'
 
 
     private InMemoryMetadata metadata
 
 
+    @SuppressWarnings(['PublicInstanceField','NonFinalPublicField']) // public for junit to use
     @Rule
     public TemporaryFolder folder = new TemporaryFolder()
 

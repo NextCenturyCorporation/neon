@@ -86,23 +86,23 @@ class ConfigWriter {
     }
 
     private void writeKeyValuePairs(String key, String value) {
-        writeAsString(key,"'${value}'");
+        writeAsString(key,"'${value}'")
     }
 
     private void writeKeyValuePairs(String key, Boolean value) {
-        writeAsString(key,value);
+        writeAsString(key,value)
     }
 
     private void writeKeyValuePairs(String key, Integer value) {
-        writeAsString(key,value);
+        writeAsString(key,value)
     }
 
     private void writeKeyValuePairs(String key, Float value) {
-        writeAsString(key,value);
+        writeAsString(key,value)
     }
 
     private void writeKeyValuePairs(String key, Double value) {
-        writeAsString(key,value);
+        writeAsString(key,value)
     }
 
     private void writeAsString(String key, Object value) {
