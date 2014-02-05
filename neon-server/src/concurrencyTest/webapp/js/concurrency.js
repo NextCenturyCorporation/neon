@@ -75,4 +75,3 @@ $(function(){
 function displayResults(text){
     $('#results').text(text);
 }
-

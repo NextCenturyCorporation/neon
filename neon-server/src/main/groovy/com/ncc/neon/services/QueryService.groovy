@@ -197,5 +197,3 @@ class QueryService {
         return assembler.createClientData()
     }
 }
-
-

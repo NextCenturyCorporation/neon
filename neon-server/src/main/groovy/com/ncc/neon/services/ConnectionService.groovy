@@ -69,7 +69,6 @@ class ConnectionService {
         connectionManager.removeConnection(id)
     }
 
-
     @POST
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.APPLICATION_JSON)

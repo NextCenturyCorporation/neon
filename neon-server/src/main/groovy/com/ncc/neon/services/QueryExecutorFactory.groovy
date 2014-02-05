@@ -1,7 +1,9 @@
 package com.ncc.neon.services
 
+import com.ncc.neon.connect.ConnectionInfo
 import com.ncc.neon.connect.ConnectionManager
 import com.ncc.neon.connect.DataSources
+import com.ncc.neon.connect.NeonConnectionException
 import com.ncc.neon.query.QueryExecutor
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
@@ -54,9 +56,19 @@ class QueryExecutorFactory {
      */
     QueryExecutor getExecutor(String connectionId) {
         connectionManager.currentRequestConnection.connectionId = connectionId
-        if (connectionManager.getConnectionById(connectionId).dataSource == DataSources.hive) {
+        ConnectionInfo info = getConnectionInfoFromId(connectionId)
+
+        if (info.dataSource == DataSources.hive) {
             return hiveQueryExecutor
         }
         return mongoQueryExecutor
+    }
+
+    private ConnectionInfo getConnectionInfoFromId(String connectionId) {
+        ConnectionInfo info = connectionManager.getConnectionById(connectionId)
+        if (!info) {
+            throw new NeonConnectionException("Connection to ${connectionId} was never established.")
+        }
+        return info
     }
 }

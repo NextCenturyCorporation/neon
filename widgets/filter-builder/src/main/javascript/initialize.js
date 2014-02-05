@@ -35,14 +35,13 @@ $(function () {
     }
 
     function setupHostnames() {
-        neon.util.ajaxUtils.doGet(getConnectionServiceBaseUrl() + "/hostnames",
-            {
-                success: function (data) {
-                    $("#hostname-input").autocomplete({
-                        source: data
-                    });
-                }
-            });
+        neon.query.getHostnames(
+            function (data) {
+                $("#hostname-input").autocomplete({
+                    source: data
+                });
+            }
+        );
     }
 
     function addClickHandlers() {
@@ -58,12 +57,12 @@ $(function () {
         $("#db-table").show();
         var databaseSelectedOption = $('#datastore-select option:selected').val();
         var hostnameSelector = $('#hostname-input').val();
-        neon.query.connectToDatastore(databaseSelectedOption, hostnameSelector, populateDatabaseDropdown);
+        var connection = new neon.query.Connection(databaseSelectedOption, hostnameSelector);
+        neon.query.connectToDatastore(connection, populateDatabaseDropdown);
     }
 
     function populateDatabaseDropdown() {
         neon.query.getDatabaseNames(function (databaseNames) {
-
             neon.wizard.populateDropdown('#database-select', databaseNames);
             populateTableDropdown();
         });
@@ -77,10 +76,6 @@ $(function () {
             neon.filterTable.initializeFilterSection();
             neon.filterBuilderState.saveState();
         });
-    }
-
-    function getConnectionServiceBaseUrl(){
-        return neon.query.SERVER_URL + "/services/connectionservice";
     }
 
     function selectDatabaseAndTable() {

@@ -1,9 +1,10 @@
 /**
- * Creates a connection to a data store such as mongo or shark.
- * @class neon.query.Connection
+ * Represents a connection to a data source.
+ * @param {String} datastore A database type
+ * @class neon.query.connection.Connection
  * @constructor
  */
-neon.query.Connection = function(datastore, hostname){
+neon.query.connection.Connection = function (datastore, hostname) {
     this.dataSource = datastore;
     this.connectionUrl = hostname;
 };
@@ -14,7 +15,7 @@ neon.query.Connection = function(datastore, hostname){
  * @param {String} id The id to set.
  */
 
-neon.query.Connection.prototype.setConnectionId = function(id){
+neon.query.connection.Connection.prototype.setConnectionId = function (id) {
     this.connectionId = id;
 };
 
@@ -27,7 +28,7 @@ neon.query.Connection.prototype.setConnectionId = function(id){
  * @return {neon.util.AjaxRequest} The xhr request object
  */
 
-neon.query.connectToDatastore = function (connection, successCallback) {
+neon.query.connection.connectToDatastore = function (connection, successCallback) {
 
     return neon.util.ajaxUtils.doPostJSON(connection,
         neon.query.SERVER_URL + '/services/connections',
@@ -44,7 +45,7 @@ neon.query.connectToDatastore = function (connection, successCallback) {
  * @returns {neon.util.AjaxRequest} The xhr request object
  */
 
-neon.query.getConnection = function(connectionId, successCallback) {
+neon.query.connection.getConnection = function (connectionId, successCallback) {
     return neon.util.ajaxUtils.doGet(
         neon.query.serviceUrl('connections', connectionId),
         {
@@ -60,7 +61,7 @@ neon.query.getConnection = function(connectionId, successCallback) {
  * @returns {neon.util.AjaxRequest} The xhr request object
  */
 
-neon.query.removeConnection = function(connectionId, successCallback) {
+neon.query.connection.removeById = function (connectionId, successCallback) {
     return neon.util.ajaxUtils.doDelete(
         neon.query.serviceUrl('connections', connectionId),
         {
@@ -68,3 +69,18 @@ neon.query.removeConnection = function(connectionId, successCallback) {
         }
     );
 };
+
+/**
+ * @method getHostnames
+ * @param successCallback
+ * @returns {neon.util.AjaxRequest}
+ */
+
+neon.query.connection.getHostnames = function (successCallback) {
+    return neon.util.ajaxUtils.doGet(
+        neon.query.serviceUrl('connections', 'hostnames'),
+        {
+            success: successCallback
+        }
+    );
+}
