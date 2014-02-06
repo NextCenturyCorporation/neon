@@ -22,8 +22,6 @@ import com.ncc.neon.query.QueryOptions
 import com.ncc.neon.query.Transform
 import com.ncc.neon.query.filter.Filter
 import com.ncc.neon.query.mongo.MongoQueryExecutor
-import org.junit.AfterClass
-import org.junit.BeforeClass
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.springframework.beans.factory.annotation.Autowired
@@ -34,8 +32,7 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner
 @ContextConfiguration(classes = IntegrationTestContext)
 class TransformIntegrationTest {
 
-    @Autowired
-    MongoQueryExecutor mongoQueryExecutor
+    private MongoQueryExecutor mongoQueryExecutor
 
     static final String DATABASE_NAME = 'neonintegrationtest'
 
@@ -50,15 +47,13 @@ class TransformIntegrationTest {
     /** a simple query that returns all of the data */
     static final Query TRANSFORM_ALL_DATA_QUERY = new Query(filter: ALL_DATA_FILTER, transform: TRANSFORM)
 
-    @BeforeClass
-    static void beforeClass() {
-        MongoQueryExecutor.metaClass.getMongo = { MongoTestUtils.mongoClient }
+    @SuppressWarnings('JUnitPublicNonTestMethod')
+    @Autowired
+    public void setMongoQueryExecutor(MongoQueryExecutor mongoQueryExectuor) {
+        this.mongoQueryExecutor = mongoQueryExectuor
+        this.mongoQueryExecutor.metaClass.getMongo = { MongoTestUtils.mongoClient }
     }
 
-    @AfterClass
-    static void afterClass() {
-        MongoQueryExecutor.metaClass = null
-    }
 
     @Test(expected = TransformerNotFoundException)
     void "bad transform throws exception"(){

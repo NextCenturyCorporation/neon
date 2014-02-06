@@ -17,6 +17,7 @@
 package com.ncc.neon
 
 import com.ncc.neon.query.Query
+import com.ncc.neon.query.QueryExecutor
 import com.ncc.neon.query.QueryGroup
 import com.ncc.neon.query.QueryOptions
 import com.ncc.neon.query.clauses.*
@@ -58,7 +59,7 @@ abstract class AbstractQueryExecutorIntegrationTest {
     /** a simple query that returns all of the data */
     static final ALL_DATA_QUERY = new Query(filter: ALL_DATA_FILTER)
 
-    protected abstract def getQueryExecutor()
+    protected abstract QueryExecutor getQueryExecutor()
 
     /**
      * Gets the folder that the input json files are stored in. By defalut, the test-data

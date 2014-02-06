@@ -65,7 +65,7 @@ class HiveQueryExecutorIntegrationTest extends AbstractQueryExecutorIntegrationT
     }
 
     @Override
-    protected def getQueryExecutor(){
+    protected HiveQueryExecutor getQueryExecutor(){
         hiveQueryExecutor
     }
 

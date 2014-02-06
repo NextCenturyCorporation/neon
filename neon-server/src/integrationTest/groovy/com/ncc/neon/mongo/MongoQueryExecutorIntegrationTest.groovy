@@ -31,15 +31,11 @@ import com.ncc.neon.util.LatLon
 import org.bson.types.ObjectId
 import org.json.JSONArray
 import org.json.JSONObject
-import org.junit.AfterClass
-import org.junit.BeforeClass
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.test.context.ContextConfiguration
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner
-
-
 /**
  * Integration test that verifies the neon server properly translates mongo queries.
  * These tests parallel the acceptance tests in the javascript client query acceptance tests
@@ -48,21 +44,17 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner
 @ContextConfiguration(classes = IntegrationTestContext)
 class MongoQueryExecutorIntegrationTest extends AbstractQueryExecutorIntegrationTest {
 
-    @BeforeClass
-    static void beforeClass() {
-        MongoQueryExecutor.metaClass.getMongo = { MongoTestUtils.mongoClient }
-    }
+    private MongoQueryExecutor mongoQueryExecutor
 
-    @AfterClass
-    static void afterClass() {
-        MongoQueryExecutor.metaClass = null
-    }
-
+    @SuppressWarnings('JUnitPublicNonTestMethod')
     @Autowired
-    MongoQueryExecutor mongoQueryExecutor
+    public void setMongoQueryExecutor(MongoQueryExecutor mongoQueryExectuor) {
+        this.mongoQueryExecutor = mongoQueryExectuor
+        this.mongoQueryExecutor.metaClass.getMongo = { MongoTestUtils.mongoClient }
+    }
 
     @Override
-    protected def getQueryExecutor(){
+    protected MongoQueryExecutor getQueryExecutor(){
         mongoQueryExecutor
     }
 
@@ -104,7 +96,6 @@ class MongoQueryExecutorIntegrationTest extends AbstractQueryExecutorIntegration
         )
         def expected = rows(2, 0)
         def query = new Query(filter: new Filter(databaseName: DATABASE_NAME, tableName: TABLE_NAME, whereClause: withinDistance))
-
         def result = queryExecutor.execute(query, QueryOptions.FILTERED_DATA)
         assertOrderedQueryResult(expected, result)
     }
