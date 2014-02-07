@@ -55,9 +55,10 @@ class QueryService {
     MetadataResolver metadataResolver
 
     /**
-     * Executes a query against the data source the user is currently connected to.
+     * Executes a query against the supplied connection.
      * This takes into account the user's current filters so the results will be limited by these if they exist.
-     * @param query The neon representation of a query. This query is converted to a database specific query language.
+     * @param connectionId The identifier of the connection resource.
+     * @param query The Neon representation of a query. This query is converted to a database specific query language.
      * @return An object that contains the query result data and optional metadata about the query.
      */
     @POST
@@ -69,8 +70,9 @@ class QueryService {
     }
 
     /**
-     * Executes a group of queries against the data source the user is currently connected to.
+     * Executes a group of queries against the supplied connection
      * This takes into account the user's current filters so the results will be limited by these if they exist.
+     * @param connectionId The identifier of the connection resource.
      * @param query A collection of queries. The results of the queries will be appended together.
      * @return An object that contains the query result data and optional metadata about the query.
      */
@@ -83,8 +85,9 @@ class QueryService {
     }
 
     /**
-     * Executes a query for selected items against the data source the user is currently connected to.
+     * Executes a query for selected items against the supplied connection
      * This takes into account the user's current filters so the results will be limited by these if they exist.
+     * @param connectionId The identifier of the connection resource.
      * @param query The neon representation of a query. This query is converted to a database specific query language.
      * @return An object that contains the query result data and optional metadata about the query.
      */
@@ -97,8 +100,9 @@ class QueryService {
     }
 
     /**
-     * Executes a group of queries for selected items against the data source the user is currently connected to.
+     * Executes a group of queries for selected items against the supplied connection
      * This takes into account the user's current filters so the results will be limited by these if they exist.
+     * @param connectionId The identifier of the connection resource.
      * @param query A collection of queries. The results of the queries will be appended together.
      * @return An object that contains the query result data and optional metadata about the query.
      */
@@ -110,9 +114,9 @@ class QueryService {
         return execute(connectionId, query, QueryOptions.FILTERED_AND_SELECTED_DATA)
     }
 
-
     /**
-     * Executes a query against the data source the user is currently connected to ignoring the current filters and selection.
+     * Executes a query against the supplied connection ignoring the current filters and selection.
+     * @param connectionId The identifier of the connection resource.
      * @param query The neon representation of a query
      * @return An object that contains the query result data and optional metadata about the query.
      */
@@ -125,7 +129,8 @@ class QueryService {
     }
 
     /**
-     * Executes a group of queries against the data source the user is currently connected to ignoring the current filters and selection.
+     * Executes a group of queries against the supplied connection ignoring the current filters and selection.
+     * @param connectionId The identifier of the connection resource.
      * @param query The neon representation of a query
      * @return An object that contains the query result data and optional metadata about the query.
      */
@@ -138,7 +143,8 @@ class QueryService {
     }
 
     /**
-     * Get all the columns for tabular datasets.
+     * Get all the columns for tabular datasets from the supplied connection.
+     * @param connectionId The identifier of the connection resource.
      * @param databaseName The database containing the data
      * @param tableName The table containing the data
      * @param widgetName The current widget name. If used, additional metadata may be passed down.
@@ -164,7 +170,8 @@ class QueryService {
     }
 
     /**
-     * Gets a list of all the databases for the current datastore
+     * Gets a list of all the databases for supplied connection.
+     * @param connectionId The identifier of the connection resource.
      * @return The list of database names
      */
     @GET
@@ -176,7 +183,8 @@ class QueryService {
     }
 
     /**
-     * Gets a list of all the tables
+     * Gets a list of all the tables for the supplied connection
+     * @param connectionId The identifier of the connection resource.
      * @param database The database that contains the tables
      * @return The list of table names
      */

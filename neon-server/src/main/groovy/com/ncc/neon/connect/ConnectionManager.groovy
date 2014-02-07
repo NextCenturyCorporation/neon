@@ -1,7 +1,10 @@
 package com.ncc.neon.connect
-import com.ncc.neon.cache.ImmutableValueCache
+
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
+
+import java.util.concurrent.ConcurrentHashMap
+import java.util.concurrent.ConcurrentMap
 
 /*
  * ************************************************************************
@@ -34,18 +37,14 @@ import org.springframework.stereotype.Component
 @Component
 class ConnectionManager {
 
-    private final ImmutableValueCache<String, ConnectionInfo> connections = new ImmutableValueCache()
-    private final ImmutableValueCache<String, ConnectionClientFactory> factoryCache = new ImmutableValueCache()
+    private final ConcurrentMap<String, ConnectionInfo> connections = new ConcurrentHashMap()
+    private final ConcurrentMap<String, ConnectionClientFactory> factoryCache = new ConcurrentHashMap()
 
     ConnectionClientFactory mongoConnectionFactory = new MongoConnectionClientFactory()
     ConnectionClientFactory hiveConnectionFactory = new JdbcConnectionClientFactory("org.apache.hive.jdbc.HiveDriver", "hive2")
 
     @Autowired
     CurrentRequestConnection currentRequestConnection
-
-    ConnectionInfo getConnectionById(String connectionId) {
-        return connections.get(connectionId)
-    }
 
     /**
      * Registers a connection resource with the application.
@@ -55,19 +54,38 @@ class ConnectionManager {
 
     String connect(ConnectionInfo info) {
         String connectionId = createIdFromInfo(info)
-        connections.put(connectionId, info)
-        factoryCache.put(connectionId, createClientFactory(info))
+        connections.putIfAbsent(connectionId, info)
+        factoryCache.putIfAbsent(connectionId, createClientFactory(info))
         return connectionId
     }
+
+    /**
+     * Removes a connection
+     * @param connectionId the id of the connection
+     */
 
     void removeConnection(String connectionId) {
         connections.remove(connectionId)
         factoryCache.remove(connectionId)
     }
 
+    /**
+     * Gets the connection for the current request
+     * @return The client
+     */
 
     ConnectionClient getCurrentConnectionClient(){
         return getConnectionClient(currentRequestConnection.connectionId)
+    }
+
+    /**
+     * Get the connection info based on the id
+     * @param connectionId The id
+     * @return The info
+     */
+
+    ConnectionInfo getConnectionById(String connectionId) {
+        return connections.get(connectionId)
     }
 
     private ConnectionClient getConnectionClient(String connectionId){

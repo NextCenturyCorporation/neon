@@ -10,46 +10,42 @@ neon.query.connection.Connection = function (datastore, hostname) {
 };
 
 /**
- * Set a connection id on the Connection.
- * @method setConnectionId
- * @param {String} id The id to set.
- */
-
-neon.query.connection.Connection.prototype.setConnectionId = function (id) {
-    this.connectionId = id;
-};
-
-
-/**
  * Connects a user to the given datastore.
  * @method connectToDatastore
  * @param {neon.query.Connection} connection The connection information
  * @param {Function} successCallback Callback invoked on success. The function has one parameter, the connectionId.
+ * @param {Function} errorCallback The optional callback when an error occurs. This is a 3 parameter function that contains the xhr, a short error status and the full error message.
  * @return {neon.util.AjaxRequest} The xhr request object
  */
 
-neon.query.connection.connectToDatastore = function (connection, successCallback) {
+neon.query.connection.connectToDatastore = function (connection, successCallback, errorCallback) {
 
-    return neon.util.ajaxUtils.doPostJSON(connection,
+    return neon.util.ajaxUtils.doPost(
         neon.query.SERVER_URL + '/services/connections',
         {
-            success: successCallback
+            data: JSON.stringify(connection),
+            contentType: 'application/json',
+            success: successCallback,
+            error: errorCallback
         }
     );
 };
 
 /**
  * Get the existing connection from Neon.
+ * @method getConnection
  * @param {String} connectionId The key that identifies the connection resource.
  * @param {Function} successCallback  Callback invoked on success
+ * @param {Function} errorCallback The optional callback when an error occurs. This is a 3 parameter function that contains the xhr, a short error status and the full error message.
  * @returns {neon.util.AjaxRequest} The xhr request object
  */
 
-neon.query.connection.getConnection = function (connectionId, successCallback) {
+neon.query.connection.getConnection = function (connectionId, successCallback, errorCallback) {
     return neon.util.ajaxUtils.doGet(
         neon.query.serviceUrl('connections', connectionId),
         {
-            success: successCallback
+            success: successCallback,
+            error: errorCallback
         }
     );
 };
@@ -58,29 +54,34 @@ neon.query.connection.getConnection = function (connectionId, successCallback) {
  * Removes an existing connection from Neon.
  * @param {String} connectionId The key that identifies the connection resource.
  * @param {Function} successCallback  Callback invoked on success
+ * @param {Function} errorCallback The optional callback when an error occurs. This is a 3 parameter function that contains the xhr, a short error status and the full error message.
  * @returns {neon.util.AjaxRequest} The xhr request object
  */
 
-neon.query.connection.removeById = function (connectionId, successCallback) {
+neon.query.connection.removeById = function (connectionId, successCallback, errorCallback) {
     return neon.util.ajaxUtils.doDelete(
         neon.query.serviceUrl('connections', connectionId),
         {
-            success: successCallback
+            success: successCallback,
+            error: errorCallback
         }
     );
 };
 
 /**
+ * Gets the available host names.
  * @method getHostnames
- * @param successCallback
+ * @param successCallback Callback invoked on success
+ * @param {Function} errorCallback The optional callback when an error occurs. This is a 3 parameter function that contains the xhr, a short error status and the full error message.
  * @returns {neon.util.AjaxRequest}
  */
 
-neon.query.connection.getHostnames = function (successCallback) {
+neon.query.connection.getHostnames = function (successCallback, errorCallback) {
     return neon.util.ajaxUtils.doGet(
         neon.query.serviceUrl('connections', 'hostnames'),
         {
-            success: successCallback
+            success: successCallback,
+            error: errorCallback
         }
     );
-}
+};

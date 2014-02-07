@@ -24,5 +24,6 @@
 var neon = neon || {};
 neon.eventing = neon.eventing || {};
 neon.query = neon.query || {};
+neon.query.connection = neon.query.connection || {};
 neon.util = neon.util || {};
 neon.widget = neon.widget || {};

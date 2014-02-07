@@ -42,6 +42,10 @@ class ConnectionService {
     @Autowired
     ConnectionManager connectionManager
 
+    /**
+     * Get the host names of databases.
+     * @return The host names
+     */
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     @Path("hostnames")
@@ -49,13 +53,14 @@ class ConnectionService {
         String mongo = System.getProperty("mongo.hosts", "localhost")
         String hive = System.getProperty("hive.host")
 
-        def names = [mongo]
-        if (hive) {
-            names << hive
-        }
-        return names
+        return [mongo, hive] - null
     }
 
+    /**
+     * Gets a connection resource if it exists.
+     * @param id The identifier for the connection
+     * @return The connection info, or null if it does not exist.
+     */
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     @Path("{id}")
@@ -63,14 +68,23 @@ class ConnectionService {
         connectionManager.getConnectionById(id)
     }
 
+    /**
+     * Removes a connection resource if it exists.
+     * @param id The identifer for the connection
+     */
     @DELETE
     @Path("{id}")
     void removeConnection(@PathParam("id") String id) {
         connectionManager.removeConnection(id)
     }
 
+    /**
+     * Create a connection resource.
+     * @param info The information needed to establish a connection
+     * @return The connection identifier
+     */
     @POST
-    @Produces(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.TEXT_PLAIN)
     @Consumes(MediaType.APPLICATION_JSON)
     String createConnection(ConnectionInfo info) {
         return connectionManager.connect(info)

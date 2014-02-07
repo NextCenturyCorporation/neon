@@ -2,6 +2,10 @@ package com.ncc.neon.query.filter
 import com.ncc.neon.cache.ImmutableValueCache
 import com.ncc.neon.query.clauses.AndWhereClause
 import com.ncc.neon.query.clauses.WhereClause
+
+import java.util.concurrent.ConcurrentHashMap
+import java.util.concurrent.ConcurrentMap
+
 /*
  * ************************************************************************
  * Copyright (c), 2014 Next Century Corporation. All Rights Reserved.
@@ -27,8 +31,13 @@ import com.ncc.neon.query.clauses.WhereClause
  * 
  */
 
-class FilterCache extends ImmutableValueCache<FilterKey, Filter> implements Serializable{
-    private static final long serialVersionUID = - 5911927417066895555L
+/**
+ * Holds filters for a give filter key in memory.
+ */
+class FilterCache implements Serializable {
+
+    private static final long serialVersionUID = -757738218779210868L
+    ConcurrentMap<FilterKey, Filter> cache = new ConcurrentHashMap<FilterKey, Filter>()
 
     /**
      * Clears all existing filters
@@ -44,10 +53,10 @@ class FilterCache extends ImmutableValueCache<FilterKey, Filter> implements Seri
      * @return
      */
     void addFilter(FilterKey filterKey, Filter filter) {
-        def oldFilter = put(filterKey, filter)
+        def oldFilter = cache.putIfAbsent(filterKey, filter)
         if(oldFilter){
             filter.whereClause = determineFilterWhereClause(oldFilter, filter)
-            replace(filterKey, filter)
+            cache.replace(filterKey, filter)
         }
     }
 
