@@ -57,10 +57,10 @@ class LanguageService {
     @POST
     @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
     @Produces(MediaType.APPLICATION_JSON)
-    @Path("query")
-    QueryResult executeQuery(@FormParam("text") String text) {
+    @Path("{connectionId}/query")
+    QueryResult executeQuery(@PathParam("connectionId") String connectionId, @FormParam("text") String text) {
         Query query = queryParser.parse(text)
-        return queryExecutorFactory.getExecutor().execute(query, QueryOptions.FILTERED_DATA)
+        return queryExecutorFactory.getExecutor(connectionId).execute(query, QueryOptions.FILTERED_DATA)
     }
 
 }

@@ -296,7 +296,6 @@ neon.query.Query.prototype.offset = function (offset) {
     return this;
 };
 
-
 /**
  *
  * Configures the query results to be sorted by the specified field(s). To sort by multiple fields, repeat the
@@ -437,6 +436,7 @@ neon.query.withinDistance = function (locationField, center, distance, distanceU
 /**
  * Executes a query that returns the field names from the data set. This method executes synchronously.
  * @method getFieldNames
+ * @param {String} connectionId The id of the connection resource
  * @param {String} databaseName The name of the database that holds this data
  * @param {String} tableName The table name whose fields are being returned
  * @param {String} widgetName The widget name who is requesting the field names. One of {neon.widget}
@@ -444,7 +444,7 @@ neon.query.withinDistance = function (locationField, center, distance, distanceU
  * @param {Function} [errorCallback] The optional callback when an error occurs. This is a 3 parameter function that contains the xhr, a short error status and the full error message.
  * @return {neon.util.AjaxRequest} The xhr request object
  */
-neon.query.getFieldNames = function (databaseName, tableName, widgetName, successCallback, errorCallback) {
+neon.query.getFieldNames = function (connectionId, databaseName, tableName, widgetName, successCallback, errorCallback) {
     return neon.util.ajaxUtils.doGet(
         neon.query.serviceUrl('queryservice', 'fields', '?databaseName=' + databaseName + '&tableName=' + tableName + '&widgetName=' + widgetName),
         {
@@ -457,29 +457,31 @@ neon.query.getFieldNames = function (databaseName, tableName, widgetName, succes
 /**
  * Executes the specified query and fires the callback when complete
  * @method executeQuery
+ * @param {String} connectionId The id of the connection resource
  * @param {neon.query.Query} query the query to execute
  * @param {Function} successCallback The callback to fire when the query successfully completes
  * @param {Function} [errorCallback] The optional callback when an error occurs. This is a 3 parameter function that contains the xhr, a short error status and the full error message.
  * @return {neon.util.AjaxRequest} The xhr request object
  */
-neon.query.executeQuery = function (query, successCallback, errorCallback) {
-    return neon.query.executeQueryService_(query, successCallback, errorCallback, 'query');
+neon.query.executeQuery = function (connectionId, query, successCallback, errorCallback) {
+    return neon.query.executeQueryService_(connectionId, query, successCallback, errorCallback, 'query');
 };
 
 /**
  * Executes the specified query group (a series of queries whose results are aggregate),
  * and fires the callback when complete
  * @method executeQueryGroup
+ * @param {String} connectionId The id of the connection resource
  * @param {neon.query.QueryGroup} queryGroup the query to execute
  * @param {Function} successCallback The callback to fire when the query successfully completes
  * @param {Function} [errorCallback] The optional callback when an error occurs. This is a 3 parameter function that contains the xhr, a short error status and the full error message.
  * @return {neon.util.AjaxRequest} The xhr request object
  */
-neon.query.executeQueryGroup = function (queryGroup, successCallback, errorCallback) {
-    return neon.query.executeQueryService_(queryGroup, successCallback, errorCallback, 'querygroup');
+neon.query.executeQueryGroup = function (connectionId, queryGroup, successCallback, errorCallback) {
+    return neon.query.executeQueryService_(connectionId, queryGroup, successCallback, errorCallback, 'querygroup');
 };
 
-neon.query.executeQueryService_ = function (query, successCallback, errorCallback, serviceName) {
+neon.query.executeQueryService_ = function (connectionId, query, successCallback, errorCallback, serviceName) {
     if(query.selectionOnly_){
         serviceName += "withselectiononly";
     }
@@ -496,7 +498,6 @@ neon.query.executeQueryService_ = function (query, successCallback, errorCallbac
         }
     );
 };
-
 
 /**
  * Registers for a filter key and fires the callback when complete
@@ -523,7 +524,6 @@ neon.query.registerForFilterKey = function (databaseName, tableName, successCall
         }
     );
 };
-
 
 /**
  * Adds a filter to the data and fires the callback when complete
@@ -701,16 +701,16 @@ neon.query.clearSelection = function (successCallback, errorCallback) {
     );
 };
 
-
 /**
  * Submits a text based query to the server.
  * @method submitTextQuery
+ * @param {String} connectionId The id of the connection resource
  * @param {String} queryText The query text to be submitted
  * @param {Function} successCallback The callback to execute when the query is parsed, which contains the query result
  * @param {Function} [errorCallback] The optional callback when an error occurs. This is a 3 parameter function that contains the xhr, a short error status and the full error message.
  * @return {neon.util.AjaxRequest} The xhr request object
  */
-neon.query.submitTextQuery = function (queryText, successCallback, errorCallback) {
+neon.query.submitTextQuery = function (connectionId, queryText, successCallback, errorCallback) {
     return neon.util.ajaxUtils.doPost(
         neon.query.serviceUrl('languageservice', 'query'),
         {
@@ -795,11 +795,12 @@ neon.query.getWidgetInitialization = function (id, successCallback) {
 /**
  * Gets the database names available for the current datastore
  * @method getDatabaseNames
+ * @param {String} connectionId The id of the connection resource
  * @param {Function} successCallback The callback that contains the database names in an array.
  * @return {neon.util.AjaxRequest} The xhr request object
  */
 
-neon.query.getDatabaseNames = function (successCallback) {
+neon.query.getDatabaseNames = function (connectionId, successCallback) {
     return neon.util.ajaxUtils.doGet(
         neon.query.serviceUrl('queryservice', 'databasenames'),
         {
@@ -811,12 +812,13 @@ neon.query.getDatabaseNames = function (successCallback) {
 /**
  * Gets the tables names available for the current datastore and database
  * @method getTableNames
+ * @param {String} connectionId The id of the connection resource
  * @param {String} databaseName The name of the database
  * @param {Function} successCallback The callback that contains the table names in an array.
  * @return {neon.util.AjaxRequest} The xhr request object
  */
 
-neon.query.getTableNames = function (databaseName, successCallback) {
+neon.query.getTableNames = function (connectionId, databaseName, successCallback) {
     return neon.util.ajaxUtils.doPost(
         neon.query.serviceUrl('queryservice', 'tablenames'),
         {
