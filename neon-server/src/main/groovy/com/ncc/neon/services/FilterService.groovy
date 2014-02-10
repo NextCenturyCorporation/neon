@@ -53,7 +53,6 @@ class FilterService {
      * @param dataSet The dataset to which this filter key should be applied.
      * @return An object that serializes filter key contents to the client.
      */
-
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)

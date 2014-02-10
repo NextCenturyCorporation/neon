@@ -35,7 +35,7 @@ $(function () {
     }
 
     function setupHostnames() {
-        neon.query.getHostnames(
+        neon.query.connection.getHostnames(
             function (data) {
                 $("#hostname-input").autocomplete({
                     source: data
@@ -50,19 +50,19 @@ $(function () {
         $("#clear-filters-button").click(clearAllFilters);
         $('#database-select').change(populateTableDropdown);
         $('#table-select').change(neon.filterBuilderState.saveState);
-
     }
 
     function connectToDatastore() {
         $("#db-table").show();
         var databaseSelectedOption = $('#datastore-select option:selected').val();
         var hostnameSelector = $('#hostname-input').val();
-        var connection = new neon.query.Connection(databaseSelectedOption, hostnameSelector);
-        neon.query.connectToDatastore(connection, populateDatabaseDropdown);
+        var connection = new neon.query.connection.Connection(databaseSelectedOption, hostnameSelector);
+        neon.query.connection.connectToDatastore(connection, populateDatabaseDropdown);
     }
 
-    function populateDatabaseDropdown() {
-        neon.query.getDatabaseNames(function (databaseNames) {
+    function populateDatabaseDropdown(id) {
+        neon.filterBuilderState.setConnectionId(id);
+        neon.query.getDatabaseNames(neon.filterBuilderState.getConnectionId(), function (databaseNames) {
             neon.wizard.populateDropdown('#database-select', databaseNames);
             populateTableDropdown();
         });
@@ -70,7 +70,7 @@ $(function () {
 
     function populateTableDropdown() {
         var selectedDatabase = $('#database-select option:selected').val();
-        neon.query.getTableNames(selectedDatabase, function (tableNames) {
+        neon.query.getTableNames(neon.filterBuilderState.getConnectionId(), selectedDatabase, function (tableNames) {
             neon.wizard.populateDropdown('#table-select', tableNames);
             neon.filterTable.setColumns([]);
             neon.filterTable.initializeFilterSection();
@@ -91,7 +91,7 @@ $(function () {
             executingInitFilterSection();
         });
 
-        neon.query.getFieldNames(dataSet.database, dataSet.table, "", function (data) {
+        neon.query.getFieldNames(neon.filterBuilderState.getConnectionId(), dataSet.database, dataSet.table, "", function (data) {
             neon.filterTable.setColumns(data.data);
             executingInitFilterSection();
         });

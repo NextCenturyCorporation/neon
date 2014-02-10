@@ -2,6 +2,7 @@ var neon = neon || {};
 neon.filterBuilderState = (function () {
 
     var clientId;
+    var connectionId;
 
     function restoreState(){
         neon.ready(function(){
@@ -18,6 +19,8 @@ neon.filterBuilderState = (function () {
     function restoreConnectionState(data){
         $("#db-table").show();
         $('#hostname-input').val(data.selectedHostname);
+
+        connectionId = data.connectionId;
 
         //set database options
         neon.wizard.populateDropdown('#database-select', data.databases);
@@ -43,6 +46,7 @@ neon.filterBuilderState = (function () {
         var tableOptions = $('#table-select option');
 
         var stateObject = {
+            connectionId: connectionId,
             selectedHostname: $('#hostname-input').val(),
             selectedDatastore: $('#datastore-select option:selected').val(),
             selectedDatabase: dataset.database,
@@ -76,9 +80,19 @@ neon.filterBuilderState = (function () {
         }
     }
 
+    function setConnectionId(id){
+        connectionId = id;
+    }
+
+    function getConnectionId(){
+        return connectionId;
+    }
+
     return {
         restoreState: restoreState,
-        saveState: saveState
+        saveState: saveState,
+        setConnectionId: setConnectionId,
+        getConnectionId: getConnectionId
     };
 
 })();
