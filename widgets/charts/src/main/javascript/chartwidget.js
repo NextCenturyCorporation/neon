@@ -28,6 +28,7 @@ neon.chartWidget = (function (){
     var widgetName;
     var filterKey;
     var onChange;
+    var connectionId;
 
     function onActiveDatasetChanged(message, changeHandler, widget) {
         databaseName = message.database;
@@ -38,8 +39,13 @@ neon.chartWidget = (function (){
         neon.query.registerForFilterKey(databaseName, tableName, function(filterResponse){
             filterKey = filterResponse;
         });
-        neon.query.getFieldNames(databaseName, tableName, widgetName, populateFromColumns);
+        neon.query.getFieldNames(connectionId, databaseName, tableName, widgetName, populateFromColumns);
     }
+
+    function onConnectionChanged(id){
+        connectionId = id;
+    }
+
 
     function populateFromColumns(data) {
         var elements = [new neon.dropdown.Element("x", "temporal"), new neon.dropdown.Element("y", "numeric")];
@@ -51,7 +57,7 @@ neon.chartWidget = (function (){
 
     return {
         onActiveDatasetChanged: onActiveDatasetChanged,
-
+        onConnectionChanged: onConnectionChanged,
         getXAttribute: function(){
             return $('#x option:selected').val();
         },
@@ -66,6 +72,9 @@ neon.chartWidget = (function (){
         },
         getFilterKey: function(){
             return filterKey;
+        },
+        getConnectionId: function(){
+            return connectionId;
         },
         setDatabaseName: function(dbName){
             databaseName = dbName;

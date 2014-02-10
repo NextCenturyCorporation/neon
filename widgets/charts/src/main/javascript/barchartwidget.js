@@ -37,6 +37,7 @@ neon.ready(function () {
             activeDatasetChanged: function (message) {
                 neon.chartWidget.onActiveDatasetChanged(message, drawChart, neon.widget.BARCHART);
             },
+            activeConnectionChanged: neon.chartWidget.onConnectionChanged,
             filtersChanged: drawChart
         });
 
@@ -69,7 +70,7 @@ neon.ready(function () {
         }
 
         var stateObject = buildStateObject(query);
-        neon.query.executeQuery(query, doDrawChart);
+        neon.query.executeQuery(neon.chartWidget.getConnectionId(), query, doDrawChart);
         neon.query.saveState(clientId, stateObject);
     }
 
@@ -91,6 +92,7 @@ neon.ready(function () {
 
     function buildStateObject(query) {
         return {
+            connectionId: neon.chartWidget.getConnectionId(),
             filterKey: neon.chartWidget.getFilterKey(),
             columns: neon.dropdown.getFieldNamesFromDropdown("x"),
             xValue: neon.chartWidget.getXAttribute(),
@@ -101,6 +103,7 @@ neon.ready(function () {
 
     function restoreState() {
         neon.query.getSavedState(clientId, function (data) {
+            neon.chartWidget.onConnectionChanged(data.connectionId);
             neon.chartWidget.setFilterKey(data.filterKey);
             neon.chartWidget.setDatabaseName(data.filterKey.dataSet.databaseName);
             neon.chartWidget.setTableName(data.filterKey.dataSet.tableName);
@@ -109,7 +112,7 @@ neon.ready(function () {
             neon.dropdown.populateAttributeDropdowns(data.columns, elements, drawChart);
             neon.dropdown.setDropdownInitialValue("x", data.xValue);
             neon.dropdown.setDropdownInitialValue("y", data.yValue);
-            neon.query.executeQuery(data.query, doDrawChart);
+            neon.query.executeQuery(neon.chartWidget.getConnectionId(), data.query, doDrawChart);
         });
     }
 
