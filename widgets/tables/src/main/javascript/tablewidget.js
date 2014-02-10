@@ -32,6 +32,7 @@ neon.ready(function () {
     function initialize(){
         neon.eventing.messaging.registerForNeonEvents({
             activeDatasetChanged: onActiveDatasetChanged,
+            activeConnectionChanged: onConnectionChanged,
             filtersChanged: updateTable,
             selectionChanged: onSelectionChanged
         });
@@ -43,6 +44,10 @@ neon.ready(function () {
 
         $(window).resize(sizeTableToRemainingSpace);
         sizeTableToRemainingSpace();
+    }
+
+    function onConnectionChanged(id){
+        neon.tableState.setConnectionId(id);
     }
 
     function getSortField() {
@@ -91,7 +96,7 @@ neon.ready(function () {
         applyLimit(query);
         applySort(query);
 
-        neon.query.executeQuery(query, populateTable);
+        neon.query.executeQuery(neon.tableState.getConnectionId(), query, populateTable);
         neon.tableState.saveState(query);
     }
 
@@ -184,7 +189,7 @@ neon.ready(function () {
             }
             neon.dropdown.setDropdownInitialValue("sort-field", data.sortValue);
             styleSortDirectionButtonFromValue(data.sortDirection);
-            neon.query.executeQuery(query, function(queryResults){
+            neon.query.executeQuery(neon.tableState.getConnectionId(), query, function(queryResults){
                 populateTable(queryResults);
                 if(data.selectedRows){
                     table.table_.setSelectedRows(data.selectedRows);

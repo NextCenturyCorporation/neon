@@ -28,12 +28,21 @@
 neon.ready(function () {
     neon.query.SERVER_URL = $("#neon-server").val();
 
+    var connectionId;
+    neon.eventing.messaging.registerForNeonEvents({
+        activeConnectionChanged: onConnectionChanged
+    });
+
+    function onConnectionChanged(id){
+        connectionId = id;
+    }
+
     fetchData();
 
     function fetchData() {
         var query = new neon.query.Query().selectFrom('test', 'cpan');
 
-        neon.query.executeQuery(query, displayGraph);
+        neon.query.executeQuery(connectionId, query, displayGraph);
     }
 
     function displayGraph(data) {

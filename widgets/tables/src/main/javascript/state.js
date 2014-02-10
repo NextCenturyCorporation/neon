@@ -2,6 +2,8 @@ var neon = neon || {};
 neon.tableState = (function () {
 
     var clientId;
+    var connectionId;
+
 
     function getSavedState(restoreStateCallback){
         neon.ready(function(){
@@ -23,6 +25,7 @@ neon.tableState = (function () {
             return;
         }
 
+        connectionId = data.connectionId;
         setActiveDataset(data);
         $('#limit').val(data.limitValue);
 
@@ -33,6 +36,7 @@ neon.tableState = (function () {
 
     function buildStateObject(currentQuery, rowSelection){
         var stateObject = {
+            connectionId: connectionId,
             filterKey: neon.activeDataset.getFilterKey(),
             databaseName: neon.activeDataset.getDatabaseName(),
             tableName: neon.activeDataset.getTableName(),
@@ -52,9 +56,19 @@ neon.tableState = (function () {
         neon.query.saveState(clientId, buildStateObject(currentQuery, rowSelection));
     }
 
+    function setConnectionId(id){
+        connectionId = id;
+    }
+
+    function getConnectionId(){
+        return connectionId;
+    }
+
     return {
         restoreState: getSavedState,
-        saveState: saveState
+        saveState: saveState,
+        setConnectionId: setConnectionId,
+        getConnectionId: getConnectionId
     };
 
 })();
