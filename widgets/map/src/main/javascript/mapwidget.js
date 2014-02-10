@@ -28,11 +28,13 @@ neon.ready(function () {
     var map;
 
     var clientId = neon.eventing.messaging.getInstanceId();
+    var connectionId;
 
     var options = ['latitude', 'longitude', 'color-by', 'size-by'];
 
     neon.eventing.messaging.registerForNeonEvents({
         activeDatasetChanged: onActiveDatasetChanged,
+        activeConnectionChanged: onConnectionChanged,
         filtersChanged: onFiltersChanged
     });
 
@@ -48,6 +50,10 @@ neon.ready(function () {
         setApplyFiltersListener();
         map.draw();
         map.register("moveend", this, onMapMovement);
+    }
+
+    function onConnectionChanged(id){
+        connectionId = id;
     }
 
     function onMapMovement() {
@@ -164,7 +170,7 @@ neon.ready(function () {
         neon.query.registerForFilterKey(databaseName, tableName, function (filterResponse) {
             filterKey = filterResponse;
         });
-        neon.query.getFieldNames(databaseName, tableName, neon.widget.MAP, populateFromColumns);
+        neon.query.getFieldNames(connectionId, databaseName, tableName, neon.widget.MAP, populateFromColumns);
     }
 
     function populateFromColumns(data) {
@@ -186,7 +192,7 @@ neon.ready(function () {
 
         var query = buildQuery();
         var stateObject = buildStateObject(query);
-        neon.query.executeQuery(query, redrawMapData);
+        neon.query.executeQuery(connectionId, query, redrawMapData);
         neon.query.saveState(clientId, stateObject);
     }
 
@@ -237,6 +243,7 @@ neon.ready(function () {
 
     function buildStateObject(query) {
         return {
+            connectionId: connectionId,
             filterKey: filterKey,
             columns: neon.dropdown.getFieldNamesFromDropdown("latitude"),
             selectedLatitude: neon.mapWidgetUtils.getLatitudeField(),
@@ -253,7 +260,8 @@ neon.ready(function () {
     function restoreState() {
         neon.query.getSavedState(clientId, function (data) {
             filterKey = data.filterKey;
-            if (!filterKey) {
+            connectionId = data.connectionId;
+            if (!filterKey || !connectionId) {
                 return;
             }
             databaseName = data.filterKey.dataSet.databaseName;
@@ -283,7 +291,7 @@ neon.ready(function () {
             }
             map.zoomToExtent(data.selectedExtent);
 
-            neon.query.executeQuery(data.query, redrawMapData);
+            neon.query.executeQuery(connectionId, data.query, redrawMapData);
         });
     }
 
