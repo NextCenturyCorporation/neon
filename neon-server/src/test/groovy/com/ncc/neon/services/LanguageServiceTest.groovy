@@ -47,7 +47,7 @@ class LanguageServiceTest {
 
     @Test
     void "execute query"() {
-        QueryResult result = languageService.executeQuery("queryText")
+        QueryResult result = languageService.executeQuery("","queryText")
         assert result.data
     }
 

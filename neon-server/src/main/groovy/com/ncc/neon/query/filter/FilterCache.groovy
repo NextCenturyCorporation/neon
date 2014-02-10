@@ -74,7 +74,7 @@ class FilterCache implements Serializable {
      * @return
      */
     void removeFilter(FilterKey filterKey) {
-        remove(filterKey)
+        cache.remove(filterKey)
     }
 
     /**
