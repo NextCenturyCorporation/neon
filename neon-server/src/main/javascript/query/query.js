@@ -446,7 +446,7 @@ neon.query.withinDistance = function (locationField, center, distance, distanceU
  */
 neon.query.getFieldNames = function (connectionId, databaseName, tableName, widgetName, successCallback, errorCallback) {
     return neon.util.ajaxUtils.doGet(
-        neon.query.serviceUrl('queryservice', 'fields', '?databaseName=' + databaseName + '&tableName=' + tableName + '&widgetName=' + widgetName),
+        neon.query.serviceUrl('queryservice', connectionId + '/fields', '?databaseName=' + databaseName + '&tableName=' + tableName + '&widgetName=' + widgetName),
         {
             success: successCallback,
             error: errorCallback
@@ -491,7 +491,7 @@ neon.query.executeQueryService_ = function (connectionId, query, successCallback
 
     return neon.util.ajaxUtils.doPostJSON(
         query,
-        neon.query.serviceUrl('queryservice', serviceName),
+        neon.query.serviceUrl('queryservice', connectionId + '/' + serviceName),
         {
             success: successCallback,
             error: errorCallback
@@ -712,7 +712,7 @@ neon.query.clearSelection = function (successCallback, errorCallback) {
  */
 neon.query.submitTextQuery = function (connectionId, queryText, successCallback, errorCallback) {
     return neon.util.ajaxUtils.doPost(
-        neon.query.serviceUrl('languageservice', 'query'),
+        neon.query.serviceUrl('languageservice', connectionId + '/query'),
         {
             data: { text: queryText },
             contentType: 'application/x-www-form-urlencoded; charset=UTF-8',
@@ -802,7 +802,7 @@ neon.query.getWidgetInitialization = function (id, successCallback) {
 
 neon.query.getDatabaseNames = function (connectionId, successCallback) {
     return neon.util.ajaxUtils.doGet(
-        neon.query.serviceUrl('queryservice', 'databasenames'),
+        neon.query.serviceUrl('queryservice', connectionId + '/databasenames'),
         {
             success: successCallback
         }
@@ -820,7 +820,7 @@ neon.query.getDatabaseNames = function (connectionId, successCallback) {
 
 neon.query.getTableNames = function (connectionId, databaseName, successCallback) {
     return neon.util.ajaxUtils.doPost(
-        neon.query.serviceUrl('queryservice', 'tablenames'),
+        neon.query.serviceUrl('queryservice', connectionId + '/tablenames'),
         {
             data: { database: databaseName },
             success: successCallback
