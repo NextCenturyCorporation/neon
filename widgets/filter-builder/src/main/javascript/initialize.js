@@ -62,6 +62,7 @@ $(function () {
 
     function populateDatabaseDropdown(id) {
         neon.filterBuilderState.setConnectionId(id);
+        neon.eventing.messaging.publish(neon.eventing.channels.ACTIVE_CONNECTION_CHANGED, id);
         neon.query.getDatabaseNames(neon.filterBuilderState.getConnectionId(), function (databaseNames) {
             neon.wizard.populateDropdown('#database-select', databaseNames);
             populateTableDropdown();

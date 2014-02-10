@@ -28,21 +28,25 @@ neon.queryBuilder = (function () {
     var numberOfRows = 0;
 
     var clientId;
+    var connectionId;
+
     neon.ready(function(){
-       clientId =  neon.eventing.messaging.getInstanceId();
-       restoreState();
+        clientId =  neon.eventing.messaging.getInstanceId();
+        restoreState();
+
+        neon.eventing.messaging.registerForNeonEvents({
+            activeConnectionChanged: onConnectionChanged
+        });
     });
 
-    function restoreState(){
-        neon.query.getWidgetInitialization(neon.widget.QUERY_BUILDER, function(data){
-            if(data && data.query){
-                $('#queryText').val(data.query);
-                submitQueryToServer();
-            }
-        });
+    function onConnectionChanged(id){
+        connectionId = id;
+    }
 
+    function restoreState(){
         neon.query.getSavedState(clientId, function(data){
-            $('#queryText').val(data);
+            onConnectionChanged(data.connectionId);
+            $('#queryText').val(data.text);
             submitQueryToServer();
         });
     }
@@ -75,7 +79,10 @@ neon.queryBuilder = (function () {
         table = new tables.Table('#results', {data: data.data, gridOptions: {fullWidthRows: true}}).draw();
 
         var queryText = $('#queryText').val();
-        neon.query.saveState(clientId, queryText);
+        neon.query.saveState(clientId, {
+            connectionId: connectionId,
+            text: queryText
+        });
     }
 
     function onQueryError(xhr, status, msg) {
@@ -85,7 +92,7 @@ neon.queryBuilder = (function () {
     function submitQueryToServer() {
         $("#errorText").empty();
         var queryText = $('#queryText').val();
-        neon.query.submitTextQuery(queryText, onSuccessfulQuery, onQueryError);
+        neon.query.submitTextQuery(connectionId, queryText, onSuccessfulQuery, onQueryError);
     }
 
     return {

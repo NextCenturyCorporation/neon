@@ -94,6 +94,7 @@ neon.eventing.messaging = (function () {
      * <ul>
      *     <li>selectionChanged - function to execute when the selection has changed</li>
      *     <li>filtersChanged - function to execute when the filters have been changed</li>
+     *     <li>activeConnectionChanged - function to execute when the active connection has changed</li>
      *     <li>activeDatasetChanged - function to execute when the active dataset has changed</li>
      * </ul>
      * @method registerForNeonEvents
@@ -115,6 +116,7 @@ neon.eventing.messaging = (function () {
         return [
             {channel: neon.eventing.channels.SELECTION_CHANGED, callback: neonCallbacks.selectionChanged},
             {channel: neon.eventing.channels.FILTERS_CHANGED, callback: neonCallbacks.filtersChanged},
+            {channel: neon.eventing.channels.ACTIVE_CONNECTION_CHANGED, callback: neonCallbacks.activeConnectionChanged},
             {channel: neon.eventing.channels.ACTIVE_DATASET_CHANGED, callback: neonCallbacks.activeDatasetChanged}
         ];
     }

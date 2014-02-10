@@ -32,7 +32,7 @@ neon.query.connection.connectToDatastore = function (connection, successCallback
 };
 
 /**
- * Get the existing connection from Neon.
+ * Get an existing connection by id.
  * @method getConnection
  * @param {String} connectionId The key that identifies the connection resource.
  * @param {Function} successCallback  Callback invoked on success
@@ -43,6 +43,24 @@ neon.query.connection.connectToDatastore = function (connection, successCallback
 neon.query.connection.getConnection = function (connectionId, successCallback, errorCallback) {
     return neon.util.ajaxUtils.doGet(
         neon.query.serviceUrl('connections', connectionId),
+        {
+            success: successCallback,
+            error: errorCallback
+        }
+    );
+};
+
+/**
+ * Get all the existing connections.
+ * @method getAllConnectionIds
+ * @param {Function} successCallback  Callback invoked on success
+ * @param {Function} errorCallback The optional callback when an error occurs. This is a 3 parameter function that contains the xhr, a short error status and the full error message.
+ * @returns {neon.util.AjaxRequest} The xhr request object
+ */
+
+neon.query.connection.getAllConnectionIds = function (successCallback, errorCallback) {
+    return neon.util.ajaxUtils.doGet(
+        neon.query.serviceUrl('connections', 'ids'),
         {
             success: successCallback,
             error: errorCallback

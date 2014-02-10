@@ -53,7 +53,7 @@ class ConnectionManager {
      */
 
     String connect(ConnectionInfo info) {
-        String connectionId = createIdFromInfo(info)
+        String connectionId = createConnectionId(info)
         connections.putIfAbsent(connectionId, info)
         factoryCache.putIfAbsent(connectionId, createClientFactory(info))
         return connectionId
@@ -88,6 +88,15 @@ class ConnectionManager {
         return connections.get(connectionId)
     }
 
+    /**
+     * Gets all the registered connections ids.
+     * @return the ids
+     */
+    Set<String> getAllConnectionIds() {
+        return connections.keySet()
+    }
+
+
     private ConnectionClient getConnectionClient(String connectionId){
         ConnectionClientFactory factory = factoryCache.get(connectionId)
         if(!factory){
@@ -97,7 +106,7 @@ class ConnectionManager {
         return factory.createConnectionClient(connections.get(connectionId))
     }
 
-    private String createIdFromInfo(ConnectionInfo info) {
+    private String createConnectionId(ConnectionInfo info) {
         return "${info.dataSource?.name()}@${info.connectionUrl}"
     }
 

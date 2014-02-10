@@ -8,6 +8,7 @@ neon.ready(function () {
     var HOURS_IN_DAY = 24;
 
     var clientId = neon.eventing.messaging.getInstanceId();
+    var connectionId;
 
     initialize();
 
@@ -17,6 +18,7 @@ neon.ready(function () {
 
         neon.eventing.messaging.registerForNeonEvents({
             activeDatasetChanged: onDatasetChanged,
+            activeConnectionChanged: onConnectionChanged,
             filtersChanged: onFiltersChanged
         });
 
@@ -40,13 +42,17 @@ neon.ready(function () {
         queryForChartData();
     }
 
+    function onConnectionChanged(id){
+        connectionId = id;
+    }
+
     function onDatasetChanged(message) {
         databaseName = message.database;
         tableName = message.table;
         neon.query.registerForFilterKey(databaseName, tableName, function (filterResponse) {
             filterKey = filterResponse;
         });
-        neon.query.getFieldNames(databaseName, tableName, neon.widget.CIRCULAR_HEAT, populateFromColumns);
+        neon.query.getFieldNames(connectionId, databaseName, tableName, neon.widget.CIRCULAR_HEAT, populateFromColumns);
     }
 
     function populateFromColumns(data) {
@@ -74,7 +80,7 @@ neon.ready(function () {
 
         var stateObject = buildStateObject(dateField, query);
 
-        neon.query.executeQuery(query, drawChart);
+        neon.query.executeQuery(connectionId, query, drawChart);
         neon.query.saveState(clientId, stateObject);
     }
 
@@ -115,6 +121,7 @@ neon.ready(function () {
 
     function buildStateObject(dateField, query) {
         return {
+            connectionId: connectionId,
             filterKey: filterKey,
             columns: neon.dropdown.getFieldNamesFromDropdown("date"),
             selectedField: dateField,
@@ -125,7 +132,8 @@ neon.ready(function () {
     function restoreState() {
         neon.query.getSavedState(clientId, function (data) {
             filterKey = data.filterKey;
-            if(!filterKey){
+            connectionId = data.connectionId;
+            if(!filterKey || !connectionId){
                 return;
             }
             databaseName = data.filterKey.dataSet.databaseName;
@@ -133,7 +141,7 @@ neon.ready(function () {
             var element = new neon.dropdown.Element("date", "temporal");
             neon.dropdown.populateAttributeDropdowns(data.columns, element, queryForChartData);
             neon.dropdown.setDropdownInitialValue("date", data.selectedField);
-            neon.query.executeQuery(data.query, drawChart);
+            neon.query.executeQuery(connectionId, data.query, drawChart);
         });
     }
 

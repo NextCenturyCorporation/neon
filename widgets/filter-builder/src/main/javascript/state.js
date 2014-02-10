@@ -75,9 +75,6 @@ neon.filterBuilderState = (function () {
         if(neon.filterTable.getFilterKey()){
             neon.query.saveState(clientId, buildFullStateObject());
         }
-        else{
-            neon.query.saveState(clientId, buildSimpleStateObject());
-        }
     }
 
     function setConnectionId(id){

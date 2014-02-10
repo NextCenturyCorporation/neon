@@ -50,4 +50,8 @@ describe('message handler', function () {
         testPublishedMessageReceived(neon.eventing.channels.ACTIVE_DATASET_CHANGED, 'activeDatasetChanged', {id:"activeDatasetChanged"});
     });
 
+    it('should be notified when a message is published to the active connection changed channel', function() {
+        testPublishedMessageReceived(neon.eventing.channels.ACTIVE_CONNECTION_CHANGED, 'activeConnectionChanged', {id:"activeConnectionChanged"});
+    });
+
 });

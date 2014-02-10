@@ -63,6 +63,18 @@ class ConnectionService {
      */
     @GET
     @Produces(MediaType.APPLICATION_JSON)
+    @Path("ids")
+    Set<String> getAllConnectionIds() {
+        connectionManager.allConnectionIds
+    }
+
+    /**
+     * Gets a connection resource if it exists.
+     * @param id The identifier for the connection
+     * @return The connection info, or null if it does not exist.
+     */
+    @GET
+    @Produces(MediaType.APPLICATION_JSON)
     @Path("{id}")
     ConnectionInfo getConnectionById(@PathParam("id") String id) {
         connectionManager.getConnectionById(id)
