@@ -20,4 +20,6 @@ host=sometomcathost
 user=myusername
 sshKeyFile=/path/to/sshkeyfile
 # Optionally if you don't have an ssh key file you can put the password in here
+
 # password=sshpassword
+

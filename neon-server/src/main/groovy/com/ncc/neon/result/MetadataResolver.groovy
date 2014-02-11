@@ -1,40 +1,35 @@
+/*
+ * Copyright 2013 Next Century Corporation
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ */
+
 package com.ncc.neon.result
 
-import com.ncc.neon.metadata.MetadataConnection
-import com.ncc.neon.metadata.model.dataset.WidgetAndDatasetMetadataList
 import com.ncc.neon.metadata.model.column.ColumnMetadata
 import com.ncc.neon.metadata.model.column.ColumnMetadataList
+import com.ncc.neon.metadata.model.dataset.WidgetAndDatasetMetadataList
 import com.ncc.neon.metadata.model.widget.WidgetInitializationMetadata
-import com.ncc.neon.metadata.store.MetadataRetriever
+import com.ncc.neon.metadata.store.InMemoryMetadata
 import com.ncc.neon.query.Query
 import com.ncc.neon.query.QueryGroup
 import com.ncc.neon.query.clauses.SelectClause
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
-/*
- * ************************************************************************
- * Copyright (c), 2013 Next Century Corporation. All Rights Reserved.
- *
- * This software code is the exclusive property of Next Century Corporation and is
- * protected by United States and International laws relating to the protection
- * of intellectual property.  Distribution of this software code by or to an
- * unauthorized party, or removal of any of these notices, is strictly
- * prohibited and punishable by law.
- *
- * UNLESS PROVIDED OTHERWISE IN A LICENSE AGREEMENT GOVERNING THE USE OF THIS
- * SOFTWARE, TO WHICH YOU ARE AN AUTHORIZED PARTY, THIS SOFTWARE CODE HAS BEEN
- * ACQUIRED BY YOU "AS IS" AND WITHOUT WARRANTY OF ANY KIND.  ANY USE BY YOU OF
- * THIS SOFTWARE CODE IS AT YOUR OWN RISK.  ALL WARRANTIES OF ANY KIND, EITHER
- * EXPRESSED OR IMPLIED, INCLUDING, WITHOUT LIMITATION, IMPLIED WARRANTIES OF
- * MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE, ARE HEREBY EXPRESSLY
- * DISCLAIMED.
- *
- * PROPRIETARY AND CONFIDENTIAL TRADE SECRET MATERIAL NOT FOR DISCLOSURE OUTSIDE
- * OF NEXT CENTURY CORPORATION EXCEPT BY PRIOR WRITTEN PERMISSION AND WHEN
- * RECIPIENT IS UNDER OBLIGATION TO MAINTAIN SECRECY.
- *
- * 
- */
+
+import javax.annotation.PostConstruct
 
 /**
  * Integration point between metadata and neon.
@@ -44,8 +39,25 @@ import org.springframework.stereotype.Component
 @Component
 class MetadataResolver {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(MetadataResolver)
+    private static final METADATA_FILE_NAME = "Metadata.groovy"
+
     @Autowired
-    MetadataConnection metadataConnection
+    InMemoryMetadata metadata
+
+    @SuppressWarnings("JavaIoPackageAccess") // metadata is loaded from a file on the classpath
+    @PostConstruct
+    void loadMetadata() {
+        URL url = getClass().getResource("/${METADATA_FILE_NAME}")
+        if ( url ) {
+            File file = new File(url.toURI())
+            LOGGER.info("Loading metadata from ${file}")
+            metadata.load(file)
+        }
+        else {
+            LOGGER.info("No ${METADATA_FILE_NAME} file found on classpath")
+        }
+    }
 
     /**
      * Gets all column data for a given dataset
@@ -55,8 +67,7 @@ class MetadataResolver {
      */
 
     ColumnMetadataList resolveQuery(String databaseName, String tableName) {
-        MetadataRetriever retriever = new MetadataRetriever(metadataConnection)
-        return retriever.retrieve(databaseName, tableName, [])
+        return metadata.retrieve(databaseName, tableName, [] as Set)
     }
 
     /**
@@ -67,12 +78,11 @@ class MetadataResolver {
      */
 
     ColumnMetadataList resolveQuery(Query query) {
-        MetadataRetriever retriever = new MetadataRetriever(metadataConnection)
         List<String> columns = query.fields
         if (query.fields == SelectClause.ALL_FIELDS) {
             columns = []
         }
-        return retriever.retrieve(query.databaseName, query.tableName, columns)
+        return metadata.retrieve(query.databaseName, query.tableName, columns as Set)
     }
 
     /**
@@ -87,7 +97,7 @@ class MetadataResolver {
         queryGroup.queries.each { Query query ->
             ColumnMetadataList metadataList = resolveQuery(query)
             metadataList.dataSet.each { ColumnMetadata metadata ->
-                if(!list.contains(metadata)){
+                if (!list.contains(metadata)) {
                     list << metadata
                 }
             }
@@ -103,9 +113,8 @@ class MetadataResolver {
      * @return The metadata
      */
 
-    WidgetAndDatasetMetadataList getInitializationData(String databaseName, String tableName, String widgetName){
-        MetadataRetriever retriever = new MetadataRetriever(metadataConnection)
-        return retriever.retrieve(databaseName, tableName, widgetName)
+    WidgetAndDatasetMetadataList getInitializationData(String databaseName, String tableName, String widgetName) {
+        return metadata.retrieve(databaseName, tableName, widgetName)
     }
 
     /**
@@ -115,7 +124,6 @@ class MetadataResolver {
      */
 
     WidgetInitializationMetadata getWidgetInitializationData(String widget) {
-        MetadataRetriever retriever = new MetadataRetriever(metadataConnection)
-        return retriever.retrieve(widget)
+        return metadata.retrieve(widget)
     }
 }

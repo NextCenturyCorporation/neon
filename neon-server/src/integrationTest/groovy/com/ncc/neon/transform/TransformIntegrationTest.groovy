@@ -1,51 +1,38 @@
-package com.ncc.neon.transform
+/*
+ * Copyright 2013 Next Century Corporation
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ */
 
-import com.ncc.neon.mongo.MongoIntegrationTestContext
+package com.ncc.neon.transform
+import com.ncc.neon.IntegrationTestContext
+import com.ncc.neon.mongo.MongoTestClient
 import com.ncc.neon.query.Query
 import com.ncc.neon.query.QueryOptions
 import com.ncc.neon.query.Transform
 import com.ncc.neon.query.filter.Filter
 import com.ncc.neon.query.mongo.MongoQueryExecutor
-import org.junit.AfterClass
-import org.junit.BeforeClass
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.context.ContextConfiguration
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner
-/*
- * ************************************************************************
- * Copyright (c), 2014 Next Century Corporation. All Rights Reserved.
- *
- * This software code is the exclusive property of Next Century Corporation and is
- * protected by United States and International laws relating to the protection
- * of intellectual property.  Distribution of this software code by or to an
- * unauthorized party, or removal of any of these notices, is strictly
- * prohibited and punishable by law.
- *
- * UNLESS PROVIDED OTHERWISE IN A LICENSE AGREEMENT GOVERNING THE USE OF THIS
- * SOFTWARE, TO WHICH YOU ARE AN AUTHORIZED PARTY, THIS SOFTWARE CODE HAS BEEN
- * ACQUIRED BY YOU "AS IS" AND WITHOUT WARRANTY OF ANY KIND.  ANY USE BY YOU OF
- * THIS SOFTWARE CODE IS AT YOUR OWN RISK.  ALL WARRANTIES OF ANY KIND, EITHER
- * EXPRESSED OR IMPLIED, INCLUDING, WITHOUT LIMITATION, IMPLIED WARRANTIES OF
- * MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE, ARE HEREBY EXPRESSLY
- * DISCLAIMED.
- *
- * PROPRIETARY AND CONFIDENTIAL TRADE SECRET MATERIAL NOT FOR DISCLOSURE OUTSIDE
- * OF NEXT CENTURY CORPORATION EXCEPT BY PRIOR WRITTEN PERMISSION AND WHEN
- * RECIPIENT IS UNDER OBLIGATION TO MAINTAIN SECRECY.
- *
- * 
- */
 
 @RunWith(SpringJUnit4ClassRunner)
-@ContextConfiguration(classes = MongoIntegrationTestContext)
-@ActiveProfiles("mongo-integrationtest")
+@ContextConfiguration(classes = IntegrationTestContext)
 class TransformIntegrationTest {
 
-    @Autowired
-    MongoQueryExecutor mongoQueryExecutor
+    private MongoQueryExecutor mongoQueryExecutor
 
     static final String DATABASE_NAME = 'neonintegrationtest'
 
@@ -60,15 +47,13 @@ class TransformIntegrationTest {
     /** a simple query that returns all of the data */
     static final Query TRANSFORM_ALL_DATA_QUERY = new Query(filter: ALL_DATA_FILTER, transform: TRANSFORM)
 
-    @BeforeClass
-    static void beforeClass() {
-        MongoQueryExecutor.metaClass.getMongo = { MongoIntegrationTestContext.MONGO }
+    @SuppressWarnings('JUnitPublicNonTestMethod')
+    @Autowired
+    public void setMongoQueryExecutor(MongoQueryExecutor mongoQueryExectuor) {
+        this.mongoQueryExecutor = mongoQueryExectuor
+        this.mongoQueryExecutor.metaClass.getMongo = { MongoTestClient.mongoClient }
     }
 
-    @AfterClass
-    static void afterClass() {
-        MongoQueryExecutor.metaClass = null
-    }
 
     @Test(expected = TransformerNotFoundException)
     void "bad transform throws exception"(){
