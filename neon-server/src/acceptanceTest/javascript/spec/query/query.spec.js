@@ -42,9 +42,11 @@ describe('query mapping', function () {
     var filterKey = createFilterKey();
     jasmine.getJSONFixtures().fixturesPath = 'src/test-data';
 
-
     /** the result of any asynchronously executed function. this is reset after each test */
     var currentResult;
+
+    executeAndWait(neon.query.connection.connectToDatastore, new neon.query.connection.Connection("mongo", host));
+
 
     beforeEach(function () {
         if (!allData) {
@@ -57,7 +59,7 @@ describe('query mapping', function () {
     });
 
     it('get field names', function () {
-        executeAndWait(neon.query.getFieldNames, databaseName, tableName, "");
+        executeAndWait(neon.query.getFieldNames, connectionId, databaseName, tableName, "");
         var expected = ['_id', 'firstname', 'lastname', 'city', 'state', 'salary', 'hiredate', 'location'];
         runs(function () {
             expect(currentResult.data).toBeArrayWithSameElements(expected);
@@ -423,7 +425,7 @@ describe('query mapping', function () {
         var query = baseQuery().groupBy('unknown').aggregate('unknown', 'unknown', 'unknown');
         var successCallback = jasmine.createSpy('success');
         var errorCallback = jasmine.createSpy('error');
-        neon.query.executeQuery(query, successCallback, errorCallback);
+        neon.query.executeQuery(connectionId, query, successCallback, errorCallback);
         waitsFor(function () {
             return errorCallback.wasInvoked();
         });
@@ -435,7 +437,7 @@ describe('query mapping', function () {
 
     it('query with limit', function () {
         var query = baseQuery().limit(2);
-        executeAndWait(neon.query.executeQuery, query);
+        executeAndWait(neon.query.executeQuery, connectionId, query);
         runs(function () {
             expect(currentResult.data.length).toEqual(2);
         });
@@ -517,7 +519,7 @@ describe('query mapping', function () {
      * @param expectedData The data expected to be returned from the function
      */
     function assertAsync(asyncFunction, arg, expectedData) {
-        executeAndWait(asyncFunction, arg);
+        executeAndWait(asyncFunction, connectionId, arg);
         runs(function () {
             expect(currentResult.data).toEqual(expectedData);
         });

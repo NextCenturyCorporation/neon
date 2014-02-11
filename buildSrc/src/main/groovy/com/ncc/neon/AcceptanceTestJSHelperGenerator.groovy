@@ -31,11 +31,14 @@ import org.json.JSONObject
  */
 class AcceptanceTestJSHelperGenerator {
 
-    static void generateJavascriptHelper(neonServerUrl, transformServiceUrl, outfile) {
+    static void generateJavascriptHelper(neonServerUrl, transformServiceUrl, host, outfile) {
         outfile.parentFile.mkdirs()
         outfile.withWriter { w ->
             w.println "var neonServerUrl = '${neonServerUrl}';"
             w.println "var transformServiceUrl = '${transformServiceUrl}';"
+            w.println "var host = '${host}';"
+            w.println "var connectionId = 'mongo@${host}';"
+
         }
     }
 

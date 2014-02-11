@@ -12,7 +12,7 @@ neon.query.connection.Connection = function (datastore, hostname) {
 /**
  * Connects a user to the given datastore.
  * @method connectToDatastore
- * @param {neon.query.Connection} connection The connection information
+ * @param {neon.query.connection.Connection} connection The connection information
  * @param {Function} successCallback Callback invoked on success. The function has one parameter, the connectionId.
  * @param {Function} errorCallback The optional callback when an error occurs. This is a 3 parameter function that contains the xhr, a short error status and the full error message.
  * @return {neon.util.AjaxRequest} The xhr request object

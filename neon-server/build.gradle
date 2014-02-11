@@ -329,7 +329,7 @@ task generateAcceptanceTestHelpers {
     outputs.upToDateWhen { false }
     doLast {
         def outputDir = new File(buildDir, "acceptanceTestSupport")
-        generateJavascriptHelper("http://localhost:${getAcceptanceTestPort()}/neon", "http://localhost:${getAcceptanceTestServicePort()}", new File(outputDir, "ports.js"))
+        generateJavascriptHelper("http://localhost:${getAcceptanceTestPort()}/neon", "http://localhost:${getAcceptanceTestServicePort()}", "${getMongoHosts()}", new File(outputDir, "ports.js"))
     }
 }
 
