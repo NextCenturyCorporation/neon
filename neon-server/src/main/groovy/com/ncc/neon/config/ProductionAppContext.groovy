@@ -16,9 +16,6 @@
 
 package com.ncc.neon.config
 
-import com.ncc.neon.connect.ConnectionInfo
-import com.ncc.neon.connect.ConnectionManager
-import com.ncc.neon.connect.DataSources
 import com.ncc.neon.transform.Transformer
 import com.ncc.neon.transform.TransformerRegistry
 import org.slf4j.Logger
@@ -52,14 +49,6 @@ class ProductionAppContext {
                 System.setProperty(prop, val)
             }
         }
-    }
-
-    @Bean
-    ConnectionManager connectionManagerBean() {
-        ConnectionManager manager = new ConnectionManager()
-        String host = System.getProperty("mongo.hosts", "localhost")
-        manager.initConnectionManager(new ConnectionInfo(DataSources.mongo, host))
-        return manager
     }
 
     @Bean
