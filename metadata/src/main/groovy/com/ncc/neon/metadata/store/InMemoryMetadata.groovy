@@ -132,8 +132,7 @@ class InMemoryMetadata implements Metadata {
 
     private void populateWidgetInitializationMetadata(ConfigObject config) {
         config["init"].each { name, saved ->
-            WidgetInitializationMetadata initData = new WidgetInitializationMetadata()
-            initData.widgetName = name
+            WidgetInitializationMetadata initData = new WidgetInitializationMetadata(widgetName: name)
             copyProperties(saved, initData)
             store(initData)
         }
@@ -143,16 +142,18 @@ class InMemoryMetadata implements Metadata {
         config["columns"].each { dbName, tables ->
             tables.each { table, columnMappings ->
                 columnMappings.each { columnName, fields ->
-                    ColumnMetadata columnData = new ColumnMetadata()
-                    columnData.databaseName = dbName
-                    columnData.tableName = table
-                    columnData.columnName = columnName
-                    copyProperties(fields, columnData)
+                    ColumnMetadata columnData = createColumnMetadata(dbName, table, columnName, fields)
                     store(columnData)
                 }
             }
-
         }
+    }
+
+    private static ColumnMetadata createColumnMetadata(databaseName, tableName, columnName, fields) {
+        ColumnMetadata columnData = new ColumnMetadata(databaseName: databaseName, tableName: tableName, columnName: columnName)
+        copyProperties(fields, columnData)
+        return columnData
+
     }
 
     private void populateWidgetAndDatasetMetadata(ConfigObject config) {
@@ -160,19 +161,19 @@ class InMemoryMetadata implements Metadata {
             tables.each { tableName, widgetMappings ->
                 widgetMappings.each { widgetName, widgetMapping ->
                     widgetMapping.each { elementId,  data ->
-                        WidgetAndDatasetMetadata widgetData = new WidgetAndDatasetMetadata()
-                        widgetData.databaseName = dbName
-                        widgetData.tableName = tableName
-                        widgetData.widgetName = widgetName
-                        widgetData.elementId = elementId
-                        copyProperties(data, widgetData)
+                        WidgetAndDatasetMetadata widgetData = createWidgetAndDatasetMetadata(dbName, tableName, widgetName, elementId, data)
                         store(widgetData)
-
                     }
                 }
             }
-
         }
+    }
+
+    private static WidgetAndDatasetMetadata createWidgetAndDatasetMetadata(databaseName, tableName, widgetName, elementId, widgetData) {
+        WidgetAndDatasetMetadata widgetMetaData = new WidgetAndDatasetMetadata(databaseName: databaseName,
+                tableName: tableName, widgetName: widgetName, elementId: elementId)
+        copyProperties(widgetData, widgetMetaData)
+        return widgetMetaData
     }
 
     private static void copyProperties(def from, def to) {

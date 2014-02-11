@@ -1,27 +1,19 @@
-package com.ncc.neon.metadata.store
-
 /*
- * ************************************************************************
- * Copyright (c), 2014 Next Century Corporation. All Rights Reserved.
+ * Copyright 2014 Next Century Corporation
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
  *
- * This software code is the exclusive property of Next Century Corporation and is
- * protected by United States and International laws relating to the protection
- * of intellectual property.  Distribution of this software code by or to an
- * unauthorized party, or removal of any of these notices, is strictly
- * prohibited and punishable by law.
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
- * UNLESS PROVIDED OTHERWISE IN A LICENSE AGREEMENT GOVERNING THE USE OF THIS
- * SOFTWARE, TO WHICH YOU ARE AN AUTHORIZED PARTY, THIS SOFTWARE CODE HAS BEEN
- * ACQUIRED BY YOU "AS IS" AND WITHOUT WARRANTY OF ANY KIND.  ANY USE BY YOU OF
- * THIS SOFTWARE CODE IS AT YOUR OWN RISK.  ALL WARRANTIES OF ANY KIND, EITHER
- * EXPRESSED OR IMPLIED, INCLUDING, WITHOUT LIMITATION, IMPLIED WARRANTIES OF
- * MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE, ARE HEREBY EXPRESSLY
- * DISCLAIMED.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  *
- * PROPRIETARY AND CONFIDENTIAL TRADE SECRET MATERIAL NOT FOR DISCLOSURE OUTSIDE
- * OF NEXT CENTURY CORPORATION EXCEPT BY PRIOR WRITTEN PERMISSION AND WHEN
- * RECIPIENT IS UNDER OBLIGATION TO MAINTAIN SECRECY.
  */
+package com.ncc.neon.metadata.store
 
 /**
  * Writes out arbitrary objects to a groovy config file in a way that is easy to read/edit
@@ -43,11 +35,37 @@ class ConfigWriter {
 
     ConfigWriter(Set<String> excludes = [] as Set) {
         this.excludes = Collections.unmodifiableSet(excludes + (['class', 'metaClass'] as Set))
-        builder.metaClass.newLine = { delegate.append(System.getProperty("line.separator")); return delegate }
-        builder.metaClass.indent { depth.times { delegate.append("\t") }; return delegate }
-        builder.metaClass.startBlock = { key, separator -> delegate.indent().append("${key} ${separator}").newLine(); depth++; return delegate }
-        builder.metaClass.endBlock = { separator -> depth--; delegate.indent().append(separator).newLine(); return delegate }
+        addBuilderMetaMethods()
     }
+
+    @SuppressWarnings("MethodSize") // this is just adding a couple of metamethods. it's pretty straightforward and I (jstorey) don't think it will make it much cleaner to split it up
+
+    private void addBuilderMetaMethods() {
+        builder.metaClass.newLine = {
+            delegate.append(System.getProperty("line.separator"))
+            return delegate
+        }
+
+        builder.metaClass.indent = {
+            depth.times {
+                delegate.append("\t")
+            }
+            return delegate
+        }
+
+        builder.metaClass.startBlock = { key, separator ->
+            delegate.indent().append("${key} ${separator}").newLine()
+            depth++
+            return delegate
+        }
+
+        builder.metaClass.endBlock = { separator ->
+            depth--
+            delegate.indent().append(separator).newLine()
+            return delegate
+        }
+    }
+
 
     public String writeConfig(String name, Map<String, Object> map) {
         write(name, map)
@@ -86,23 +104,23 @@ class ConfigWriter {
     }
 
     private void writeKeyValuePairs(String key, String value) {
-        writeAsString(key,"'${value}'")
+        writeAsString(key, "'${value}'")
     }
 
     private void writeKeyValuePairs(String key, Boolean value) {
-        writeAsString(key,value)
+        writeAsString(key, value)
     }
 
     private void writeKeyValuePairs(String key, Integer value) {
-        writeAsString(key,value)
+        writeAsString(key, value)
     }
 
     private void writeKeyValuePairs(String key, Float value) {
-        writeAsString(key,value)
+        writeAsString(key, value)
     }
 
     private void writeKeyValuePairs(String key, Double value) {
-        writeAsString(key,value)
+        writeAsString(key, value)
     }
 
     private void writeAsString(String key, Object value) {

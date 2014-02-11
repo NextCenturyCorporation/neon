@@ -50,7 +50,7 @@ class MongoQueryExecutorIntegrationTest extends AbstractQueryExecutorIntegration
     @Autowired
     public void setMongoQueryExecutor(MongoQueryExecutor mongoQueryExectuor) {
         this.mongoQueryExecutor = mongoQueryExectuor
-        this.mongoQueryExecutor.metaClass.getMongo = { MongoTestUtils.mongoClient }
+        this.mongoQueryExecutor.metaClass.getMongo = { MongoTestClient.mongoClient }
     }
 
     @Override

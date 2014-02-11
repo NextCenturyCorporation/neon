@@ -22,9 +22,11 @@ import com.ncc.neon.config.MongoConfigParser
 /**
  * Contains a connection to Mongo.
  */
-class MongoTestUtils {
 
-    private MongoTestUtils() {}
+// TODO: NEON-565 another duplication of mongo.hosts in here
+class MongoTestClient {
+
+    private MongoTestClient() {}
 
     private static MongoClient mongo
 

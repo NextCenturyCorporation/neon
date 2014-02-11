@@ -16,7 +16,7 @@
 
 package com.ncc.neon.transform
 import com.ncc.neon.IntegrationTestContext
-import com.ncc.neon.mongo.MongoTestUtils
+import com.ncc.neon.mongo.MongoTestClient
 import com.ncc.neon.query.Query
 import com.ncc.neon.query.QueryOptions
 import com.ncc.neon.query.Transform
@@ -51,7 +51,7 @@ class TransformIntegrationTest {
     @Autowired
     public void setMongoQueryExecutor(MongoQueryExecutor mongoQueryExectuor) {
         this.mongoQueryExecutor = mongoQueryExectuor
-        this.mongoQueryExecutor.metaClass.getMongo = { MongoTestUtils.mongoClient }
+        this.mongoQueryExecutor.metaClass.getMongo = { MongoTestClient.mongoClient }
     }
 
 

@@ -46,6 +46,9 @@ class MongoColumnMetadataScript {
      */
     @SuppressWarnings('JavaIoPackageAccess') // this is run as a standalone script that accesses the file system
     public static void main(String[] args) {
+        if (args.length < 3) {
+            usage()
+        }
         String database = args[0]
         String table = args[1]
         File file = new File(args[2])
@@ -58,6 +61,14 @@ class MongoColumnMetadataScript {
             port = args[4].toInteger()
         }
         new MongoColumnMetadataScript(host, port).generateMetadata(database, table, file)
+    }
+
+    private static void usage(args) {
+        def builder = new StringBuilder()
+        builder.append("Invalid arguments: ${args}")
+        builder.append(System.getProperty("line.separator"))
+        builder.append("usage: ${MongoColumnMetadataScript.name} <database> <table> <outputFile> [<mongoHost>] [<mongoPort>]")
+        throw new IllegalArgumentException(builder.toString())
     }
 
     public MongoColumnMetadataScript(String mongoHost, int mongoPort) {
