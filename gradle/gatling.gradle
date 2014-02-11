@@ -148,8 +148,6 @@ task stopGatlingJetty(type: org.gradle.api.plugins.jetty.JettyStop) {
     stopPort = concurrencyTestPort + 2
 }
 
-
-
 def getMongoHosts() {
     return project.hasProperty("mongo.hosts") ? getProperty("mongo.hosts") : "localhost"
 }
