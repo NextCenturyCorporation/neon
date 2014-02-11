@@ -1,4 +1,4 @@
-gitpackage com.ncc.neon.services
+package com.ncc.neon.services
 
 import com.ncc.neon.connect.ConnectionInfo
 import com.ncc.neon.connect.ConnectionManager
