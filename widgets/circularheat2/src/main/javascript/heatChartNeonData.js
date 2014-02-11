@@ -53,6 +53,9 @@ var HeatChartNeonData = (function () {
 		 */
 		var lastMode;
 
+
+        var connectionId;
+
 		initialize();
 
 		function initialize() {
@@ -62,10 +65,15 @@ var HeatChartNeonData = (function () {
 			neon.ready(function() {
 				neon.eventing.messaging.registerForNeonEvents({
 					activeDatasetChanged: onDatasetChanged,
+                    activeConnectionChanged: onConnectionChanged,
 					filtersChanged: onFiltersChanged
 				});
 			});
 		}
+
+        function onConnectionChanged(id){
+            connectionId = id;
+        }
 
 		function onFiltersChanged(message) {
 			// TODO: Handle filter change
@@ -301,7 +309,7 @@ var HeatChartNeonData = (function () {
 						}
 					};
 
-					neon.query.executeQuery(query, successCallback, errorCallback);
+					neon.query.executeQuery(connectionId, query, successCallback, errorCallback);
 				}
 				return stateObject;
 			}
