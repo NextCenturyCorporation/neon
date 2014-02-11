@@ -15,7 +15,6 @@
  */
 
 package com.ncc.neon.config
-
 import com.ncc.neon.connect.ConnectionInfo
 import com.ncc.neon.connect.ConnectionManager
 import com.ncc.neon.connect.DataSources
@@ -23,16 +22,12 @@ import com.ncc.neon.transform.Transformer
 import com.ncc.neon.transform.TransformerRegistry
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
-import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.context.annotation.Profile
 import org.springframework.context.annotation.PropertySource
-import org.springframework.core.env.Environment
-import org.springframework.core.env.PropertiesPropertySource
 
 import javax.annotation.PostConstruct
-
 /**
  * Spring bean configuration to use in production
  */
@@ -40,9 +35,6 @@ import javax.annotation.PostConstruct
 @PropertySource("classpath:neon.properties")
 @Profile("production")
 class ProductionAppContext {
-
-    @Autowired
-    private Environment environment
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ProductionAppContext)
 
@@ -55,7 +47,9 @@ class ProductionAppContext {
         if (override.exists()) {
             def properties = new Properties()
             properties.load(new FileInputStream(override))
-            environment.propertySources.addFirst(new PropertiesPropertySource("overrides", properties))
+            properties.each { prop, val ->
+                System.setProperty(prop, val)
+            }
         }
     }
 
