@@ -1,6 +1,23 @@
+/*
+ * Copyright 2013 Next Century Corporation
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ */
+
 package com.ncc.neon
 
 import com.ncc.neon.query.Query
+import com.ncc.neon.query.QueryExecutor
 import com.ncc.neon.query.QueryGroup
 import com.ncc.neon.query.QueryOptions
 import com.ncc.neon.query.clauses.*
@@ -13,28 +30,7 @@ import org.json.JSONArray
 import org.junit.After
 import org.junit.Test
 
-/*
- * ************************************************************************
- * Copyright (c), 2013 Next Century Corporation. All Rights Reserved.
- *
- * This software code is the exclusive property of Next Century Corporation and is
- * protected by United States and International laws relating to the protection
- * of intellectual property.  Distribution of this software code by or to an
- * unauthorized party, or removal of any of these notices, is strictly
- * prohibited and punishable by law.
- *
- * UNLESS PROVIDED OTHERWISE IN A LICENSE AGREEMENT GOVERNING THE USE OF THIS
- * SOFTWARE, TO WHICH YOU ARE AN AUTHORIZED PARTY, THIS SOFTWARE CODE HAS BEEN
- * ACQUIRED BY YOU "AS IS" AND WITHOUT WARRANTY OF ANY KIND.  ANY USE BY YOU OF
- * THIS SOFTWARE CODE IS AT YOUR OWN RISK.  ALL WARRANTIES OF ANY KIND, EITHER
- * EXPRESSED OR IMPLIED, INCLUDING, WITHOUT LIMITATION, IMPLIED WARRANTIES OF
- * MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE, ARE HEREBY EXPRESSLY
- * DISCLAIMED.
- *
- * PROPRIETARY AND CONFIDENTIAL TRADE SECRET MATERIAL NOT FOR DISCLOSURE OUTSIDE
- * OF NEXT CENTURY CORPORATION EXCEPT BY PRIOR WRITTEN PERMISSION AND WHEN
- * RECIPIENT IS UNDER OBLIGATION TO MAINTAIN SECRECY.
- */
+
 
 /**
  * Integration test that verifies the neon server properly translates database specific queries.
@@ -63,7 +59,7 @@ abstract class AbstractQueryExecutorIntegrationTest {
     /** a simple query that returns all of the data */
     static final ALL_DATA_QUERY = new Query(filter: ALL_DATA_FILTER)
 
-    protected abstract def getQueryExecutor()
+    protected abstract QueryExecutor getQueryExecutor()
 
     /**
      * Gets the folder that the input json files are stored in. By defalut, the test-data

@@ -1,6 +1,22 @@
-package com.ncc.neon.mongo
+/*
+ * Copyright 2013 Next Century Corporation
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ */
 
+package com.ncc.neon.mongo
 import com.ncc.neon.AbstractQueryExecutorIntegrationTest
+import com.ncc.neon.IntegrationTestContext
 import com.ncc.neon.connect.NeonConnectionException
 import com.ncc.neon.query.Query
 import com.ncc.neon.query.QueryOptions
@@ -15,61 +31,30 @@ import com.ncc.neon.util.LatLon
 import org.bson.types.ObjectId
 import org.json.JSONArray
 import org.json.JSONObject
-import org.junit.AfterClass
-import org.junit.BeforeClass
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.context.ContextConfiguration
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner
-/*
- * ************************************************************************
- * Copyright (c), 2013 Next Century Corporation. All Rights Reserved.
- *
- * This software code is the exclusive property of Next Century Corporation and is
- * protected by United States and International laws relating to the protection
- * of intellectual property.  Distribution of this software code by or to an
- * unauthorized party, or removal of any of these notices, is strictly
- * prohibited and punishable by law.
- *
- * UNLESS PROVIDED OTHERWISE IN A LICENSE AGREEMENT GOVERNING THE USE OF THIS
- * SOFTWARE, TO WHICH YOU ARE AN AUTHORIZED PARTY, THIS SOFTWARE CODE HAS BEEN
- * ACQUIRED BY YOU "AS IS" AND WITHOUT WARRANTY OF ANY KIND.  ANY USE BY YOU OF
- * THIS SOFTWARE CODE IS AT YOUR OWN RISK.  ALL WARRANTIES OF ANY KIND, EITHER
- * EXPRESSED OR IMPLIED, INCLUDING, WITHOUT LIMITATION, IMPLIED WARRANTIES OF
- * MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE, ARE HEREBY EXPRESSLY
- * DISCLAIMED.
- *
- * PROPRIETARY AND CONFIDENTIAL TRADE SECRET MATERIAL NOT FOR DISCLOSURE OUTSIDE
- * OF NEXT CENTURY CORPORATION EXCEPT BY PRIOR WRITTEN PERMISSION AND WHEN
- * RECIPIENT IS UNDER OBLIGATION TO MAINTAIN SECRECY.
- */
-
 /**
  * Integration test that verifies the neon server properly translates mongo queries.
  * These tests parallel the acceptance tests in the javascript client query acceptance tests
  */
 @RunWith(SpringJUnit4ClassRunner)
-@ContextConfiguration(classes = MongoIntegrationTestContext)
-@ActiveProfiles("mongo-integrationtest")
+@ContextConfiguration(classes = IntegrationTestContext)
 class MongoQueryExecutorIntegrationTest extends AbstractQueryExecutorIntegrationTest {
 
-    @BeforeClass
-    static void beforeClass() {
-        MongoQueryExecutor.metaClass.getMongo = { MongoIntegrationTestContext.MONGO }
-    }
+    private MongoQueryExecutor mongoQueryExecutor
 
-    @AfterClass
-    static void afterClass() {
-        MongoQueryExecutor.metaClass = null
-    }
-
+    @SuppressWarnings('JUnitPublicNonTestMethod')
     @Autowired
-    MongoQueryExecutor mongoQueryExecutor
+    public void setMongoQueryExecutor(MongoQueryExecutor mongoQueryExectuor) {
+        this.mongoQueryExecutor = mongoQueryExectuor
+        this.mongoQueryExecutor.metaClass.getMongo = { MongoTestClient.mongoClient }
+    }
 
     @Override
-    protected def getQueryExecutor(){
+    protected MongoQueryExecutor getQueryExecutor(){
         mongoQueryExecutor
     }
 
@@ -111,7 +96,6 @@ class MongoQueryExecutorIntegrationTest extends AbstractQueryExecutorIntegration
         )
         def expected = rows(2, 0)
         def query = new Query(filter: new Filter(databaseName: DATABASE_NAME, tableName: TABLE_NAME, whereClause: withinDistance))
-
         def result = queryExecutor.execute(query, QueryOptions.FILTERED_DATA)
         assertOrderedQueryResult(expected, result)
     }
