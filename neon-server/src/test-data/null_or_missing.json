@@ -1,0 +1,14 @@
+[
+    {
+        "_id": "5137b623a9f279d831b6fb8b",
+        "firstname": "Rodney",
+        "city": "Washington",
+        "state": "DC",
+        "salary": 88000,
+        "hiredate": "2012-10-30T00:00:00Z",
+        "location": {
+            "type": "Point",
+            "coordinates": [14.0, 22.0]
+        }
+    }
+]
