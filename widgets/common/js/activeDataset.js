@@ -31,8 +31,8 @@ neon.activeDataset = (function(){
         });
     }
 
-    function getFieldNamesForDataset(widgetName, callback){
-        neon.query.getFieldNames(databaseName, tableName, widgetName, callback);
+    function getFieldNamesForDataset(connectionId, widgetName, callback){
+        neon.query.getFieldNames(connectionId, databaseName, tableName, widgetName, callback);
     }
 
     return {

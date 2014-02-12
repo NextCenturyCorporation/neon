@@ -167,7 +167,7 @@ neon.ready(function () {
 
     function onActiveDatasetChanged(message) {
         state.setActiveDataset(message);
-        state.getFieldNamesForDataset(neon.widget.TABLE, populateSortFieldDropdown);
+        state.getFieldNamesForDataset(neon.tableState.getConnectionId(), neon.widget.TABLE, populateSortFieldDropdown);
         updateTable();
     }
 

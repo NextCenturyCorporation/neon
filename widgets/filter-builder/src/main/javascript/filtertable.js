@@ -83,7 +83,6 @@ neon.filterTable = (function () {
         setFilterContentFromFilterState();
     };
 
-
     function buildCompoundWhereClause(data) {
         var whereClause;
         var clauses = [];
