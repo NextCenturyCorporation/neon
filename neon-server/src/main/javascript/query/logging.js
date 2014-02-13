@@ -1,5 +1,8 @@
 neon.util.registerNewLogger = function (componentName) {
+
+    /* jshint ignore:start */
     var ac = new activityLogger();
+    /* jshint ignore:end */
 
     $.ajax({
             url: neon.query.SERVER_URL + '/services/loggingservice',

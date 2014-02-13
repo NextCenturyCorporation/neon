@@ -33,13 +33,19 @@ class LoggingSession {
         logData
     }
 
+    @SuppressWarnings("CatchException")
     private LogData register(){
-        RESTClient restClient = new RESTClient("${DRAPER_SERVER_URL}/")
-        HttpResponseDecorator resp = restClient.get(path: 'register')
+        try{
+            RESTClient restClient = new RESTClient("${DRAPER_SERVER_URL}/")
+            HttpResponseDecorator resp = restClient.get(path: 'register')
 
-        String ipAddress = resp.data.get("client_ip")
-        String sessionId = resp.data.get("session_id")
-        return new LogData(draperUrl: DRAPER_SERVER_URL, ipAddress: ipAddress, sessionId: sessionId)
+            String ipAddress = resp.data.get("client_ip")
+            String sessionId = resp.data.get("session_id")
+            return new LogData(draperUrl: DRAPER_SERVER_URL, ipAddress: ipAddress, sessionId: sessionId)
+        }
+        catch(Exception e){
+            return new LogData("","","")
+        }
     }
 
 }
