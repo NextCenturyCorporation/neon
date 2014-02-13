@@ -84,10 +84,19 @@ class HiveConvertQueryTest extends AbstractConversionTest {
     }
 
     @Override
+    protected void assertQueryWithWhereNullClause(query) {
+        assert query.toLowerCase() == "select * from ${DATABASE_NAME}.${TABLE_NAME} where ${FIELD_NAME} is null"
+    }
+
+    @Override
+    protected void assertQueryWithWhereNotNullClause(query) {
+        assert query.toLowerCase() == "select * from ${DATABASE_NAME}.${TABLE_NAME} where ${FIELD_NAME} is not null"
+    }
+
+    @Override
     protected void assertQueryWithEmptyFilter(query) {
         assertStandardHiveQLStatement(query)
     }
-
 
     @Override
     protected void assertSelectClausePopulated(query) {

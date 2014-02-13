@@ -60,7 +60,7 @@ class HiveWhereClause {
 
     private String renderClause(SingularWhereClause clause) {
         stringBuilder << formatLhs(clause.lhs, clause.rhs)
-        stringBuilder << " " << formatOperator(clause.operator) << " "
+        stringBuilder << " " << formatOperator(clause) << " "
         stringBuilder << formatRhs(clause.rhs)
     }
 
@@ -89,9 +89,25 @@ class HiveWhereClause {
         return rhs instanceof Date ? "unix_timestamp(${lhs})" : lhs
     }
 
-    private static String formatOperator(operator) {
-        // all operators translate directly from standard symbols except for notin
-        return operator == "notin" ? "not in" : operator
+    private static String formatOperator(clause) {
+        def operator = clause.operator
+        def value = clause.rhs
+
+        // special cases
+        if ( operator == "notin" ) {
+            return "not in"
+        }
+        if ( operator == '=' && !value ) {
+            // = null is translated to is null
+            return "is"
+        }
+        if ( operator == '!=' && !value ) {
+            // != null is translated to is not null
+            return "is not"
+        }
+
+        // no special case, operator maps directly to the string
+        return operator
     }
 
     private static String formatRhs(val) {

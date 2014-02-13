@@ -143,12 +143,10 @@ class JdbcClient implements ConnectionClient {
         }
     }
 
-
-
     private def getValue(ResultSetMetaData metadata, ResultSet resultSet, int index) {
         def val = resultSet.getObject(index)
         // timestamps are time-zone less, but we assume UTC
-        if (metadata.getColumnType(index) == Types.TIMESTAMP) {
+        if (val && metadata.getColumnType(index) == Types.TIMESTAMP) {
             // use joda time because not all jdbc drivers (e.g. hive) support timezones - they return in local time
             val = new DateTime(val.time).withZoneRetainFields(DateTimeZone.UTC).toDate()
         }

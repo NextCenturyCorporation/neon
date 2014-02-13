@@ -104,7 +104,7 @@ class HiveQueryExecutor implements QueryExecutor {
 
     @Override
     List<String> showTables(String dbName) {
-        LOGGER.debug("Executing Hive SHOW TABLES on database {}", dbName)
+        LOGGER.debug("Executing Hive SHOW TABLES IN {}", dbName)
         return runAndRelease { client ->
             client.executeQuery("SHOW TABLES IN " + dbName).collect { Map<String, String> map ->
                 map.get("tab_name")

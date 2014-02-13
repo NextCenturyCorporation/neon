@@ -71,7 +71,6 @@ class HiveConversionStrategy {
     }
 
     private static String escapeFieldName(String fieldName) {
-        // TODO: NEON-151 field may be null when doing a count operation
         return fieldName?.startsWith("_") ? "`${fieldName}`" : fieldName
     }
 

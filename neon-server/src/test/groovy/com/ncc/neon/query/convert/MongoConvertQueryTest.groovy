@@ -15,6 +15,7 @@
  */
 
 package com.ncc.neon.query.convert
+
 import com.mongodb.BasicDBObject
 import com.ncc.neon.query.QueryOptions
 import com.ncc.neon.query.filter.SelectionState
@@ -87,6 +88,20 @@ class MongoConvertQueryTest extends AbstractConversionTest {
     }
 
     @Override
+    protected void assertQueryWithWhereNullClause(query) {
+        assert query.query == simpleQuery
+        assert query.whereClauseParams == new BasicDBObject(FIELD_NAME, null)
+        assert query.selectParams == new BasicDBObject()
+    }
+
+    @Override
+    protected void assertQueryWithWhereNotNullClause(query) {
+        assert query.query == simpleQuery
+        assert query.whereClauseParams == new BasicDBObject(FIELD_NAME, new BasicDBObject('$ne', null))
+        assert query.selectParams == new BasicDBObject()
+    }
+
+    @Override
     protected void assertQueryWithEmptyFilter(query) {
         standardQueryAsserts(query)
     }
@@ -106,7 +121,7 @@ class MongoConvertQueryTest extends AbstractConversionTest {
         assert query.selectParams == selectParams
     }
 
-    private void standardQueryAsserts(query){
+    private void standardQueryAsserts(query) {
         assert query.query == simpleQuery
         assert query.whereClauseParams == new BasicDBObject()
         assert query.selectParams == new BasicDBObject()

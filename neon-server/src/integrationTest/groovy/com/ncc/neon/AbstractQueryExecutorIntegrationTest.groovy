@@ -148,6 +148,22 @@ abstract class AbstractQueryExecutorIntegrationTest {
     }
 
     @Test
+    void "query WHERE field is null or missing"() {
+        def whereLastNameNullClause = new SingularWhereClause(lhs: 'lastname', operator: '=', rhs: null)
+        def expected = readJson('null_or_missing.json')
+        def result = queryExecutor.execute(createQueryWithWhereClause(whereLastNameNullClause), QueryOptions.FILTERED_DATA)
+        assertUnorderedQueryResult(expected,result)
+    }
+
+    @Test
+    void "query WHERE field is not null and not missing"() {
+        def whereLastNameNotNullClause = new SingularWhereClause(lhs: 'lastname', operator: '!=', rhs: null)
+        def expected = readJson('not_null_and_not_missing.json')
+        def result = queryExecutor.execute(createQueryWithWhereClause(whereLastNameNotNullClause), QueryOptions.FILTERED_DATA)
+        assertUnorderedQueryResult(expected,result)
+    }
+
+    @Test
     void "group by and sort"() {
         def groupByStateClause = new GroupByFieldClause(field: 'state')
         def groupByCityClause = new GroupByFieldClause(field: 'city')

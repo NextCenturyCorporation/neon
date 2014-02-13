@@ -100,6 +100,20 @@ describe('query mapping', function () {
         assertQueryResults(query, rows(0, 2, 4));
     });
 
+    it('query WHERE field is null or missing', function() {
+        var whereLastNameNullClause = where('lastname','=',null);
+        var query = baseQuery().where(whereLastNameNullClause);
+        var expectedData = getJSONFixture('null_or_missing.json');
+        assertQueryResults(query,expectedData);
+    });
+
+    it('query WHERE field is not null and not missing', function() {
+        var whereLastNameNotNullClause = where('lastname','!=',null);
+        var query = baseQuery().where(whereLastNameNotNullClause);
+        var expectedData = getJSONFixture('not_null_and_not_missing.json');
+        assertQueryResults(query,expectedData);
+    });
+
     it('group by and sort', function () {
         var query = baseQuery()
             .groupBy('state', 'city')

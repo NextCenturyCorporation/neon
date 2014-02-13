@@ -15,6 +15,7 @@
  */
 
 package com.ncc.neon.query.convert
+
 import com.ncc.neon.query.Query
 import com.ncc.neon.query.clauses.*
 import com.ncc.neon.query.filter.DataSet
@@ -78,28 +79,28 @@ abstract class AbstractConversionTest {
     }
 
     @Test
-    void "test select clause populated"(){
+    void "test select clause populated"() {
         givenQueryHasFields()
         def query = convertQuery(simpleQuery)
         assertSelectClausePopulated(query)
     }
 
     @Test
-    void "test sort clause populated"(){
+    void "test sort clause populated"() {
         givenQueryHasSortClause()
         def query = convertQuery(simpleQuery)
         assertQueryWithSortClause(query)
     }
 
     @Test
-    void "test limit clause populated"(){
+    void "test limit clause populated"() {
         givenQueryHasLimitClause()
         def query = convertQuery(simpleQuery)
         assertQueryWithLimitClause(query)
     }
 
     @Test
-    void "test offset clause populated"(){
+    void "test offset clause populated"() {
         givenQueryHasSkipClause()
         def query = convertQuery(simpleQuery)
         assertQueryWithOffsetClause(query)
@@ -107,31 +108,45 @@ abstract class AbstractConversionTest {
 
 
     @Test
-    void "test distinct clause populated"(){
+    void "test distinct clause populated"() {
         givenQueryHasDistinctClause()
         def query = convertQuery(simpleQuery)
         assertQueryWithDistinctClause(query)
     }
 
     @Test
-    void "test aggregate clause populated"(){
+    void "test aggregate clause populated"() {
         givenQueryHasAggregateClause()
         def query = convertQuery(simpleQuery)
         assertQueryWithAggregateClause(query)
     }
 
     @Test
-    void "test group by clause populated"(){
+    void "test group by clause populated"() {
         givenQueryHasGroupByPopulated()
         def query = convertQuery(simpleQuery)
         assertQueryWithGroupByClauses(query)
     }
 
     @Test
-    void "test a filter with no where clause"(){
+    void "test a filter with no where clause"() {
         givenFilterStateHasAnEmptyFilter()
         def query = convertQuery(simpleQuery)
         assertQueryWithEmptyFilter(query)
+    }
+
+    @Test
+    void "test query where null"() {
+        givenQueryHasWhereNullClause()
+        def query = convertQuery(simpleQuery)
+        assertQueryWithWhereNullClause(query)
+    }
+
+    @Test
+    void "test query where not null"() {
+        givenQueryHasWhereNotNullClause()
+        def query = convertQuery(simpleQuery)
+        assertQueryWithWhereNotNullClause(query)
     }
 
     protected abstract def convertQuery(query)
@@ -156,9 +171,13 @@ abstract class AbstractConversionTest {
 
     protected abstract void assertQueryWithOrWhereClause(query)
 
+    protected abstract void assertQueryWithWhereNullClause(query)
+
+    protected abstract void assertQueryWithWhereNotNullClause(query)
+
     protected abstract void assertQueryWithEmptyFilter(query)
 
-    private void givenFilterStateHasAnEmptyFilter(){
+    private void givenFilterStateHasAnEmptyFilter() {
         FilterKey filterKey = new FilterKey(uuid: UUID.randomUUID(), dataSet: new DataSet(databaseName: simpleFilter.databaseName, tableName: simpleFilter.tableName))
         Filter filter = new Filter(databaseName: simpleFilter.databaseName, tableName: simpleFilter.tableName)
         filterState.addFilter(filterKey, filter)
@@ -181,6 +200,14 @@ abstract class AbstractConversionTest {
         OrWhereClause orWhereClause = new OrWhereClause(whereClauses: [clause1, clause2])
 
         simpleQuery.filter.whereClause = orWhereClause
+    }
+
+    private void givenQueryHasWhereNullClause() {
+        simpleQuery.filter.whereClause = new SingularWhereClause(lhs: FIELD_NAME, operator: "=", rhs: null)
+    }
+
+    private void givenQueryHasWhereNotNullClause() {
+        simpleQuery.filter.whereClause = new SingularWhereClause(lhs: FIELD_NAME, operator: "!=", rhs: null)
     }
 
     private void givenQueryHasSortClause() {
