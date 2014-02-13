@@ -23,6 +23,9 @@ neon.ready(function () {
     var query;
     var state = neon.activeDataset;
 
+    var ac = neon.util.registerNewLogger("Neon-Table");
+    ac.logSystemActivity('load table');
+
     initialize();
     function initialize(){
         neon.eventing.messaging.registerForNeonEvents({

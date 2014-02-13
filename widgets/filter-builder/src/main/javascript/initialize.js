@@ -19,6 +19,9 @@ $(function () {
     initializeWidget();
     neon.filterBuilderState.restoreState();
 
+    var ac = neon.util.registerNewLogger("Neon-Filter-Builder");
+    ac.logSystemActivity('load filter builder');
+
     function initializeWidget() {
         neon.query.SERVER_URL = $("#neon-server").val();
         createHandlebarsHelpers();

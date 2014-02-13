@@ -15,7 +15,6 @@
  */
 
 
-
 /**
  * The url of the query server. Defaults to localhost:8080/neon.
  * @property SERVER_URL
@@ -322,7 +321,7 @@ neon.query.Query.prototype.sortBy = function (fieldName, sortOrder) {
  * @param {neon.query.Transform} transformObj a transform to be applied to the data
  * @return {neon.query.Query} This query object
  */
-neon.query.Query.prototype.setTransform = function(transformObj){
+neon.query.Query.prototype.setTransform = function (transformObj) {
     this.transform = transformObj;
     return this;
 };
@@ -477,7 +476,7 @@ neon.query.executeQueryGroup = function (connectionId, queryGroup, successCallba
 };
 
 neon.query.executeQueryService_ = function (connectionId, query, successCallback, errorCallback, serviceName) {
-    if(query.selectionOnly_){
+    if (query.selectionOnly_) {
         serviceName += "withselectiononly";
     }
     else if (query.disregardFilters_) {
@@ -784,8 +783,6 @@ neon.query.getWidgetInitialization = function (id, successCallback) {
         }
     );
 };
-
-
 
 /**
  * Gets the database names available for the current datastore
