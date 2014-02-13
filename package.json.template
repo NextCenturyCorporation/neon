@@ -4,7 +4,7 @@
   "author": "Next Century Corporation",
   "devDependencies": {
     "grunt-cli": "~0.1.9",
-    "grunt-contrib-jshint": "~0.6.0",
+    "grunt-contrib-jshint": "~0.8.0",
     "grunt-contrib-concat": "~0.3.0",
     "grunt-contrib-jasmine": "~0.5.1",
     "yuidocjs": "~0.3.45"
