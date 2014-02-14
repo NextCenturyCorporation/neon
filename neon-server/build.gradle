@@ -347,6 +347,18 @@ task generateAcceptanceTestHelpers {
     }
 }
 
+task copyExamples(type: Copy) {
+    from '../examples'
+    into "${buildDir}/tmp/runExamples/webapp"
+    group = "Examples"
+}
+
+task runExamples(type: org.gradle.api.plugins.jetty.JettyRunWar) {
+    dependsOn 'clean', 'copyExamples', 'compileGroovy'
+    group = "Examples"
+    daemon = false
+}
+
 processAcceptanceTestResources {
     from(sourceSets.acceptanceTest.resources.srcDirs) {
         filter(ReplaceTokens, tokens: [
