@@ -11,7 +11,7 @@
             var connectionId = "mongo@localhost";
 
             //Build a query. This query gets all data from the given database and table.
-            var query = new neon.query.Query().selectFrom("mydb", "sample");
+            var query = new neon.query.Query().selectFrom("mydb", "sample").limit(5);
 
             //Execute the query and display the results.
             neon.query.executeQuery(connectionId, query, function(result){
