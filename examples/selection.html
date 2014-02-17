@@ -1,0 +1,43 @@
+<html>
+<head>
+    <!-- Import Neon JavaScript library. Jquery and Lodash come with the library.-->
+    <script src="http://localhost:8080/neon/js/neon.js"></script>
+
+    <script>
+        //Tell the JavaScript library the location where Neon is deployed.
+        neon.query.SERVER_URL = "http://localhost:8080/neon";
+
+        //A connection is already established. This identifies the connection.
+        var connectionId = "mongo@localhost";
+
+        var databaseName = "mydb";
+        var tableName = "sample";
+
+        //Register for a filter key. The server uses this to identify which client is creating the filter.
+        neon.query.registerForFilterKey(databaseName, tableName, function (filterKey) {
+            //Create a selection
+            var whereClause = neon.query.where("magnitude", ">=", 2.5);
+            var filter = new neon.query.Filter().selectFrom(databaseName, tableName).where(whereClause);
+            neon.eventing.publishing.addSelection(filterKey, filter);
+
+            //Query in selection mode.
+            var query = new neon.query.Query().selectFrom(databaseName, tableName).selectionMode();
+            //Execute the query and display the results.
+            neon.query.executeQuery(connectionId, query, function(result){
+                $("#result").html(JSON.stringify(result.data));
+            });
+
+        });
+
+    </script>
+
+</head>
+
+
+<body>
+<p>Selection Query Results:</p>
+<p id="result"></p>
+
+</body>
+
+</html>
