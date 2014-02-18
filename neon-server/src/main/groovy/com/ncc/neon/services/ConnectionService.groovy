@@ -50,9 +50,8 @@ class ConnectionService {
     }
 
     /**
-     * Gets a connection resource if it exists.
-     * @param id The identifier for the connection
-     * @return The connection info, or null if it does not exist.
+     * Gets the set of available connection resources
+     * @return A set of collection ids.
      */
     @GET
     @Produces(MediaType.APPLICATION_JSON)

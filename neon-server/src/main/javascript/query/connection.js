@@ -1,6 +1,7 @@
 /**
  * Represents a connection to a data source.
  * @param {String} datastore A database type
+ * @param {String} hostname The url where the connection is hosted.
  * @class neon.query.connection.Connection
  * @constructor
  */
