@@ -15,7 +15,6 @@
  */
 
 
-
 /**
  * This is an end to end acceptance test to verify that queries can be executed against a mongo instance.
  * These tests parallel those in the MongoQueryExecutorIntegrationTest.
@@ -76,7 +75,7 @@ describe('query mapping', function () {
             expectedRow._id = row._id;
             fields.forEach(function (field) {
                 // some rows do not have all fields, so skip those
-                if ( row[field] ) {
+                if (row[field]) {
                     expectedRow[field] = row[field];
                 }
             });
@@ -100,18 +99,18 @@ describe('query mapping', function () {
         assertQueryResults(query, rows(0, 2, 4));
     });
 
-    it('query WHERE field is null or missing', function() {
-        var whereLastNameNullClause = where('lastname','=',null);
+    it('query WHERE field is null or missing', function () {
+        var whereLastNameNullClause = where('lastname', '=', null);
         var query = baseQuery().where(whereLastNameNullClause);
         var expectedData = getJSONFixture('null_or_missing.json');
-        assertQueryResults(query,expectedData);
+        assertQueryResults(query, expectedData);
     });
 
-    it('query WHERE field is not null and not missing', function() {
-        var whereLastNameNotNullClause = where('lastname','!=',null);
+    it('query WHERE field is not null and not missing', function () {
+        var whereLastNameNotNullClause = where('lastname', '!=', null);
         var query = baseQuery().where(whereLastNameNotNullClause);
         var expectedData = getJSONFixture('not_null_and_not_missing.json');
-        assertQueryResults(query,expectedData);
+        assertQueryResults(query, expectedData);
     });
 
     it('group by and sort', function () {
@@ -495,6 +494,79 @@ describe('query mapping', function () {
 
         var expectedData = getJSONFixture('queryGroup.json');
         assertQueryGroupResults(queryGroup, expectedData);
+    });
+
+    it('gets a unique instance id', function () {
+        // instanceId1a and 1b should be the same
+        var instanceId1a = neon.query.getInstanceId('qualifier1');
+        var instanceId1b = neon.query.getInstanceId('qualifier1');
+        var instanceId2 = neon.query.getInstanceId('qualifier2');
+        // these are synchronous methods so they will block
+        var globalInstanceId1a = neon.query.getInstanceId();
+        var globalInstanceId1b = neon.query.getInstanceId();
+
+        expect(instanceId1a).toEqual(instanceId1b);
+        expect(instanceId1a).not.toEqual(instanceId2);
+        expect(instanceId1a).not.toEqual(globalInstanceId1a);
+        expect(instanceId2).not.toEqual(globalInstanceId1a);
+        expect(globalInstanceId1a).toEqual(globalInstanceId1b);
+    });
+
+    it('saves and restores state', function () {
+        // simulate state from two different widgets with different client ids
+        var widgetId1 = "id1";
+        var state1 = {"s1": "val1"};
+        var state1Saved = false;
+        var state1Restored = false;
+        var restoredState1;
+
+
+        var widgetId2 = "id2";
+        var state2 = {"s2": "val2"};
+        var restoredState2;
+        var state2Saved = false;
+        var state2Restored = false;
+
+        var empty = function () {
+        };
+
+        neon.query.saveState(widgetId1, state1, function () {
+            state1Saved = true;
+        }, empty);
+        waitsFor(function () {
+            return  state1Saved;
+        });
+        runs(function () {
+            neon.query.saveState(widgetId2, state2, function () {
+                state2Saved = true;
+            }, empty);
+            waitsFor(function () {
+                return state2Saved;
+            });
+            runs(function () {
+                neon.query.getSavedState(widgetId1, function (state) {
+                    restoredState1 = state;
+                    state1Restored = true;
+                });
+                waitsFor(function () {
+                    return state1Restored;
+                });
+                runs(function () {
+                    neon.query.getSavedState(widgetId2, function (state) {
+                        restoredState2 = state;
+                        state2Restored = true;
+                    });
+                    waitsFor(function () {
+                        return state2Restored;
+                    });
+                    runs(function () {
+                        expect(restoredState1).toEqual(state1);
+                        expect(restoredState2).toEqual(state2);
+                    });
+                });
+
+            });
+        });
     });
 
     /**

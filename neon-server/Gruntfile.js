@@ -23,6 +23,10 @@ module.exports = function (grunt) {
         return 'src/main/javascript/' + file;
     }
 
+    function lib(dir) {
+        return 'src/main/js-lib/' + dir + '/**/*.js';
+    }
+
     function createTestOptions(specs) {
         return {
             specs: specs,
@@ -33,6 +37,7 @@ module.exports = function (grunt) {
                 'src/js-test-support/mockNamespaces.js',
                 'src/js-test-support/ajaxMockUtils.js',
                 'src/js-test-support/owfEventingMock.js',
+                'src/js-test-support/eventBusTestUtils.js',
                 'build/acceptanceTestSupport/ports.js'],
             '--web-security': false,
             '--local-to-remote-url-access': true,
@@ -41,7 +46,7 @@ module.exports = function (grunt) {
     }
 
     // order dependent files, so exclude them from the concatenation. they will be included in the correct order
-    var concatExcludes = ['intro.js', 'util/loggerUtils.js'];
+    var concatExcludes = ['intro.js', 'util/loggerUtils.js', 'util/owfUtils.js', 'eventing/owf/owfEventBus.js'];
 
 
     grunt.initConfig({
@@ -55,13 +60,13 @@ module.exports = function (grunt) {
                     stripBanners: true
                 },
                 nodeps: {
-                    src: [].concat([src('intro.js'), src('util/loggerUtils.js')]).concat(grunt.file.expand(src('**/*.js'), concatExcludes.map(function (file) {
+                    src: [].concat([src('intro.js'), src('util/loggerUtils.js'), src('util/owfUtils.js'), src('eventing/owf/owfEventBus.js')]).concat(grunt.file.expand(src('**/*.js'), concatExcludes.map(function (file) {
                         return '!' + src(file);
                     }))),
                     dest: 'build/js-temp/<%= pkg.name %>.js'
                 },
                 dist: {
-                    src: ['src/main/js-lib/**/*.js', 'build/dependencies/**/*.js', '<%= concat.nodeps.dest %>'],
+                    src: [lib('lodash'), lib('uuid'), lib('postal'), lib('jquery'), lib('log4javascript'), 'build/dependencies/**/*.js', '<%= concat.nodeps.dest %>'],
                     dest: outputFile
                 }
             },
@@ -84,13 +89,15 @@ module.exports = function (grunt) {
 
             }
         }
-    );
+    )
+    ;
 
     grunt.loadNpmTasks('grunt-contrib-concat');
     grunt.loadNpmTasks('grunt-contrib-jshint');
     grunt.loadNpmTasks('grunt-contrib-jasmine');
 
-    // hint after concatenation since the concatenated version is also hinted
+// hint after concatenation since the concatenated version is also hinted
     grunt.registerTask('default', ['concat', 'jshint', 'jasmine:unit']);
 
-};
+}
+;

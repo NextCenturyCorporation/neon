@@ -78,7 +78,7 @@ $(function () {
 
     function populateDatabaseDropdown(id) {
         neon.filterBuilderState.setConnectionId(id);
-        neon.eventing.messaging.publish(neon.eventing.channels.ACTIVE_CONNECTION_CHANGED, id);
+        neon.filterTable.messenger.publish(neon.eventing.channels.ACTIVE_CONNECTION_CHANGED, id);
         neon.query.getDatabaseNames(neon.filterBuilderState.getConnectionId(), function (databaseNames) {
             neon.wizard.populateDropdown('#database-select', databaseNames);
             populateTableDropdown();
@@ -121,7 +121,7 @@ $(function () {
     }
 
     function clearAllFilters() {
-        neon.eventing.publishing.clearFilters(function () {
+        neon.filterTable.messenger.clearFilters(function () {
             var database = $('#database-select').val();
             var table = $('#table-select').val();
             var message = { "database": database, "table": table };
@@ -133,7 +133,7 @@ $(function () {
         var database = $('#database-select').val();
         var table = $('#table-select').val();
         var message = { "database": database, "table": table };
-        neon.eventing.messaging.publish(neon.eventing.channels.ACTIVE_DATASET_CHANGED, message);
+        neon.filterTable.messenger.publish(neon.eventing.channels.ACTIVE_DATASET_CHANGED, message);
     }
 
 });

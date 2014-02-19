@@ -45,6 +45,8 @@ neon.util.ajaxUtils = (function(){
      *  <li>contentType: The mime type of data being sent, such as <code>application/json</code></li>
      *  <li>responseType: The type of data expected as a return value, such as <code>json</code> or <code>text</code></li>
      *  <li>success: The callback function to execute on success. It will be passed the return value of the call</li>
+     *  <li>async: If the call should be asynchronous (defaults to true)</li>
+     *  <li>global: If the call should trigger global ajax handlers</li>
      *  <li>error: The callback function to execute on error. It will have 3 parameters - the xhr, a short error status message and the error message</li>
      * </ul>
      * @return {neon.util.AjaxRequest} The xhr request object
@@ -61,6 +63,7 @@ neon.util.ajaxUtils = (function(){
         params.success = opts.success;
         params.error = opts.error;
         params.global = opts.global;
+        params.async = opts.async;
         // set a default error behavior is none is specified
         if (!params.error) {
             params.error = function (xhr, status, error) {

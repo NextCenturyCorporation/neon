@@ -1,5 +1,5 @@
 /*
- * Copyright 2013 Next Century Corporation
+ * Copyright 2014 Next Century Corporation
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -14,12 +14,26 @@
  *
  */
 
+/**
+ * Utility methods for working with OWF
+ * @class neon.util.owfUtils
+ * @static
+ */
+neon.util.owfUtils = (function () {
 
 
-var neon = neon || {};
-neon.eventing = neon.eventing || {};
-neon.eventing.owf = neon.eventing.owf || {};
-neon.query = neon.query || {};
-neon.query.connection = neon.query.connection || {};
-neon.util = neon.util || {};
-neon.widget = neon.widget || {};
+    /**
+     * Indicates if neon is running within an OWF environment
+     * @return {boolean} true if running in OWF, false if not
+     * @method isRunningInOWF
+     */
+    function isRunningInOWF() {
+        return typeof (OWF) !== "undefined" && OWF.Util.isRunningInOWF();
+    }
+
+    return {
+        isRunningInOWF: isRunningInOWF
+    };
+
+
+})();

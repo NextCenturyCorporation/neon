@@ -23,16 +23,16 @@ neon.ready(function () {
     var HOURS_IN_WEEK = 168;
     var HOURS_IN_DAY = 24;
 
-    var clientId = neon.eventing.messaging.getInstanceId();
+    var messenger = new neon.eventing.Messenger();
+    var clientId;
     var connectionId;
 
     initialize();
 
     function initialize() {
-
         neon.query.SERVER_URL = $("#neon-server").val();
-
-        neon.eventing.messaging.registerForNeonEvents({
+        clientId = neon.query.getInstanceId('neon.circularheat');
+        messenger.registerForNeonEvents({
             activeDatasetChanged: onDatasetChanged,
             activeConnectionChanged: onConnectionChanged,
             filtersChanged: onFiltersChanged

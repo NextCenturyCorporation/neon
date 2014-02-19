@@ -15,7 +15,6 @@
  */
 
 
-
 /**
  * The url of the query server. Defaults to localhost:8080/neon.
  * @property SERVER_URL
@@ -322,7 +321,7 @@ neon.query.Query.prototype.sortBy = function (fieldName, sortOrder) {
  * @param {neon.query.Transform} transformObj a transform to be applied to the data
  * @return {neon.query.Query} This query object
  */
-neon.query.Query.prototype.setTransform = function(transformObj){
+neon.query.Query.prototype.setTransform = function (transformObj) {
     this.transform = transformObj;
     return this;
 };
@@ -477,7 +476,7 @@ neon.query.executeQueryGroup = function (connectionId, queryGroup, successCallba
 };
 
 neon.query.executeQueryService_ = function (connectionId, query, successCallback, errorCallback, serviceName) {
-    if(query.selectionOnly_){
+    if (query.selectionOnly_) {
         serviceName += "withselectiononly";
     }
     else if (query.disregardFilters_) {
@@ -769,6 +768,45 @@ neon.query.getSavedState = function (id, successCallback) {
 };
 
 /**
+ * Gets a unique id for a widget for a particular session. Repeated calls to this method in a single session with the
+ * same parameters will result in the same id being returned. Note this method is executed synchronously.
+ * @param {String} [qualifier] If a qualifier is specified, the id will be tied to that qualifier. This
+ * allows multiple ids to be created for a single session. If a qualifier is not specified, the id returned
+ * will be unique to the session.
+ * If running within OWF, the OWF instanceId is appended to the identifier so the same widget can be reused in
+ * multiple windows without conflict.
+ * @method getInstanceId
+ * @return {String} A unique identifier string
+ */
+neon.query.getInstanceId = function (qualifier) {
+    // callers expect the id to return synchronously so set async to false
+    var instanceId;
+    neon.util.ajaxUtils.doGet(
+        neon.query.serviceUrl('widgetstateservice', 'instanceid', neon.query.buildInstanceIdQueryString_(qualifier)),
+        {
+            async: false,
+            success: function (id) {
+                instanceId = id;
+            }
+        }
+    );
+    return instanceId;
+};
+
+neon.query.buildInstanceIdQueryString_ = function (qualifier) {
+    var queryString = '';
+    if (qualifier) {
+        queryString = '?qualifier=' + qualifier;
+        // when running in OWF, it is possible to have the same widget running multiple times so append
+        // the owf widget instanceid to the qualifier
+        if (neon.util.owfUtils.isRunningInOWF()) {
+            queryString += OWF.getInstanceId();
+        }
+    }
+    return queryString;
+};
+
+/**
  * Gets widget initialization metadata.
  * @method getWidgetInitialization
  * @param {String} id an identifier of a widget, usually the widget name
@@ -784,7 +822,6 @@ neon.query.getWidgetInitialization = function (id, successCallback) {
         }
     );
 };
-
 
 
 /**

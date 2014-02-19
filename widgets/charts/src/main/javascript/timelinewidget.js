@@ -15,21 +15,22 @@
  */
 
 
-
 neon.ready(function () {
     var timeline;
     var COUNT_FIELD_NAME = 'Count';
-    var clientId = neon.eventing.messaging.getInstanceId();
+    var messenger = new neon.eventing.Messenger();
+    var clientId;
 
     initialize();
 
     function initialize() {
         neon.query.SERVER_URL = $("#neon-server").val();
+        clientId = neon.query.getInstanceId('neon.timeline');
         neon.toggle.createOptionsPanel("#options-panel");
         drawChart();
         populateTimeGranularityDropdown();
 
-        neon.eventing.messaging.registerForNeonEvents({
+        messenger.registerForNeonEvents({
             activeDatasetChanged: function (message) {
                 neon.chartWidget.onActiveDatasetChanged(message, drawChart, neon.widget.TIMELINE);
             },
@@ -47,14 +48,12 @@ neon.ready(function () {
             drawChart();
         });
         $('#reset-filter').click(function () {
-            neon.eventing.publishing.removeFilter(neon.chartWidget.getFilterKey(), drawChart);
+            messenger.removeFilter(neon.chartWidget.getFilterKey(), drawChart);
         });
     }
 
-    function onFiltersChanged(message, sender) {
-        if (sender !== neon.eventing.messaging.getIframeId()) {
-            drawChart();
-        }
+    function onFiltersChanged(message) {
+        drawChart();
     }
 
     /**
@@ -132,7 +131,7 @@ neon.ready(function () {
             var filterClause = neon.query.and(startFilterClause, endFilterClause);
             var filter = new neon.query.Filter().selectFrom(neon.chartWidget.getDatabaseName(), neon.chartWidget.getTableName()).where(filterClause);
 
-            neon.eventing.publishing.replaceFilter(neon.chartWidget.getFilterKey(), filter);
+            messenger.replaceFilter(neon.chartWidget.getFilterKey(), filter);
         });
     }
 

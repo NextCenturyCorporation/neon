@@ -24,7 +24,9 @@ neon.ready(function () {
     neon.query.SERVER_URL = $("#neon-server").val();
 
     var connectionId;
-    neon.eventing.messaging.registerForNeonEvents({
+    var messenger = new neon.eventing.Messenger();
+
+    messenger.registerForNeonEvents({
         activeConnectionChanged: onConnectionChanged
     });
 

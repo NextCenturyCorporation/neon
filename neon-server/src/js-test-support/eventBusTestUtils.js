@@ -1,5 +1,5 @@
 /*
- * Copyright 2013 Next Century Corporation
+ * Copyright 2014 Next Century Corporation
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -14,12 +14,18 @@
  *
  */
 
+neon.eventing.eventBusTestUtils = (function () {
 
+    // helper method for testing event bus functionality
+    return {
+        testPublishSubscribe: function (eventBus) {
+            var channel = 'aChannel';
+            var message = 'theMessage';
+            var callback = jasmine.createSpy();
+            eventBus.subscribe(channel, callback);
+            eventBus.publish(channel, message);
+            expect(callback).toHaveBeenCalledWith(message);
+        }
+    };
 
-var neon = neon || {};
-neon.eventing = neon.eventing || {};
-neon.eventing.owf = neon.eventing.owf || {};
-neon.query = neon.query || {};
-neon.query.connection = neon.query.connection || {};
-neon.util = neon.util || {};
-neon.widget = neon.widget || {};
+})();

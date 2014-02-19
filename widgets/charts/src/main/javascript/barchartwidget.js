@@ -20,15 +20,16 @@
 neon.ready(function () {
 
     var COUNT_FIELD_NAME = 'Count';
-    var clientId = neon.eventing.messaging.getInstanceId();
+    var messenger = new neon.eventing.Messenger();
+    var clientId;
     initialize();
 
     function initialize() {
         neon.query.SERVER_URL = $("#neon-server").val();
-
+        clientId = neon.query.getInstanceId('neon.barchart');
         neon.toggle.createOptionsPanel("#options-panel");
         drawChart();
-        neon.eventing.messaging.registerForNeonEvents({
+        messenger.registerForNeonEvents({
             activeDatasetChanged: function (message) {
                 neon.chartWidget.onActiveDatasetChanged(message, drawChart, neon.widget.BARCHART);
             },

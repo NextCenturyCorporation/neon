@@ -15,17 +15,19 @@
  */
 
 
-
 neon.ready(function () {
     neon.query.SERVER_URL = $("#neon-server").val();
+    var widgetName = 'neon.table';
 
     var table;
     var query;
     var state = neon.activeDataset;
+    var messenger = new neon.eventing.Messenger();
+
 
     initialize();
-    function initialize(){
-        neon.eventing.messaging.registerForNeonEvents({
+    function initialize() {
+        messenger.registerForNeonEvents({
             activeDatasetChanged: onActiveDatasetChanged,
             activeConnectionChanged: onConnectionChanged,
             filtersChanged: updateTable,
@@ -41,7 +43,7 @@ neon.ready(function () {
         sizeTableToRemainingSpace();
     }
 
-    function onConnectionChanged(id){
+    function onConnectionChanged(id) {
         neon.tableState.setConnectionId(id);
     }
 
@@ -92,7 +94,7 @@ neon.ready(function () {
         applySort(query);
 
         neon.query.executeQuery(neon.tableState.getConnectionId(), query, populateTable);
-        neon.tableState.saveState(query);
+        neon.tableState.saveState(neon.query.getInstanceId(widgetName),query);
     }
 
     function applyLimit() {
@@ -109,43 +111,44 @@ neon.ready(function () {
             query.sortBy(sortField, sortDirection);
         }
     }
+
     function populateTable(data) {
         var options = createOptions(data);
         table = new tables.Table('#table', options).draw().registerSelectionListener(onSelection);
         sizeTableToRemainingSpace();
     }
 
-    function createOptions(data){
+    function createOptions(data) {
         var _id = "_id";
         var has_id = true;
 
-        _.each(data.data, function(element){
-            if(!(_.has(element, _id))){
+        _.each(data.data, function (element) {
+            if (!(_.has(element, _id))) {
                 has_id = false;
             }
         });
 
         var options = {data: data.data};
 
-        if(has_id){
+        if (has_id) {
             options.id = _id;
         }
         return options;
     }
 
-    function onSelection(idField, rows){
+    function onSelection(idField, rows) {
         var values = [];
-        _.each(rows, function(row){
+        _.each(rows, function (row) {
             values.push(row[idField]);
         });
 
-        if(values.length > 0){
+        if (values.length > 0) {
             var filterClause = neon.query.where(idField, "in", values);
             var filter = new neon.query.Filter().selectFrom(state.getDatabaseName(), state.getTableName()).where(filterClause);
-            neon.eventing.publishing.replaceSelection(state.getFilterKey(), filter);
+            messenger.replaceSelection(state.getFilterKey(), filter);
         }
-        else{
-            neon.eventing.publishing.removeSelection(state.getFilterKey());
+        else {
+            messenger.removeSelection(state.getFilterKey());
         }
     }
 
@@ -159,10 +162,8 @@ neon.ready(function () {
         $('#limit').change(updateTable);
     }
 
-    function onSelectionChanged(message, sender){
-        if (sender === neon.eventing.messaging.getIframeId()) {
-            neon.tableState.saveState(query, table.table_.getSelectedRows());
-        }
+    function onSelectionChanged(message) {
+        neon.tableState.saveState(query, table.table_.getSelectedRows());
     }
 
     function onActiveDatasetChanged(message) {
@@ -177,16 +178,16 @@ neon.ready(function () {
     }
 
     function restoreState() {
-        neon.tableState.restoreState(function(data){
+        neon.tableState.restoreState(neon.query.getInstanceId(widgetName), function (data) {
             query = data.query;
-            if(data.sortColumns){
+            if (data.sortColumns) {
                 populateSortFieldDropdown(data.sortColumns);
             }
             neon.dropdown.setDropdownInitialValue("sort-field", data.sortValue);
             styleSortDirectionButtonFromValue(data.sortDirection);
-            neon.query.executeQuery(neon.tableState.getConnectionId(), query, function(queryResults){
+            neon.query.executeQuery(neon.tableState.getConnectionId(), query, function (queryResults) {
                 populateTable(queryResults);
-                if(data.selectedRows){
+                if (data.selectedRows) {
                     table.table_.setSelectedRows(data.selectedRows);
                 }
             });

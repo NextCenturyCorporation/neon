@@ -21,5 +21,7 @@
     OWF.Intents = OWF.Intents || {};
 
     window.neon = window.neon || {};
-    neon.mock = {};
+    neon.mock = neon.mock || {};
+    neon.mock.owf = neon.mock.owf || {};
+    neon.eventing = neon.eventing || {};
 })();

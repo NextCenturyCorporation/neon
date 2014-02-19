@@ -17,13 +17,11 @@
 var neon = neon || {};
 neon.tableState = (function () {
 
-    var clientId;
     var connectionId;
 
 
-    function getSavedState(restoreStateCallback){
+    function getSavedState(clientId, restoreStateCallback){
         neon.ready(function(){
-            clientId = neon.eventing.messaging.getInstanceId();
             neon.query.getSavedState(clientId, function(state){
                 restoreTableState(state, restoreStateCallback);
             });
@@ -68,7 +66,7 @@ neon.tableState = (function () {
     }
 
 
-    function saveState(currentQuery, rowSelection){
+    function saveState(clientId, currentQuery, rowSelection){
         neon.query.saveState(clientId, buildStateObject(currentQuery, rowSelection));
     }
 

@@ -72,6 +72,8 @@ var HeatChartNeonData = (function () {
 
         var connectionId;
 
+        var messenger = new neon.eventing.Messenger();
+
 		initialize();
 
 		function initialize() {
@@ -79,7 +81,7 @@ var HeatChartNeonData = (function () {
 			neon.query.SERVER_URL = "https://localhost:9443/neon"/* TODO: $("#neon-server").val()*/;
 
 			neon.ready(function() {
-				neon.eventing.messaging.registerForNeonEvents({
+				messenger.registerForNeonEvents({
 					activeDatasetChanged: onDatasetChanged,
                     activeConnectionChanged: onConnectionChanged,
 					filtersChanged: onFiltersChanged
@@ -188,7 +190,7 @@ var HeatChartNeonData = (function () {
 			var endClause = neon.query.where(dateField, "<=", end.toJSON());
 			var filterClause = neon.query.and(startClause, endClause);
 			var filter = new neon.query.Filter().selectFrom(databaseName, tableName).where(filterClause);
-			neon.eventing.publishing.replaceFilter(filterKey, filter);
+			messenger.replaceFilter(filterKey, filter);
 		}
 
 		var pub = {
@@ -216,7 +218,7 @@ var HeatChartNeonData = (function () {
 				if (filterKey) {
 					var endpoints = _time.computeChartEnds(date, mode);
 					filterTimeRange(endpoints[0], endpoints[1]);
-					var clientId = neon.eventing.messaging.getInstanceId();
+					var clientId = neon.query.getInstanceId('neon.circularheat2');
 					var stateObject = this._GET(date, mode, updateDataCallback, errorCallback);
 					if (stateObject) {
 						neon.query.saveState(clientId, stateObject);

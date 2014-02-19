@@ -22,7 +22,7 @@ neon.filterBuilderState = (function () {
 
     function restoreState(){
         neon.ready(function(){
-            clientId = neon.eventing.messaging.getInstanceId();
+            clientId = neon.query.getInstanceId('neon.filterbuilder');
             neon.query.getSavedState(clientId, function(data){
                 restoreConnectionState(data);
                 if(data.filterKey){

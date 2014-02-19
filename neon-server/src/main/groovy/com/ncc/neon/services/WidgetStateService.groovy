@@ -17,6 +17,7 @@
 package com.ncc.neon.services
 
 import com.ncc.neon.result.MetadataResolver
+import com.ncc.neon.state.StateIdGenerator
 import com.ncc.neon.state.WidgetStates
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
@@ -38,6 +39,9 @@ class WidgetStateService {
 
     @Autowired
     MetadataResolver metadataResolver
+
+    @Autowired
+    StateIdGenerator stateIdGenerator
 
     /**
      * Saves the state of the widget to the user's session
@@ -62,7 +66,7 @@ class WidgetStateService {
     @Path("restoreState")
     String restoreState(@QueryParam("clientId") String clientId) {
         def widgetState = widgetStates.getWidgetState(clientId)
-        if(widgetState){
+        if (widgetState) {
             return widgetState.state
         }
         return null
@@ -81,5 +85,21 @@ class WidgetStateService {
         def data = metadataResolver.getWidgetInitializationData(clientId)
         return data.initDataJson
     }
+
+    @GET
+    @Produces(MediaType.TEXT_PLAIN)
+    @Path("instanceid")
+    String getInstanceId(@QueryParam("qualifier") String qualifier) {
+        UUID id
+        if ( qualifier ) {
+            id = stateIdGenerator.getId(qualifier)
+        }
+        else {
+            // no qualifier, use the global id
+            id = stateIdGenerator.id
+        }
+        return id.toString()
+    }
+
 
 }

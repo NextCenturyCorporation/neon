@@ -15,34 +15,30 @@
  */
 
 
-
-neon.mock.channelRegistry = {};
-
-neon.mock.Channel = function() {
-    this.callbacks = [];
-}
+neon.mock.owf.channels = {};
+neon.mock.owf.runningInOWF = false;
 
 OWF.Util = {
-    isRunningInOWF: function(){
-        return true;
+    isRunningInOWF: function () {
+        return neon.mock.owf.runningInOWF;
     }
 };
 
-OWF.Eventing.subscribe = function(channelName, callback) {
-    if ( !(channelName in neon.mock.channelRegistry) ) {
-        neon.mock.channelRegistry[channelName] = new neon.mock.Channel();
+OWF.Eventing.subscribe = function (channelName, callback) {
+    neon.mock.owf.channels[channelName] = callback;
+};
+
+OWF.Eventing.publish = function (channelName, message) {
+    var callback = neon.mock.owf.channels[channelName];
+    if (callback) {
+        callback('owfEventingMockSender', message, channelName);
     }
-    neon.mock.channelRegistry[channelName].callbacks.push(callback)
 };
 
-OWF.Eventing.publish = function(channelName, message) {
-    var channel = neon.mock.channelRegistry[channelName];
-    channel.callbacks.forEach(function(callback) {
-        callback.call(null, 'owfEventingMockSender', message);
-    });
-
+OWF.Eventing.unsubscribe = function (channelName) {
+    delete neon.mock.owf.channels[channelName];
 };
 
-neon.mock.clearChannels = function() {
-    neon.mock.channelRegistry = {};
+neon.mock.owf.clearChannels = function () {
+    neon.mock.owf.channels = {};
 };

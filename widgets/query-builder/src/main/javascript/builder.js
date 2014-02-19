@@ -20,14 +20,15 @@ neon.queryBuilder = (function () {
     var table = new tables.Table('#results', {data: []});
     var numberOfRows = 0;
 
+    var messenger = new neon.eventing.Messenger();
     var clientId;
     var connectionId;
 
     neon.ready(function(){
-        clientId =  neon.eventing.messaging.getInstanceId();
+        clientId =  neon.query.getInstanceId('neon.querybuilder');
         restoreState();
 
-        neon.eventing.messaging.registerForNeonEvents({
+        messenger.registerForNeonEvents({
             activeConnectionChanged: onConnectionChanged
         });
     });

@@ -17,8 +17,7 @@
 
 
 /**
- * This class has a list of the available channels that are used for messaging between
- * OWF widgets
+ * This class has a list of the available channels that are used for messaging between widgets
  * @class neon.eventing.channels
  */
 

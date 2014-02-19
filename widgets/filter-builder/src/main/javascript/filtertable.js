@@ -17,6 +17,7 @@
 var neon = neon || {};
 neon.filterTable = (function () {
 
+    var messenger = new neon.eventing.Messenger();
     var filterKey;
     var columnOptions;
     var operatorOptions = ["=", "!=", ">", "<", ">=", "<="];
@@ -38,7 +39,7 @@ neon.filterTable = (function () {
         updateDataFromForm(id);
         var filter = buildFilterFromData();
 
-        neon.eventing.publishing.replaceFilter(filterKey, filter, function(){
+        messenger.replaceFilter(filterKey, filter, function(){
             if (!updatingExisting) {
                 filterState.data.push(new FilterRow());
             }
@@ -50,7 +51,7 @@ neon.filterTable = (function () {
         filterState.data.splice(id, 1);
         var filter = buildFilterFromData();
 
-        neon.eventing.publishing.replaceFilter(filterKey, filter, redrawFilterContentAndSaveState);
+        messenger.replaceFilter(filterKey, filter, redrawFilterContentAndSaveState);
     };
 
     var initializeFilterSection = function () {
@@ -187,7 +188,8 @@ neon.filterTable = (function () {
         setColumns: setColumns,
         getFilterKey: getFilterKey,
         getFilterState: getFilterState,
-        initializeFilterSection: initializeFilterSection
+        initializeFilterSection: initializeFilterSection,
+        messenger: messenger
     };
 
 })();
