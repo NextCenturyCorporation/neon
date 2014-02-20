@@ -53,7 +53,7 @@ Wiki: [Neon Developer's Guide](https://github.com/NextCenturyCorporation/neon/wi
 
 Website: [Neon Framework Website](http://neonframework.org)
 
-Live Examples: http://nextcenturycorporation.github.io/neon/
+Live Examples: [Neon Examples Gallery](http://nextcenturycorporation.github.io/neon)
 
 Copyright 2013 Next Century Corporation
 
