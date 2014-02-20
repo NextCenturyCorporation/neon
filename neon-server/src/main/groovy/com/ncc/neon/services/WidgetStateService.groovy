@@ -69,7 +69,7 @@ class WidgetStateService {
         if (widgetState) {
             return widgetState.state
         }
-        return null
+        return ""
     }
 
     /**

@@ -20,19 +20,21 @@ neon.filterBuilderState = (function () {
     var clientId;
     var connectionId;
 
-    function restoreState(){
-        neon.ready(function(){
+    function restoreState() {
+        neon.ready(function () {
             clientId = neon.query.getInstanceId('neon.filterbuilder');
-            neon.query.getSavedState(clientId, function(data){
-                restoreConnectionState(data);
-                if(data.filterKey){
+            neon.query.getSavedState(clientId, function (data) {
+                if (data.connectionId) {
+                    restoreConnectionState(data);
+                }
+                if (data.filterKey) {
                     restoreConnectionAndFilterState(data);
                 }
             });
         });
     }
 
-    function restoreConnectionState(data){
+    function restoreConnectionState(data) {
         $("#db-table").show();
         $('#hostname-input').val(data.selectedHostname);
 
@@ -48,7 +50,7 @@ neon.filterBuilderState = (function () {
         neon.dropdown.setDropdownInitialValue("table-select", data.selectedTable);
     }
 
-    function restoreConnectionAndFilterState(data){
+    function restoreConnectionAndFilterState(data) {
         $("#filter-container").show();
         $("#clear-filters-button").show();
         neon.filterTable.setFilterKey(data.filterKey);
@@ -56,7 +58,7 @@ neon.filterBuilderState = (function () {
         $("input[type='radio'][name='boolean'][value=" + data.andOr + "]").attr('checked', 'checked');
     }
 
-    function buildSimpleStateObject(){
+    function buildSimpleStateObject() {
         var dataset = neon.wizard.getDataset();
         var databaseOptions = $('#database-select option');
         var tableOptions = $('#table-select option');
@@ -67,14 +69,18 @@ neon.filterBuilderState = (function () {
             selectedDatastore: $('#datastore-select option:selected').val(),
             selectedDatabase: dataset.database,
             selectedTable: dataset.table,
-            databases: $.map(databaseOptions, function(option){ return option.value;}),
-            tables: $.map(tableOptions, function(option){ return option.value;})
+            databases: $.map(databaseOptions, function (option) {
+                return option.value;
+            }),
+            tables: $.map(tableOptions, function (option) {
+                return option.value;
+            })
         };
 
         return stateObject;
     }
 
-    function buildFullStateObject(){
+    function buildFullStateObject() {
         var stateObject = buildSimpleStateObject();
         var selectedAndOr = $("input[type='radio'][name='boolean']:checked").val();
 
@@ -87,17 +93,17 @@ neon.filterBuilderState = (function () {
         return stateObject;
     }
 
-    function saveState(){
-        if(neon.filterTable.getFilterKey()){
+    function saveState() {
+        if (neon.filterTable.getFilterKey()) {
             neon.query.saveState(clientId, buildFullStateObject());
         }
     }
 
-    function setConnectionId(id){
+    function setConnectionId(id) {
         connectionId = id;
     }
 
-    function getConnectionId(){
+    function getConnectionId() {
         return connectionId;
     }
 

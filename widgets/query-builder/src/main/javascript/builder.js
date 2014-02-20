@@ -24,8 +24,8 @@ neon.queryBuilder = (function () {
     var clientId;
     var connectionId;
 
-    neon.ready(function(){
-        clientId =  neon.query.getInstanceId('neon.querybuilder');
+    neon.ready(function () {
+        clientId = neon.query.getInstanceId('neon.querybuilder');
         restoreState();
 
         messenger.registerForNeonEvents({
@@ -33,14 +33,18 @@ neon.queryBuilder = (function () {
         });
     });
 
-    function onConnectionChanged(id){
+    function onConnectionChanged(id) {
         connectionId = id;
     }
 
-    function restoreState(){
-        neon.query.getSavedState(clientId, function(data){
-            onConnectionChanged(data.connectionId);
-            $('#queryText').val(data.text);
+    function restoreState() {
+        neon.query.getSavedState(clientId, function (data) {
+            if (data.connectionId) {
+                onConnectionChanged(data.connectionId);
+            }
+            if (data.text) {
+                $('#queryText').val(data.text);
+            }
             submitQueryToServer();
         });
     }
