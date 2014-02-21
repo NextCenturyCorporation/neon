@@ -114,8 +114,6 @@ task concurrencyTestWar(type: org.gradle.api.plugins.jetty.JettyRunWar) {
     httpPort = concurrencyTestPort
     stopPort = httpPort + 2
     stopKey = 'stop'
-    jettyConfig = new File(sourceSets.concurrencyTest.output.resourcesDir, 'jetty-config.xml')
-
 }
 
 processConcurrencyTestResources {
