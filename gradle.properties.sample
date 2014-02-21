@@ -5,10 +5,8 @@ org.gradle.daemon=true
 # Path to a tomcat or other application server.
 NEON_SERVER=/my/tomcat/path/apache-tomcat-7.0.39
 
-# Configuration for Mongo
+# Configuration for the instances of mongo/shark used for testing
 mongo.hosts=localhost
-
-# Configuration for Shark
 hdfs.url=hdfs://localhost:8020
 hive.host=localhost:10000
 
