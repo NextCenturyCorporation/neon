@@ -348,13 +348,13 @@ task generateAcceptanceTestHelpers {
 }
 
 task copyExamples(type: Copy) {
-    from '../examples'
+    from rootProject.file('examples').toString()
     into "${buildDir}/tmp/runExamples/webapp"
     group = "Examples"
 }
 
 task runExamples(type: org.gradle.api.plugins.jetty.JettyRunWar) {
-    dependsOn 'clean', 'copyExamples', 'compileGroovy'
+    dependsOn 'copyExamples'
     group = "Examples"
     daemon = false
 }

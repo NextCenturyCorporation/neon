@@ -15,13 +15,17 @@
 
         var filterKey;
 
-        //Register for a filter key. The server uses this to identify which client is creating the filter.
-        neon.query.registerForFilterKey(databaseName, tableName, function (key) {
-            filterKey = key;
-        });
+        // sends and receive messages about filters that were applied
+        var messenger = new neon.eventing.Messenger();
 
-        //Make sure jquery is ready
+        //Make sure neon is ready for events
         neon.ready(function(){
+
+            //Register for a filter key. The server uses this to identify which client is creating the filter.
+            neon.query.registerForFilterKey(databaseName, tableName, function (key) {
+                filterKey = key;
+            });
+
             //Add a click handler to the query button
             $("#query-button").click(function(){
                 var query = new neon.query.Query().selectFrom(databaseName, tableName);
@@ -35,12 +39,12 @@
             $("#add-button").click(function(){
                 var whereClause = neon.query.where("magnitude", ">=", 3.0);
                 var filter = new neon.query.Filter().selectFrom(databaseName, tableName).where(whereClause);
-                neon.eventing.publishing.replaceFilter(filterKey, filter);
+                messenger.replaceFilter(filterKey, filter);
             });
 
             //Add a click handler to the filter button
             $("#remove-button").click(function(){
-                neon.query.removeFilter(filterKey);
+                messenger.removeFilter(filterKey);
             });
         });
 
