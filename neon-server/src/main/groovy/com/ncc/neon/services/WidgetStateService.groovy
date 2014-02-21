@@ -63,7 +63,7 @@ class WidgetStateService {
     @GET
     @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
     @Produces(MediaType.APPLICATION_JSON)
-    @Path("restoreState")
+    @Path("restorestate")
     String restoreState(@QueryParam("clientId") String clientId) {
         def widgetState = widgetStates.getWidgetState(clientId)
         if (widgetState) {

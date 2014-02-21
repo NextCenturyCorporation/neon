@@ -749,7 +749,7 @@ neon.query.saveState = function (id, stateObject, successCallback, errorCallback
 
 neon.query.getSavedState = function (id, successCallback) {
     return neon.util.ajaxUtils.doGet(
-        neon.query.serviceUrl('widgetstateservice', 'restoreState', '?clientId=' + id),
+        neon.query.serviceUrl('widgetstateservice', 'restorestate', '?clientId=' + id),
         {
             success: function (data) {
                 if (!data) {
