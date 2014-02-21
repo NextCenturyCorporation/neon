@@ -14,7 +14,7 @@
  *
  */
 
-include 'neon-server', 'common', 'filter-builder', 'query-builder', 'charts', 'tables', 'circularheat', 'circularheat2', 'map', 'metadata', 'network-graph'
+include 'neon-server', 'common', 'filter-builder', 'query-builder', 'charts', 'tables', 'circularheat', 'circularheat2', 'map', 'metadata'
 
 // the neon-server project is just output as neon.js/neon.war for simpler referencing
 project(":neon-server").name = 'neon'
