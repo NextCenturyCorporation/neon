@@ -18,8 +18,7 @@
  * The neon event bus that is used to coordinate messages between widgets. This implementation
  * is used when not running in an OWF environment (the {{#crossLink "neon.eventing.owf.OWFEventBus"}}{{/crossLink}}
  exists for that).
- * @namespace neon.eventing
- * @class EventBus
+ * @class neon.eventing.EventBus
  * @constructor
  */
 neon.eventing.EventBus = function () {

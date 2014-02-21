@@ -17,8 +17,7 @@
 
 /**
  * Utility methods for working with arrays
- * @namespace neon.util
- * @class arrayUtils
+ * @class neon.util.arrayUtils
  */
 
 neon.util.arrayUtils = {

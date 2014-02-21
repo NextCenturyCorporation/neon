@@ -18,7 +18,7 @@
  * A query group is one that encompasses multiple queries. The results of all queries in the group are
  * combined into a single json object.
  * @constructor
- * @class QueryGroup
+ * @class neon.query.QueryGroup
  */
 neon.query.QueryGroup = function () {
     this.queries = [];

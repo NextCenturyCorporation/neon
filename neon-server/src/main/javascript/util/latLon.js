@@ -18,8 +18,7 @@
 
 /**
  * Creates a new latitude/longitude pair with the specified values in degrees
- * @namespace neon.util
- * @class LatLon
+ * @class neon.util.LatLon
  * @constructor
  * @param {double} latDegrees
  * @param {double} lonDegrees

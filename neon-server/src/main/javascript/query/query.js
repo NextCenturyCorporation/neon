@@ -30,8 +30,7 @@ neon.query.SERVER_URL = 'http://localhost:8080/neon';
  *     var and = neon.query.and;
  *     var query = new neon.query.Query(where(and(where('someProperty','=',5), where('someOtherProperty','<',10))));
  *     neon.query.executeQuery(query);
- * @namespace neon.query
- * @class Query
+ * @class neon.query.Query
  * @constructor
  */
 neon.query.Query = function () {
@@ -875,8 +874,7 @@ neon.query.serviceUrl = function (servicePath, serviceName, queryParamsString) {
  * @param {String} operation The name of the operation to perform
  * @param {String} field The name of the field to perform the operation on
  * @param {String} name The name of the field created by performing this operation
- * @namespace neon.query
- * @class FieldFunction
+ * @class neon.query.FieldFunction
  * @constructor
  * @private
  */
@@ -892,8 +890,7 @@ neon.query.FieldFunction = function (operation, field, name) {
  * @param {String} operation The name of the operation to perform
  * @param {String} field The name of the field to perform the operation on
  * @param {String} name The name of the field created by performing this operation
- * @namespace neon.query
- * @class GroupByFunctionClause
+ * @class neon.query.GroupByFunctionClause
  * @constructor
  */
 neon.query.GroupByFunctionClause = function (operation, field, name) {

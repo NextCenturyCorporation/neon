@@ -15,6 +15,10 @@
  */
 
 /**
+ * @class neon
+ */
+
+/**
  * Runs a function after the dom is loaded. The implementation will vary depending on whether the widgets are
  * running in an OWF environment.
  * @param functionToRun  the function to run.

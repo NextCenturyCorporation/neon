@@ -43,8 +43,7 @@ neon.eventing.eventBus_ = neon.eventing.createEventBus_();
  * A messenger is a widget's gateway to the event bus used for communication between widgets. Widgets publish and
  * subscribe to messages through a messenger. Each messenger has a unique id to identify which widget published the
  * message to ensure that widgets are not receiving their own messages to facilitate simpler widget code.
- * @namespace neon.eventing
- * @class Messenger
+ * @class neon.eventing.Messenger
  * @constructor
  */
 

@@ -171,7 +171,7 @@ neon.util.ajaxUtils = (function(){
 
 /**
  * Stores an ajax request that is in progress (returned by any of the ajax method calls in this class)
- * @class AjaxRequest
+ * @class neon.util.AjaxRequest
  * @param {Object} xhr The jquery xhr being wrapped
  * @constructor
  */
