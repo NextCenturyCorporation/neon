@@ -59,6 +59,7 @@ neon.eventing.EventBus.prototype.subscribe = function (channel, callback) {
 /**
  * Unsubscribes the subscription created from the subscribe method.
  * @param {Object} subscription The subscription to remove from the bus
+ * @method unsubscribe
  */
 neon.eventing.EventBus.prototype.unsubscribe = function(subscription) {
     subscription.unsubscribe();
