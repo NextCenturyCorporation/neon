@@ -316,11 +316,11 @@ neon.query.Query.prototype.sortBy = function (fieldName, sortOrder) {
 
 /**
  * Adds a transform to this query
- * @method setTransform
+ * @method transform
  * @param {neon.query.Transform} transformObj a transform to be applied to the data
  * @return {neon.query.Query} This query object
  */
-neon.query.Query.prototype.setTransform = function (transformObj) {
+neon.query.Query.prototype.transform = function (transformObj) {
     this.transform = transformObj;
     return this;
 };
