@@ -16,7 +16,7 @@
 
 package com.ncc.neon.taglib;
 
-import com.ncc.neon.NeonPropertiesLoader;
+import com.ncc.neon.NeonProperties;
 
 import javax.servlet.jsp.JspException;
 import javax.servlet.jsp.JspWriter;
@@ -29,7 +29,7 @@ import java.io.IOException;
 public class OwfUrlTag extends SimpleTagSupport {
 
     public void doTag() throws JspException, IOException {
-        NeonPropertiesLoader properties = new NeonPropertiesLoader();
+        NeonProperties properties = NeonProperties.getInstance();
         JspWriter out = getJspContext().getOut();
         String url = properties.getOwfUrl();
         out.println(url);

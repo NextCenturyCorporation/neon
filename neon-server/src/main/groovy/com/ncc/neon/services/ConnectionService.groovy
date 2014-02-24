@@ -1,5 +1,7 @@
 
 package com.ncc.neon.services
+
+import com.ncc.neon.NeonProperties
 import com.ncc.neon.connect.ConnectionInfo
 import com.ncc.neon.connect.ConnectionManager
 import org.springframework.beans.factory.annotation.Autowired
@@ -43,10 +45,7 @@ class ConnectionService {
     @Produces(MediaType.APPLICATION_JSON)
     @Path("hostnames")
     List<String> getHostnames() {
-        String mongo = System.getProperty("mongo.hosts", "localhost")
-        String hive = System.getProperty("hive.host")
-
-        return [mongo, hive] - null
+        return NeonProperties.instance.hostnames
     }
 
     /**
