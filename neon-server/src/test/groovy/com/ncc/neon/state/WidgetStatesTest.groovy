@@ -30,8 +30,8 @@ class WidgetStatesTest {
     @Test
     void "adding null or empty clientId does nothing"() {
         WidgetStates widgetStates = new WidgetStates()
-        widgetStates.addWidgetState(null, STATE_DATA)
-        widgetStates.addWidgetState("", STATE_DATA)
+        widgetStates.addWidgetState(new WidgetState(clientId: null, state: STATE_DATA))
+        widgetStates.addWidgetState(new WidgetState(clientId: "", state: STATE_DATA))
 
         WidgetState retrievedWidgetState = widgetStates.getWidgetState(null)
         assert !retrievedWidgetState
@@ -43,7 +43,7 @@ class WidgetStatesTest {
     @Test
     void "add and retrieve state"() {
         WidgetStates widgetStates = new WidgetStates()
-        widgetStates.addWidgetState(CLIENT_ID, STATE_DATA)
+        widgetStates.addWidgetState(new WidgetState(clientId: CLIENT_ID, state: STATE_DATA))
         WidgetState retrievedWidgetState = widgetStates.getWidgetState(CLIENT_ID)
 
         assert retrievedWidgetState.clientId == CLIENT_ID
@@ -53,8 +53,8 @@ class WidgetStatesTest {
     @Test
     void "save multiple states and the last one gets used"() {
         WidgetStates widgetStates = new WidgetStates()
-        widgetStates.addWidgetState(CLIENT_ID, STATE_DATA)
-        widgetStates.addWidgetState(CLIENT_ID, DIFFERENT_DATA)
+        widgetStates.addWidgetState(new WidgetState(clientId: CLIENT_ID, state: STATE_DATA))
+        widgetStates.addWidgetState(new WidgetState(clientId: CLIENT_ID, state: DIFFERENT_DATA))
         WidgetState retrievedWidgetState = widgetStates.getWidgetState(CLIENT_ID)
 
         assert retrievedWidgetState.clientId == CLIENT_ID

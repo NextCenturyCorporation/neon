@@ -46,18 +46,15 @@ class WidgetStates implements Serializable{
 
     /**
      * Creates a new widget state for the current user.
-     * @param clientId An identifier specified by the client. This is typically the widget name, e,g, "Map"
-     * @param json data that is stored that a widget can use to set it's state.
+     * @param state The state being stored
      */
 
-    void addWidgetState(String clientId, String json) {
-        if(!clientId){
+    void addWidgetState(WidgetState state) {
+        if(!state.clientId){
             return
         }
-
-        WidgetState widgetState = new WidgetState(clientId, json)
-        states.remove(widgetState)
-        states.add(widgetState)
+        states.remove(state)
+        states.add(state)
     }
 
     /**

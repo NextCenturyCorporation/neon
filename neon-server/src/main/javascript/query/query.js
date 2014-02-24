@@ -728,10 +728,10 @@ neon.query.submitTextQuery = function (connectionId, queryText, successCallback,
 
 neon.query.saveState = function (id, stateObject, successCallback, errorCallback) {
     var strObject = JSON.stringify(stateObject);
-    return neon.util.ajaxUtils.doPost(
+    return neon.util.ajaxUtils.doPostJSON(
+        {clientId: id, state: strObject},
         neon.query.serviceUrl('widgetstateservice', 'savestate'),
         {
-            data: { clientId: id, state: strObject},
             success: successCallback,
             error: errorCallback,
             global: false

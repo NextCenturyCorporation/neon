@@ -354,16 +354,6 @@ describe('query mapping', function () {
         });
     });
 
-    it('save and restore state', function () {
-        executeAndWait(neon.query.saveState, "clientId", "state");
-        runs(function () {
-            executeAndWait(neon.query.getSavedState, "clientId");
-            runs(function () {
-                expect(currentResult).toEqual("state");
-            });
-        });
-    });
-
     it('group by month', function () {
         var groupByMonthClause = new neon.query.GroupByFunctionClause(neon.query.MONTH, 'hiredate', 'hire_month');
         var query = baseQuery().groupBy(groupByMonthClause).aggregate(neon.query.SUM, 'salary', 'salary_sum').sortBy('hire_month', neon.query.ASCENDING);
@@ -512,7 +502,18 @@ describe('query mapping', function () {
         expect(globalInstanceId1a).toEqual(globalInstanceId1b);
     });
 
-    it('saves and restores state', function () {
+
+    it('save and restore single state state', function () {
+        executeAndWait(neon.query.saveState, "clientId", "state");
+        runs(function () {
+            executeAndWait(neon.query.getSavedState, "clientId");
+            runs(function () {
+                expect(currentResult).toEqual("state");
+            });
+        });
+    });
+
+    it('save and restore multiple states', function () {
         // simulate state from two different widgets with different client ids
         var widgetId1 = "id1";
         var state1 = {"s1": "val1"};
