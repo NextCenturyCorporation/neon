@@ -86,14 +86,14 @@ class MongoQueryExecutor implements QueryExecutor {
 
     @Override
     List<String> showDatabases() {
-        LOGGER.debug("Executing Mongo SHOW DATABASES")
+        LOGGER.debug("Executing getDatabaseNames")
         mongo.databaseNames
     }
 
     @Override
     List<String> showTables(String dbName) {
         DB database = mongo.getDB(dbName)
-        LOGGER.info("Executing Mongo SHOW COLLECTIONS on database {}", dbName)
+        LOGGER.debug("Executing getCollectionNames on database {}", dbName)
         database.getCollectionNames().collect { it }
     }
 
@@ -107,13 +107,13 @@ class MongoQueryExecutor implements QueryExecutor {
 
     private AbstractMongoQueryWorker createMongoQueryWorker(Query query) {
         if (query.isDistinct) {
-            LOGGER.debug("Using distinct mongo query worker")
+            LOGGER.trace("Using distinct mongo query worker")
             return new DistinctMongoQueryWorker(mongo)
         } else if (query.aggregates || query.groupByClauses) {
-            LOGGER.debug("Using aggregate mongo query worker")
+            LOGGER.trace("Using aggregate mongo query worker")
             return new AggregateMongoQueryWorker(mongo)
         }
-        LOGGER.debug("Using simple mongo query worker")
+        LOGGER.trace("Using simple mongo query worker")
         return new SimpleMongoQueryWorker(mongo)
     }
 

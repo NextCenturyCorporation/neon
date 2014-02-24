@@ -59,7 +59,7 @@ class HiveQueryExecutor implements QueryExecutor {
     private QueryResult executeQuery(JdbcClient client, Query query, QueryOptions options) {
         HiveConversionStrategy conversionStrategy = new HiveConversionStrategy(filterState: filterState, selectionState: selectionState)
         String hiveQuery = conversionStrategy.convertQuery(query, options)
-        LOGGER.debug("Hive Query: {}", hiveQuery)
+        LOGGER.debug("Query: {}", hiveQuery)
         int offset = query.offsetClause ? query.offsetClause.offset : 0
         List<Map> resultList = client.executeQuery(hiveQuery, offset)
         QueryResult result = new TableQueryResult(data: resultList)
@@ -94,7 +94,7 @@ class HiveQueryExecutor implements QueryExecutor {
 
     @Override
     List<String> showDatabases() {
-        LOGGER.debug("Executing Hive SHOW DATABASES")
+        LOGGER.debug("Executing SHOW DATABASES")
         return runAndRelease { client ->
             client.executeQuery("SHOW DATABASES").collect { Map<String, String> map ->
                 map.get("database_name")
@@ -104,7 +104,7 @@ class HiveQueryExecutor implements QueryExecutor {
 
     @Override
     List<String> showTables(String dbName) {
-        LOGGER.debug("Executing Hive SHOW TABLES IN {}", dbName)
+        LOGGER.debug("Executing SHOW TABLES IN {}", dbName)
         return runAndRelease { client ->
             client.executeQuery("SHOW TABLES IN " + dbName).collect { Map<String, String> map ->
                 map.get("tab_name")
