@@ -81,7 +81,7 @@ class HiveDataInserter extends DefaultTask{
 
     private File getFile(resourcePath){
         def testDataPath = "neon-server/src/test-data" + resourcePath
-        return new File(testDataPath)
+        return new File(project.rootDir, testDataPath)
     }
 
 

@@ -40,9 +40,9 @@ class MongoDataInserter extends DefaultTask{
         collection.ensureIndex(new BasicDBObject("location", "2dsphere"))
     }
 
-    private static def parseJSON(resourcePath) {
+    private def parseJSON(resourcePath) {
         def testDataPath = "neon-server/src/test-data" + resourcePath
-        return JSON.parse(new File(testDataPath).text)
+        return JSON.parse(new File(project.rootDir,testDataPath).text)
     }
 
 }
