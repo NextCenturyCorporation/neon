@@ -22,14 +22,14 @@ import org.springframework.web.context.WebApplicationContext
 
 
 /**
- * Holds which data store the user is connected to in his or her session
+ * Holds the database connection being used for the current request
  */
-
 @Component
 @Scope(value = WebApplicationContext.SCOPE_REQUEST, proxyMode = ScopedProxyMode.TARGET_CLASS)
 class CurrentRequestConnection implements Serializable{
 
-    private static final long serialVersionUID = 6978933557828783521L
-    String connectionId
+    private static final long serialVersionUID = 3037767326123010753L
+
+    ConnectionInfo connectionInfo
 
 }

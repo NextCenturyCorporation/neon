@@ -17,9 +17,7 @@ object Requests {
   val filter_key = """{"uuid":"8ed4a02e-53fa-4c41-850f-0af77cfbeb81","dataSet":{"databaseName":"concurrencytest","tableName":"records"}}"""
 
   val mongoHost = System.getProperty("mongo.hosts")
-  val mongo_connection_request = """{"dataSource":"mongo","connectionUrl":"""" + mongoHost +""""}"""
 
   val hiveHost = System.getProperty("hive.host")
-  val hive_connection_request = """{"dataSource":"hive","connectionUrl":"""" + hiveHost +""""}"""
 
 }

@@ -23,11 +23,10 @@ import org.slf4j.LoggerFactory
 
 import java.sql.*
 
-
 /**
  * Wrapper for JDBC API
  */
-class JdbcClient implements ConnectionClient {
+class JdbcClient implements Closeable {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(JdbcClient)
 
@@ -41,7 +40,7 @@ class JdbcClient implements ConnectionClient {
     }
 
     /**
-     * Each jdbcClient instance is created per session,
+     * Executes the specified query
      * @param offset An optional number of rows to skip in the result set. This is provided as a parameter to
      * execute query since not all JDBC drivers (namely hive) support doing this as part of the query
      */

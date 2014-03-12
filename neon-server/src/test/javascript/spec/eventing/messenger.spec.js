@@ -89,10 +89,6 @@ describe('messenger', function () {
         testGlobalNeonEventReceived(neon.eventing.channels.ACTIVE_DATASET_CHANGED, 'activeDatasetChanged', {id: "activeDatasetChanged"});
     });
 
-    it('should be notified when a message is published to the active connection changed channel', function () {
-        testGlobalNeonEventReceived(neon.eventing.channels.ACTIVE_CONNECTION_CHANGED, 'activeConnectionChanged', {id: "activeConnectionChanged"});
-    });
-
     function testGlobalNeonEventReceived(channelName, callbackName, message) {
         var messenger = new neon.eventing.Messenger();
         var callback = jasmine.createSpy(channelName);

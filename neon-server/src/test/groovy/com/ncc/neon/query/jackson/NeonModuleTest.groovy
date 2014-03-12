@@ -19,7 +19,7 @@ import com.mongodb.BasicDBObject
 import com.mongodb.DBObject
 import com.ncc.neon.connect.ConnectionInfo
 import com.ncc.neon.connect.DataSources
-import com.ncc.neon.query.TableQueryResult
+import com.ncc.neon.query.TabularQueryResult
 import com.ncc.neon.query.mongo.MongoQueryResult
 import com.ncc.neon.util.DateUtils
 import org.bson.types.ObjectId
@@ -55,14 +55,14 @@ class NeonModuleTest {
 
         MongoQueryResult mongoResult = createMongoQueryResult(objectId, date)
         String serialize = mapper.writeValueAsString(mongoResult)
-        TableQueryResult tqResult = mapper.readValue(serialize, TableQueryResult)
+        TabularQueryResult tqResult = mapper.readValue(serialize, TabularQueryResult)
 
         assertTableQueryValues(tqResult, objectIdString, date)
     }
 
     @Test
     void "serialize and then deserialize ConnectionInfo"(){
-        def connectionInfo = new ConnectionInfo(dataSource: DataSources.mongo, connectionUrl: "localhost")
+        def connectionInfo = new ConnectionInfo(dataSource: DataSources.mongo, host: "localhost")
 
         ObjectMapperProvider provider = new ObjectMapperProvider()
         ObjectMapper mapper = provider.getContext(NeonModuleTest)
@@ -81,7 +81,7 @@ class NeonModuleTest {
         return new MongoQueryResult([object])
     }
 
-    private void assertTableQueryValues(TableQueryResult tqResult, String objectIdString, Date date) {
+    private void assertTableQueryValues(TabularQueryResult tqResult, String objectIdString, Date date) {
         assert tqResult
         assert tqResult.data.size() == 1
         assert tqResult.data[0].get("_id") == objectIdString

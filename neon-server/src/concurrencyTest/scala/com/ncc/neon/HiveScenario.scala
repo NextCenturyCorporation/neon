@@ -23,16 +23,10 @@ class HiveScenario extends Simulation {
 
   val serviceRoot = "/neon/services/"
   val userCount = 10
-  val connectionId = "hive@" + hiveHost
+  val queryServicePath = hiveHost + "/hive"
+
 
   val scn = scenario("Hive under "+ userCount +" concurrent users")
-    .exec(http("Create a connection")
-    .post(serviceRoot + "connections")
-    .headers(json_header)
-    .body(hive_connection_request)
-  )
-
-    .pause(2)
     .exec(http("Register for a filter key")
     .post(serviceRoot + "filterservice/registerforfilterkey")
     .headers(json_header)
@@ -40,7 +34,7 @@ class HiveScenario extends Simulation {
   )
     .pause(2)
     .exec(http("Query for all data")
-    .post(serviceRoot + "queryservice/" + connectionId + "/querydisregardfilters")
+    .post(serviceRoot + "queryservice/querydisregardfilters/" + queryServicePath)
     .headers(json_header)
     .body(all_data_query)
     .check(bodyString.is(hive_all_data))
@@ -59,7 +53,7 @@ class HiveScenario extends Simulation {
   )
     .pause(5)
     .exec(http("Query for the selection")
-    .post(serviceRoot + "queryservice/" + connectionId + "/querywithselectiononly")
+    .post(serviceRoot + "queryservice/querywithselectiononly/" + queryServicePath)
     .headers(json_header)
     .body(selection_only_query)
     .check(bodyString.is(hive_selection_data))
@@ -72,7 +66,7 @@ class HiveScenario extends Simulation {
   )
     .pause(5)
     .exec(http("Query for filtered data")
-    .post(serviceRoot + "queryservice/" + connectionId + "/query")
+    .post(serviceRoot + "queryservice/query/" + queryServicePath)
     .headers(json_header)
     .body(filtered_query)
     .check(bodyString.is(hive_all_data))
@@ -85,7 +79,7 @@ class HiveScenario extends Simulation {
   )
     .pause(5)
     .exec(http("Query for selection after it was removed")
-    .post(serviceRoot + "queryservice/" + connectionId + "/querywithselectiononly")
+    .post(serviceRoot + "queryservice/querywithselectiononly/" + queryServicePath)
     .headers(json_header)
     .body(selection_only_query)
     .check(bodyString.is(hive_all_data))

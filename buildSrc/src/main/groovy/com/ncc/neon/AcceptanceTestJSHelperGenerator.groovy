@@ -30,8 +30,7 @@ class AcceptanceTestJSHelperGenerator {
             w.println "var neonServerUrl = '${neonServerUrl}';"
             w.println "var transformServiceUrl = '${transformServiceUrl}';"
             w.println "var host = '${host}';"
-            w.println "var connectionId = 'mongo@${host}';"
-
+            w.println "neon.SERVER_URL = neonServerUrl;"
         }
     }
 

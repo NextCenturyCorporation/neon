@@ -15,11 +15,13 @@
  */
 
 package com.ncc.neon.services
+
+import com.ncc.neon.connect.DataSources
 import com.ncc.neon.language.QueryParser
 import com.ncc.neon.query.Query
 import com.ncc.neon.query.QueryExecutor
 import com.ncc.neon.query.QueryResult
-import com.ncc.neon.query.TableQueryResult
+import com.ncc.neon.query.TabularQueryResult
 import org.junit.Before
 import org.junit.Test
 
@@ -28,19 +30,25 @@ class LanguageServiceTest {
 
     private LanguageService languageService
 
+    private static final String HOST = "aHost"
+    private static final String DATABASE_TYPE = DataSources.mongo.toString()
+
     @Before
     void before() {
         languageService = new LanguageService()
-        QueryExecutor executor = [execute: { query, options -> new TableQueryResult([["key1": "val1"], ["key2": 2]]) }] as QueryExecutor
-        languageService.queryExecutorFactory = [getExecutor: { executor }] as QueryExecutorFactory
-
+        QueryExecutor executor = [execute: { query, options -> new TabularQueryResult([["key1": "val1"], ["key2": 2]]) }] as QueryExecutor
+        languageService.queryExecutorFactory = [getExecutor: { connection ->
+            assert connection.host == HOST
+            assert connection.dataSource == DataSources.valueOf(DATABASE_TYPE)
+            executor
+        }] as QueryExecutorFactory
         QueryParser queryParser = [parse: { new Query() }] as QueryParser
         languageService.queryParser = queryParser
     }
 
     @Test
     void "execute query"() {
-        QueryResult result = languageService.executeQuery("","queryText")
+        QueryResult result = languageService.executeQuery(HOST, DATABASE_TYPE, "queryText")
         assert result.data
     }
 

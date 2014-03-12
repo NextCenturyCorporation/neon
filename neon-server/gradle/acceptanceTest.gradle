@@ -1,0 +1,119 @@
+/*
+ * Copyright 2014 Next Century Corporation
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ */
+
+import static com.ncc.neon.AcceptanceTestJSHelperGenerator.*
+import org.apache.tools.ant.filters.ReplaceTokens
+import com.ncc.common.GruntTask
+
+apply plugin: 'groovy'
+
+def TEST_GROUP = JavaBasePlugin.VERIFICATION_GROUP
+
+sourceSets {
+    acceptanceTest
+}
+
+configurations {
+    acceptanceTestCompile { extendsFrom testCompile }
+    acceptanceTestRuntime { extendsFrom testCompile, testRuntime }
+}
+
+task transformTestWebService(type: org.gradle.api.plugins.jetty.JettyRun) {
+    dependsOn 'acceptanceTestClasses', 'generateAcceptanceTestHelpers'
+    daemon = true
+    httpPort = getAcceptanceTestServicePort()
+    stopPort = httpPort + 2
+    stopKey = 'stop'
+    classpath = sourceSets.acceptanceTest.runtimeClasspath
+    webXml = new File(sourceSets.acceptanceTest.output.resourcesDir, 'test-services-web.xml')
+}
+
+task acceptanceTestWar(type: org.gradle.api.plugins.jetty.JettyRunWar) {
+    dependsOn 'acceptanceTestClasses', 'generateAcceptanceTestHelpers'
+    daemon = true
+    httpPort = getAcceptanceTestPort()
+    stopPort = httpPort + 2
+    stopKey = 'stop'
+    jettyConfig = new File(sourceSets.acceptanceTest.output.resourcesDir, 'jetty-config.xml')
+    // the additionalRuntimeJars can be any file/folder, not just a jar file
+    additionalRuntimeJars = [file('src/acceptanceTest/resources/additionalClasspath')]
+}
+
+task generateAcceptanceTestHelpers {
+    // since the properties may change in the build file, always regenerate this file
+    outputs.upToDateWhen { false }
+    doLast {
+        def outputDir = new File(buildDir, "acceptanceTestSupport")
+        generateJavascriptHelper("http://localhost:${getAcceptanceTestPort()}/neon", "http://localhost:${getAcceptanceTestServicePort()}", "${getMongoHosts()}", new File(outputDir, "testConfig.js"))
+    }
+}
+
+processAcceptanceTestResources {
+    from(sourceSets.acceptanceTest.resources.srcDirs) {
+        filter(ReplaceTokens, tokens: [
+                "mongo.hosts": getMongoHosts()
+        ])
+    }
+}
+
+def getAcceptanceTestPort() {
+    return project.hasProperty("acceptanceTest.port") ? getProperty("acceptanceTest.port").toInteger() : 10002
+}
+
+// used for the transform service that runs as part of the acceptance test
+def getAcceptanceTestServicePort() {
+    // the test war runs on the acceptanceTestPort and the stop port is +2, so run the service on +4
+    return getAcceptanceTestPort() + 4
+}
+
+task stopAcceptanceTestWar(type: org.gradle.api.plugins.jetty.JettyStop) {
+    stopPort = getAcceptanceTestPort() + 2
+    stopKey = 'stop'
+}
+
+task stopTransformJetty(type: org.gradle.api.plugins.jetty.JettyStop) {
+    stopPort = getAcceptanceTestServicePort() + 2
+    stopKey = 'stop'
+}
+
+task insertMongoDataAcceptanceTest(type: com.ncc.neon.data.MongoDataInserter) {
+    dependsOn 'deleteMongoDataAcceptanceTestBeforeInsert', 'generateMongoJson'
+    host = getMongoHosts()
+    databaseName = 'acceptanceTest'
+}
+task deleteMongoDataAcceptanceTestBeforeInsert(type: com.ncc.neon.data.MongoDataDeleter) {
+    host = getMongoHosts()
+    databaseName = 'acceptanceTest'
+}
+
+task deleteMongoDataAcceptanceTest(type: com.ncc.neon.data.MongoDataDeleter) {
+    host = getMongoHosts()
+    databaseName = 'acceptanceTest'
+}
+
+task afterAcceptanceTest {
+    dependsOn 'stopAcceptanceTestWar', 'stopTransformJetty', 'deleteMongoDataAcceptanceTest'
+}
+
+task acceptanceTest(type: GruntTask) {
+    dependsOn 'assemble', 'acceptanceTestWar', 'insertMongoDataAcceptanceTest', 'transformTestWebService'
+    group = TEST_GROUP
+    gruntArgs "jasmine:acceptance", "--outfile=${jsOutputFile}"
+}
+
+acceptanceTest.finalizedBy afterAcceptanceTest
+
+

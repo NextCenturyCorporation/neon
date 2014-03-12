@@ -121,7 +121,7 @@ abstract class AbstractQueryExecutorIntegrationTest {
     void "field names"() {
         def fieldNames = queryExecutor.getFieldNames(DATABASE_NAME, TABLE_NAME)
         def expected = getAllData()[0].keySet()
-        AssertUtils.assertEqualCollections(expected, fieldNames.data)
+        AssertUtils.assertEqualCollections(expected, fieldNames)
     }
 
     @Test

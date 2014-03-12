@@ -19,43 +19,34 @@ package com.ncc.neon.connect
 import org.junit.Before
 import org.junit.Test
 
-
 class ConnectionManagerTest {
 
     private ConnectionManager connectionManager
-    private final def fakeMongoConnectionClient = {"mongo"} as ConnectionClient
-    private final def fakeHiveConnectionClient = {"hive"} as ConnectionClient
+    private final def fakeMongoConnectionClient = { "mongo" } as ConnectionClient
+    private final def fakeHiveConnectionClient = { "hive" } as ConnectionClient
 
 
     @Before
-    void setup(){
+    void setup() {
         connectionManager = new ConnectionManager()
-
+        connectionManager.currentRequestConnection = new CurrentRequestConnection()
         connectionManager.mongoConnectionFactory = { fakeMongoConnectionClient } as ConnectionClientFactory
         connectionManager.hiveConnectionFactory = { fakeHiveConnectionClient } as ConnectionClientFactory
     }
 
     @Test(expected = NeonConnectionException)
-    void "no connections set throws an exception"() {
-        connectionManager.getConnectionClient("")
-    }
-
-    @Test(expected = NeonConnectionException)
-    void "invalid connection info throws exception"() {
-        ConnectionInfo info = new ConnectionInfo()
-        connectionManager.connect(info)
-        connectionManager.getConnectionClient(info)
+    void "no connection set throws an exception"() {
+        // nothing explicit to do here, just verifying that this throws an exception
+        connectionManager.connection
     }
 
     @Test
     void "connecting to data sources"() {
-        ConnectionInfo mongo = new ConnectionInfo(dataSource: DataSources.mongo)
-        String id = connectionManager.connect(mongo)
-        assert connectionManager.getConnectionClient(id) == fakeMongoConnectionClient
+        connectionManager.currentRequest = new ConnectionInfo(host: "aHost", dataSource: DataSources.mongo)
+        assert connectionManager.connection == fakeMongoConnectionClient
 
-        ConnectionInfo hive = new ConnectionInfo(dataSource: DataSources.hive)
-        id = connectionManager.connect(hive)
-        assert connectionManager.getConnectionClient(id) == fakeHiveConnectionClient
+        connectionManager.currentRequest = new ConnectionInfo(host: "aHost", dataSource: DataSources.hive)
+        assert connectionManager.connection == fakeHiveConnectionClient
     }
 
 }

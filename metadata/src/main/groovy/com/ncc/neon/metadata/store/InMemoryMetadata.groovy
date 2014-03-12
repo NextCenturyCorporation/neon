@@ -16,11 +16,9 @@
 
 package com.ncc.neon.metadata.store
 
-import com.ncc.neon.metadata.model.column.ColumnMetadata
-import com.ncc.neon.metadata.model.column.ColumnMetadataList
-import com.ncc.neon.metadata.model.dataset.WidgetAndDatasetMetadata
-import com.ncc.neon.metadata.model.dataset.WidgetAndDatasetMetadataList
-import com.ncc.neon.metadata.model.widget.WidgetInitializationMetadata
+import com.ncc.neon.metadata.model.ColumnMetadata
+import com.ncc.neon.metadata.model.WidgetAndDatasetMetadata
+import com.ncc.neon.metadata.model.WidgetInitializationMetadata
 import org.springframework.stereotype.Component
 
 /**
@@ -66,7 +64,7 @@ class InMemoryMetadata implements Metadata {
     }
 
     @Override
-    ColumnMetadataList retrieve(String databaseName, String tableName, Set<String> columnNames) {
+    List<ColumnMetadata> retrieve(String databaseName, String tableName, Set<String> columnNames = [] as Set) {
 
         List<ColumnMetadata> metadata = columnMetadata[databaseName][tableName].values() as List
 
@@ -75,7 +73,7 @@ class InMemoryMetadata implements Metadata {
             metadata = metadata.findAll { columnNames.contains(it.getColumnName()) }
         }
 
-        return new ColumnMetadataList(dataSet: metadata)
+        return metadata
     }
 
     @Override
@@ -89,9 +87,8 @@ class InMemoryMetadata implements Metadata {
     }
 
     @Override
-    WidgetAndDatasetMetadataList retrieve(String databaseName, String tableName, String widgetName) {
-        List<WidgetAndDatasetMetadata> metadata = widgetAndDatasetMetadata[databaseName][tableName][widgetName].values() as List
-        return new WidgetAndDatasetMetadataList(dataSet: metadata)
+    List<WidgetAndDatasetMetadata> retrieve(String databaseName, String tableName, String widgetName) {
+        return widgetAndDatasetMetadata[databaseName][tableName][widgetName].values() as List
     }
 
     /**

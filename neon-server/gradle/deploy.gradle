@@ -1,0 +1,88 @@
+/*
+ * Copyright 2014 Next Century Corporation
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ */
+
+apply plugin: 'ssh'
+
+// task groupings we add
+def DEPLOY_GROUP = 'deploy'
+
+project.ext {
+    // neon server to deploy to. may be remote or local, depending on the remote configuration
+    neonServer = project.hasProperty('NEON_SERVER') ? project.getProperty('NEON_SERVER') : System.env.NEON_SERVER
+    neonServerWebapps = neonServer + '/webapps'
+
+    // these are set to empty string, not null, when not provided. otherwise the ssh task will choke
+    remoteUser = project.hasProperty('user') ? project.getProperty('user') : ''
+    remoteHost = project.hasProperty('host') ? project.getProperty('host') : ''
+
+    // these are set to null since the ssh task expects them not to be set if they are not being used
+    remotePassword = project.hasProperty('password') ? project.getProperty('password') : null
+    sshIdentity = project.hasProperty('sshKeyFile') ? file(project.getProperty('sshKeyFile')) : null
+}
+
+task('deployToTomcat', type: Copy) {
+    dependsOn war
+    description = "Copies the project's war file to the neon server tomcat webapps dir"
+    group = DEPLOY_GROUP
+
+    doFirst {
+        validateNeonServer()
+        delete "${neonServerWebapps}/${war.baseName}", "${neonServerWebapps}/${war.baseName}.war"
+    }
+
+    from(war.destinationDir) {
+        rename { "${war.baseName}.war" }
+    }
+    into neonServerWebapps
+
+    doLast {
+        println "Copying $war.archivePath to $neonServerWebapps/${war.baseName}.war"
+    }
+}
+
+ssh {
+    config(StrictHostKeyChecking: 'no')
+}
+remotes {
+    neon {
+        host = remoteHost
+        user = remoteUser
+        password = remotePassword
+        identity = sshIdentity
+    }
+}
+
+task 'remoteTomcatDeploy'(type: SshTask) {
+    dependsOn war
+    description = "Copies the project's war file to the neon server tomcat webapps dir on a remote serer"
+    group = DEPLOY_GROUP
+    doFirst {
+        validateNeonServer()
+        if (!remoteHost || !remoteUser || !(remotePassword || sshIdentity)) {
+            throw new GradleException("Must specify -Phost=<host>, -Puser=<user> and either -Ppassword=<password> or -PsshKeyFile=<ssh-key-file-path> properties to deploy to a remote server")
+        }
+    }
+    session(remotes.neon) {
+        execute("rm -rf ${neonServerWebapps}/${war.baseName} ${neonServerWebapps}/${war.baseName}.war")
+        put(war.archivePath.absolutePath, "${neonServerWebapps}/${war.baseName}.war")
+    }
+}
+
+private def validateNeonServer() {
+    if (!neonServer) {
+        throw new GradleException("Must specify the neon server to deploy to using -PNEON_SERVER=<neon-server> or using a NEON_SERVER environment variable")
+    }
+}

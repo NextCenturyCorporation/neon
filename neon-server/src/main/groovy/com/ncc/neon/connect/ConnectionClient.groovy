@@ -16,8 +16,9 @@
 
 package com.ncc.neon.connect
 
-
-
+/**
+ * A connection client provides a connection to a specific database
+ */
 public interface ConnectionClient extends Closeable {
 
 }

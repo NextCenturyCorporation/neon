@@ -19,9 +19,6 @@
  * This is an end to end acceptance test to verify that queries can be executed against a mongo instance.
  * These tests parallel those in the MongoQueryExecutorIntegrationTest.
  */
-// neonServerUrl is generated dynamically during the build and included in the acceptance test helper file
-neon.query.SERVER_URL = neonServerUrl;
-
 describe('query mapping', function () {
     // aliases for easier test writing
     var where = neon.query.where;
@@ -39,10 +36,14 @@ describe('query mapping', function () {
     /** the result of any asynchronously executed function. this is reset after each test */
     var currentResult;
 
-    executeAndWait(neon.query.connection.connectToDatastore, new neon.query.connection.Connection("mongo", host));
+    var connection = new neon.query.Connection();
 
 
     beforeEach(function () {
+        // host is generated dynamically during the build and included in the acceptance test helper file
+        connection.connect(neon.query.Connection.MONGO, host);
+        connection.use(databaseName);
+
         if (!allData) {
             allData = getJSONFixture('data.json');
         }
@@ -53,10 +54,10 @@ describe('query mapping', function () {
     });
 
     it('get field names', function () {
-        executeAndWait(neon.query.getFieldNames, connectionId, databaseName, tableName, "");
+        executeAndWait(connection.getFieldNames, tableName);
         var expected = ['_id', 'firstname', 'lastname', 'city', 'state', 'salary', 'hiredate', 'location'];
         runs(function () {
-            expect(currentResult.data).toBeArrayWithSameElements(expected);
+            expect(currentResult).toBeArrayWithSameElements(expected);
         });
 
     });
@@ -65,6 +66,12 @@ describe('query mapping', function () {
         assertQueryResults(baseQuery(), allData);
     });
 
+    it('can use a fully qualified table name to override the database', function() {
+        // set the connection to another database and the fully qualified database name should override it
+        connection.use("invalidDatabase");
+        var query = new neon.query.Query().selectFrom(databaseName + '.' + tableName);
+        assertQueryResults(query, allData);
+    });
 
     it('select subset of fields from result', function () {
         var fields = ['firstname', 'lastname'];
@@ -423,7 +430,7 @@ describe('query mapping', function () {
         var query = baseQuery().groupBy('unknown').aggregate('unknown', 'unknown', 'unknown');
         var successCallback = jasmine.createSpy('success');
         var errorCallback = jasmine.createSpy('error');
-        neon.query.executeQuery(connectionId, query, successCallback, errorCallback);
+        connection.executeQuery(query, successCallback, errorCallback);
         waitsFor(function () {
             return errorCallback.wasInvoked();
         });
@@ -435,7 +442,7 @@ describe('query mapping', function () {
 
     it('query with limit', function () {
         var query = baseQuery().limit(2);
-        executeAndWait(neon.query.executeQuery, connectionId, query);
+        executeAndWait(connection.executeQuery, query);
         runs(function () {
             expect(currentResult.data.length).toEqual(2);
         });
@@ -480,93 +487,26 @@ describe('query mapping', function () {
         queryGroup.addQuery(query1);
         queryGroup.addQuery(query2);
         queryGroup.addQuery(query3);
-
-
         var expectedData = getJSONFixture('queryGroup.json');
         assertQueryGroupResults(queryGroup, expectedData);
     });
 
-    it('gets a unique instance id', function () {
-        // instanceId1a and 1b should be the same
-        var instanceId1a = neon.query.getInstanceId('qualifier1');
-        var instanceId1b = neon.query.getInstanceId('qualifier1');
-        var instanceId2 = neon.query.getInstanceId('qualifier2');
-        // these are synchronous methods so they will block
-        var globalInstanceId1a = neon.query.getInstanceId();
-        var globalInstanceId1b = neon.query.getInstanceId();
-
-        expect(instanceId1a).toEqual(instanceId1b);
-        expect(instanceId1a).not.toEqual(instanceId2);
-        expect(instanceId1a).not.toEqual(globalInstanceId1a);
-        expect(instanceId2).not.toEqual(globalInstanceId1a);
-        expect(globalInstanceId1a).toEqual(globalInstanceId1b);
-    });
-
-
-    it('save and restore single state state', function () {
-        executeAndWait(neon.query.saveState, "clientId", "state");
-        runs(function () {
-            executeAndWait(neon.query.getSavedState, "clientId");
-            runs(function () {
-                expect(currentResult).toEqual("state");
-            });
+    it('gets column metadata', function() {
+        var expected =
+            [
+                {"columnName":"field1", "numeric":true, "logical":true, "temporal":true, "array":true, "object":true, "text":true, "heterogeneous":true, "nullable":true },
+                {"columnName":"field2" ,"numeric":false, "logical":false, "temporal":false, "array":false, "object":false, "text":false, "heterogeneous":false, "nullable":false}
+            ];
+        var actual;
+        connection.use('database1');
+        connection.getColumnMetadata('table1', function(columnMetadata) {
+            actual = columnMetadata;
         });
-    });
-
-    it('save and restore multiple states', function () {
-        // simulate state from two different widgets with different client ids
-        var widgetId1 = "id1";
-        var state1 = {"s1": "val1"};
-        var state1Saved = false;
-        var state1Restored = false;
-        var restoredState1;
-
-
-        var widgetId2 = "id2";
-        var state2 = {"s2": "val2"};
-        var restoredState2;
-        var state2Saved = false;
-        var state2Restored = false;
-
-        var empty = function () {
-        };
-
-        neon.query.saveState(widgetId1, state1, function () {
-            state1Saved = true;
-        }, empty);
-        waitsFor(function () {
-            return  state1Saved;
+        waitsFor(function() {
+            return 'undefined' !== typeof actual;
         });
-        runs(function () {
-            neon.query.saveState(widgetId2, state2, function () {
-                state2Saved = true;
-            }, empty);
-            waitsFor(function () {
-                return state2Saved;
-            });
-            runs(function () {
-                neon.query.getSavedState(widgetId1, function (state) {
-                    restoredState1 = state;
-                    state1Restored = true;
-                });
-                waitsFor(function () {
-                    return state1Restored;
-                });
-                runs(function () {
-                    neon.query.getSavedState(widgetId2, function (state) {
-                        restoredState2 = state;
-                        state2Restored = true;
-                    });
-                    waitsFor(function () {
-                        return state2Restored;
-                    });
-                    runs(function () {
-                        expect(restoredState1).toEqual(state1);
-                        expect(restoredState2).toEqual(state2);
-                    });
-                });
-
-            });
+        runs(function() {
+            expect(actual).toEqual(expected);
         });
     });
 
@@ -576,7 +516,7 @@ describe('query mapping', function () {
      * @param expectedData
      */
     function assertQueryResults(query, expectedData) {
-        doAssertQueryResults(neon.query.executeQuery, query, expectedData);
+        doAssertQueryResults(connection.executeQuery, query, expectedData);
     }
 
     /**
@@ -585,7 +525,7 @@ describe('query mapping', function () {
      * @param expectedData
      */
     function assertQueryGroupResults(query, expectedData) {
-        doAssertQueryResults(neon.query.executeQueryGroup, query, expectedData);
+        doAssertQueryResults(connection.executeQueryGroup, query, expectedData);
     }
 
 
@@ -601,7 +541,7 @@ describe('query mapping', function () {
      * @param expectedData The data expected to be returned from the function
      */
     function assertAsync(asyncFunction, arg, expectedData) {
-        executeAndWait(asyncFunction, connectionId, arg);
+        executeAndWait(asyncFunction, arg);
         runs(function () {
             expect(currentResult.data).toEqual(expectedData);
         });
@@ -617,14 +557,14 @@ describe('query mapping', function () {
         var done = false;
 
         var argsArray = [];
-        // the first argument is the function - the rest of the arguments are passed through to the function
+        // the first argument is the function being executed - the rest of the arguments are passed through to the function
         argsArray = argsArray.concat(neon.util.arrayUtils.argumentsToArray(arguments).slice(1));
         argsArray.push(function (res) {
             currentResult = res;
             done = true;
         });
 
-        asyncFunction.apply(null, argsArray);
+        asyncFunction.apply(connection, argsArray);
         waitsFor(function () {
             return done;
         });
@@ -648,7 +588,7 @@ describe('query mapping', function () {
      * @return {neon.query.Query}
      */
     function baseQuery() {
-        return new neon.query.Query().selectFrom(databaseName, tableName);
+        return new neon.query.Query().selectFrom(tableName);
     }
 
     /**
@@ -656,7 +596,7 @@ describe('query mapping', function () {
      * @return {neon.query.Filter}
      */
     function baseFilter() {
-        return new neon.query.Filter().selectFrom(databaseName, tableName);
+        return new neon.query.Filter().selectFrom(tableName);
     }
 
     function createFilterKey() {

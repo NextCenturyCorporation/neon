@@ -20,19 +20,28 @@
  * @constructor
  */
 neon.query.Filter = function () {
+    // the database name will automatically be populated by the connection when a query is executed based
+    // on what the "use" method provided as a database
+    this.databaseName = undefined;
     this.whereClause = undefined;
 };
 
 /**
- * Sets the *select* clause of the filter to select data from the specified dataset
+ * Sets the *select* clause of the filter to select data from the specified table
  * @method selectFrom
- * @param {String} databaseName The name of the database that contains the data
- * @param {String} tableName The table to select from
+ * @param {String} tableName The table to select from. This may be fully qualified with [databaseName.]tableName, in
+ * which case, the database specified in the "use" method of the connection will be overridden.
  * @return {neon.query.Filter} This filter object
  */
-neon.query.Filter.prototype.selectFrom = function (databaseName, tableName) {
-    this.databaseName = databaseName;
-    this.tableName = tableName;
+neon.query.Filter.prototype.selectFrom = function (tableName) {
+    var parts = tableName.split(".");
+    if ( parts.length === 1 ) {
+        this.tableName = parts[0];
+    }
+    else {
+        this.databaseName = parts[0];
+        this.tableName = parts[1];
+    }
     return this;
 };
 

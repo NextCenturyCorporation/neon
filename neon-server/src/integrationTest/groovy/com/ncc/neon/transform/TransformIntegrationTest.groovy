@@ -16,12 +16,14 @@
 
 package com.ncc.neon.transform
 import com.ncc.neon.IntegrationTestContext
-import com.ncc.neon.mongo.MongoTestClient
+import com.ncc.neon.connect.ConnectionInfo
+import com.ncc.neon.connect.DataSources
 import com.ncc.neon.query.Query
 import com.ncc.neon.query.QueryOptions
 import com.ncc.neon.query.Transform
 import com.ncc.neon.query.filter.Filter
 import com.ncc.neon.query.mongo.MongoQueryExecutor
+import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.springframework.beans.factory.annotation.Autowired
@@ -31,6 +33,9 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner
 @RunWith(SpringJUnit4ClassRunner)
 @ContextConfiguration(classes = IntegrationTestContext)
 class TransformIntegrationTest {
+
+    // TODO: NEON-565 another duplication of mongo.hosts in here
+    private static final String HOST_STRING = System.getProperty("mongo.hosts", "localhost")
 
     private MongoQueryExecutor mongoQueryExecutor
 
@@ -47,11 +52,15 @@ class TransformIntegrationTest {
     /** a simple query that returns all of the data */
     static final Query TRANSFORM_ALL_DATA_QUERY = new Query(filter: ALL_DATA_FILTER, transform: TRANSFORM)
 
+    @Before
+    void before() {
+        this.mongoQueryExecutor.connectionManager.currentRequest = new ConnectionInfo(host: HOST_STRING, dataSource: DataSources.mongo)
+    }
+
     @SuppressWarnings('JUnitPublicNonTestMethod')
     @Autowired
-    public void setMongoQueryExecutor(MongoQueryExecutor mongoQueryExectuor) {
+    void setMongoQueryExecutor(MongoQueryExecutor mongoQueryExectuor) {
         this.mongoQueryExecutor = mongoQueryExectuor
-        this.mongoQueryExecutor.metaClass.getMongo = { MongoTestClient.mongoClient }
     }
 
 

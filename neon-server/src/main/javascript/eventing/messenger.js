@@ -118,7 +118,6 @@ neon.eventing.Messenger.prototype.createGlobalChannelSubscriptions_ = function (
     return [
         {channel: neon.eventing.channels.SELECTION_CHANGED, callback: neonCallbacks.selectionChanged},
         {channel: neon.eventing.channels.FILTERS_CHANGED, callback: neonCallbacks.filtersChanged},
-        {channel: neon.eventing.channels.ACTIVE_CONNECTION_CHANGED, callback: neonCallbacks.activeConnectionChanged},
         {channel: neon.eventing.channels.ACTIVE_DATASET_CHANGED, callback: neonCallbacks.activeDatasetChanged}
     ];
 };

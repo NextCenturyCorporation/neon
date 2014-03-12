@@ -1,0 +1,128 @@
+/*
+ * Copyright 2014 Next Century Corporation
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ */
+apply plugin: 'groovy'
+
+sourceSets {
+    integrationTest {
+        resources {
+            srcDir 'src/integrationTest/resources'
+            srcDir 'src/test-data'
+        }
+    }
+}
+
+configurations {
+    integrationTestCompile { extendsFrom testCompile }
+    integrationTestRuntime { extendsFrom integrationTestCompile, testRuntime }
+}
+
+dependencies {
+    integrationTestCompile('org.apache.hadoop:hadoop-hdfs:2.0.0-cdh4.3.0') {
+        exclude group: 'javax.servlet'
+        exclude group: 'javax.servlet.jsp'
+        exclude module: 'jasper-runtime'
+        // using log4j-over-slf4j
+        exclude module: 'log4j'
+        exclude module: 'slf4j-log4j12'
+    }
+
+    integrationTestCompile sourceSets.main.output
+    integrationTestCompile sourceSets.test.output
+
+}
+
+task integrationTest(type: Test) {
+    dependsOn 'integrationTestClasses'
+
+    // TODO: NEON-960 workaround
+    if (isMongoOnly()) {
+        dependsOn 'insertMongoDataIntegrationTest'
+    } else if (isHiveOnly()) {
+        dependsOn 'insertHiveDataIntegrationTest'
+    } else {
+        dependsOn 'insertMongoDataIntegrationTest', 'insertHiveDataIntegrationTest'
+    }
+
+    testClassesDir = sourceSets.integrationTest.output.classesDir
+    classpath = sourceSets.integrationTest.runtimeClasspath
+
+    // allow project properties and just pass them through to the system properties
+    def props = [:]
+    props["mongo.hosts"] = getMongoHosts()
+    props["hive.host"] = getHiveHost()
+    props["hdfs.url"] = getHdfsUrl()
+
+    props['integration.test'] = true
+    systemProperties props
+}
+
+
+task insertMongoDataIntegrationTest(type: com.ncc.neon.data.MongoDataInserter) {
+    dependsOn 'deleteMongoDataIntegrationTestBeforeInsert', 'generateMongoJson'
+    host = getMongoHosts()
+    databaseName = 'neonintegrationtest'
+}
+
+task deleteMongoDataIntegrationTestBeforeInsert(type: com.ncc.neon.data.MongoDataDeleter) {
+    host = getMongoHosts()
+    databaseName = 'neonintegrationtest'
+}
+
+task insertHiveDataIntegrationTest(type: com.ncc.neon.data.HiveDataInserter) {
+    dependsOn 'deleteHiveDataIntegrationTestBeforeInsert', 'generateHiveCSV', 'generateHiveJson'
+    host = getHiveHost()
+    hdfsUrl = getHdfsUrl()
+    databaseName = 'neonintegrationtest'
+}
+
+task deleteHiveDataIntegrationTestBeforeInsert(type: com.ncc.neon.data.HiveDataDeleter) {
+    host = getHiveHost()
+    databaseName = 'neonintegrationtest'
+}
+
+task afterIntegrationTest {
+    // TODO: NEON-960 workaround
+    if (isMongoOnly()) {
+        dependsOn 'deleteMongoDataIntegrationTest'
+    } else if (isHiveOnly()) {
+        dependsOn 'deleteHiveDataIntegrationTest'
+    } else {
+        dependsOn 'deleteMongoDataIntegrationTest', 'deleteHiveDataIntegrationTest'
+    }
+}
+
+integrationTest.finalizedBy afterIntegrationTest
+
+task deleteMongoDataIntegrationTest(type: com.ncc.neon.data.MongoDataDeleter) {
+    host = getMongoHosts()
+    databaseName = 'neonintegrationtest'
+}
+
+task deleteHiveDataIntegrationTest(type: com.ncc.neon.data.HiveDataDeleter) {
+    host = getHiveHost()
+    databaseName = 'neonintegrationtest'
+}
+
+// TODO: NEON-960 The isXXXOnly are workarounds for NEON-960
+def isMongoOnly() {
+    // all other non-hive/shark tests require mongo
+    def integrationTestSingle = System.getProperty("integrationTest.single")
+    return integrationTestSingle && !integrationTestSingle.toLowerCase().contains("hive")
+}
+
+def isHiveOnly() {
+    return System.getProperty("integrationTest.single")?.toLowerCase()?.contains("hive")
+}

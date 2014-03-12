@@ -1,6 +1,2 @@
-icons from:
-pixel-mixer
-icojam
-
 Connection Pooling:
 c3po

@@ -15,7 +15,10 @@
  */
 
 package com.ncc.neon
+
 import com.ncc.neon.connect.ConnectionManager
+import com.ncc.neon.query.hive.HiveQueryExecutor
+import com.ncc.neon.query.mongo.MongoQueryExecutor
 import com.ncc.neon.transform.SalaryTransformer
 import com.ncc.neon.transform.Transformer
 import com.ncc.neon.transform.TransformerRegistry
@@ -24,7 +27,6 @@ import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.ComponentScan
 import org.springframework.context.annotation.Configuration
 import org.springframework.context.support.SimpleThreadScope
-
 
 @Configuration
 @ComponentScan(basePackages = ['com.ncc.neon'])
@@ -50,4 +52,18 @@ class IntegrationTestContext {
         }
         return registry
     }
-}
+
+    @Bean
+    MongoQueryExecutor mongoQueryExecutor() {
+        MongoQueryExecutor executor = new MongoQueryExecutor()
+        executor.connectionManager = new ConnectionManager()
+        return executor
+    }
+
+    @Bean
+    HiveQueryExecutor hiveQueryExecutor() {
+        HiveQueryExecutor executor = new HiveQueryExecutor()
+        executor.connectionManager = new ConnectionManager()
+        return executor
+    }
+    }

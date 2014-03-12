@@ -76,7 +76,7 @@ class MongoQueryExecutor implements QueryExecutor {
 
     @Override
     QueryResult execute(QueryGroup queryGroup, QueryOptions options) {
-        TableQueryResult queryResult = new TableQueryResult()
+        TabularQueryResult queryResult = new TabularQueryResult()
         queryGroup.queries.each {
             def result = execute(it, options)
             queryResult.data.addAll(result.data)
@@ -98,11 +98,11 @@ class MongoQueryExecutor implements QueryExecutor {
     }
 
     @Override
-    QueryResult getFieldNames(String databaseName, String tableName) {
+    List<String> getFieldNames(String databaseName, String tableName) {
         def db = mongo.getDB(databaseName)
         def collection = db.getCollection(tableName)
         def result = collection.findOne()
-        return new ListQueryResult(result?.keySet() ?: [])
+        return (result?.keySet() as List) ?: []
     }
 
     private AbstractMongoQueryWorker createMongoQueryWorker(Query query) {
@@ -118,7 +118,7 @@ class MongoQueryExecutor implements QueryExecutor {
     }
 
     private MongoClient getMongo(){
-        connectionManager.currentConnectionClient.getMongo()
+        connectionManager.connection.mongo
     }
 
 }

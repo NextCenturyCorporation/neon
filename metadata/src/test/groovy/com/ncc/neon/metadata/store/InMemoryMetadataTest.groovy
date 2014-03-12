@@ -16,11 +16,9 @@
 
 package com.ncc.neon.metadata.store
 
-import com.ncc.neon.metadata.model.column.ColumnMetadata
-import com.ncc.neon.metadata.model.column.ColumnMetadataList
-import com.ncc.neon.metadata.model.dataset.WidgetAndDatasetMetadata
-import com.ncc.neon.metadata.model.dataset.WidgetAndDatasetMetadataList
-import com.ncc.neon.metadata.model.widget.WidgetInitializationMetadata
+import com.ncc.neon.metadata.model.ColumnMetadata
+import com.ncc.neon.metadata.model.WidgetAndDatasetMetadata
+import com.ncc.neon.metadata.model.WidgetInitializationMetadata
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -81,20 +79,20 @@ class InMemoryMetadataTest {
 
     @Test
     void "retrieve empty column metadata when database does not exist"() {
-        ColumnMetadataList empty = metadata.retrieve("nonExistentDatabase", "nonExistentTable", [] as Set)
-        assert empty.dataSet.isEmpty()
+        List<ColumnMetadata> empty = metadata.retrieve("nonExistentDatabase", "nonExistentTable", [] as Set)
+        assert empty.isEmpty()
     }
 
     @Test
     void "retrieve empty column metadata when table does not exist"() {
-        ColumnMetadataList empty = metadata.retrieve(DATABASE_NAME1, "nonExistentTable", [] as Set)
-        assert empty.dataSet.isEmpty()
+        List<ColumnMetadata> empty = metadata.retrieve(DATABASE_NAME1, "nonExistentTable", [] as Set)
+        assert empty.isEmpty()
     }
 
     @Test
     void "retrieve empty column metadata when column filters are passed to non existent metadata"() {
-        ColumnMetadataList empty = metadata.retrieve("nonExistentDatabase", "nonExistentTable", ["nonExistentColumn"] as Set)
-        assert empty.dataSet.isEmpty()
+        List<ColumnMetadata> empty = metadata.retrieve("nonExistentDatabase", "nonExistentTable", ["nonExistentColumn"] as Set)
+        assert empty.isEmpty()
     }
 
     @Test
@@ -107,7 +105,7 @@ class InMemoryMetadataTest {
     void "clear column metadata"() {
         addColumnMetadata()
         metadata.clearColumnMetadata(DATABASE_NAME1, TABLE_NAME1)
-        List<ColumnMetadata> retrieved = metadata.retrieve(DATABASE_NAME1, TABLE_NAME1, [] as Set).dataSet
+        List<ColumnMetadata> retrieved = metadata.retrieve(DATABASE_NAME1, TABLE_NAME1, [] as Set)
         assert retrieved.isEmpty()
     }
 
@@ -116,7 +114,7 @@ class InMemoryMetadataTest {
      * @param metadata
      */
     private static void assertColumnMetadata(Metadata metadata) {
-        List<ColumnMetadata> retrieved = metadata.retrieve(DATABASE_NAME1, TABLE_NAME1, [] as Set).dataSet
+        List<ColumnMetadata> retrieved = metadata.retrieve(DATABASE_NAME1, TABLE_NAME1, [] as Set)
         assert retrieved.size() == 2
 
         assert retrieved[0].databaseName == DATABASE_NAME1
@@ -137,8 +135,7 @@ class InMemoryMetadataTest {
     @Test
     void "retrieve column metadata filtered by column names"() {
         addColumnMetadata()
-        List<ColumnMetadata> retrieved = metadata.retrieve(DATABASE_NAME1, TABLE_NAME1, [COLUMN_NAME1] as Set).dataSet
-
+        List<ColumnMetadata> retrieved = metadata.retrieve(DATABASE_NAME1, TABLE_NAME1, [COLUMN_NAME1] as Set)
         assert retrieved.size() == 1
 
         assert retrieved[0].databaseName == DATABASE_NAME1
@@ -149,23 +146,23 @@ class InMemoryMetadataTest {
 
     @Test
     void "retrieve empty widget dataset metadata when database does not exist"() {
-        WidgetAndDatasetMetadataList empty = metadata.retrieve("nonExistentDatabase", "nonExistentTable", "nonExistentWidget")
-        assert empty.dataSet.isEmpty()
+        List<WidgetAndDatasetMetadata> empty = metadata.retrieve("nonExistentDatabase", "nonExistentTable", "nonExistentWidget")
+        assert empty.isEmpty()
     }
 
     @Test
     void "retrieve empty widget dataset metadata when table does not exist"() {
         addWidgetAndDatasetMetadata()
-        WidgetAndDatasetMetadataList empty = metadata.retrieve(DATABASE_NAME1, "nonExistentTable", "nonExistentWidget")
-        assert empty.dataSet.isEmpty()
+        List<WidgetAndDatasetMetadata> empty = metadata.retrieve(DATABASE_NAME1, "nonExistentTable", "nonExistentWidget")
+        assert empty.isEmpty()
     }
 
 
     @Test
     void "retrieve empty widget dataset metadata when none exists"() {
         addWidgetAndDatasetMetadata()
-        WidgetAndDatasetMetadataList empty = metadata.retrieve(DATABASE_NAME1, TABLE_NAME1, "nonExistentWidget")
-        assert empty.dataSet.isEmpty()
+        List<WidgetAndDatasetMetadata> empty = metadata.retrieve(DATABASE_NAME1, TABLE_NAME1, "nonExistentWidget")
+        assert empty.isEmpty()
     }
 
     @Test
@@ -179,7 +176,7 @@ class InMemoryMetadataTest {
      * @param metadata
      */
     private static void assertWidgetAndDatasetMetadata(Metadata metadata) {
-        List<WidgetAndDatasetMetadata> retrieved = metadata.retrieve(DATABASE_NAME1, TABLE_NAME2, WIDGET_NAME1).dataSet
+        List<WidgetAndDatasetMetadata> retrieved = metadata.retrieve(DATABASE_NAME1, TABLE_NAME2, WIDGET_NAME1)
         assert retrieved.size() == 2
 
         assert retrieved[0].databaseName == DATABASE_NAME1

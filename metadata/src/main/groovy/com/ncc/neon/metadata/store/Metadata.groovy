@@ -16,11 +16,9 @@
 
 package com.ncc.neon.metadata.store
 
-import com.ncc.neon.metadata.model.column.ColumnMetadata
-import com.ncc.neon.metadata.model.column.ColumnMetadataList
-import com.ncc.neon.metadata.model.dataset.WidgetAndDatasetMetadata
-import com.ncc.neon.metadata.model.dataset.WidgetAndDatasetMetadataList
-import com.ncc.neon.metadata.model.widget.WidgetInitializationMetadata
+import com.ncc.neon.metadata.model.ColumnMetadata
+import com.ncc.neon.metadata.model.WidgetAndDatasetMetadata
+import com.ncc.neon.metadata.model.WidgetInitializationMetadata
 
 /**
  * Metadata about widgets and data types
@@ -55,7 +53,7 @@ interface Metadata {
      * @param columnNames
      * @return
      */
-    ColumnMetadataList retrieve(String databaseName, String tableName, Set<String> columnNames)
+    List<ColumnMetadata> retrieve(String databaseName, String tableName, Set<String> columnNames)
 
     /**
      * Clears any metadata for the given table in the database
@@ -78,6 +76,6 @@ interface Metadata {
      * @param widgetName
      * @return
      */
-    WidgetAndDatasetMetadataList retrieve(String databaseName, String tableName, String widgetName)
+    List<WidgetAndDatasetMetadata> retrieve(String databaseName, String tableName, String widgetName)
 
 }

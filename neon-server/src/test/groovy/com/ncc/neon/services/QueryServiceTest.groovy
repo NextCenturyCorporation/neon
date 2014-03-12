@@ -16,51 +16,38 @@
 
 package com.ncc.neon.services
 
-import com.ncc.neon.metadata.model.column.ColumnMetadataList
-import com.ncc.neon.metadata.model.column.ColumnMetadata
-import com.ncc.neon.query.Query
-import com.ncc.neon.query.QueryExecutor
-import com.ncc.neon.query.QueryGroup
-import com.ncc.neon.query.TableQueryResult
-import com.ncc.neon.result.ClientData
-import com.ncc.neon.result.MetadataResolver
+import com.ncc.neon.connect.DataSources
+import com.ncc.neon.query.*
 import org.junit.Before
 import org.junit.Test
 
-
-
 class QueryServiceTest {
+
+    private static final String HOST = "aHost"
+    private static final String DATABASE_TYPE = DataSources.mongo.toString()
 
     private QueryService queryService
 
     @Before
     void before() {
         queryService = new QueryService()
-        QueryExecutor executor = [execute: { query, options -> new TableQueryResult([["key1": "val1"], ["key2": 2]]) }] as QueryExecutor
-        queryService.queryExecutorFactory = [getExecutor: { executor }] as QueryExecutorFactory
-
-        def metadata = [new ColumnMetadata(columnName: "key1", text: true), new ColumnMetadata(columnName: "key2", numeric: true)]
-        queryService.metadataResolver = [resolveQuery: { new ColumnMetadataList(metadata) }] as MetadataResolver
+        QueryExecutor executor = [execute: { query, options -> new TabularQueryResult([["key1": "val1"], ["key2": 2]]) }] as QueryExecutor
+        queryService.queryExecutorFactory = [getExecutor: { connection ->
+            assert connection.host == HOST
+            assert connection.dataSource == DataSources.valueOf(DATABASE_TYPE)
+            executor }] as QueryExecutorFactory
     }
 
     @Test
     void "execute query"() {
-        ClientData clientData = queryService.executeQuery("", new Query())
-        assert clientData.data
-        assert clientData.data == [["key1": "val1"], ["key2": 2]]
-
-        assert clientData.metadata
-        assert clientData.metadata == ["key1": ["text": true], "key2": ["numeric": true]]
+        QueryResult result = queryService.executeQuery(HOST, DATABASE_TYPE, new Query())
+        assert result.data == [["key1": "val1"], ["key2": 2]]
     }
 
     @Test
     void "execute query group"() {
         QueryGroup queryGroup = new QueryGroup(queries: [new Query()])
-        ClientData clientData = queryService.executeQueryGroup("", queryGroup)
-        assert clientData.data
-        assert clientData.data == [["key1": "val1"], ["key2": 2]]
-
-        assert clientData.metadata
-        assert clientData.metadata == ["key1": ["text": true], "key2": ["numeric": true]]
+        QueryResult result = queryService.executeQueryGroup(HOST, DATABASE_TYPE, queryGroup)
+        assert result.data == [["key1": "val1"], ["key2": 2]]
     }
 }

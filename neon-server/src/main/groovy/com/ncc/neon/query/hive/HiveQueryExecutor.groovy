@@ -62,7 +62,7 @@ class HiveQueryExecutor implements QueryExecutor {
         LOGGER.debug("Query: {}", hiveQuery)
         int offset = query.offsetClause ? query.offsetClause.offset : 0
         List<Map> resultList = client.executeQuery(hiveQuery, offset)
-        QueryResult result = new TableQueryResult(data: resultList)
+        QueryResult result = new TabularQueryResult(resultList)
         return transform(query.transform, result)
     }
 
@@ -83,7 +83,7 @@ class HiveQueryExecutor implements QueryExecutor {
     @Override
     QueryResult execute(QueryGroup queryGroup, QueryOptions options) {
         return runAndRelease { client ->
-            TableQueryResult queryResult = new TableQueryResult()
+            TabularQueryResult queryResult = new TabularQueryResult()
             queryGroup.queries.each {
                 def result = executeQuery(client, it, options)
                 queryResult.data.addAll(result.data)
@@ -113,19 +113,19 @@ class HiveQueryExecutor implements QueryExecutor {
     }
 
     @Override
-    QueryResult getFieldNames(String databaseName, String tableName) {
+    List<String> getFieldNames(String databaseName, String tableName) {
         try {
             def columns = runAndRelease { client -> client.getColumnNames(databaseName, tableName) }
-            return new ListQueryResult(columns)
+            return columns
         }
         catch (SQLException ex) {
             LOGGER.error("Columns cannot be found ", ex)
-            return new ListQueryResult()
+            return []
         }
     }
 
     private JdbcClient getJdbcClient() {
-        return connectionManager.currentConnectionClient
+        return connectionManager.connection.jdbcClient
     }
 
     /**

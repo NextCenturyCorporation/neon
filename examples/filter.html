@@ -1,16 +1,15 @@
 <html>
 <head>
-    <!-- Import Neon JavaScript library. Jquery and Lodash come with the library.-->
     <script src="http://localhost:8080/neon/js/neon.js"></script>
 
     <script>
-        //Tell the JavaScript library the location where Neon is deployed.
-        neon.query.SERVER_URL = "http://localhost:8080/neon";
-
-        //A connection is already established. This identifies the connection.
-        var connectionId = "mongo@localhost";
+        neon.SERVER_URL = "http://localhost:8080/neon";
+        var connection = new neon.query.Connection();
+        connection.connect(neon.query.Connection.MONGO,"localhost");
 
         var databaseName = "mydb";
+        connection.use(databaseName);
+
         var tableName = "sample";
 
         var filterKey;
@@ -18,8 +17,15 @@
         // sends and receive messages about filters that were applied
         var messenger = new neon.eventing.Messenger();
 
+        // in a more complex app, this messenger could be in another component. it listens to filter changes and reacts
+        var messenger2 = new neon.eventing.Messenger();
+        var eventHandlers = {"filtersChanged": function () {
+            $('#message').html('Filters Changed!');
+        }};
+        messenger2.registerForNeonEvents(eventHandlers);
+
         //Make sure neon is ready for events
-        neon.ready(function(){
+        neon.ready(function () {
 
             //Register for a filter key. The server uses this to identify which client is creating the filter.
             neon.query.registerForFilterKey(databaseName, tableName, function (key) {
@@ -27,23 +33,24 @@
             });
 
             //Add a click handler to the query button
-            $("#query-button").click(function(){
-                var query = new neon.query.Query().selectFrom(databaseName, tableName);
+            $("#query-button").click(function () {
+                var query = new neon.query.Query().selectFrom(tableName);
                 //Execute the query and display the results.
-                neon.query.executeQuery(connectionId, query, function(result){
+                connection.executeQuery(query, function (result) {
+                    $('#message').html('');
                     $("#result").html(JSON.stringify(result.data));
                 });
             });
 
             //Add a click handler to the filter button
-            $("#add-button").click(function(){
+            $("#add-button").click(function () {
                 var whereClause = neon.query.where("magnitude", ">=", 3.0);
-                var filter = new neon.query.Filter().selectFrom(databaseName, tableName).where(whereClause);
+                var filter = new neon.query.Filter().selectFrom(tableName).where(whereClause);
                 messenger.replaceFilter(filterKey, filter);
             });
 
             //Add a click handler to the filter button
-            $("#remove-button").click(function(){
+            $("#remove-button").click(function () {
                 messenger.removeFilter(filterKey);
             });
         });
@@ -54,13 +61,18 @@
 
 
 <body>
-    <p>
-        <button id="query-button">Execute Query</button>
-        <button id="add-button">Add Filter</button>
-        <button id="remove-button">Remove Filter</button>
-    </p>
-    <p>Query Results:</p>
-    <p id="result"></p>
+<p>
+    <button id="query-button">Execute Query</button>
+    <button id="add-button">Add Filter</button>
+    <button id="remove-button">Remove Filter</button>
+</p>
+<p>Message:</p>
+
+<p id="message"></p>
+
+<p>Query Results:</p>
+
+<p id="result"></p>
 
 </body>
 

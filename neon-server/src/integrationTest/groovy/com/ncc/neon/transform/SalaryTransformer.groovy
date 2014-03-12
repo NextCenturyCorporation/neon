@@ -16,7 +16,7 @@
 
 package com.ncc.neon.transform
 import com.ncc.neon.query.QueryResult
-import com.ncc.neon.query.TableQueryResult
+import com.ncc.neon.query.TabularQueryResult
 
 
 class SalaryTransformer implements Transformer{
@@ -27,7 +27,7 @@ class SalaryTransformer implements Transformer{
         data.each { Map<String,Object> rows ->
             rows['salary'] = rows['salary'] * salaryMultiplier
         }
-        return new TableQueryResult(data)
+        return new TabularQueryResult(data)
     }
 
     @Override

@@ -7,6 +7,7 @@
     "grunt-contrib-jshint": "~0.8.0",
     "grunt-contrib-concat": "~0.3.0",
     "grunt-contrib-jasmine": "~0.5.1",
+    "grunt-contrib-watch": "~0.5.3",
     "yuidocjs": "~0.3.45"
   }
 }

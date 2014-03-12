@@ -1,24 +1,22 @@
 <html>
 <head>
-    <!-- Import Neon JavaScript library. Jquery and Lodash come with the library.-->
     <script src="http://localhost:8080/neon/js/neon.js"></script>
 
     <script>
-        //Tell the JavaScript library the location where Neon is deployed.
-        neon.query.SERVER_URL = "http://localhost:8080/neon";
-
-        //A connection is already established. This identifies the connection.
-        var connectionId = "mongo@localhost";
+        neon.SERVER_URL = "http://localhost:8080/neon";
+        var connection = new neon.query.Connection();
+        connection.connect(neon.query.Connection.MONGO,"localhost");
 
         //A text based query. This query gets 5 rows of data from the given database and table.
         var textQuery = "use mydb; select * from sample limit 5";
 
         //Execute the query and display the results.
-        neon.query.submitTextQuery(connectionId, textQuery, function(result){
+        connection.executeTextQuery(textQuery, function (result) {
             $("#result").html(JSON.stringify(result.data));
         });
-    </script>
 
+
+    </script>
 </head>
 
 <body>

@@ -17,6 +17,8 @@
 package com.ncc.neon.mongo
 import com.ncc.neon.AbstractQueryExecutorIntegrationTest
 import com.ncc.neon.IntegrationTestContext
+import com.ncc.neon.connect.ConnectionInfo
+import com.ncc.neon.connect.DataSources
 import com.ncc.neon.connect.NeonConnectionException
 import com.ncc.neon.query.Query
 import com.ncc.neon.query.QueryOptions
@@ -31,11 +33,13 @@ import com.ncc.neon.util.LatLon
 import org.bson.types.ObjectId
 import org.json.JSONArray
 import org.json.JSONObject
+import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.test.context.ContextConfiguration
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner
+
 /**
  * Integration test that verifies the neon server properly translates mongo queries.
  * These tests parallel the acceptance tests in the javascript client query acceptance tests
@@ -44,14 +48,22 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner
 @ContextConfiguration(classes = IntegrationTestContext)
 class MongoQueryExecutorIntegrationTest extends AbstractQueryExecutorIntegrationTest {
 
+    // TODO: NEON-565 another duplication of mongo.hosts in here
+    private static final String HOST_STRING = System.getProperty("mongo.hosts", "localhost")
+
     private MongoQueryExecutor mongoQueryExecutor
 
     @SuppressWarnings('JUnitPublicNonTestMethod')
     @Autowired
     public void setMongoQueryExecutor(MongoQueryExecutor mongoQueryExectuor) {
         this.mongoQueryExecutor = mongoQueryExectuor
-        this.mongoQueryExecutor.metaClass.getMongo = { MongoTestClient.mongoClient }
     }
+
+    @Before
+    void before() {
+        this.mongoQueryExecutor.connectionManager.currentRequest = new ConnectionInfo(host: HOST_STRING, dataSource: DataSources.mongo)
+    }
+
 
     @Override
     protected MongoQueryExecutor getQueryExecutor(){

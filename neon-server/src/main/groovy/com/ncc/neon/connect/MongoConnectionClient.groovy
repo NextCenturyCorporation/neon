@@ -27,7 +27,7 @@ class MongoConnectionClient implements ConnectionClient{
     private MongoClient mongo
 
     public MongoConnectionClient(ConnectionInfo info){
-        mongo = new MongoClient(info.connectionUrl)
+        mongo = new MongoClient(info.host)
     }
 
     MongoClient getMongo(){

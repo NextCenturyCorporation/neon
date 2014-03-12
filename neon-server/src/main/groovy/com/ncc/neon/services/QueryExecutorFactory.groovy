@@ -42,24 +42,22 @@ class QueryExecutorFactory {
     private ConnectionManager connectionManager
 
     /**
-     * Gets the query executor based on the connection
+     * Gets a query executor to execute a query against the specified connection. The
+     * executor is valid for the current request only.
+     * @param connectionInfo
      * @return the appropriate query executor
      */
-    QueryExecutor getExecutor(String connectionId) {
-        connectionManager.currentRequestConnection.connectionId = connectionId
-        ConnectionInfo info = getConnectionInfoFromId(connectionId)
-
-        if (info.dataSource == DataSources.hive) {
-            return hiveQueryExecutor
+    QueryExecutor getExecutor(ConnectionInfo connectionInfo) {
+        connectionManager.currentRequest = connectionInfo
+        DataSources databaseType = connectionInfo.dataSource
+        switch (databaseType) {
+            case DataSources.mongo:
+                return mongoQueryExecutor
+            case DataSources.hive:
+                return hiveQueryExecutor
+            default:
+                throw new NeonConnectionException("Unsupported database type ${databaseType}")
         }
-        return mongoQueryExecutor
     }
 
-    private ConnectionInfo getConnectionInfoFromId(String connectionId) {
-        ConnectionInfo info = connectionManager.getConnectionById(connectionId)
-        if (!info) {
-            throw new NeonConnectionException("Connection to ${connectionId} was never established.")
-        }
-        return info
-    }
 }

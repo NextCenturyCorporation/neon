@@ -54,6 +54,6 @@ public interface QueryExecutor {
      * @param tableName
      * @return
      */
-    QueryResult getFieldNames(String databaseName, String tableName)
+    List<String> getFieldNames(String databaseName, String tableName)
 
 }

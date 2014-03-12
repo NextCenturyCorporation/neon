@@ -44,7 +44,7 @@ appender("CONSOLE", ConsoleAppender) {
 }
 
 // this appender is not used for testing and we don't want to even create the appender
-// because it willl create a log file in the source tree
+// because it will create a log file in the source tree
 if (!test) {
     appender("FILE", RollingFileAppender) {
         file = "${logDir}/neon.log"

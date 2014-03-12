@@ -15,15 +15,16 @@
  */
 
 package com.ncc.neon.hive
+
 import com.ncc.neon.AbstractQueryExecutorIntegrationTest
 import com.ncc.neon.IntegrationTestContext
-import com.ncc.neon.connect.*
+import com.ncc.neon.connect.ConnectionInfo
+import com.ncc.neon.connect.DataSources
 import com.ncc.neon.query.hive.HiveQueryExecutor
 import com.ncc.neon.util.DateUtils
 import org.json.JSONArray
 import org.json.JSONObject
-import org.junit.AfterClass
-import org.junit.BeforeClass
+import org.junit.Before
 import org.junit.runner.RunWith
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.test.context.ContextConfiguration
@@ -35,38 +36,24 @@ import java.sql.Timestamp
 @ContextConfiguration(classes = IntegrationTestContext)
 class HiveQueryExecutorIntegrationTest extends AbstractQueryExecutorIntegrationTest {
 
+    // TODO: NEON-565 another duplication of hive.host in here
     private static final String HOST_STRING = System.getProperty("hive.host", "localhost:10000")
 
-
-    /** a separate connection used for inserting/deleting test data */
-    private static JdbcClient jdbcClient
-
-    private static final ConnectionInfo CONNECTION_INFO = new ConnectionInfo(connectionUrl: HOST_STRING, dataSource: DataSources.hive)
-    private static final ConnectionClientFactory CONNECTION_FACTORY = new JdbcConnectionClientFactory("org.apache.hive.jdbc.HiveDriver", "hive2")
-
-    @BeforeClass
-    static void beforeClass() {
-        jdbcClient = CONNECTION_FACTORY.createConnectionClient(CONNECTION_INFO)
-    }
-
-    @AfterClass
-    static void afterClass() {
-        CONNECTION_FACTORY.dataSource?.close()
-    }
-
     HiveQueryExecutor hiveQueryExecutor
-
 
     @SuppressWarnings("JUnitPublicNonTestMethod")
     @Autowired
     void setHiveQueryExecutor(HiveQueryExecutor hiveQueryExecutor) {
         this.hiveQueryExecutor = hiveQueryExecutor
-        String connectionId = this.hiveQueryExecutor.connectionManager.connect(CONNECTION_INFO)
-        this.hiveQueryExecutor.connectionManager.currentRequestConnection.connectionId = connectionId
+    }
+
+    @Before
+    void before() {
+        this.hiveQueryExecutor.connectionManager.currentRequest = new ConnectionInfo(host: HOST_STRING, dataSource: DataSources.hive)
     }
 
     @Override
-    protected HiveQueryExecutor getQueryExecutor(){
+    protected HiveQueryExecutor getQueryExecutor() {
         hiveQueryExecutor
     }
 

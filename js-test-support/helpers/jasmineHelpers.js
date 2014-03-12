@@ -96,7 +96,7 @@ neontest.matchers.toBeArrayWithSameElements = function (expectedArray) {
         return 'expected: ' + expectedArray + ', actual: ' + actual;
     };
 
-    return expectedArray.length == actual.length && lodash.difference(expectedArray, actual).length == 0;
+    return expectedArray.length === actual.length && lodash.difference(expectedArray, actual).length === 0;
 };
 
 jasmine.Spy.prototype.wasInvoked = function () {

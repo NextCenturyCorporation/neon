@@ -15,16 +15,15 @@
  */
 
 package com.ncc.neon.connect
-
-import com.mchange.v2.c3p0.ComboPooledDataSource
-
-
+/**
+ * A factory that maintains JDBC connection pools for each unique host neon connects to.
+ *
+ * Note this class is not threadsafe.
+ */
 class JdbcConnectionClientFactory implements ConnectionClientFactory {
 
-    private ComboPooledDataSource dataSource
     private final String databaseType
     private final String driverName
-    private final Object lock = new Object()
 
     public JdbcConnectionClientFactory(String driverName, String databaseType) {
         this.driverName = driverName
@@ -33,27 +32,7 @@ class JdbcConnectionClientFactory implements ConnectionClientFactory {
 
     @Override
     ConnectionClient createConnectionClient(ConnectionInfo info) {
-        // the data source is created lazily because ConnectionManager.connect calls
-        // connectionCache.put(info,createClientFactory) as part of its connect method, so a new instance of
-        // this class will be created even if it already exists in the map. initializing the pool when this connection
-        // is actually used prevents multiple pools to the same connection from being instantiated
-
-        // because of the lazy initialization, we need to synchronize on the creation of the data source to avoid
-        // possibly creating it twice
-        synchronized (lock) {
-            if (!dataSource) {
-                configureConnectionPool(info)
-            }
-        }
-        return new JdbcClient(dataSource.getConnection("", ""))
+        return new JdbcClientPool(info, driverName, databaseType)
     }
 
-    private void configureConnectionPool(ConnectionInfo info) {
-        this.dataSource = new ComboPooledDataSource()
-        this.dataSource.setDriverClass(driverName)
-        this.dataSource.setJdbcUrl("jdbc:${databaseType}://${info.connectionUrl}")
-        addShutdownHook {
-            dataSource.close()
-        }
-    }
 }

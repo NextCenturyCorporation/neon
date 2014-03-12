@@ -19,11 +19,22 @@ package com.ncc.common
 import org.apache.tools.ant.taskdefs.condition.Os
 import org.gradle.api.tasks.Exec
 
+import java.lang.reflect.Method
+
 /**
  * GruntTask adopted from http://naleid.com/blog/2013/01/24/calling-gruntjs-tasks-from-gradle/
  */
 class GruntTask extends Exec {
     static final String GRUNT_EXECUTABLE = Os.isFamily(Os.FAMILY_WINDOWS) ? "grunt.cmd" : "grunt"
+
+    private static final Method PARENT_EXEC_METHOD
+
+    boolean background = false
+
+    static {
+        PARENT_EXEC_METHOD = Exec.getDeclaredMethod("exec", null)
+        PARENT_EXEC_METHOD.accessible = true
+    }
 
     GruntTask() {
         executable = GRUNT_EXECUTABLE
@@ -32,4 +43,18 @@ class GruntTask extends Exec {
     void gruntArgs(Object... gruntArgs) {
         this.args = gruntArgs as List
     }
+
+    // this is a groovy hack that lets us override exec, but it will let us run the task in the background
+    void exec() {
+        def runnable = [run: { PARENT_EXEC_METHOD.invoke(this) }] as Runnable
+        if (background) {
+            Thread t = new Thread(runnable)
+            t.daemon = true
+            t.start()
+        } else {
+            runnable.run()
+        }
+
+    }
+
 }

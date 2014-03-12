@@ -14,22 +14,13 @@
  *
  */
 
-
-/**
- * The url of the query server. Defaults to localhost:8080/neon.
- * @property SERVER_URL
- * @type {String}
- */
-neon.query.SERVER_URL = 'http://localhost:8080/neon';
-
 /**
  * Represents a query to be constructed against some data source. This class is built so query
- * clauses can be chained together to create an entire query, as shown below
+ * clauses can be chained together to create an entire query.
  * @example
  *     var where = neon.query.where;
  *     var and = neon.query.and;
  *     var query = new neon.query.Query(where(and(where('someProperty','=',5), where('someOtherProperty','<',10))));
- *     neon.query.executeQuery(query);
  * @class neon.query.Query
  * @constructor
  */
@@ -163,13 +154,14 @@ neon.query.KM = 'km';
 neon.query.MILE = 'mile';
 
 /**
- * Sets the *select* clause of the query to select data from the specified dataset
+ * Sets the *select* clause of the query to select data from the specified table
  * @method selectFrom
- * @param {String} databaseName The name of the database that contains the data
- * @param {String} tableName The dataset to select from
+ * @method selectFrom
+ * @param {String} tableName The table to select from. This may be fully qualified with [databaseName.]tableName, in
+ * which case, the database specified in the "use" method of the connection will be overridden.
  * @return {neon.query.Query} This query object
  */
-neon.query.Query.prototype.selectFrom = function (databaseName, tableName) {
+neon.query.Query.prototype.selectFrom = function (tableName) {
     this.filter.selectFrom.apply(this.filter, arguments);
     return this;
 };
@@ -427,72 +419,6 @@ neon.query.withinDistance = function (locationField, center, distance, distanceU
 };
 
 /**
- * Executes a query that returns the field names from the data set. This method executes synchronously.
- * @method getFieldNames
- * @param {String} connectionId The id of the connection resource
- * @param {String} databaseName The name of the database that holds this data
- * @param {String} tableName The table name whose fields are being returned
- * @param {String} widgetName The widget name who is requesting the field names. One of {neon.widget}
- * @param {Function} successCallback The callback to call when the field names are successfully retrieved
- * @param {Function} [errorCallback] The optional callback when an error occurs. This is a 3 parameter function that contains the xhr, a short error status and the full error message.
- * @return {neon.util.AjaxRequest} The xhr request object
- */
-neon.query.getFieldNames = function (connectionId, databaseName, tableName, widgetName, successCallback, errorCallback) {
-    return neon.util.ajaxUtils.doGet(
-        neon.query.serviceUrl('queryservice', connectionId + '/fields', '?databaseName=' + databaseName + '&tableName=' + tableName + '&widgetName=' + widgetName),
-        {
-            success: successCallback,
-            error: errorCallback
-        }
-    );
-};
-
-/**
- * Executes the specified query and fires the callback when complete
- * @method executeQuery
- * @param {String} connectionId The id of the connection resource
- * @param {neon.query.Query} query the query to execute
- * @param {Function} successCallback The callback to fire when the query successfully completes
- * @param {Function} [errorCallback] The optional callback when an error occurs. This is a 3 parameter function that contains the xhr, a short error status and the full error message.
- * @return {neon.util.AjaxRequest} The xhr request object
- */
-neon.query.executeQuery = function (connectionId, query, successCallback, errorCallback) {
-    return neon.query.executeQueryService_(connectionId, query, successCallback, errorCallback, 'query');
-};
-
-/**
- * Executes the specified query group (a series of queries whose results are aggregate),
- * and fires the callback when complete
- * @method executeQueryGroup
- * @param {String} connectionId The id of the connection resource
- * @param {neon.query.QueryGroup} queryGroup the query to execute
- * @param {Function} successCallback The callback to fire when the query successfully completes
- * @param {Function} [errorCallback] The optional callback when an error occurs. This is a 3 parameter function that contains the xhr, a short error status and the full error message.
- * @return {neon.util.AjaxRequest} The xhr request object
- */
-neon.query.executeQueryGroup = function (connectionId, queryGroup, successCallback, errorCallback) {
-    return neon.query.executeQueryService_(connectionId, queryGroup, successCallback, errorCallback, 'querygroup');
-};
-
-neon.query.executeQueryService_ = function (connectionId, query, successCallback, errorCallback, serviceName) {
-    if (query.selectionOnly_) {
-        serviceName += "withselectiononly";
-    }
-    else if (query.disregardFilters_) {
-        serviceName += "disregardfilters";
-    }
-
-    return neon.util.ajaxUtils.doPostJSON(
-        query,
-        neon.query.serviceUrl('queryservice', connectionId + '/' + serviceName),
-        {
-            success: successCallback,
-            error: errorCallback
-        }
-    );
-};
-
-/**
  * Registers for a filter key and fires the callback when complete
  * @method registerForFilterKey
  * @param {String} databaseName The database name against which the filter is registered
@@ -510,7 +436,7 @@ neon.query.registerForFilterKey = function (databaseName, tableName, successCall
 
     return neon.util.ajaxUtils.doPostJSON(
         dataSet,
-        neon.query.serviceUrl('filterservice', 'registerforfilterkey'),
+        neon.serviceUrl('filterservice', 'registerforfilterkey'),
         {
             success: successCallback,
             error: errorCallback
@@ -535,7 +461,7 @@ neon.query.addFilter = function (filterKey, filter, successCallback, errorCallba
 
     return neon.util.ajaxUtils.doPostJSON(
         filterContainer,
-        neon.query.serviceUrl('filterservice', 'addfilter'),
+        neon.serviceUrl('filterservice', 'addfilter'),
         {
             success: successCallback,
             error: errorCallback
@@ -554,7 +480,7 @@ neon.query.addFilter = function (filterKey, filter, successCallback, errorCallba
 neon.query.removeFilter = function (filterKey, successCallback, errorCallback) {
     return neon.util.ajaxUtils.doPostJSON(
         filterKey,
-        neon.query.serviceUrl('filterservice', 'removefilter'),
+        neon.serviceUrl('filterservice', 'removefilter'),
         {
             success: successCallback,
             error: errorCallback
@@ -579,7 +505,7 @@ neon.query.replaceFilter = function (filterKey, filter, successCallback, errorCa
 
     return neon.util.ajaxUtils.doPostJSON(
         filterContainer,
-        neon.query.serviceUrl('filterservice', 'replacefilter'),
+        neon.serviceUrl('filterservice', 'replacefilter'),
         {
             success: successCallback,
             error: errorCallback
@@ -596,7 +522,7 @@ neon.query.replaceFilter = function (filterKey, filter, successCallback, errorCa
  */
 neon.query.clearFilters = function (successCallback, errorCallback) {
     return neon.util.ajaxUtils.doPost(
-        neon.query.serviceUrl('filterservice', 'clearfilters'),
+        neon.serviceUrl('filterservice', 'clearfilters'),
         {
             success: successCallback,
             error: errorCallback
@@ -621,7 +547,7 @@ neon.query.addSelection = function (filterKey, filter, successCallback, errorCal
 
     return neon.util.ajaxUtils.doPostJSON(
         filterContainer,
-        neon.query.serviceUrl('selectionservice', 'addselection'),
+        neon.serviceUrl('selectionservice', 'addselection'),
         {
             success: successCallback,
             error: errorCallback,
@@ -641,7 +567,7 @@ neon.query.addSelection = function (filterKey, filter, successCallback, errorCal
 neon.query.removeSelection = function (filterKey, successCallback, errorCallback) {
     return neon.util.ajaxUtils.doPostJSON(
         filterKey,
-        neon.query.serviceUrl('selectionservice', 'removeselection'),
+        neon.serviceUrl('selectionservice', 'removeselection'),
         {
             success: successCallback,
             error: errorCallback,
@@ -667,7 +593,7 @@ neon.query.replaceSelection = function (filterKey, filter, successCallback, erro
 
     return neon.util.ajaxUtils.doPostJSON(
         filterContainer,
-        neon.query.serviceUrl('selectionservice', 'replaceselection'),
+        neon.serviceUrl('selectionservice', 'replaceselection'),
         {
             success: successCallback,
             error: errorCallback,
@@ -685,186 +611,13 @@ neon.query.replaceSelection = function (filterKey, filter, successCallback, erro
  */
 neon.query.clearSelection = function (successCallback, errorCallback) {
     return neon.util.ajaxUtils.doPost(
-        neon.query.serviceUrl('selectionservice', 'clearselection'),
+        neon.serviceUrl('selectionservice', 'clearselection'),
         {
             success: successCallback,
             error: errorCallback,
             global: false
         }
     );
-};
-
-/**
- * Submits a text based query to the server.
- * @method submitTextQuery
- * @param {String} connectionId The id of the connection resource
- * @param {String} queryText The query text to be submitted
- * @param {Function} successCallback The callback to execute when the query is parsed, which contains the query result
- * @param {Function} [errorCallback] The optional callback when an error occurs. This is a 3 parameter function that contains the xhr, a short error status and the full error message.
- * @return {neon.util.AjaxRequest} The xhr request object
- */
-neon.query.submitTextQuery = function (connectionId, queryText, successCallback, errorCallback) {
-    return neon.util.ajaxUtils.doPost(
-        neon.query.serviceUrl('languageservice', connectionId + '/query'),
-        {
-            data: { text: queryText },
-            contentType: 'application/x-www-form-urlencoded; charset=UTF-8',
-            responseType: 'json',
-            success: successCallback,
-            error: errorCallback
-        }
-    );
-};
-
-/**
- * Save the current state of a widget.
- * @method saveState
- * @param {String} id a unique identifier of a client widget
- * @param {Object} stateObject an object that is to be saved.
- * @param {Function} successCallback The callback to execute when the state is saved. The callback will have no data.
- * @param {Function} errorCallback The optional callback when an error occurs. This is a 3 parameter function that contains the xhr, a short error status and the full error message.
- * @return {neon.util.AjaxRequest} The xhr request object
- */
-
-neon.query.saveState = function (id, stateObject, successCallback, errorCallback) {
-    var strObject = JSON.stringify(stateObject);
-    return neon.util.ajaxUtils.doPostJSON(
-        {clientId: id, state: strObject},
-        neon.query.serviceUrl('widgetstateservice', 'savestate'),
-        {
-            success: successCallback,
-            error: errorCallback,
-            global: false
-        }
-    );
-};
-
-/**
- * Gets the current state that has been saved.
- * @method getSavedState
- * @param {String} id an unique identifier of a client widget
- * @param {Function} successCallback The callback that contains the saved data.
- * @return {neon.util.AjaxRequest} The xhr request object
- */
-
-neon.query.getSavedState = function (id, successCallback) {
-    return neon.util.ajaxUtils.doGet(
-        neon.query.serviceUrl('widgetstateservice', 'restorestate', '?clientId=' + id),
-        {
-            success: function (data) {
-                if (!data) {
-                    return;
-                }
-                if (successCallback && typeof successCallback === 'function') {
-                    successCallback(data);
-                }
-            },
-            error: function () {
-                //Do nothing, the state does not exist.
-            }
-        }
-    );
-};
-
-/**
- * Gets a unique id for a widget for a particular session. Repeated calls to this method in a single session with the
- * same parameters will result in the same id being returned. Note this method is executed synchronously.
- * @param {String} [qualifier] If a qualifier is specified, the id will be tied to that qualifier. This
- * allows multiple ids to be created for a single session. If a qualifier is not specified, the id returned
- * will be unique to the session.
- * If running within OWF, the OWF instanceId is appended to the identifier so the same widget can be reused in
- * multiple windows without conflict.
- * @method getInstanceId
- * @return {String} A unique identifier string
- */
-neon.query.getInstanceId = function (qualifier) {
-    // callers expect the id to return synchronously so set async to false
-    var instanceId;
-    neon.util.ajaxUtils.doGet(
-        neon.query.serviceUrl('widgetstateservice', 'instanceid', neon.query.buildInstanceIdQueryString_(qualifier)),
-        {
-            async: false,
-            success: function (id) {
-                instanceId = id;
-            }
-        }
-    );
-    return instanceId;
-};
-
-neon.query.buildInstanceIdQueryString_ = function (qualifier) {
-    var queryString = '';
-    if (qualifier) {
-        queryString = '?qualifier=' + qualifier;
-        // when running in OWF, it is possible to have the same widget running multiple times so append
-        // the owf widget instanceid to the qualifier
-        if (neon.util.owfUtils.isRunningInOWF()) {
-            queryString += OWF.getInstanceId();
-        }
-    }
-    return queryString;
-};
-
-/**
- * Gets widget initialization metadata.
- * @method getWidgetInitialization
- * @param {String} id an identifier of a widget, usually the widget name
- * @param {Function} successCallback The callback that contains the saved data.
- * @return {neon.util.AjaxRequest} The xhr request object
- */
-
-neon.query.getWidgetInitialization = function (id, successCallback) {
-    return neon.util.ajaxUtils.doGet(
-        neon.query.serviceUrl('widgetstateservice', 'widgetinitialization', '?widget=' + id),
-        {
-            success: successCallback
-        }
-    );
-};
-
-
-/**
- * Gets the database names available for the current datastore
- * @method getDatabaseNames
- * @param {String} connectionId The id of the connection resource
- * @param {Function} successCallback The callback that contains the database names in an array.
- * @return {neon.util.AjaxRequest} The xhr request object
- */
-
-neon.query.getDatabaseNames = function (connectionId, successCallback) {
-    return neon.util.ajaxUtils.doGet(
-        neon.query.serviceUrl('queryservice', connectionId + '/databasenames'),
-        {
-            success: successCallback
-        }
-    );
-};
-
-/**
- * Gets the tables names available for the current datastore and database
- * @method getTableNames
- * @param {String} connectionId The id of the connection resource
- * @param {String} databaseName The name of the database
- * @param {Function} successCallback The callback that contains the table names in an array.
- * @return {neon.util.AjaxRequest} The xhr request object
- */
-
-neon.query.getTableNames = function (connectionId, databaseName, successCallback) {
-    return neon.util.ajaxUtils.doPost(
-        neon.query.serviceUrl('queryservice', connectionId + '/tablenames'),
-        {
-            data: { database: databaseName },
-            success: successCallback
-        }
-    );
-};
-
-neon.query.serviceUrl = function (servicePath, serviceName, queryParamsString) {
-    if (!queryParamsString) {
-        queryParamsString = '';
-    }
-
-    return neon.query.SERVER_URL + '/services/' + servicePath + '/' + serviceName + queryParamsString;
 };
 
 /**

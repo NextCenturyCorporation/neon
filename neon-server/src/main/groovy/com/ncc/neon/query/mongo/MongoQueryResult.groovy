@@ -17,15 +17,16 @@
 package com.ncc.neon.query.mongo
 
 import com.mongodb.DBObject
-import com.ncc.neon.query.TableQueryResult
+import com.ncc.neon.query.TabularQueryResult
 
 
 
-class MongoQueryResult extends TableQueryResult{
+/**
+ * A convenience subclass for creating a query result from mongo dat
+ */
+class MongoQueryResult extends TabularQueryResult {
 
-    MongoQueryResult(Iterable<DBObject> results){
-        results.each {DBObject object ->
-            data << object.toMap()
-        }
+    MongoQueryResult(Iterable<DBObject> results) {
+        super(results.collect { it.toMap() } as List)
     }
 }

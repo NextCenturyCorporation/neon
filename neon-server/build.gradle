@@ -15,38 +15,11 @@
  */
 
 import org.json.JSONArray
-import static com.ncc.neon.AcceptanceTestJSHelperGenerator.*
 import com.ncc.neon.HiveJSONGenerator
 import com.ncc.neon.MongoJSONGenerator
 import com.ncc.neon.JSONToCSVConverter
-import com.ncc.common.GruntTask
-import groovy.io.FileType
-import org.apache.tools.ant.filters.ReplaceTokens
-
-// define source sets first so tasks that act dynamically on sourcesets have a list of all of them
-sourceSets {
-    // contains the server integration tests
-    integrationTest {
-        resources {
-            srcDir 'src/integrationTest/resources'
-            srcDir 'src/test-data'
-        }
-    }
-    acceptanceTest
-}
-
-apply plugin: 'jetty'
-
-// antlr plugin and configuration take from https://github.com/fraoch/antlr4-plugin/
-apply plugin: 'antlr4'
-apply from: "${rootDir}/gradle/groovy.gradle"
-apply from: "${rootDir}/gradle/gatling.gradle"
-apply from: "${rootDir}/gradle/sharedDependencies.gradle"
-
-
-sourceCompatibility = 1.7
-
-def TEST_GROUP = JavaBasePlugin.VERIFICATION_GROUP
+import org.gradle.api.plugins.jetty.internal.Monitor
+import org.gradle.api.plugins.jetty.internal.JettyPluginWebAppContext
 
 buildscript {
     repositories {
@@ -60,12 +33,14 @@ buildscript {
     }
     dependencies {
         classpath ':antlr4-plugin:0.1.1'
+        classpath 'org.hidetake:gradle-ssh-plugin:0.2.0'
     }
 }
 
 repositories {
     maven {
         url 'https://repository.cloudera.com/artifactory/public'
+        mavenCentral()
     }
 
     flatDir {
@@ -75,28 +50,33 @@ repositories {
 
 project.ext {
     testDataDir = "${projectDir}/src/test-data"
-    javadocTitle = "$libraryName API Documentation"
 
     // a mongo instance for inserting/deleting test data (will be lazy initialized)
     mongoInstance = null
 
     // used for determining when test data json needs to be generated
     testDataInputFileTree = fileTree('src/test-data').include('*.json')
-
-    // because of this issue with the plugin https://github.com/fraoch/antlr4-plugin/issues/1, the
-    // package using the antlr generated code must be the same as the package it is generated to
-    antlrPackage = "com.ncc.neon.language"
-    antlrGrammar = "Neon"
 }
 
 
+apply plugin: 'jetty'
+apply plugin: 'war'
+
+// these files need to be applied in order since there are dependencies between them
+apply from: "${rootDir}/gradle/sharedDependencies.gradle"
+apply from: "${rootDir}/gradle/js.gradle"
+apply from: "gradle/integrationTest.gradle"
+apply from: "gradle/acceptanceTest.gradle"
+apply from: "gradle/performanceTest.gradle"
+
+apply from: "${rootDir}/gradle/groovy.gradle"
+apply from: "gradle/antlr.gradle"
+apply from: "gradle/deploy.gradle"
+
+sourceCompatibility = 1.7
+
 configurations {
-    integrationTestCompile { extendsFrom testCompile }
-    integrationTestRuntime { extendsFrom integrationTestCompile, testRuntime }
-
-    acceptanceTestCompile { extendsFrom testCompile }
-    acceptanceTestRuntime { extendsFrom testCompile, testRuntime }
-
+    // using slf4j
     compile.exclude module: 'commons-logging'
 }
 
@@ -111,7 +91,6 @@ dependencies {
     compile 'org.slf4j:slf4j-api:1.7.2'
     compile 'org.slf4j:jcl-over-slf4j:1.7.2'
     compile 'org.slf4j:log4j-over-slf4j:1.7.2'
-
     compile "ch.qos.logback:logback-core:$logbackVersion"
     compile "ch.qos.logback:logback-classic:$logbackVersion"
     compile "com.google.guava:guava:14.0.1"
@@ -121,8 +100,6 @@ dependencies {
         exclude module: 'groovy'
     }
     compile 'commons-lang:commons-lang:2.6'
-
-
     compile('org.apache.hadoop:hadoop-common:2.0.0-cdh4.3.0') {
         exclude group: 'org.mortbay.jetty'
         exclude group: 'javax.servlet'
@@ -133,7 +110,6 @@ dependencies {
         exclude module: 'log4j'
         exclude module: 'slf4j-log4j12'
     }
-
     compile 'jline:jline:0.9.94'
     compile 'com.googlecode.javaewah:JavaEWAH:0.3.2'
     compile 'javolution:javolution:5.5.1'
@@ -157,16 +133,6 @@ dependencies {
 
     }
     compile 'com.google.code.tempus-fugit:tempus-fugit:1.1'
-
-    integrationTestCompile('org.apache.hadoop:hadoop-hdfs:2.0.0-cdh4.3.0') {
-        exclude group: 'javax.servlet'
-        exclude group: 'javax.servlet.jsp'
-        exclude module: 'jasper-runtime'
-        // using log4j-over-slf4j
-        exclude module: 'log4j'
-        exclude module: 'slf4j-log4j12'
-    }
-
     compile project(":metadata")
 
     providedCompile 'javax.servlet:javax.servlet-api:3.0.1'
@@ -177,140 +143,64 @@ dependencies {
     testCompile 'commons-collections:commons-collections:3.2.1'
     testCompile 'commons-io:commons-io:2.4'
     testCompile "org.springframework:spring-test:$springVersion"
-
-    integrationTestCompile sourceSets.main.output
-    integrationTestCompile sourceSets.test.output
-
-    antlr4 'org.antlr:antlr4:4.0'
-    antlr4 'org.antlr:antlr4-runtime:4.0'
-    antlr4 'org.antlr:antlr-runtime:3.5'
-    antlr4 'org.antlr:ST4:4.0.7'
 }
 
-antlr4 {
-    tool {
-        "${antlrPackage}.${antlrGrammar}" {
-            listener = true
-            warnAsError = true
-        }
+war {
+    description = 'Creates a war file for the project'
+    from(jsOutputFile) {
+        into 'js'
     }
 }
 
-// copies the antlr generated files from build/antlr4-gen to src/main/groovy so we can commit them and IDEs can easily
-// pick them up
-task copyAntlrFilesToSrc(type: Copy) {
-    dependsOn 'generate'
-    def antlrPackageFilePath = antlrPackage.replaceAll("\\.", "/")
-    inputs.file { file("${antlrPackage}.${antlrGrammar}") }
-    outputs.files { fileTree("${projectDir}/src/main/groovy/${antlrPackageFilePath}").include('*.java') }
-    from("${buildDir}/${generate.buildGenDir}/main/${antlrPackageFilePath}") {
-        include '*.java'
-    }
-    into "${projectDir}/src/main/groovy/${antlrPackageFilePath}"
+task watch(type: com.ncc.common.GruntTask) {
+    background = true
+    gruntArgs "watch", "--outfile=${jsOutputFile}"
 }
 
-// remove full path info from the files
-generate.doLast {
-    def genDir = new File("${buildDir}/${generate.buildGenDir}")
-    genDir.eachFileRecurse(FileType.FILES) { file ->
-        def fullPathRegex = "(//.*?)[\\S]*(${antlrGrammar}\\.g4)"
-        file.write(file.text.replaceAll(fullPathRegex, '$1$2'))
+jettyRun {
+    dependsOn concatjs, watch
+    reload = 'automatic'
+    scanIntervalSeconds = 10
+    httpPort = 8080
+
+    webAppConfig = new JettyPluginWebAppContext()
+    webAppConfig.baseResource = jettyRun.class.classLoader.loadClass('org.mortbay.resource.ResourceCollection').newInstance(
+            [
+                    file(webAppDirName).toString(),
+
+                    // add the concatenated javascript so the widgets can access it by neon.js
+                    buildDir.absolutePath,
+
+                    // this lets us get to the examples directory using the /examples path, but unfortunately it also
+                    // adds all of our base directories. this isn't really a problem just more clutter than is needed
+                    rootDir.absolutePath
+            ] as String[])
+
+    doFirst {
+        System.setProperty("log.dir", "${project.buildDir}/jettyRunLogs")
     }
 }
 
-compileGroovy.dependsOn copyAntlrFilesToSrc
+[jettyRun, jettyRunWar, transformTestWebService, acceptanceTestWar, concurrencyTestWar]*.doLast {
+    /**
+     * THIS IS A WORKAROUND! THE CURRENT VERSION OF THIS TASK DOESN'T START A WATCHER IN DAEMON MODE
+     *
+     * If starting the monitor fails, it may be because the jetty task was updated to fix this issue
+     * When that happens, we shouldn't need the custom task any more
+     *
+     * http://issues.gradle.org/browse/GRADLE-2263
+     */
+    if (getStopPort() != null && getStopPort() > 0 && getStopKey() != null) {
+        Monitor monitor = new Monitor(getStopPort(), getStopKey(), server.getProxiedObject());
+        monitor.start();
+    }
+}
 
 test {
     def props = [:]
     props['unit.test'] = true
     systemProperties props
 }
-
-task integrationTest(type: Test) {
-    dependsOn 'integrationTestClasses'
-
-    // TODO: NEON-960 workaround
-    if (isMongoOnly()) {
-        dependsOn 'insertMongoDataIntegrationTest'
-    } else if (isHiveOnly()) {
-        dependsOn 'insertHiveDataIntegrationTest'
-    } else {
-        dependsOn 'insertMongoDataIntegrationTest', 'insertHiveDataIntegrationTest'
-    }
-
-    testClassesDir = sourceSets.integrationTest.output.classesDir
-    classpath = sourceSets.integrationTest.runtimeClasspath
-
-    // allow project properties and just pass them through to the system properties
-    def props = [:]
-    props["mongo.hosts"] = getMongoHosts()
-    props["hive.host"] = getHiveHost()
-    props["hdfs.url"] = getHdfsUrl()
-
-    props['integration.test'] = true
-    systemProperties props
-}
-
-// TODO: NEON-960 The isXXXOnly are workarounds for NEON-960
-def isMongoOnly() {
-    // all other non-hive/shark tests require mongo
-    def integrationTestSingle = System.getProperty("integrationTest.single")
-    return integrationTestSingle && !integrationTestSingle.toLowerCase().contains("hive")
-}
-
-def isHiveOnly() {
-    return System.getProperty("integrationTest.single")?.toLowerCase()?.contains("hive")
-}
-
-task insertMongoDataIntegrationTest(type: com.ncc.neon.data.MongoDataInserter) {
-    dependsOn 'deleteMongoDataIntegrationTestBeforeInsert', 'generateMongoJson'
-    host = getMongoHosts()
-    databaseName = 'neonintegrationtest'
-}
-
-task deleteMongoDataIntegrationTestBeforeInsert(type: com.ncc.neon.data.MongoDataDeleter) {
-    host = getMongoHosts()
-    databaseName = 'neonintegrationtest'
-}
-
-task insertHiveDataIntegrationTest(type: com.ncc.neon.data.HiveDataInserter) {
-    dependsOn 'deleteHiveDataIntegrationTestBeforeInsert', 'generateHiveCSV', 'generateHiveJson'
-    host = getHiveHost()
-    hdfsUrl = getHdfsUrl()
-    databaseName = 'neonintegrationtest'
-}
-
-task deleteHiveDataIntegrationTestBeforeInsert(type: com.ncc.neon.data.HiveDataDeleter) {
-    host = getHiveHost()
-    databaseName = 'neonintegrationtest'
-}
-
-task afterIntegrationTest {
-    // TODO: NEON-960 workaround
-    if ( isMongoOnly() ) {
-        dependsOn 'deleteMongoDataIntegrationTest'
-    }
-    else if ( isHiveOnly()) {
-        dependsOn 'deleteHiveDataIntegrationTest'
-    }
-    else {
-        dependsOn 'deleteMongoDataIntegrationTest', 'deleteHiveDataIntegrationTest'
-    }
-}
-
-integrationTest.finalizedBy afterIntegrationTest
-
-
-task deleteMongoDataIntegrationTest(type: com.ncc.neon.data.MongoDataDeleter) {
-    host = getMongoHosts()
-    databaseName = 'neonintegrationtest'
-}
-
-task deleteHiveDataIntegrationTest(type: com.ncc.neon.data.HiveDataDeleter) {
-    host = getHiveHost()
-    databaseName = 'neonintegrationtest'
-}
-
 
 task jacocoFullTestReport(type: JacocoReport) {
     dependsOn integrationTest
@@ -319,113 +209,7 @@ task jacocoFullTestReport(type: JacocoReport) {
     sourceDirectories = files(sourceSets.main.output.classesDir)
 }
 
-task transformTestWebService(type: org.gradle.api.plugins.jetty.JettyRun) {
-    dependsOn 'acceptanceTestClasses', 'generateAcceptanceTestHelpers'
-    daemon = true
-    httpPort = getAcceptanceTestServicePort()
-    stopPort = httpPort + 2
-    stopKey = 'stop'
-    classpath = sourceSets.acceptanceTest.runtimeClasspath
-    webXml = new File(sourceSets.acceptanceTest.output.resourcesDir, 'test-services-web.xml')
-}
-
-task acceptanceTestWar(type: org.gradle.api.plugins.jetty.JettyRunWar) {
-    dependsOn 'acceptanceTestClasses', 'generateAcceptanceTestHelpers'
-    daemon = true
-    httpPort = getAcceptanceTestPort()
-    stopPort = httpPort + 2
-    stopKey = 'stop'
-    jettyConfig = new File(sourceSets.acceptanceTest.output.resourcesDir, 'jetty-config.xml')
-}
-
-task generateAcceptanceTestHelpers {
-    // since the properties may change in the build file, always regenerate this file
-    outputs.upToDateWhen { false }
-    doLast {
-        def outputDir = new File(buildDir, "acceptanceTestSupport")
-        generateJavascriptHelper("http://localhost:${getAcceptanceTestPort()}/neon", "http://localhost:${getAcceptanceTestServicePort()}", "${getMongoHosts()}", new File(outputDir, "ports.js"))
-    }
-}
-
-task copyExamples(type: Copy) {
-    from rootProject.file('examples').toString()
-    into "${buildDir}/tmp/runExamples/webapp"
-    group = "Examples"
-}
-
-task runExamples(type: org.gradle.api.plugins.jetty.JettyRunWar) {
-    dependsOn 'copyExamples'
-    group = "Examples"
-    daemon = false
-}
-
-processAcceptanceTestResources {
-    from(sourceSets.acceptanceTest.resources.srcDirs) {
-        filter(ReplaceTokens, tokens: [
-                "mongo.hosts": getMongoHosts()
-        ])
-    }
-}
-
-// if the hosts are not specified just use an empty string and neon will choose defaults
-def getMongoHosts() {
-    return project.hasProperty("mongo.hosts") ? getProperty("mongo.hosts") : "localhost"
-}
-
-def getHiveHost() {
-    return project.hasProperty("hive.host") ? getProperty("hive.host") : "localhost:10000"
-}
-
-def getHdfsUrl() {
-    return project.hasProperty("hdfs.url") ? getProperty("hdfs.url") : "hdfs://localhost:8020"
-}
-
-def getAcceptanceTestPort() {
-    return project.hasProperty("acceptanceTest.port") ? getProperty("acceptanceTest.port").toInteger() : 10002
-}
-
-// used for the transform service that runs as part of the acceptance test
-def getAcceptanceTestServicePort() {
-    // the test war runs on the acceptanceTestPort and the stop port is +2, so run the service on +4
-    return getAcceptanceTestPort() + 4
-}
-
-task stopAcceptanceTestWar(type: org.gradle.api.plugins.jetty.JettyStop) {
-    stopPort = getAcceptanceTestPort() + 2
-    stopKey = 'stop'
-}
-
-task stopTransformJetty(type: org.gradle.api.plugins.jetty.JettyStop) {
-    stopPort = getAcceptanceTestServicePort() + 2
-    stopKey = 'stop'
-}
-
-task insertMongoDataAcceptanceTest(type: com.ncc.neon.data.MongoDataInserter) {
-    dependsOn 'deleteMongoDataAcceptanceTestBeforeInsert', 'generateMongoJson'
-    host = getMongoHosts()
-    databaseName = 'acceptanceTest'
-}
-task deleteMongoDataAcceptanceTestBeforeInsert(type: com.ncc.neon.data.MongoDataDeleter) {
-    host = getMongoHosts()
-    databaseName = 'acceptanceTest'
-}
-
-task deleteMongoDataAcceptanceTest(type: com.ncc.neon.data.MongoDataDeleter) {
-    host = getMongoHosts()
-    databaseName = 'acceptanceTest'
-}
-
-task afterAcceptanceTest {
-    dependsOn 'stopAcceptanceTestWar', 'stopTransformJetty', 'deleteMongoDataAcceptanceTest'
-}
-
-task acceptanceTest(type: GruntTask) {
-    dependsOn 'assemble', 'acceptanceTestWar', 'insertMongoDataAcceptanceTest', 'transformTestWebService'
-    group = TEST_GROUP
-    gruntArgs "jasmine:acceptance", "--outfile=${jsOutputFile}"
-}
-
-acceptanceTest.finalizedBy afterAcceptanceTest
+// helper functions for generating data for the tests. this is used by several of the gradle files that configure the tests
 
 task generateMongoJson {
     def outputDir = "${testDataDir}/mongo-json"
@@ -461,19 +245,15 @@ task generateHiveCSV {
     }
 }
 
-import org.gradle.api.plugins.jetty.internal.Monitor
+// if the hosts are not specified just use an empty string and neon will choose defaults
+def getMongoHosts() {
+    return project.hasProperty("mongo.hosts") ? getProperty("mongo.hosts") : "localhost"
+}
 
-[transformTestWebService, acceptanceTestWar]*.doLast {
-    /**
-     * THIS IS A WORKAROUND! THE CURRENT VERSION OF THIS TASK DOESN'T START A WATCHER IN DAEMON MODE
-     *
-     * If starting the monitor fails, it may be because the jetty task was updated to fix this issue
-     * When that happens, we shouldn't need the custom task any more
-     *
-     * http://issues.gradle.org/browse/GRADLE-2263
-     */
-    if (getStopPort() != null && getStopPort() > 0 && getStopKey() != null) {
-        Monitor monitor = new Monitor(getStopPort(), getStopKey(), server.getProxiedObject());
-        monitor.start();
-    }
+def getHiveHost() {
+    return project.hasProperty("hive.host") ? getProperty("hive.host") : "localhost:10000"
+}
+
+def getHdfsUrl() {
+    return project.hasProperty("hdfs.url") ? getProperty("hdfs.url") : "hdfs://localhost:8020"
 }

@@ -16,6 +16,9 @@
 
 package com.ncc.neon.services
 
+import com.ncc.neon.connect.ConnectionInfo
+import com.ncc.neon.connect.ConnectionManager
+import com.ncc.neon.connect.DataSources
 import com.ncc.neon.language.QueryParser
 import com.ncc.neon.query.Query
 import com.ncc.neon.query.QueryOptions
@@ -42,18 +45,26 @@ class LanguageService {
     @Autowired
     QueryExecutorFactory queryExecutorFactory
 
+    @Autowired
+    ConnectionManager connectionManager
+
     /**
      * Executes a query using a TQL query.
+     * @param host The host the database is running on
+     * @param databaseType the type of database
      * @param text The query string that will be parsed and converted into a query.
      * @return The query result data
      */
     @POST
     @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
     @Produces(MediaType.APPLICATION_JSON)
-    @Path("{connectionId}/query")
-    QueryResult executeQuery(@PathParam("connectionId") String connectionId, @FormParam("text") String text) {
+    @Path("query/{host}/{databaseType}")
+    QueryResult executeQuery(@PathParam("host") String host,
+                             @PathParam("databaseType") String databaseType,
+                             @FormParam("text") String text) {
+        ConnectionInfo connection = new ConnectionInfo(dataSource: databaseType as DataSources, host: host)
         Query query = queryParser.parse(text)
-        return queryExecutorFactory.getExecutor(connectionId).execute(query, QueryOptions.FILTERED_DATA)
+        return queryExecutorFactory.getExecutor(connection).execute(query, QueryOptions.FILTERED_DATA)
     }
 
 }

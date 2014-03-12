@@ -30,7 +30,11 @@ class LogPathServletContextListener implements ServletContextListener {
     void contextInitialized(ServletContextEvent sce) {
         def context = sce.servletContext
         if (!System.getProperty("log.dir")) {
-            System.setProperty("log.dir", "${context.getRealPath('/')}logs")
+            def path = context.getRealPath('/') ?: ""
+            if ( !path?.endsWith(File.separator)) {
+                path += File.separator
+            }
+            System.setProperty("log.dir", "${path}logs")
         }
     }
 

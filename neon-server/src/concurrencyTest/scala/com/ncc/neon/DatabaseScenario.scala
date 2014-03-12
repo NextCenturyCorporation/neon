@@ -20,23 +20,15 @@ class DatabaseScenario extends Simulation {
     .userAgentHeader("Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:23.0) Gecko/20100101 Firefox/23.0")
 
   val serviceRoot = "/neon/services/"
-  val connectionId = "mongo@" + mongoHost
 
   val scn = scenario("Query for database and table names")
-    .exec(http("Create a connection")
-    .post(serviceRoot + "connections")
-    .headers(json_header)
-    .body(mongo_connection_request))
-    .pause(2)
-
     .exec(http("Get Database Names")
-    .get("http://localhost:11402/neon/services/queryservice/" + connectionId + "/databasenames")
+    .get("http://localhost:11402/neon/services/queryservice/databasenames/" + mongoHost + "/mongo")
     .check(jsonPath("$[?(@=='concurrencytest')]").exists))
 
     .exec(http("Get Table Names")
-    .post("http://localhost:11402/neon/services/queryservice/" + connectionId + "/tablenames")
+    .get("http://localhost:11402/neon/services/queryservice/tablenames/" + mongoHost + "/mongo/concurrencytest")
     .headers(form_header)
-    .param("database", "concurrencytest")
     .check(jsonPath("$[?(@=='records')]").exists))
 
 

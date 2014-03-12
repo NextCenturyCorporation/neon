@@ -18,7 +18,7 @@ package com.ncc.neon.query.mongo
 
 import com.mongodb.MongoClient
 import com.ncc.neon.query.QueryResult
-import com.ncc.neon.query.TableQueryResult
+import com.ncc.neon.query.TabularQueryResult
 import com.ncc.neon.query.clauses.SelectClause
 import com.ncc.neon.query.clauses.SortClause
 import com.ncc.neon.query.clauses.SortOrder
@@ -54,7 +54,7 @@ class DistinctMongoQueryWorker extends AbstractMongoQueryWorker {
         // create a mapping of field to distinct values
         def distinctRows = distinct.collect { [(field): it] }
 
-        return new TableQueryResult(distinctRows)
+        return new TabularQueryResult(distinctRows)
     }
 
     private List limitSkipDistinctResults(MongoQuery mongoQuery, List distinct) {

@@ -20,15 +20,17 @@ import groovy.transform.Canonical
 
 
 /**
- * Contains connection information to a data source.
+ * Stores information about a connection to a database
  */
-
 @Canonical
-class ConnectionInfo implements Serializable{
+class ConnectionInfo implements Serializable {
 
     private static final long serialVersionUID = 9017739423385857826L
 
+    /** the type of database being connected to */
     DataSources dataSource
-    String connectionUrl
+
+    /** The database host, and optionally :port */
+    String host
 
 }

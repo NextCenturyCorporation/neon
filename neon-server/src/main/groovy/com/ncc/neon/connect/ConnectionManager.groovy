@@ -22,85 +22,51 @@ import org.springframework.stereotype.Component
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.ConcurrentMap
 
-
-
 /**
- * This holds the connection information for the application.
+ * Provides a way for a client to get a connection to a database
  */
 @Component
 class ConnectionManager {
 
-    private final ConcurrentMap<String, ConnectionInfo> connections = new ConcurrentHashMap()
-    private final ConcurrentMap<String, ConnectionClientFactory> factoryCache = new ConcurrentHashMap()
+
+    private final ConcurrentMap<ConnectionInfo, ConnectionClient> clients = new ConcurrentHashMap<ConnectionInfo, MongoConnectionClient>()
 
     ConnectionClientFactory mongoConnectionFactory = new MongoConnectionClientFactory()
     ConnectionClientFactory hiveConnectionFactory = new JdbcConnectionClientFactory("org.apache.hive.jdbc.HiveDriver", "hive2")
 
     @Autowired
-    CurrentRequestConnection currentRequestConnection
+    private CurrentRequestConnection currentRequestConnection
 
     /**
-     * Registers a connection resource with the application.
-     * @param info Fully identifies the connection information
-     * @return A key that identifies this connection resource.
+     * Gets a connection to use for the current query
+     * @return
      */
-
-    String connect(ConnectionInfo info) {
-        String connectionId = createConnectionId(info)
-        connections.putIfAbsent(connectionId, info)
-        factoryCache.putIfAbsent(connectionId, createClientFactory(info))
-        return connectionId
-    }
-
-    /**
-     * Removes a connection
-     * @param connectionId the id of the connection
-     */
-
-    void removeConnection(String connectionId) {
-        connections.remove(connectionId)
-        factoryCache.remove(connectionId)
-    }
-
-    /**
-     * Gets the connection for the current request
-     * @return The client
-     */
-
-    ConnectionClient getCurrentConnectionClient(){
-        return getConnectionClient(currentRequestConnection.connectionId)
-    }
-
-    /**
-     * Get the connection info based on the id
-     * @param connectionId The id
-     * @return The info
-     */
-
-    ConnectionInfo getConnectionById(String connectionId) {
-        return connections.get(connectionId)
-    }
-
-    /**
-     * Gets all the registered connections ids.
-     * @return the ids
-     */
-    Set<String> getAllConnectionIds() {
-        return connections.keySet()
-    }
-
-
-    private ConnectionClient getConnectionClient(String connectionId){
-        ConnectionClientFactory factory = factoryCache.get(connectionId)
-        if(!factory){
-            throw new NeonConnectionException("Connection to ${connectionId} was never established.")
+    ConnectionClient getConnection() {
+        validateCurrentRequestConnection()
+        ConnectionInfo connectionInfo = currentRequestConnection.connectionInfo
+        clients.putIfAbsent(connectionInfo, new ConnectionClientHolder(createClientFactory(connectionInfo)))
+        ConnectionClientHolder clientHolder = clients.get(connectionInfo)
+        def connection = clientHolder.connection
+        if (!connection) {
+            // initClient is threadsafe so even if two threads get here at the same time because they both request
+            // the initial connection at the same time, the connection will only be initialized once
+            connection = clientHolder.initClient(connectionInfo)
         }
-
-        return factory.createConnectionClient(connections.get(connectionId))
+        return connection
     }
 
-    private String createConnectionId(ConnectionInfo info) {
-        return "${info.dataSource?.name()}@${info.connectionUrl}"
+    /**
+     * Sets the connection that is being used for the current request. This will only affect the current request.
+     * @param connection
+     */
+    void setCurrentRequest(ConnectionInfo connectionInfo) {
+        currentRequestConnection.connectionInfo = connectionInfo
+    }
+
+    private void validateCurrentRequestConnection() {
+        if ( !currentRequestConnection.connectionInfo) {
+            throw new NeonConnectionException("No connection set for the current request")
+        }
     }
 
     private ConnectionClientFactory createClientFactory(ConnectionInfo connectionInfo) {
@@ -110,7 +76,7 @@ class ConnectionManager {
         if (connectionInfo.dataSource == DataSources.hive) {
             return hiveConnectionFactory
         }
-        throw new NeonConnectionException("There must be a data source to which to connect.")
+        throw new NeonConnectionException("Could not connect to data source of type ${connectionInfo.dataSource}")
     }
 
 }

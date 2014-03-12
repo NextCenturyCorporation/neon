@@ -14,17 +14,7 @@
  *
  */
 
-include 'neon-server', 'common', 'filter-builder', 'query-builder', 'charts', 'tables', 'circularheat', 'circularheat2', 'map', 'metadata'
+include 'neon-server', 'metadata'
 
 // the neon-server project is just output as neon.js/neon.war for simpler referencing
 project(":neon-server").name = 'neon'
-
-def widgetsDir = file('widgets')
-widgetsDir.eachDir {
-    // there could be common directories that are not projects
-    def project = findProject(":${it.name}")
-    if (project) {
-        project.projectDir = new File(settingsDir, "widgets/${project.name}")
-    }
-
-}

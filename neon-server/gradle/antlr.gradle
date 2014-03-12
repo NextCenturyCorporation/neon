@@ -1,0 +1,67 @@
+/*
+ * Copyright 2014 Next Century Corporation
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ */
+
+import groovy.io.FileType
+
+// antlr plugin and configuration taken from https://github.com/fraoch/antlr4-plugin/
+apply plugin: 'antlr4'
+
+dependencies {
+    antlr4 'org.antlr:antlr4:4.0'
+    antlr4 'org.antlr:antlr4-runtime:4.0'
+    antlr4 'org.antlr:antlr-runtime:3.5'
+    antlr4 'org.antlr:ST4:4.0.7'
+}
+
+project.ext {
+    // because of this issue with the plugin https://github.com/fraoch/antlr4-plugin/issues/1, the
+    // package using the antlr generated code must be the same as the package it is generated to
+    antlrPackage = "com.ncc.neon.language"
+    antlrGrammar = "Neon"
+}
+
+antlr4 {
+    tool {
+        "${antlrPackage}.${antlrGrammar}" {
+            listener = true
+            warnAsError = true
+        }
+    }
+}
+
+// copies the antlr generated files from build/antlr4-gen to src/main/groovy so we can commit them and IDEs can easily
+// pick them up
+task copyAntlrFilesToSrc(type: Copy) {
+    dependsOn 'generate'
+    def antlrPackageFilePath = antlrPackage.replaceAll("\\.", "/")
+    inputs.file { file("${antlrPackage}.${antlrGrammar}") }
+    outputs.files { fileTree("${projectDir}/src/main/groovy/${antlrPackageFilePath}").include('*.java') }
+    from("${buildDir}/${generate.buildGenDir}/main/${antlrPackageFilePath}") {
+        include '*.java'
+    }
+    into "${projectDir}/src/main/groovy/${antlrPackageFilePath}"
+}
+
+// remove full path info from the generated antlr files
+generate.doLast {
+    def genDir = new File("${buildDir}/${generate.buildGenDir}")
+    genDir.eachFileRecurse(FileType.FILES) { file ->
+        def fullPathRegex = "(//.*?)[\\S]*(${antlrGrammar}\\.g4)"
+        file.write(file.text.replaceAll(fullPathRegex, '$1$2'))
+    }
+}
+
+compileGroovy.dependsOn copyAntlrFilesToSrc

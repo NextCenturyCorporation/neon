@@ -16,7 +16,7 @@
 package com.ncc.neon.metadata.store.script
 
 import com.mongodb.*
-import com.ncc.neon.metadata.model.column.ColumnMetadata
+import com.ncc.neon.metadata.model.ColumnMetadata
 import com.ncc.neon.metadata.store.InMemoryMetadata
 import com.ncc.neon.metadata.store.Metadata
 

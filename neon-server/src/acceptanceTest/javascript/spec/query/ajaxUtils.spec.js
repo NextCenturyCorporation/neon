@@ -21,7 +21,7 @@
  * These tests parallel those in the MongoQueryExecutorIntegrationTest.
  */
 // neonServerUrl is generated dynamically during the build and included in the acceptance test helper file
-neon.query.SERVER_URL = neonServerUrl;
+neon.SERVER_URL = neonServerUrl;
 
 describe('ajax utils', function () {
 
