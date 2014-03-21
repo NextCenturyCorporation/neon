@@ -49,7 +49,7 @@ task('deployToTomcat', type: Copy) {
     into neonServerWebapps
 
     doLast {
-        println "Copying $war.archivePath to $neonServerWebapps/${war.baseName}.war"
+        logger.lifecycle("Copying $war.archivePath to $neonServerWebapps/${war.baseName}.war")
     }
 }
 
