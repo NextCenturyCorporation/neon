@@ -50,7 +50,7 @@ class WidgetStates implements Serializable{
      */
 
     void addWidgetState(WidgetState state) {
-        if(!state.clientId){
+        if(!state.instanceId){
             return
         }
         states.remove(state)
@@ -59,12 +59,12 @@ class WidgetStates implements Serializable{
 
     /**
      * Gets the widget state from the session
-     * @param clientId The clientId must match a previous addition
+     * @param instanceId The instance id that was used to save the widget state
      * @return the WidgetState or null if none is found.
      */
-    WidgetState getWidgetState(String clientId) {
+    WidgetState getWidgetState(String instanceId) {
         states.find {
-            clientId == it.clientId
+            instanceId == it.instanceId
         }
     }
 

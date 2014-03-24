@@ -25,16 +25,16 @@ neon.widget = (function() {
     /**
      * Save the current state of a widget.
      * @method saveState
-     * @param {String} id a unique identifier of a client widget
+     * @param {String} instanceId a unique identifier of an instance of a widget
      * @param {Object} stateObject an object that is to be saved.
      * @param {Function} successCallback The callback to execute when the state is saved. The callback will have no data.
      * @param {Function} errorCallback The optional callback when an error occurs. This is a 3 parameter function that contains the xhr, a short error status and the full error message.
      * @return {neon.util.AjaxRequest} The xhr request object
      */
-    function saveState(id, stateObject, successCallback, errorCallback) {
+    function saveState(instanceId, stateObject, successCallback, errorCallback) {
         var strObject = JSON.stringify(stateObject);
         return neon.util.ajaxUtils.doPostJSON(
-            {clientId: id, state: strObject},
+            {instanceId: instanceId, state: strObject},
             neon.serviceUrl('widgetservice', 'savestate'),
             {
                 success: successCallback,

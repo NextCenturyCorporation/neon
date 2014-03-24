@@ -30,12 +30,12 @@ class WidgetStateTest {
 
     @Test
     void "ids must be equal for WidgetStates to be equal"() {
-        WidgetState state1 = new WidgetState(clientId: ID_1, state: CONTENT_1)
-        WidgetState state2 = new WidgetState(clientId: ID_1, state: CONTENT_1)
+        WidgetState state1 = new WidgetState(instanceId: ID_1, state: CONTENT_1)
+        WidgetState state2 = new WidgetState(instanceId: ID_1, state: CONTENT_1)
 
         assert state1 == state2
 
-        state2 = new WidgetState(clientId: ID_1, state: CONTENT_2)
+        state2 = new WidgetState(instanceId: ID_1, state: CONTENT_2)
 
         assert state1 == state2
     }
@@ -43,12 +43,12 @@ class WidgetStateTest {
     @Test
     void "if the ids are not equal the widget states are not equal"() {
 
-        WidgetState state1 = new WidgetState(clientId: ID_1, state: CONTENT_1)
-        WidgetState state2 = new WidgetState(clientId: ID_2, state: CONTENT_1)
+        WidgetState state1 = new WidgetState(instanceId: ID_1, state: CONTENT_1)
+        WidgetState state2 = new WidgetState(instanceId: ID_2, state: CONTENT_1)
 
         assert state1 != state2
 
-        state2 = new WidgetState(clientId: ID_2, state: CONTENT_2)
+        state2 = new WidgetState(instanceId: ID_2, state: CONTENT_2)
 
         assert state1 != state2
 

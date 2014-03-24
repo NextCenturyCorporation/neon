@@ -16,15 +16,15 @@
 describe('widgets', function() {
 
     it('save and restore states', function () {
-        // simulate state from two different widgets with different client ids
-        var widgetId1 = "id1";
+        // simulate state from two different widgets with different ids
+        var instanceId1 = "id1";
         var state1 = {"s1": "val1"};
         var state1Saved = false;
         var state1Restored = false;
         var restoredState1;
 
 
-        var widgetId2 = "id2";
+        var instanceId2 = "id2";
         var state2 = {"s2": "val2"};
         var restoredState2;
         var state2Saved = false;
@@ -33,21 +33,21 @@ describe('widgets', function() {
         var empty = function () {
         };
 
-        neon.widget.saveState(widgetId1, state1, function () {
+        neon.widget.saveState(instanceId1, state1, function () {
             state1Saved = true;
         }, empty);
         waitsFor(function () {
             return  state1Saved;
         });
         runs(function () {
-            neon.widget.saveState(widgetId2, state2, function () {
+            neon.widget.saveState(instanceId2, state2, function () {
                 state2Saved = true;
             }, empty);
             waitsFor(function () {
                 return state2Saved;
             });
             runs(function () {
-                neon.widget.getSavedState(widgetId1, function (state) {
+                neon.widget.getSavedState(instanceId1, function (state) {
                     restoredState1 = state;
                     state1Restored = true;
                 });
@@ -55,7 +55,7 @@ describe('widgets', function() {
                     return state1Restored;
                 });
                 runs(function () {
-                    neon.widget.getSavedState(widgetId2, function (state) {
+                    neon.widget.getSavedState(instanceId2, function (state) {
                         restoredState2 = state;
                         state2Restored = true;
                     });

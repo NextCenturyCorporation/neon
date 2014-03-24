@@ -37,7 +37,7 @@ class WidgetServiceTest {
 
     @Test
     void "add and restore widget state"() {
-        service.saveState(new WidgetState(clientId: "id", state: "state"))
+        service.saveState(new WidgetState(instanceId: "id", state: "state"))
         assert service.restoreState("id") == "state"
     }
 

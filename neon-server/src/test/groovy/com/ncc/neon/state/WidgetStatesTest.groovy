@@ -30,8 +30,8 @@ class WidgetStatesTest {
     @Test
     void "adding null or empty clientId does nothing"() {
         WidgetStates widgetStates = new WidgetStates()
-        widgetStates.addWidgetState(new WidgetState(clientId: null, state: STATE_DATA))
-        widgetStates.addWidgetState(new WidgetState(clientId: "", state: STATE_DATA))
+        widgetStates.addWidgetState(new WidgetState(instanceId: null, state: STATE_DATA))
+        widgetStates.addWidgetState(new WidgetState(instanceId: "", state: STATE_DATA))
 
         WidgetState retrievedWidgetState = widgetStates.getWidgetState(null)
         assert !retrievedWidgetState
@@ -43,21 +43,21 @@ class WidgetStatesTest {
     @Test
     void "add and retrieve state"() {
         WidgetStates widgetStates = new WidgetStates()
-        widgetStates.addWidgetState(new WidgetState(clientId: CLIENT_ID, state: STATE_DATA))
+        widgetStates.addWidgetState(new WidgetState(instanceId: CLIENT_ID, state: STATE_DATA))
         WidgetState retrievedWidgetState = widgetStates.getWidgetState(CLIENT_ID)
 
-        assert retrievedWidgetState.clientId == CLIENT_ID
+        assert retrievedWidgetState.instanceId == CLIENT_ID
         assert retrievedWidgetState.state == STATE_DATA
     }
 
     @Test
     void "save multiple states and the last one gets used"() {
         WidgetStates widgetStates = new WidgetStates()
-        widgetStates.addWidgetState(new WidgetState(clientId: CLIENT_ID, state: STATE_DATA))
-        widgetStates.addWidgetState(new WidgetState(clientId: CLIENT_ID, state: DIFFERENT_DATA))
+        widgetStates.addWidgetState(new WidgetState(instanceId: CLIENT_ID, state: STATE_DATA))
+        widgetStates.addWidgetState(new WidgetState(instanceId: CLIENT_ID, state: DIFFERENT_DATA))
         WidgetState retrievedWidgetState = widgetStates.getWidgetState(CLIENT_ID)
 
-        assert retrievedWidgetState.clientId == CLIENT_ID
+        assert retrievedWidgetState.instanceId == CLIENT_ID
         assert retrievedWidgetState.state == DIFFERENT_DATA
     }
 
