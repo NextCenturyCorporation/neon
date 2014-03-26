@@ -89,19 +89,19 @@ neon.eventing.Messenger.prototype.unsubscribe = function (channel) {
 };
 
 /**
- * Subscribe to Neon's global events.
- * @param neonCallbacks {object} An object containing callback functions to Neon's events. Each function takes one
+ * Subscribe to events notifications
+ * @param callbacks {object} An object containing callback functions. Each function takes one
  * parameter, the message that was published.
  * <ul>
  *     <li>selectionChanged - function to execute when the selection has changed</li>
  *     <li>filtersChanged - function to execute when the filters have been changed</li>
  *     <li>activeDatasetChanged - function to execute when the active dataset has changed</li>
  * </ul>
- * @method registerForNeonEvents
+ * @method events
  */
-neon.eventing.Messenger.prototype.registerForNeonEvents = function (neonCallbacks) {
+neon.eventing.Messenger.prototype.events = function (callbacks) {
     var me = this;
-    var globalChannelConfigs = this.createGlobalChannelSubscriptions_(neonCallbacks);
+    var globalChannelConfigs = this.createGlobalChannelSubscriptions_(callbacks);
     _.each(globalChannelConfigs, function (channelConfig) {
         me.subscribe(channelConfig.channel, function (message) {
                 if (channelConfig.callback && typeof channelConfig.callback === 'function') {

@@ -94,7 +94,7 @@ describe('messenger', function () {
         var callback = jasmine.createSpy(channelName);
         var callbacks = {};
         callbacks[callbackName] = callback;
-        messenger.registerForNeonEvents(callbacks);
+        messenger.events(callbacks);
         new neon.eventing.Messenger().publish(channelName, message);
         expect(callback).toHaveBeenCalledWith(message);
     }

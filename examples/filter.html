@@ -23,7 +23,7 @@
         var eventHandlers = {"filtersChanged": function () {
             $('#message').html('Filters Changed!');
         }};
-        messenger2.registerForNeonEvents(eventHandlers);
+        messenger2.events(eventHandlers);
 
         //Make sure neon is ready for events
         neon.ready(function () {
