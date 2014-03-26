@@ -17,4 +17,10 @@ object Headers {
     "X-Requested-With" -> """XMLHttpRequest"""
   )
 
+  val text_header = Map(
+    "Cache-Control" -> """no-cache""",
+    "Content-Type" -> """text/plain""",
+    "Pragma" -> """no-cache""",
+    "X-Requested-With" -> """XMLHttpRequest"""
+  )
 }

@@ -21,6 +21,37 @@ neontest.matchers = {};
 neontest.matchers.matcher = new jasmine.Matchers();
 
 /**
+ * Executes the asynchronous function synchronously and returns the result of the call
+ * @param {Object} The target object to execute the function on
+ * @param {Function} asyncFunction The function to execute
+ * @param {Array} args The arguments to pass to the function. This may be either a single argument or an array of arguments
+ * @param {Object} A future whose "get" method will return the value of the async function when it is completed.
+ * Typically this will be used inside of a jasmine "runs" block.
+  */
+neontest.executeAndWait = function(target, asyncFunction, args) {
+    var done = false;
+    var argsArray = [];
+    var result;
+    if ( args ) {
+        argsArray = argsArray.concat(args);
+    }
+
+    // push the success callback to store the current result
+    argsArray.push(function (res) {
+        result = res;
+        done = true;
+    });
+    asyncFunction.apply(target, argsArray);
+    waitsFor(function () {
+        return done;
+    });
+    return {
+        get: function() { return result; }
+    };
+
+};
+
+/**
  * Checks if the expected array is equal to the actual array. This comparison
  * uses a deeper equality check (checks actual keys and values).
  * @param expectedArray

@@ -54,8 +54,8 @@ neon.query.Connection.HIVE = 'hive';
  * Specifies what database type and host the queries will be executed against.
  * @method connect
  * @param {String} databaseType What type of database is being connected to. The constants in this class specify the
- * @param {String} host The host the database is running on
  * valid database types.
+ * @param {String} host The host the database is running on
  */
 neon.query.Connection.prototype.connect = function(databaseType, host) {
     this.host_ = host;
@@ -157,7 +157,7 @@ neon.query.Connection.prototype.executeQueryService_ = function (query, successC
     if (query.selectionOnly_) {
         serviceName += "withselectiononly";
     }
-    else if (query.disregardFilters_) {
+    else if (query.ignoreFilters_) {
         serviceName += "disregardfilters";
     }
     return neon.util.ajaxUtils.doPostJSON(

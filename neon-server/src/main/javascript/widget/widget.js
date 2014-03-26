@@ -82,11 +82,11 @@ neon.widget = (function() {
      * @return {String} A unique identifier string
      */
     function getInstanceId(qualifier) {
-        // callers expect the id to return synchronously so set async to false
         var instanceId;
         neon.util.ajaxUtils.doGet(
             neon.serviceUrl('widgetservice', 'instanceid', buildInstanceIdQueryString(qualifier)),
             {
+                // callers expect the id to return synchronously so set async to false
                 async: false,
                 success: function (id) {
                     instanceId = id;
@@ -96,15 +96,28 @@ neon.widget = (function() {
         return instanceId;
     }
 
+    /**
+     * Given the text qualifier value, if running in OWF, the OWF instance id is appended to it. Otherwise, the original
+     * value is returned.
+     * @method buildQualifierString
+     * @param {String} [qualifier]
+     * @return {string} The full qualifier, which may include the OWF instance id if running in OWF
+     */
+    function buildQualifierString(qualifier) {
+        var fullQualifier = qualifier || '';
+        // when running in OWF, it is possible to have the same widget running multiple times so append
+        // the owf widget instanceid to the qualifier
+        if (neon.util.owfUtils.isRunningInOWF()) {
+            fullQualifier += OWF.getInstanceId();
+        }
+        return fullQualifier;
+    }
+
+
     function buildInstanceIdQueryString(qualifier) {
         var queryString = '';
         if (qualifier) {
-            queryString = '?qualifier=' + qualifier;
-            // when running in OWF, it is possible to have the same widget running multiple times so append
-            // the owf widget instanceid to the qualifier
-            if (neon.util.owfUtils.isRunningInOWF()) {
-                queryString += OWF.getInstanceId();
-            }
+            queryString = '?qualifier=' + buildQualifierString(qualifier);
         }
         return queryString;
     }
@@ -150,7 +163,7 @@ neon.widget = (function() {
         getSavedState: getSavedState,
         getInstanceId: getInstanceId,
         getWidgetInitializationData: getWidgetInitializationData,
-        getWidgetDatasetMetadata: getWidgetDatasetMetadata
+        getWidgetDatasetMetadata: getWidgetDatasetMetadata,
     };
 
 })();

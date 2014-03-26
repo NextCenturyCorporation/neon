@@ -16,18 +16,15 @@
 
 package com.ncc.neon.services
 
-import com.ncc.neon.query.filter.FilterContainer
-import com.ncc.neon.query.filter.FilterKey
-import com.ncc.neon.query.filter.SelectionState
+import com.ncc.neon.query.filter.*
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
 
 import javax.ws.rs.Consumes
 import javax.ws.rs.POST
 import javax.ws.rs.Path
+import javax.ws.rs.Produces
 import javax.ws.rs.core.MediaType
-
-
 
 /**
  * Service for working with a user's current selection.
@@ -37,52 +34,68 @@ import javax.ws.rs.core.MediaType
 @Path("/selectionservice")
 class SelectionService {
 
+    /** empty dataset returned when invalid selection is removed or the selection is cleared */
+    private static final DataSet EMPTY_DATASET = new DataSet(databaseName: "", tableName: "")
+
+    // Note that selection is just implemented as a series of filters that indicate what is selected
+
     @Autowired
     SelectionState selectionState
 
     /**
-     * Add an additional selection
-     * @param container An object containing a filter key, a server generated identifier for a given widget instance,
-     * and a filter which contains information about the selection,
+     * Adds an additional selection
+     * @param filterKey The filter that indicates what data is selected
+     * @return an ADD selection event
      */
     @POST
     @Path("addselection")
     @Consumes(MediaType.APPLICATION_JSON)
-    void addSelection(FilterContainer container) {
-        selectionState.addFilter(container.filterKey, container.filter)
+    @Produces(MediaType.APPLICATION_JSON)
+    SelectionEvent addSelection(FilterKey filterKey) {
+        selectionState.addFilter(filterKey)
+        return new SelectionEvent(type: "ADD", dataSet: filterKey.dataSet)
     }
 
     /**
-     * Remove the selection for the given widget instance, identified by the filterKey
-     * @param filterKey a server generated identifier for a given widget instance
+     * Remove the selection
+     * @param id The id of the filter that defines the selection to remove
+     * @return a REMOVE selection event
      */
     @POST
-    @Consumes(MediaType.APPLICATION_JSON)
+    @Consumes(MediaType.TEXT_PLAIN)
+    @Produces(MediaType.APPLICATION_JSON)
     @Path("removeselection")
-    void removeSelection(FilterKey filterKey) {
-        selectionState.removeFilter(filterKey)
+    SelectionEvent removeSelection(String id) {
+        FilterKey removed = selectionState.removeFilter(id)
+        DataSet dataset = removed ? removed.dataSet : EMPTY_DATASET
+        return new SelectionEvent(type: "REMOVE", dataSet: dataset)
     }
 
     /**
-     * Replace the selection for the given filter key. If none exists, this works the same as addSelection(container)
-     * @param container An object containing a filter key, a server generated identifier for a given widget instance,
-     * and a filter which contains information about the selection,
+     * Replace the selection. If none exists, this works the same as addSelection(filterKey)
+     * @param filterKey The filter that indicates the new selection
+     * @return a REPLACE selection event
      */
     @POST
     @Path("replaceselection")
     @Consumes(MediaType.APPLICATION_JSON)
-    void replaceSelection(FilterContainer container) {
-        removeSelection(container.filterKey)
-        addSelection(container)
+    @Produces(MediaType.APPLICATION_JSON)
+    SelectionEvent replaceSelection(FilterKey filterKey) {
+        removeSelection(filterKey.id)
+        addSelection(filterKey)
+        return new SelectionEvent(type: "REPLACE", dataSet: filterKey.dataSet)
     }
 
     /**
      * Clears all selections.
+     * @return a CLEAR selection event
      */
     @POST
     @Path("clearselection")
-    void clearSelection() {
+    @Produces(MediaType.APPLICATION_JSON)
+    SelectionEvent clearSelection() {
         selectionState.clearAllFilters()
+        return new SelectionEvent(type: "CLEAR", dataSet: EMPTY_DATASET)
     }
 
 }

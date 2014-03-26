@@ -22,7 +22,7 @@
  */
 neon.query.QueryGroup = function () {
     this.queries = [];
-    this.disregardFilters_ = false;
+    this.ignoreFilters_ = false;
     this.selectionOnly_ = false;
 };
 
@@ -38,34 +38,21 @@ neon.query.QueryGroup.prototype.addQuery = function (query) {
 };
 
 /**
- * Sets the query mode to return all data. This ignores the current filters and selection.
- * @method allDataMode
- * @return {neon.query.QueryGroup} This query group for method chaining
+ * Sets the query to ignore any filters that are currently applied
+ * @method ignoreFilters
+ * @return {neon.query.QueryGroup} This query group object
  */
-neon.query.QueryGroup.prototype.allDataMode = function () {
-    this.disregardFilters_ = true;
-    this.selectionOnly_ = false;
+neon.query.QueryGroup.prototype.ignoreFilters = function () {
+    this.ignoreFilters_ = true;
     return this;
 };
 
 /**
- * Sets the query mode to return all data. This applies the current filters and ignores the selection.
- * @method filteredMode
- * @return {neon.query.QueryGroup} This query group for method chaining
+ * Sets the query to return just the current selection
+ * @method selectionOnly
+ * @return {neon.query.QueryGroup} This query group object
  */
-neon.query.QueryGroup.prototype.filteredMode = function () {
-    this.disregardFilters_ = false;
-    this.selectionOnly_ = false;
-    return this;
-};
-
-/**
- * Sets the query mode to return just the current selection. Selected items will be returned after the current filters are applied.
- * @method selectionMode
- * @return {neon.query.QueryGroup} This query group for method chaining
- */
-neon.query.QueryGroup.prototype.selectionMode = function () {
-    this.disregardFilters_ = false;
+neon.query.QueryGroup.prototype.selectionOnly = function () {
     this.selectionOnly_ = true;
     return this;
 };

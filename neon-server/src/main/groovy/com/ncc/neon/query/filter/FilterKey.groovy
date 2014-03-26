@@ -19,11 +19,17 @@ package com.ncc.neon.query.filter
 import groovy.transform.Canonical
 
 
-
+/**
+ * Stores a filter with its id
+ */
 @Canonical
-class FilterKey implements Serializable{
+class FilterKey implements Serializable {
 
     private static final long serialVersionUID = -5783657018410727352L
-    UUID uuid
-    DataSet dataSet
+    String id
+    Filter filter
+
+    DataSet getDataSet() {
+        return new DataSet(databaseName: filter.databaseName, tableName: filter.tableName)
+    }
 }

@@ -84,7 +84,7 @@ neon.eventing.Messenger.prototype.subscribe = function (channel, callback) {
  * @param {String} channel The channel to unsubscribe from
  * @method unsubscribe
  */
-neon.eventing.Messenger.prototype.unsubscribe = function(channel) {
+neon.eventing.Messenger.prototype.unsubscribe = function (channel) {
     neon.eventing.eventBus_.unsubscribe(channel);
 };
 
@@ -95,7 +95,6 @@ neon.eventing.Messenger.prototype.unsubscribe = function(channel) {
  * <ul>
  *     <li>selectionChanged - function to execute when the selection has changed</li>
  *     <li>filtersChanged - function to execute when the filters have been changed</li>
- *     <li>activeConnectionChanged - function to execute when the active connection has changed</li>
  *     <li>activeDatasetChanged - function to execute when the active dataset has changed</li>
  * </ul>
  * @method registerForNeonEvents
@@ -124,89 +123,181 @@ neon.eventing.Messenger.prototype.createGlobalChannelSubscriptions_ = function (
 
 /**
  * Adds a filter to the data being viewed, so only data matching that filter is returned from queries. This will
- * fire a filter changed event to notify other widgets that the filters have changed.
- * See {{#crossLink "neon.query.Query/addFilter:method"}}{{/crossLink}}
+ * fire a filter changed event to notify other widgets that the filters have changed. If a filter with this id
+ * already exists, the filter is appended to that one with an AND clause. To replace the filter entirely, use
+ * {{#crossLink "neon.eventing.Messenger/replaceFilter:method"}}{{/crossLink}}.
+ * @param {String} id The id of the filter to apply. A typical value to use for the id is the return value of
+ * {{#crossLink "neon.widget/getInstanceId:method"}}{{/crossLink}}
+ * @param {neon.query.Filter} filter The filter to add
+ * @param {Function} successCallback The callback to invoke when the filter is added
+ * @param {Function} errorCallback The callback to invoke if an error occurs.
  * @method addFilter
  */
-neon.eventing.Messenger.prototype.addFilter = function (filterKey, filter, successCallback, errorCallback) {
-    neon.query.addFilter(filterKey, filter, this.createChannelCallback_(neon.eventing.channels.FILTERS_CHANGED, successCallback), errorCallback);
+neon.eventing.Messenger.prototype.addFilter = function (id, filter, successCallback, errorCallback) {
+    var filterKey = this.createFilterKey_(id, filter);
+    return neon.util.ajaxUtils.doPostJSON(
+        filterKey,
+        neon.serviceUrl('filterservice', 'addfilter'),
+        {
+            success: this.createChannelCallback_(neon.eventing.channels.FILTERS_CHANGED, successCallback),
+            error: errorCallback
+        }
+    );
 };
 
 /**
  * Removes a previously added filter. This will fire a filter changed event to notify other widgets that the filters
  * have changed.
- * See {{#crossLink "neon.query.Query/removeFilter:method"}}{{/crossLink}}
+ * @param {String} id The id of the filter to remove. This will be the same id used to create the filter.
+ * @param {Function} successCallback The callback to invoke when the filter is removed
+ * @param {Function} errorCallback The callback to invoke if an error occurs.
  * @method removeFilter
  */
-neon.eventing.Messenger.prototype.removeFilter = function (filterKey, successCallback, errorCallback) {
-    neon.query.removeFilter(filterKey, this.createChannelCallback_(neon.eventing.channels.FILTERS_CHANGED, successCallback), errorCallback);
+neon.eventing.Messenger.prototype.removeFilter = function (id, successCallback, errorCallback) {
+    return neon.util.ajaxUtils.doPost(
+        neon.serviceUrl('filterservice', 'removefilter'),
+        {
+            success: this.createChannelCallback_(neon.eventing.channels.FILTERS_CHANGED, successCallback),
+            error: errorCallback,
+            data: id,
+            contentType: 'text/plain'
+        }
+    );
 };
 
 /**
- * Replaces a previously added filter. This is a similar to calling remove and then add, but the id of the filter does
- * not change. It replaces the filter rather than creating a new one. This will fire a filter changed event to notify
- * other widgets that the filters have changed.
- * See {{#crossLink "neon.query.Query/replaceFilter:method"}}{{/crossLink}}
+ * Replaces a previously added filter. This is a similar to calling remove and then add, but does so with one
+ * notification event.
+ * @param {String} id The id of the filter to replace.
+ * @param {neon.query.Filter} filter The filter to replace the old one with
+ * @param {Function} successCallback The callback to invoke when the filter is replaced
+ * @param {Function} errorCallback The callback to invoke if an error occurs.
  * @method replaceFilter
  */
-neon.eventing.Messenger.prototype.replaceFilter = function (filterKey, filter, successCallback, errorCallback) {
-    neon.query.replaceFilter(filterKey, filter, this.createChannelCallback_(neon.eventing.channels.FILTERS_CHANGED, successCallback), errorCallback);
+neon.eventing.Messenger.prototype.replaceFilter = function (id, filter, successCallback, errorCallback) {
+    var filterKey = this.createFilterKey_(id, filter);
+    return neon.util.ajaxUtils.doPostJSON(
+        filterKey,
+        neon.serviceUrl('filterservice', 'replacefilter'),
+        {
+            success: this.createChannelCallback_(neon.eventing.channels.FILTERS_CHANGED, successCallback),
+            error: errorCallback
+        }
+    );
 };
 
 /**
  * Clears all filters. This will fire a filter changed event to notify other widgets that the filters have changed.
- * See {{#crossLink "neon.query.Query/clearFilters:method"}}{{/crossLink}}
  * @method clearFilters
  */
 neon.eventing.Messenger.prototype.clearFilters = function (successCallback, errorCallback) {
-    neon.query.clearFilters(this.createChannelCallback_(neon.eventing.channels.FILTERS_CHANGED, successCallback), errorCallback);
+    return neon.util.ajaxUtils.doPost(
+        neon.serviceUrl('filterservice', 'clearfilters'),
+        {
+            success: this.createChannelCallback_(neon.eventing.channels.FILTERS_CHANGED, successCallback),
+            error: errorCallback
+        }
+    );
 };
 
 /**
  * Adds any elements matching the filter to the current selection. This will fire a selection changed event to notify
  * other widgets that the selection has changed.
- * See {{#crossLink "neon.query.Query/addSelection:method"}}{{/crossLink}}
+ * @param {String} id The id of the selection to apply. A typical value to use for the id is the return value of
+ * {{#crossLink "neon.widget/getInstanceId:method"}}{{/crossLink}}
+ * @param {neon.query.Filter} filter Items matching this filter will be marked as selected
+ * @param {Function} successCallback The callback to invoke when the selection is added
+ * @param {Function} errorCallback The callback to invoke if an error occurs.
  * @method addSelection
  */
-neon.eventing.Messenger.prototype.addSelection = function (filterKey, filter, successCallback, errorCallback) {
-    neon.query.addSelection(filterKey, filter, this.createChannelCallback_(neon.eventing.channels.SELECTION_CHANGED, successCallback), errorCallback);
+neon.eventing.Messenger.prototype.addSelection = function (id, filter, successCallback, errorCallback) {
+    var filterKey = this.createFilterKey_(id, filter);
+    return neon.util.ajaxUtils.doPostJSON(
+        filterKey,
+        neon.serviceUrl('selectionservice', 'addselection'),
+        {
+            success: this.createChannelCallback_(neon.eventing.channels.SELECTION_CHANGED, successCallback),
+            error: errorCallback,
+            global: false
+        }
+    );
 };
 
 /**
  * Removes this filter from the selected items. This will fire a selection changed event to notify
  * other widgets that the selection has changed.
- * See {{#crossLink "neon.query.Query/removeSelection:method"}}{{/crossLink}}
+ * @param {String} id The id of the selection to remove. This will be the same id used to create the selection.
+ * @param {Function} successCallback The callback to invoke when the selection is removed
+ * @param {Function} errorCallback The callback to invoke if an error occurs.
  * @method removeSelection
  */
-neon.eventing.Messenger.prototype.removeSelection = function (filterKey, successCallback, errorCallback) {
-    neon.query.removeSelection(filterKey, this.createChannelCallback_(neon.eventing.channels.SELECTION_CHANGED, successCallback), errorCallback);
+neon.eventing.Messenger.prototype.removeSelection = function (id, successCallback, errorCallback) {
+    return neon.util.ajaxUtils.doPost(
+        neon.serviceUrl('selectionservice', 'removeselection'),
+        {
+            success:  this.createChannelCallback_(neon.eventing.channels.SELECTION_CHANGED, successCallback),
+            error: errorCallback,
+            global: false,
+            data: id,
+            contentType: 'text/plain'
+        }
+    );
 };
 
 /**
- * Replaces the contents of the filter that is specifying which items are selected. This will fire a selection changed
- * event to notify other widgets that the selection has changed.
- * See {{#crossLink "neon.query.Query/replaceSelection:method"}}{{/crossLink}}
- * @method replaceSelection
+ * Replaces a previously added selection. This is a similar to calling remove and then add, but does so with one
+ * notification event.
+ * @param {String} id The id of the selection to replace.
+ * @param {neon.query.Filter} filter The filter that defines the new selection
+ * @param {Function} successCallback The callback to invoke when the selection is replaced
+ * @param {Function} errorCallback The callback to invoke if an error occurs.
+ * @method replaceFilter
  */
-neon.eventing.Messenger.prototype.replaceSelection = function (filterKey, filter, successCallback, errorCallback) {
-    neon.query.replaceSelection(filterKey, filter, this.createChannelCallback_(neon.eventing.channels.SELECTION_CHANGED, successCallback), errorCallback);
+
+neon.eventing.Messenger.prototype.replaceSelection = function (id, filter, successCallback, errorCallback) {
+    var filterKey = this.createFilterKey_(id, filter);
+    return neon.util.ajaxUtils.doPostJSON(
+        filterKey,
+        neon.serviceUrl('selectionservice', 'replaceselection'),
+        {
+            success: this.createChannelCallback_(neon.eventing.channels.SELECTION_CHANGED, successCallback),
+            error: errorCallback,
+            global: false
+        }
+    );
 };
 
 /**
  * Clears the currently selected items. This will fire a selection changed event to notify
  * other widgets that the selection has changed.
- * See {{#crossLink "neon.query.Query/clearSelection:method"}}{{/crossLink}}
  * @method clearSelection
  */
 neon.eventing.Messenger.prototype.clearSelection = function (successCallback, errorCallback) {
-    neon.query.clearSelection(this.createChannelCallback_(neon.eventing.channels.SELECTION_CHANGED, successCallback), errorCallback);
+    return neon.util.ajaxUtils.doPost(
+        neon.serviceUrl('selectionservice', 'clearselection'),
+        {
+            success: this.createChannelCallback_(neon.eventing.channels.SELECTION_CHANGED, successCallback),
+            error: errorCallback,
+            global: false
+        }
+    );
+};
+
+
+neon.eventing.Messenger.prototype.createFilterKey_ = function (id, filter) {
+    return {
+        id : id,
+        filter: filter
+    };
 };
 
 neon.eventing.Messenger.prototype.createChannelCallback_ = function (channelName, successCallback) {
     var me = this;
     var callback = function (results) {
+        // pass the results in the callback and publish them to the channel so callers can listen
+        // in either place
         if (successCallback && typeof successCallback === 'function') {
-            successCallback();
+            successCallback(results);
         }
         me.publish(channelName, results || {});
     };

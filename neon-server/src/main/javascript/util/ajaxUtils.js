@@ -67,7 +67,7 @@ neon.util.ajaxUtils = (function(){
         // set a default error behavior is none is specified
         if (!params.error) {
             params.error = function (xhr, status, error) {
-                errorLogger.error(xhr, status, error);
+                errorLogger.error('Error accessing ' + url, status, error);
             };
         }
         logRequest(params);

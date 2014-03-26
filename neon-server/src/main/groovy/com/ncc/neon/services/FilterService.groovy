@@ -26,8 +26,6 @@ import javax.ws.rs.Path
 import javax.ws.rs.Produces
 import javax.ws.rs.core.MediaType
 
-
-
 /**
  * Service for working with a user's current filters
  */
@@ -36,67 +34,67 @@ import javax.ws.rs.core.MediaType
 @Path("/filterservice")
 class FilterService {
 
+    /** empty dataset returned when invalid filter is removed or when the filters are cleared */
+    private static final DataSet EMPTY_DATASET = new DataSet(databaseName: "", tableName: "")
+
     @Autowired
     FilterState filterState
 
     /**
-     * Creates a filter key which is used in other operations in this service. A client needs
-     * a unique filter key per dataset per widget instance. This is how we keep track of which widget
-     * instance applied which filter or selection.
-     * @param dataSet The dataset to which this filter key should be applied.
-     * @return An object that serializes filter key contents to the client.
-     */
-    @POST
-    @Consumes(MediaType.APPLICATION_JSON)
-    @Produces(MediaType.APPLICATION_JSON)
-    @Path("registerforfilterkey")
-    FilterEvent registerForFilterKey(DataSet dataSet) {
-        FilterKey filterKey = new FilterKey(uuid: UUID.randomUUID(), dataSet: dataSet)
-        FilterEvent.fromFilterKey(filterKey)
-    }
-
-    /**
-     * Add an additional filter
-     * @param container An object containing a filter key, a server generated identifier for a given widget instance,
-     * and a filter,
+     * Add a filter
+     * @param filterKey The filter to add
+     * @return an ADD filter event
      */
     @POST
     @Path("addfilter")
     @Consumes(MediaType.APPLICATION_JSON)
-    void addFilter(FilterContainer container) {
-        filterState.addFilter(container.filterKey, container.filter)
+    @Produces(MediaType.APPLICATION_JSON)
+    FilterEvent addFilter(FilterKey filterKey) {
+        filterState.addFilter(filterKey)
+        return new FilterEvent(type: "ADD", dataSet: filterKey.dataSet)
+
     }
 
     /**
-     * Remove the filters for the given widget instance, identified by the filterKey
-     * @param filterKey a server generated identifier for a given widget instance
+     * Removes the filters associated with the specified id
+     * @param filterId The id of the filter to remove
+     * @return a REMOVE filter event
      */
     @POST
-    @Consumes(MediaType.APPLICATION_JSON)
+    @Consumes(MediaType.TEXT_PLAIN)
+    @Produces(MediaType.APPLICATION_JSON)
     @Path("removefilter")
-    void removeFilter(FilterKey filterKey) {
-        filterState.removeFilter(filterKey)
+    FilterEvent removeFilter(String id) {
+        FilterKey removed = filterState.removeFilter(id)
+        DataSet dataset = removed ? removed.dataSet : EMPTY_DATASET
+        return new FilterEvent(type: "REMOVE", dataSet: dataset)
     }
 
     /**
-     * Replace the filters for the given filter key. If none exists, this works the same as addFilter(container)
-     * @param container An object containing a filter key, a server generated identifier for a given widget instance,
-     * and a filter,
+     * Replace the filters for the given filter key. If none exists, this works the same as addFilter(filterKey)
+     * @param filterKey The filter to replace
+     * @return a REPLACE filter event
      */
     @POST
     @Path("replacefilter")
     @Consumes(MediaType.APPLICATION_JSON)
-    void replaceFilter(FilterContainer container) {
-        removeFilter(container.filterKey)
-        addFilter(container)
+    @Produces(MediaType.APPLICATION_JSON)
+    FilterEvent replaceFilter(FilterKey filterKey) {
+        removeFilter(filterKey.id)
+        addFilter(filterKey)
+        return new FilterEvent(type: "REPLACE", dataSet: filterKey.dataSet)
     }
 
     /**
      * Clears all filters.
+     * @return a CLEAR filter event
      */
     @POST
     @Path("clearfilters")
-    void clearFilters() {
+    @Produces(MediaType.APPLICATION_JSON)
+    FilterEvent clearFilters() {
         filterState.clearAllFilters()
+        // use an empty dataset since the clear can span multiple datasets
+        return new FilterEvent(type: "CLEAR", dataSet: EMPTY_DATASET)
     }
 }

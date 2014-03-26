@@ -100,18 +100,11 @@ describe('messenger', function () {
     }
 
     it('should publish add filter results', function () {
-        var filterKey = {
-            uuid: "84bc5064-c837-483b-8454-c8c72abe45f8",
-            dataSet: {
-                databaseName: databaseName,
-                tableName: tableName
-            }
-        };
         var filter = new neon.query.Filter().selectFrom(databaseName, tableName);
         testResultsPublishedToChannel(
             neon.eventing.channels.FILTERS_CHANGED,
             'addFilter',
-            [filterKey, filter]
+            ["filterA", filter]
         );
     });
 
@@ -124,7 +117,6 @@ describe('messenger', function () {
     });
 
     it('should publish clear filter results', function () {
-
         testResultsPublishedToChannel(
             neon.eventing.channels.FILTERS_CHANGED,
             'clearFilters',
@@ -133,18 +125,11 @@ describe('messenger', function () {
     });
 
     it('should publish add selection', function () {
-        var filterKey = {
-            uuid: "84bc5064-c837-483b-8454-c8c72abe45f8",
-            dataSet: {
-                databaseName: databaseName,
-                tableName: tableName
-            }
-        };
         var filter = new neon.query.Filter().selectFrom(databaseName, tableName);
         testResultsPublishedToChannel(
             neon.eventing.channels.SELECTION_CHANGED,
             'addSelection',
-            [filterKey, filter]
+            ["filterId", filter]
         );
     });
 
@@ -167,17 +152,14 @@ describe('messenger', function () {
     /**
      * Executes a query method and tests that the results are published to the specified channel
      * @param channel The channel the message should be published to
-     * @param methodName The method executed on the messenger. A method with the same name on the query
-     * executor will be mocked out since the messenger just delegates to the query executor.
+     * @param methodName
      * @param args The args to that query method
      */
     function testResultsPublishedToChannel(channel, methodName, args) {
         var callback = jasmine.createSpy();
 
-
         // not all of the real methods actually return any results , but for this test it doesn't matter
         var mockResults = {mock: "results"};
-        var delegateSpy = spyOn(neon.query, methodName).andCallThrough();
         neon.mock.AjaxMockUtils.mockNextAjaxCall(mockResults);
 
         var subscriber = new neon.eventing.Messenger();
@@ -187,9 +169,6 @@ describe('messenger', function () {
         neon.eventing.Messenger.prototype[methodName].apply(publisher, args);
 
         expect(callback).toHaveBeenCalledWith(mockResults);
-
-        // verify that the correct delegate method on the query executor was actually called
-        expect(delegateSpy).toHaveBeenCalled();
     }
 
 });

@@ -1,4 +1,3 @@
-
 package com.ncc.neon.query.filter
 
 import com.ncc.neon.query.clauses.AndWhereClause
@@ -23,14 +22,14 @@ import java.util.concurrent.ConcurrentMap
  *
  */
 
-
 /**
  * Holds filters for a give filter key in memory.
  */
 class FilterCache implements Serializable {
 
     private static final long serialVersionUID = -757738218779210868L
-    ConcurrentMap<FilterKey, Filter> cache = new ConcurrentHashMap<FilterKey, Filter>()
+
+    ConcurrentMap<String, FilterKey> cache = new ConcurrentHashMap<String, FilterKey>()
 
     /**
      * Clears all existing filters
@@ -40,16 +39,15 @@ class FilterCache implements Serializable {
     }
 
     /**
-     * Adds a filter to the filter state
+     * Adds a filter to the filter state. If the cache already contains a filter with the same key, they will be
+     * merged with an AND clause, and this container will be modified to reflect the new filter.
      * @param filterKey
-     * @param filter
-     * @return
      */
-    void addFilter(FilterKey filterKey, Filter filter) {
-        def oldFilter = cache.putIfAbsent(filterKey, filter)
-        if(oldFilter){
-            filter.whereClause = determineFilterWhereClause(oldFilter, filter)
-            cache.replace(filterKey, filter)
+    void addFilter(FilterKey filterKey) {
+        def oldFilterKey = cache.putIfAbsent(filterKey.id, filterKey)
+        if (oldFilterKey) {
+            filterKey.filter.whereClause = determineFilterWhereClause(oldFilterKey.filter, filterKey.filter)
+            cache.replace(filterKey.id, filterKey)
         }
     }
 
@@ -66,8 +64,8 @@ class FilterCache implements Serializable {
      * @param id The id of the filter generated when adding it
      * @return
      */
-    void removeFilter(FilterKey filterKey) {
-        cache.remove(filterKey)
+    FilterKey removeFilter(String id) {
+        return cache.remove(id)
     }
 
     /**
@@ -76,9 +74,9 @@ class FilterCache implements Serializable {
      * @return A list of filters applied to that dataset
      */
     List<Filter> getFiltersForDataset(DataSet dataSet) {
-        return cache.findResults {k,v ->
-            if(k.dataSet == dataSet){
-                return v
+        return cache.findResults { k, v ->
+            if (v.dataSet == dataSet) {
+                return v.filter
             }
         }
     }

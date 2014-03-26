@@ -30,13 +30,21 @@ describe('query mapping', function () {
     var allData;
 
     var dcStateFilter = baseFilter().where('state', '=', 'DC');
-    var filterKey = createFilterKey();
+
     jasmine.getJSONFixtures().fixturesPath = 'src/test-data';
 
-    /** the result of any asynchronously executed function. this is reset after each test */
-    var currentResult;
-
     var connection = new neon.query.Connection();
+    var messenger = new neon.eventing.Messenger();
+    var filterId = "filterA";
+
+    // helpers to run async tests against the correct objects
+    var executeQueryAndWait = function (asyncFunction, query) {
+        return neontest.executeAndWait(connection, asyncFunction, query);
+    };
+
+    var sendMessageAndWait = function (asyncFunction, args) {
+        return neontest.executeAndWait(messenger, asyncFunction, args);
+    };
 
 
     beforeEach(function () {
@@ -49,27 +57,31 @@ describe('query mapping', function () {
         }
     });
 
-    afterEach(function () {
-        currentResult = undefined;
-    });
-
     it('get field names', function () {
-        executeAndWait(connection.getFieldNames, tableName);
+        var result = executeQueryAndWait(connection.getFieldNames, tableName);
         var expected = ['_id', 'firstname', 'lastname', 'city', 'state', 'salary', 'hiredate', 'location'];
         runs(function () {
-            expect(currentResult).toBeArrayWithSameElements(expected);
+            expect(result.get()).toBeArrayWithSameElements(expected);
         });
 
     });
+
 
     it('query all data', function () {
         assertQueryResults(baseQuery(), allData);
     });
 
-    it('can use a fully qualified table name to override the database', function() {
+    it('can use a fully qualified table name to override the database', function () {
         // set the connection to another database and the fully qualified database name should override it
         connection.use("invalidDatabase");
         var query = new neon.query.Query().selectFrom(databaseName + '.' + tableName);
+        assertQueryResults(query, allData);
+    });
+
+    it('can use a multiple arguments in the select statement to override the database', function () {
+        // set the connection to another database and the fully qualified database name should override it
+        connection.use("invalidDatabase");
+        var query = new neon.query.Query().selectFrom(databaseName,tableName);
         assertQueryResults(query, allData);
     });
 
@@ -199,24 +211,24 @@ describe('query mapping', function () {
     });
 
     it('apply and remove filter', function () {
-        executeAndWait(neon.query.addFilter, filterKey, dcStateFilter);
+        sendMessageAndWait(neon.eventing.Messenger.prototype.addFilter, [filterId, dcStateFilter]);
         runs(function () {
             var expectedData = rows(1, 2, 5);
             assertQueryResults(baseQuery(), expectedData);
 
             // verify that if the query is supposed to include the filtered data, all data is returned
             runs(function () {
-                assertQueryResults(baseQuery().allDataMode(), allData);
+                assertQueryResults(baseQuery().ignoreFilters(), allData);
                 runs(function () {
                     // apply another filter and make sure both are applied
                     var salaryFilter = baseFilter().where('salary', '>', 85000);
-                    executeAndWait(neon.query.addFilter, filterKey, salaryFilter);
+                    sendMessageAndWait(neon.eventing.Messenger.prototype.addFilter, [filterId, salaryFilter]);
                     runs(function () {
                         expectedData = rows(2, 5);
                         assertQueryResults(baseQuery(), expectedData);
                         runs(function () {
                             // remove the filter key and re-execute the query
-                            executeAndWait(neon.query.removeFilter, filterKey);
+                            sendMessageAndWait(neon.eventing.Messenger.prototype.removeFilter, filterId);
                             runs(function () {
                                 assertQueryResults(baseQuery(), allData);
                             });
@@ -228,9 +240,9 @@ describe('query mapping', function () {
     });
 
     it('clear filters', function () {
-        executeAndWait(neon.query.addFilter, filterKey, dcStateFilter);
+        sendMessageAndWait(neon.eventing.Messenger.prototype.addFilter, [filterId, dcStateFilter]);
         runs(function () {
-            executeAndWait(neon.query.clearFilters);
+            sendMessageAndWait(neon.eventing.Messenger.prototype.clearFilters);
             runs(function () {
                 assertQueryResults(baseQuery(), allData);
             });
@@ -238,7 +250,7 @@ describe('query mapping', function () {
     });
 
     it('replace filter', function () {
-        executeAndWait(neon.query.replaceFilter, filterKey, dcStateFilter);
+        sendMessageAndWait(neon.eventing.Messenger.prototype.replaceFilter, [filterId, dcStateFilter]);
         runs(function () {
             var expectedData = rows(1, 2, 5);
             assertQueryResults(baseQuery(), expectedData);
@@ -246,13 +258,13 @@ describe('query mapping', function () {
             runs(function () {
                 // replace filter and make sure new one is applied.
                 var salaryFilter = baseFilter().where('salary', '>', 85000);
-                executeAndWait(neon.query.replaceFilter, filterKey, salaryFilter);
+                sendMessageAndWait(neon.eventing.Messenger.prototype.replaceFilter, [filterId, salaryFilter]);
                 runs(function () {
                     expectedData = rows(0, 2, 4, 5, 6);
                     assertQueryResults(baseQuery(), expectedData);
                     runs(function () {
                         // remove the filter key and re-execute the query
-                        executeAndWait(neon.query.removeFilter, filterKey);
+                        sendMessageAndWait(neon.eventing.Messenger.prototype.removeFilter, filterId);
                         runs(function () {
                             assertQueryResults(baseQuery(), allData);
                         });
@@ -264,26 +276,26 @@ describe('query mapping', function () {
     });
 
     it('apply and remove selection', function () {
-        executeAndWait(neon.query.addSelection, filterKey, dcStateFilter);
+        sendMessageAndWait(neon.eventing.Messenger.prototype.addSelection, [filterId, dcStateFilter]);
         runs(function () {
             var expectedData = rows(1, 2, 5);
-            assertQueryResults(baseQuery().selectionMode(), expectedData);
+            assertQueryResults(baseQuery().selectionOnly(), expectedData);
 
             // verify that we can still get back all data the data
             runs(function () {
-                assertQueryResults(baseQuery().allDataMode(), allData);
+                assertQueryResults(baseQuery().ignoreFilters(), allData);
                 runs(function () {
                     // apply another selection and make sure both are applied
                     var salaryFilter = baseFilter().where('salary', '>', 85000);
-                    executeAndWait(neon.query.addSelection, filterKey, salaryFilter);
+                    sendMessageAndWait(neon.eventing.Messenger.prototype.addSelection, [filterId, salaryFilter]);
                     runs(function () {
                         expectedData = rows(2, 5);
-                        assertQueryResults(baseQuery().selectionMode(), expectedData);
+                        assertQueryResults(baseQuery().selectionOnly(), expectedData);
                         runs(function () {
                             // remove the filter key and re-execute the query
-                            executeAndWait(neon.query.removeSelection, filterKey);
+                            sendMessageAndWait(neon.eventing.Messenger.prototype.removeSelection, filterId);
                             runs(function () {
-                                assertQueryResults(baseQuery().selectionMode(), allData);
+                                assertQueryResults(baseQuery().selectionOnly(), allData);
                             });
                         });
                     });
@@ -293,33 +305,33 @@ describe('query mapping', function () {
     });
 
     it('clear selection', function () {
-        executeAndWait(neon.query.addSelection, filterKey, dcStateFilter);
+        sendMessageAndWait(neon.eventing.Messenger.prototype.addSelection, [filterId, dcStateFilter]);
         runs(function () {
-            executeAndWait(neon.query.clearSelection);
+            sendMessageAndWait(neon.eventing.Messenger.prototype.clearSelection);
             runs(function () {
-                assertQueryResults(baseQuery().selectionMode(), allData);
+                assertQueryResults(baseQuery().selectionOnly(), allData);
             });
         });
     });
 
     it('replace selection', function () {
-        executeAndWait(neon.query.replaceSelection, filterKey, dcStateFilter);
+        sendMessageAndWait(neon.eventing.Messenger.prototype.replaceSelection, [filterId, dcStateFilter]);
         runs(function () {
             var expectedData = rows(1, 2, 5);
-            assertQueryResults(baseQuery().selectionMode(), expectedData);
+            assertQueryResults(baseQuery().selectionOnly(), expectedData);
 
             runs(function () {
                 // replace filter and make sure new one is applied.
                 var salaryFilter = baseFilter().where('salary', '>', 85000);
-                executeAndWait(neon.query.replaceSelection, filterKey, salaryFilter);
+                sendMessageAndWait(neon.eventing.Messenger.prototype.replaceSelection, [filterId, salaryFilter]);
                 runs(function () {
                     expectedData = rows(0, 2, 4, 5, 6);
-                    assertQueryResults(baseQuery().selectionMode(), expectedData);
+                    assertQueryResults(baseQuery().selectionOnly(), expectedData);
                     runs(function () {
                         // remove the filter key and re-execute the query
-                        executeAndWait(neon.query.removeSelection, filterKey);
+                        sendMessageAndWait(neon.eventing.Messenger.prototype.removeSelection, filterId);
                         runs(function () {
-                            assertQueryResults(baseQuery().selectionMode(), allData);
+                            assertQueryResults(baseQuery().selectionOnly(), allData);
                         });
                     });
                 });
@@ -328,29 +340,70 @@ describe('query mapping', function () {
         });
     });
 
+    it('sends filter events to the callback functions', function () {
+        var addEvent = sendMessageAndWait(neon.eventing.Messenger.prototype.addSelection, [filterId, dcStateFilter]);
+        runs(function () {
+            assertEventType("ADD", addEvent.get());
+            // replace filter and make sure new one is applied.
+            var salaryFilter = baseFilter().where('salary', '>', 85000);
+            var replaceEvent = sendMessageAndWait(neon.eventing.Messenger.prototype.replaceSelection, [filterId, salaryFilter]);
+            runs(function () {
+                assertEventType("REPLACE", replaceEvent.get());
+                runs(function () {
+                    // remove the filter key and re-execute the query
+                    var removeEvent = sendMessageAndWait(neon.eventing.Messenger.prototype.removeSelection, filterId);
+                    runs(function () {
+                        assertEventType("REMOVE", removeEvent.get());
+                    });
+                });
+            });
+        });
+    });
+
+
+    it('sends filter events to the callback functions', function () {
+        var addEvent = sendMessageAndWait(neon.eventing.Messenger.prototype.addFilter, [filterId, dcStateFilter]);
+        runs(function () {
+            assertEventType("ADD", addEvent.get());
+            // replace filter and make sure new one is applied.
+            var salaryFilter = baseFilter().where('salary', '>', 85000);
+            var replaceEvent = sendMessageAndWait(neon.eventing.Messenger.prototype.replaceFilter, [filterId, salaryFilter]);
+            runs(function () {
+                assertEventType("REPLACE", replaceEvent.get());
+                runs(function () {
+                    // remove the filter key and re-execute the query
+                    var removeEvent = sendMessageAndWait(neon.eventing.Messenger.prototype.removeFilter, filterId);
+                    runs(function () {
+                        assertEventType("REMOVE", removeEvent.get());
+                    });
+                });
+            });
+        });
+    });
+
     it('replace filter and selection are independent', function () {
-        executeAndWait(neon.query.replaceFilter, filterKey, dcStateFilter);
+        sendMessageAndWait(neon.eventing.Messenger.prototype.replaceFilter, [filterId, dcStateFilter]);
         runs(function () {
             var expectedData = rows(1, 2, 5);
             assertQueryResults(baseQuery(), expectedData);
             runs(function () {
                 // add a selection and make sure both are applied.
                 var salaryFilter = baseFilter().where('salary', '>', 85000);
-                executeAndWait(neon.query.replaceSelection, filterKey, salaryFilter);
+                sendMessageAndWait(neon.eventing.Messenger.prototype.replaceSelection, [filterId, salaryFilter]);
                 runs(function () {
                     expectedData = rows(2, 5);
-                    assertQueryResults(baseQuery().selectionMode(), expectedData);
+                    assertQueryResults(baseQuery().selectionOnly(), expectedData);
                     runs(function () {
                         // remove the selection and re-execute the query
-                        executeAndWait(neon.query.removeSelection, filterKey);
+                        sendMessageAndWait(neon.eventing.Messenger.prototype.removeSelection, filterId);
                         runs(function () {
                             expectedData = rows(1, 2, 5);
-                            assertQueryResults(baseQuery().selectionMode(), expectedData);
+                            assertQueryResults(baseQuery().selectionOnly(), expectedData);
                             runs(function () {
                                 // remove the filter key from selection and re-execute the query
-                                executeAndWait(neon.query.removeFilter, filterKey);
+                                sendMessageAndWait(neon.eventing.Messenger.prototype.removeFilter, filterId);
                                 runs(function () {
-                                    assertQueryResults(baseQuery().selectionMode(), allData);
+                                    assertQueryResults(baseQuery().selectionOnly(), allData);
                                 });
                             });
                         });
@@ -442,9 +495,9 @@ describe('query mapping', function () {
 
     it('query with limit', function () {
         var query = baseQuery().limit(2);
-        executeAndWait(connection.executeQuery, query);
+        var result = executeQueryAndWait(connection.executeQuery, query);
         runs(function () {
-            expect(currentResult.data.length).toEqual(2);
+            expect(result.get().data.length).toEqual(2);
         });
     });
 
@@ -491,21 +544,88 @@ describe('query mapping', function () {
         assertQueryGroupResults(queryGroup, expectedData);
     });
 
-    it('gets column metadata', function() {
+    it('query group uses filters', function () {
+        var query1 = baseQuery().where('state', '=', 'VA');
+        var query2 = baseQuery().where('state', '=', 'MD');
+        var query3 = baseQuery().where('state', '=', 'DC');
+
+        var queryGroup = new neon.query.QueryGroup();
+        queryGroup.addQuery(query1);
+        queryGroup.addQuery(query2);
+        queryGroup.addQuery(query3);
+        sendMessageAndWait(neon.eventing.Messenger.prototype.addFilter, [filterId, dcStateFilter]);
+        runs(function() {
+            var expectedData = getJSONFixture('queryGroupFiltered.json');
+            assertQueryGroupResults(queryGroup, expectedData);
+            runs(function() {
+                sendMessageAndWait(neon.eventing.Messenger.prototype.removeFilter, filterId);
+                runs(function() {
+                    expectedData = getJSONFixture('queryGroup.json');
+                    assertQueryGroupResults(queryGroup, expectedData);
+                });
+            });
+        });
+    });
+
+    it('query group can ignore filters', function () {
+        var query1 = baseQuery().where('state', '=', 'VA');
+        var query2 = baseQuery().where('state', '=', 'MD');
+        var query3 = baseQuery().where('state', '=', 'DC');
+
+        var queryGroup = new neon.query.QueryGroup();
+        queryGroup.addQuery(query1);
+        queryGroup.addQuery(query2);
+        queryGroup.addQuery(query3);
+        queryGroup.ignoreFilters();
+        sendMessageAndWait(neon.eventing.Messenger.prototype.addFilter, [filterId, dcStateFilter]);
+        runs(function() {
+            var expectedData = getJSONFixture('queryGroup.json');
+            assertQueryGroupResults(queryGroup, expectedData);
+            runs(function() {
+                sendMessageAndWait(neon.eventing.Messenger.prototype.removeFilter, filterId);
+            });
+        });
+    });
+
+
+    it('query group uses selection', function () {
+        var query1 = baseQuery().where('state', '=', 'VA');
+        var query2 = baseQuery().where('state', '=', 'MD');
+        var query3 = baseQuery().where('state', '=', 'DC');
+
+        var queryGroup = new neon.query.QueryGroup();
+        queryGroup.addQuery(query1);
+        queryGroup.addQuery(query2);
+        queryGroup.addQuery(query3);
+        queryGroup.selectionOnly();
+        sendMessageAndWait(neon.eventing.Messenger.prototype.addSelection, [filterId, dcStateFilter]);
+        runs(function() {
+            // queryGroupFiltered.json is used since we select the same data we filter on in the tests
+            var expectedData = getJSONFixture('queryGroupFiltered.json');
+            assertQueryGroupResults(queryGroup, expectedData);
+            runs(function() {
+                sendMessageAndWait(neon.eventing.Messenger.prototype.removeSelection, filterId);
+            });
+        });
+    });
+
+
+
+    it('gets column metadata', function () {
         var expected =
             [
-                {"columnName":"field1", "numeric":true, "logical":true, "temporal":true, "array":true, "object":true, "text":true, "heterogeneous":true, "nullable":true },
-                {"columnName":"field2" ,"numeric":false, "logical":false, "temporal":false, "array":false, "object":false, "text":false, "heterogeneous":false, "nullable":false}
+                {"columnName": "field1", "numeric": true, "logical": true, "temporal": true, "array": true, "object": true, "text": true, "heterogeneous": true, "nullable": true },
+                {"columnName": "field2", "numeric": false, "logical": false, "temporal": false, "array": false, "object": false, "text": false, "heterogeneous": false, "nullable": false}
             ];
         var actual;
         connection.use('database1');
-        connection.getColumnMetadata('table1', function(columnMetadata) {
+        connection.getColumnMetadata('table1', function (columnMetadata) {
             actual = columnMetadata;
         });
-        waitsFor(function() {
+        waitsFor(function () {
             return 'undefined' !== typeof actual;
         });
-        runs(function() {
+        runs(function () {
             expect(actual).toEqual(expected);
         });
     });
@@ -530,44 +650,33 @@ describe('query mapping', function () {
 
 
     function doAssertQueryResults(queryMethod, query, expectedData) {
-        assertAsync(queryMethod, query, expectedData);
+        assertAsyncQueryResults(queryMethod, query, expectedData);
     }
 
     /**
      * Executes the specified async function with the given argument. The function must also take a second
      * argument with a callback to invoke when the operation completes and a third argument that is an error callback
      * @param asyncFunction The asynchronous function to call
-     * @param arg The argument to pass to the function
+     * @param query The query to pass to the function
      * @param expectedData The data expected to be returned from the function
      */
-    function assertAsync(asyncFunction, arg, expectedData) {
-        executeAndWait(asyncFunction, arg);
+    function assertAsyncQueryResults(asyncFunction, query, expectedData) {
+        var result = executeQueryAndWait(asyncFunction, query);
         runs(function () {
-            expect(currentResult.data).toEqual(expectedData);
+            expect(result.get().data).toEqual(expectedData);
         });
     }
 
     /**
-     * Executes the asynchronous function and blocks until it completes. The currentResult variable is set to the
-     * value of the async call. All calls after this must be run in a "runs" block.
-     * @param asyncFunction
-     * @param args
+     * Asserts that the event has the expected type and the dataset is correct
+     * @param eventType
+     * @param event
+     * @method assertEventType
      */
-    function executeAndWait(asyncFunction, args) {
-        var done = false;
-
-        var argsArray = [];
-        // the first argument is the function being executed - the rest of the arguments are passed through to the function
-        argsArray = argsArray.concat(neon.util.arrayUtils.argumentsToArray(arguments).slice(1));
-        argsArray.push(function (res) {
-            currentResult = res;
-            done = true;
-        });
-
-        asyncFunction.apply(connection, argsArray);
-        waitsFor(function () {
-            return done;
-        });
+    function assertEventType(eventType, event) {
+        expect(event.type).toEqual(eventType);
+        expect(event.dataSet.databaseName).toEqual(databaseName);
+        expect(event.dataSet.tableName).toEqual(tableName);
     }
 
     /**
@@ -596,17 +705,8 @@ describe('query mapping', function () {
      * @return {neon.query.Filter}
      */
     function baseFilter() {
-        return new neon.query.Filter().selectFrom(tableName);
+        return new neon.query.Filter().selectFrom(databaseName, tableName);
     }
 
-    function createFilterKey() {
-        return {
-            uuid: "84bc5064-c837-483b-8454-c8c72abe45f8",
-            dataSet: {
-                databaseName: databaseName,
-                tableName: tableName
-            }
-        };
-    }
 
 });

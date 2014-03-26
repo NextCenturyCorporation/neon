@@ -18,13 +18,9 @@ package com.ncc.neon.query.convert
 
 import com.ncc.neon.query.Query
 import com.ncc.neon.query.clauses.*
-import com.ncc.neon.query.filter.DataSet
-import com.ncc.neon.query.filter.Filter
-import com.ncc.neon.query.filter.FilterKey
-import com.ncc.neon.query.filter.FilterState
+import com.ncc.neon.query.filter.*
 import org.junit.Before
 import org.junit.Test
-
 
 /*
  Sets up unit tests to be run against both hive and mongo conversion strategies
@@ -178,16 +174,16 @@ abstract class AbstractConversionTest {
     protected abstract void assertQueryWithEmptyFilter(query)
 
     private void givenFilterStateHasAnEmptyFilter() {
-        FilterKey filterKey = new FilterKey(uuid: UUID.randomUUID(), dataSet: new DataSet(databaseName: simpleFilter.databaseName, tableName: simpleFilter.tableName))
         Filter filter = new Filter(databaseName: simpleFilter.databaseName, tableName: simpleFilter.tableName)
-        filterState.addFilter(filterKey, filter)
+        FilterKey filterKey = new FilterKey(id: "emptyFilter", filter: filter)
+        filterState.addFilter(filterKey)
     }
 
     private void givenFilterStateHasOneFilter() {
-        FilterKey filterKey = new FilterKey(uuid: UUID.randomUUID(), dataSet: new DataSet(databaseName: simpleFilter.databaseName, tableName: simpleFilter.tableName))
         SingularWhereClause whereClause = new SingularWhereClause(lhs: COLUMN_NAME, operator: "=", rhs: COLUMN_VALUE)
         Filter filterWithWhere = new Filter(databaseName: simpleFilter.databaseName, tableName: simpleFilter.tableName, whereClause: whereClause)
-        filterState.addFilter(filterKey, filterWithWhere)
+        FilterKey filterKey = new FilterKey(id: "filterA", filter: filterWithWhere)
+        filterState.addFilter(filterKey)
     }
 
     private void givenQueryHasFields() {

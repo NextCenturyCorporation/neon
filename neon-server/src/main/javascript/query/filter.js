@@ -29,15 +29,25 @@ neon.query.Filter = function () {
 /**
  * Sets the *select* clause of the filter to select data from the specified table
  * @method selectFrom
- * @param {String} tableName The table to select from. This may be fully qualified with [databaseName.]tableName, in
- * which case, the database specified in the "use" method of the connection will be overridden.
+ * @param {...String} args The database/table to select from. This may be the database and table name or just arg table
+ * name, in which case the database specified in the "use" method of the connection will be added to the query when
+ * it is executed. The table name may also be fully qualified with [databaseName.]tableName.
  * @return {neon.query.Filter} This filter object
  */
-neon.query.Filter.prototype.selectFrom = function (tableName) {
-    var parts = tableName.split(".");
-    if ( parts.length === 1 ) {
-        this.tableName = parts[0];
+neon.query.Filter.prototype.selectFrom = function (args) {
+    var parts = neon.util.arrayUtils.argumentsToArray(arguments);
+    if (parts.length === 1) {
+        // check for the fully qualified [database.]table
+        var table = parts[0].split(".");
+        if (table.length === 1) {
+            this.tableName = table[0];
+        }
+        else {
+            this.databaseName = table[0];
+            this.tableName = table[1];
+        }
     }
+    // database and table passed in separately
     else {
         this.databaseName = parts[0];
         this.tableName = parts[1];

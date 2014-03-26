@@ -21,16 +21,15 @@ import groovy.transform.ToString
 
 
 /**
- * This class is sent to the client as JSON and so uses the raw String uuid,
+ * Indicates that the filters changes on a dataset
  */
 @ToString(includeNames = true)
 class FilterEvent {
 
-    String uuid
-    DataSet dataSet
+    /** a string description of the type of event */
+    String type
 
-    static FilterEvent fromFilterKey(FilterKey filterKey){
-        new FilterEvent(uuid: filterKey.uuid.toString(), dataSet: filterKey.dataSet)
-    }
+    /** the datset the filter changed on */
+    DataSet dataSet
 
 }

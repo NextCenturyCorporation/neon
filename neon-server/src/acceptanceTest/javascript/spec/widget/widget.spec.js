@@ -13,58 +13,33 @@
  * limitations under the License.
  *
  */
-describe('widgets', function() {
+describe('widgets', function () {
+
+    // helper to execute async functions
+    var executeAndWait = function (asyncFunction, args) {
+        // the target is null since there is no "this" context for these functions (they are "static")
+        return neontest.executeAndWait(null, asyncFunction, args);
+    };
 
     it('save and restore states', function () {
         // simulate state from two different widgets with different ids
         var instanceId1 = "id1";
         var state1 = {"s1": "val1"};
-        var state1Saved = false;
-        var state1Restored = false;
         var restoredState1;
-
-
         var instanceId2 = "id2";
         var state2 = {"s2": "val2"};
         var restoredState2;
-        var state2Saved = false;
-        var state2Restored = false;
 
-        var empty = function () {
-        };
-
-        neon.widget.saveState(instanceId1, state1, function () {
-            state1Saved = true;
-        }, empty);
-        waitsFor(function () {
-            return  state1Saved;
-        });
+        executeAndWait(neon.widget.saveState, [instanceId1, state1]);
         runs(function () {
-            neon.widget.saveState(instanceId2, state2, function () {
-                state2Saved = true;
-            }, empty);
-            waitsFor(function () {
-                return state2Saved;
-            });
+            executeAndWait(neon.widget.saveState, [instanceId2, state2]);
             runs(function () {
-                neon.widget.getSavedState(instanceId1, function (state) {
-                    restoredState1 = state;
-                    state1Restored = true;
-                });
-                waitsFor(function () {
-                    return state1Restored;
-                });
+                restoredState1 = executeAndWait(neon.widget.getSavedState, instanceId1);
                 runs(function () {
-                    neon.widget.getSavedState(instanceId2, function (state) {
-                        restoredState2 = state;
-                        state2Restored = true;
-                    });
-                    waitsFor(function () {
-                        return state2Restored;
-                    });
+                    restoredState2 = executeAndWait(neon.widget.getSavedState, instanceId2);
                     runs(function () {
-                        expect(restoredState1).toEqual(state1);
-                        expect(restoredState2).toEqual(state2);
+                        expect(restoredState1.get()).toEqual(state1);
+                        expect(restoredState2.get()).toEqual(state2);
                     });
                 });
 
@@ -72,72 +47,44 @@ describe('widgets', function() {
         });
     });
 
-    it('get an empty state if none exists', function() {
-        var empty;
-        neon.widget.getSavedState('invalidWidgetId',function(state) {
-            empty = state;
-        });
-        waitsFor(function() {
-            return 'undefined' !== typeof empty;
-        });
-        runs(function() {
-           expect(empty).toEqual({});
+    it('get an empty state if none exists', function () {
+        var empty = executeAndWait(neon.widget.getSavedState, 'invalidWidgetId');
+        runs(function () {
+            expect(empty.get()).toEqual({});
         });
     });
 
-    it('gets widget initialization data', function() {
-        var expected = {"key1":"value1"};
-        var actual;
-        neon.widget.getWidgetInitializationData('widget1', function(initData) {
-            actual = initData;
-        });
-        waitsFor(function() {
-            return 'undefined' !== typeof actual;
-        });
-        runs(function() {
-            expect(actual).toEqual(expected);
+    it('gets widget initialization data', function () {
+        var expected = {"key1": "value1"};
+        var actual = executeAndWait(neon.widget.getWidgetInitializationData, 'widget1');
+        runs(function () {
+            expect(actual.get()).toEqual(expected);
         });
     });
 
-    it('get empty initialization data if none exists', function() {
-        var empty;
-        neon.widget.getWidgetInitializationData('invalidWidget', function(widgetData) {
-            empty = widgetData;
-        });
-        waitsFor(function() {
-            return 'undefined' !== typeof empty;
-        });
-        runs(function() {
-            expect(empty).toBe('');
+    it('get empty initialization data if none exists', function () {
+        var empty = executeAndWait(neon.widget.getWidgetInitializationData, 'invalidWidget');
+        runs(function () {
+            expect(empty.get()).toBe('');
         });
     });
 
 
-    it('gets widget dataset data', function() {
+    it('gets widget dataset data', function () {
         var expected =
-            [ {"elementId" :"aSelector", "value":"someValue"}];
-        var actual;
-        neon.widget.getWidgetDatasetMetadata('database1', 'table1', 'widget1', function(widgetData) {
-            actual = widgetData;
-        });
-        waitsFor(function() {
-            return 'undefined' !== typeof actual;
-        });
-        runs(function() {
-            expect(actual).toEqual(expected);
+            [
+                {"elementId": "aSelector", "value": "someValue"}
+            ];
+        var actual = executeAndWait(neon.widget.getWidgetDatasetMetadata, ['database1', 'table1', 'widget1']);
+        runs(function () {
+            expect(actual.get()).toEqual(expected);
         });
     });
 
-    it('gets empty widget dataset data if none exists', function() {
-        var empty;
-        neon.widget.getWidgetDatasetMetadata('invalidDatabase', 'invalidWidget', 'invalidWidget', function(widgetData) {
-            empty = widgetData;
-        });
-        waitsFor(function() {
-            return 'undefined' !== typeof empty;
-        });
-        runs(function() {
-            expect(empty.length).toEqual(0);
+    it('gets empty widget dataset data if none exists', function () {
+        var empty = executeAndWait(neon.widget.getWidgetDatasetMetadata, ['invalidDatabase', 'invalidWidget', 'invalidWidget']);
+        runs(function () {
+            expect(empty.get().length).toEqual(0);
         });
     });
 

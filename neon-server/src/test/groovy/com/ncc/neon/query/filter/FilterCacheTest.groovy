@@ -23,23 +23,20 @@ import org.junit.Before
 import org.junit.Test
 
 
-class FilterStateTest {
+class FilterCacheTest {
 
-    private static final String UUID_STRING = "84bc5064-c837-483b-8454-c8c72abe45f8"
-    private FilterState filterState
-    private FilterKey filterKey
+    private FilterCache filterCache
     private DataSet dataSet
 
     @Before
     void before() {
-        filterState = new FilterState()
+        filterCache = new FilterCache()
         dataSet = new DataSet(databaseName: "testDB", tableName: "testTable")
-        filterKey = new FilterKey(uuid: UUID.fromString(UUID_STRING), dataSet: dataSet)
     }
 
     @Test
     void "add a simple filter and see that it can be retrieved"() {
-        Filter filter = addEmptyFilter()
+        Filter filter = addEmptyFilter("filterA")
         assertEmptyFilterCanBeRetrieved(filter)
     }
 
@@ -48,20 +45,20 @@ class FilterStateTest {
         SingularWhereClause singularWhereClause1 = new SingularWhereClause(lhs: "column1", operator: "=", rhs: "value1")
         SingularWhereClause singularWhereClause2 = new SingularWhereClause(lhs: "column2", operator: "=", rhs: "value2")
 
-        addBothWhereClausesToFilterStateUnderTheSameKey(singularWhereClause1, singularWhereClause2)
+        addBothWhereClausesToFilterCacheUnderTheSameKey(singularWhereClause1, singularWhereClause2)
 
-        List<Filter> filters = filterState.getFiltersForDataset(dataSet)
+        List<Filter> filters = filterCache.getFiltersForDataset(dataSet)
         assert filters
         assert filters.size() == 1
         assert filters[0].whereClause instanceof AndWhereClause
         assert filters[0].whereClause.whereClauses == [singularWhereClause1, singularWhereClause2]
     }
 
-    private void addBothWhereClausesToFilterStateUnderTheSameKey(SingularWhereClause where1, SingularWhereClause where2) {
+    private void addBothWhereClausesToFilterCacheUnderTheSameKey(SingularWhereClause where1, SingularWhereClause where2) {
         Filter filter1 = createFilterFromWhereClause(where1)
         Filter filter2 = createFilterFromWhereClause(where2)
-        filterState.addFilter(filterKey, filter1)
-        filterState.addFilter(filterKey, filter2)
+        addFilter("filterA", filter1)
+        addFilter("filterA", filter2)
     }
 
     @Test
@@ -69,37 +66,39 @@ class FilterStateTest {
         SingularWhereClause singularWhereClause1 = new SingularWhereClause(lhs: "column1", operator: "=", rhs: "value1")
         SingularWhereClause singularWhereClause2 = new SingularWhereClause(lhs: "column2", operator: "=", rhs: "value2")
 
-        addBothWhereClausesToFilterStateWithDifferentKeys(singularWhereClause1, singularWhereClause2)
+        addBothWhereClausesToFilterCacheWithDifferentKeys(singularWhereClause1, singularWhereClause2)
 
-        List<Filter> filters = filterState.getFiltersForDataset(dataSet)
+        List<Filter> filters = filterCache.getFiltersForDataset(dataSet)
         assert filters
         assert filters.size() == 2
         assert filters.find{ it.whereClause == singularWhereClause1}
         assert filters.find{ it.whereClause == singularWhereClause2}
     }
 
-    private void addBothWhereClausesToFilterStateWithDifferentKeys(SingularWhereClause where1, SingularWhereClause where2) {
+    private void addBothWhereClausesToFilterCacheWithDifferentKeys(SingularWhereClause where1, SingularWhereClause where2) {
         Filter filter1 = createFilterFromWhereClause(where1)
         Filter filter2 = createFilterFromWhereClause(where2)
-        filterState.addFilter(new FilterKey(uuid: UUID.randomUUID(), dataSet: dataSet), filter1)
-        filterState.addFilter(new FilterKey(uuid: UUID.randomUUID(), dataSet: dataSet), filter2)
+        addFilter("filterA", filter1)
+        addFilter("filterB", filter2)
     }
 
 
     @Test
     void "removing a filter works for one filter"() {
-        Filter filter = addEmptyFilter()
+        Filter filter = addEmptyFilter("filterA")
         assertEmptyFilterCanBeRetrieved(filter)
-        filterState.removeFilter(filterKey)
-        assert filterState.getFiltersForDataset() == []
+        FilterKey removed = filterCache.removeFilter("filterA")
+        assert filter.is(removed.filter)
+        assert removed.id == "filterA"
+        assert filterCache.getFiltersForDataset(dataSet) == []
     }
 
     @Test
     void "clearing a filter works for one filter"() {
-        Filter filter = addEmptyFilter()
+        Filter filter = addEmptyFilter("emptyFilter")
         assertEmptyFilterCanBeRetrieved(filter)
-        filterState.clearAllFilters()
-        assert filterState.getFiltersForDataset() == []
+        filterCache.clearAllFilters()
+        assert filterCache.getFiltersForDataset(dataSet) == []
     }
 
     private createFilterFromWhereClause(WhereClause whereClause, DataSet ds = dataSet) {
@@ -107,17 +106,22 @@ class FilterStateTest {
     }
 
     private void assertEmptyFilterCanBeRetrieved(Filter filter) {
-        List<Filter> filters = filterState.getFiltersForDataset(dataSet)
+        List<Filter> filters = filterCache.getFiltersForDataset(dataSet)
 
         assert filters
         assert filters.size() == 1
         assert filters[0] == filter
     }
 
-    private Filter addEmptyFilter() {
+    private Filter addEmptyFilter(String id) {
         Filter filter = createFilterFromWhereClause(null)
-        filterState.addFilter(filterKey, filter)
+        addFilter(id, filter)
         return filter
+    }
+
+    private void addFilter(String id, Filter filter) {
+        FilterKey filterKey = new FilterKey(id:id, filter: filter)
+        filterCache.addFilter(filterKey)
     }
 
 }

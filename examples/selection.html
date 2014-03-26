@@ -15,20 +15,22 @@
         // sends and receive messages about what elements are selected
         var messenger = new neon.eventing.Messenger();
 
-        //Register for a filter key. The server uses this to identify which client is creating the filter.
-        neon.query.registerForFilterKey(databaseName, tableName, function (filterKey) {
-            //Create a selection
-            var whereClause = neon.query.where("magnitude", ">=", 2.5);
-            var filter = new neon.query.Filter().selectFrom(tableName).where(whereClause);
-            messenger.addSelection(filterKey, filter, function () {
-                //Query in selection mode.
-                var query = new neon.query.Query().selectFrom(tableName).selectionMode();
-                //Execute the query and display the results.
-                connection.executeQuery(query, function (result) {
-                    $("#result").html(JSON.stringify(result.data));
-                });
+        // this can be any value. each key can contain 1 or more selections
+        var selectionKey = "exampleKey";
+
+        //Create a selection
+        var whereClause = neon.query.where("magnitude", ">=", 2.5);
+        var filter = new neon.query.Filter().selectFrom(databaseName,tableName).where(whereClause);
+
+        messenger.addSelection(selectionKey, filter, function () {
+            //Query in selection mode.
+            var query = new neon.query.Query().selectFrom(tableName).selectionOnly();
+            //Execute the query and display the results.
+            connection.executeQuery(query, function (result) {
+                $("#result").html(JSON.stringify(result.data));
             });
         });
+
     </script>
 
 </head>

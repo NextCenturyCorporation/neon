@@ -24,38 +24,72 @@ import org.junit.Test
 
 class FilterServiceTest {
 
-    private static final String UUID_STRING = "1af29529-86bb-4f2c-9928-7f4484b9cc49"
+    private static final String ID = "filterA"
     private FilterService filterService
     private FilterKey filterKey
+    Filter filter
     private DataSet dataSet
 
     @Before
     void before() {
         filterService = new FilterService()
         dataSet = new DataSet(databaseName: "testDB", tableName: "testTable")
-        filterKey = new FilterKey(uuid: UUID.fromString(UUID_STRING),
-                dataSet: dataSet)
+        filter = new Filter(databaseName: dataSet.databaseName, tableName: dataSet.tableName)
+        filterKey = new FilterKey(id: ID, filter: filter)
     }
 
     @Test
-    void "register for filter key"() {
-        FilterEvent event = filterService.registerForFilterKey(dataSet)
+    void "add filter"() {
+        def filterStateMock = new MockFor(FilterState)
+        filterStateMock.demand.addFilter { key -> assert key.is(filterKey)}
+        def filterState = filterStateMock.proxyInstance()
+        filterService.filterState = filterState
+        FilterEvent event = filterService.addFilter(filterKey)
+        filterStateMock.verify(filterState)
+        assert event.type == "ADD"
         assert event.dataSet == dataSet
-        assert event.uuid
     }
+
+    @Test
+    void "remove filter"() {
+        def filterStateMock = new MockFor(FilterState)
+        filterStateMock.demand.removeFilter { id -> assert id == ID; return filterKey }
+        def filterState = filterStateMock.proxyInstance()
+        filterService.filterState = filterState
+        FilterEvent event = filterService.removeFilter(ID)
+        filterStateMock.verify(filterState)
+        assert event.type == "REMOVE"
+        assert event.dataSet == dataSet
+    }
+
+    @Test
+    void "remove filter that does not exist"() {
+        def filterStateMock = new MockFor(FilterState)
+        filterStateMock.demand.removeFilter { id -> null }
+        def filterState = filterStateMock.proxyInstance()
+        filterService.filterState = filterState
+        FilterEvent event = filterService.removeFilter(ID)
+        filterStateMock.verify(filterState)
+        assert event.type == "REMOVE"
+
+        // explicitly check for empty string, not null
+        assert event.dataSet.databaseName == ""
+        assert event.dataSet.tableName == ""
+
+    }
+
 
     @Test
     void "replace filter"() {
-        def filter = new Filter(databaseName: dataSet.databaseName, tableName: dataSet.tableName)
-
         def filterStateMock = new MockFor(FilterState)
-        filterStateMock.demand.removeFilter { key -> assert key == filterKey }
-        filterStateMock.demand.addFilter { key, f -> assert key == filterKey; f.is(filter)}
+        filterStateMock.demand.removeFilter { id -> assert id == ID }
+        filterStateMock.demand.addFilter { key -> assert key.is(filterKey)}
         def filterState = filterStateMock.proxyInstance()
-
         filterService.filterState = filterState
-        filterService.replaceFilter(new FilterContainer(filterKey: filterKey, filter: filter))
+        FilterEvent event = filterService.replaceFilter(filterKey)
         filterStateMock.verify(filterState)
+        assert event.type == "REPLACE"
+        assert event.dataSet == dataSet
     }
 
 }

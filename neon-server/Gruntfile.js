@@ -93,8 +93,7 @@ module.exports = function (grunt) {
 
             }
         }
-    )
-    ;
+    );
 
     grunt.loadNpmTasks('grunt-contrib-concat');
     grunt.loadNpmTasks('grunt-contrib-jshint');
@@ -104,5 +103,4 @@ module.exports = function (grunt) {
     // hint after concatenation since the concatenated version is also hinted
     grunt.registerTask('default', ['concat', 'jshint', 'jasmine:unit']);
 
-}
-;
+};

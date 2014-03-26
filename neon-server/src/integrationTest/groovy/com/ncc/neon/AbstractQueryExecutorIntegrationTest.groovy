@@ -21,7 +21,6 @@ import com.ncc.neon.query.QueryExecutor
 import com.ncc.neon.query.QueryGroup
 import com.ncc.neon.query.QueryOptions
 import com.ncc.neon.query.clauses.*
-import com.ncc.neon.query.filter.DataSet
 import com.ncc.neon.query.filter.Filter
 import com.ncc.neon.query.filter.FilterKey
 import com.ncc.neon.util.AssertUtils
@@ -29,8 +28,6 @@ import com.ncc.neon.util.DateUtils
 import org.json.JSONArray
 import org.junit.After
 import org.junit.Test
-
-
 
 /**
  * Integration test that verifies the neon server properly translates database specific queries.
@@ -359,20 +356,22 @@ abstract class AbstractQueryExecutorIntegrationTest {
 
 
     @Test
+    @SuppressWarnings('MethodSize') // method is slightly long because of some test setup but is still pretty straight forward
     void "add filter"() {
-        UUID uuid = UUID.randomUUID()
-        def filterId = new FilterKey(uuid, new DataSet(databaseName: DATABASE_NAME, tableName: TABLE_NAME))
+        String filterId = "filterId"
         def dcStateFilter = createFilterWithWhereClause(new SingularWhereClause(lhs: 'state', operator: '=', rhs: 'DC'))
+        def dcStateFilterKey = new FilterKey(id: filterId, filter: dcStateFilter)
 
         // apply a filter and make sure only that data is returned
-        queryExecutor.filterState.addFilter(filterId, dcStateFilter)
+        queryExecutor.filterState.addFilter(dcStateFilterKey)
         def dcStateResult = queryExecutor.execute(ALL_DATA_QUERY, QueryOptions.FILTERED_DATA)
         def dcStateRecords = rows(1, 2, 5)
         assertUnorderedQueryResult(dcStateRecords, dcStateResult)
 
         // apply another filter and make sure both are applied
         def salaryFilter = createFilterWithWhereClause(new SingularWhereClause(lhs: 'salary', operator: '>', rhs: 85000))
-        queryExecutor.filterState.addFilter(filterId, salaryFilter)
+        def salaryFilterKey = new FilterKey(id: filterId, filter: salaryFilter)
+        queryExecutor.filterState.addFilter(salaryFilterKey)
 
         def dcStateWithSalaryFilterRecords = rows(2, 5)
         def dcStateWithSalaryResult = queryExecutor.execute(ALL_DATA_QUERY, QueryOptions.FILTERED_DATA)
@@ -380,16 +379,51 @@ abstract class AbstractQueryExecutorIntegrationTest {
     }
 
     @Test
+    @SuppressWarnings('MethodSize') // method is slightly long because of some test setup but is still pretty straight forward
+    void "filters with different ids"() {
+        String dcStateFilterId = "dcStateFilterId"
+        def dcStateFilter = createFilterWithWhereClause(new SingularWhereClause(lhs: 'state', operator: '=', rhs: 'DC'))
+        def dcStateFilterKey = new FilterKey(id: dcStateFilterId, filter: dcStateFilter)
+
+        // apply a filter and make sure only that data is returned
+        queryExecutor.filterState.addFilter(dcStateFilterKey)
+        def dcStateResult = queryExecutor.execute(ALL_DATA_QUERY, QueryOptions.FILTERED_DATA)
+        def dcStateRecords = rows(1, 2, 5)
+        assertUnorderedQueryResult(dcStateRecords, dcStateResult)
+
+        // apply another filter and make sure both are applied
+        def salaryFilterId = "salaryFilterId"
+        def salaryFilter = createFilterWithWhereClause(new SingularWhereClause(lhs: 'salary', operator: '>', rhs: 85000))
+        def salaryFilterKey = new FilterKey(id: salaryFilterId, filter: salaryFilter)
+        queryExecutor.filterState.addFilter(salaryFilterKey)
+
+        def dcStateWithSalaryFilterRecords = rows(2, 5)
+        def dcStateWithSalaryResult = queryExecutor.execute(ALL_DATA_QUERY, QueryOptions.FILTERED_DATA)
+        assertUnorderedQueryResult(dcStateWithSalaryFilterRecords, dcStateWithSalaryResult)
+
+        // remove one of the filters, the other should stay since they have different ids
+        queryExecutor.filterState.removeFilter(salaryFilterId)
+        dcStateResult = queryExecutor.execute(ALL_DATA_QUERY, QueryOptions.FILTERED_DATA)
+        assertUnorderedQueryResult(dcStateRecords, dcStateResult)
+
+        queryExecutor.filterState.removeFilter(dcStateFilterId)
+        def result = queryExecutor.execute(ALL_DATA_QUERY, QueryOptions.FILTERED_DATA)
+        assertUnorderedQueryResult(getAllData(), result)
+
+    }
+
+
+    @Test
     void "remove filter"() {
         // add some filters that can be removed (the add filters are tested separately)
-        UUID uuid = UUID.randomUUID()
-        def filterId = new FilterKey(uuid, new DataSet(databaseName: DATABASE_NAME, tableName: TABLE_NAME))
-
+        String filterId = "filterId"
         def dcStateFilter = createFilterWithWhereClause(new SingularWhereClause(lhs: 'state', operator: '=', rhs: 'DC'))
-        queryExecutor.filterState.addFilter(filterId, dcStateFilter)
+        def dcStateFilterKey = new FilterKey(id: filterId, filter: dcStateFilter)
+        queryExecutor.filterState.addFilter(dcStateFilterKey)
 
         def salaryFilter = createFilterWithWhereClause(new SingularWhereClause(lhs: 'salary', operator: '>', rhs: 85000))
-        queryExecutor.filterState.addFilter(filterId, salaryFilter)
+        def salaryFilterKey = new FilterKey(id: filterId, filter: salaryFilter)
+        queryExecutor.filterState.addFilter(salaryFilterKey)
 
         queryExecutor.filterState.removeFilter(filterId)
         def allDataResult = queryExecutor.execute(ALL_DATA_QUERY, QueryOptions.FILTERED_DATA)
@@ -398,23 +432,24 @@ abstract class AbstractQueryExecutorIntegrationTest {
 
     @Test
     void "ignore filters"() {
-        UUID uuid = UUID.randomUUID()
-        def filterId = new FilterKey(uuid, new DataSet(databaseName: DATABASE_NAME, tableName: TABLE_NAME))
+        String filterId = "filterId"
         def dcStateFilter = createFilterWithWhereClause(new SingularWhereClause(lhs: 'state', operator: '=', rhs: 'DC'))
+        FilterKey filterKey = new FilterKey(id: filterId, filter: dcStateFilter)
 
         // apply a filter, but execute the query that bypasses the filters, so all data should be returned
-        queryExecutor.filterState.addFilter(filterId, dcStateFilter)
+        queryExecutor.filterState.addFilter(filterKey)
         def allDataResult = queryExecutor.execute(ALL_DATA_QUERY, QueryOptions.ALL_DATA)
         assertUnorderedQueryResult(getAllData(), allDataResult)
     }
 
     @Test
     void "clear filters"() {
-        def filterId = new FilterKey(UUID.randomUUID(), new DataSet(databaseName: DATABASE_NAME, tableName: TABLE_NAME))
+        String filterId = "filterId"
         def dcStateFilter = createFilterWithWhereClause(new SingularWhereClause(lhs: 'state', operator: '=', rhs: 'DC'))
+        FilterKey filterKey = new FilterKey(id: filterId, filter: dcStateFilter)
 
         // addFilter is tested separately, so we can be confident the filter is added properly
-        queryExecutor.filterState.addFilter(filterId, dcStateFilter)
+        queryExecutor.filterState.addFilter(filterKey)
 
         // clear the filters, and there should be no filters applied
         queryExecutor.filterState.clearAllFilters()
@@ -594,20 +629,22 @@ abstract class AbstractQueryExecutorIntegrationTest {
     }
 
     @Test
+    @SuppressWarnings('MethodSize') // method is slightly long because of some test setup but is still pretty straight forward
     void "add selection"() {
-        UUID uuid = UUID.randomUUID()
-        def filterId = new FilterKey(uuid, new DataSet(databaseName: DATABASE_NAME, tableName: TABLE_NAME))
+        String filterId = "filterId"
         def dcStateFilter = createFilterWithWhereClause(new SingularWhereClause(lhs: 'state', operator: '=', rhs: 'DC'))
+        FilterKey dcStateFilterKey = new FilterKey(id: filterId, filter: dcStateFilter)
 
         // apply a selection and make sure only that data is returned
-        queryExecutor.selectionState.addFilter(filterId, dcStateFilter)
+        queryExecutor.selectionState.addFilter(dcStateFilterKey)
         def dcStateResult = queryExecutor.execute(ALL_DATA_QUERY, QueryOptions.FILTERED_AND_SELECTED_DATA)
         def dcStateRecords = rows(1, 2, 5)
         assertUnorderedQueryResult(dcStateRecords, dcStateResult)
 
         // apply a filter and make sure both are applied
         def salaryFilter = createFilterWithWhereClause(new SingularWhereClause(lhs: 'salary', operator: '>', rhs: 85000))
-        queryExecutor.filterState.addFilter(filterId, salaryFilter)
+        FilterKey salaryFilterKey = new FilterKey(id: filterId, filter: salaryFilter)
+        queryExecutor.filterState.addFilter(salaryFilterKey)
 
         def dcStateWithSalaryFilterRecords = rows(2, 5)
         def dcStateWithSalaryResult = queryExecutor.execute(ALL_DATA_QUERY, QueryOptions.FILTERED_AND_SELECTED_DATA)
@@ -616,15 +653,15 @@ abstract class AbstractQueryExecutorIntegrationTest {
 
     @Test
     void "remove selection"() {
-        // add some filters that can be removed (the add filters are tested separately)
-        UUID uuid = UUID.randomUUID()
-        def filterId = new FilterKey(uuid, new DataSet(databaseName: DATABASE_NAME, tableName: TABLE_NAME))
-
+        // add some selected items that can be removed (the add selected items are tested separately)
+        String filterId = "filterId"
         def dcStateFilter = createFilterWithWhereClause(new SingularWhereClause(lhs: 'state', operator: '=', rhs: 'DC'))
-        queryExecutor.selectionState.addFilter(filterId, dcStateFilter)
+        FilterKey dcStateFilterKey = new FilterKey(id: filterId, filter: dcStateFilter)
+        queryExecutor.selectionState.addFilter(dcStateFilterKey)
 
         def salaryFilter = createFilterWithWhereClause(new SingularWhereClause(lhs: 'salary', operator: '>', rhs: 85000))
-        queryExecutor.selectionState.addFilter(filterId, salaryFilter)
+        FilterKey salaryFilterKey = new FilterKey(id: filterId, filter: salaryFilter)
+        queryExecutor.selectionState.addFilter(salaryFilterKey)
 
         queryExecutor.selectionState.removeFilter(filterId)
         def allDataResult = queryExecutor.execute(ALL_DATA_QUERY, QueryOptions.FILTERED_AND_SELECTED_DATA)
@@ -633,23 +670,24 @@ abstract class AbstractQueryExecutorIntegrationTest {
 
     @Test
     void "ignore selection"() {
-        UUID uuid = UUID.randomUUID()
-        def filterId = new FilterKey(uuid, new DataSet(databaseName: DATABASE_NAME, tableName: TABLE_NAME))
+        String filterId = "filterId"
         def dcStateFilter = createFilterWithWhereClause(new SingularWhereClause(lhs: 'state', operator: '=', rhs: 'DC'))
+        FilterKey dcStateFilterKey = new FilterKey(id: filterId, filter: dcStateFilter)
 
         // apply a filter, but execute the query that bypasses the filters, so all data should be returned
-        queryExecutor.selectionState.addFilter(filterId, dcStateFilter)
+        queryExecutor.selectionState.addFilter(dcStateFilterKey)
         def allDataResult = queryExecutor.execute(ALL_DATA_QUERY, QueryOptions.ALL_DATA)
         assertUnorderedQueryResult(getAllData(), allDataResult)
     }
 
     @Test
     void "clear selection"() {
-        def filterId = new FilterKey(UUID.randomUUID(), new DataSet(databaseName: DATABASE_NAME, tableName: TABLE_NAME))
+        String filterId = "filterId"
         def dcStateFilter = createFilterWithWhereClause(new SingularWhereClause(lhs: 'state', operator: '=', rhs: 'DC'))
+        FilterKey dcStateFilterKey = new FilterKey(id: filterId, filter: dcStateFilter)
 
         // addFilter is tested separately, so we can be confident the filter is added properly
-        queryExecutor.selectionState.addFilter(filterId, dcStateFilter)
+        queryExecutor.selectionState.addFilter(dcStateFilterKey)
 
         // clear the filters, and there should be no filters applied
         queryExecutor.selectionState.clearAllFilters()

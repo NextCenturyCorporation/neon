@@ -19,10 +19,17 @@ package com.ncc.neon.query.filter
 import groovy.transform.ToString
 
 
-@ToString(includeNames = true)
-class FilterContainer {
 
-    FilterKey filterKey
-    Filter filter
+/**
+ * Indicates the selected items changed on a dataset
+ */
+@ToString(includeNames = true)
+class SelectionEvent {
+
+    /** a string description of the type of event */
+    String type
+
+    /** the datset the selection changed on */
+    DataSet dataSet
 
 }
