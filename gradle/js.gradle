@@ -69,10 +69,6 @@ task installGruntDeps(type: Exec) {
     dependsOn 'createPackageJson'
     inputs.file "${projectDir}/package.json"
     outputs.dir "${projectDir}/node_modules"
-    // if npm is not on the path, allow a full dir to specified
-    if ( project.hasProperty("npm.dir")) {
-        workingDir = project.getProperty("npm.dir")
-    }
     commandLine npmExecutable, "install"
 }
 
