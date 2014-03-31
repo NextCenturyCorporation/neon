@@ -107,13 +107,8 @@ class WidgetService {
     @Produces(MediaType.TEXT_PLAIN)
     @Path("instanceid")
     String getInstanceId(@QueryParam("qualifier") String qualifier) {
-        UUID id
-        if (qualifier) {
-            id = stateIdGenerator.getId(qualifier)
-        } else {
-            // no qualifier, use the global id
-            id = stateIdGenerator.id
-        }
+        // if there is qualifier, get the id associated with that. otherwise, use the global id
+        UUID id = qualifier ? stateIdGenerator.getId(qualifier) : stateIdGenerator.id
         return id.toString()
     }
 

@@ -25,7 +25,8 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner
 import org.springframework.web.context.WebApplicationContext
 
 /**
- * A test that verifies that the stateId generator is configured to give different ids per session
+ * A test that verifies that the stateId generator is configured to be setup as a session bean. This helps
+ * to ensure that qualifier to id mappings (see the StateIdGenerator) are unique for each session.
  */
 @RunWith(SpringJUnit4ClassRunner)
 @ContextConfiguration(classes = StateIdGeneratorIntegrationTestContext)

@@ -17,7 +17,7 @@
 /*global module:false*/
 module.exports = function (grunt) {
 
-    var outputFile = grunt.option('outfile') || 'build/<%= pkg.name %>.js'
+    var outputFile = grunt.option('outfile') || 'build/<%= pkg.name %>.js';
 
     function src(file) {
         return 'src/main/javascript/' + file;
