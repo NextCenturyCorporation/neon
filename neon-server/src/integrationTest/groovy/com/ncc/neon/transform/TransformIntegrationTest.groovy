@@ -34,8 +34,8 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner
 @ContextConfiguration(classes = IntegrationTestContext)
 class TransformIntegrationTest {
 
-    // TODO: NEON-565 another duplication of mongo.hosts in here
-    private static final String HOST_STRING = System.getProperty("mongo.hosts", "localhost")
+    // TODO: NEON-565 another duplication of mongo.host in here
+    private static final String HOST_STRING = System.getProperty("mongo.host", "localhost")
 
     private MongoQueryExecutor mongoQueryExecutor
 

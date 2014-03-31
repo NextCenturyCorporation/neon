@@ -245,9 +245,9 @@ task generateSharkCSV {
     }
 }
 
-// if the hosts are not specified just use an empty string and neon will choose defaults
-def getMongoHosts() {
-    return project.hasProperty("mongo.hosts") ? getProperty("mongo.hosts") : "localhost"
+// if the host is not specified just use an empty string and neon will choose defaults
+def getMongoHost() {
+    return project.hasProperty("mongo.host") ? getProperty("mongo.host") : "localhost"
 }
 
 def getSharkHost() {

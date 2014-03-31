@@ -91,7 +91,7 @@ def getFullyQualifiedClassName(File file){
 
 def createSystemProperties(){
     return [
-        "mongo.hosts" : getMongoHosts(),
+        "mongo.host" : getMongoHost(),
         "shark.host" : getSharkHost()
     ]
 }
@@ -108,17 +108,17 @@ task concurrencyTestWar(type: org.gradle.api.plugins.jetty.JettyRunWar) {
 processConcurrencyTestResources {
     from(sourceSets.concurrencyTest.resources.srcDirs) {
         filter(ReplaceTokens, tokens: [
-                "mongo.hosts": getMongoHosts()
+                "mongo.host": getMongoHost()
         ])
     }
 }
 
 task insertDataIntoMongo(type: com.ncc.neon.data.MongoDataInserter) {
     dependsOn 'deleteDataFromMongoBeforeInsert', 'generateMongoJson'
-    host = getMongoHosts()
+    host = getMongoHost()
 }
 task deleteDataFromMongoBeforeInsert(type: com.ncc.neon.data.MongoDataDeleter) {
-    host = getMongoHosts()
+    host = getMongoHost()
 }
 
 task insertDataIntoShark(type: com.ncc.neon.data.SharkDataInserter) {
@@ -131,7 +131,7 @@ task deleteDataFromSharkBeforeInsert(type: com.ncc.neon.data.SharkDataDeleter) {
 }
 
 task deleteDataFromMongo(type: com.ncc.neon.data.MongoDataDeleter) {
-    host = getMongoHosts()
+    host = getMongoHost()
 }
 
 task deleteDataFromShark(type: com.ncc.neon.data.SharkDataDeleter) {

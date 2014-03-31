@@ -57,14 +57,14 @@ task generateAcceptanceTestHelpers {
     outputs.upToDateWhen { false }
     doLast {
         def outputDir = new File(buildDir, "acceptanceTestSupport")
-        generateJavascriptHelper("http://localhost:${getAcceptanceTestPort()}/neon", "http://localhost:${getAcceptanceTestServicePort()}", "${getMongoHosts()}", new File(outputDir, "testConfig.js"))
+        generateJavascriptHelper("http://localhost:${getAcceptanceTestPort()}/neon", "http://localhost:${getAcceptanceTestServicePort()}", "${getMongoHost()}", new File(outputDir, "testConfig.js"))
     }
 }
 
 processAcceptanceTestResources {
     from(sourceSets.acceptanceTest.resources.srcDirs) {
         filter(ReplaceTokens, tokens: [
-                "mongo.hosts": getMongoHosts()
+                "mongo.host": getMongoHost()
         ])
     }
 }
@@ -91,16 +91,16 @@ task stopTransformJetty(type: org.gradle.api.plugins.jetty.JettyStop) {
 
 task insertMongoDataAcceptanceTest(type: com.ncc.neon.data.MongoDataInserter) {
     dependsOn 'deleteMongoDataAcceptanceTestBeforeInsert', 'generateMongoJson'
-    host = getMongoHosts()
+    host = getMongoHost()
     databaseName = 'acceptanceTest'
 }
 task deleteMongoDataAcceptanceTestBeforeInsert(type: com.ncc.neon.data.MongoDataDeleter) {
-    host = getMongoHosts()
+    host = getMongoHost()
     databaseName = 'acceptanceTest'
 }
 
 task deleteMongoDataAcceptanceTest(type: com.ncc.neon.data.MongoDataDeleter) {
-    host = getMongoHosts()
+    host = getMongoHost()
     databaseName = 'acceptanceTest'
 }
 

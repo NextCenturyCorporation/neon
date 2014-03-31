@@ -10,7 +10,7 @@ object Requests {
 
   val filterId = "filterId"
 
-  val mongoHost = System.getProperty("mongo.hosts")
+  val mongoHost = System.getProperty("mongo.host")
 
   val sharkHost = System.getProperty("shark.host")
 

@@ -61,7 +61,7 @@ task integrationTest(type: Test) {
 
     // allow project properties and just pass them through to the system properties
     def props = [:]
-    props["mongo.hosts"] = getMongoHosts()
+    props["mongo.host"] = getMongoHost()
     props["shark.host"] = getSharkHost()
     props["hdfs.url"] = getHdfsUrl()
 
@@ -72,12 +72,12 @@ task integrationTest(type: Test) {
 
 task insertMongoDataIntegrationTest(type: com.ncc.neon.data.MongoDataInserter) {
     dependsOn 'deleteMongoDataIntegrationTestBeforeInsert', 'generateMongoJson'
-    host = getMongoHosts()
+    host = getMongoHost()
     databaseName = 'neonintegrationtest'
 }
 
 task deleteMongoDataIntegrationTestBeforeInsert(type: com.ncc.neon.data.MongoDataDeleter) {
-    host = getMongoHosts()
+    host = getMongoHost()
     databaseName = 'neonintegrationtest'
 }
 
@@ -107,7 +107,7 @@ task afterIntegrationTest {
 integrationTest.finalizedBy afterIntegrationTest
 
 task deleteMongoDataIntegrationTest(type: com.ncc.neon.data.MongoDataDeleter) {
-    host = getMongoHosts()
+    host = getMongoHost()
     databaseName = 'neonintegrationtest'
 }
 
