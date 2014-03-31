@@ -30,7 +30,7 @@ dependencies {
     compile 'joda-time:joda-time:2.1'
 
     compile 'com.mchange:c3p0:0.9.5-pre6'
-    // these libraries are needed for the patched version of hive that we use
+    // these libraries are needed for the patched version of hive/shark that we use
     compile ':hive-cli:0.11.0-shark-SNAPSHOT'
     compile ':hive-common:0.11.0-shark-SNAPSHOT'
     compile ':hive-contrib:0.11.0-shark-SNAPSHOT'

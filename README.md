@@ -29,7 +29,7 @@ This task compiles the source code, runs the unit tests, executes static code qu
 Neon is extensively tested. The following gradle tasks can be invoked for additional testing beyond the unit tests:
 
 * gradlew acceptanceTest - (requires mongodb) Runs end-to-end acceptance tests. One must create a gradle.properties file that has a mongo.hosts property that points to his or her mongo instance. See gradle.properties.sample for an example.
-* gradlew integrationTest - (requires mongodb and shark) Runs integration tests against the existing data sources. In addition to the mongo.hosts property, one must set the hdfs.url and hive.host properties. Installation for shark can be found here: https://github.com/amplab/shark/wiki
+* gradlew integrationTest - (requires mongodb and shark) Runs integration tests against the existing data sources. In addition to the mongo.hosts property, one must set the hdfs.url and shark.host properties. Installation for shark can be found here: https://github.com/amplab/shark/wiki
 * gradlew gatling - (requires mongodb and shark) Runs multi-user concurrency tests.
 
 ## Deploying Neon

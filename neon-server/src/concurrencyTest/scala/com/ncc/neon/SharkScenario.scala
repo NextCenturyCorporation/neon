@@ -11,7 +11,7 @@ import Headers._
 import Responses._
 import Requests._
 
-class HiveScenario extends Simulation {
+class SharkScenario extends Simulation {
 
   val httpConf = httpConfig
     .baseURL("http://localhost:11402")
@@ -23,15 +23,15 @@ class HiveScenario extends Simulation {
 
   val serviceRoot = "/neon/services/"
   val userCount = 10
-  val queryServicePath = hiveHost + "/hive"
+  val queryServicePath = sharkHost + "/shark"
 
 
-  val scn = scenario("Hive under "+ userCount +" concurrent users")
+  val scn = scenario("Shark under "+ userCount +" concurrent users")
     .exec(http("Query for all data")
     .post(serviceRoot + "queryservice/querydisregardfilters/" + queryServicePath)
     .headers(json_header)
     .body(query)
-    .check(bodyString.is(hive_all_data))
+    .check(bodyString.is(shark_all_data))
   )
     .pause(2)
     .exec(http("Add a filter")
@@ -50,7 +50,7 @@ class HiveScenario extends Simulation {
     .post(serviceRoot + "queryservice/querywithselectiononly/" + queryServicePath)
     .headers(json_header)
     .body(query)
-    .check(bodyString.is(hive_selection_data))
+    .check(bodyString.is(shark_selection_data))
   )
     .pause(2)
     .exec(http("Remove the filter")
@@ -63,7 +63,7 @@ class HiveScenario extends Simulation {
     .post(serviceRoot + "queryservice/query/" + queryServicePath)
     .headers(json_header)
     .body(query)
-    .check(bodyString.is(hive_all_data))
+    .check(bodyString.is(shark_all_data))
   )
     .pause(2)
     .exec(http("Remove the selection")
@@ -76,7 +76,7 @@ class HiveScenario extends Simulation {
     .post(serviceRoot + "queryservice/querywithselectiononly/" + queryServicePath)
     .headers(json_header)
     .body(query)
-    .check(bodyString.is(hive_all_data))
+    .check(bodyString.is(shark_all_data))
   )
 
   setUp(scn.users(userCount).ramp(5).protocolConfig(httpConf))

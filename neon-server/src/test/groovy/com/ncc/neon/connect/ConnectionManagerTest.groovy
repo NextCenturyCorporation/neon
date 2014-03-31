@@ -22,16 +22,16 @@ import org.junit.Test
 class ConnectionManagerTest {
 
     private ConnectionManager connectionManager
-    private final def fakeMongoConnectionClient = { "mongo" } as ConnectionClient
-    private final def fakeHiveConnectionClient = { "hive" } as ConnectionClient
+    private final def mockMongoConnectionClient = { "mongo" } as ConnectionClient
+    private final def mockSharkConnectionClient = { "shark" } as ConnectionClient
 
 
     @Before
     void setup() {
         connectionManager = new ConnectionManager()
         connectionManager.currentRequestConnection = new CurrentRequestConnection()
-        connectionManager.mongoConnectionFactory = { fakeMongoConnectionClient } as ConnectionClientFactory
-        connectionManager.hiveConnectionFactory = { fakeHiveConnectionClient } as ConnectionClientFactory
+        connectionManager.mongoConnectionFactory = { mockMongoConnectionClient } as ConnectionClientFactory
+        connectionManager.sharkConnectionFactory = { mockSharkConnectionClient } as ConnectionClientFactory
     }
 
     @Test(expected = NeonConnectionException)
@@ -43,10 +43,10 @@ class ConnectionManagerTest {
     @Test
     void "connecting to data sources"() {
         connectionManager.currentRequest = new ConnectionInfo(host: "aHost", dataSource: DataSources.mongo)
-        assert connectionManager.connection == fakeMongoConnectionClient
+        assert connectionManager.connection == mockMongoConnectionClient
 
-        connectionManager.currentRequest = new ConnectionInfo(host: "aHost", dataSource: DataSources.hive)
-        assert connectionManager.connection == fakeHiveConnectionClient
+        connectionManager.currentRequest = new ConnectionInfo(host: "aHost", dataSource: DataSources.shark)
+        assert connectionManager.connection == mockSharkConnectionClient
     }
 
 }

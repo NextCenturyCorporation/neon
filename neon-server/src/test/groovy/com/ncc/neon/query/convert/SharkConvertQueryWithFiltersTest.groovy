@@ -18,18 +18,18 @@ package com.ncc.neon.query.convert
 
 import com.ncc.neon.query.QueryOptions
 import com.ncc.neon.query.filter.SelectionState
-import com.ncc.neon.query.hive.HiveConversionStrategy
+import com.ncc.neon.query.shark.SharkConversionStrategy
 
 
 /*
- Tests the HiveConversionStrategy.convertQueryWithFilterState()
-  correctly converts Query objects into hive queries
+ Tests the SharkConversionStrategy.convertQueryWithFilterState()
+  correctly converts Query objects into shark queries
 */
-class HiveConvertQueryWithFiltersTest extends HiveConvertQueryTest{
+class SharkConvertQueryWithFiltersTest extends SharkConvertQueryTest{
 
     @Override
     protected def convertQuery(query) {
-        HiveConversionStrategy conversionStrategy = new HiveConversionStrategy(filterState: filterState, selectionState: new SelectionState())
+        SharkConversionStrategy conversionStrategy = new SharkConversionStrategy(filterState: filterState, selectionState: new SelectionState())
         conversionStrategy.convertQuery(query, QueryOptions.FILTERED_DATA)
     }
 

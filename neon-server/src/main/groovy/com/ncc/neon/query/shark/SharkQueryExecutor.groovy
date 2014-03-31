@@ -14,7 +14,7 @@
  *
  */
 
-package com.ncc.neon.query.hive
+package com.ncc.neon.query.shark
 
 import com.ncc.neon.connect.ConnectionManager
 import com.ncc.neon.query.*
@@ -35,9 +35,9 @@ import java.sql.SQLException
 
 
 @Component
-class HiveQueryExecutor implements QueryExecutor {
+class SharkQueryExecutor implements QueryExecutor {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(HiveQueryExecutor)
+    private static final Logger LOGGER = LoggerFactory.getLogger(SharkQueryExecutor)
 
     @Autowired
     TransformerRegistry registry
@@ -57,11 +57,11 @@ class HiveQueryExecutor implements QueryExecutor {
     }
 
     private QueryResult executeQuery(JdbcClient client, Query query, QueryOptions options) {
-        HiveConversionStrategy conversionStrategy = new HiveConversionStrategy(filterState: filterState, selectionState: selectionState)
-        String hiveQuery = conversionStrategy.convertQuery(query, options)
-        LOGGER.debug("Query: {}", hiveQuery)
+        SharkConversionStrategy conversionStrategy = new SharkConversionStrategy(filterState: filterState, selectionState: selectionState)
+        String sharkQuery = conversionStrategy.convertQuery(query, options)
+        LOGGER.debug("Query: {}", sharkQuery)
         int offset = query.offsetClause ? query.offsetClause.offset : 0
-        List<Map> resultList = client.executeQuery(hiveQuery, offset)
+        List<Map> resultList = client.executeQuery(sharkQuery, offset)
         QueryResult result = new TabularQueryResult(resultList)
         return transform(query.transform, result)
     }

@@ -8,7 +8,7 @@ NEON_SERVER=/my/tomcat/path/apache-tomcat-7.0.39
 # Configuration for the instances of mongo/shark used for testing
 mongo.hosts=localhost
 hdfs.url=hdfs://localhost:8020
-hive.host=localhost:10000
+shark.host=localhost:10000
 
 # Change the port for acceptance tests
 acceptanceTest.port=10102

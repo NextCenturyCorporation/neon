@@ -50,10 +50,10 @@ task integrationTest(type: Test) {
     // TODO: NEON-960 workaround
     if (isMongoOnly()) {
         dependsOn 'insertMongoDataIntegrationTest'
-    } else if (isHiveOnly()) {
-        dependsOn 'insertHiveDataIntegrationTest'
+    } else if (isSharkOnly()) {
+        dependsOn 'insertSharkDataIntegrationTest'
     } else {
-        dependsOn 'insertMongoDataIntegrationTest', 'insertHiveDataIntegrationTest'
+        dependsOn 'insertMongoDataIntegrationTest', 'insertSharkDataIntegrationTest'
     }
 
     testClassesDir = sourceSets.integrationTest.output.classesDir
@@ -62,7 +62,7 @@ task integrationTest(type: Test) {
     // allow project properties and just pass them through to the system properties
     def props = [:]
     props["mongo.hosts"] = getMongoHosts()
-    props["hive.host"] = getHiveHost()
+    props["shark.host"] = getSharkHost()
     props["hdfs.url"] = getHdfsUrl()
 
     props['integration.test'] = true
@@ -81,15 +81,15 @@ task deleteMongoDataIntegrationTestBeforeInsert(type: com.ncc.neon.data.MongoDat
     databaseName = 'neonintegrationtest'
 }
 
-task insertHiveDataIntegrationTest(type: com.ncc.neon.data.HiveDataInserter) {
-    dependsOn 'deleteHiveDataIntegrationTestBeforeInsert', 'generateHiveCSV', 'generateHiveJson'
-    host = getHiveHost()
+task insertSharkDataIntegrationTest(type: com.ncc.neon.data.SharkDataInserter) {
+    dependsOn 'deleteSharkDataIntegrationTestBeforeInsert', 'generateSharkCSV', 'generateSharkJson'
+    host = getSharkHost()
     hdfsUrl = getHdfsUrl()
     databaseName = 'neonintegrationtest'
 }
 
-task deleteHiveDataIntegrationTestBeforeInsert(type: com.ncc.neon.data.HiveDataDeleter) {
-    host = getHiveHost()
+task deleteSharkDataIntegrationTestBeforeInsert(type: com.ncc.neon.data.SharkDataDeleter) {
+    host = getSharkHost()
     databaseName = 'neonintegrationtest'
 }
 
@@ -97,10 +97,10 @@ task afterIntegrationTest {
     // TODO: NEON-960 workaround
     if (isMongoOnly()) {
         dependsOn 'deleteMongoDataIntegrationTest'
-    } else if (isHiveOnly()) {
-        dependsOn 'deleteHiveDataIntegrationTest'
+    } else if (isSharkOnly()) {
+        dependsOn 'deleteSharkDataIntegrationTest'
     } else {
-        dependsOn 'deleteMongoDataIntegrationTest', 'deleteHiveDataIntegrationTest'
+        dependsOn 'deleteMongoDataIntegrationTest', 'deleteSharkDataIntegrationTest'
     }
 }
 
@@ -111,18 +111,18 @@ task deleteMongoDataIntegrationTest(type: com.ncc.neon.data.MongoDataDeleter) {
     databaseName = 'neonintegrationtest'
 }
 
-task deleteHiveDataIntegrationTest(type: com.ncc.neon.data.HiveDataDeleter) {
-    host = getHiveHost()
+task deleteSharkDataIntegrationTest(type: com.ncc.neon.data.SharkDataDeleter) {
+    host = getSharkHost()
     databaseName = 'neonintegrationtest'
 }
 
 // TODO: NEON-960 The isXXXOnly are workarounds for NEON-960
 def isMongoOnly() {
-    // all other non-hive/shark tests require mongo
+    // all other non-shark tests require mongo
     def integrationTestSingle = System.getProperty("integrationTest.single")
-    return integrationTestSingle && !integrationTestSingle.toLowerCase().contains("hive")
+    return integrationTestSingle && !integrationTestSingle.toLowerCase().contains("shark")
 }
 
-def isHiveOnly() {
-    return System.getProperty("integrationTest.single")?.toLowerCase()?.contains("hive")
+def isSharkOnly() {
+    return System.getProperty("integrationTest.single")?.toLowerCase()?.contains("shark")
 }

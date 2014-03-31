@@ -1,0 +1,14 @@
+[
+    {
+        "salary_min": 85000,
+        "state": "DC"
+    },
+    {
+        "salary_min": 105000,
+        "state": "MD"
+    },
+    {
+        "salary_min": 55000,
+        "state": "VA"
+    }
+]

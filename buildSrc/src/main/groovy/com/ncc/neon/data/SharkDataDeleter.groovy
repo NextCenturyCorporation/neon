@@ -23,7 +23,7 @@ import java.sql.DriverManager
 import java.sql.Statement
 import com.mchange.v2.c3p0.ComboPooledDataSource
 
-class HiveDataDeleter extends DefaultTask {
+class SharkDataDeleter extends DefaultTask {
 
     // default value. build will override this
     String host = "shark:10000"

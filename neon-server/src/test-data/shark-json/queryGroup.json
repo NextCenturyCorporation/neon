@@ -1,0 +1,73 @@
+[
+    {
+        "_id": "5137b623a9f279d831b6fb86",
+        "city": "Arlington",
+        "firstname": "Bill",
+        "hiredate": "2012-09-15T00:00:00Z",
+        "lastname": "Jones",
+        "salary": 100000,
+        "state": "VA"
+    },
+    {
+        "_id": "5137b623a9f279d831b6fb89",
+        "city": "Alexandria",
+        "firstname": "Andrew",
+        "hiredate": "2013-01-10T00:00:00Z",
+        "lastname": "Wilks",
+        "salary": 55000,
+        "state": "VA"
+    },
+    {
+        "_id": "5137b623a9f279d831b6fb8a",
+        "city": "Arlington",
+        "firstname": "Michelle",
+        "hiredate": "2010-06-15T00:00:00Z",
+        "lastname": "Jackson",
+        "salary": 118000,
+        "state": "VA"
+    },
+    {
+        "_id": "5137b623a9f279d831b6fb8d",
+        "city": "Arlington",
+        "firstname": "Fred",
+        "hiredate": "2012-02-21T00:00:00Z",
+        "lastname": "Porter",
+        "salary": 60000,
+        "state": "VA"
+    },
+    {
+        "_id": "5137b623a9f279d831b6fb8c",
+        "city": "Germantown",
+        "firstname": "Anthony",
+        "hiredate": "2012-02-15T00:00:00Z",
+        "lastname": "Bowles",
+        "salary": 105000,
+        "state": "MD"
+    },
+    {
+        "_id": "5137b623a9f279d831b6fb87",
+        "city": "Washington",
+        "firstname": "Tom",
+        "hiredate": "2011-10-17T00:00:00Z",
+        "lastname": "Smith",
+        "salary": 85000,
+        "state": "DC"
+    },
+    {
+        "_id": "5137b623a9f279d831b6fb88",
+        "city": "Washington",
+        "firstname": "Maggie",
+        "hiredate": "2011-10-15T00:00:00Z",
+        "lastname": "Thomas",
+        "salary": 175000,
+        "state": "DC"
+    },
+    {
+        "_id": "5137b623a9f279d831b6fb8b",
+        "city": "Washington",
+        "firstname": "Rodney",
+        "hiredate": "2012-10-30T00:00:00Z",
+        "salary": 88000,
+        "state": "DC"
+    }
+]

@@ -36,7 +36,7 @@ class QueryExecutorFactory {
     private QueryExecutor mongoQueryExecutor
 
     @Resource
-    private QueryExecutor hiveQueryExecutor
+    private QueryExecutor sharkQueryExecutor
 
     @Autowired
     private ConnectionManager connectionManager
@@ -53,8 +53,8 @@ class QueryExecutorFactory {
         switch (databaseType) {
             case DataSources.mongo:
                 return mongoQueryExecutor
-            case DataSources.hive:
-                return hiveQueryExecutor
+            case DataSources.shark:
+                return sharkQueryExecutor
             default:
                 throw new NeonConnectionException("Unsupported database type ${databaseType}")
         }

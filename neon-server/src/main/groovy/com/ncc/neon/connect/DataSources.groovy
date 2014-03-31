@@ -23,5 +23,5 @@ package com.ncc.neon.connect
  */
 
 enum DataSources{
-    mongo, hive
+    mongo, shark
 }

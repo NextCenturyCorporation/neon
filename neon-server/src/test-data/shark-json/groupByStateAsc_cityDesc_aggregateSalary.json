@@ -1,0 +1,22 @@
+[
+    {
+        "city": "Washington",
+        "salary_sum": 348000,
+        "state": "DC"
+    },
+    {
+        "city": "Germantown",
+        "salary_sum": 105000,
+        "state": "MD"
+    },
+    {
+        "city": "Arlington",
+        "salary_sum": 278000,
+        "state": "VA"
+    },
+    {
+        "city": "Alexandria",
+        "salary_sum": 55000,
+        "state": "VA"
+    }
+]

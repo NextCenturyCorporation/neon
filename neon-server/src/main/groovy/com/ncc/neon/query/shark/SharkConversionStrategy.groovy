@@ -14,7 +14,7 @@
  *
  */
 
-package com.ncc.neon.query.hive
+package com.ncc.neon.query.shark
 import com.ncc.neon.query.Query
 import com.ncc.neon.query.QueryOptions
 import com.ncc.neon.query.clauses.*
@@ -26,11 +26,11 @@ import groovy.transform.Immutable
 
 
 /**
- * Converts a Query object into a hive based query.
+ * Converts a Query object into a shark based query.
  */
 
 @Immutable
-class HiveConversionStrategy {
+class SharkConversionStrategy {
 
     private final FilterState filterState
     private final SelectionState selectionState
@@ -60,7 +60,7 @@ class HiveConversionStrategy {
             fields << groupByClauseToString(groupBy)
         }
         // if there are aggregates in the field, those and the group by fields are the only valid values to return
-        // and the hive - jdbc drivers can return some strange results
+        // and the hive/jdbc drivers can return some strange results
         // https://issues.apache.org/jira/browse/HIVE-4392,
         // https://issues.apache.org/jira/browse/HIVE-4522
         // so don't allow fields not grouped on
@@ -85,7 +85,7 @@ class HiveConversionStrategy {
     private void applyWhereStatement(StringBuilder builder, Query query, QueryOptions queryOptions) {
         List whereClauses = collectWhereClauses(query, queryOptions)
 
-        HiveWhereClause clause = createWhereClauseParams(whereClauses)
+        SharkWhereClause clause = createWhereClauseParams(whereClauses)
         if (clause) {
             builder << " where " << clause.toString()
         }
@@ -125,7 +125,7 @@ class HiveConversionStrategy {
         groupByClauses.addAll(query.groupByClauses)
 
         if (groupByClauses) {
-            // hive doesn't support grouping by the field alias so we actually need to provide the field function again
+            // shark doesn't support grouping by the field alias so we actually need to provide the field function again
             builder << " group by " << groupByClauses.collect { groupByClauseToString(it).split(" ")[0] }.join(", ")
         }
 
@@ -144,14 +144,14 @@ class HiveConversionStrategy {
         }
     }
 
-    private static HiveWhereClause createWhereClauseParams(List whereClauses) {
+    private static SharkWhereClause createWhereClauseParams(List whereClauses) {
         if (!whereClauses) {
             return null
         }
         if (whereClauses.size() == 1) {
-            return new HiveWhereClause(whereClause: whereClauses[0])
+            return new SharkWhereClause(whereClause: whereClauses[0])
         }
-        return new HiveWhereClause(whereClause: new AndWhereClause(whereClauses: whereClauses))
+        return new SharkWhereClause(whereClause: new AndWhereClause(whereClauses: whereClauses))
     }
 
 }

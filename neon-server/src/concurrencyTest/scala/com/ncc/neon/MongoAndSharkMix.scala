@@ -12,7 +12,7 @@ import Responses._
 import Requests._
 
 
-class MongoAndHiveMix extends Simulation {
+class MongoAndSharkMix extends Simulation {
 
   val httpConf = httpConfig
     .baseURL("http://localhost:11402")
@@ -24,9 +24,9 @@ class MongoAndHiveMix extends Simulation {
 
   val serviceRoot = "/neon/services/"
   val mongoQueryServicePath = mongoHost + "/mongo"
-  val hiveQueryServicePath = hiveHost + "/hive"
+  val sharkQueryServicePath = sharkHost + "/shark"
 
-  val scn = scenario("Query both mongo and hive")
+  val scn = scenario("Query both mongo and shark")
     .exec(http("Query for all data")
     .post(serviceRoot + "queryservice/querydisregardfilters/" + mongoQueryServicePath)
     .headers(json_header)
@@ -46,18 +46,18 @@ class MongoAndHiveMix extends Simulation {
     .body(add_selection)
   )
     .pause(3)
-    .exec(http("Query filtered data from hive")
-    .post(serviceRoot + "queryservice/query/" + hiveQueryServicePath)
+    .exec(http("Query filtered data from shark")
+    .post(serviceRoot + "queryservice/query/" + sharkQueryServicePath)
     .headers(json_header)
     .body(query)
-    .check(bodyString.is(hive_filtered_data))
+    .check(bodyString.is(shark_filtered_data))
   )
     .pause(5)
-    .exec(http("Query selection from hive")
-    .post(serviceRoot + "queryservice/querywithselectiononly/" + hiveQueryServicePath)
+    .exec(http("Query selection from shark")
+    .post(serviceRoot + "queryservice/querywithselectiononly/" + sharkQueryServicePath)
     .headers(json_header)
     .body(query)
-    .check(bodyString.is(hive_selection_data))
+    .check(bodyString.is(shark_selection_data))
   )
     .pause(5)
     .exec(http("Query filtered data from mongo")

@@ -49,7 +49,7 @@ dependencies {
 }
 
 task gatling {
-    dependsOn 'concurrencyTestWar', 'insertDataIntoMongo', 'insertDataIntoHive'
+    dependsOn 'concurrencyTestWar', 'insertDataIntoMongo', 'insertDataIntoShark'
     group = GATLING_GROUP
 
     doLast {
@@ -92,7 +92,7 @@ def getFullyQualifiedClassName(File file){
 def createSystemProperties(){
     return [
         "mongo.hosts" : getMongoHosts(),
-        "hive.host" : getHiveHost()
+        "shark.host" : getSharkHost()
     ]
 }
 
@@ -121,26 +121,26 @@ task deleteDataFromMongoBeforeInsert(type: com.ncc.neon.data.MongoDataDeleter) {
     host = getMongoHosts()
 }
 
-task insertDataIntoHive(type: com.ncc.neon.data.HiveDataInserter) {
-    dependsOn 'deleteDataFromHiveBeforeInsert', 'generateHiveCSV', 'generateHiveJson'
-    host = getHiveHost()
+task insertDataIntoShark(type: com.ncc.neon.data.SharkDataInserter) {
+    dependsOn 'deleteDataFromSharkBeforeInsert', 'generateSharkCSV', 'generateSharkJson'
+    host = getSharkHost()
     hdfsUrl = getHdfsUrl()
 }
-task deleteDataFromHiveBeforeInsert(type: com.ncc.neon.data.HiveDataDeleter) {
-    host = getHiveHost()
+task deleteDataFromSharkBeforeInsert(type: com.ncc.neon.data.SharkDataDeleter) {
+    host = getSharkHost()
 }
 
 task deleteDataFromMongo(type: com.ncc.neon.data.MongoDataDeleter) {
     host = getMongoHosts()
 }
 
-task deleteDataFromHive(type: com.ncc.neon.data.HiveDataDeleter) {
-    host = getHiveHost()
+task deleteDataFromShark(type: com.ncc.neon.data.SharkDataDeleter) {
+    host = getSharkHost()
 }
 
 task afterGatlingTest{
     group = GATLING_GROUP
-    dependsOn 'stopGatlingJetty', 'deleteDataFromMongo', 'deleteDataFromHive'
+    dependsOn 'stopGatlingJetty', 'deleteDataFromMongo', 'deleteDataFromShark'
 }
 
 gatling.finalizedBy afterGatlingTest

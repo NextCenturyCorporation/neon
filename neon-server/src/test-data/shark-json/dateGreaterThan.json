@@ -1,0 +1,28 @@
+[
+    {
+        "_id": "5137b623a9f279d831b6fb86",
+        "city": "Arlington",
+        "firstname": "Bill",
+        "hiredate": "2012-09-15T00:00:00Z",
+        "lastname": "Jones",
+        "salary": 100000,
+        "state": "VA"
+    },
+    {
+        "_id": "5137b623a9f279d831b6fb89",
+        "city": "Alexandria",
+        "firstname": "Andrew",
+        "hiredate": "2013-01-10T00:00:00Z",
+        "lastname": "Wilks",
+        "salary": 55000,
+        "state": "VA"
+    },
+    {
+        "_id": "5137b623a9f279d831b6fb8b",
+        "city": "Washington",
+        "firstname": "Rodney",
+        "hiredate": "2012-10-30T00:00:00Z",
+        "salary": 88000,
+        "state": "DC"
+    }
+]

@@ -32,7 +32,7 @@ class ConnectionManager {
     private final ConcurrentMap<ConnectionInfo, ConnectionClient> clients = new ConcurrentHashMap<ConnectionInfo, MongoConnectionClient>()
 
     ConnectionClientFactory mongoConnectionFactory = new MongoConnectionClientFactory()
-    ConnectionClientFactory hiveConnectionFactory = new JdbcConnectionClientFactory("org.apache.hive.jdbc.HiveDriver", "hive2")
+    ConnectionClientFactory sharkConnectionFactory = new JdbcConnectionClientFactory("org.apache.hive.jdbc.HiveDriver", "hive2")
 
     @Autowired
     private CurrentRequestConnection currentRequestConnection
@@ -73,8 +73,8 @@ class ConnectionManager {
         if (connectionInfo.dataSource == DataSources.mongo) {
             return mongoConnectionFactory
         }
-        if (connectionInfo.dataSource == DataSources.hive) {
-            return hiveConnectionFactory
+        if (connectionInfo.dataSource == DataSources.shark) {
+            return sharkConnectionFactory
         }
         throw new NeonConnectionException("Could not connect to data source of type ${connectionInfo.dataSource}")
     }

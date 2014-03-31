@@ -14,17 +14,14 @@
  *
  */
 
-package com.ncc.neon.query.hive
-
+package com.ncc.neon.query.shark
 import com.ncc.neon.query.clauses.AndWhereClause
 import com.ncc.neon.query.clauses.OrWhereClause
 import com.ncc.neon.query.clauses.SingularWhereClause
 import com.ncc.neon.util.DateUtils
 import org.junit.Test
 
-
-
-class HiveWhereClauseTest {
+class SharkWhereClauseTest {
 
 
     @Test
@@ -34,7 +31,7 @@ class HiveWhereClauseTest {
         def rhs = "aStringValue"
         def whereClause = createSimpleWhereClause(lhs, operator, rhs)
         def expected = "${lhs} ${operator} '${rhs}'"
-        assertSameClause(expected, new HiveWhereClause(whereClause: whereClause))
+        assertSameClause(expected, new SharkWhereClause(whereClause: whereClause))
     }
 
     @Test
@@ -44,7 +41,7 @@ class HiveWhereClauseTest {
         def rhs = 10
         def whereClause = createSimpleWhereClause(lhs, operator, rhs)
         def expected = "${lhs} ${operator} ${rhs}"
-        assertSameClause(expected, new HiveWhereClause(whereClause: whereClause))
+        assertSameClause(expected, new SharkWhereClause(whereClause: whereClause))
     }
 
     @Test
@@ -54,10 +51,10 @@ class HiveWhereClauseTest {
         def rhs = ["a", "b", "c"]
         def whereClause = createSimpleWhereClause(lhs, operator, rhs)
         def expected = "${lhs} ${operator} ('a','b','c')"
-        assertSameClause(expected, new HiveWhereClause(whereClause: whereClause))
+        assertSameClause(expected, new SharkWhereClause(whereClause: whereClause))
     }
 
-    // not in is tested separately because hive handles not in specially
+    // "not in" is tested separately because shark handles it specially
     @Test
     void "where not in collection"() {
         def lhs = "afield"
@@ -65,7 +62,7 @@ class HiveWhereClauseTest {
         def rhs = ["a", "b", "c"]
         def whereClause = createSimpleWhereClause(lhs, operator, rhs)
         def expected = "${lhs} not in ('a','b','c')"
-        assertSameClause(expected, new HiveWhereClause(whereClause: whereClause))
+        assertSameClause(expected, new SharkWhereClause(whereClause: whereClause))
     }
 
     @Test
@@ -75,7 +72,7 @@ class HiveWhereClauseTest {
         def rhs = DateUtils.tryToParseDate('2013-09-15')
         def whereClause = createSimpleWhereClause(lhs, operator, rhs)
         def expected = "unix_timestamp(${lhs}) ${operator} unix_timestamp('2013-09-15 00:00:00')"
-        assertSameClause(expected, new HiveWhereClause(whereClause: whereClause))
+        assertSameClause(expected, new SharkWhereClause(whereClause: whereClause))
     }
 
     @Test
@@ -100,7 +97,7 @@ class HiveWhereClauseTest {
         def andClause = new AndWhereClause(whereClauses: [orClause, whereClause3])
 
         def expected = "((${lhs1} ${operator1} ${rhs1} OR ${lhs2} ${operator2} '${rhs2}') AND ${lhs3} ${operator3} '${rhs3}')"
-        assertSameClause(expected, new HiveWhereClause(whereClause: andClause))
+        assertSameClause(expected, new SharkWhereClause(whereClause: andClause))
 
 
     }
@@ -109,8 +106,8 @@ class HiveWhereClauseTest {
         return new SingularWhereClause(lhs: lhs, operator: operator, rhs: rhs)
     }
 
-    private static assertSameClause(expected, hiveWhereClause) {
-        assert expected.equalsIgnoreCase(hiveWhereClause.toString())
+    private static assertSameClause(expected, sharkWhereClause) {
+        assert expected.equalsIgnoreCase(sharkWhereClause.toString())
     }
 
 }

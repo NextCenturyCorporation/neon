@@ -14,13 +14,13 @@
  *
  */
 
-package com.ncc.neon.hive
+package com.ncc.neon.shark
 
 import com.ncc.neon.AbstractQueryExecutorIntegrationTest
 import com.ncc.neon.IntegrationTestContext
 import com.ncc.neon.connect.ConnectionInfo
 import com.ncc.neon.connect.DataSources
-import com.ncc.neon.query.hive.HiveQueryExecutor
+import com.ncc.neon.query.shark.SharkQueryExecutor
 import com.ncc.neon.util.DateUtils
 import org.json.JSONArray
 import org.json.JSONObject
@@ -34,31 +34,31 @@ import java.sql.Timestamp
 
 @RunWith(SpringJUnit4ClassRunner)
 @ContextConfiguration(classes = IntegrationTestContext)
-class HiveQueryExecutorIntegrationTest extends AbstractQueryExecutorIntegrationTest {
+class SharkQueryExecutorIntegrationTest extends AbstractQueryExecutorIntegrationTest {
 
-    // TODO: NEON-565 another duplication of hive.host in here
-    private static final String HOST_STRING = System.getProperty("hive.host", "localhost:10000")
+    // TODO: NEON-565 another duplication of shark.host in here
+    private static final String HOST_STRING = System.getProperty("shark.host", "localhost:10000")
 
-    HiveQueryExecutor hiveQueryExecutor
+    SharkQueryExecutor sharkQueryExecutor
 
     @SuppressWarnings("JUnitPublicNonTestMethod")
     @Autowired
-    void setHiveQueryExecutor(HiveQueryExecutor hiveQueryExecutor) {
-        this.hiveQueryExecutor = hiveQueryExecutor
+    void setSharkQueryExecutor(SharkQueryExecutor sharkQueryExecutor) {
+        this.sharkQueryExecutor = sharkQueryExecutor
     }
 
     @Before
     void before() {
-        this.hiveQueryExecutor.connectionManager.currentRequest = new ConnectionInfo(host: HOST_STRING, dataSource: DataSources.hive)
+        this.sharkQueryExecutor.connectionManager.currentRequest = new ConnectionInfo(host: HOST_STRING, dataSource: DataSources.shark)
     }
 
     @Override
-    protected HiveQueryExecutor getQueryExecutor() {
-        hiveQueryExecutor
+    protected SharkQueryExecutor getQueryExecutor() {
+        sharkQueryExecutor
     }
 
     protected String getResultsJsonFolder() {
-        return "hive-json/"
+        return "shark-json/"
     }
 
     protected def jsonObjectToMap(jsonObject) {

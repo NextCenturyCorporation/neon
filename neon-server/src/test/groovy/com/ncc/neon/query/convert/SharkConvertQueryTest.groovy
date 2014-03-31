@@ -18,30 +18,30 @@ package com.ncc.neon.query.convert
 
 import com.ncc.neon.query.QueryOptions
 import com.ncc.neon.query.filter.SelectionState
-import com.ncc.neon.query.hive.HiveConversionStrategy
+import com.ncc.neon.query.shark.SharkConversionStrategy
 
 
 /*
- Tests the HiveConversionStrategy.convertQuery()
- correctly converts Query objects into hive queries
+ Tests the SharkConversionStrategy.convertQuery()
+ correctly converts Query objects into shark queries
 */
 
-class HiveConvertQueryTest extends AbstractConversionTest {
+class SharkConvertQueryTest extends AbstractConversionTest {
 
     @Override
     protected def convertQuery(query) {
-        HiveConversionStrategy conversionStrategy = new HiveConversionStrategy(filterState: filterState, selectionState: new SelectionState())
+        SharkConversionStrategy conversionStrategy = new SharkConversionStrategy(filterState: filterState, selectionState: new SelectionState())
         conversionStrategy.convertQuery(query, QueryOptions.ALL_DATA)
     }
 
     @Override
     void assertSimplestConvertQuery(query) {
-        assertStandardHiveQLStatement(query)
+        assertStandardSharkQLStatement(query)
     }
 
     @Override
     void assertQueryWithOneFilterInFilterState(query) {
-        assertStandardHiveQLStatement(query)
+        assertStandardSharkQLStatement(query)
     }
 
     @Override
@@ -56,10 +56,10 @@ class HiveConvertQueryTest extends AbstractConversionTest {
 
     @Override
     protected void assertQueryWithOffsetClause(query) {
-        // OFFSET is not actually implemented in Hive, so it is not included in the query. Neon will adjust the
+        // OFFSET is not actually implemented in Shark, so it is not included in the query. Neon will adjust the
         // query to include enough results to get the offset and then manually advance the cursor to the correct
         // position.
-        assertStandardHiveQLStatement(query)
+        assertStandardSharkQLStatement(query)
     }
 
 
@@ -95,7 +95,7 @@ class HiveConvertQueryTest extends AbstractConversionTest {
 
     @Override
     protected void assertQueryWithEmptyFilter(query) {
-        assertStandardHiveQLStatement(query)
+        assertStandardSharkQLStatement(query)
     }
 
     @Override
@@ -103,7 +103,7 @@ class HiveConvertQueryTest extends AbstractConversionTest {
         assert query.toLowerCase() == "select $FIELD_NAME, $FIELD_NAME_2 from ${DATABASE_NAME}.${TABLE_NAME}".toLowerCase()
     }
 
-    private void assertStandardHiveQLStatement(query){
+    private void assertStandardSharkQLStatement(query){
         assert query.toLowerCase() == "select * from ${DATABASE_NAME}.${TABLE_NAME}".toLowerCase()
     }
 

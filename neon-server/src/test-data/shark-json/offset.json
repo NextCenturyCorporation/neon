@@ -1,0 +1,38 @@
+[
+    {
+        "_id": "5137b623a9f279d831b6fb86",
+        "city": "Arlington",
+        "firstname": "Bill",
+        "hiredate": "2012-09-15T00:00:00Z",
+        "lastname": "Jones",
+        "salary": 100000,
+        "state": "VA"
+    },
+    {
+        "_id": "5137b623a9f279d831b6fb8c",
+        "city": "Germantown",
+        "firstname": "Anthony",
+        "hiredate": "2012-02-15T00:00:00Z",
+        "lastname": "Bowles",
+        "salary": 105000,
+        "state": "MD"
+    },
+    {
+        "_id": "5137b623a9f279d831b6fb8a",
+        "city": "Arlington",
+        "firstname": "Michelle",
+        "hiredate": "2010-06-15T00:00:00Z",
+        "lastname": "Jackson",
+        "salary": 118000,
+        "state": "VA"
+    },
+    {
+        "_id": "5137b623a9f279d831b6fb88",
+        "city": "Washington",
+        "firstname": "Maggie",
+        "hiredate": "2011-10-15T00:00:00Z",
+        "lastname": "Thomas",
+        "salary": 175000,
+        "state": "DC"
+    }
+]

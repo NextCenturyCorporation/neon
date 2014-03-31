@@ -15,7 +15,7 @@
  */
 
 import org.json.JSONArray
-import com.ncc.neon.HiveJSONGenerator
+import com.ncc.neon.SharkJSONGenerator
 import com.ncc.neon.MongoJSONGenerator
 import com.ncc.neon.JSONToCSVConverter
 import org.gradle.api.plugins.jetty.internal.Monitor
@@ -221,17 +221,17 @@ task generateMongoJson {
     }
 }
 
-task generateHiveJson {
-    def outputDir = "${testDataDir}/hive-json"
+task generateSharkJson {
+    def outputDir = "${testDataDir}/shark-json"
     inputs.files { testDataInputFileTree }
     outputs.dir { outputDir }
     doLast {
-        new HiveJSONGenerator().generateJson(testDataDir, outputDir)
+        new SharkJSONGenerator().generateJson(testDataDir, outputDir)
     }
 }
 
-task generateHiveCSV {
-    def outputDir = "${testDataDir}/hive-csv"
+task generateSharkCSV {
+    def outputDir = "${testDataDir}/shark-csv"
     def inputFile = new File(testDataDir, 'data.json')
     inputs.file { inputFile }
     outputs.dir { outputDir }
@@ -250,8 +250,8 @@ def getMongoHosts() {
     return project.hasProperty("mongo.hosts") ? getProperty("mongo.hosts") : "localhost"
 }
 
-def getHiveHost() {
-    return project.hasProperty("hive.host") ? getProperty("hive.host") : "localhost:10000"
+def getSharkHost() {
+    return project.hasProperty("shark.host") ? getProperty("shark.host") : "localhost:10000"
 }
 
 def getHdfsUrl() {

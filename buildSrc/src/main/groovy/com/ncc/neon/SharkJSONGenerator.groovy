@@ -20,9 +20,9 @@ import org.json.JSONArray
 import org.json.JSONObject
 
 /**
- * Generates json that can be used for hive database tests, specifically removing nested data
+ * Generates json that can be used for shark database tests, specifically removing nested data
  */
-class HiveJSONGenerator extends AbstractJSONGenerator {
+class SharkJSONGenerator extends AbstractJSONGenerator {
 
 
     @Override

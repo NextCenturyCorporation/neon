@@ -15,7 +15,7 @@
  */
 
 
-package com.ncc.neon.query.hive
+package com.ncc.neon.query.shark
 
 import com.ncc.neon.query.clauses.AndWhereClause
 import com.ncc.neon.query.clauses.BooleanWhereClause
@@ -28,18 +28,18 @@ import org.joda.time.format.DateTimeFormatter
 import org.joda.time.format.DateTimeFormatterBuilder
 
 /**
- * Utility class for creating Hive WHERE clauses
+ * Utility class for creating Shark WHERE clauses
  */
-class HiveWhereClause {
+class SharkWhereClause {
 
     private WhereClause whereClause
 
     // used to build up the text of the where clause when toString is called
     private final StringBuilder stringBuilder = new StringBuilder()
 
-    private static final DateTimeFormatter HIVE_DATETIME_FORMATTER = createHiveDateTimeFormat()
+    private static final DateTimeFormatter SHARK_DATETIME_FORMATTER = createSharkDateTimeFormat()
 
-    private static DateTimeFormatter createHiveDateTimeFormat() {
+    private static DateTimeFormatter createSharkDateTimeFormat() {
         new DateTimeFormatterBuilder()
                 .appendYear(4, 4).appendLiteral('-')
                 .appendMonthOfYear(2).appendLiteral('-')
@@ -120,7 +120,7 @@ class HiveWhereClause {
         }
 
         if (val instanceof Date) {
-            return "unix_timestamp('${return HIVE_DATETIME_FORMATTER.print(new DateTime(val).withZone(DateTimeZone.UTC))}')"
+            return "unix_timestamp('${return SHARK_DATETIME_FORMATTER.print(new DateTime(val).withZone(DateTimeZone.UTC))}')"
         }
 
         return val

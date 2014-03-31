@@ -26,7 +26,7 @@ import com.mchange.v2.c3p0.ComboPooledDataSource
 import java.sql.Connection
 import java.sql.Statement
 
-class HiveDataInserter extends DefaultTask{
+class SharkDataInserter extends DefaultTask{
     private static final def FIELD_TYPES = [_id: "string", firstname: "string", lastname: "string", city: "string", state: "string", salary: "int", hiredate: "timestamp"]
 
     // default values. build will override these
@@ -42,8 +42,8 @@ class HiveDataInserter extends DefaultTask{
         conf.set("fs.defaultFS", hdfsUrl)
         FileSystem fileSystem = FileSystem.get(conf)
 
-        File testDataFile = getFile("/hive-csv/data.csv")
-        File fieldsFile = getFile("/hive-csv/fields.csv")
+        File testDataFile = getFile("/shark-csv/data.csv")
+        File fieldsFile = getFile("/shark-csv/fields.csv")
         def destFolder = "${hdfsUrl}/tmp/neonconcurrencytest-${new Random().nextInt(Integer.MAX_VALUE)}/"
         def destFolderPath = new Path(destFolder)
         fileSystem.mkdirs(destFolderPath)

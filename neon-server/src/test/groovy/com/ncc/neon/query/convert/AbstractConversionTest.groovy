@@ -22,9 +22,9 @@ import com.ncc.neon.query.filter.*
 import org.junit.Before
 import org.junit.Test
 
-/*
- Sets up unit tests to be run against both hive and mongo conversion strategies
-*/
+/**
+ * Sets up unit tests to be run against both shark and mongo conversion strategies
+ */
 abstract class AbstractConversionTest {
 
     protected static final String DATABASE_NAME = "database"

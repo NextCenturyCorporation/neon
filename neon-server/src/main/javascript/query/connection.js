@@ -43,11 +43,11 @@ neon.query.Connection = function() {
 neon.query.Connection.MONGO = 'mongo';
 
 /**
- * Indicates the database type is hive
- * @property HIVE
+ * Indicates the database type is shark
+ * @property SHARK
  * @type {String}
  */
-neon.query.Connection.HIVE = 'hive';
+neon.query.Connection.SHARK = 'shark';
 
 
 /**

@@ -1,0 +1,14 @@
+[
+    {
+        "salary_max": 175000,
+        "state": "DC"
+    },
+    {
+        "salary_max": 105000,
+        "state": "MD"
+    },
+    {
+        "salary_max": 118000,
+        "state": "VA"
+    }
+]
