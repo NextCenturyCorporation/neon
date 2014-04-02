@@ -98,10 +98,10 @@ class SharkConversionStrategy {
             whereClauses << query.filter.whereClause
         }
         DataSet dataSet = new DataSet(databaseName: query.databaseName, tableName: query.tableName)
-        if (!options.disregardFilters) {
+        if (!options.ignoreFilters) {
             whereClauses.addAll(createWhereClausesForFilters(dataSet, filterState))
         }
-        if (!options.disregardSelection) {
+        if (options.selectionOnly) {
             whereClauses.addAll(createWhereClausesForFilters(dataSet, selectionState))
         }
 

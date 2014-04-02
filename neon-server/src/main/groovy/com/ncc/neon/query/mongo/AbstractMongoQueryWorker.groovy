@@ -20,7 +20,7 @@ import com.mongodb.BasicDBObject
 import com.mongodb.DBCollection
 import com.mongodb.MongoClient
 import com.ncc.neon.connect.NeonConnectionException
-import com.ncc.neon.query.QueryResult
+import com.ncc.neon.query.result.QueryResult
 
 
 

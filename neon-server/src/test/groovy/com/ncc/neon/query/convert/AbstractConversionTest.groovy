@@ -17,8 +17,12 @@
 package com.ncc.neon.query.convert
 
 import com.ncc.neon.query.Query
+import com.ncc.neon.query.QueryOptions
 import com.ncc.neon.query.clauses.*
-import com.ncc.neon.query.filter.*
+import com.ncc.neon.query.filter.Filter
+import com.ncc.neon.query.filter.FilterKey
+import com.ncc.neon.query.filter.FilterState
+import com.ncc.neon.query.filter.SelectionState
 import org.junit.Before
 import org.junit.Test
 
@@ -29,14 +33,14 @@ abstract class AbstractConversionTest {
 
     protected static final String DATABASE_NAME = "database"
     protected static final String TABLE_NAME = "table"
-    protected static final String COLUMN_NAME = "column"
-    protected static final String COLUMN_VALUE = "value"
     protected static final String FIELD_NAME = "field"
     protected static final String FIELD_NAME_2 = "field2"
+    protected static final String FIELD_VALUE = "value"
     protected static final int LIMIT_AMOUNT = 5
     protected static final int SKIP_AMOUNT = 2
 
     protected FilterState filterState
+    protected SelectionState selectionState
     private Filter simpleFilter
     protected Query simpleQuery
 
@@ -45,6 +49,7 @@ abstract class AbstractConversionTest {
         simpleFilter = new Filter(databaseName: DATABASE_NAME, tableName: TABLE_NAME)
         simpleQuery = new Query(filter: simpleFilter)
         filterState = new FilterState()
+        selectionState = new SelectionState()
     }
 
     @Test(expected = NullPointerException)
@@ -63,7 +68,37 @@ abstract class AbstractConversionTest {
     void "test converting a query with a filter in the FilterState"() {
         givenFilterStateHasOneFilter()
         def query = convertQuery(simpleQuery)
-        assertQueryWithOneFilterInFilterState(query)
+        assertQueryWithWhereClause(query)
+    }
+
+    @Test
+    void "test converting a query with a filter in the FilterState but ignore filters"() {
+        givenFilterStateHasOneFilter()
+        def query = convertQuery(simpleQuery,new QueryOptions(ignoreFilters: true, selectionOnly: false))
+        assertSimplestConvertQuery(query)
+    }
+
+    @Test
+    void "test converting a query with a selection"() {
+        givenSelectionStateHasOneFilter()
+        def query = convertQuery(simpleQuery,new QueryOptions(ignoreFilters: false, selectionOnly: true))
+        assertQueryWithWhereClause(query)
+    }
+
+    @Test
+    void "test converting a compound query with a selection"() {
+        givenSelectionStateHasOneFilter()
+        givenQueryHasOrWhereClause()
+        def query = convertQuery(simpleQuery,new QueryOptions(ignoreFilters: false, selectionOnly: true))
+        assertQueryWithOrWhereClauseaAndFilter(query)
+    }
+
+    @Test
+    void "test selection not used"() {
+        givenSelectionStateHasOneFilter()
+        givenQueryHasSimpleWhereClause()
+        def query = convertQuery(simpleQuery,new QueryOptions(ignoreFilters: false, selectionOnly: false))
+        assertQueryWithWhereClause(query)
     }
 
     @Test
@@ -71,7 +106,7 @@ abstract class AbstractConversionTest {
         givenFilterStateHasOneFilter()
         givenQueryHasOrWhereClause()
         def query = convertQuery(simpleQuery)
-        assertQueryWithOrWhereClause(query)
+        assertQueryWithOrWhereClauseaAndFilter(query)
     }
 
     @Test
@@ -145,13 +180,17 @@ abstract class AbstractConversionTest {
         assertQueryWithWhereNotNullClause(query)
     }
 
-    protected abstract def convertQuery(query)
+    private def convertQuery(query, queryOptions = QueryOptions.DEFAULT_OPTIONS) {
+        return doConvertQuery(query, queryOptions)
+    }
+
+    protected abstract def doConvertQuery(query, queryOptions)
 
     protected abstract void assertSelectClausePopulated(query)
 
     protected abstract void assertSimplestConvertQuery(query)
 
-    protected abstract void assertQueryWithOneFilterInFilterState(query)
+    protected abstract void assertQueryWithWhereClause(query)
 
     protected abstract void assertQueryWithSortClause(query)
 
@@ -165,7 +204,7 @@ abstract class AbstractConversionTest {
 
     protected abstract void assertQueryWithGroupByClauses(query)
 
-    protected abstract void assertQueryWithOrWhereClause(query)
+    protected abstract void assertQueryWithOrWhereClauseaAndFilter(query)
 
     protected abstract void assertQueryWithWhereNullClause(query)
 
@@ -180,10 +219,17 @@ abstract class AbstractConversionTest {
     }
 
     private void givenFilterStateHasOneFilter() {
-        SingularWhereClause whereClause = new SingularWhereClause(lhs: COLUMN_NAME, operator: "=", rhs: COLUMN_VALUE)
+        SingularWhereClause whereClause = new SingularWhereClause(lhs: FIELD_NAME, operator: "=", rhs: FIELD_VALUE)
         Filter filterWithWhere = new Filter(databaseName: simpleFilter.databaseName, tableName: simpleFilter.tableName, whereClause: whereClause)
         FilterKey filterKey = new FilterKey(id: "filterA", filter: filterWithWhere)
         filterState.addFilter(filterKey)
+    }
+
+    private void givenSelectionStateHasOneFilter() {
+        SingularWhereClause whereClause = new SingularWhereClause(lhs: FIELD_NAME, operator: "=", rhs: FIELD_VALUE)
+        Filter filterWithWhere = new Filter(databaseName: simpleFilter.databaseName, tableName: simpleFilter.tableName, whereClause: whereClause)
+        FilterKey filterKey = new FilterKey(id: "selectionA", filter: filterWithWhere)
+        selectionState.addFilter(filterKey)
     }
 
     private void givenQueryHasFields() {
@@ -191,8 +237,8 @@ abstract class AbstractConversionTest {
     }
 
     private void givenQueryHasOrWhereClause() {
-        SingularWhereClause clause1 = new SingularWhereClause(lhs: FIELD_NAME, operator: "=", rhs: COLUMN_VALUE)
-        SingularWhereClause clause2 = new SingularWhereClause(lhs: FIELD_NAME_2, operator: "=", rhs: COLUMN_VALUE)
+        SingularWhereClause clause1 = new SingularWhereClause(lhs: FIELD_NAME, operator: "=", rhs: FIELD_VALUE)
+        SingularWhereClause clause2 = new SingularWhereClause(lhs: FIELD_NAME_2, operator: "=", rhs: FIELD_VALUE)
         OrWhereClause orWhereClause = new OrWhereClause(whereClauses: [clause1, clause2])
 
         simpleQuery.filter.whereClause = orWhereClause
@@ -204,6 +250,10 @@ abstract class AbstractConversionTest {
 
     private void givenQueryHasWhereNotNullClause() {
         simpleQuery.filter.whereClause = new SingularWhereClause(lhs: FIELD_NAME, operator: "!=", rhs: null)
+    }
+
+    private void givenQueryHasSimpleWhereClause() {
+        simpleQuery.filter.whereClause = new SingularWhereClause(lhs: FIELD_NAME, operator: '=' , rhs: FIELD_VALUE)
     }
 
     private void givenQueryHasSortClause() {

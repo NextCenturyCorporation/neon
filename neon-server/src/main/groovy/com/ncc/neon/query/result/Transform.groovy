@@ -14,18 +14,20 @@
  *
  */
 
-package com.ncc.neon.transform
-import com.ncc.neon.query.QueryResult
+package com.ncc.neon.query.result
+
+import groovy.transform.Canonical
+
 
 
 /**
- * Transforms a QueryResult into another QueryResult.
+ * Provides a way to look up a Transformer. The transformName should be the
+ * fully qualified class name of the Transformer implementation. Parameters can be any object
+ * that configures the Transformer's convert() method.
  */
 
-interface Transformer {
-
-    QueryResult convert(QueryResult queryResult, def params)
-
-    String getName()
-
+@Canonical
+class Transform {
+    String transformName
+    def params
 }

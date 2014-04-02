@@ -4,7 +4,7 @@ import com.ncc.neon.connect.ConnectionInfo
 import com.ncc.neon.connect.ConnectionManager
 import com.ncc.neon.connect.DataSources
 import com.ncc.neon.connect.NeonConnectionException
-import com.ncc.neon.query.QueryExecutor
+import com.ncc.neon.query.executor.QueryExecutor
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
 

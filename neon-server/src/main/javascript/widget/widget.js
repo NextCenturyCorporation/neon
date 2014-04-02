@@ -117,7 +117,7 @@ neon.widget = (function() {
     function buildInstanceIdQueryString(qualifier) {
         var queryString = '';
         if (qualifier) {
-            queryString = '?qualifier=' + buildQualifierString(qualifier);
+            queryString = 'qualifier=' + buildQualifierString(qualifier);
         }
         return queryString;
     }

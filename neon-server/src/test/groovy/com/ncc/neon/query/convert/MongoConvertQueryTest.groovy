@@ -15,13 +15,8 @@
  */
 
 package com.ncc.neon.query.convert
-
 import com.mongodb.BasicDBObject
-import com.ncc.neon.query.QueryOptions
-import com.ncc.neon.query.filter.SelectionState
 import com.ncc.neon.query.mongo.MongoConversionStrategy
-
-
 /*
  Tests the MongoConversionStrategy.convertQuery()
  correctly converts Query objects into MongoQuery objects
@@ -29,14 +24,13 @@ import com.ncc.neon.query.mongo.MongoConversionStrategy
 class MongoConvertQueryTest extends AbstractConversionTest {
 
     @Override
-    protected def convertQuery(query) {
-        MongoConversionStrategy conversionStrategy = new MongoConversionStrategy(filterState: filterState, selectionState: new SelectionState())
-        conversionStrategy.convertQuery(query, QueryOptions.ALL_DATA)
+    protected def doConvertQuery(query, queryOptions) {
+        MongoConversionStrategy conversionStrategy = new MongoConversionStrategy(filterState: filterState, selectionState: selectionState)
+        conversionStrategy.convertQuery(query, queryOptions)
     }
 
     // For many of these query clause tests, the conversion strategy does not need to do anything so it just asserts
-    // the "standard query asserts." This is because the mongo query worker classes handle the actual clauses and
-    // attach them to the dbcursors.
+    // the "standard query asserts." This is because the mongo query worker classes handle the actual clauses
 
     @Override
     void assertSimplestConvertQuery(query) {
@@ -44,8 +38,10 @@ class MongoConvertQueryTest extends AbstractConversionTest {
     }
 
     @Override
-    void assertQueryWithOneFilterInFilterState(query) {
-        standardQueryAsserts(query)
+    void assertQueryWithWhereClause(query) {
+        assert query.query == simpleQuery
+        assert query.whereClauseParams == new BasicDBObject(FIELD_NAME, FIELD_VALUE)
+        assert query.selectParams == new BasicDBObject()
     }
 
     @Override
@@ -79,11 +75,13 @@ class MongoConvertQueryTest extends AbstractConversionTest {
     }
 
     @Override
-    protected void assertQueryWithOrWhereClause(query) {
+    protected void assertQueryWithOrWhereClauseaAndFilter(query) {
         assert query.query == simpleQuery
         BasicDBObject orClause = createOrClause()
+        BasicDBObject filterClause = new BasicDBObject(FIELD_NAME, FIELD_VALUE)
+        BasicDBObject compoundClause = new BasicDBObject('$and',[orClause,filterClause])
 
-        assert query.whereClauseParams == orClause
+        assert query.whereClauseParams == compoundClause
         assert query.selectParams == new BasicDBObject()
     }
 
@@ -107,8 +105,8 @@ class MongoConvertQueryTest extends AbstractConversionTest {
     }
 
     protected BasicDBObject createOrClause() {
-        BasicDBObject simpleClause1 = new BasicDBObject(FIELD_NAME, COLUMN_VALUE)
-        BasicDBObject simpleClause2 = new BasicDBObject(FIELD_NAME_2, COLUMN_VALUE)
+        BasicDBObject simpleClause1 = new BasicDBObject(FIELD_NAME, FIELD_VALUE)
+        BasicDBObject simpleClause2 = new BasicDBObject(FIELD_NAME_2, FIELD_VALUE)
         return new BasicDBObject('$or', [simpleClause1, simpleClause2])
     }
 

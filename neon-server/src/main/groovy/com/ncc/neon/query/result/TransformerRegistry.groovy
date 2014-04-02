@@ -14,17 +14,22 @@
  *
  */
 
-package com.ncc.neon.transform
-
+package com.ncc.neon.query.result
 
 
 /**
- * Thrown when a transform name does not match any transformers in the TransformerRegistry
+ * Holds all the transformer implementations. A transformer must be registered
+ * so that it can be looked up by QueryExecutors.
  */
 
-class TransformerNotFoundException extends RuntimeException{
+class TransformerRegistry {
+    private final Map<String, Transformer> registry = [:]
 
-    TransformerNotFoundException(String message){
-        super(message)
+    void register(Transformer transformer){
+        registry.put(transformer.name, transformer)
+    }
+
+    Transformer getTransformer(String transformName){
+        registry.get(transformName)
     }
 }

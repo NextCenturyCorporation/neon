@@ -27,11 +27,12 @@
 neon.SERVER_URL = 'http://localhost:8080/neon';
 
 neon.serviceUrl = function (servicePath, serviceName, queryParamsString) {
+    var queryString = '';
 
-    if (!queryParamsString) {
-        queryParamsString = '';
+    if (queryParamsString) {
+        queryString = '?' + queryParamsString;
     }
 
-    return neon.SERVER_URL + '/services/' + servicePath + '/' + serviceName + queryParamsString;
+    return neon.SERVER_URL + '/services/' + servicePath + '/' + serviceName + queryString;
 
 };

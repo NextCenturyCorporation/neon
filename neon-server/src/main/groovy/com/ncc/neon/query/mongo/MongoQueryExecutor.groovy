@@ -18,29 +18,23 @@ package com.ncc.neon.query.mongo
 import com.mongodb.DB
 import com.mongodb.MongoClient
 import com.ncc.neon.connect.ConnectionManager
-import com.ncc.neon.query.*
+import com.ncc.neon.query.executor.AbstractQueryExecutor
+import com.ncc.neon.query.Query
+import com.ncc.neon.query.QueryOptions
+import com.ncc.neon.query.result.QueryResult
 import com.ncc.neon.query.filter.FilterState
 import com.ncc.neon.query.filter.SelectionState
-import com.ncc.neon.transform.TransformerNotFoundException
-import com.ncc.neon.query.Transform
-import com.ncc.neon.transform.Transformer
-import com.ncc.neon.transform.TransformerRegistry
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
-
-
 /**
  * Executes queries against a mongo data store
  */
 @Component
-class MongoQueryExecutor implements QueryExecutor {
+class MongoQueryExecutor extends AbstractQueryExecutor {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(MongoQueryExecutor)
-
-    @Autowired
-    TransformerRegistry registry
 
     @Autowired
     private FilterState filterState
@@ -52,36 +46,11 @@ class MongoQueryExecutor implements QueryExecutor {
     private ConnectionManager connectionManager
 
     @Override
-    QueryResult execute(Query query, QueryOptions options) {
+    QueryResult doExecute(Query query, QueryOptions options) {
         AbstractMongoQueryWorker worker = createMongoQueryWorker(query)
         MongoConversionStrategy mongoConversionStrategy = new MongoConversionStrategy(filterState: filterState, selectionState: selectionState)
         MongoQuery mongoQuery = mongoConversionStrategy.convertQuery(query, options)
-        QueryResult queryResult = worker.executeQuery(mongoQuery)
-        return transform(query.transform, queryResult)
-    }
-
-    QueryResult transform(Transform transform, QueryResult queryResult) {
-        if(!transform){
-            return queryResult
-        }
-
-        String transformName = transform.transformName
-        Transformer transformer = registry.getTransformer(transformName)
-        if(!transformer){
-            throw new TransformerNotFoundException("Transform ${transformName} does not exist.")
-        }
-
-        return transformer.convert(queryResult, transform.params)
-    }
-
-    @Override
-    QueryResult execute(QueryGroup queryGroup, QueryOptions options) {
-        TabularQueryResult queryResult = new TabularQueryResult()
-        queryGroup.queries.each {
-            def result = execute(it, options)
-            queryResult.data.addAll(result.data)
-        }
-        return queryResult
+        return worker.executeQuery(mongoQuery)
     }
 
     @Override

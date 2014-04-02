@@ -14,22 +14,24 @@
  *
  */
 
-package com.ncc.neon.transform
-
-
+package com.ncc.neon.query.result
 /**
- * Holds all the transformer implementations. A transformer must be registered
- * so that it can be looked up by QueryExecutors.
+ * Query results of a tabular data store.
+ * This is represented as a list of rows, where a row is a map of column names to values.
  */
+class TabularQueryResult implements QueryResult{
 
-class TransformerRegistry {
-    private final Map<String, Transformer> registry = [:]
+    public static final EMPTY = new TabularQueryResult(Collections.EMPTY_LIST)
 
-    void register(Transformer transformer){
-        registry.put(transformer.name, transformer)
+    final List<Map<String, Object>> data
+
+    public TabularQueryResult() {
+        this([])
     }
 
-    Transformer getTransformer(String transformName){
-        registry.get(transformName)
+    public TabularQueryResult(List<Map<String, Object>> table){
+        this.data = table
     }
 }
+
+

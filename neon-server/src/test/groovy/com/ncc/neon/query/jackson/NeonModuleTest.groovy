@@ -19,7 +19,7 @@ import com.mongodb.BasicDBObject
 import com.mongodb.DBObject
 import com.ncc.neon.connect.ConnectionInfo
 import com.ncc.neon.connect.DataSources
-import com.ncc.neon.query.TabularQueryResult
+import com.ncc.neon.query.result.TabularQueryResult
 import com.ncc.neon.query.mongo.MongoQueryResult
 import com.ncc.neon.util.DateUtils
 import org.bson.types.ObjectId

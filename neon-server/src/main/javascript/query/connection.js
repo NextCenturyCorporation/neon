@@ -28,7 +28,7 @@
  *     connection.executeQuery(query2, callback);
  * @constructor
  */
-neon.query.Connection = function() {
+neon.query.Connection = function () {
 
     this.host_ = undefined;
     this.databaseType_ = undefined;
@@ -57,7 +57,7 @@ neon.query.Connection.SHARK = 'shark';
  * valid database types.
  * @param {String} host The host the database is running on
  */
-neon.query.Connection.prototype.connect = function(databaseType, host) {
+neon.query.Connection.prototype.connect = function (databaseType, host) {
     this.host_ = host;
     this.databaseType_ = databaseType;
 };
@@ -67,7 +67,7 @@ neon.query.Connection.prototype.connect = function(databaseType, host) {
  * @param {String} database The name of the database to use for queries
  * @method use
  */
-neon.query.Connection.prototype.use = function(database) {
+neon.query.Connection.prototype.use = function (database) {
     this.database_ = database;
 };
 
@@ -116,7 +116,7 @@ neon.query.Connection.prototype.executeTextQuery = function (queryText, successC
  * @param {Function} successCallback
  * @return {neon.util.AjaxRequest}
  */
-neon.query.Connection.prototype.getColumnMetadata = function(tableName, successCallback) {
+neon.query.Connection.prototype.getColumnMetadata = function (tableName, successCallback) {
     return neon.util.ajaxUtils.doGet(
         neon.serviceUrl('queryservice', 'columnmetadata/' + this.database_ + '/' + tableName),
         {
@@ -125,7 +125,7 @@ neon.query.Connection.prototype.getColumnMetadata = function(tableName, successC
     );
 };
 
-neon.query.Connection.prototype.populateQueryDatabaseField_ = function(query) {
+neon.query.Connection.prototype.populateQueryDatabaseField_ = function (query) {
     if (!query.filter.databaseName) {
         query.filter.databaseName = this.database_;
     }
@@ -146,23 +146,25 @@ neon.query.Connection.prototype.executeQueryGroup = function (queryGroup, succes
     return this.executeQueryService_(queryGroup, successCallback, errorCallback, 'querygroup');
 };
 
-neon.query.Connection.prototype.populateQueryGroupDatabaseField_ = function(queryGroup) {
+neon.query.Connection.prototype.populateQueryGroupDatabaseField_ = function (queryGroup) {
     var me = this;
-    _.each(queryGroup.queries, function(query) {
+    _.each(queryGroup.queries, function (query) {
         me.populateQueryDatabaseField_(query);
     });
 };
 
 neon.query.Connection.prototype.executeQueryService_ = function (query, successCallback, errorCallback, serviceName) {
+    var opts = [];
+    if (query.ignoreFilters_) {
+        opts.push("ignoreFilters=true");
+    }
     if (query.selectionOnly_) {
-        serviceName += "withselectiononly";
+        opts.push("selectionOnly=true");
     }
-    else if (query.ignoreFilters_) {
-        serviceName += "disregardfilters";
-    }
+
     return neon.util.ajaxUtils.doPostJSON(
         query,
-        neon.serviceUrl('queryservice', serviceName + '/' + this.host_ + '/' + this.databaseType_),
+        neon.serviceUrl('queryservice', serviceName + '/' + this.host_ + '/' + this.databaseType_, opts.join('&')),
         {
             success: successCallback,
             error: errorCallback
@@ -180,7 +182,7 @@ neon.query.Connection.prototype.executeQueryService_ = function (query, successC
 
 neon.query.Connection.prototype.getDatabaseNames = function (successCallback) {
     return neon.util.ajaxUtils.doGet(
-        neon.serviceUrl('queryservice','databasenames/' +  this.host_ + '/' + this.databaseType_),
+        neon.serviceUrl('queryservice', 'databasenames/' + this.host_ + '/' + this.databaseType_),
         {
             success: successCallback
         }

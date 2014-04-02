@@ -18,6 +18,7 @@ package com.ncc.neon.query
 
 import com.ncc.neon.query.clauses.*
 import com.ncc.neon.query.filter.Filter
+import com.ncc.neon.query.result.Transform
 import groovy.transform.ToString
 import org.codehaus.jackson.annotate.JsonIgnoreProperties
 

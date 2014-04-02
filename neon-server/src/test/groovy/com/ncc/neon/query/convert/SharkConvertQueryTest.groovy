@@ -16,11 +16,7 @@
 
 package com.ncc.neon.query.convert
 
-import com.ncc.neon.query.QueryOptions
-import com.ncc.neon.query.filter.SelectionState
 import com.ncc.neon.query.shark.SharkConversionStrategy
-
-
 /*
  Tests the SharkConversionStrategy.convertQuery()
  correctly converts Query objects into shark queries
@@ -29,9 +25,9 @@ import com.ncc.neon.query.shark.SharkConversionStrategy
 class SharkConvertQueryTest extends AbstractConversionTest {
 
     @Override
-    protected def convertQuery(query) {
-        SharkConversionStrategy conversionStrategy = new SharkConversionStrategy(filterState: filterState, selectionState: new SelectionState())
-        conversionStrategy.convertQuery(query, QueryOptions.ALL_DATA)
+    protected def doConvertQuery(query, queryOptions) {
+        SharkConversionStrategy conversionStrategy = new SharkConversionStrategy(filterState: filterState, selectionState: selectionState)
+        conversionStrategy.convertQuery(query, queryOptions)
     }
 
     @Override
@@ -40,8 +36,8 @@ class SharkConvertQueryTest extends AbstractConversionTest {
     }
 
     @Override
-    void assertQueryWithOneFilterInFilterState(query) {
-        assertStandardSharkQLStatement(query)
+    void assertQueryWithWhereClause(query) {
+        assert query.toLowerCase() == "select * from ${DATABASE_NAME}.${TABLE_NAME} where ${FIELD_NAME} = '${FIELD_VALUE}'"
     }
 
     @Override
@@ -79,8 +75,8 @@ class SharkConvertQueryTest extends AbstractConversionTest {
     }
 
     @Override
-    protected void assertQueryWithOrWhereClause(query) {
-        assert query.toLowerCase() == "select * from ${DATABASE_NAME}.${TABLE_NAME} where (${FIELD_NAME} = '${COLUMN_VALUE}' or ${FIELD_NAME_2} = '${COLUMN_VALUE}')".toLowerCase()
+    protected void assertQueryWithOrWhereClauseaAndFilter(query) {
+        assert query.toLowerCase() == "select * from ${DATABASE_NAME}.${TABLE_NAME} where ((${FIELD_NAME} = '${FIELD_VALUE}' or ${FIELD_NAME_2} = '${FIELD_VALUE}') AND ${FIELD_NAME} = '${FIELD_VALUE}')".toLowerCase()
     }
 
     @Override

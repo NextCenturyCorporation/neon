@@ -17,8 +17,8 @@
 package com.ncc.neon.query.mongo
 
 import com.mongodb.MongoClient
-import com.ncc.neon.query.QueryResult
-import com.ncc.neon.query.TabularQueryResult
+import com.ncc.neon.query.result.QueryResult
+import com.ncc.neon.query.result.TabularQueryResult
 import com.ncc.neon.query.clauses.SelectClause
 import com.ncc.neon.query.clauses.SortClause
 import com.ncc.neon.query.clauses.SortOrder

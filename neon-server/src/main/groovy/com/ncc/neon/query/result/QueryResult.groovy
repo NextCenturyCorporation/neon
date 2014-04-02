@@ -14,7 +14,7 @@
  *
  */
 
-package com.ncc.neon.query
+package com.ncc.neon.query.result
 
 
 /**
