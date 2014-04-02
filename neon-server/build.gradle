@@ -181,6 +181,22 @@ jettyRun {
     }
 }
 
+[jettyRun, jettyRunWar, transformTestWebService, acceptanceTestWar, concurrencyTestWar]*.with {
+    /**
+     * THIS IS A WORKAROUND FOR JETTY LOCKING STATIC HTML FILES ON WINDOWS
+     * 
+     * When developing on Windows Jetty locks any static HTML files and resources, preventing on-the-fly
+     * editing for quick development turn-around.  The work around for this is to override the 
+     * default setting for useFileMappedBuffer in jetty's webdefault.xml file.  Here we've extracted
+     * the Jetty 6.1.25 webdefault.xml and simply set useFileMappedBuffer to false.
+     * 
+     * References: 
+     * http://issues.gradle.org/browse/GRADLE-727
+     * http://stackoverflow.com/questions/11032342/gradle-jetty-plugin-locking-files
+     */
+    webDefaultXml = file("${projectDir}/webdefault.xml")
+}
+
 [jettyRun, jettyRunWar, transformTestWebService, acceptanceTestWar, concurrencyTestWar]*.doLast {
     /**
      * THIS IS A WORKAROUND! THE CURRENT VERSION OF THIS TASK DOESN'T START A WATCHER IN DAEMON MODE
