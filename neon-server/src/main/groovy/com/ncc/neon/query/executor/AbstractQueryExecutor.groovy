@@ -66,6 +66,8 @@ abstract class AbstractQueryExecutor implements QueryExecutor {
         return queryResult
     }
 
+    // This method is public due to http://jira.codehaus.org/browse/GROOVY-2433. While this doesn't look
+    // like it is being called in a closure, it is exhibiting the same symptoms.
     /**
      * Determines if the query is asking for selection only but there is no selection. In this case,
      * the data returned should be empty
