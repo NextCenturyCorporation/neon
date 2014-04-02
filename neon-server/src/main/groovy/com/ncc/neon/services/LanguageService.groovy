@@ -22,7 +22,7 @@ import com.ncc.neon.connect.DataSources
 import com.ncc.neon.language.QueryParser
 import com.ncc.neon.query.Query
 import com.ncc.neon.query.QueryOptions
-import com.ncc.neon.query.QueryResult
+import com.ncc.neon.query.result.QueryResult
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
 
@@ -64,7 +64,7 @@ class LanguageService {
                              @FormParam("text") String text) {
         ConnectionInfo connection = new ConnectionInfo(dataSource: databaseType as DataSources, host: host)
         Query query = queryParser.parse(text)
-        return queryExecutorFactory.getExecutor(connection).execute(query, QueryOptions.FILTERED_DATA)
+        return queryExecutorFactory.getExecutor(connection).execute(query, QueryOptions.DEFAULT_OPTIONS)
     }
 
 }

@@ -19,9 +19,9 @@ package com.ncc.neon.services
 import com.ncc.neon.connect.DataSources
 import com.ncc.neon.language.QueryParser
 import com.ncc.neon.query.Query
-import com.ncc.neon.query.QueryExecutor
-import com.ncc.neon.query.QueryResult
-import com.ncc.neon.query.TabularQueryResult
+import com.ncc.neon.query.executor.QueryExecutor
+import com.ncc.neon.query.result.QueryResult
+import com.ncc.neon.query.result.TabularQueryResult
 import org.junit.Before
 import org.junit.Test
 

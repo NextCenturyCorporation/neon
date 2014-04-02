@@ -15,8 +15,8 @@
  */
 
 package com.ncc.neon.config
-import com.ncc.neon.transform.Transformer
-import com.ncc.neon.transform.TransformerRegistry
+import com.ncc.neon.query.result.Transformer
+import com.ncc.neon.query.result.TransformerRegistry
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.context.annotation.Profile

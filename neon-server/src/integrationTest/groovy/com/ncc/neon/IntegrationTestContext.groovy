@@ -19,9 +19,9 @@ package com.ncc.neon
 import com.ncc.neon.connect.ConnectionManager
 import com.ncc.neon.query.shark.SharkQueryExecutor
 import com.ncc.neon.query.mongo.MongoQueryExecutor
-import com.ncc.neon.transform.SalaryTransformer
-import com.ncc.neon.transform.Transformer
-import com.ncc.neon.transform.TransformerRegistry
+import com.ncc.neon.query.transform.SalaryTransformer
+import com.ncc.neon.query.result.Transformer
+import com.ncc.neon.query.result.TransformerRegistry
 import org.springframework.beans.factory.config.CustomScopeConfigurer
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.ComponentScan

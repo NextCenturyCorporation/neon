@@ -1,0 +1,105 @@
+/*
+ * Copyright 2014 Next Century Corporation
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ */
+
+package com.ncc.neon.query.executor
+
+import com.ncc.neon.query.Query
+import com.ncc.neon.query.QueryGroup
+import com.ncc.neon.query.QueryOptions
+import com.ncc.neon.query.result.QueryResult
+import com.ncc.neon.query.result.TabularQueryResult
+import com.ncc.neon.query.filter.DataSet
+import com.ncc.neon.query.filter.SelectionState
+import com.ncc.neon.query.result.Transform
+import com.ncc.neon.query.result.Transformer
+import com.ncc.neon.query.result.TransformerNotFoundException
+import com.ncc.neon.query.result.TransformerRegistry
+import org.springframework.beans.factory.annotation.Autowired
+/**
+ * Abstract implementation of a QueryExecutor that provides some default functionality useful
+ * to all executors
+ */
+abstract class AbstractQueryExecutor implements QueryExecutor {
+
+
+    @Autowired
+    private SelectionState selectionState
+
+    @Autowired
+    TransformerRegistry transformRegistry
+
+    @Override
+    QueryResult execute(Query query, QueryOptions options) {
+        // cutoff queries where there is no selection but selectionOnly was specified. otherwise the WHERE clause
+        // created by the query executors to get the selected data will be empty the request for selectionOnly is
+        // effectively ignored
+        if (isEmptySelection(query, options)) {
+            return TabularQueryResult.EMPTY
+        }
+        QueryResult result = doExecute(query, options)
+        return transform(query.transform, result)
+
+    }
+
+    @Override
+    QueryResult execute(QueryGroup queryGroup, QueryOptions options) {
+        TabularQueryResult queryResult = new TabularQueryResult()
+        queryGroup.queries.each {
+            if (!isEmptySelection(it, options)) {
+                def result = doExecute(it, options)
+                queryResult.data.addAll(result.data)
+            }
+        }
+        return queryResult
+    }
+
+    /**
+     * Determines if the query is asking for selection only but there is no selection. In this case,
+     * the data returned should be empty
+     * @param query
+     * @param options
+     * @return true if the query will always return an empty result because it is querying on the empty selection
+     */
+    boolean isEmptySelection(Query query, QueryOptions options) {
+        return options.selectionOnly &&
+                !selectionState.getFiltersForDataset(new DataSet(databaseName: query.databaseName, tableName: query.tableName))
+    }
+
+    protected abstract QueryResult doExecute(Query query, QueryOptions options)
+
+    /**
+     * Transforms the query if a transform is provided. If not, the original query result is return unchanged.
+     * @param transform
+     * @param queryResult
+     * @return
+     */
+    private QueryResult transform(Transform transform, QueryResult queryResult) {
+        if(!transform){
+            return queryResult
+        }
+
+        String transformName = transform.transformName
+        Transformer transformer = transformRegistry.getTransformer(transformName)
+        if(!transformer){
+            throw new TransformerNotFoundException("Transform ${transformName} does not exist.")
+        }
+
+        return transformer.convert(queryResult, transform.params)
+    }
+
+
+
+}

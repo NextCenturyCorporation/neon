@@ -18,6 +18,9 @@ package com.ncc.neon.services
 
 import com.ncc.neon.connect.DataSources
 import com.ncc.neon.query.*
+import com.ncc.neon.query.executor.QueryExecutor
+import com.ncc.neon.query.result.QueryResult
+import com.ncc.neon.query.result.TabularQueryResult
 import org.junit.Before
 import org.junit.Test
 
@@ -40,14 +43,14 @@ class QueryServiceTest {
 
     @Test
     void "execute query"() {
-        QueryResult result = queryService.executeQuery(HOST, DATABASE_TYPE, new Query())
+        QueryResult result = queryService.executeQuery(HOST, DATABASE_TYPE, false, false, new Query())
         assert result.data == [["key1": "val1"], ["key2": 2]]
     }
 
     @Test
     void "execute query group"() {
         QueryGroup queryGroup = new QueryGroup(queries: [new Query()])
-        QueryResult result = queryService.executeQueryGroup(HOST, DATABASE_TYPE, queryGroup)
+        QueryResult result = queryService.executeQueryGroup(HOST, DATABASE_TYPE, false, false, queryGroup)
         assert result.data == [["key1": "val1"], ["key2": 2]]
     }
 }

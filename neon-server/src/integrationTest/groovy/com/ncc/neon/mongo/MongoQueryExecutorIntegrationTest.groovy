@@ -108,7 +108,7 @@ class MongoQueryExecutorIntegrationTest extends AbstractQueryExecutorIntegration
         )
         def expected = rows(2, 0)
         def query = new Query(filter: new Filter(databaseName: DATABASE_NAME, tableName: TABLE_NAME, whereClause: withinDistance))
-        def result = queryExecutor.execute(query, QueryOptions.FILTERED_DATA)
+        def result = queryExecutor.execute(query, QueryOptions.DEFAULT_OPTIONS)
         assertOrderedQueryResult(expected, result)
     }
 
@@ -125,14 +125,14 @@ class MongoQueryExecutorIntegrationTest extends AbstractQueryExecutorIntegration
         def whereClause = new AndWhereClause(whereClauses: [withinDistance, dcStateClause])
         def query = new Query(filter: new Filter(databaseName: DATABASE_NAME, tableName: TABLE_NAME, whereClause: whereClause))
 
-        def result = queryExecutor.execute(query, QueryOptions.FILTERED_DATA)
+        def result = queryExecutor.execute(query, QueryOptions.DEFAULT_OPTIONS)
         assertOrderedQueryResult(expected, result)
     }
 
     @Test(expected = NeonConnectionException)
     void "exception thrown rather than trying to create an empty database"() {
         def query = new Query(filter: new Filter(databaseName: "nonexistentdb", tableName: "nonexistentable"))
-        queryExecutor.execute(query, QueryOptions.FILTERED_DATA)
+        queryExecutor.execute(query, QueryOptions.DEFAULT_OPTIONS)
     }
 
 }
