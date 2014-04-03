@@ -1,0 +1,84 @@
+<div class="row">
+	<div class="col-xs-2 col-xs-offset-1">
+		<div id="datastore-container">
+			<div class="row">
+				<h4 class="col-xs-2 col-xs-offset-1">Connection</h4>
+			</div>
+			<div class="controls-row">
+				<div class="control-group row">
+					<div class="col-xs-2 col-xs-offset-1">
+						<label class="control-label" for="datastore-select">Type</label>
+						<div class="controls">
+							<select id="datastore-select" class="span2" ng-model="datastoreSelect">
+								<option value="mongo">Mongo</option>
+								<option value="hive">Hive</option>
+							</select>
+						</div>
+					</div>
+				</div>
+				<div class="control-group row">
+					<div class="col-xs-2 col-xs-offset-1">
+						<label class="control-label" for="hostname-input">Host</label>
+						<div class="controls" class="textfield">
+							<input class="span2" type="text" id="hostname-input" ng-model="hostnameInput" />
+						</div>
+					</div>
+				</div>
+				<div class="control-group row">
+					<div class="col-xs-2 col-xs-offset-1">
+						<div class="controls">
+							<button class="btn btn-primary" id="datastore-button" ng-click="connectToDatastore()">Continue</button>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+		<br>
+		<div id="db-table" ng-show="showDbTable">
+			<div class="row">
+				<h4 class="col-xs-2 col-xs-offset-1">Database</h4>
+			</div>
+			<div class="controls controls-row">
+				<div class="control-group row">
+					<div class="col-xs-2 col-xs-offset-1">
+						<label class="control-label" for="database-select">Database</label>
+
+						<div class="controls">
+							<select id="database-select" class="span2" ng-change="selectDatabase()" ng-model="selectedDb">
+								<option value="">Select Database...</option>
+								<option ng-repeat="db in databases" value="{{db}}">{{db}}</option>
+							</select>
+						</div>
+					</div>
+				</div>
+
+				<div class="control-group row">
+					<div class="col-xs-2 col-xs-offset-1">
+						<label class="control-label" for="table-select">Table</label>
+
+						<div class="controls">
+							<select id="table-select" class="span2" ng-model="selectedTable">
+								<option ng-repeat="table in dbTables" value="{{table}}">{{table}}</option>
+							</select>
+						</div>
+					</div>
+				</div>
+
+				<div class="control-group row">
+					<div class="col-xs-2 col-xs-offset-1">
+						<div class="controls">
+							<button class="btn btn-primary" id="database-table-button" ng-click="continueClick()">Continue</button>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+	<div class="col-xs-5 col-xs-offset-1"
+		<div class="row">
+			<ol class="col-xs-2 col-xs-offset-1">
+				<li ng-repeat="field in fields">{{field}}</li>
+			</ol>
+		</div>
+	</div>
+</div>
