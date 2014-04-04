@@ -1,6 +1,6 @@
 'use strict';
 /*
- * Copyright 2014 Next Century Corporation
+ * Copyright 2013 Next Century Corporation
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,9 +15,17 @@
  *
  */
 
-var neonDemo = angular.module('neonDemo', [
-	'neonDemo.controllers',
-	'configurationDirective',
-	'circularHeatChartDirective'
-	//'barchartController'
-]);
+angular.module('neonDemo.controllers', []).controller('neonDemoController', ['$scope', 
+	function($scope) {
+
+		$scope.data = [0, 10, 20];
+		$scope.data2 = [0, 0, 0, 20, 100, 50];
+
+		setInterval(function() {
+			$scope.data.push(30);
+			$scope.data2.push(70);
+			console.log('changing...');
+			$scope.$digest();
+		}, 5000)
+
+	}]);
