@@ -6,6 +6,7 @@
 		<link rel="stylesheet" type="text/css" href="css/bootstrap/bootstrap.min.css">
 		<link rel="stylesheet" type="text/css" href="css/bootstrap/bootstrap-theme.min.css">
 		<link rel="stylesheet" type="text/css" href="css/directives/circularHeatChart.css">
+		<link rel="stylesheet" type="text/css" href="css/directives/circularHeatForm.css">
 	</head>
 	<body ng-controller="neonDemoController">
 		<div class="container-fluid">
@@ -13,8 +14,8 @@
 			<database-config></database-config>
 			<br>
 			<!--div ng-include="'partials/barchart.html'"></div-->
+			<circular-heat-form></circular-heat-form>
 			<circular-heat-chart cell-values="data"></circular-heat-chart>
-			<circular-heat-chart cell-values="data2"></circular-heat-chart>
 		</div>
 
 
@@ -36,5 +37,6 @@
 
 		<script src="js/charts/circularHeatChart.js"></script>
 		<script src="js/directives/circularHeatChart.js"></script>
+		<script src="js/directives/circularHeatForm.js"></script>
 	</body>
 </html>
