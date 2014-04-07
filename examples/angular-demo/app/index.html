@@ -5,8 +5,10 @@
 		<title>My AngularJS App</title>
 		<link rel="stylesheet" type="text/css" href="css/bootstrap/bootstrap.min.css">
 		<link rel="stylesheet" type="text/css" href="css/bootstrap/bootstrap-theme.min.css">
+
 		<link rel="stylesheet" type="text/css" href="css/directives/circularHeatChart.css">
 		<link rel="stylesheet" type="text/css" href="css/directives/circularHeatForm.css">
+		<link rel="stylesheet" type="text/css" href="css/directives/barchart.css">
 	</head>
 	<body ng-controller="neonDemoController">
 		<div class="container-fluid">
@@ -14,8 +16,10 @@
 			<database-config></database-config>
 			<br>
 			<!--div ng-include="'partials/barchart.html'"></div-->
+
 			<circular-heat-form></circular-heat-form>
 			<circular-heat-chart cell-values="data"></circular-heat-chart>
+			<barchart></barchart>
 		</div>
 
 
@@ -29,14 +33,17 @@
 		<script src="lib/d3/d3.v3.min.js"></script>
 		<script src="lib/bootstrap/bootstrap.min.js"></script>
 		<script src="js/namespaces.js"></script>
-		<script src="js/barchart.js"></script>
+		<script src="js/charts/barchart.js"></script>
 
 		<script src="js/app.js"></script>
 		<script src="js/neonDemoController.js"></script>
+
 		<script src="js/directives/databaseConfigDirective.js"></script>
 
 		<script src="js/charts/circularHeatChart.js"></script>
 		<script src="js/directives/circularHeatChart.js"></script>
 		<script src="js/directives/circularHeatForm.js"></script>
+
+		<script src="js/directives/barchartDirective.js"></script>
 	</body>
 </html>

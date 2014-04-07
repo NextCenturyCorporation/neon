@@ -22,14 +22,14 @@ public class NeonBaseListener implements NeonListener {
 	@Override public void enterFieldList(NeonParser.FieldListContext ctx) { }
 	@Override public void exitFieldList(NeonParser.FieldListContext ctx) { }
 
-	@Override public void enterSortClause(NeonParser.SortClauseContext ctx) { }
-	@Override public void exitSortClause(NeonParser.SortClauseContext ctx) { }
-
 	@Override public void enterQuery(NeonParser.QueryContext ctx) { }
 	@Override public void exitQuery(NeonParser.QueryContext ctx) { }
 
 	@Override public void enterSelect(NeonParser.SelectContext ctx) { }
 	@Override public void exitSelect(NeonParser.SelectContext ctx) { }
+
+	@Override public void enterSortClause(NeonParser.SortClauseContext ctx) { }
+	@Override public void exitSortClause(NeonParser.SortClauseContext ctx) { }
 
 	@Override public void enterWhere(NeonParser.WhereContext ctx) { }
 	@Override public void exitWhere(NeonParser.WhereContext ctx) { }

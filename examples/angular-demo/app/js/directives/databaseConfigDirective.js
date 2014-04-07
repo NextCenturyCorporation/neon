@@ -23,7 +23,7 @@ databaseConfig.directive('databaseConfig', function() {
 			connection.getDatabaseNames(populateDatabaseDropdown);
 		};
 
-		populateDatabaseDropdown = function(dbs) {
+		var populateDatabaseDropdown = function(dbs) {
 			$scope.databases = dbs;
 			$scope.$apply();
 		};
