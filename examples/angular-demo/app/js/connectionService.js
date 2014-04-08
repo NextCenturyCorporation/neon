@@ -14,8 +14,8 @@
  * limitations under the License.
  *
  */
-angular.module('neonDemo.services', []).factory('ConnectionService',
-	function() {
+angular.module('neonDemo.services', []).factory('ConnectionService', ['$filter',
+	function($filter) {
 
 		var activeConnection = undefined;
 		var connectionInformation = [
@@ -23,15 +23,24 @@ angular.module('neonDemo.services', []).factory('ConnectionService',
 				name: "Sample Earthquake Data",
 				type: "mongo",
 				host: "localhost",
-				database: "mydb",
-				metaData: [{
-					table: "sample",
-					mappings: {
-						"time": "time",
-						"latitude": "latitude",
-						"longitude": "longitude"
-					}
+				mappings: [{
+					database: "mydb",
+					tables: [{
+						name: "sample",
+						fields: [{
+							name: "date",
+							mapping: "time"
+						}, {
+							name: "latitude",
+							"latitude": "latitude"
+						}, {
+							name: "longitude",
+							"longitude": "longitude"
+						}]
+					}]
 				}]
+			}, {
+				host: "fluffy"
 			}
 		];
 
@@ -45,15 +54,27 @@ angular.module('neonDemo.services', []).factory('ConnectionService',
 			return activeConnection;
 		};
 
-		service.getConnectionInformation = function(name) {
-			if (typeof(name) === 'undefined') {
-				return connectionInformation;
+		service.getActiveConnectionInformation = function(name) {
+			return $filter('filter')(connectionInformation, { "host": activeConnection.host_ }); 
+		}
+
+		service.getFieldMapping = function(database, table, field) {
+			var connectionInfo = $filter('filter')(connectionInformation, { "host": activeConnection.host_ });
+			if (connectionInfo.length > 0) {
+				var database = $filter('filter')(connectionInfo[0].mappings, { "database":database });
+				if (database.length > 0) {
+					var table = $filter('filter')(database[0].tables, { "name": table });
+					if (table.length > 0) {
+						var field = $filter('filter')(table[0].fields, { "name": field });
+						if (field.length > 0) {
+							return field[0];
+						}
+					}
+				}
 			}
-			else {
-				return angular.filter(connectionInformation, { "name": name }); 
-			}
+			return {};
 		}
 
 		return service;
 
-	});
+	}]);

@@ -71,7 +71,11 @@ angular.module('circularHeatFormDirective', []).directive('circularHeatForm', ['
 		    }
 
 		    $scope.queryForChartData = function() {
-		        var dateField = $scope.getDateField();
+		    	// TODO: Decide how to pass in field mappings.  We can do this through a controller or the
+		    	// connection service or some mapping service.  Two example below, one commented out.
+		        //var dateField = $scope.getDateField();
+		        var dateField = connectionService.getFieldMapping($scope.databaseName, $scope.tableName, "date");
+		        dateField = dateField.mapping;
 
 		        if (!dateField) {
 		            $scope.drawChart({data: []});
@@ -88,13 +92,21 @@ angular.module('circularHeatFormDirective', []).directive('circularHeatForm', ['
 		            .where($scope.dateField, '!=', null)
 		            .aggregate(neon.query.COUNT, '*', 'count');
 
-		        //$scope.connection.executeQuery(query, $scope.drawChart);
-		        connectionService.getActiveConnection().executeQuery(query, $scope.drawChart);
+		        // Issue the query and provide a success handler that will forcefully apply an update to the chart.
+		        // This is done since the callbacks from queries execute outside digest cycle for angular.
+		        // If drawChart is called from within angular code or triggered by handler within angular, 
+		        // then the apply is handled by angular.  Forcing apply inside drawChart instead is error prone as it
+		        // may cause an apply within a digest cycle when triggered by an angular event.
+		        connectionService.getActiveConnection().executeQuery(query, function(queryResults) {
+		        	$scope.$apply(function(){
+		        		$scope.drawChart(queryResults);
+		        	});
+		        });
+
 		    }
 
 		    $scope.drawChart = function(queryResults) {
 		        $scope.data = $scope.createHeatChartData(queryResults);
-		        $scope.$apply();
 		    }
 
 		    $scope.createHeatChartData = function(queryResults){
