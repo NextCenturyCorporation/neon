@@ -38,7 +38,7 @@ function circularHeatChart(element, configuration) {
 
 
             // Unique id so that the text path defs are unique - is there a better way to do this?
-            var id = d3.selectAll(".circular-heat")[0].length;
+            var id = uuid.v4();
 
             //Radial labels
             var lsa = 0.01; //Label start angle
