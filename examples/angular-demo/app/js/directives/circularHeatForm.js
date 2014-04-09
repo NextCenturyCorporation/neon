@@ -14,18 +14,35 @@
  * limitations under the License.
  *
  */
-angular.module('circularHeatFormDirective', []).directive('circularHeatForm', function() {
+/**
+/**
+ * This directive adds a circular heat map to the DOM and drives the visualization data from
+ * whatever database and table are currently selected in neon.  This directive accomplishes that
+ * by using getting a neon connection from a connection service and listening for 
+ * neon system events (e.g., data tables changed).  On these events, it requeries the active
+ * connection for data and updates applies the change to its scope.  The contained
+ * circular heat map will update as a result.
+ * @class neonDemo.directives.circularHeatForm
+ * @constructor
+ */
+angular.module('circularHeatFormDirective', []).directive('circularHeatForm', ['ConnectionService',
+	function(connectionService) {
 
 	return {
 		templateUrl: 'partials/circularHeatForm.html',
 		restrict: 'E',
 		scope: {
-			//serverUrl: 'localhost',
-			//databaseName: 'mydb',
-			clientId: '&',
-			//tableName: 'sample',
 			filterKey: '=',
-			//dateField: 'time'
+		},
+		controller: function($scope) {
+
+			$scope.setDateField = function(field) {
+				$scope.dateField = field;
+			};
+
+			$scope.getDateField = function() {
+		    	return $scope.dateField;
+		    }
 		},
 		link: function($scope, element, attr) {
 			element.addClass('circularheatform');
@@ -33,59 +50,32 @@ angular.module('circularHeatFormDirective', []).directive('circularHeatForm', fu
 			var HOURS_IN_WEEK = 168;
 			var HOURS_IN_DAY = 24;
 
-			$scope.initialize = function() {
-		    	// Not sure we want to change this in a single page app.
-		        //neon.query.SERVER_URL = $("#neon-server").val();
-		        
-		        // TODO: Is this necessary?  Need to remove or convert to use new API.
-		        // Stubbing out for now.
-		        // clientId = neon.query.getInstanceId('neon.circularheat');
-		        $scope.clientId = 'neon.circularheat.example';
-		        $scope.serverUrl = 'localhost';
-		        $scope.databaseName = 'mydb';
-		        $scope.tableName = 'sample';
+			$scope.initialize = function() {	        
+		        // Defaulting the expected date field to 'time'.
 		        $scope.dateField = 'time';
-		        // $scope.messenger.registerForNeonEvents({
-		        //     activeDatasetChanged: onDatasetChanged,
-		        //     activeConnectionChanged: onConnectionChanged,
-		        //     filtersChanged: onFiltersChanged
-		        // });
 
-		        // TODO: Remove; no longer in API.
-		        //neon.toggle.createOptionsPanel("#options-panel");
-		        $scope.initChart();
-		        //$scope.restoreState();
+		        $scope.messenger.events({
+		            activeDatasetChanged: $scope.onDatasetChanged,
+		            filtersChanged: $scope.onFiltersChanged
+		        });
 		    };
-
-			$scope.initChart = function() {
-		        $scope.queryForChartData();
-		    }
 
 		    $scope.onFiltersChanged = function(message) {
 		        $scope.queryForChartData();
 		    }
 
-		    $scope.onConnectionChanged = function(id){
-		        connectionId = id;
-		    }
-
 		    $scope.onDatasetChanged = function(message) {
 		        $scope.databaseName = message.database;
 		        $scope.tableName = message.table;
-		        neon.query.registerForFilterKey(databaseName, tableName, function (filterResponse) {
-		            filterKey = filterResponse;
-		        });
-		        neon.query.getFieldNames(connectionId, databaseName, tableName, neon.widget.CIRCULAR_HEAT, populateFromColumns);
+		        $scope.queryForChartData();
 		    }
 
-		    // TODO: Remove or reimplement; these methods are no longer in neon API.
-		    // $scope.populateFromColumns = function(data) {
-		    //     var element = new neon.dropdown.Element("date", "temporal");
-		    //     neon.dropdown.populateAttributeDropdowns(data, element, queryForChartData);
-		    // }
-
 		    $scope.queryForChartData = function() {
-		        var dateField = $scope.getDateField();
+		    	// TODO: Decide how to pass in field mappings.  We can do this through a controller or the
+		    	// connection service or some mapping service.  Two example below, one commented out.
+		        //var dateField = $scope.getDateField();
+		        var dateField = connectionService.getFieldMapping($scope.databaseName, $scope.tableName, "date");
+		        dateField = dateField.mapping;
 
 		        if (!dateField) {
 		            $scope.drawChart({data: []});
@@ -102,15 +92,17 @@ angular.module('circularHeatFormDirective', []).directive('circularHeatForm', fu
 		            .where($scope.dateField, '!=', null)
 		            .aggregate(neon.query.COUNT, '*', 'count');
 
-		        //var stateObject = buildStateObject(dateField, query);
-		        // neon.query.Connection.executeQuery($scope.connectionId, query, $scope.drawChart);
+		        // Issue the query and provide a success handler that will forcefully apply an update to the chart.
+		        // This is done since the callbacks from queries execute outside digest cycle for angular.
+		        // If drawChart is called from within angular code or triggered by handler within angular, 
+		        // then the apply is handled by angular.  Forcing apply inside drawChart instead is error prone as it
+		        // may cause an apply within a digest cycle when triggered by an angular event.
+		        connectionService.getActiveConnection().executeQuery(query, function(queryResults) {
+		        	$scope.$apply(function(){
+		        		$scope.drawChart(queryResults);
+		        	});
+		        });
 
-		        var connection = new neon.query.Connection();
-		        connection.connect(neon.query.Connection.MONGO, "localhost");
-		        connection.use($scope.databaseName);
-		        connection.executeQuery(query, $scope.drawChart);
-		        // TODO: Remove or rewrite.  This method no longer in API.
-		        // neon.query.saveState(clientId, stateObject);
 		    }
 
 		    $scope.drawChart = function(queryResults) {
@@ -133,11 +125,6 @@ angular.module('circularHeatFormDirective', []).directive('circularHeatForm', fu
 		        return data;
 		    }
 
-		    $scope.getDateField = function() {
-		    	return $scope.dateField;
-		        //return $('#date option:selected').val();
-		    }
-
 		    $scope.buildStateObject = function(dateField, query) {
 		        return {
 		            connectionId: connectionId,
@@ -148,33 +135,12 @@ angular.module('circularHeatFormDirective', []).directive('circularHeatForm', fu
 		        };
 		    }
 
-		    // TODO: Remove or rewrite.  These methods are no longer in the Neon API and we're ditching the 
-		    // column pull-down menus.
-		    // $scope.restoreState = function() {
-		    //     neon.query.getSavedState(clientId, function (data) {
-		    //         filterKey = data.filterKey;
-		    //         connectionId = data.connectionId;
-		    //         if(!filterKey || !connectionId){
-		    //             return;
-		    //         }
-		    //         databaseName = data.filterKey.dataSet.databaseName;
-		    //         tableName = data.filterKey.dataSet.tableName;
-		    //         var element = new neon.dropdown.Element("date", "temporal");
-		    //         neon.dropdown.populateAttributeDropdowns(data.columns, element, queryForChartData);
-		    //         neon.dropdown.setDropdownInitialValue("date", data.selectedField);
-		    //         neon.query.executeQuery(connectionId, data.query, drawChart);
-		    //     });
-		    // }
-
+		    // Wait for neon to be ready, the create our messenger and intialize the view and data.
 			neon.ready(function () {
-
 			    $scope.messenger = new neon.eventing.Messenger();
-			    // scope.clientId;
-			    // scope.connectionId;
-
 			    $scope.initialize();   
 			});
 
 		}
 	}
-});
+}]);
