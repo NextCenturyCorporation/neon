@@ -11,15 +11,24 @@ databaseConfig.directive('databaseConfig', ['ConnectionService', function(connec
 		$scope.databases = [];
 		$scope.dbTables = [];
 		$scope.fields = [];
+		$scope.isConnected = false;
 
 		var connection;
 
 		$scope.connectToDatastore = function() {
 			$scope.showDbTable = true;
 
+			// Connect to the datastore.
 			connection = new neon.query.Connection();
 			connection.connect($scope.datastoreSelect, $scope.hostnameInput);
-			connectionService.setActiveConnection(connection)
+
+			// Save the connection in the connection service for reuse by other directives.
+			connectionService.setActiveConnection(connection);
+
+			// Flag that we're connected for the front-end controls enable/disable code.
+			$scope.isConnected = true;
+
+			// Pull in the databse names.
 			connection.getDatabaseNames(populateDatabaseDropdown);
 		};
 

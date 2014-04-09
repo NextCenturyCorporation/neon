@@ -18,7 +18,7 @@
     width: 360px;
     height: 360px;
     margin: auto;
-    float: left;
+    display: block;
 }
 
 .circularheatchart svg {
