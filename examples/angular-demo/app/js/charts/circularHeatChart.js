@@ -1,5 +1,5 @@
 function circularHeatChart(element, configuration) {
-    var margin = {top: 0, right: 0, bottom: 0, left: 0},
+    var margin = {top: 20, right: 20, bottom: 20, left: 20},
     innerRadius = 50,
     numSegments = 24,
     segmentHeight = 20,
@@ -85,6 +85,7 @@ function circularHeatChart(element, configuration) {
                 .append("textPath")
                 .attr("xlink:href", "#segment-label-path-"+id)
                 .attr("startOffset", function(d, i) {return i * 100 / numSegments + "%";})
+                .style("font-size", 0.7 * segmentHeight + 'px')
                 .text(function(d) {return d;});
         });
 

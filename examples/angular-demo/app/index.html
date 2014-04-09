@@ -6,7 +6,7 @@
 			<meta name="viewport" content="width=device-width, initial-scale=1">
 		<title>Neon</title>
 
-
+		<link type="image/png" rel="shortcut icon" href="img/Neon_16x16.png">
 
 		<link rel="stylesheet" type="text/css" href="css/bootstrap/bootstrap.min.css">
 
@@ -20,8 +20,8 @@
 		<!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
 		<!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
 		<!--[if lt IE 9]>
-		<script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
-		<script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+		<script src="lib/html5shiv.js"></script>
+		<script src="lib/respond.min.js"></script>
 		<![endif]-->
 	</head>
 	<body ng-controller="neonDemoController">
@@ -67,11 +67,55 @@
 
 					</ul>
 				</div>
+		<!-- Header -->
+		<!-- This could be made into either a directive or a partial -->
+		<div role="navigation" class="navbar navbar-default navbar-static-top">
+			<div class="container">
+
+				<button data-target=".navbar-collapse" data-toggle="collapse" class="navbar-toggle pull-left" type="button">
+					<span class="sr-only">Toggle navigation</span>
+					<span class="icon-bar"></span>
+					<span class="icon-bar"></span>
+					<span class="icon-bar"></span>
+				</button>
+
+				<a href="" class="navbar-text pull-right">
+					Powered by <img class="brand-image" src="img/Neon_60x34.png"></img>
+				</a>
+
+				<div class="clearfix visible-xs"></div>
+
+				<div class="navbar-collapse collapse">
+					<ul class="nav navbar-nav">
+
+						<li class="dropdown">
+							<a data-toggle="dropdown" class="dropdown-toggle primary" href="#">Twitter <b class="caret"></b></a>
+							<ul class="dropdown-menu">
+								<li class="active"><a href="#">Twitter</a></li>
+								<li class="divider"></li>
+								<li><a data-toggle="modal" href="#customConnectionModal">Custom...</a></li>
+							</ul>
+						</li>
+
+						<li>
+							<a data-toggle="collapse" data-parent="#trays" href="#filter-tray" class="collapsed">
+								<span class="glyphicon glyphicon-filter"></span> Create Filter
+							</a>
+						</li>
+						<li>
+							<a data-toggle="collapse" data-parent="#trays" href="#data-tray" class="collapsed">
+								<span class="glyphicon glyphicon-list"></span> See Data
+							</a>
+						</li>
+
+					</ul>
+				</div>
 
 			</div>
 		</div>
 
-		<!-- Header slideout trays -->
+
+		<!-- THESE TRAYS SHOULD BE DIRECTIVES EVENTUALLY -->
 		<div id="trays">
 
 			<!-- Filter Builder tray -->
@@ -289,105 +333,105 @@
 
 		</div>
 
+		<!-- DASHBOARD CONTENT -->
 		<div class="container">
 
-			<!-- Timeline -->
-			<div class="well well-blank">
-				<h3><span class="count count-large text-primary">233,312</span> tweets from February 1, 2014 to March 31, 2014</h3>
-				<!-- chart container here -->
-			</div>
+		<!-- Timeline -->
+		<div class="well well-blank">
+			<h3><span class="count count-large text-primary">233,312</span> tweets from February 1, 2014 to March 31, 2014</h3>
+			<!-- chart container here -->
+		</div>
 
-			<div class="row">
+		<div class="row">
 
-				<!-- Left column -->
-				<div class="col-md-5">
+			<!-- Left column -->
+			<div class="col-md-4">
 
-					<!-- Circular heat chart -->
-					<div class="well">
-						<h4>User(s) most active <span class="count count-large text-primary">Sunday nights</span></h4>
-						<div class="clearfix">
-							<circular-heat-form></circular-heat-form>
-						</div>
-					</div>
+				<!-- Circular heat chart -->
+				<circular-heat-form></circular-heat-form>
 
-					<!-- Tag cloud -->
-					<div class="well">
-						<h4>Popular Hashtags</h4>
-						<!-- chart container here -->
-					</div>
-
+				<!-- Tag cloud -->
+				<div class="well">
+					<h4>Popular Hashtags</h4>
+					<!-- chart container here -->
 				</div>
 
-				<!-- Right column -->
-				<div class="col-md-7">
+			</div>
 
-					<!-- Sentiment chart -->
-					<div class="well">
+			<!-- Right column -->
+			<div class="col-md-8">
 
-						<div class="dropdown pull-right">
-							<a class="btn btn-lg text-muted dropdown-toggle" data-toggle="dropdown">
-								<span class="glyphicon glyphicon-cog"></span>
-								<span class="caret"></span>
-							</a>
-							<div class="dropdown-menu panel-body">
+				<!-- Sentiment chart -->
+				<div class="well">
 
-								<div class="form-group">
-									<label>Chart Type</label>
-									<div class="btn-group" data-toggle="buttons">
-										<label class="btn btn-default active">
-											<input type="radio" name="chartType" id="chartType_column" checked>
-											<span class="glyphicon glyphicon-stats"></span>
-										</label>
-										<label class="btn btn-default">
-											<input type="radio" name="chartType" id="chartType_line">
-											<span class="glyphicon glyphicon-ok"></span>
-										</label>
-									</div>
+					<div class="dropdown pull-right">
+						<a class="btn btn-lg text-muted dropdown-toggle" data-toggle="dropdown">
+							<span class="glyphicon glyphicon-cog"></span>
+							<span class="caret"></span>
+						</a>
+						<div class="dropdown-menu panel-body">
+
+							<div class="form-group">
+								<label>Chart Type</label>
+								<div class="btn-group" data-toggle="buttons">
+									<label class="btn btn-default active">
+										<input type="radio" name="chartType" id="chartType_column" checked>
+										<span class="glyphicon glyphicon-stats"></span>
+									</label>
+									<label class="btn btn-default">
+										<input type="radio" name="chartType" id="chartType_line">
+										<span class="glyphicon glyphicon-ok"></span>
+									</label>
 								</div>
-
-								<div class="form-group">
-									<label>Show Unknown</label>
-									<div class="btn-group" data-toggle="buttons">
-										<label class="btn btn-default active">
-											<input type="radio" name="boolean" id="boolean_and" checked> ON
-										</label>
-										<label class="btn btn-default">
-											<input type="radio" name="boolean" id="boolean_or"> OFF
-										</label>
-									</div>
-								</div>
-
 							</div>
-						</div>
 
-						<h4>
-							<span class="count-group"><span class="count count-large text-primary">3%</span> positive</span>
-							<span class="count-group"><span class="count count-large text-danger">5%</span> negative</span>
-							<span class="count-group"><span class="count count-large text-success">10%</span> neutral</span>
-							<span class="count-group"><span class="count count-large text-muted">82%</span> unknown</span>
-						</h4>
+							<div class="form-group">
+								<label>Show Unknown</label>
+								<div class="btn-group" data-toggle="buttons">
+									<label class="btn btn-default active">
+										<input type="radio" name="boolean" id="boolean_and" checked> ON
+									</label>
+									<label class="btn btn-default">
+										<input type="radio" name="boolean" id="boolean_or"> OFF
+									</label>
+								</div>
+							</div>
 
-						<!-- chart container here -->
-						<div class="clearfix">
-							<barchart attr-x="'time'" attr-y="'magnitude'"></barchart>
 						</div>
 					</div>
 
-					<!-- Map -->
-					<div class="well">
-						<!-- chart container here -->
-					</div>
+					<h4>
+						<span class="count-group"><span class="count count-large text-primary">3%</span> positive</span>
+						<span class="count-group"><span class="count count-large text-danger">5%</span> negative</span>
+						<span class="count-group"><span class="count count-large text-success">10%</span> neutral</span>
+						<span class="count-group"><span class="count count-large text-muted">82%</span> unknown</span>
+					</h4>
 
+					<!-- chart container here -->
+					<div class="clearfix">
+						<barchart attr-x="'time'" attr-y="'magnitude'"></barchart>
+					</div>
 				</div>
+
+				<!-- Map -->
+				<div class="well">
+					<!-- chart container here -->
+				</div>
+
 			</div>
+		</div>
 
 		</div>
+
+		<!-- Custom Connection Modal -->
+		<!--div ng-include="'partials/start.html'"></div-->
+
 		<database-config></database-config>
 
 		<!-- In production use:
 		<script src="//ajax.googleapis.com/ajax/libs/angularjs/x.x.x/angular.min.js"></script>
 		-->
-		<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script>
+		<script src="lib/jquery-1.11.0.min.js"></script>
 		<script src="lib/angular/angular.min.js"></script>
 
 		<script src="/neon/js/neon.js"></script>
