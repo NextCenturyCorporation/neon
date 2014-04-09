@@ -1,0 +1,338 @@
+/* ================
+	FONT
+================ */
+
+@font-face {
+  font-family: 'Open Sans';
+  font-style: normal;
+  font-weight: 300;
+  src:  url('../fonts/OpenSans-Light.eot'); 
+  src: 	url('../fonts/OpenSans-Light.eot?#iefix') format('embedded-opentype'),
+		url('../fonts/OpenSans-Light.woff') format('woff'),
+		url('../fonts/OpenSans-Light.ttf') format('truetype'),
+		url('../fonts/opensans-light-webfont.svg#open_sanslight') format('svg');
+}
+@font-face {
+  font-family: 'Open Sans';
+  font-style: normal;
+  font-weight: 400;
+  src:  url('../fonts/OpenSans-Regular.eot'); 
+  src: 	url('../fonts/OpenSans-Regular.eot?#iefix') format('embedded-opentype'),
+		url('../fonts/OpenSans-Regular.woff') format('woff'),
+		url('../fonts/OpenSans-Regular.ttf') format('truetype'),
+		url('../fonts/opensans-regular-webfont.svg#open_sansregular') format('svg');
+}
+@font-face {
+  font-family: 'Open Sans';
+  font-style: normal;
+  font-weight: 700;
+  src:  url('../fonts/OpenSans-Bold.eot'); 
+  src: 	url('../fonts/OpenSans-Bold.eot?#iefix') format('embedded-opentype'),
+		url('../fonts/OpenSans-Bold.woff') format('woff'),
+		url('../fonts/OpenSans-Bold.ttf') format('truetype'),
+		url('../fonts/opensans-bold-webfont.svg#open_sansbold') format('svg');
+}
+
+/* Better font rendering for Chrome */
+@media screen and (-webkit-min-device-pixel-ratio:0) {
+  @font-face {
+	  font-family: 'Open Sans';
+	  font-style: normal;
+	  font-weight: 300;
+	  src: 	url('../fonts/opensans-light-webfont.svg#open_sanslight') format('svg');
+	}
+	@font-face {
+	  font-family: 'Open Sans';
+	  font-style: normal;
+	  font-weight: 400;
+	  src: 	url('../fonts/opensans-regular-webfont.svg#open_sansregular') format('svg');
+	}
+	@font-face {
+	  font-family: 'Open Sans';
+	  font-style: normal;
+	  font-weight: 700;
+	  src:  url('../fonts/opensans-bold-webfont.svg#open_sansbold') format('svg');
+	}
+	
+	/* Just for selects... */
+	@font-face {
+	  font-family: 'Open Sans Selects';
+	  font-style: normal;
+	  font-weight: 300;
+	  src:  url('../fonts/OpenSans-Light.eot'); 
+	  src: 	url('../fonts/OpenSans-Light.eot?#iefix') format('embedded-opentype'),
+			url('../fonts/OpenSans-Light.woff') format('woff'),
+			url('../fonts/OpenSans-Light.ttf') format('truetype');
+	}
+	@font-face {
+	  font-family: 'Open Sans Selects';
+	  font-style: normal;
+	  font-weight: 400;
+	  src:  url('../fonts/OpenSans-Regular.eot'); 
+	  src: 	url('../fonts/OpenSans-Regular.eot?#iefix') format('embedded-opentype'),
+			url('../fonts/OpenSans-Regular.woff') format('woff'),
+			url('../fonts/OpenSans-Regular.ttf') format('truetype');
+	}
+	@font-face {
+	  font-family: 'Open Sans Selects';
+	  font-style: normal;
+	  font-weight: 700;
+	  src:  url('../fonts/OpenSans-Bold.eot'); 
+	  src: 	url('../fonts/OpenSans-Bold.eot?#iefix') format('embedded-opentype'),
+			url('../fonts/OpenSans-Bold.woff') format('woff'),
+			url('../fonts/OpenSans-Bold.ttf') format('truetype');
+	}
+	select{
+		font-family: "Open Sans Selects", Helvetica, arial, sans-serif !important;
+	}
+}
+@font-face {
+  font-family: 'Glyphicons Halflings';
+
+  src: url('../fonts/glyphicons-halflings-regular.eot');
+  src: url('../fonts/glyphicons-halflings-regular.eot?#iefix') format('embedded-opentype'), url('../fonts/glyphicons-halflings-regular.woff') format('woff'), url('../fonts/glyphicons-halflings-regular.ttf') format('truetype'), url('../fonts/glyphicons-halflings-regular.svg#glyphicons_halflingsregular') format('svg');
+}
+
+/* ================
+	BASE
+================ */
+
+*{
+	outline: 0 none !important;
+}
+body{
+	background-color: #F1F1F1;
+}
+body,
+h1, .h1,
+h2, .h2,
+h3, .h3,
+h4, .h4,
+h5, .h5,
+h6, .h6{
+	font-family: "Open Sans", Helvetica, arial, sans-serif;
+}
+h1, .h1,
+h2, .h2,
+h3, .h3,
+h4, .h4,
+h5, .h5,
+h6, .h6{
+	color: #888888;
+}
+.text-primary{
+	color: #39b54a;
+}
+.text-success{
+	color: #3681CC;
+}
+.text-danger{
+	color: #C2360D;
+}
+.dropdown-menu > .active > a,
+.dropdown-menu > .active > a:hover,
+.dropdown-menu > .active > a:focus{
+	background-color: #39b54a;
+}
+.btn-primary{
+	background-color: #39b54a;
+	border-color: #39b54a;
+}
+.btn-primary:hover,
+.btn-primary:focus,
+.btn-primary:active,
+.btn-primary.active,
+.open .dropdown-toggle.btn-primary{
+	background-color: #2f9f3e;
+	border-color: #2f9f3e;
+}
+.btn-success{
+	background-color: #3681CC;
+	border-color: #3681CC;
+}
+.btn-danger{
+	background-color: #C2360D;
+	border-color: #C2360D;
+}
+
+/* ================
+	NAVBAR
+================ */
+
+a.navbar-text:hover{
+	text-decoration: none;
+	color: #333333;
+}
+.navbar{
+	margin-bottom: 30px;
+}
+.navbar-default{
+	background-color: #FFFFFF;
+	border: 0;
+	box-shadow: 0 1px 2px rgba(0, 0, 0, 0.15);
+}
+.navbar-text{
+	margin: 8px;
+}
+.navbar-text img{
+	margin-left: 6px;
+}
+
+
+.navbar-default .navbar-nav > li > a{
+	margin-right: 40px;
+	color: #39b54a;
+	border-bottom: 3px solid #39b54a;
+	padding: 15px 0 12px;
+}
+
+.navbar-default .navbar-nav > li > a.collapsed,
+.navbar-default .navbar-nav > li > a.collapsed:focus{
+	background: none;
+	color: #777777;
+	border: 0;
+	padding-bottom: 15px;
+}
+.navbar-default .navbar-nav > li > a:focus,
+.navbar-default .navbar-nav > li > a:hover,
+.navbar-default .navbar-nav > li > a.collapsed:hover{
+    color: #39b54a;
+}
+
+.navbar-default .navbar-nav > .dropdown > .primary{
+	border: 0;
+	background-color: #39b54a;
+	color: #FFFFFF;
+	padding: 15px 30px;
+	font-weight: bold;
+}
+.navbar-default .navbar-nav > .dropdown > .primary:hover,
+.navbar-default .navbar-nav > .dropdown > .primary:focus{
+	background-color: #2f9f3e;
+    color: #FFFFFF;
+}
+
+@media (max-width: 767px) {
+	.navbar-default .navbar-nav > li > a{
+		margin-right: 0;
+		padding: 15px 30px 12px;
+	}
+}
+
+/* ================
+	TRAYS
+================ */
+
+.tray{
+	margin-top: -30px;
+	border-top: 0;
+	margin-bottom: 30px;
+	background-color: #FAFAFA;
+}
+.tray .table{
+	margin-bottom: 0;
+}
+.tray .table-responsive{
+	max-height: 250px;
+	overflow-y: scroll;
+	margin: 15px 0;
+}
+.tray .container > .pull-right{
+	margin-top: 5px;
+}
+
+/* FILTER TRAY */
+
+.filter-tray .filter{
+	background-color: #e9e9e9;
+	padding: 10px;
+	border-radius: 4px;
+	margin-top: 10px;
+}
+.filter-tray .filter-new{
+	background: none;
+}
+.filter-tray .filter .form-group{
+	margin-right: 5px;
+}
+.filter-tray .container > .btn-group{
+	margin-right: 10px;
+}
+.filter-tray .container > .btn-group > .btn{
+	font-weight: bold;
+	font-size: 12px;
+	line-height: 20px;
+}
+
+/* ================
+	WELLS
+================ */
+
+.well{
+	background-color: #FFFFFF;
+	box-shadow: 0 1px 4px rgba(154, 154, 154, 0.3);
+	border: 1px solid #D6D6D6;
+	margin-bottom: 30px;
+	padding: 30px;
+}
+.well-blank{
+	background: none;
+	box-shadow: none;
+	border: 0;
+	padding: 0;
+}
+.well > h1,
+.well > h2,
+.well > h3,
+.well > h4{
+	margin-top: 0;
+	margin-bottom: 30px;
+}
+
+/* ================
+	COUNTS
+================ */
+
+.count{
+	font-weight: bold;
+	font-size: 120%;
+	display: inline-block;
+}
+.count-large{
+	font-size: 160%;
+	bottom: -4px;
+    display: inline-block;
+    margin-right: 5px;
+    position: relative;
+}
+.count-group{
+	display: inline-block;
+	margin-right: 20px;
+}
+
+/* ================
+	TABLES
+================ */
+
+.table-responsive{
+	border: 1px solid #DDDDDD;
+	border-radius: 4px;
+}
+.table-striped > tbody > tr:nth-child(2n+1) > td,
+.table-striped > tbody > tr:nth-child(2n+1) > th {
+    background-color: #F1f1f1;
+}
+
+/* ================
+	FORMS
+================ */
+
+.form-control:focus {
+    border-color: #39b54a;
+    box-shadow: 0 1px 1px rgba(0, 0, 0, 0.075) inset, 0 0 8px rgba(57, 181, 74, 0.5);
+}
+label{
+	font-size: 12px;
+	color: #777777;
+	text-transform: uppercase;
+}

@@ -1,10 +1,10 @@
 function circularHeatChart(element, configuration) {
-    var margin = {top: 20, right: 20, bottom: 20, left: 20},
+    var margin = {top: 0, right: 0, bottom: 0, left: 0},
     innerRadius = 50,
     numSegments = 24,
     segmentHeight = 20,
     domain = null,
-    range = ["white", "red"],
+    range = ["#ffffff", "#39b54a"],
     accessor = function(d) {return d;},
     radialLabels = segmentLabels = [];
 
