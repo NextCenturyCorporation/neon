@@ -650,3 +650,6 @@ charts.BarChart.prototype.redrawOnResize_ = function () {
     $(window).resize(_.debounce(drawChart, 100));
 
 };
+
+//FIXME charts.BarChart.destroy(el, selector);
+//FIXME charts.BarChart.render(data);

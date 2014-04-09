@@ -1,8 +1,15 @@
+/* global neon */
+/* global charts */
+'use strict';
+
+
 var barchart = angular.module('barchartDirective', []);
 
-barchart.directive('barchart', function() {
-	var elm;
+barchart.directive('barchart', ['ConnectionService', function(connectionService) {
+	var COUNT_FIELD_NAME = 'Count';
+
 	var link = function($scope, el, attr) {
+
 		var messenger = new neon.eventing.Messenger();
 		$scope.fields = [];
 		$scope.xAxisSelect = $scope.fields[0] ? $scope.fields[0] : '';
@@ -12,19 +19,49 @@ barchart.directive('barchart', function() {
 		var clientId;
 
 		var initialize = function() {
-			// neon.query.SERVER_URL = $("#neon-server").val();
-			// clientId = neon.query.getInstanceId('neon.barchart');
-			// neon.toggle.createOptionsPanel("#options-panel");
-			drawChart();
-			// messenger.registerForNeonEvents({
-			// 	activeDatasetChanged: function (message) {
-			// 		neon.chartWidget.onActiveDatasetChanged(message, drawChart, neon.widget.BARCHART);
-			// 	},
-			// 	activeConnectionChanged: neon.chartWidget.onConnectionChanged,
-			// 	filtersChanged: drawChart
-			// });
+			//determine fields
+			console.log($scope);
 
-			// restoreState();
+			$scope.attrX = ($scope.attrX ? $scope.attrX : 'foo') ;
+			$scope.attrY = ($scope.attrY ? $scope.attrY : 'bar');
+
+			drawChart();
+
+			$scope.messenger.events({
+				activeDatasetChanged: onDatasetChanged,
+				filtersChanged: onFiltersChanged
+			});
+		};
+
+		var onFiltersChanged = function(message) {
+			$scope.queryForData();
+		};
+
+		var onDatasetChanged = function(message) {
+			$scope.databaseName = message.database;
+			$scope.tableName = message.table;
+
+
+			queryForData();
+		};
+
+		var queryForData = function() {
+			var query = new neon.query.Query()
+			.selectFrom($scope.databaseName, $scope.tableName)
+			.where($scope.attrX, '!=', null)
+			.groupBy($scope.attrX);
+
+			if($scope.attrY) {
+				query.aggregate(neon.query.SUM, $scope.attrY, $scope.attrY);
+			} else {
+				query.aggregate(neon.query.COUNT, '*', COUNT_FIELD_NAME);
+			}
+
+			connectionService.getActiveConnection().executeQuery(query, function(queryResults) {
+				$scope.$apply(function(){
+					doDrawChart(queryResults);
+				});
+			});
 		};
 
 		/**
@@ -32,93 +69,33 @@ barchart.directive('barchart', function() {
 		 * @method drawChart
 		 */
 		var drawChart = function() {
-			var xAttr = 'foo';//neon.chartWidget.getXAttribute();
-			var yAttr = 'bar';//neon.chartWidget.getYAttribute();
-			// if (!xAttr) {
-				doDrawChart({data: [{foo:1, bar:10},{foo:2,bar:5},{foo:3, bar:15},{foo:4, bar:23}]});
-				// return;
-			// }
-
-
-			// var query = new neon.query.Query()
-			// 	.selectFrom(neon.chartWidget.getDatabaseName(), neon.chartWidget.getTableName())
-			// 	.where(xAttr, '!=', null).groupBy(xAttr);
-
-			// if (yAttr) {
-			// 	query.aggregate(neon.query.SUM, yAttr, yAttr);
-			// }
-			// else {
-			// 	query.aggregate(neon.query.COUNT, '*', COUNT_FIELD_NAME);
-			// }
-
-			// var stateObject = buildStateObject(query);
-			// neon.query.executeQuery(neon.chartWidget.getConnectionId(), query, doDrawChart);
-			// neon.query.saveState(clientId, stateObject);
-		}
+			doDrawChart({data: []});
+		};
 
 		var doDrawChart = function(data) {
-			$('#chart').empty();
-			// var xAttr = neon.chartWidget.getXAttribute();
-			// var yAttr = neon.chartWidget.getYAttribute();
-			var xAttr = 'foo';//neon.chartWidget.getXAttribute();
-			var yAttr = 'bar';//neon.chartWidget.getYAttribute();
+			if (!$scope.attrY) {
+				$scope.attrY = COUNT_FIELD_NAME;
+			}
 
-			// if (!yAttr) {
-			// 	yAttr = COUNT_FIELD_NAME;
-			// }
+			var opts = { "data": data.data, "x": $scope.attrX, "y": $scope.attrY, responsive: true};
 
-			//We need this because we set a window listener which holds a reference to old barchart objects.
-			//We should really only use one barchart object, but that will be fixed as part of NEON-294
-			$(window).off("resize");
-			var opts = { "data": data.data, "x": xAttr, "y": yAttr, responsive: true};
-
+			//FIXME need to update... not recreate
 			var chart = new charts.BarChart(el[0], '.barchart', opts).draw();
-		}
+		};
 
-		initialize();
-
-
-
-
-
-
-
-		// function buildStateObject(query) {
-		// 	return {
-		// 		connectionId: neon.chartWidget.getConnectionId(),
-		// 		filterKey: neon.chartWidget.getFilterKey(),
-		// 		columns: neon.dropdown.getFieldNamesFromDropdown("x"),
-		// 		xValue: neon.chartWidget.getXAttribute(),
-		// 		yValue: neon.chartWidget.getYAttribute(),
-		// 		query: query
-		// 	};
-		// }
-
-		// function restoreState() {
-		// 	neon.query.getSavedState(clientId, function (data) {
-		// 		neon.chartWidget.onConnectionChanged(data.connectionId);
-		// 		neon.chartWidget.setFilterKey(data.filterKey);
-		// 		neon.chartWidget.setDatabaseName(data.filterKey.dataSet.databaseName);
-		// 		neon.chartWidget.setTableName(data.filterKey.dataSet.tableName);
-
-		// 		var elements = [new neon.dropdown.Element("x", ["text", "numeric"]), new neon.dropdown.Element("y", "numeric")];
-		// 		neon.dropdown.populateAttributeDropdowns(data.columns, elements, drawChart);
-		// 		neon.dropdown.setDropdownInitialValue("x", data.xValue);
-		// 		neon.dropdown.setDropdownInitialValue("y", data.yValue);
-		// 		neon.query.executeQuery(neon.chartWidget.getConnectionId(), data.query, doDrawChart);
-		// 	});
-		// }
-	}
-
-
-
-
+		neon.ready(function () {
+			$scope.messenger = new neon.eventing.Messenger();
+			initialize();
+		});
+	};
 
 	return {
 		templateUrl: 'partials/barchart.html',
 		restrict: 'E',
 		scope: {
+			attrX: '=',
+			attrY: '='
 		},
 		link: link
-	}
-});
+	};
+}]);

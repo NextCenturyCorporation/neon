@@ -305,10 +305,9 @@
 					<!-- Circular heat chart -->
 					<div class="well">
 						<h4>User(s) most active <span class="count count-large text-primary">Sunday nights</span></h4>
-						<!--div ng-include="'partials/barchart.html'"></div-->
-				<div class="clearfix">
-					<circular-heat-form></circular-heat-form>
-				</div>
+						<div class="clearfix">
+							<circular-heat-form></circular-heat-form>
+						</div>
 					</div>
 
 					<!-- Tag cloud -->
@@ -369,7 +368,9 @@
 						</h4>
 
 						<!-- chart container here -->
-
+						<div class="clearfix">
+							<barchart attr-x="'time'" attr-y="'magnitude'"></barchart>
+						</div>
 					</div>
 
 					<!-- Map -->
