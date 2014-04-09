@@ -3,7 +3,7 @@
 	<head>
 		<meta charset="utf-8">
 		<meta http-equiv="X-UA-Compatible" content="IE=edge">
-  		<meta name="viewport" content="width=device-width, initial-scale=1">
+			<meta name="viewport" content="width=device-width, initial-scale=1">
 		<title>Neon</title>
 
 
@@ -25,375 +25,363 @@
 		<![endif]-->
 	</head>
 	<body ng-controller="neonDemoController">
+		<!-- Header -->
+		<div role="navigation" class="navbar navbar-default navbar-static-top">
+			<div class="container">
 
+				<button data-target=".navbar-collapse" data-toggle="collapse" class="navbar-toggle pull-left" type="button">
+					<span class="sr-only">Toggle navigation</span>
+					<span class="icon-bar"></span>
+					<span class="icon-bar"></span>
+					<span class="icon-bar"></span>
+				</button>
 
+				<a href="" class="navbar-text pull-right">
+					Powered by <img class="brand-image" src="img/Neon_60x34.png"></img>
+				</a>
 
+				<div class="clearfix visible-xs"></div>
 
+				<div class="navbar-collapse collapse">
+					<ul class="nav navbar-nav">
 
+						<li class="dropdown">
+							<a data-toggle="dropdown" class="dropdown-toggle primary" href="#">Twitter <b class="caret"></b></a>
+							<ul class="dropdown-menu">
+								<li class="active"><a href="#">Twitter</a></li>
+								<li class="divider"></li>
+								<li><a data-toggle="modal" href="#customConnectionModal">Custom...</a></li>
+							</ul>
+						</li>
 
+						<li>
+							<a data-toggle="collapse" data-parent="#trays" href="#filter-tray" class="collapsed">
+								<span class="glyphicon glyphicon-filter"></span> Create Filter
+							</a>
+						</li>
+						<li>
+							<a data-toggle="collapse" data-parent="#trays" href="#data-tray" class="collapsed">
+								<span class="glyphicon glyphicon-list"></span> See Data
+							</a>
+						</li>
 
+					</ul>
+				</div>
 
-
-			<!-- Header -->
-  <div role="navigation" class="navbar navbar-default navbar-static-top">
-    <div class="container">
-
-      <button data-target=".navbar-collapse" data-toggle="collapse" class="navbar-toggle pull-left" type="button">
-        <span class="sr-only">Toggle navigation</span>
-        <span class="icon-bar"></span>
-        <span class="icon-bar"></span>
-        <span class="icon-bar"></span>
-      </button>
-
-      <a href="" class="navbar-text pull-right">
-        Powered by <img class="brand-image" src="img/Neon_60x34.png"></img>
-      </a>
-
-      <div class="clearfix visible-xs"></div>
-
-      <div class="navbar-collapse collapse">
-        <ul class="nav navbar-nav">
-
-          <li class="dropdown">
-            <a data-toggle="dropdown" class="dropdown-toggle primary" href="#">Twitter <b class="caret"></b></a>
-            <ul class="dropdown-menu">
-              <li class="active"><a href="#">Twitter</a></li>
-              <li class="divider"></li>
-              <li><a data-toggle="modal" href="#customConnectionModal">Custom...</a></li>
-            </ul>
-          </li>
-
-          <li>
-            <a data-toggle="collapse" data-parent="#trays" href="#filter-tray" class="collapsed">
-              <span class="glyphicon glyphicon-filter"></span> Create Filter
-            </a>
-          </li>
-          <li>
-            <a data-toggle="collapse" data-parent="#trays" href="#data-tray" class="collapsed">
-              <span class="glyphicon glyphicon-list"></span> See Data
-            </a>
-          </li>
-
-        </ul>
-      </div>
-
-    </div>
-  </div>
-
-  <!-- Header slideout trays -->
-  <div id="trays">
-
-    <!-- Filter Builder tray -->
-    <div id="filter-tray" class="tray filter-tray panel panel-default collapse">
-      <div class="container panel-body">
-
-        <h4 class="pull-left">Create Filter</h4>
-
-        <div class="btn-group pull-right" data-toggle="buttons">
-          <label class="btn btn-default active">
-            <input type="radio" name="boolean" id="boolean_and" checked> AND
-          </label>
-          <label class="btn btn-default">
-            <input type="radio" name="boolean" id="boolean_or"> OR
-          </label>
-        </div>
-
-        <div class="clearfix"></div>
-
-        <div class="filter form-inline clearfix">
-          <div class="form-group">
-            <select id="field1" class="form-control">
-              <option>user_id</option>
-              <option>sentiment</option>
-              <option>something</option>
-              <option>something</option>
-              <option>something</option>
-            </select>
-          </div>
-          <div class="form-group">
-            <select id="operator1" class="form-control">
-              <option>==</option>
-              <option>&gt;=</option>
-              <option>&lt;=</option>
-              <option>&gt;</option>
-              <option>&lt;</option>
-              <option>!=</option>
-              <option>between</option>
-            </select>
-          </div>
-          <div class="form-group">
-            <input type="text" class="form-control" id="value1" size="46" placeholder="Value" value="423423423">
-          </div>
-          <div class="form-group pull-right">
-            <button type="button" class="btn btn-danger">
-              <span class="glyphicon glyphicon-remove"></span>
-            </button>
-          </div>
-        </div>
-
-        <div class="filter form-inline clearfix">
-          <div class="form-group">
-            <select id="field2" class="form-control">
-              <option>user_id</option>
-              <option selected>sentiment</option>
-              <option>something</option>
-              <option>something</option>
-              <option>something</option>
-            </select>
-          </div>
-          <div class="form-group">
-            <select id="operator2" class="form-control">
-              <option>==</option>
-              <option>&gt;=</option>
-              <option>&lt;=</option>
-              <option>&gt;</option>
-              <option>&lt;</option>
-              <option>!=</option>
-              <option selected>between</option>
-            </select>
-          </div>
-          <div class="form-group">
-            <input type="text" class="form-control" id="value2" placeholder="Min Value" value="0">
-          </div>
-          <div class="form-group">
-            <input type="text" class="form-control" id="value2_max" placeholder="Max Value" value="1">
-          </div>
-          <div class="form-group pull-right">
-            <button type="button" class="btn btn-danger">
-              <span class="glyphicon glyphicon-remove"></span>
-            </button>
-          </div>
-        </div>
-
-        <div class="filter filter-new form-inline">
-          <div class="form-group">
-            <select id="field3" class="form-control">
-              <option>Select field</option>
-              <option>something</option>
-              <option>something</option>
-              <option>something</option>
-              <option>something</option>
-            </select>
-          </div>
-          <div class="form-group">
-            <select id="operator3" class="form-control">
-              <option>==</option>
-              <option>&gt;=</option>
-              <option>&lt;=</option>
-              <option>&gt;</option>
-              <option>&lt;</option>
-              <option>!=</option>
-              <option>between</option>
-            </select>
-          </div>
-          <div class="form-group">
-            <input type="text" class="form-control" id="value3" size="46" placeholder="Value">
-          </div>
-          <div class="form-group">
-            <button type="button" class="btn btn-primary">
-              Add
-            </button>
-          </div>
-        </div>
-
-      </div>
-    </div>
-
-    <!-- See Data tray -->
-    <div id="data-tray" class="tray panel panel-default collapse">
-      <div class="container panel-body">
-
-        <h4 class="pull-left">Showing <span class="count text-primary">4,421</span> of 344,214 rows</h4>
-
-        <div class="pull-right">
-          <input type="text" class="form-control" placeholder="Search">
-        </div>
-
-        <div class="clearfix"></div>
-
-        <div class="table-responsive">
-        <table class="table table-striped">
-          <thead>
-            <tr>
-              <th>Field</th>
-              <th>Field</th>
-              <th>Field</th>
-              <th>Field</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td>Value</td>
-              <td>Value</td>
-              <td>Value</td>
-              <td>Value</td>
-            </tr>
-            <tr>
-              <td>Value</td>
-              <td>Value</td>
-              <td>Value</td>
-              <td>Value</td>
-            </tr>
-            <tr>
-              <td>Value</td>
-              <td>Value</td>
-              <td>Value</td>
-              <td>Value</td>
-            </tr>
-            <tr>
-              <td>Value</td>
-              <td>Value</td>
-              <td>Value</td>
-              <td>Value</td>
-            </tr>
-            <tr>
-              <td>Value</td>
-              <td>Value</td>
-              <td>Value</td>
-              <td>Value</td>
-            </tr>
-            <tr>
-              <td>Value</td>
-              <td>Value</td>
-              <td>Value</td>
-              <td>Value</td>
-            </tr>
-            <tr>
-              <td>Value</td>
-              <td>Value</td>
-              <td>Value</td>
-              <td>Value</td>
-            </tr>
-            <tr>
-              <td>Value</td>
-              <td>Value</td>
-              <td>Value</td>
-              <td>Value</td>
-            </tr>
-            <tr>
-              <td>Value</td>
-              <td>Value</td>
-              <td>Value</td>
-              <td>Value</td>
-            </tr>
-            <tr>
-              <td>Value</td>
-              <td>Value</td>
-              <td>Value</td>
-              <td>Value</td>
-            </tr>
-            <tr>
-              <td>Value</td>
-              <td>Value</td>
-              <td>Value</td>
-              <td>Value</td>
-            </tr>
-
-          </tbody>
-        </table>
-        </div>
-
-      </div>
-    </div>
-
-  </div>
-
-  <div class="container">
-
-    <!-- Timeline -->
-    <div class="well well-blank">
-      <h3><span class="count count-large text-primary">233,312</span> tweets from February 1, 2014 to March 31, 2014</h3>
-      <!-- chart container here -->
-    </div>
-
-    <div class="row">
-
-      <!-- Left column -->
-      <div class="col-md-5">
-
-        <!-- Circular heat chart -->
-        <div class="well">
-          <h4>User(s) most active <span class="count count-large text-primary">Sunday nights</span></h4>
-          <!--div ng-include="'partials/barchart.html'"></div-->
-			<div class="clearfix">
-				<circular-heat-form></circular-heat-form>
 			</div>
-        </div>
+		</div>
 
-        <!-- Tag cloud -->
-        <div class="well">
-          <h4>Popular Hashtags</h4>
-          <!-- chart container here -->
-        </div>
+		<!-- Header slideout trays -->
+		<div id="trays">
 
-      </div>
+			<!-- Filter Builder tray -->
+			<div id="filter-tray" class="tray filter-tray panel panel-default collapse">
+				<div class="container panel-body">
 
-      <!-- Right column -->
-      <div class="col-md-7">
+					<h4 class="pull-left">Create Filter</h4>
 
-        <!-- Sentiment chart -->
-        <div class="well">
+					<div class="btn-group pull-right" data-toggle="buttons">
+						<label class="btn btn-default active">
+							<input type="radio" name="boolean" id="boolean_and" checked> AND
+						</label>
+						<label class="btn btn-default">
+							<input type="radio" name="boolean" id="boolean_or"> OR
+						</label>
+					</div>
 
-          <div class="dropdown pull-right">
-            <a class="btn btn-lg text-muted dropdown-toggle" data-toggle="dropdown">
-              <span class="glyphicon glyphicon-cog"></span>
-              <span class="caret"></span>
-            </a>
-            <div class="dropdown-menu panel-body">
+					<div class="clearfix"></div>
 
-              <div class="form-group">
-                <label>Chart Type</label>
-                <div class="btn-group" data-toggle="buttons">
-                  <label class="btn btn-default active">
-                    <input type="radio" name="chartType" id="chartType_column" checked>
-                    <span class="glyphicon glyphicon-stats"></span>
-                  </label>
-                  <label class="btn btn-default">
-                    <input type="radio" name="chartType" id="chartType_line">
-                    <span class="glyphicon glyphicon-ok"></span>
-                  </label>
-                </div>
-              </div>
+					<div class="filter form-inline clearfix">
+						<div class="form-group">
+							<select id="field1" class="form-control">
+								<option>user_id</option>
+								<option>sentiment</option>
+								<option>something</option>
+								<option>something</option>
+								<option>something</option>
+							</select>
+						</div>
+						<div class="form-group">
+							<select id="operator1" class="form-control">
+								<option>==</option>
+								<option>&gt;=</option>
+								<option>&lt;=</option>
+								<option>&gt;</option>
+								<option>&lt;</option>
+								<option>!=</option>
+								<option>between</option>
+							</select>
+						</div>
+						<div class="form-group">
+							<input type="text" class="form-control" id="value1" size="46" placeholder="Value" value="423423423">
+						</div>
+						<div class="form-group pull-right">
+							<button type="button" class="btn btn-danger">
+								<span class="glyphicon glyphicon-remove"></span>
+							</button>
+						</div>
+					</div>
 
-              <div class="form-group">
-                <label>Show Unknown</label>
-                <div class="btn-group" data-toggle="buttons">
-                  <label class="btn btn-default active">
-                    <input type="radio" name="boolean" id="boolean_and" checked> ON
-                  </label>
-                  <label class="btn btn-default">
-                    <input type="radio" name="boolean" id="boolean_or"> OFF
-                  </label>
-                </div>
-              </div>
+					<div class="filter form-inline clearfix">
+						<div class="form-group">
+							<select id="field2" class="form-control">
+								<option>user_id</option>
+								<option selected>sentiment</option>
+								<option>something</option>
+								<option>something</option>
+								<option>something</option>
+							</select>
+						</div>
+						<div class="form-group">
+							<select id="operator2" class="form-control">
+								<option>==</option>
+								<option>&gt;=</option>
+								<option>&lt;=</option>
+								<option>&gt;</option>
+								<option>&lt;</option>
+								<option>!=</option>
+								<option selected>between</option>
+							</select>
+						</div>
+						<div class="form-group">
+							<input type="text" class="form-control" id="value2" placeholder="Min Value" value="0">
+						</div>
+						<div class="form-group">
+							<input type="text" class="form-control" id="value2_max" placeholder="Max Value" value="1">
+						</div>
+						<div class="form-group pull-right">
+							<button type="button" class="btn btn-danger">
+								<span class="glyphicon glyphicon-remove"></span>
+							</button>
+						</div>
+					</div>
 
-            </div>
-          </div>
+					<div class="filter filter-new form-inline">
+						<div class="form-group">
+							<select id="field3" class="form-control">
+								<option>Select field</option>
+								<option>something</option>
+								<option>something</option>
+								<option>something</option>
+								<option>something</option>
+							</select>
+						</div>
+						<div class="form-group">
+							<select id="operator3" class="form-control">
+								<option>==</option>
+								<option>&gt;=</option>
+								<option>&lt;=</option>
+								<option>&gt;</option>
+								<option>&lt;</option>
+								<option>!=</option>
+								<option>between</option>
+							</select>
+						</div>
+						<div class="form-group">
+							<input type="text" class="form-control" id="value3" size="46" placeholder="Value">
+						</div>
+						<div class="form-group">
+							<button type="button" class="btn btn-primary">
+								Add
+							</button>
+						</div>
+					</div>
 
-          <h4>
-            <span class="count-group"><span class="count count-large text-primary">3%</span> positive</span>
-            <span class="count-group"><span class="count count-large text-danger">5%</span> negative</span>
-            <span class="count-group"><span class="count count-large text-success">10%</span> neutral</span>
-            <span class="count-group"><span class="count count-large text-muted">82%</span> unknown</span>
-          </h4>
+				</div>
+			</div>
 
-          <!-- chart container here -->
+			<!-- See Data tray -->
+			<div id="data-tray" class="tray panel panel-default collapse">
+				<div class="container panel-body">
 
-        </div>
+					<h4 class="pull-left">Showing <span class="count text-primary">4,421</span> of 344,214 rows</h4>
 
-        <!-- Map -->
-        <div class="well">
-          <!-- chart container here -->
-        </div>
+					<div class="pull-right">
+						<input type="text" class="form-control" placeholder="Search">
+					</div>
 
-      </div>
-    </div>
+					<div class="clearfix"></div>
 
-  </div>
+					<div class="table-responsive">
+					<table class="table table-striped">
+						<thead>
+							<tr>
+								<th>Field</th>
+								<th>Field</th>
+								<th>Field</th>
+								<th>Field</th>
+							</tr>
+						</thead>
+						<tbody>
+							<tr>
+								<td>Value</td>
+								<td>Value</td>
+								<td>Value</td>
+								<td>Value</td>
+							</tr>
+							<tr>
+								<td>Value</td>
+								<td>Value</td>
+								<td>Value</td>
+								<td>Value</td>
+							</tr>
+							<tr>
+								<td>Value</td>
+								<td>Value</td>
+								<td>Value</td>
+								<td>Value</td>
+							</tr>
+							<tr>
+								<td>Value</td>
+								<td>Value</td>
+								<td>Value</td>
+								<td>Value</td>
+							</tr>
+							<tr>
+								<td>Value</td>
+								<td>Value</td>
+								<td>Value</td>
+								<td>Value</td>
+							</tr>
+							<tr>
+								<td>Value</td>
+								<td>Value</td>
+								<td>Value</td>
+								<td>Value</td>
+							</tr>
+							<tr>
+								<td>Value</td>
+								<td>Value</td>
+								<td>Value</td>
+								<td>Value</td>
+							</tr>
+							<tr>
+								<td>Value</td>
+								<td>Value</td>
+								<td>Value</td>
+								<td>Value</td>
+							</tr>
+							<tr>
+								<td>Value</td>
+								<td>Value</td>
+								<td>Value</td>
+								<td>Value</td>
+							</tr>
+							<tr>
+								<td>Value</td>
+								<td>Value</td>
+								<td>Value</td>
+								<td>Value</td>
+							</tr>
+							<tr>
+								<td>Value</td>
+								<td>Value</td>
+								<td>Value</td>
+								<td>Value</td>
+							</tr>
 
-	<!--div ng-include="'partials/start.html'"></div-->
-	<database-config></database-config>
+						</tbody>
+					</table>
+					</div>
 
+				</div>
+			</div>
+
+		</div>
+
+		<div class="container">
+
+			<!-- Timeline -->
+			<div class="well well-blank">
+				<h3><span class="count count-large text-primary">233,312</span> tweets from February 1, 2014 to March 31, 2014</h3>
+				<!-- chart container here -->
+			</div>
+
+			<div class="row">
+
+				<!-- Left column -->
+				<div class="col-md-5">
+
+					<!-- Circular heat chart -->
+					<div class="well">
+						<h4>User(s) most active <span class="count count-large text-primary">Sunday nights</span></h4>
+						<!--div ng-include="'partials/barchart.html'"></div-->
+				<div class="clearfix">
+					<circular-heat-form></circular-heat-form>
+				</div>
+					</div>
+
+					<!-- Tag cloud -->
+					<div class="well">
+						<h4>Popular Hashtags</h4>
+						<!-- chart container here -->
+					</div>
+
+				</div>
+
+				<!-- Right column -->
+				<div class="col-md-7">
+
+					<!-- Sentiment chart -->
+					<div class="well">
+
+						<div class="dropdown pull-right">
+							<a class="btn btn-lg text-muted dropdown-toggle" data-toggle="dropdown">
+								<span class="glyphicon glyphicon-cog"></span>
+								<span class="caret"></span>
+							</a>
+							<div class="dropdown-menu panel-body">
+
+								<div class="form-group">
+									<label>Chart Type</label>
+									<div class="btn-group" data-toggle="buttons">
+										<label class="btn btn-default active">
+											<input type="radio" name="chartType" id="chartType_column" checked>
+											<span class="glyphicon glyphicon-stats"></span>
+										</label>
+										<label class="btn btn-default">
+											<input type="radio" name="chartType" id="chartType_line">
+											<span class="glyphicon glyphicon-ok"></span>
+										</label>
+									</div>
+								</div>
+
+								<div class="form-group">
+									<label>Show Unknown</label>
+									<div class="btn-group" data-toggle="buttons">
+										<label class="btn btn-default active">
+											<input type="radio" name="boolean" id="boolean_and" checked> ON
+										</label>
+										<label class="btn btn-default">
+											<input type="radio" name="boolean" id="boolean_or"> OFF
+										</label>
+									</div>
+								</div>
+
+							</div>
+						</div>
+
+						<h4>
+							<span class="count-group"><span class="count count-large text-primary">3%</span> positive</span>
+							<span class="count-group"><span class="count count-large text-danger">5%</span> negative</span>
+							<span class="count-group"><span class="count count-large text-success">10%</span> neutral</span>
+							<span class="count-group"><span class="count count-large text-muted">82%</span> unknown</span>
+						</h4>
+
+						<!-- chart container here -->
+
+					</div>
+
+					<!-- Map -->
+					<div class="well">
+						<!-- chart container here -->
+					</div>
+
+				</div>
+			</div>
+
+		</div>
+		<database-config></database-config>
 
 		<!-- In production use:
 		<script src="//ajax.googleapis.com/ajax/libs/angularjs/x.x.x/angular.min.js"></script>
