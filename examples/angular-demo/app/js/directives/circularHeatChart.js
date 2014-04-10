@@ -14,13 +14,26 @@
  * limitations under the License.
  *
  */
+/**
+ * This Angualr JS directive creates a D3JS circular heat chart for hours within the days of the week and adds
+ * that chart to the DOM.  This directive binds its display data to the an number array variable specified 
+ * by the cell-values attribute.
+ *
+ * @example
+ *    &lt;circular-heat-chart cell-values="data"&gt;&lt;/circular-heat-chart&gt;<br>
+ *    &lt;div circular-heat-chart cell-values="data"&gt;&lt;/div&gt;
+  *
+ * @see neonDemo.charts.circularHeatChart
+ * @class neonDemo.directives.circularHeatChart
+ * @constructor
+ */
 angular.module('circularHeatChartDirective', []).directive('circularHeatChart', function() {
 
     var HOURS_IN_WEEK = 168;
     var HOURS_IN_DAY = 24;
 
 	return {
-		restrict: 'E',
+		restrict: 'EA',
 		scope: {
             cellValues: '='
         },

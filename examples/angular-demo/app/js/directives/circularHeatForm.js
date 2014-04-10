@@ -14,14 +14,18 @@
  * limitations under the License.
  *
  */
+
 /**
-/**
- * This directive adds a circular heat map to the DOM and drives the visualization data from
- * whatever database and table are currently selected in neon.  This directive accomplishes that
- * by using getting a neon connection from a connection service and listening for
- * neon system events (e.g., data tables changed).  On these events, it requeries the active
- * connection for data and updates applies the change to its scope.  The contained
- * circular heat map will update as a result.
+ * This Angular JS directive adds a circular heat map to the DOM and drives the visualization data from
+ * whatever database and table are currently selected in Neon.  This directive pulls the current
+ * Neon connection from a connection service and listens for
+ * neon system events (e.g., data tables changed) to determine when to update its visualization
+ * by issuing a Neon query for aggregated time data.
+ * 
+ * @example
+ *    &lt;circular-heat-form&gt;&lt;/circular-heat-form&gt;<br>
+ *    &lt;div circular-heat-form&gt;&lt;/div&gt;
+ * 
  * @class neonDemo.directives.circularHeatForm
  * @constructor
  */
@@ -30,16 +34,24 @@ angular.module('circularHeatFormDirective', []).directive('circularHeatForm', ['
 
 	return {
 		templateUrl: 'partials/circularHeatForm.html',
-		restrict: 'E',
+		restrict: 'EA',
 		scope: {
 			filterKey: '=',
 		},
 		controller: function($scope) {
 
+			/** 
+			 * Sets the name of the date field to pull from the current dataset.
+			 * @method setDateField
+			 */
 			$scope.setDateField = function(field) {
 				$scope.dateField = field;
 			};
 
+			/** 
+			 * Returns the name of the date field used to pull from time data from the current dataset.
+			 * @method getDateField
+			 */
 			$scope.getDateField = function() {
 				return $scope.dateField;
 			};
@@ -50,26 +62,49 @@ angular.module('circularHeatFormDirective', []).directive('circularHeatForm', ['
 			var HOURS_IN_WEEK = 168;
 			var HOURS_IN_DAY = 24;
 
+			/** 
+			 * Initializes the name of the date field used to query the current dataset
+			 * and the Neon Messenger used to monitor data change events.
+			 * @method initialize
+			 */
 			$scope.initialize = function() {
 				// Defaulting the expected date field to 'time'.
 				$scope.dateField = 'time';
 
 				$scope.messenger.events({
-					activeDatasetChanged: $scope.onDatasetChanged,
-					filtersChanged: $scope.onFiltersChanged
+					activeDatasetChanged: onDatasetChanged,
+					filtersChanged: onFiltersChanged
 				});
 			};
 
-			$scope.onFiltersChanged = function(message) {
+			/**
+			 * Event handler for filter changed events issues over Neon's messaging channels.
+			 * @param {Object} message A Neon filter changed message.
+			 * @method onFiltersChanged
+			 * @private
+			 */ 
+			var onFiltersChanged = function(message) {
 				$scope.queryForChartData();
 			};
 
-			$scope.onDatasetChanged = function(message) {
+			/**
+			 * Event handler for dataset changed events issues over Neon's messaging channels.
+			 * @param {Object} message A Neon dataset changed message.
+			 * @param {String} message.database The database that was selected.
+			 * @param {String} message.table The table within the database that was selected.
+			 * @method onDatasetChanged
+			 * @private
+			 */ 
+			var onDatasetChanged = function(message) {
 				$scope.databaseName = message.database;
 				$scope.tableName = message.table;
 				$scope.queryForChartData();
 			};
 
+			/**
+			 * Triggers a Neon query that will aggregate the time data for the currently selected dataset.
+			 * @method queryForChartData
+			 */
 			$scope.queryForChartData = function() {
 				// TODO: Decide how to pass in field mappings.  We can do this through a controller or the
 				// connection service or some mapping service.  Two example below, one commented out.
@@ -78,7 +113,7 @@ angular.module('circularHeatFormDirective', []).directive('circularHeatForm', ['
 				dateField = dateField.mapping;
 
 				if (!dateField) {
-					$scope.drawChart({data: []});
+					$scope.updateChartData({data: []});
 					return;
 				}
 
@@ -94,21 +129,35 @@ angular.module('circularHeatFormDirective', []).directive('circularHeatForm', ['
 
 				// Issue the query and provide a success handler that will forcefully apply an update to the chart.
 				// This is done since the callbacks from queries execute outside digest cycle for angular.
-				// If drawChart is called from within angular code or triggered by handler within angular,
-				// then the apply is handled by angular.  Forcing apply inside drawChart instead is error prone as it
+				// If updateChartData is called from within angular code or triggered by handler within angular,
+				// then the apply is handled by angular.  Forcing apply inside updateChartData instead is error prone as it
 				// may cause an apply within a digest cycle when triggered by an angular event.
 				connectionService.getActiveConnection().executeQuery(query, function(queryResults) {
 					$scope.$apply(function(){
-						$scope.drawChart(queryResults);
+						$scope.updateChartData(queryResults);
 					});
 				});
 
 			};
 
-			$scope.drawChart = function(queryResults) {
+			/**
+			 * Updates the data bound to the heat chart managed by this directive.  This will trigger a change in 
+			 * the chart's visualization.
+			 * @param {Object} queryResults Results returned from a Neon query.
+			 * @param {Array} queryResults.data The aggregate numbers for the heat chart cells.
+			 * @method updateChartData
+			 */
+			$scope.updateChartData = function(queryResults) {
 				$scope.data = $scope.createHeatChartData(queryResults);
 			};
 
+			/**
+			 * Creates a new data array used to populate our contained heat chart.  This function is used
+			 * as or by Neon query handlers.
+			 * @param {Object} queryResults Results returned from a Neon query.
+			 * @param {Array} queryResults.data The aggregate numbers for the heat chart cells.
+			 * @method createHeatChartData
+			 */
 			$scope.createHeatChartData = function(queryResults){
 				var rawData = queryResults.data;
 
@@ -123,16 +172,6 @@ angular.module('circularHeatFormDirective', []).directive('circularHeatForm', ['
 				});
 
 				return data;
-			};
-
-			$scope.buildStateObject = function(dateField, query) {
-				return {
-					connectionId: connectionId,
-					filterKey: filterKey,
-					columns: neon.dropdown.getFieldNamesFromDropdown("date"),
-					selectedField: dateField,
-					query: query
-				};
 			};
 
 			// Wait for neon to be ready, the create our messenger and intialize the view and data.
