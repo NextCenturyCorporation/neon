@@ -1,4 +1,6 @@
-<ul class="nav navbar-nav">
+<div class="overlay" ng-class="{true: 'sr-only', false: ''}[activeServer != 'Choose dataset']"></div>
+
+<ul class="nav navbar-nav overlay-above">
   <li class="dropdown">
     <a data-toggle="dropdown" class="dropdown-toggle primary" href="#">{{activeServer}} <b class="caret"></b></a>
     <ul class="dropdown-menu">
@@ -51,18 +53,15 @@
           <div class="col-md-6">
             <div class="form-group">
               <label for="database-select">Database Name</label>
-              <select id="database-select" class="form-control" ng-change="selectDatabase()" ng-model="selectedDb">
+              <select id="database-select" class="form-control" ng-change="selectDatabase()" ng-model="selectedDb" ng-options="db for db in databases" ng-disabled="!(isConnected)">
       					<option value="">Select Database</option>
-      					<option ng-repeat="db in databases" value="{{db}}">{{db}}</option>
       				</select>
             </div>
           </div>
           <div class="col-md-6">
             <div class="form-group">
               <label for="table-select">Table Name</label>
-              <select id="table-select" class="form-control" ng-model="selectedTable" ng-disabled="!(dbTables.length > 0)">
-      					<option ng-repeat="table in dbTables" value="{{table}}">{{table}}</option>
-      				</select>
+              <select id="table-select" class="form-control" ng-model="selectedTable" ng-disabled="!(dbTables.length > 0)" ng-options="table for table in dbTables"></select>
             </div>
           </div>
         </div>
