@@ -633,10 +633,7 @@ charts.BarChart.prototype.redrawOnResize_ = function () {
 
 };
 
-//FIXME charts.BarChart.destroy(el, selector);
 charts.BarChart.destroy = function(el, selector) {
     var element = d3.select(el).select(selector);
     $(element[0]).empty();
 };
-
-//FIXME charts.BarChart.render(data);
