@@ -15,6 +15,8 @@ function circularHeatChart(element, configuration) {
         selection.each(function(data) {
             var svg = d3.select(this);
 
+            svg.attr("viewBox","0 0 356 356");
+
             var offset = innerRadius + Math.ceil(data.length / numSegments) * segmentHeight;
             g = svg.append("g")
                 .classed("circular-heat", true)
