@@ -282,7 +282,7 @@ charts.BarChart.createYAxisTickFormat_ = function () {
  */
 charts.BarChart.prototype.draw = function () {
     this.preparePropertiesForDrawing_();
-    this.element.empty();
+    $(this.element[0]).empty();
     if (this.plotWidth === 0) {
         this.displayError();
     }
