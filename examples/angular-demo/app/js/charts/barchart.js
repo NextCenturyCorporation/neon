@@ -413,46 +413,28 @@ charts.BarChart.prototype.setInactive = function (predicate) {
 };
 
 charts.BarChart.prototype.showTooltip_ = function (item, mouseLocation) {
-    var tooltip = this.createTooltip_(item);
-    // initially hidden because it will fade in
-    tooltip.hide();
-    this.element.append(tooltip);
-    // must position after appending so its width can be properly computed
-    this.positionTooltip_(tooltip, mouseLocation);
-    tooltip.fadeIn(500);
-};
-
-charts.BarChart.prototype.createTooltip_ = function (item) {
-    var tooltip = $('<div/>', {
-        "class": "charttooltip",
-        id: charts.BarChart.TOOLTIP_ID_
-    });
-
-    // if a tick format was specified, use that to format the tooltip for a consistent look
     var xValue = this.tickFormat_ ? this.tickFormat_(item.key) : item.key;
-    var xAttributeHtml = $('<div/>').html(this.xLabel_ + ': ' + xValue);
-    var yAttributeHtml = $('<div/>').html(this.yLabel_ + ': ' + item.values);
-    tooltip.append(xAttributeHtml);
-    tooltip.append(yAttributeHtml);
-    return tooltip;
+
+    var tooltip = this.element.append("div")
+    .property('id', charts.BarChart.TOOLTIP_ID_)
+    .classed({'charttooltip':true});
+
+    tooltip.append("div").html(this.xLabel_ + ': ' + xValue)
+    .append("div").html(this.yLabel_ + ': ' + item.values);
+    $(tooltip[0]).hide();
+    this.positionTooltip_(tooltip, mouseLocation);
+    $(tooltip[0]).fadeIn(500);
 };
 
 charts.BarChart.prototype.positionTooltip_ = function (tooltip, mouseLocation) {
-    // set the tooltip to appear where the mouse pointer is
-    var top = window.event.clientY;
     // the extra 35px in the next two variables is needed to account for the padding of .charttooltip
-    var chartHeight = $(this.element).height()-35;
+    var chartHeight = $(this.element[0]).height() - 35;
     var spaceNeeded = $(".charttooltip").height() + 35;
 
-    // if there is not enough space below the pointer to display the tooltip, put it above
-    if(Number(chartHeight - mouseLocation[1]) < spaceNeeded) {
-        // the extra 35px is needed to account for the padding of .charttooltip
-        top = mouseLocation[1] - spaceNeeded + 35;
-    }
-    tooltip.css({
-        'top': top + 'px',
-        'left': mouseLocation[0] + 'px'
-    });
+    var top = mouseLocation[1] + 35;
+
+    tooltip.style('top', top + 'px')
+    .style('left', mouseLocation[0] + 'px');
 };
 
 charts.BarChart.prototype.hideTooltip_ = function () {
@@ -652,4 +634,9 @@ charts.BarChart.prototype.redrawOnResize_ = function () {
 };
 
 //FIXME charts.BarChart.destroy(el, selector);
+charts.BarChart.destroy = function(el, selector) {
+    var element = d3.select(el).select(selector);
+    $(element[0]).empty();
+};
+
 //FIXME charts.BarChart.render(data);

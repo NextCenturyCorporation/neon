@@ -1,31 +1,50 @@
+'use strict';
 /* global neon */
 /* global charts */
-'use strict';
+/*
+ * Copyright 2014 Next Century Corporation
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ */
 
-
+/**
+ * This directive adds a barchart to the DOM and drives the visualization data from
+ * whatever database and table are currently selected in neon.  This directive accomplishes that
+ * by using getting a neon connection from a connection service and listening for
+ * neon system events (e.g., data tables changed).  On these events, it requeries the active
+ * connection for data and updates applies the change to its scope.  The contained
+ * barchart will update as a result.
+ * @class neonDemo.directives.barchart
+ * @constructor
+ */
 var barchart = angular.module('barchartDirective', []);
 
 barchart.directive('barchart', ['ConnectionService', function(connectionService) {
 	var COUNT_FIELD_NAME = 'Count';
 
 	var link = function($scope, el, attr) {
+		el.addClass('barchartDirective');
 
 		var messenger = new neon.eventing.Messenger();
 		$scope.fields = [];
 		$scope.xAxisSelect = $scope.fields[0] ? $scope.fields[0] : '';
 
 		var COUNT_FIELD_NAME = 'Count';
-		// var messenger = new neon.eventing.Messenger();
 		var clientId;
 
 		var initialize = function() {
-			//determine fields
-			console.log($scope);
 
-			$scope.attrX = ($scope.attrX ? $scope.attrX : 'foo') ;
-			$scope.attrY = ($scope.attrY ? $scope.attrY : 'bar');
-
-			drawChart();
+			drawBlankChart();
 
 			$scope.messenger.events({
 				activeDatasetChanged: onDatasetChanged,
@@ -40,8 +59,6 @@ barchart.directive('barchart', ['ConnectionService', function(connectionService)
 		var onDatasetChanged = function(message) {
 			$scope.databaseName = message.database;
 			$scope.tableName = message.table;
-
-
 			queryForData();
 		};
 
@@ -64,22 +81,18 @@ barchart.directive('barchart', ['ConnectionService', function(connectionService)
 			});
 		};
 
-		/**
-		 * Redraws the chart based on the user selected attribtues
-		 * @method drawChart
-		 */
-		var drawChart = function() {
+		var drawBlankChart = function() {
 			doDrawChart({data: []});
 		};
 
 		var doDrawChart = function(data) {
+			charts.BarChart.destroy(el[0], '.barchart');
+
 			if (!$scope.attrY) {
 				$scope.attrY = COUNT_FIELD_NAME;
 			}
 
 			var opts = { "data": data.data, "x": $scope.attrX, "y": $scope.attrY, responsive: true};
-
-			//FIXME need to update... not recreate
 			var chart = new charts.BarChart(el[0], '.barchart', opts).draw();
 		};
 

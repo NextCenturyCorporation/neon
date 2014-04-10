@@ -14,6 +14,16 @@
  *
  */
 
+.barchartDirective {
+    height: 298px;
+    margin: auto;
+    display: block;
+}
+
+.barchart {
+    height: 298px;
+}
+
 #plot {
     font: 10px sans-serif;
     text-align: right;
@@ -66,9 +76,9 @@ svg .tick {
 
 .chart-div {
     width: 100%;
-    position: absolute;
+    /*position: absolute;
     top: 25px;
-    bottom: 0px;
+    bottom: 0px;*/
 }
 
 .error-text {
