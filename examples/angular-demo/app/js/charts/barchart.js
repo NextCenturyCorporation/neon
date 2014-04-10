@@ -348,7 +348,7 @@ charts.BarChart.prototype.bindData_ = function (chart) {
             return me.height - me.vMargin_ - me.y(d.values);
         })
         // using the same color for the border of the bars as the svg background gives separation for adjacent bars
-        .attr('stroke', $('#chart').css('background-color'))
+        .attr('stroke', '#FFFFFF')
         .on('mouseover', function (d) {
             me.toggleHoverStyle_(d3.select(this), true);
             me.showTooltip_(d, d3.mouse(this));
@@ -418,8 +418,8 @@ charts.BarChart.prototype.showTooltip_ = function (item, mouseLocation) {
     .property('id', charts.BarChart.TOOLTIP_ID_)
     .classed({'charttooltip':true});
 
-    tooltip.append("div").html(this.xLabel_ + ': ' + xValue)
-    .append("div").html(this.yLabel_ + ': ' + item.values);
+    tooltip.append("div").html('<strong>' + this.xLabel_ + ':</strong> ' + xValue)
+    .append("div").html('<strong>' + this.yLabel_ + ':</strong> ' + item.values);
     $(tooltip[0]).hide();
     this.positionTooltip_(tooltip, mouseLocation);
     $(tooltip[0]).fadeIn(500);
