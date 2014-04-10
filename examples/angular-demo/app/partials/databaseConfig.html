@@ -2,7 +2,7 @@
 
 <ul class="nav navbar-nav overlay-above">
   <li class="dropdown">
-    <a data-toggle="dropdown" class="dropdown-toggle primary" href="#">{{activeServer}} <b class="caret"></b></a>
+    <a data-toggle="dropdown" class="dropdown-toggle primary" href="#" ng-click="clearPopover = 'sr-only'">{{activeServer}} <b class="caret"></b></a>
     <ul class="dropdown-menu">
 
       <li ng-repeat="server in servers" ng-class="{true: 'active', false: ''}[server.name == activeServer]">
@@ -16,6 +16,15 @@
 
     </ul>
   </li>
+
+  <div class="popover fade bottom in {{clearPopover}}" style="display: block; top: 51px;">
+    <div class="arrow"></div>
+    <h3 class="popover-title">Start here!</h3>
+    <div class="popover-content">
+      <p>First you must select a dataset from the dropdown menu. You can use a preset dataset or click Custom to configure your own.</p>
+    </div>
+  </div>
+
 </ul>
 
 <div class="modal fade" id="customConnectionModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">

@@ -13,6 +13,7 @@ databaseConfig.directive('databaseConfig', ['ConnectionService', function(connec
 		$scope.dbTables = [];
 		$scope.fields = [];
 		$scope.isConnected = false;
+		$scope.clearPopover = '';
 		$scope.activeServer = "Choose dataset";
 		$scope.servers = [{
 			name: "Sample",
