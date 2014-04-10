@@ -70,120 +70,7 @@
 		<div id="trays">
 
 			<!-- Filter Builder tray -->
-			<div id="filter-tray" class="tray filter-tray panel panel-default collapse">
-				<div class="container panel-body">
-
-					<h4 class="pull-left">Create Filter</h4>
-
-					<div class="btn-group pull-right" data-toggle="buttons">
-						<label class="btn btn-default active">
-							<input type="radio" name="boolean" id="boolean_and" checked> AND
-						</label>
-						<label class="btn btn-default">
-							<input type="radio" name="boolean" id="boolean_or"> OR
-						</label>
-					</div>
-
-					<div class="clearfix"></div>
-
-					<div class="filter form-inline clearfix">
-						<div class="form-group">
-							<select id="field1" class="form-control">
-								<option>user_id</option>
-								<option>sentiment</option>
-								<option>something</option>
-								<option>something</option>
-								<option>something</option>
-							</select>
-						</div>
-						<div class="form-group">
-							<select id="operator1" class="form-control">
-								<option>==</option>
-								<option>&gt;=</option>
-								<option>&lt;=</option>
-								<option>&gt;</option>
-								<option>&lt;</option>
-								<option>!=</option>
-								<option>between</option>
-							</select>
-						</div>
-						<div class="form-group">
-							<input type="text" class="form-control" id="value1" size="46" placeholder="Value" value="423423423">
-						</div>
-						<div class="form-group pull-right">
-							<button type="button" class="btn btn-danger">
-								<span class="glyphicon glyphicon-remove"></span>
-							</button>
-						</div>
-					</div>
-
-					<div class="filter form-inline clearfix">
-						<div class="form-group">
-							<select id="field2" class="form-control">
-								<option>user_id</option>
-								<option selected>sentiment</option>
-								<option>something</option>
-								<option>something</option>
-								<option>something</option>
-							</select>
-						</div>
-						<div class="form-group">
-							<select id="operator2" class="form-control">
-								<option>==</option>
-								<option>&gt;=</option>
-								<option>&lt;=</option>
-								<option>&gt;</option>
-								<option>&lt;</option>
-								<option>!=</option>
-								<option selected>between</option>
-							</select>
-						</div>
-						<div class="form-group">
-							<input type="text" class="form-control" id="value2" placeholder="Min Value" value="0">
-						</div>
-						<div class="form-group">
-							<input type="text" class="form-control" id="value2_max" placeholder="Max Value" value="1">
-						</div>
-						<div class="form-group pull-right">
-							<button type="button" class="btn btn-danger">
-								<span class="glyphicon glyphicon-remove"></span>
-							</button>
-						</div>
-					</div>
-
-					<div class="filter filter-new form-inline">
-						<div class="form-group">
-							<select id="field3" class="form-control">
-								<option>Select field</option>
-								<option>something</option>
-								<option>something</option>
-								<option>something</option>
-								<option>something</option>
-							</select>
-						</div>
-						<div class="form-group">
-							<select id="operator3" class="form-control">
-								<option>==</option>
-								<option>&gt;=</option>
-								<option>&lt;=</option>
-								<option>&gt;</option>
-								<option>&lt;</option>
-								<option>!=</option>
-								<option>between</option>
-							</select>
-						</div>
-						<div class="form-group">
-							<input type="text" class="form-control" id="value3" size="46" placeholder="Value">
-						</div>
-						<div class="form-group">
-							<button type="button" class="btn btn-primary">
-								Add
-							</button>
-						</div>
-					</div>
-
-				</div>
-			</div>
+			<div id="filter-tray" filter-builder class="tray filter-tray panel panel-default collapse"></div>
 
 			<!-- See Data tray -->
 			<div id="data-tray" class="tray panel panel-default collapse">
@@ -391,7 +278,7 @@
 		<script src="js/neonDemoController.js"></script>
 
 		<script src="js/directives/databaseConfigDirective.js"></script>
-
+		<script src="js/directives/filterBuilderDirective.js"></script>
 		<script src="js/charts/circularHeatChart.js"></script>
 		<script src="js/directives/circularHeatChart.js"></script>
 		<script src="js/directives/circularHeatForm.js"></script>
