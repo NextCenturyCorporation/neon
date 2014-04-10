@@ -34,7 +34,7 @@ angular.module('circularHeatFormDirective', []).directive('circularHeatForm', ['
 
 	return {
 		templateUrl: 'partials/circularHeatForm.html',
-		restrict: 'E',
+		restrict: 'EA',
 		scope: {
 			filterKey: '=',
 		},
