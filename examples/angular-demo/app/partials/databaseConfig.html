@@ -5,10 +5,10 @@
     <a data-toggle="dropdown" class="dropdown-toggle primary" href="#" ng-click="clearPopover = 'sr-only'">{{activeServer}} <b class="caret"></b></a>
     <ul class="dropdown-menu">
 
-      <li ng-repeat="server in servers" ng-class="{true: 'active', false: ''}[server.name == activeServer]">
-        <a href="#" ng-click="connectToPreset(server)">{{server.name}}</a>
-      </li>
-      
+			<li ng-repeat="server in servers" ng-class="{true: 'active', false: ''}[server.name == activeServer]">
+				<a href="#" ng-click="connectToPreset(server)">{{server.name}}</a>
+			</li>
+
       <li class="divider"></li>
       <li ng-class="{true: 'active', false: ''}[activeServer == 'Custom' || !(servers.length > 0)]">
         <a data-toggle="modal" href="#customConnectionModal" >Custom...</a>
@@ -24,17 +24,17 @@
       <p>First you must select a dataset from the dropdown menu. You can use a preset dataset or click Custom to configure your own.</p>
     </div>
   </div>
-
+			
 </ul>
 
 <div class="modal fade" id="customConnectionModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
-  <div class="modal-dialog">
-    <div class="modal-content">
-      <div class="modal-header">
-        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-        <h4 class="modal-title">Custom Connection</h4>
-      </div>
-      <div class="modal-body">
+	<div class="modal-dialog">
+		<div class="modal-content">
+			<div class="modal-header">
+				<button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+				<h4 class="modal-title">Custom Connection</h4>
+			</div>
+			<div class="modal-body">
 
         <div class="row">
           <div class="col-md-6">
@@ -75,11 +75,11 @@
           </div>
         </div>
 
-      </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-        <button type="button" class="btn btn-primary" data-dismiss="modal" id="database-table-button" ng-click="continueClick()">Connect</button>
-      </div>
-    </div>
-  </div>
+			</div>
+			<div class="modal-footer">
+				<button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+				<button type="button" class="btn btn-primary" data-dismiss="modal" id="database-table-button" ng-click="continueClick()">Connect</button>
+			</div>
+		</div>
+	</div>
 </div>

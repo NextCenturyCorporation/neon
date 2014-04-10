@@ -18,7 +18,7 @@
 /**
  * This directive adds a circular heat map to the DOM and drives the visualization data from
  * whatever database and table are currently selected in neon.  This directive accomplishes that
- * by using getting a neon connection from a connection service and listening for 
+ * by using getting a neon connection from a connection service and listening for
  * neon system events (e.g., data tables changed).  On these events, it requeries the active
  * connection for data and updates applies the change to its scope.  The contained
  * circular heat map will update as a result.
@@ -41,8 +41,8 @@ angular.module('circularHeatFormDirective', []).directive('circularHeatForm', ['
 			};
 
 			$scope.getDateField = function() {
-		    	return $scope.dateField;
-		    }
+				return $scope.dateField;
+			};
 		},
 		link: function($scope, element, attr) {
 			element.addClass('circularheatform');
@@ -50,97 +50,97 @@ angular.module('circularHeatFormDirective', []).directive('circularHeatForm', ['
 			var HOURS_IN_WEEK = 168;
 			var HOURS_IN_DAY = 24;
 
-			$scope.initialize = function() {	        
-		        // Defaulting the expected date field to 'time'.
-		        $scope.dateField = 'time';
+			$scope.initialize = function() {
+				// Defaulting the expected date field to 'time'.
+				$scope.dateField = 'time';
 
-		        $scope.messenger.events({
-		            activeDatasetChanged: $scope.onDatasetChanged,
-		            filtersChanged: $scope.onFiltersChanged
-		        });
-		    };
+				$scope.messenger.events({
+					activeDatasetChanged: $scope.onDatasetChanged,
+					filtersChanged: $scope.onFiltersChanged
+				});
+			};
 
-		    $scope.onFiltersChanged = function(message) {
-		        $scope.queryForChartData();
-		    }
+			$scope.onFiltersChanged = function(message) {
+				$scope.queryForChartData();
+			};
 
-		    $scope.onDatasetChanged = function(message) {
-		        $scope.databaseName = message.database;
-		        $scope.tableName = message.table;
-		        $scope.queryForChartData();
-		    }
+			$scope.onDatasetChanged = function(message) {
+				$scope.databaseName = message.database;
+				$scope.tableName = message.table;
+				$scope.queryForChartData();
+			};
 
-		    $scope.queryForChartData = function() {
-		    	// TODO: Decide how to pass in field mappings.  We can do this through a controller or the
-		    	// connection service or some mapping service.  Two example below, one commented out.
-		        //var dateField = $scope.getDateField();
-		        var dateField = connectionService.getFieldMapping($scope.databaseName, $scope.tableName, "date");
-		        dateField = dateField.mapping;
+			$scope.queryForChartData = function() {
+				// TODO: Decide how to pass in field mappings.  We can do this through a controller or the
+				// connection service or some mapping service.  Two example below, one commented out.
+				//var dateField = $scope.getDateField();
+				var dateField = connectionService.getFieldMapping($scope.databaseName, $scope.tableName, "date");
+				dateField = dateField.mapping;
 
-		        if (!dateField) {
-		            $scope.drawChart({data: []});
-		            return;
-		        }
+				if (!dateField) {
+					$scope.drawChart({data: []});
+					return;
+				}
 
-		        //TODO: NEON-603 Add support for dayOfWeek to query API
-		        var groupByDayClause = new neon.query.GroupByFunctionClause('dayOfWeek', $scope.dateField, 'day');
-		        var groupByHourClause = new neon.query.GroupByFunctionClause(neon.query.HOUR, $scope.dateField, 'hour');
+				//TODO: NEON-603 Add support for dayOfWeek to query API
+				var groupByDayClause = new neon.query.GroupByFunctionClause('dayOfWeek', $scope.dateField, 'day');
+				var groupByHourClause = new neon.query.GroupByFunctionClause(neon.query.HOUR, $scope.dateField, 'hour');
 
-		        var query = new neon.query.Query()
-		            .selectFrom($scope.databaseName, $scope.tableName)
-		            .groupBy(groupByDayClause, groupByHourClause)
-		            .where($scope.dateField, '!=', null)
-		            .aggregate(neon.query.COUNT, '*', 'count');
+				var query = new neon.query.Query()
+					.selectFrom($scope.databaseName, $scope.tableName)
+					.groupBy(groupByDayClause, groupByHourClause)
+					.where($scope.dateField, '!=', null)
+					.aggregate(neon.query.COUNT, '*', 'count');
 
-		        // Issue the query and provide a success handler that will forcefully apply an update to the chart.
-		        // This is done since the callbacks from queries execute outside digest cycle for angular.
-		        // If drawChart is called from within angular code or triggered by handler within angular, 
-		        // then the apply is handled by angular.  Forcing apply inside drawChart instead is error prone as it
-		        // may cause an apply within a digest cycle when triggered by an angular event.
-		        connectionService.getActiveConnection().executeQuery(query, function(queryResults) {
-		        	$scope.$apply(function(){
-		        		$scope.drawChart(queryResults);
-		        	});
-		        });
+				// Issue the query and provide a success handler that will forcefully apply an update to the chart.
+				// This is done since the callbacks from queries execute outside digest cycle for angular.
+				// If drawChart is called from within angular code or triggered by handler within angular,
+				// then the apply is handled by angular.  Forcing apply inside drawChart instead is error prone as it
+				// may cause an apply within a digest cycle when triggered by an angular event.
+				connectionService.getActiveConnection().executeQuery(query, function(queryResults) {
+					$scope.$apply(function(){
+						$scope.drawChart(queryResults);
+					});
+				});
 
-		    }
+			};
 
-		    $scope.drawChart = function(queryResults) {
-		        $scope.data = $scope.createHeatChartData(queryResults);
-		    }
+			$scope.drawChart = function(queryResults) {
+				$scope.data = $scope.createHeatChartData(queryResults);
+			};
 
-		    $scope.createHeatChartData = function(queryResults){
-		        var rawData = queryResults.data;
+			$scope.createHeatChartData = function(queryResults){
+				var rawData = queryResults.data;
 
-		        var data = [];
+				var data = [];
 
-		        for (var i = 0; i < HOURS_IN_WEEK; i++) {
-		            data[i] = 0;
-		        }
+				for (var i = 0; i < HOURS_IN_WEEK; i++) {
+					data[i] = 0;
+				}
 
-		        _.each(rawData, function (element) {
-		            data[(element.day - 1) * HOURS_IN_DAY + element.hour] = element.count;
-		        });
+				_.each(rawData, function (element) {
+					data[(element.day - 1) * HOURS_IN_DAY + element.hour] = element.count;
+				});
 
-		        return data;
-		    }
+				return data;
+			};
 
-		    $scope.buildStateObject = function(dateField, query) {
-		        return {
-		            connectionId: connectionId,
-		            filterKey: filterKey,
-		            columns: neon.dropdown.getFieldNamesFromDropdown("date"),
-		            selectedField: dateField,
-		            query: query
-		        };
-		    }
+			$scope.buildStateObject = function(dateField, query) {
+				return {
+					connectionId: connectionId,
+					filterKey: filterKey,
+					columns: neon.dropdown.getFieldNamesFromDropdown("date"),
+					selectedField: dateField,
+					query: query
+				};
+			};
 
-		    // Wait for neon to be ready, the create our messenger and intialize the view and data.
+			// Wait for neon to be ready, the create our messenger and intialize the view and data.
 			neon.ready(function () {
-			    $scope.messenger = new neon.eventing.Messenger();
-			    $scope.initialize();   
+				$scope.messenger = new neon.eventing.Messenger();
+				$scope.initialize();
 			});
 
 		}
-	}
+	};
 }]);

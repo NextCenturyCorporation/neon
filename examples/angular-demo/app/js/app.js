@@ -20,6 +20,7 @@ var neonDemo = angular.module('neonDemo', [
 	'neonDemo.services',
 	'configurationDirective',
 	'circularHeatChartDirective',
-	'circularHeatFormDirective'
+	'circularHeatFormDirective',
 	//'barchartController'
+	'barchartDirective'
 ]);

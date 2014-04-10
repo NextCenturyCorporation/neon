@@ -3,18 +3,19 @@
 	<head>
 		<meta charset="utf-8">
 		<meta http-equiv="X-UA-Compatible" content="IE=edge">
-  		<meta name="viewport" content="width=device-width, initial-scale=1">
+			<meta name="viewport" content="width=device-width, initial-scale=1">
 		<title>Neon</title>
 
 		<link type="image/png" rel="shortcut icon" href="img/Neon_16x16.png">
 
 		<link rel="stylesheet" type="text/css" href="css/bootstrap/bootstrap.min.css">
-		
+
 		<!-- Custom Stylesheet -->
 		<link href="css/style.css" rel="stylesheet">
 
 		<!-- Directive styles -->
 		<link rel="stylesheet" type="text/css" href="css/directives/circularHeatChart.css">
+		<link rel="stylesheet" type="text/css" href="css/directives/barchart.css">
 
 		<!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
 		<!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
@@ -24,46 +25,43 @@
 		<![endif]-->
 	</head>
 	<body ng-controller="neonDemoController">
-
 		<!-- Header -->
 		<!-- This could be made into either a directive or a partial -->
 		<div role="navigation" class="navbar navbar-default navbar-static-top">
 			<div class="container">
 
-			  <button data-target=".navbar-collapse" data-toggle="collapse" class="navbar-toggle pull-left" type="button">
-			    <span class="sr-only">Toggle navigation</span>
-			    <span class="icon-bar"></span>
-			    <span class="icon-bar"></span>
-			    <span class="icon-bar"></span>
-			  </button>
 
-			  <a href="" class="navbar-text pull-right">
-			    Powered by <img class="brand-image" src="img/Neon_60x34.png"></img>
-			  </a>
+				<button data-target=".navbar-collapse" data-toggle="collapse" class="navbar-toggle pull-left" type="button">
+					<span class="sr-only">Toggle navigation</span>
+					<span class="icon-bar"></span>
+					<span class="icon-bar"></span>
+					<span class="icon-bar"></span>
+				</button>
 
-			  <div class="clearfix visible-xs"></div>
+				<a href="" class="navbar-text pull-right">
+					Powered by <img class="brand-image" src="img/Neon_60x34.png"></img>
+				</a>
 
-			  <div class="navbar-collapse collapse">
+				<div class="clearfix visible-xs"></div>
 
-			  	<!-- Database Config -->
-          		<!--div ng-include="'partials/start.html'"></div-->
-			  	<database-config></database-config>
-			    
-				<ul class="nav navbar-nav">
-			      <li>
-			        <a data-toggle="collapse" data-parent="#trays" href="#filter-tray" class="collapsed">
-			          <span class="glyphicon glyphicon-filter"></span> Create Filter
-			        </a>
-			      </li>
-			      <li>
-			        <a data-toggle="collapse" data-parent="#trays" href="#data-tray" class="collapsed">
-			          <span class="glyphicon glyphicon-list"></span> See Data
-			        </a>
-			      </li>
+				<div class="navbar-collapse collapse">
 
-			    </ul>
-			  </div>
-
+					<!-- Database Config -->
+					<!--div ng-include="'partials/start.html'"></div-->
+					<database-config></database-config>
+					<ul class="nav navbar-nav">
+						<li>
+							<a data-toggle="collapse" data-parent="#trays" href="#filter-tray" class="collapsed">
+								<span class="glyphicon glyphicon-filter"></span> Create Filter
+							</a>
+						</li>
+						<li>
+							<a data-toggle="collapse" data-parent="#trays" href="#data-tray" class="collapsed">
+								<span class="glyphicon glyphicon-list"></span> See Data
+							</a>
+						</li>
+					</ul>
+				</div>
 			</div>
 		</div>
 
@@ -73,215 +71,215 @@
 
 			<!-- Filter Builder tray -->
 			<div id="filter-tray" class="tray filter-tray panel panel-default collapse">
-			  <div class="container panel-body">
+				<div class="container panel-body">
 
-			    <h4 class="pull-left">Create Filter</h4>
+					<h4 class="pull-left">Create Filter</h4>
 
-			    <div class="btn-group pull-right" data-toggle="buttons">
-			      <label class="btn btn-default active">
-			        <input type="radio" name="boolean" id="boolean_and" checked> AND
-			      </label>
-			      <label class="btn btn-default">
-			        <input type="radio" name="boolean" id="boolean_or"> OR
-			      </label>
-			    </div>
+					<div class="btn-group pull-right" data-toggle="buttons">
+						<label class="btn btn-default active">
+							<input type="radio" name="boolean" id="boolean_and" checked> AND
+						</label>
+						<label class="btn btn-default">
+							<input type="radio" name="boolean" id="boolean_or"> OR
+						</label>
+					</div>
 
-			    <div class="clearfix"></div>
+					<div class="clearfix"></div>
 
-			    <div class="filter form-inline clearfix">
-			      <div class="form-group">
-			        <select id="field1" class="form-control">
-			          <option>user_id</option>
-			          <option>sentiment</option>
-			          <option>something</option>
-			          <option>something</option>
-			          <option>something</option>
-			        </select>
-			      </div>
-			      <div class="form-group">
-			        <select id="operator1" class="form-control">
-			          <option>==</option>
-			          <option>&gt;=</option>
-			          <option>&lt;=</option>
-			          <option>&gt;</option>
-			          <option>&lt;</option>
-			          <option>!=</option>
-			          <option>between</option>
-			        </select>
-			      </div>
-			      <div class="form-group">
-			        <input type="text" class="form-control" id="value1" size="46" placeholder="Value" value="423423423">
-			      </div>
-			      <div class="form-group pull-right">
-			        <button type="button" class="btn btn-danger">
-			          <span class="glyphicon glyphicon-remove"></span>
-			        </button>
-			      </div>
-			    </div>
+					<div class="filter form-inline clearfix">
+						<div class="form-group">
+							<select id="field1" class="form-control">
+								<option>user_id</option>
+								<option>sentiment</option>
+								<option>something</option>
+								<option>something</option>
+								<option>something</option>
+							</select>
+						</div>
+						<div class="form-group">
+							<select id="operator1" class="form-control">
+								<option>==</option>
+								<option>&gt;=</option>
+								<option>&lt;=</option>
+								<option>&gt;</option>
+								<option>&lt;</option>
+								<option>!=</option>
+								<option>between</option>
+							</select>
+						</div>
+						<div class="form-group">
+							<input type="text" class="form-control" id="value1" size="46" placeholder="Value" value="423423423">
+						</div>
+						<div class="form-group pull-right">
+							<button type="button" class="btn btn-danger">
+								<span class="glyphicon glyphicon-remove"></span>
+							</button>
+						</div>
+					</div>
 
-			    <div class="filter form-inline clearfix">
-			      <div class="form-group">
-			        <select id="field2" class="form-control">
-			          <option>user_id</option>
-			          <option selected>sentiment</option>
-			          <option>something</option>
-			          <option>something</option>
-			          <option>something</option>
-			        </select>
-			      </div>
-			      <div class="form-group">
-			        <select id="operator2" class="form-control">
-			          <option>==</option>
-			          <option>&gt;=</option>
-			          <option>&lt;=</option>
-			          <option>&gt;</option>
-			          <option>&lt;</option>
-			          <option>!=</option>
-			          <option selected>between</option>
-			        </select>
-			      </div>
-			      <div class="form-group">
-			        <input type="text" class="form-control" id="value2" placeholder="Min Value" value="0">
-			      </div>
-			      <div class="form-group">
-			        <input type="text" class="form-control" id="value2_max" placeholder="Max Value" value="1">
-			      </div>
-			      <div class="form-group pull-right">
-			        <button type="button" class="btn btn-danger">
-			          <span class="glyphicon glyphicon-remove"></span>
-			        </button>
-			      </div>
-			    </div>
+					<div class="filter form-inline clearfix">
+						<div class="form-group">
+							<select id="field2" class="form-control">
+								<option>user_id</option>
+								<option selected>sentiment</option>
+								<option>something</option>
+								<option>something</option>
+								<option>something</option>
+							</select>
+						</div>
+						<div class="form-group">
+							<select id="operator2" class="form-control">
+								<option>==</option>
+								<option>&gt;=</option>
+								<option>&lt;=</option>
+								<option>&gt;</option>
+								<option>&lt;</option>
+								<option>!=</option>
+								<option selected>between</option>
+							</select>
+						</div>
+						<div class="form-group">
+							<input type="text" class="form-control" id="value2" placeholder="Min Value" value="0">
+						</div>
+						<div class="form-group">
+							<input type="text" class="form-control" id="value2_max" placeholder="Max Value" value="1">
+						</div>
+						<div class="form-group pull-right">
+							<button type="button" class="btn btn-danger">
+								<span class="glyphicon glyphicon-remove"></span>
+							</button>
+						</div>
+					</div>
 
-			    <div class="filter filter-new form-inline">
-			      <div class="form-group">
-			        <select id="field3" class="form-control">
-			          <option>Select field</option>
-			          <option>something</option>
-			          <option>something</option>
-			          <option>something</option>
-			          <option>something</option>
-			        </select>
-			      </div>
-			      <div class="form-group">
-			        <select id="operator3" class="form-control">
-			          <option>==</option>
-			          <option>&gt;=</option>
-			          <option>&lt;=</option>
-			          <option>&gt;</option>
-			          <option>&lt;</option>
-			          <option>!=</option>
-			          <option>between</option>
-			        </select>
-			      </div>
-			      <div class="form-group">
-			        <input type="text" class="form-control" id="value3" size="46" placeholder="Value">
-			      </div>
-			      <div class="form-group">
-			        <button type="button" class="btn btn-primary">
-			          Add
-			        </button>
-			      </div>
-			    </div>
+					<div class="filter filter-new form-inline">
+						<div class="form-group">
+							<select id="field3" class="form-control">
+								<option>Select field</option>
+								<option>something</option>
+								<option>something</option>
+								<option>something</option>
+								<option>something</option>
+							</select>
+						</div>
+						<div class="form-group">
+							<select id="operator3" class="form-control">
+								<option>==</option>
+								<option>&gt;=</option>
+								<option>&lt;=</option>
+								<option>&gt;</option>
+								<option>&lt;</option>
+								<option>!=</option>
+								<option>between</option>
+							</select>
+						</div>
+						<div class="form-group">
+							<input type="text" class="form-control" id="value3" size="46" placeholder="Value">
+						</div>
+						<div class="form-group">
+							<button type="button" class="btn btn-primary">
+								Add
+							</button>
+						</div>
+					</div>
 
-			  </div>
+				</div>
 			</div>
 
 			<!-- See Data tray -->
 			<div id="data-tray" class="tray panel panel-default collapse">
-			  <div class="container panel-body">
+				<div class="container panel-body">
 
-			    <h4 class="pull-left">Showing <span class="count text-primary">4,421</span> of 344,214 rows</h4>
+					<h4 class="pull-left">Showing <span class="count text-primary">4,421</span> of 344,214 rows</h4>
 
-			    <div class="pull-right">
-			      <input type="text" class="form-control" placeholder="Search">
-			    </div>
+					<div class="pull-right">
+						<input type="text" class="form-control" placeholder="Search">
+					</div>
 
-			    <div class="clearfix"></div>
+					<div class="clearfix"></div>
 
-			    <div class="table-responsive">
-			    <table class="table table-striped">
-			      <thead>
-			        <tr>
-			          <th>Field</th>
-			          <th>Field</th>
-			          <th>Field</th>
-			          <th>Field</th>
-			        </tr>
-			      </thead>
-			      <tbody>
-			        <tr>
-			          <td>Value</td>
-			          <td>Value</td>
-			          <td>Value</td>
-			          <td>Value</td>
-			        </tr>
-			        <tr>
-			          <td>Value</td>
-			          <td>Value</td>
-			          <td>Value</td>
-			          <td>Value</td>
-			        </tr>
-			        <tr>
-			          <td>Value</td>
-			          <td>Value</td>
-			          <td>Value</td>
-			          <td>Value</td>
-			        </tr>
-			        <tr>
-			          <td>Value</td>
-			          <td>Value</td>
-			          <td>Value</td>
-			          <td>Value</td>
-			        </tr>
-			        <tr>
-			          <td>Value</td>
-			          <td>Value</td>
-			          <td>Value</td>
-			          <td>Value</td>
-			        </tr>
-			        <tr>
-			          <td>Value</td>
-			          <td>Value</td>
-			          <td>Value</td>
-			          <td>Value</td>
-			        </tr>
-			        <tr>
-			          <td>Value</td>
-			          <td>Value</td>
-			          <td>Value</td>
-			          <td>Value</td>
-			        </tr>
-			        <tr>
-			          <td>Value</td>
-			          <td>Value</td>
-			          <td>Value</td>
-			          <td>Value</td>
-			        </tr>
-			        <tr>
-			          <td>Value</td>
-			          <td>Value</td>
-			          <td>Value</td>
-			          <td>Value</td>
-			        </tr>
-			        <tr>
-			          <td>Value</td>
-			          <td>Value</td>
-			          <td>Value</td>
-			          <td>Value</td>
-			        </tr>
-			        <tr>
-			          <td>Value</td>
-			          <td>Value</td>
-			          <td>Value</td>
-			          <td>Value</td>
-			        </tr>
-			        
-			      </tbody>
-			    </table>
-			    </div>
+					<div class="table-responsive">
+					<table class="table table-striped">
+						<thead>
+							<tr>
+								<th>Field</th>
+								<th>Field</th>
+								<th>Field</th>
+								<th>Field</th>
+							</tr>
+						</thead>
+						<tbody>
+							<tr>
+								<td>Value</td>
+								<td>Value</td>
+								<td>Value</td>
+								<td>Value</td>
+							</tr>
+							<tr>
+								<td>Value</td>
+								<td>Value</td>
+								<td>Value</td>
+								<td>Value</td>
+							</tr>
+							<tr>
+								<td>Value</td>
+								<td>Value</td>
+								<td>Value</td>
+								<td>Value</td>
+							</tr>
+							<tr>
+								<td>Value</td>
+								<td>Value</td>
+								<td>Value</td>
+								<td>Value</td>
+							</tr>
+							<tr>
+								<td>Value</td>
+								<td>Value</td>
+								<td>Value</td>
+								<td>Value</td>
+							</tr>
+							<tr>
+								<td>Value</td>
+								<td>Value</td>
+								<td>Value</td>
+								<td>Value</td>
+							</tr>
+							<tr>
+								<td>Value</td>
+								<td>Value</td>
+								<td>Value</td>
+								<td>Value</td>
+							</tr>
+							<tr>
+								<td>Value</td>
+								<td>Value</td>
+								<td>Value</td>
+								<td>Value</td>
+							</tr>
+							<tr>
+								<td>Value</td>
+								<td>Value</td>
+								<td>Value</td>
+								<td>Value</td>
+							</tr>
+							<tr>
+								<td>Value</td>
+								<td>Value</td>
+								<td>Value</td>
+								<td>Value</td>
+							</tr>
+							<tr>
+								<td>Value</td>
+								<td>Value</td>
+								<td>Value</td>
+								<td>Value</td>
+							</tr>
 
-			  </div>
+						</tbody>
+					</table>
+					</div>
+
+				</div>
 			</div>
 
 		</div>
@@ -291,85 +289,86 @@
 
 		<!-- Timeline -->
 		<div class="well well-blank">
-		  <h3><span class="count count-large text-primary">233,312</span> tweets from February 1, 2014 to March 31, 2014</h3>
-		  <!-- chart container here -->
+			<h3><span class="count count-large text-primary">233,312</span> tweets from February 1, 2014 to March 31, 2014</h3>
+			<!-- chart container here -->
 		</div>
 
 		<div class="row">
 
-		  <!-- Left column -->
-		  <div class="col-md-4">
+			<!-- Left column -->
+			<div class="col-md-4">
 
-		    <!-- Circular heat chart -->
-		   	<circular-heat-form></circular-heat-form>
+				<!-- Circular heat chart -->
+				<circular-heat-form></circular-heat-form>
 
-		    <!-- Tag cloud -->
-		    <div class="well">
-		      <h4>Popular Hashtags</h4>
-		      <!-- chart container here -->
-		    </div>
+				<!-- Tag cloud -->
+				<div class="well">
+					<h4>Popular Hashtags</h4>
+					<!-- chart container here -->
+				</div>
 
-		  </div>
+			</div>
 
-		  <!-- Right column -->
-		  <div class="col-md-8">
+			<!-- Right column -->
+			<div class="col-md-8">
 
-		    <!-- Sentiment chart -->
-		    <div class="well">
+				<!-- Sentiment chart -->
+				<div class="well">
 
-		      <div class="dropdown pull-right">
-		        <a class="btn btn-lg text-muted dropdown-toggle" data-toggle="dropdown">
-		          <span class="glyphicon glyphicon-cog"></span>
-		          <span class="caret"></span>
-		        </a>
-		        <div class="dropdown-menu panel-body">
+					<div class="dropdown pull-right">
+						<a class="btn btn-lg text-muted dropdown-toggle" data-toggle="dropdown">
+							<span class="glyphicon glyphicon-cog"></span>
+							<span class="caret"></span>
+						</a>
+						<div class="dropdown-menu panel-body">
 
-		          <div class="form-group">
-		            <label>Chart Type</label>
-		            <div class="btn-group" data-toggle="buttons">
-		              <label class="btn btn-default active">
-		                <input type="radio" name="chartType" id="chartType_column" checked>
-		                <span class="glyphicon glyphicon-stats"></span>
-		              </label>
-		              <label class="btn btn-default">
-		                <input type="radio" name="chartType" id="chartType_line">
-		                <span class="glyphicon glyphicon-ok"></span>
-		              </label>
-		            </div>
-		          </div>
+							<div class="form-group">
+								<label>Chart Type</label>
+								<div class="btn-group" data-toggle="buttons">
+									<label class="btn btn-default active">
+										<input type="radio" name="chartType" id="chartType_column" checked>
+										<span class="glyphicon glyphicon-stats"></span>
+									</label>
+									<label class="btn btn-default">
+										<input type="radio" name="chartType" id="chartType_line">
+										<span class="glyphicon glyphicon-ok"></span>
+									</label>
+								</div>
+							</div>
 
-		          <div class="form-group">
-		            <label>Show Unknown</label>
-		            <div class="btn-group" data-toggle="buttons">
-		              <label class="btn btn-default active">
-		                <input type="radio" name="boolean" id="boolean_and" checked> ON
-		              </label>
-		              <label class="btn btn-default">
-		                <input type="radio" name="boolean" id="boolean_or"> OFF
-		              </label>
-		            </div>
-		          </div>
+							<div class="form-group">
+								<label>Show Unknown</label>
+								<div class="btn-group" data-toggle="buttons">
+									<label class="btn btn-default active">
+										<input type="radio" name="boolean" id="boolean_and" checked> ON
+									</label>
+									<label class="btn btn-default">
+										<input type="radio" name="boolean" id="boolean_or"> OFF
+									</label>
+								</div>
+							</div>
 
-		        </div>
-		      </div>
+						</div>
+					</div>
 
-		      <h4>
-		        <span class="count-group"><span class="count count-large text-primary">3%</span> positive</span>
-		        <span class="count-group"><span class="count count-large text-danger">5%</span> negative</span>
-		        <span class="count-group"><span class="count count-large text-success">10%</span> neutral</span>
-		        <span class="count-group"><span class="count count-large text-muted">82%</span> unknown</span>
-		      </h4>
+					<h4>
+						<span class="count-group"><span class="count count-large text-primary">3%</span> positive</span>
+						<span class="count-group"><span class="count count-large text-danger">5%</span> negative</span>
+						<span class="count-group"><span class="count count-large text-success">10%</span> neutral</span>
+						<span class="count-group"><span class="count count-large text-muted">82%</span> unknown</span>
+					</h4>
 
-		      <!-- chart container here -->
+					<!-- FIXME x and y based on sample data. -->
+					<!-- Need to figure out how we are working these for different datasets -->
+					<barchart attr-x="'time'" attr-y="'magnitude'"></barchart>
+				</div>
 
-		    </div>
+				<!-- Map -->
+				<div class="well">
+					<!-- chart container here -->
+				</div>
 
-		    <!-- Map -->
-		    <div class="well">
-		      <!-- chart container here -->
-		    </div>
-
-		  </div>
+			</div>
 		</div>
 
 		</div>
@@ -385,15 +384,18 @@
 		<script src="lib/d3/d3.v3.min.js"></script>
 		<script src="lib/bootstrap/bootstrap.min.js"></script>
 		<script src="js/namespaces.js"></script>
-		<script src="js/barchart.js"></script>
+		<script src="js/charts/barchart.js"></script>
 
 		<script src="js/app.js"></script>
 		<script src="js/connectionService.js"></script>
 		<script src="js/neonDemoController.js"></script>
+
 		<script src="js/directives/databaseConfigDirective.js"></script>
 
 		<script src="js/charts/circularHeatChart.js"></script>
 		<script src="js/directives/circularHeatChart.js"></script>
 		<script src="js/directives/circularHeatForm.js"></script>
+
+		<script src="js/directives/barchartDirective.js"></script>
 	</body>
 </html>

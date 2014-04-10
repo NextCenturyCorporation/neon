@@ -78,9 +78,10 @@
  *    var barchart = new charts.BarChart('#chart', opts).draw();
  *
  */
-charts.BarChart = function (chartSelector, opts) {
+charts.BarChart = function (rootElement, selector, opts) {
     opts = opts || {};
-    this.chartSelector_ = chartSelector;
+    this.chartSelector_ = selector;
+    this.element = d3.select(rootElement).select(selector);
 
     if (!opts.responsive) {
         this.userSetWidth_ = opts.width;
@@ -281,7 +282,7 @@ charts.BarChart.createYAxisTickFormat_ = function () {
  */
 charts.BarChart.prototype.draw = function () {
     this.preparePropertiesForDrawing_();
-    $(this.chartSelector_).empty();
+    $(this.element[0]).empty();
     if (this.plotWidth === 0) {
         this.displayError();
     }
@@ -296,8 +297,8 @@ charts.BarChart.prototype.draw = function () {
 
 charts.BarChart.prototype.preparePropertiesForDrawing_ = function () {
 
-    this.width = this.determineWidth_(this.chartSelector_);
-    this.height = this.determineHeight_(this.chartSelector_);
+    this.width = this.determineWidth_(this.element);
+    this.height = this.determineHeight_(this.element);
     this.setMargins_();
     this.x = this.createXScale_();
     // set the width to be as close to the user specified size (but not larger) so the bars divide evenly into
@@ -314,14 +315,14 @@ charts.BarChart.prototype.preparePropertiesForDrawing_ = function () {
  * @method displayError
  */
 charts.BarChart.prototype.displayError = function () {
-    $(this.chartSelector_).append("<div class='error-text'>" +
+    this.element.append("<div class='error-text'>" +
         "You've attempted to draw a chart with too many categories.<br/>" +
         "Reduce the number of categories or increase the width of the chart to " +
         this.categories.length + " pixels.</div>");
 };
 
 charts.BarChart.prototype.drawChartSVG_ = function () {
-    var chart = d3.select(this.chartSelector_)
+    var chart = this.element
         .append('svg')
         .attr('id', 'plot')
         .attr('width', this.plotWidth + this.hMargin_)
@@ -412,46 +413,28 @@ charts.BarChart.prototype.setInactive = function (predicate) {
 };
 
 charts.BarChart.prototype.showTooltip_ = function (item, mouseLocation) {
-    var tooltip = this.createTooltip_(item);
-    // initially hidden because it will fade in
-    tooltip.hide();
-    $(this.chartSelector_).append(tooltip);
-    // must position after appending so its width can be properly computed
-    this.positionTooltip_(tooltip, mouseLocation);
-    tooltip.fadeIn(500);
-};
-
-charts.BarChart.prototype.createTooltip_ = function (item) {
-    var tooltip = $('<div/>', {
-        "class": "charttooltip",
-        id: charts.BarChart.TOOLTIP_ID_
-    });
-
-    // if a tick format was specified, use that to format the tooltip for a consistent look
     var xValue = this.tickFormat_ ? this.tickFormat_(item.key) : item.key;
-    var xAttributeHtml = $('<div/>').html(this.xLabel_ + ': ' + xValue);
-    var yAttributeHtml = $('<div/>').html(this.yLabel_ + ': ' + item.values);
-    tooltip.append(xAttributeHtml);
-    tooltip.append(yAttributeHtml);
-    return tooltip;
+
+    var tooltip = this.element.append("div")
+    .property('id', charts.BarChart.TOOLTIP_ID_)
+    .classed({'charttooltip':true});
+
+    tooltip.append("div").html(this.xLabel_ + ': ' + xValue)
+    .append("div").html(this.yLabel_ + ': ' + item.values);
+    $(tooltip[0]).hide();
+    this.positionTooltip_(tooltip, mouseLocation);
+    $(tooltip[0]).fadeIn(500);
 };
 
 charts.BarChart.prototype.positionTooltip_ = function (tooltip, mouseLocation) {
-    // set the tooltip to appear where the mouse pointer is
-    var top = window.event.clientY;
     // the extra 35px in the next two variables is needed to account for the padding of .charttooltip
-    var chartHeight = $(this.chartSelector_).height()-35;
+    var chartHeight = $(this.element[0]).height() - 35;
     var spaceNeeded = $(".charttooltip").height() + 35;
 
-    // if there is not enough space below the pointer to display the tooltip, put it above
-    if(Number(chartHeight - mouseLocation[1]) < spaceNeeded) {
-        // the extra 35px is needed to account for the padding of .charttooltip
-        top = mouseLocation[1] - spaceNeeded + 35;
-    }
-    tooltip.css({
-        'top': top + 'px',
-        'left': mouseLocation[0] + 'px'
-    });
+    var top = mouseLocation[1] + 35;
+
+    tooltip.style('top', top + 'px')
+    .style('left', mouseLocation[0] + 'px');
 };
 
 charts.BarChart.prototype.hideTooltip_ = function () {
@@ -618,22 +601,22 @@ charts.BarChart.prototype.removeDataWithNoMatchingCategory_ = function (aggregat
     });
 };
 
-charts.BarChart.prototype.determineWidth_ = function (chartSelector) {
+charts.BarChart.prototype.determineWidth_ = function (element) {
     if (this.userSetWidth_) {
         return this.userSetWidth_;
     }
-    else if ($(chartSelector).width() !== 0) {
-        return $(chartSelector).width() - this.hMargin_;
+    else if ($(element[0]).width() !== 0) {
+        return $(element[0]).width() - this.hMargin_;
     }
     return charts.BarChart.DEFAULT_WIDTH_;
 };
 
-charts.BarChart.prototype.determineHeight_ = function (chartSelector) {
+charts.BarChart.prototype.determineHeight_ = function (element) {
     if (this.userSetHeight_) {
         return this.userSetHeight_;
     }
-    else if ($(chartSelector).height() !== 0) {
-        return $(chartSelector).height();
+    else if ($(element[0]).height() !== 0) {
+        return $(element[0]).height();
     }
     return charts.BarChart.DEFAULT_HEIGHT_;
 };
@@ -648,4 +631,9 @@ charts.BarChart.prototype.redrawOnResize_ = function () {
     //Debounce is needed because browser resizes fire this resize even multiple times.
     $(window).resize(_.debounce(drawChart, 100));
 
+};
+
+charts.BarChart.destroy = function(el, selector) {
+    var element = d3.select(el).select(selector);
+    $(element[0]).empty();
 };

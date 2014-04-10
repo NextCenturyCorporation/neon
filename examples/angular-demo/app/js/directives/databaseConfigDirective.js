@@ -81,8 +81,8 @@ databaseConfig.directive('databaseConfig', ['ConnectionService', function(connec
 
 		$scope.connectToDatabase = function() {
 
-			// TODO:  Remove this.  Temportary Debug code to demonstrate the visualization 
-			// redrawing after a filter changes.  This will 
+			// TODO:  Remove this.  Temportary Debug code to demonstrate the visualization
+			// redrawing after a filter changes.  This will
 			// set an intial filter on the data before publishing the active dataset.  Then 10 seconds later
 			// it will alter the filter.
 			// var whereClause = neon.query.where("magnitude", ">=", 3.0);
@@ -115,10 +115,10 @@ databaseConfig.directive('databaseConfig', ['ConnectionService', function(connec
 		};
 
 		$scope.broadcastActiveDataset = function() {
-			// TODO: Alter or eliminate this when the Connection class in Neon is changed to emit 
+			// TODO: Alter or eliminate this when the Connection class in Neon is changed to emit
 			// dataset selections.
-	        var message = { 
-	        	"database": $scope.selectedDb, 
+	        var message = {
+	        	"database": $scope.selectedDb,
 	        	"table": $scope.selectedTable
 	        };
 	        messenger.publish(neon.eventing.channels.ACTIVE_DATASET_CHANGED, message);
