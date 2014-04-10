@@ -91,7 +91,7 @@ barchart.directive('barchart', ['ConnectionService', function(connectionService)
 				$scope.attrY = COUNT_FIELD_NAME;
 			}
 
-			var opts = { "data": data.data, "x": $scope.attrX, "y": $scope.attrY, responsive: true};
+			var opts = { "data": data.data, "x": $scope.attrX, "y": $scope.attrY, responsive: false};
 			var chart = new charts.BarChart(el[0], '.barchart', opts).draw();
 		};
 

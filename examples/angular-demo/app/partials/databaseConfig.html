@@ -1,19 +1,30 @@
-<ul class="nav navbar-nav">
-	<li class="dropdown">
-		<a data-toggle="dropdown" class="dropdown-toggle primary" href="#">{{activeServer}} <b class="caret"></b></a>
-		<ul class="dropdown-menu">
+<div class="overlay" ng-class="{true: 'sr-only', false: ''}[activeServer != 'Choose dataset']"></div>
+
+<ul class="nav navbar-nav overlay-above">
+  <li class="dropdown">
+    <a data-toggle="dropdown" class="dropdown-toggle primary" href="#" ng-click="clearPopover = 'sr-only'">{{activeServer}} <b class="caret"></b></a>
+    <ul class="dropdown-menu">
 
 			<li ng-repeat="server in servers" ng-class="{true: 'active', false: ''}[server.name == activeServer]">
 				<a href="#" ng-click="connectToPreset(server)">{{server.name}}</a>
 			</li>
 
-			<li class="divider"></li>
-			<li ng-class="{true: 'active', false: ''}[activeServer == 'Custom' || !(servers.length > 0)]">
-				<a data-toggle="modal" href="#customConnectionModal" >Custom...</a>
-			</li>
+      <li class="divider"></li>
+      <li ng-class="{true: 'active', false: ''}[activeServer == 'Custom' || !(servers.length > 0)]">
+        <a data-toggle="modal" href="#customConnectionModal" >Custom...</a>
+      </li>
 
-		</ul>
-	</li>
+    </ul>
+  </li>
+
+  <div class="popover fade bottom in {{clearPopover}}" style="display: block; top: 51px;">
+    <div class="arrow"></div>
+    <h3 class="popover-title">Start here!</h3>
+    <div class="popover-content">
+      <p>First you must select a dataset from the dropdown menu. You can use a preset dataset or click Custom to configure your own.</p>
+    </div>
+  </div>
+			
 </ul>
 
 <div class="modal fade" id="customConnectionModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
@@ -25,47 +36,44 @@
 			</div>
 			<div class="modal-body">
 
-				<div class="row">
-					<div class="col-md-6">
-						<div class="form-group">
-							<label for="datastore-select">Datastore Type</label>
-							<select id="datastore-select" class="form-control" ng-model="datastoreSelect">
-								<option value="mongo">Mongo</option>
-								<option value="hive">Hive</option>
-							</select>
-						</div>
-					</div>
-					<div class="col-md-6">
-						<div class="form-group">
-							<label for="hostname-input">Datastore Host Name</label>
-							<div class="input-group">
-								<input class="form-control" type="text" id="hostname-input" ng-model="hostnameInput" />
-								<span class="input-group-btn">
-									<button class="btn btn-default" id="datastore-button" ng-click="connectToDatastore()">Continue</button>
-								</span>
-							</div>
-						</div>
-					</div>
-				</div>
-				<div class="row">
-					<div class="col-md-6">
-						<div class="form-group">
-							<label for="database-select">Database Name</label>
-							<select id="database-select" class="form-control" ng-change="selectDatabase()" ng-model="selectedDb">
-								<option value="">Select Database</option>
-								<option ng-repeat="db in databases" value="{{db}}">{{db}}</option>
-							</select>
-						</div>
-					</div>
-					<div class="col-md-6">
-						<div class="form-group">
-							<label for="table-select">Table Name</label>
-							<select id="table-select" class="form-control" ng-model="selectedTable" ng-disabled="!(dbTables.length > 0)">
-								<option ng-repeat="table in dbTables" value="{{table}}">{{table}}</option>
-							</select>
-						</div>
-					</div>
-				</div>
+        <div class="row">
+          <div class="col-md-6">
+            <div class="form-group">
+              <label for="datastore-select">Datastore Type</label>
+              <select id="datastore-select" class="form-control" ng-model="datastoreSelect">
+      					<option value="mongo">Mongo</option>
+      					<option value="hive">Hive</option>
+      				</select>
+            </div>
+          </div>
+          <div class="col-md-6">
+            <div class="form-group">
+              <label for="hostname-input">Datastore Host Name</label>
+              <div class="input-group">
+              	<input class="form-control" type="text" id="hostname-input" ng-model="hostnameInput" />
+                <span class="input-group-btn">
+                  <button class="btn btn-default" id="datastore-button" ng-click="connectToDatastore()">Continue</button>
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="row">
+          <div class="col-md-6">
+            <div class="form-group">
+              <label for="database-select">Database Name</label>
+              <select id="database-select" class="form-control" ng-change="selectDatabase()" ng-model="selectedDb" ng-options="db for db in databases" ng-disabled="!(isConnected)">
+      					<option value="">Select Database</option>
+      				</select>
+            </div>
+          </div>
+          <div class="col-md-6">
+            <div class="form-group">
+              <label for="table-select">Table Name</label>
+              <select id="table-select" class="form-control" ng-model="selectedTable" ng-disabled="!(dbTables.length > 0)" ng-options="table for table in dbTables"></select>
+            </div>
+          </div>
+        </div>
 
 			</div>
 			<div class="modal-footer">

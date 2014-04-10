@@ -112,9 +112,9 @@ charts.BarChart = function (rootElement, selector, opts) {
     }
 };
 
-charts.BarChart.DEFAULT_HEIGHT_ = 400;
+charts.BarChart.DEFAULT_HEIGHT_ = 300;
 charts.BarChart.DEFAULT_WIDTH_ = 600;
-charts.BarChart.DEFAULT_MARGIN_ = {top: 20, bottom: 20, left: 40, right: 30};
+charts.BarChart.DEFAULT_MARGIN_ = {top: 20, bottom: 30, left: 30, right: 20};
 charts.BarChart.TOOLTIP_ID_ = 'tooltip';
 charts.BarChart.SVG_ELEMENT_ = 'rect';
 charts.BarChart.ACTIVE_STYLE_KEY_ = 'active';
@@ -324,9 +324,8 @@ charts.BarChart.prototype.displayError = function () {
 charts.BarChart.prototype.drawChartSVG_ = function () {
     var chart = this.element
         .append('svg')
+        .attr("viewBox","0 0 618 288")
         .attr('id', 'plot')
-        .attr('width', this.plotWidth + this.hMargin_)
-        .attr('height', this.height)
         .append('g')
         .attr('transform', 'translate(' + this.margin.left + ',' + this.margin.top + ')');
     return chart;

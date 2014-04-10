@@ -167,7 +167,8 @@ h6, .h6{
 	NAVBAR
 ================ */
 
-a.navbar-text:hover{
+a.navbar-text:hover,
+a.navbar-text:focus{
 	text-decoration: none;
 	color: #333333;
 }
@@ -218,6 +219,20 @@ a.navbar-text:hover{
 .navbar-default .navbar-nav > .dropdown > .primary:focus{
 	background-color: #2f9f3e;
     color: #FFFFFF;
+}
+
+.overlay{
+	background-color: rgba(241, 241, 241, 0.5);
+    bottom: 0;
+    left: 0;
+    position: fixed;
+    right: 0;
+    top: 0;
+    z-index: 1;
+}
+.overlay-above{
+	position: relative;
+	z-index: 2;
 }
 
 @media (max-width: 767px) {
