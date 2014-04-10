@@ -13,8 +13,8 @@
 		<!-- Custom Stylesheet -->
 		<link href="css/style.css" rel="stylesheet">
 
+		<!-- Directive styles -->
 		<link rel="stylesheet" type="text/css" href="css/directives/circularHeatChart.css">
-		<link rel="stylesheet" type="text/css" href="css/directives/circularHeatForm.css">
 
 		<!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
 		<!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
@@ -44,17 +44,12 @@
 			  <div class="clearfix visible-xs"></div>
 
 			  <div class="navbar-collapse collapse">
-			    <ul class="nav navbar-nav">
 
-			      <li class="dropdown">
-			        <a data-toggle="dropdown" class="dropdown-toggle primary" href="#">Twitter <b class="caret"></b></a>
-			        <ul class="dropdown-menu">
-			          <li class="active"><a href="#">Twitter</a></li>
-			          <li class="divider"></li>
-			          <li><a data-toggle="modal" href="#customConnectionModal">Custom...</a></li>
-			        </ul>
-			      </li>
-
+			  	<!-- Database Config -->
+          		<!--div ng-include="'partials/start.html'"></div-->
+			  	<database-config></database-config>
+			    
+				<ul class="nav navbar-nav">
 			      <li>
 			        <a data-toggle="collapse" data-parent="#trays" href="#filter-tray" class="collapsed">
 			          <span class="glyphicon glyphicon-filter"></span> Create Filter
@@ -378,10 +373,6 @@
 		</div>
 
 		</div>
-
-		<!-- Custom Connection Modal -->
-		<!--div ng-include="'partials/start.html'"></div-->
-		<database-config></database-config>
 
 		<!-- In production use:
 		<script src="//ajax.googleapis.com/ajax/libs/angularjs/x.x.x/angular.min.js"></script>
