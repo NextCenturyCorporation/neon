@@ -155,6 +155,14 @@ h6, .h6{
 	border-color: #C2360D;
 }
 
+/* Fixes for modal in header */
+.navbar-static-top{
+	z-index: auto;
+}
+.collapsing {
+    position: static;
+}
+
 /* ================
 	NAVBAR
 ================ */
@@ -329,7 +337,7 @@ a.navbar-text:hover{
 
 .form-control:focus {
     border-color: #39b54a;
-    box-shadow: 0 1px 1px rgba(0, 0, 0, 0.075) inset, 0 0 8px rgba(57, 181, 74, 0.5);
+    box-shadow: 0 1px 1px rgba(0, 0, 0, 0.075) inset, 0 0 8px rgba(57, 181, 74, 0.4);
 }
 label{
 	font-size: 12px;

@@ -3,6 +3,7 @@ var databaseConfig = angular.module('configurationDirective', []);
 databaseConfig.directive('databaseConfig', ['ConnectionService', function(connectionService) {
 	var link = function($scope, el, attr) {
 		var messenger = new neon.eventing.Messenger();
+		el.addClass('databaseConfig');
 
 		$scope.datastoreSelect = $scope.storeSelect || 'mongo';
 		$scope.hostnameInput = $scope.hostName || 'localhost';
@@ -12,6 +13,14 @@ databaseConfig.directive('databaseConfig', ['ConnectionService', function(connec
 		$scope.dbTables = [];
 		$scope.fields = [];
 		$scope.isConnected = false;
+		$scope.activeServer = "Choose dataset";
+		$scope.servers = [{
+			name: "Sample",
+			datastoreSelect: "mongo",
+			hostnameInput: "localhost",
+			selectedDb: "mydb",
+			selectedTable: "sample"
+		}];
 
 		var connection;
 
@@ -32,6 +41,24 @@ databaseConfig.directive('databaseConfig', ['ConnectionService', function(connec
 			connection.getDatabaseNames(populateDatabaseDropdown);
 		};
 
+		$scope.connectToPreset = function(server) {
+			// Change name of active connection.
+			$scope.activeServer = server.name;
+
+			// Set datastore connection details and connect to the datastore.
+			$scope.datastoreSelect = server.datastoreSelect;
+			$scope.hostnameInput = server.hostnameInput;
+			$scope.connectToDatastore();
+
+			// Set database name and get list of tables.
+			$scope.selectedDb = server.selectedDb;
+			$scope.selectDatabase();
+
+			// Set table name and initiate connection.
+			$scope.selectedTable = server.selectedTable;
+			$scope.connectToDatabase();
+		};
+
 		var populateDatabaseDropdown = function(dbs) {
 			$scope.databases = dbs;
 			$scope.$apply();
@@ -47,10 +74,10 @@ databaseConfig.directive('databaseConfig', ['ConnectionService', function(connec
 			$scope.$apply();
 		};
 
-		$scope.continueClick = function() {
+		$scope.connectToDatabase = function() {
 
-			// TODO:  Remove this.  Temportary Debug code to demonstrate the visualization 
-			// redrawing after a filter changes.  This will 
+			// TODO:  Remove this.  Temportary Debug code to demonstrate the visualization
+			// redrawing after a filter changes.  This will
 			// set an intial filter on the data before publishing the active dataset.  Then 10 seconds later
 			// it will alter the filter.
 			// var whereClause = neon.query.where("magnitude", ">=", 3.0);
@@ -71,13 +98,22 @@ databaseConfig.directive('databaseConfig', ['ConnectionService', function(connec
 
 				messenger.publish('neon.database.fields', JSON.stringify(fields));
 			});
+
+			//$scope.selectedDb = "mydb";
+			//$scope.selectedTable = "system.indexes";
+		};
+
+		$scope.continueClick = function() {
+			// Set active connection to Custom and connect.
+			$scope.activeServer = "Custom";
+			$scope.connectToDatabase();
 		};
 
 		$scope.broadcastActiveDataset = function() {
-			// TODO: Alter or eliminate this when the Connection class in Neon is changed to emit 
+			// TODO: Alter or eliminate this when the Connection class in Neon is changed to emit
 			// dataset selections.
-	        var message = { 
-	        	"database": $scope.selectedDb, 
+	        var message = {
+	        	"database": $scope.selectedDb,
 	        	"table": $scope.selectedTable
 	        };
 	        messenger.publish(neon.eventing.channels.ACTIVE_DATASET_CHANGED, message);

@@ -1,59 +1,77 @@
+<ul class="nav navbar-nav">
+	<li class="dropdown">
+		<a data-toggle="dropdown" class="dropdown-toggle primary" href="#">{{activeServer}} <b class="caret"></b></a>
+		<ul class="dropdown-menu">
+
+			<li ng-repeat="server in servers" ng-class="{true: 'active', false: ''}[server.name == activeServer]">
+				<a href="#" ng-click="connectToPreset(server)">{{server.name}}</a>
+			</li>
+
+			<li class="divider"></li>
+			<li ng-class="{true: 'active', false: ''}[activeServer == 'Custom' || !(servers.length > 0)]">
+				<a data-toggle="modal" href="#customConnectionModal" >Custom...</a>
+			</li>
+
+		</ul>
+	</li>
+</ul>
+
 <div class="modal fade" id="customConnectionModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
-    <div class="modal-dialog">
-      <div class="modal-content">
-        <div class="modal-header">
-          <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-          <h4 class="modal-title">Custom Connection</h4>
-        </div>
-        <div class="modal-body">
+	<div class="modal-dialog">
+		<div class="modal-content">
+			<div class="modal-header">
+				<button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+				<h4 class="modal-title">Custom Connection</h4>
+			</div>
+			<div class="modal-body">
 
-          <div class="row">
-            <div class="col-md-6">
-              <div class="form-group">
-                <label for="datastore-select">Datastore Type</label>
-                <select id="datastore-select" class="form-control" ng-model="datastoreSelect">
-					<option value="mongo">Mongo</option>
-					<option value="hive">Hive</option>
-				</select>
-              </div>
-            </div>
-            <div class="col-md-6">
-              <div class="form-group">
-                <label for="hostname-input">Datastore Host Name</label>
-                <div class="input-group">
-                	<input class="form-control" type="text" id="hostname-input" ng-model="hostnameInput" />
-                  <span class="input-group-btn">
-                    <button class="btn btn-default" id="datastore-button" ng-click="connectToDatastore()">Continue</button>
-                  </span>
-                </div>
-              </div>
-            </div>
-          </div>
-          <div class="row">
-            <div class="col-md-6">
-              <div class="form-group">
-                <label for="database-select">Database Name</label>
-                <select id="database-select" class="form-control" ng-change="selectDatabase()" ng-model="selectedDb" ng-disabled="!isConnected">
-					<option value="">Select Database</option>
-					<option ng-repeat="db in databases" value="{{db}}">{{db}}</option>
-				</select>
-              </div>
-            </div>
-            <div class="col-md-6">
-              <div class="form-group">
-                <label for="table-select">Table Name</label>
-                <select id="table-select" class="form-control" ng-model="selectedTable" ng-disabled="!(dbTables.length > 0)">
-					<option ng-repeat="table in dbTables" value="{{table}}">{{table}}</option>
-				</select>
-              </div>
-            </div>
-          </div>
+				<div class="row">
+					<div class="col-md-6">
+						<div class="form-group">
+							<label for="datastore-select">Datastore Type</label>
+							<select id="datastore-select" class="form-control" ng-model="datastoreSelect">
+								<option value="mongo">Mongo</option>
+								<option value="hive">Hive</option>
+							</select>
+						</div>
+					</div>
+					<div class="col-md-6">
+						<div class="form-group">
+							<label for="hostname-input">Datastore Host Name</label>
+							<div class="input-group">
+								<input class="form-control" type="text" id="hostname-input" ng-model="hostnameInput" />
+								<span class="input-group-btn">
+									<button class="btn btn-default" id="datastore-button" ng-click="connectToDatastore()">Continue</button>
+								</span>
+							</div>
+						</div>
+					</div>
+				</div>
+				<div class="row">
+					<div class="col-md-6">
+						<div class="form-group">
+							<label for="database-select">Database Name</label>
+							<select id="database-select" class="form-control" ng-change="selectDatabase()" ng-model="selectedDb">
+								<option value="">Select Database</option>
+								<option ng-repeat="db in databases" value="{{db}}">{{db}}</option>
+							</select>
+						</div>
+					</div>
+					<div class="col-md-6">
+						<div class="form-group">
+							<label for="table-select">Table Name</label>
+							<select id="table-select" class="form-control" ng-model="selectedTable" ng-disabled="!(dbTables.length > 0)">
+								<option ng-repeat="table in dbTables" value="{{table}}">{{table}}</option>
+							</select>
+						</div>
+					</div>
+				</div>
 
-        </div>
-        <div class="modal-footer">
-          <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-          <button type="button" class="btn btn-primary" data-dismiss="modal" id="database-table-button" ng-click="continueClick()">Connect</button>
-        </div>
-      </div>
-    </div>
-  </div>
+			</div>
+			<div class="modal-footer">
+				<button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+				<button type="button" class="btn btn-primary" data-dismiss="modal" id="database-table-button" ng-click="continueClick()">Connect</button>
+			</div>
+		</div>
+	</div>
+</div>
