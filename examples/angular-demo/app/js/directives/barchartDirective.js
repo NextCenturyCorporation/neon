@@ -58,10 +58,10 @@ barchart.directive('barchart', ['ConnectionService', function(connectionService)
 		var onDatasetChanged = function(message) {
 			$scope.databaseName = message.database;
 			$scope.tableName = message.table;
-			queryForData();
+			$scope.queryForData();
 		};
 
-		var queryForData = function() {
+		$scope.queryForData = function() {
 			var query = new neon.query.Query()
 			.selectFrom($scope.databaseName, $scope.tableName)
 			.where($scope.attrX, '!=', null)
