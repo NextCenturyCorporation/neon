@@ -78,7 +78,7 @@ angular.module('circularHeatFormDirective', []).directive('circularHeatForm', ['
 			};
 
 			/**
-			 * Event handler for filter changed events issues over Neon's messaging channels.
+			 * Event handler for filter changed events issued over Neon's messaging channels.
 			 * @param {Object} message A Neon filter changed message.
 			 * @method onFiltersChanged
 			 * @private
@@ -88,7 +88,7 @@ angular.module('circularHeatFormDirective', []).directive('circularHeatForm', ['
 			};
 
 			/**
-			 * Event handler for dataset changed events issues over Neon's messaging channels.
+			 * Event handler for dataset changed events issued over Neon's messaging channels.
 			 * @param {Object} message A Neon dataset changed message.
 			 * @param {String} message.database The database that was selected.
 			 * @param {String} message.table The table within the database that was selected.
