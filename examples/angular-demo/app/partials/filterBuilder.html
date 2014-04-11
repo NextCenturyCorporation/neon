@@ -2,12 +2,12 @@
 
   <h4 class="pull-left">Create Filter</h4>
 
-  <div class="btn-group pull-right" data-toggle="buttons">
-    <label class="btn btn-default active">
-      <input type="radio" name="boolean" id="boolean_and" checked> AND
+  <div class="btn-group pull-right" >
+    <label class="btn btn-default active" ng-class="{true: 'active', false: ''}[andClauses]">
+      <input type="radio" ng-model="andClauses" style="display:none" ng-value="true"> AND
     </label>
-    <label class="btn btn-default">
-      <input type="radio" name="boolean" id="boolean_or"> OR
+    <label class="btn btn-default" ng-class="{true: '', false: 'active'}[andClauses]">
+      <input type="radio" ng-model="andClauses" style="display:none" ng-value="false"> OR
     </label>
   </div>
 

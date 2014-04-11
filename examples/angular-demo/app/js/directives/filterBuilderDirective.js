@@ -118,7 +118,38 @@ angular.module('filterBuilderDirective', []).directive('filterBuilder', ['Connec
 				$scope.fields = fields;
 			};
 
-			$scope.onFilterAdd
+			// Adjust the filters whenever the user toggles AND/OR clauses.
+            $scope.$watch('andClauses', function(newVal, oldVal) {
+            	if (newVal != oldVal) {
+            		var filter = $scope.filterTable.buildFilterFromData($scope.databaseName, $scope.tableName, $scope.andClauses);
+            		$scope.messenger.replaceFilter($scope.filterTable.filterKey, filter, function(){
+						// No action required at present.
+			        }, function() {
+			        	$scope.$apply(function() {
+				        	// Error handler:  If the new query failed, reset the previous value of the AND / OR field.
+				        	$scope.andClauses = !$scope.andClauses;
+
+				        	// TODO: Notify the user of the error.
+				        });
+			        });
+            	}
+            });
+
+            $scope.$watch('filterTable.filterState', function(newVal, oldVal) {
+            	if (newVal != oldVal) {
+            		var filter = $scope.filterTable.buildFilterFromData($scope.databaseName, $scope.tableName, $scope.andClauses);
+            		$scope.messenger.replaceFilter($scope.filterTable.filterKey, filter, function(){
+						// No action required at present.
+			        }, function() {
+			        	$scope.$apply(function() {
+				        	// Error handler:  If the new query failed, reset the previous value of the AND / OR field.
+				        	$scope.filterTable.filterState = oldVal;
+
+				        	// TODO: Notify the user of the error.
+				        });
+			        });
+            	}
+            }, true);
 
 			// Wait for neon to be ready, the create our messenger and intialize the view and data.
 			neon.ready(function () {
