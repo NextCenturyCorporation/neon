@@ -182,6 +182,7 @@ a.navbar-text:focus{
 }
 .navbar-text{
 	margin: 8px;
+	font-weight: 300;
 }
 .navbar-text img{
 	margin-left: 6px;

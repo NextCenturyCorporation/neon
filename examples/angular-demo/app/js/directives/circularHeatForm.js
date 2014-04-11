@@ -58,21 +58,8 @@ angular.module('circularHeatFormDirective', []).directive('circularHeatForm', ['
 		},
 		link: function($scope, element, attr) {
 
-			$scope.days = [
-				{name: "Sunday", count: 0},
-				{name: "Monday", count: 0},
-				{name: "Tuesday", count: 0},
-				{name: "Wednesday", count: 0},
-				{name: "Thursday", count: 0},
-				{name: "Friday", count: 0},
-				{name: "Saturday", count: 0}
-			];
-			$scope.timeofday = [
-				{name: "morning", count: 0},
-				{name: "afternoon", count: 0},
-				{name: "evening", count: 0},
-				{name: "night", count: 0}
-			];
+			$scope.days = [];
+			$scope.timeofday = [];
 			$scope.maxDay = "";
 			$scope.maxTime = "";
 
@@ -95,6 +82,30 @@ angular.module('circularHeatFormDirective', []).directive('circularHeatForm', ['
 					filtersChanged: onFiltersChanged
 				});
 			};
+
+			/**
+			 * Initializes the arrays and variables used to track the most active day of the week and time of day.
+			 * @method initDayTimeArrays
+			 */
+			$scope.initDayTimeArrays = function(){
+				$scope.days = [
+					{name: "Sundays", count: 0},
+					{name: "Mondays", count: 0},
+					{name: "Tuesdays", count: 0},
+					{name: "Wednesdays", count: 0},
+					{name: "Thursdays", count: 0},
+					{name: "Fridays", count: 0},
+					{name: "Saturdays", count: 0}
+				];
+				$scope.timeofday = [
+					{name: "mornings", count: 0},
+					{name: "afternoons", count: 0},
+					{name: "evenings", count: 0},
+					{name: "nights", count: 0}
+				];
+				$scope.maxDay = "";
+				$scope.maxTime = "";
+			}
 
 			/**
 			 * Event handler for filter changed events issued over Neon's messaging channels.
@@ -186,7 +197,7 @@ angular.module('circularHeatFormDirective', []).directive('circularHeatForm', ['
 					data[i] = 0;
 				}
 
-				$scope.resetDayTimeArrays();
+				$scope.initDayTimeArrays();
 
 				_.each(rawData, function (element) {
 					data[(element.day - 1) * HOURS_IN_DAY + element.hour] = element.count;
@@ -225,30 +236,6 @@ angular.module('circularHeatFormDirective', []).directive('circularHeatForm', ['
 
 				return data;
 			};
-
-			/**
-			 * Resets the arrays and variables used to track the most active day of the week and time of day.
-			 * @method resetDayTimeArrays
-			 */
-			$scope.resetDayTimeArrays = function(){
-				$scope.days = [
-					{name: "Sunday", count: 0},
-					{name: "Monday", count: 0},
-					{name: "Tuesday", count: 0},
-					{name: "Wednesday", count: 0},
-					{name: "Thursday", count: 0},
-					{name: "Friday", count: 0},
-					{name: "Saturday", count: 0}
-				];
-				$scope.timeofday = [
-					{name: "morning", count: 0},
-					{name: "afternoon", count: 0},
-					{name: "evening", count: 0},
-					{name: "night", count: 0}
-				];
-				$scope.maxDay = "";
-				$scope.maxTime = "";
-			}
 
 			// Wait for neon to be ready, the create our messenger and intialize the view and data.
 			neon.ready(function () {
