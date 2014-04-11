@@ -35,7 +35,7 @@ svg .tick {
 
 .bar {
     /** provides a slight separation for adjacent bars. the barchart javascript sets the color based on the svg color */
-    fill: #999999;
+    fill: #CCCCCC;
     stroke-width: 6;
     stroke-opacity: 1;
 }
@@ -45,7 +45,7 @@ svg .tick {
 }
 
 .axis line, .axis path {
-    stroke: darkgrey;
+    stroke: #cccccc;
     stroke-width: 1px;
     fill: none;
 }
@@ -61,7 +61,7 @@ svg .tick {
     border-radius: 4px;
     box-shadow: 0 6px 12px rgba(0, 0, 0, 0.176);
     pointer-events: none;
-    color: #333333;
+    color: #555555;
 }
 
 .timeline-div {
@@ -71,6 +71,7 @@ svg .tick {
 
 .chart-div {
     width: 100%;
+    max-height: 307px;
     /*position: absolute;
     top: 25px;
     bottom: 0px;*/
