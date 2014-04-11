@@ -13,66 +13,21 @@
 
   <div class="clearfix"></div>
 
-  <div class="filter form-inline clearfix">
+  <div class="filter form-inline clearfix" ng-repeat="filterRow in filterTable.filterState.data">
     <div class="form-group">
-      <select id="field1" class="form-control">
-        <option>user_id</option>
-        <option>sentiment</option>
-        <option>something</option>
-        <option>something</option>
-        <option>something</option>
+      <select class="form-control" ng-model="filterRow.columnValue" ng-disabled="!(fields.length > 0)" ng-options="field for field in fields">
       </select>
     </div>
     <div class="form-group">
-      <select id="operator1" class="form-control">
-        <option>==</option>
-        <option>&gt;=</option>
-        <option>&lt;=</option>
-        <option>&gt;</option>
-        <option>&lt;</option>
-        <option>!=</option>
-        <option>between</option>
+      <select class="form-control"  ng-model="filterRow.operatorValue" ng-disabled="!(fields.length > 0)"
+        ng-options="operator for operator in filterTable.operatorOptions">
       </select>
     </div>
     <div class="form-group">
-      <input type="text" class="form-control" id="value1" size="46" placeholder="Value" value="423423423">
+      <input type="text" class="form-control" size="46" placeholder="Value" ng-model="filterRow.value">
     </div>
     <div class="form-group pull-right">
-      <button type="button" class="btn btn-danger">
-        <span class="glyphicon glyphicon-remove"></span>
-      </button>
-    </div>
-  </div>
-
-  <div class="filter form-inline clearfix">
-    <div class="form-group">
-      <select id="field2" class="form-control">
-        <option>user_id</option>
-        <option selected>sentiment</option>
-        <option>something</option>
-        <option>something</option>
-        <option>something</option>
-      </select>
-    </div>
-    <div class="form-group">
-      <select id="operator2" class="form-control">
-        <option>==</option>
-        <option>&gt;=</option>
-        <option>&lt;=</option>
-        <option>&gt;</option>
-        <option>&lt;</option>
-        <option>!=</option>
-        <option selected>between</option>
-      </select>
-    </div>
-    <div class="form-group">
-      <input type="text" class="form-control" id="value2" placeholder="Min Value" value="0">
-    </div>
-    <div class="form-group">
-      <input type="text" class="form-control" id="value2_max" placeholder="Max Value" value="1">
-    </div>
-    <div class="form-group pull-right">
-      <button type="button" class="btn btn-danger">
+      <button type="button" class="btn btn-danger" ng-click="removeFilterRow($index)">
         <span class="glyphicon glyphicon-remove"></span>
       </button>
     </div>
@@ -80,30 +35,20 @@
 
   <div class="filter filter-new form-inline">
     <div class="form-group">
-      <select id="field3" class="form-control">
-        <option>Select field</option>
-        <option>something</option>
-        <option>something</option>
-        <option>something</option>
-        <option>something</option>
+      <select id="filter-field-selection" class="form-control" ng-model="selectedField" ng-disabled="!(fields.length > 0)" ng-options="field for field in fields">
       </select>
     </div>
     <div class="form-group">
-      <select id="operator3" class="form-control">
-        <option>==</option>
-        <option>&gt;=</option>
-        <option>&lt;=</option>
-        <option>&gt;</option>
-        <option>&lt;</option>
-        <option>!=</option>
-        <option>between</option>
+      <select id="filter-operator-selection" class="form-control"  ng-model="selectedOperator" ng-disabled="!(fields.length > 0)"
+        ng-options="operator for operator in filterTable.operatorOptions">
       </select>
     </div>
     <div class="form-group">
-      <input type="text" class="form-control" id="value3" size="46" placeholder="Value">
+      <input type="text" class="form-control" id="filter-value" size="46" placeholder="Value"  ng-model="selectedValue" 
+        ng-disabled="!(fields.length > 0)" ng-required="true">
     </div>
     <div class="form-group">
-      <button type="button" class="btn btn-primary">
+      <button type="button" class="btn btn-primary" ng-click="addFilterRow()">
         Add
       </button>
     </div>
