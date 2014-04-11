@@ -36,7 +36,7 @@ angular.module('circularHeatFormDirective', []).directive('circularHeatForm', ['
 		templateUrl: 'partials/circularHeatForm.html',
 		restrict: 'EA',
 		scope: {
-			filterKey: '=',
+			filterKey: '='
 		},
 		controller: function($scope) {
 
@@ -57,6 +57,25 @@ angular.module('circularHeatFormDirective', []).directive('circularHeatForm', ['
 			};
 		},
 		link: function($scope, element, attr) {
+
+			$scope.days = [
+				{name: "Sunday", count: 0},
+				{name: "Monday", count: 0},
+				{name: "Tuesday", count: 0},
+				{name: "Wednesday", count: 0},
+				{name: "Thursday", count: 0},
+				{name: "Friday", count: 0},
+				{name: "Saturday", count: 0}
+			];
+			$scope.timeofday = [
+				{name: "morning", count: 0},
+				{name: "afternoon", count: 0},
+				{name: "evening", count: 0},
+				{name: "night", count: 0}
+			];
+			$scope.maxDay = "";
+			$scope.maxTime = "";
+
 			element.addClass('circularheatform');
 
 			var HOURS_IN_WEEK = 168;
@@ -169,6 +188,37 @@ angular.module('circularHeatFormDirective', []).directive('circularHeatForm', ['
 
 				_.each(rawData, function (element) {
 					data[(element.day - 1) * HOURS_IN_DAY + element.hour] = element.count;
+
+					// Add count to total for this day of the week.
+					$scope.days[element.day-1].count += element.count;
+
+					// Add count to total for this time of day.
+					if(element.hour >= 5 && element.hour < 12)
+						$scope.timeofday[0].count += element.count;
+					else if(element.hour >= 12 && element.hour < 17)
+						$scope.timeofday[1].count += element.count;
+					else if(element.hour >= 17 && element.hour < 21)
+						$scope.timeofday[2].count += element.count;
+					else
+						$scope.timeofday[3].count += element.count;
+				});
+
+				// Find the day with the highest count.
+				var maxCount = 0;
+				_.each($scope.days, function (day) {
+					if(day.count > maxCount){
+						maxCount = day.count;
+						$scope.maxDay = day.name;
+					}
+				});
+
+				// Find the time of day with the highest count.
+				maxCount = 0;
+				_.each($scope.timeofday, function (time) {
+					if(time.count > maxCount){
+						maxCount = time.count;
+						$scope.maxTime = time.name;
+					}
 				});
 
 				return data;
