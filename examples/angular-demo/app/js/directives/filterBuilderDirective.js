@@ -89,6 +89,8 @@ angular.module('filterBuilderDirective', []).directive('filterBuilder', ['Connec
 
 			/**
 			 * Removes a filter row from the table of filter clauses.
+			 * @param {Number} index The row to remove.
+			 * @method updateFilterRow
 			 */
 			$scope.removeFilterRow = function(index) {
 
@@ -101,10 +103,46 @@ angular.module('filterBuilderDirective', []).directive('filterBuilder', ['Connec
 		        }, function() {
 		        	$scope.$apply(function() {
 			        	// Error handler:  the addition to the filter failed.  Remove it.
-			        	$scope.filterTable.insertFilterRow(row, index);
+			        	$scope.filterTable.setFilterRow(row, index);
 
 			        	// TODO: Notify the user.
 			        });
+		        });
+			}
+
+			/**
+			 * Updates a filter row from current visible values and resets the filters on the server.
+			 * @param {Number} index The row to update and push to the server.
+			 * @method updateFilterRow
+			 */
+			$scope.updateFilterRow = function(index) {
+				var row = $scope.filterTable.getFilterRow(index);
+
+        		var filter = $scope.filterTable.buildFilterFromData($scope.databaseName, $scope.tableName, $scope.andClauses);
+        		$scope.messenger.replaceFilter($scope.filterTable.filterKey, filter, function(){
+					// No action required at present.
+		        }, function() {
+		        	$scope.$apply(function() {
+			        	// Error handler:  If the new query failed, reset the previous value of the AND / OR field.
+			        	$scope.filterTable.filterState = oldVal;
+
+			        	// TODO: Notify the user of the error.
+			        });
+		        });
+			}
+
+			/**
+			 * Resets the current filter. 
+			 * @method resetFilters
+			 */
+			$scope.resetFilters = function() {
+				$scope.messenger.removeFilter($scope.filterTable.filterKey, function(){
+					$scope.$apply(function() {
+						// Remove the visible filter list.
+						$scope.filterTable.clearFilterState();
+					});
+		        }, function() {
+		        	// TODO: Notify the user of the error.
 		        });
 			}
 
@@ -134,22 +172,6 @@ angular.module('filterBuilderDirective', []).directive('filterBuilder', ['Connec
 			        });
             	}
             });
-
-            $scope.$watch('filterTable.filterState', function(newVal, oldVal) {
-            	if (newVal != oldVal) {
-            		var filter = $scope.filterTable.buildFilterFromData($scope.databaseName, $scope.tableName, $scope.andClauses);
-            		$scope.messenger.replaceFilter($scope.filterTable.filterKey, filter, function(){
-						// No action required at present.
-			        }, function() {
-			        	$scope.$apply(function() {
-				        	// Error handler:  If the new query failed, reset the previous value of the AND / OR field.
-				        	$scope.filterTable.filterState = oldVal;
-
-				        	// TODO: Notify the user of the error.
-				        });
-			        });
-            	}
-            }, true);
 
 			// Wait for neon to be ready, the create our messenger and intialize the view and data.
 			neon.ready(function () {

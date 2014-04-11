@@ -1,19 +1,21 @@
 <div class="container panel-body">
 
-  <h4 class="pull-left">Create Filter</h4>
+  <h4 class="pull-left">Create Filters</h4>
 
-  <div class="btn-group pull-right" >
-    <label class="btn btn-default active" ng-class="{true: 'active', false: ''}[andClauses]">
-      <input type="radio" ng-model="andClauses" style="display:none" ng-value="true"> AND
-    </label>
-    <label class="btn btn-default" ng-class="{true: '', false: 'active'}[andClauses]">
-      <input type="radio" ng-model="andClauses" style="display:none" ng-value="false"> OR
-    </label>
+  <div class="pull-right">
+    <div class="btn-group" >
+      <label class="btn btn-default active" ng-class="{true: 'active', false: ''}[andClauses]">
+        <input type="radio" ng-model="andClauses" style="display:none" ng-value="true"> AND
+      </label>
+      <label class="btn btn-default" ng-class="{true: '', false: 'active'}[andClauses]">
+        <input type="radio" ng-model="andClauses" style="display:none" ng-value="false"> OR
+      </label>
+    </div>
+
+    <button type="button" class="btn btn-danger" ng-click="resetFilters()">
+        Reset
+    </button>
   </div>
-
-  <button type="button" class="btn btn-danger pull-right">
-    Reset
-  </button>
 
   <div class="clearfix"></div>
 
@@ -32,7 +34,7 @@
     </div>
     <div class="form-group pull-right">
       <button type="button" class="btn btn-default">
-        <span class="glyphicon glyphicon-refresh"></span>
+        <span class="glyphicon glyphicon-refresh" ng-click="updateFilterRow($index)"></span>
       </button>
       <button type="button" class="btn btn-danger" ng-click="removeFilterRow($index)">
         <span class="glyphicon glyphicon-remove"></span>

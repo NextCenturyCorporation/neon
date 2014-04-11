@@ -47,6 +47,14 @@ neon.query.FilterTable.prototype.removeFilterRow = function (id) {
     return this.filterState.data.splice(id, 1);
 };
 
+neon.query.FilterTable.prototype.getFilterRow = function (id) {
+    return this.filterState.data[id];
+};
+
+neon.query.FilterTable.prototype.setFilterRow = function (row, index) {
+    return this.filterState.data[index] = row;
+};
+
 neon.query.FilterTable.prototype.clearFilterState = function () {
     this.filterState.data = [];
 };
