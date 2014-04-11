@@ -281,6 +281,7 @@ a.navbar-text:focus{
 }
 .filter-tray .container > .btn-group{
 	margin-right: 10px;
+	margin-left: 10px;
 }
 .filter-tray .container > .btn-group > .btn{
 	font-weight: bold;
