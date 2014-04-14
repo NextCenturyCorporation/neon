@@ -316,7 +316,7 @@ charts.BarChart.prototype.preparePropertiesForDrawing_ = function () {
  * @method displayError
  */
 charts.BarChart.prototype.displayError = function () {
-    this.element.append("<div class='error-text'>" +
+    $(this.element[0]).append("<div class='error-text'>" +
         "You've attempted to draw a chart with too many categories.<br/>" +
         "Reduce the number of categories or increase the width of the chart to " +
         this.categories.length + " pixels.</div>");
