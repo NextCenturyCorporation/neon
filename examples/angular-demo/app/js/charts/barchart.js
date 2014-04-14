@@ -258,6 +258,7 @@ charts.BarChart.prototype.createXAxis_ = function () {
     if (this.tickValues_) {
         xAxis = xAxis.tickValues(this.tickValues_);
     }
+
     return xAxis;
 };
 
@@ -445,6 +446,15 @@ charts.BarChart.prototype.drawXAxis_ = function (chart) {
         .attr('class', 'x axis')
         .attr('transform', 'translate(0,' + (this.height - this.vMargin_) + ')')
         .call(this.xAxis_);
+
+    axis.selectAll("text")
+    .style("text-anchor", "end")
+    .attr("dx", "-.8em")
+    .attr("dy", ".15em")
+    .attr("transform", function(d) {
+        return "rotate(-60)";
+    });
+
     return axis;
 };
 
