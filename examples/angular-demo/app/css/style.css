@@ -134,6 +134,19 @@ h6, .h6{
 .dropdown-menu > .active > a:focus{
 	background-color: #39b54a;
 }
+
+/* Fixes for modal in header */
+.navbar-static-top{
+	z-index: auto;
+}
+.collapsing {
+    position: static;
+}
+
+/* ================
+	BUTTONS
+================ */
+
 .btn-primary{
 	background-color: #39b54a;
 	border-color: #39b54a;
@@ -153,14 +166,6 @@ h6, .h6{
 .btn-danger{
 	background-color: #C2360D;
 	border-color: #C2360D;
-}
-
-/* Fixes for modal in header */
-.navbar-static-top{
-	z-index: auto;
-}
-.collapsing {
-    position: static;
 }
 
 /* ================
@@ -279,14 +284,12 @@ a.navbar-text:focus{
 .filter-tray .filter .form-group{
 	margin-right: 5px;
 }
-.filter-tray .container > .btn-group{
+.filter-tray .container .btn-group{
 	margin-right: 10px;
 	margin-left: 10px;
 }
-.filter-tray .container > .btn-group > .btn{
-	font-weight: bold;
-	font-size: 12px;
-	line-height: 20px;
+.filter-tray .refresh{
+	margin-right: 10px;
 }
 
 /* ================
