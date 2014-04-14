@@ -35,6 +35,8 @@ barchart.directive('barchart', ['ConnectionService', function(connectionService)
 		el.addClass('barchartDirective');
 
 		var messenger = new neon.eventing.Messenger();
+		$scope.database = '';
+		$scope.tableName = '';
 		$scope.fields = [];
 		$scope.xAxisSelect = $scope.fields[0] ? $scope.fields[0] : '';
 
@@ -58,17 +60,21 @@ barchart.directive('barchart', ['ConnectionService', function(connectionService)
 		var onDatasetChanged = function(message) {
 			$scope.databaseName = message.database;
 			$scope.tableName = message.table;
-			$scope.queryForData();
 		};
 
 		$scope.queryForData = function() {
-			var query = new neon.query.Query()
-			.selectFrom($scope.databaseName, $scope.tableName)
-			.where($scope.attrX, '!=', null)
-			.groupBy($scope.attrX);
+			var xAxis = connectionService.getFieldMapping($scope.database, $scope.tableName, "x-axis");
+			    xAxis = xAxis.mapping || $scope.attrX;
+			var yAxis = connectionService.getFieldMapping($scope.database, $scope.tableName, "y-axis")
+			    yAxis = yAxis.mapping || $scope.attrY;
 
-			if($scope.attrY) {
-				query.aggregate(neon.query.SUM, $scope.attrY, $scope.attrY);
+			var query = new neon.query.Query()
+			    .selectFrom($scope.databaseName, $scope.tableName)
+			    .where(xAxis,'!=', null)
+			    .groupBy(xAxis);
+
+			if(yAxis) {
+				query.aggregate(neon.query.COUNT, yAxis, COUNT_FIELD_NAME);
 			} else {
 				query.aggregate(neon.query.COUNT, '*', COUNT_FIELD_NAME);
 			}
@@ -87,11 +93,18 @@ barchart.directive('barchart', ['ConnectionService', function(connectionService)
 		var doDrawChart = function(data) {
 			charts.BarChart.destroy(el[0], '.barchart');
 
-			if (!$scope.attrY) {
-				$scope.attrY = COUNT_FIELD_NAME;
+			var xAxis = connectionService.getFieldMapping($scope.database, $scope.tableName, "x-axis");
+			    xAxis = xAxis.mapping || $scope.attrX;
+			var yAxis = connectionService.getFieldMapping($scope.database, $scope.tableName, "y-axis")
+			    yAxis = yAxis.mapping || $scope.attrY;
+
+			if (!yAxis) {
+				yAxis = COUNT_FIELD_NAME;
+			} else {
+				yAxis = COUNT_FIELD_NAME;
 			}
 
-			var opts = { "data": data.data, "x": $scope.attrX, "y": $scope.attrY, responsive: false};
+			var opts = { "data": data.data, "x": xAxis, "y": yAxis, responsive: false};
 			var chart = new charts.BarChart(el[0], '.barchart', opts).draw();
 		};
 
