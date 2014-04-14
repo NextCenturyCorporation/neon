@@ -32,10 +32,19 @@ angular.module('neonDemo.services', []).factory('ConnectionService', ['$filter',
 							mapping: "time"
 						}, {
 							name: "latitude",
-							"latitude": "latitude"
+							mapping: "latitude"
 						}, {
 							name: "longitude",
-							"longitude": "longitude"
+							mapping: "longitude"
+						}, {
+							name: "x-axis",
+							mapping: "time"
+						}, {
+							name: "y-axis",
+							mapping: "magnitude"
+						}, {
+							name: "color-by",
+							mapping: "magnitudeType"
 						}]
 					},{
 						name: "gbSmall",
@@ -44,10 +53,19 @@ angular.module('neonDemo.services', []).factory('ConnectionService', ['$filter',
 							mapping: "created_at"
 						}, {
 							name: "latitude",
-							"latitude": "latitude"
+							mapping: "latitude"
 						}, {
 							name: "longitude",
-							"longitude": "longitude"
+							mapping: "longitude"
+						}, {
+							name: "x-axis",
+							mapping: "yyyy-mm"
+						}, {
+							name: "y-axis",
+							mapping: "sentiment"
+						}, {
+							name: "color-by",
+							mapping: "retweet_count"
 						}]
 					}]
 				}]
@@ -71,7 +89,7 @@ angular.module('neonDemo.services', []).factory('ConnectionService', ['$filter',
 		}
 
 		service.getFieldMapping = function(database, table, field) {
-			var connectionInfo = $filter('filter')(connectionInformation, { "host": activeConnection.host_ });
+			var connectionInfo = (activeConnection) ? $filter('filter')(connectionInformation, { "host": activeConnection.host_ }) : [];
 			if (connectionInfo.length > 0) {
 				var database = $filter('filter')(connectionInfo[0].mappings, { "database":database });
 				if (database.length > 0) {
