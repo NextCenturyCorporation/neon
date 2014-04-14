@@ -17,6 +17,40 @@
 var neon = neon || {};
 neon.query = neon.query || {};
 
+/**
+ * A FilterRow is a basic support object for a filter build application.  It store the 
+ * minimum data elements required to build a Neon filter: a column to act upon, the operator
+ * for comparison, and a value to compare against.
+ * 
+ * @example
+ *    var filterRow = new FilterRow("total", "<", 10);
+ * 
+ * @class neon.query.FilterRow
+ * @constructor
+ */
+neon.query.FilterRow = function (columnValue, operatorValue, value, columnOptions, operatorOptions) {
+    this.columnOptions = columnOptions;
+    this.columnValue = columnValue;
+    this.operatorOptions = operatorOptions;
+    this.operatorValue = operatorValue;
+    this.value = value;
+};
+
+/**
+ * This Angular JS directive adds a circular heat map to the DOM and drives the visualization data from
+ * whatever database and table are currently selected in Neon.  This directive pulls the current
+ * Neon connection from a connection service and listens for
+ * neon system events (e.g., data tables changed) to determine when to update its visualization
+ * by issuing a Neon query for aggregated time data.
+ * 
+ * @example
+ *    var filterRow = new FilterRow("total", "<", 10);
+ *    var filterTable = new FilterTable();
+ *    filterTable.addFilterRow(filterRow);
+ * 
+ * @class neon.query.FilterTable
+ * @constructor
+ */
 neon.query.FilterTable = function () {
     //this.messenger = new neon.eventing.Messenger();
     this.filterKey = '';
@@ -25,14 +59,6 @@ neon.query.FilterTable = function () {
     this.filterState = {
         data: []
     };
-};
-
-neon.query.FilterRow = function (columnValue, operatorValue, value, columnOptions, operatorOptions) {
-    this.columnOptions = columnOptions;
-    this.columnValue = columnValue;
-    this.operatorOptions = operatorOptions;
-    this.operatorValue = operatorValue;
-    this.value = value;
 };
 
 neon.query.FilterTable.prototype.addFilterRow = function(row) {
@@ -75,6 +101,16 @@ neon.query.FilterTable.prototype.getFilterState = function () {
     return this.filterState;
 };
 
+/** 
+ * Builds a Neon where clause suitable for use as a composite Filter for Neon Queries from the
+ * FilterRow data contained in this FilterTable.
+ * @param {String} database The database to filter.
+ * @param {String} table The table to filter.
+ * @param {Boolean} andClauses True if the compound clause should 'AND' all the FilterRows; false
+ *    if it should 'OR' all the FilterRows
+ * @return {neon.query.where}
+ * @method buildFilterFromData
+ */
 neon.query.FilterTable.prototype.buildFilterFromData = function(database, table, andClauses) {
     var baseFilter = new neon.query.Filter().selectFrom(database, table);
 
@@ -92,6 +128,16 @@ neon.query.FilterTable.prototype.buildFilterFromData = function(database, table,
     return baseFilter.where(whereClause);
 };
 
+/**
+ * Takes an array of FilterRows and builds a compound Neon where object suitable for 
+ * filtering Neon Queries.
+ * @param {Array} data A data array of FilterRows 
+ * @param {Boolean} andClauses True if the compound clause should 'AND' all the FilterRows; false
+ *    if it should 'OR' all the FilterRows
+ * @return {neon.query.where}
+ * @method buildCompoundWhereClause
+ * @static
+ */
 neon.query.FilterTable.buildCompoundWhereClause = function(data, andClauses) {
     var whereClause;
     var clauses = [];
@@ -110,6 +156,14 @@ neon.query.FilterTable.buildCompoundWhereClause = function(data, andClauses) {
     return whereClause;
 };
 
+/**
+ * Takes a string value (e.g., input field value) and parses it to a float, null, or boolean, or string as
+ * appropriate to work with the Neon Query API.
+ * @param {String} value The value to parse
+ * @return {String|Number|Boolean|null} 
+ * @method ParseValue
+ * @static
+ */
 neon.query.FilterTable.parseValue = function(value) {
     var retVal = value;
 

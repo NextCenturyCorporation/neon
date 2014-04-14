@@ -38,6 +38,9 @@ angular.module('filterBuilderDirective', []).directive('filterBuilder', ['Connec
 				// Clear the filter table.
 				$scope.filterTable.clearFilterState();
 
+				// Clear our filters against the last table before requesting data.
+				$scope.messenger.removeFilter($scope.filterTable.getFilterKey());
+
 				// Save the new database and table name; Fetch the new table fields.
 				$scope.databaseName = message.database;
 				$scope.tableName = message.table;
@@ -48,10 +51,6 @@ angular.module('filterBuilderDirective', []).directive('filterBuilder', ['Connec
 				        $scope.selectedField = results[0];
 				    });
 				});
-
-				// Clear our filters.
-				$scope.messenger.removeFilter($scope.filterTable.getFilterKey());
-
 			};
 
 			/** 
