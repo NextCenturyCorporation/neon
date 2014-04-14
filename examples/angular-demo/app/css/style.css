@@ -134,6 +134,9 @@ h6, .h6{
 .dropdown-menu > .active > a:focus{
 	background-color: #39b54a;
 }
+.label{
+	padding: 0.2em 0.6em;
+}
 
 /* Fixes for modal in header */
 .navbar-static-top{
@@ -147,7 +150,8 @@ h6, .h6{
 	BUTTONS
 ================ */
 
-.btn-primary{
+.btn-primary,
+.label-primary{
 	background-color: #39b54a;
 	border-color: #39b54a;
 }
@@ -382,15 +386,16 @@ label{
 	line-height: 1;
 	-webkit-font-smoothing: antialiased;
 	-moz-osx-font-smoothing: grayscale;
+	z-index: 99999;
 
 	font-size: 80px;
-	color: #444444;
-	text-shadow: 0 1px 0 #ffffff;
+	color: rgba(25,25,25,0.5);
+	text-shadow: 0 1px 0 rgba(255,255,255,0.3);
 
-	-webkit-animation: spin 1.2s infinite linear;
-	-moz-animation: spin 1.2s infinite linear;
-	-o-animation: spin 1.2s infinite linear;
-	animation: spin 1.2s infinite linear;
+	-webkit-animation: spin 1.5s infinite linear;
+	-moz-animation: spin 1.5s infinite linear;
+	-o-animation: spin 1.5s infinite linear;
+	animation: spin 1.5s infinite linear;
 }
 .overlay-container .spinner:before {
   content: "\e031";
