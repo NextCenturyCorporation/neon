@@ -150,6 +150,11 @@ h6, .h6{
 	BUTTONS
 ================ */
 
+.btn-default:focus{
+    background-color: #FFFFFF;
+    border-color: #CCCCCC;
+    color: #333333;
+}
 .btn-primary,
 .label-primary{
 	background-color: #39b54a;
