@@ -80,32 +80,7 @@ databaseConfig.directive('databaseConfig', ['ConnectionService', function(connec
 		};
 
 		$scope.connectToDatabase = function() {
-
-			// TODO:  Remove this.  Temportary Debug code to demonstrate the visualization
-			// redrawing after a filter changes.  This will
-			// set an intial filter on the data before publishing the active dataset.  Then 10 seconds later
-			// it will alter the filter.
-			// var whereClause = neon.query.where("magnitude", ">=", 3.0);
-            // var filter = new neon.query.Filter().selectFrom($scope.selectedDb, $scope.selectedTable).where(whereClause);
-            // messenger.replaceFilter("examplekey", filter);
-
-            // var whereClause = neon.query.where("magnitude", ">=", 0.0);
-            // var filter = new neon.query.Filter().selectFrom($scope.selectedDb, $scope.selectedTable).where(whereClause);
-            // setTimeout(function() {
-            // 	messenger.replaceFilter("examplekey", filter);
-            // }, 10000);
-
 			$scope.broadcastActiveDataset();
-
-			connection.getFieldNames($scope.selectedTable, function (fields) {
-				$scope.fields = fields;
-				$scope.$apply();
-
-				messenger.publish('neon.database.fields', JSON.stringify(fields));
-			});
-
-			//$scope.selectedDb = "mydb";
-			//$scope.selectedTable = "system.indexes";
 		};
 
 		$scope.continueClick = function() {
