@@ -128,7 +128,6 @@ angular.module('circularHeatFormDirective', []).directive('circularHeatForm', ['
 			var onDatasetChanged = function(message) {
 				$scope.databaseName = message.database;
 				$scope.tableName = message.table;
-				$scope.queryForChartData();
 			};
 
 			/**
