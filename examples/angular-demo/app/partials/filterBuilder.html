@@ -30,10 +30,10 @@
       </select>
     </div>
     <div class="form-group">
-      <input type="text" class="form-control" size="46" placeholder="Value" ng-model="filterRow.value">
+      <input type="text" class="form-control" size="42" placeholder="Value" ng-model="filterRow.value">
     </div>
     <div class="form-group pull-right">
-      <button type="button" class="btn btn-default">
+      <button type="button" class="btn btn-default refresh">
         <span class="glyphicon glyphicon-refresh" ng-click="updateFilterRow($index)"></span>
       </button>
       <button type="button" class="btn btn-danger" ng-click="removeFilterRow($index)">
@@ -53,12 +53,12 @@
       </select>
     </div>
     <div class="form-group">
-      <input type="text" class="form-control" id="filter-value" size="46" placeholder="Value"  ng-model="selectedValue" 
+      <input type="text" class="form-control" id="filter-value" size="42" placeholder="Value"  ng-model="selectedValue" 
         ng-disabled="!(fields.length > 0)" ng-required="true">
     </div>
     <div class="form-group">
       <button type="button" class="btn btn-primary" ng-click="addFilterRow()">
-        Add
+        Add Filter
       </button>
     </div>
   </div>

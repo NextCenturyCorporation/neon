@@ -37,6 +37,18 @@ angular.module('neonDemo.services', []).factory('ConnectionService', ['$filter',
 							name: "longitude",
 							"longitude": "longitude"
 						}]
+					},{
+						name: "gbSmall",
+						fields: [{
+							name: "date",
+							mapping: "created_at"
+						}, {
+							name: "latitude",
+							"latitude": "latitude"
+						}, {
+							name: "longitude",
+							"longitude": "longitude"
+						}]
 					}]
 				}]
 			}, {

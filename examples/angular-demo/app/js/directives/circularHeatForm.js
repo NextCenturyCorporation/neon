@@ -128,7 +128,6 @@ angular.module('circularHeatFormDirective', []).directive('circularHeatForm', ['
 			var onDatasetChanged = function(message) {
 				$scope.databaseName = message.database;
 				$scope.tableName = message.table;
-				$scope.queryForChartData();
 			};
 
 			/**
@@ -145,6 +144,8 @@ angular.module('circularHeatFormDirective', []).directive('circularHeatForm', ['
 				if (!dateField) {
 					$scope.updateChartData({data: []});
 					return;
+				} else {
+					$scope.dateField = dateField;
 				}
 
 				//TODO: NEON-603 Add support for dayOfWeek to query API
