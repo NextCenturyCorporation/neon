@@ -18,25 +18,6 @@ var neon = neon || {};
 neon.query = neon.query || {};
 
 /**
- * A FilterRow is a basic support object for a filter build application.  It store the 
- * minimum data elements required to build a Neon filter: a column to act upon, the operator
- * for comparison, and a value to compare against.
- * 
- * @example
- *    var filterRow = new FilterRow("total", "<", 10);
- * 
- * @class neon.query.FilterRow
- * @constructor
- */
-neon.query.FilterRow = function (columnValue, operatorValue, value, columnOptions, operatorOptions) {
-    this.columnOptions = columnOptions;
-    this.columnValue = columnValue;
-    this.operatorOptions = operatorOptions;
-    this.operatorValue = operatorValue;
-    this.value = value;
-};
-
-/**
  * This Angular JS directive adds a circular heat map to the DOM and drives the visualization data from
  * whatever database and table are currently selected in Neon.  This directive pulls the current
  * Neon connection from a connection service and listens for
@@ -161,7 +142,7 @@ neon.query.FilterTable.buildCompoundWhereClause = function(data, andClauses) {
  * appropriate to work with the Neon Query API.
  * @param {String} value The value to parse
  * @return {String|Number|Boolean|null} 
- * @method ParseValue
+ * @method parseValue
  * @static
  */
 neon.query.FilterTable.parseValue = function(value) {
@@ -183,4 +164,23 @@ neon.query.FilterTable.parseValue = function(value) {
        retVal = true;
     }
     return retVal;
+};
+
+/**
+ * A FilterRow is a basic support object for a filter build application.  It store the 
+ * minimum data elements required to build a Neon filter: a column to act upon, the operator
+ * for comparison, and a value to compare against.
+ * 
+ * @example
+ *    var filterRow = new FilterRow("total", "<", 10);
+ * 
+ * @class neon.query.FilterRow
+ * @constructor
+ */
+neon.query.FilterRow = function (columnValue, operatorValue, value, columnOptions, operatorOptions) {
+    this.columnOptions = columnOptions;
+    this.columnValue = columnValue;
+    this.operatorOptions = operatorOptions;
+    this.operatorValue = operatorValue;
+    this.value = value;
 };
