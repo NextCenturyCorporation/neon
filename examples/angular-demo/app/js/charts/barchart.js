@@ -94,6 +94,11 @@ charts.BarChart = function (rootElement, selector, opts) {
     this.yLabel_ = opts.yLabel || this.determineYLabel_();
     this.margin = $.extend({}, charts.BarChart.DEFAULT_MARGIN_, opts.margin || {});
 
+    this.viewboxXMin = 0;
+    this.viewboxYMin = 0;
+    this.viewboxXMax = 618;
+    this.viewboxYMax = 270;
+
     if (opts.init) {
         opts.init.call(this, opts);
     }
@@ -120,6 +125,9 @@ charts.BarChart.SVG_ELEMENT_ = 'rect';
 charts.BarChart.ACTIVE_STYLE_KEY_ = 'active';
 charts.BarChart.INACTIVE_STYLE_KEY_ = 'inactive';
 charts.BarChart.HOVER_STYLE_KEY_ = 'hover';
+
+
+
 
 // the bar classes are not used for styling directly through the CSS but as
 // selectors to indicate which style functions to apply. this is because the styles are
@@ -187,6 +195,10 @@ charts.BarChart.prototype.computeTickValues_ = function (tickValues) {
         return tickValues.call(this);
     }
     return tickValues;
+};
+
+charts.BarChart.prototype.determineVeiwboxString = function() {
+    return this.viewboxXMin + " " + this.viewboxYMin + " " + this.viewboxXMax + " " + this.viewboxYMax;
 };
 
 charts.BarChart.prototype.createCategoriesFromUniqueValues_ = function (data) {
@@ -293,6 +305,7 @@ charts.BarChart.prototype.draw = function () {
         this.drawXAxis_(chart);
         this.drawYAxis_(chart);
     }
+
     return this;
 };
 
@@ -325,7 +338,7 @@ charts.BarChart.prototype.displayError = function () {
 charts.BarChart.prototype.drawChartSVG_ = function () {
     var chart = this.element
         .append('svg')
-        .attr("viewBox","0 0 618 288")
+        .attr("viewBox", this.determineVeiwboxString())
         .attr('id', 'plot')
         .append('g')
         .attr('transform', 'translate(' + this.margin.left + ',' + this.margin.top + ')');
@@ -454,6 +467,10 @@ charts.BarChart.prototype.drawXAxis_ = function (chart) {
     .attr("transform", function(d) {
         return "rotate(-60)";
     });
+
+    this.viewboxYMax = this.viewboxYMax + $(this.element[0]).find('g.x')[0].getBoundingClientRect().height
+    $(this.element[0]).children('svg')[0].setAttribute("viewBox", this.determineVeiwboxString());
+    console.log($(this.element[0]).children('svg'));
 
     return axis;
 };
