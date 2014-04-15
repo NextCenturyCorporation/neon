@@ -25,8 +25,8 @@ neon.query = neon.query || {};
  * by issuing a Neon query for aggregated time data.
  * 
  * @example
- *    var filterRow = new FilterRow("total", "<", 10);
- *    var filterTable = new FilterTable();
+ *    var filterRow = new FilterRow("total", "<", 10);<br>
+ *    var filterTable = new FilterTable();<br>
  *    filterTable.addFilterRow(filterRow);
  * 
  * @class neon.query.FilterTable
@@ -42,42 +42,97 @@ neon.query.FilterTable = function () {
     };
 };
 
+/**
+ * Adds a FilterRow to the table.
+ * @param {neon.query.FilterRow} row
+ * @method addFilterRow
+ */
 neon.query.FilterTable.prototype.addFilterRow = function(row) {
     this.filterState.data.push(row);
 }
 
+/**
+ * Inserts a FilterRow at a particular index in the table.
+ * @param {neon.query.FilterRow} row
+ * @param {Number} index
+ * @method insertFilterRow
+ */
 neon.query.FilterTable.prototype.insertFilterRow = function(row, index) {
     this.filterState.data.splice(index, 1, row);
 }
 
+/**
+ * Removes a FilterRow from the given row index and returns it.
+ * @param {Number} id
+ * @return {neon.query.FilterRow}
+ * @method removeFilterRow
+ */
 neon.query.FilterTable.prototype.removeFilterRow = function (id) {
     return this.filterState.data.splice(id, 1);
 };
 
+/**
+ * Returns the FilterRow at the given index.
+ * @param {Number} id
+ * @return {neon.query.FilterRow}
+ * @method getFilterRow
+ */
 neon.query.FilterTable.prototype.getFilterRow = function (id) {
     return this.filterState.data[id];
 };
 
+/**
+ * Sets the FilterRow at the given row index.
+ * @param {neon.query.FilterRow} row 
+ * @param {Number} index
+ * @return {neon.query.FilterRow}
+ * @method setFilterRow
+ */
 neon.query.FilterTable.prototype.setFilterRow = function (row, index) {
     return this.filterState.data[index] = row;
 };
 
+/**
+ * Clears the filter table's state, removing all rows.
+ * @method clearFilterState
+ */
 neon.query.FilterTable.prototype.clearFilterState = function () {
     this.filterState.data = [];
 };
 
+/**
+ * Sets a filter key to use with these filter clauses
+ * @param {String} key
+ * @method setFilterKey
+ */
 neon.query.FilterTable.prototype.setFilterKey = function (key) {
     this.filterKey = key;
 };
 
+/**
+ * Sets the list of valid column names for a FilterRow
+ * @param {Array} columns An array of column names
+ * @deprecated
+ * @method setColumns
+ */
 neon.query.FilterTable.prototype.setColumns = function (columns){
     this.columnOptions = columns;
 };
 
+/**
+ * Returns the current filter key associated with this filter table.
+ * @return {String}
+ * @method getFilterKey
+ */
 neon.query.FilterTable.prototype.getFilterKey = function () {
     return this.filterKey;
 };
 
+/**
+ * Returns the filter state, the interal array of filter rows.
+ * @return {Object}  An object containing a data array of FilterRows.
+ * @method getFilterState
+ */
 neon.query.FilterTable.prototype.getFilterState = function () {
     return this.filterState;
 };
