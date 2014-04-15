@@ -470,7 +470,6 @@ charts.BarChart.prototype.drawXAxis_ = function (chart) {
 
     this.viewboxYMax = this.viewboxYMax + $(this.element[0]).find('g.x')[0].getBoundingClientRect().height
     $(this.element[0]).children('svg')[0].setAttribute("viewBox", this.determineVeiwboxString());
-    console.log($(this.element[0]).children('svg'));
 
     return axis;
 };
