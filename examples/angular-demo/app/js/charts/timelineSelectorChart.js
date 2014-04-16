@@ -17,9 +17,9 @@ charts.TimelineSelectorChart = function (element, configuration)
 	this.configure = function(configuration)
 	{
 		this.config = configuration || {};
-		this.config.margin = this.config.margin || {top: 10, right: 0, bottom: 20, left: 30};
+		this.config.margin = this.config.margin || {top: 10, right: 0, bottom: 20, left: 0};
 		this.config.width = this.config.width  || 800;
-		this.config.height = this.config.height || 50;
+		this.config.height = this.config.height || 40;
 
 		return this;
 	}
@@ -89,9 +89,9 @@ charts.TimelineSelectorChart = function (element, configuration)
 		    .attr("transform", "translate(0," + this.config.height + ")")
 		    .call(xAxis);
 
-		context.append("g")
-			.attr("class", "y axis")
-			.call(yAxis);
+		//context.append("g")
+		//	.attr("class", "y axis")
+		//	.call(yAxis);
 
 		context.append("g")
 		    .attr("class", "x brush")
