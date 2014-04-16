@@ -32,8 +32,11 @@ charts.TimelineSelectorChart = function (element, configuration)
 			data = values;
 		}
 
+		// Date formatters used by the xAxis and summary header.
 		var parseDate = d3.time.format("%b %Y").parse;
+        var summaryDateFormat = d3.time.format("%B %d, %Y");
 
+        // Setup the axes and their scales.
 		var x = d3.time.scale().range([0, this.config.width]),
 		    y = d3.scale.linear().range([this.config.height, 0]);
 
@@ -50,16 +53,21 @@ charts.TimelineSelectorChart = function (element, configuration)
 		    .y0(this.config.height)
 		    .y1(function(d) { return y(d.value); });
         
-        // var yMin = d3.min(data.map(function(d) { return d.value; }));
-        // var yMax = d3.max(data.map(function(d) { return d.value; }));
+        var xMin = d3.min(data.map(function(d) { return d.date; }));
+        var xMax = d3.max(data.map(function(d) { return d.date; }));
+        var totalRecords = d3.sum(data.map(function(d) { return d.value }));
 
         x.domain(d3.extent(data.map(function(d) { return d.date; })));
 		y.domain([0, d3.max(data.map(function(d) { return d.value; }))]);
 
         // Clear the old contents by replacing innerhtml with the summary header.
 		d3.select(this.element).html('<h3><span class="count count-large text-primary">' 
-			+ data.length
-			+ '</span> records from February 1, 2014 to March 31, 2014</h3>');
+			+ totalRecords
+			+ '</span> records from '
+			+ summaryDateFormat(xMin)
+			+ ' to '
+			+ summaryDateFormat(xMax)
+			+ '</h3>');
 
         // Append our chart graphics
 		var svg = d3.select(this.element)
