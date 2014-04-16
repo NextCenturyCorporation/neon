@@ -110,7 +110,7 @@ charts.TimelineSelectorChart = function (element, configuration)
 
 		context.append("g")
 		    .attr("class", "x axis")
-		    .attr("transform", "translate(0," + (this.config.height+1) + ")")
+		    .attr("transform", "translate(0," + (this.config.height+2) + ")")
 		    .call(xAxis);
 
 		//context.append("g")

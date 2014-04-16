@@ -38,6 +38,10 @@
   stroke: #bbbbbb;
   shape-rendering: crispEdges;
 }
+.timeline-selector-chart .axis path {
+    stroke: #F1F1F1;
+    stroke-width: 3px;
+}
 
 .timeline-selector-chart .brush .extent {
   fill-opacity: .125;
