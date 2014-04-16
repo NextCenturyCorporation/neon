@@ -38,9 +38,13 @@
 }
 
 .timeline-selector-chart .brush .extent {
-  stroke: #fff;
   fill-opacity: .125;
   shape-rendering: crispEdges;
+}
+
+.timeline-selector-chart .brush .resize path {
+    fill: #EEEEEE;
+    stroke: #666666;
 }
 
 .timeline-selector-chart h3 {

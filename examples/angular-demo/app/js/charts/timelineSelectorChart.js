@@ -44,7 +44,7 @@ charts.TimelineSelectorChart = function (element, configuration)
 		    yAxis = d3.svg.axis().scale(y).orient("left").ticks(1);
 
 		var brush = d3.svg.brush()
-		    .x(x)
+			.x(x)
 		    .on("brushend", brushed);
 
 		var area = d3.svg.area()
@@ -52,6 +52,23 @@ charts.TimelineSelectorChart = function (element, configuration)
 		    .x(function(d) { return x(d.date); })
 		    .y0(this.config.height)
 		    .y1(function(d) { return y(d.value); });
+
+		var height = y.range()[0];
+
+		function resizePath(d) {
+	        var e = +(d == "e"),
+	            x = e ? 1 : -1,
+	            y = height / 3;
+	        return "M" + (.5 * x) + "," + y
+	            + "A6,6 0 0 " + e + " " + (6.5 * x) + "," + (y + 6)
+	            + "V" + (2 * y - 6)
+	            + "A6,6 0 0 " + e + " " + (.5 * x) + "," + (2 * y)
+	            + "Z"
+	            + "M" + (2.5 * x) + "," + (y + 8)
+	            + "V" + (2 * y - 8)
+	            + "M" + (4.5 * x) + "," + (y + 8)
+	            + "V" + (2 * y - 8);
+	      }
         
         var xMin = d3.min(data.map(function(d) { return d.date; }));
         var xMax = d3.max(data.map(function(d) { return d.date; }));
@@ -101,12 +118,17 @@ charts.TimelineSelectorChart = function (element, configuration)
 		//	.attr("class", "y axis")
 		//	.call(yAxis);
 
-		context.append("g")
-		    .attr("class", "x brush")
-		    .call(brush)
-		  .selectAll("rect")
+		var gBrush = context.append("g")
+			.attr("class", "brush")
+			.call(brush);
+
+        gBrush.selectAll("rect")
 		    .attr("y", -6)
 		    .attr("height", this.config.height + 7);
+
+        gBrush.selectAll(".resize")
+        	.append("path")
+        	.attr("d", resizePath);
 
 		function brushed() {
 			console.log("WE BRUSHED!");
