@@ -59,6 +59,12 @@ angular.module('timelineSelectorChartDirective', []).directive('timelineSelector
                     $scope.timelineBrush = [];
                 }
             }, true);
+
+            $scope.$watch('timelineBrush', function(newVal) {
+                if (newVal && newVal.length === 0) {
+                    $scope.chart.clearBrush();
+                }
+            })
         }
 	}
 });

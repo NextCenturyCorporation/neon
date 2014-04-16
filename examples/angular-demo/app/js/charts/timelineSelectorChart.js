@@ -73,6 +73,11 @@ charts.TimelineSelectorChart = function (element, configuration)
     	this.brush.on("brushed");
     }
 
+    this.clearBrush = function() {
+    	this.brush.clear();
+    	d3.select(this.element).select('.brush').call(this.brush);
+    }
+
 
     /**
      * This will re-render the control with the given values.  This is a costly method and calls to it should be minimized
