@@ -55,3 +55,9 @@
   fill: #777777;
   font-size: 0.9em;
 }
+
+.timeline-selector-chart .line {
+  fill: none;
+  stroke: #179328;
+  stroke-width: 1.5px;
+}

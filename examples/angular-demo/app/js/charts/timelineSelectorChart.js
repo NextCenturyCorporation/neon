@@ -17,7 +17,7 @@ charts.TimelineSelectorChart = function (element, configuration)
 	this.configure = function(configuration)
 	{
 		this.config = configuration || {};
-		this.config.margin = this.config.margin || {top: 10, right: 0, bottom: 20, left: 0};
+		this.config.margin = this.config.margin || {top: 10, right: 5, bottom: 20, left: 5};
 		this.config.width = this.config.width  || 800;
 		this.config.height = this.config.height || 40;
 
@@ -47,8 +47,11 @@ charts.TimelineSelectorChart = function (element, configuration)
 			.x(x)
 		    .on("brushend", brushed);
 
+		var line = d3.svg.line()
+		    .x(function(d) { return x(d.date); })
+		    .y(function(d) { return y(d.value); });
+
 		var area = d3.svg.area()
-		    .interpolate("monotone")
 		    .x(function(d) { return x(d.date); })
 		    .y0(this.config.height)
 		    .y1(function(d) { return y(d.value); });
@@ -103,6 +106,11 @@ charts.TimelineSelectorChart = function (element, configuration)
 		var context = svg.append("g")
 		    .attr("class", "context")
 		    .attr("transform", "translate(" + this.config.margin.left + "," + this.config.margin.top + ")");
+
+		context.append("path")
+		    .datum(data)
+		    .attr("class", "line")
+		    .attr("d", line);
 
 		context.append("path")
 		    .datum(data)

@@ -22,7 +22,7 @@
  *    &lt;timeline-selector&gt;&lt;/timeline-selector&gt;<br>
  *    &lt;div timeline-selector&gt;&lt;/div&gt;
  * 
- * @class neonDemo.directives.circularHeatForm
+ * @class neonDemo.directives.timelineSelector
  * @constructor
  */
 angular.module('timelineSelectorDirective', []).directive('timelineSelector', ['ConnectionService',
@@ -39,19 +39,13 @@ angular.module('timelineSelectorDirective', []).directive('timelineSelector', ['
 		},
 		link: function($scope, element, attr) {
 
+            // Cache the number of milliseconds in an hour for processing.
+            var MILLIS_IN_HOUR = 1000 * 60 * 60;
+
 			element.addClass('timeline-selector');
 
-			// TODO: Default to [] and remove sample data when finally hooked up.
-			$scope.data = [{
-		        date: new Date(Date.now()),
-		        value: 0
-		    },{
-		        date: new Date(Date.now() + (31536000000 / 2)),
-		        value: 50
-		    },{
-		        date: new Date(Date.now() + 31536000000),
-		        value: 50
-		    }];
+			// Default our time data to an empty array.
+			$scope.data = [];
 
 			/** 
 			 * Initializes the name of the date field used to query the current dataset
@@ -67,14 +61,6 @@ angular.module('timelineSelectorDirective', []).directive('timelineSelector', ['
 					filtersChanged: onFiltersChanged
 				});
 			};
-
-			/**
-			 * Initializes the arrays and variables used to track the most active day of the week and time of day.
-			 * @method initDayTimeArrays
-			 */
-			$scope.initDayTimeArrays = function(){
-				// TODO: Everything.
-			}
 
 			/**
 			 * Event handler for filter changed events issued over Neon's messaging channels.
@@ -104,40 +90,28 @@ angular.module('timelineSelectorDirective', []).directive('timelineSelector', ['
 			 * @method queryForChartData
 			 */
 			$scope.queryForChartData = function() {
-				// TODO: Decide how to pass in field mappings.  We can do this through a controller or the
-				// connection service or some mapping service.  Two example below, one commented out.
-				//var dateField = $scope.getDateField();
-				// var dateField = connectionService.getFieldMapping($scope.databaseName, $scope.tableName, "date");
-				// var yAxis = connectionService.getFieldMapping($scope.databaseName, $scope.tableName, "y-axis");
-				// dateField = dateField.mapping;
+				var timeField = connectionService.getFieldMapping($scope.database, $scope.tableName, "date");
+				timeField = timeField.mapping || 'time';
 
-				// if (!dateField) {
-				// 	$scope.updateChartData({data: []});
-				// 	return;
-				// } else {
-				// 	$scope.dateField = dateField;
-				// }
+				var yearGroupClause = new neon.query.GroupByFunctionClause(neon.query.YEAR, timeField, 'year');
+				var monthGroupClause = new neon.query.GroupByFunctionClause(neon.query.MONTH, timeField, 'month');
+				var dayGroupClause = new neon.query.GroupByFunctionClause(neon.query.DAY, timeField, 'day');
+				var hourGroupClause = new neon.query.GroupByFunctionClause(neon.query.HOUR, timeField, 'hour');
 
-				// //TODO: NEON-603 Add support for dayOfWeek to query API
-				// var groupByDayClause = new neon.query.GroupByFunctionClause('dayOfWeek', $scope.dateField, 'day');
-				// var groupByHourClause = new neon.query.GroupByFunctionClause(neon.query.HOUR, $scope.dateField, 'hour');
+				var query = new neon.query.Query()
+				    .selectFrom($scope.databaseName, $scope.tableName)
+				    .where(timeField, '!=', null)
+				    .groupBy(yearGroupClause, monthGroupClause, dayGroupClause, hourGroupClause);
 
-				// var query = new neon.query.Query()
-				// 	.selectFrom($scope.databaseName, $scope.tableName)
-				// 	.groupBy(groupByDayClause, groupByHourClause)
-				// 	.where($scope.dateField, '!=', null)
-				// 	.aggregate(neon.query.COUNT, '*', 'count');
+				query.aggregate(neon.query.COUNT, '*', 'count');
+				query.aggregate(neon.query.MIN, timeField, 'date');
+				query.sortBy('date', neon.query.ASCENDING);
 
-				// // Issue the query and provide a success handler that will forcefully apply an update to the chart.
-				// // This is done since the callbacks from queries execute outside digest cycle for angular.
-				// // If updateChartData is called from within angular code or triggered by handler within angular,
-				// // then the apply is handled by angular.  Forcing apply inside updateChartData instead is error prone as it
-				// // may cause an apply within a digest cycle when triggered by an angular event.
-				// connectionService.getActiveConnection().executeQuery(query, function(queryResults) {
-				// 	$scope.$apply(function(){
-				// 		$scope.updateChartData(queryResults);
-				// 	});
-				// });
+				connectionService.getActiveConnection().executeQuery(query, function(queryResults) {
+					$scope.$apply(function(){
+						$scope.updateChartData(queryResults);
+					});
+				});
 
 			};
 
@@ -149,7 +123,7 @@ angular.module('timelineSelectorDirective', []).directive('timelineSelector', ['
 			 * @method updateChartData
 			 */
 			$scope.updateChartData = function(queryResults) {
-				$scope.data = $scope.createHeatChartData(queryResults);
+				$scope.data = $scope.createTimelineData(queryResults);
 			};
 
 			/**
@@ -157,14 +131,45 @@ angular.module('timelineSelectorDirective', []).directive('timelineSelector', ['
 			 * as or by Neon query handlers.
 			 * @param {Object} queryResults Results returned from a Neon query.
 			 * @param {Array} queryResults.data The aggregate numbers for the heat chart cells.
-			 * @method createHeatChartData
+			 * @method createTimelineData
 			 */
 			$scope.createTimelineData = function(queryResults){
 				var rawData = queryResults.data;
-
 				var data = [];
-                // TODO: Everything.
 
+				// If we have only 1 value, create a range for it.
+				if (rawData.length === 1) {
+					rawData[1] = rawData[0]; 
+				}
+
+				var rawLength = rawData.length;
+
+                // If we have at least 2 values, setup the data buckets for them.
+				if (rawLength > 1) {
+					// Determine the number of hour buckets.
+					var startDate = new Date(Date.UTC(rawData[0].year, rawData[0].month - 1, rawData[0].day, rawData[0].hour));
+					var endDate = new Date(Date.UTC(rawData[rawLength - 1].year, rawData[rawLength - 1].month - 1, 
+						rawData[rawLength - 1].day, rawData[rawLength - 1].hour));
+					// var startDate = new Date(rawData[0].date);
+					// var endDate = new Date(rawData[rawData.length - 1].date);
+					var numBuckets = Math.ceil(Math.abs(endDate - startDate) / MILLIS_IN_HOUR) + 1;
+					var startTime = startDate.getTime();
+
+					for (var i = 0; i < numBuckets; i++) {
+						data[i] = {
+							date: new Date(startTime + (MILLIS_IN_HOUR * i)),
+							value: 0 
+						}
+					}
+
+					// Fill our rawData into the appropriate hour buckets.
+					var diff = 0;
+					var resultDate;
+					for (i = 0; i < rawLength; i++) {
+						resultDate = new Date(rawData[i].date);
+						data[Math.floor(Math.abs(resultDate - startDate) / MILLIS_IN_HOUR)].value = rawData[i].count;
+					}
+				}
 				return data;
 			};
 
