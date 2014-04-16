@@ -47,10 +47,6 @@ charts.TimelineSelectorChart = function (element, configuration)
 			.x(x)
 		    .on("brushend", brushed);
 
-		var line = d3.svg.line()
-		    .x(function(d) { return x(d.date); })
-		    .y(function(d) { return y(d.value); });
-
 		var area = d3.svg.area()
 		    .x(function(d) { return x(d.date); })
 		    .y0(this.config.height)
@@ -109,17 +105,12 @@ charts.TimelineSelectorChart = function (element, configuration)
 
 		context.append("path")
 		    .datum(data)
-		    .attr("class", "line")
-		    .attr("d", line);
-
-		context.append("path")
-		    .datum(data)
 		    .attr("class", "area")
 		    .attr("d", area);
 
 		context.append("g")
 		    .attr("class", "x axis")
-		    .attr("transform", "translate(0," + this.config.height + ")")
+		    .attr("transform", "translate(0," + (this.config.height+1) + ")")
 		    .call(xAxis);
 
 		//context.append("g")

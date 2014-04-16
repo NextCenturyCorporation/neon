@@ -28,6 +28,8 @@
 
 .timeline-selector-chart .area {
   fill: #39b54a;
+  stroke: #39b54a;
+  stroke-width: 1px;
   clip-path: url(#clip);
 }
 .timeline-selector-chart .axis path,
@@ -54,10 +56,4 @@
 .timeline-selector-chart .tick text{
   fill: #777777;
   font-size: 0.9em;
-}
-
-.timeline-selector-chart .line {
-  fill: none;
-  stroke: #179328;
-  stroke-width: 1.5px;
 }
