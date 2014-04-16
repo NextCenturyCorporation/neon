@@ -27,13 +27,13 @@
 }
 
 .timeline-selector-chart .area {
-  fill: steelblue;
+  fill: #39b54a;
   clip-path: url(#clip);
 }
 .timeline-selector-chart .axis path,
 .timeline-selector-chart .axis line {
   fill: none;
-  stroke: #000;
+  stroke: #bbbbbb;
   shape-rendering: crispEdges;
 }
 
@@ -45,5 +45,10 @@
 
 .timeline-selector-chart h3 {
   margin-top: 0px;
-  margin-bottom: 0px;
+  margin-bottom: 20px;
+}
+
+.timeline-selector-chart .tick text{
+  fill: #777777;
+  font-size: 0.9em;
 }

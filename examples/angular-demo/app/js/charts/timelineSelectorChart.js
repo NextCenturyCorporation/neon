@@ -17,7 +17,7 @@ charts.TimelineSelectorChart = function (element, configuration)
 	this.configure = function(configuration)
 	{
 		this.config = configuration || {};
-		this.config.margin = this.config.margin || {top: 10, right: 0, bottom: 20, left: 40};
+		this.config.margin = this.config.margin || {top: 10, right: 0, bottom: 20, left: 30};
 		this.config.width = this.config.width  || 800;
 		this.config.height = this.config.height || 50;
 
