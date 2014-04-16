@@ -71,6 +71,8 @@ angular.module('timelineSelectorDirective', []).directive('timelineSelector', ['
 			 * @private
 			 */ 
 			var onFiltersChanged = function(message) {
+				// Clear our filters against the last table before requesting data.
+				$scope.messenger.clearSelection();
 				$scope.queryForChartData();
 			};
 
@@ -84,7 +86,7 @@ angular.module('timelineSelectorDirective', []).directive('timelineSelector', ['
 			 */ 
 			var onDatasetChanged = function(message) {
 				// Clear our filters against the last table before requesting data.
-				$scope.messenger.removeFilter($scope.filterKey);
+				$scope.messenger.clearSelection($scope.filterKey);
 
 				$scope.databaseName = message.database;
 				$scope.tableName = message.table;
@@ -114,6 +116,7 @@ angular.module('timelineSelectorDirective', []).directive('timelineSelector', ['
 
 				connectionService.getActiveConnection().executeQuery(query, function(queryResults) {
 					$scope.$apply(function(){
+						$scope.brush = [];
 						$scope.updateChartData(queryResults);
 					});
 				});
@@ -184,7 +187,7 @@ angular.module('timelineSelectorDirective', []).directive('timelineSelector', ['
 					console.log("newVal" + newVal);
 					console.log("Brushing from " + newVal[0] + " to " + newVal[1]);
 					if (newVal === undefined || (newVal.length < 2) || (newVal[0].getTime() === newVal[1].getTime())) {
-						$scope.messenger.clearFilters($scope.filterKey);
+						$scope.messenger.clearSelection($scope.filterKey);
 					} else {
 						var startFilterClause = neon.query.where($scope.dateField, '>=', newVal[0]);
 			            var endFilterClause = neon.query.where($scope.dateField, '<', newVal[1]);
@@ -192,7 +195,7 @@ angular.module('timelineSelectorDirective', []).directive('timelineSelector', ['
 			            var filterClause = neon.query.and.apply(this, clauses);
 			            var filter = new neon.query.Filter().selectFrom($scope.databaseName, $scope.tableName).where(filterClause);
 
-			            $scope.messenger.replaceFilter($scope.filterKey, filter);
+			            $scope.messenger.replaceSelection($scope.filterKey, filter);
 					}
 				}
 			}, true);
