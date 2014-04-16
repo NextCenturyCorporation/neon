@@ -32,7 +32,7 @@ angular.module('timelineSelectorDirective', []).directive('timelineSelector', ['
 		templateUrl: 'partials/timelineSelector.html',
 		restrict: 'EA',
 		scope: {
-			filterKey: '='
+
 		},
 		controller: function($scope) {
 
@@ -41,11 +41,7 @@ angular.module('timelineSelectorDirective', []).directive('timelineSelector', ['
 
             // Cache the number of milliseconds in an hour for processing.
             var MILLIS_IN_HOUR = 1000 * 60 * 60;
-
 			element.addClass('timeline-selector');
-
-			// Default our time data to an empty array.
-			$scope.data = [];
 
 			/** 
 			 * Initializes the name of the date field used to query the current dataset
@@ -53,8 +49,14 @@ angular.module('timelineSelectorDirective', []).directive('timelineSelector', ['
 			 * @method initialize
 			 */
 			$scope.initialize = function() {
-				// Defaulting the expected date field to 'time'.
-				$scope.dateField = 'time';
+				// Defaulting the expected date field to 'date'.
+				$scope.dateField = 'date';
+
+				// Default our time data to an empty array.
+				$scope.data = [];
+				$scope.brush = [];
+				$scope.filterKey = neon.widget.getInstanceId("timlineFilter");
+				$scope.messenger = new neon.eventing.Messenger();
 
 				$scope.messenger.events({
 					activeDatasetChanged: onDatasetChanged,
@@ -81,6 +83,9 @@ angular.module('timelineSelectorDirective', []).directive('timelineSelector', ['
 			 * @private
 			 */ 
 			var onDatasetChanged = function(message) {
+				// Clear our filters against the last table before requesting data.
+				$scope.messenger.removeFilter($scope.filterKey);
+
 				$scope.databaseName = message.database;
 				$scope.tableName = message.table;
 			};
@@ -90,21 +95,21 @@ angular.module('timelineSelectorDirective', []).directive('timelineSelector', ['
 			 * @method queryForChartData
 			 */
 			$scope.queryForChartData = function() {
-				var timeField = connectionService.getFieldMapping($scope.database, $scope.tableName, "date");
-				timeField = timeField.mapping || 'time';
+				$scope.dateField = connectionService.getFieldMapping($scope.database, $scope.tableName, "date");
+				$scope.dateField = $scope.dateField.mapping || 'date';
 
-				var yearGroupClause = new neon.query.GroupByFunctionClause(neon.query.YEAR, timeField, 'year');
-				var monthGroupClause = new neon.query.GroupByFunctionClause(neon.query.MONTH, timeField, 'month');
-				var dayGroupClause = new neon.query.GroupByFunctionClause(neon.query.DAY, timeField, 'day');
-				var hourGroupClause = new neon.query.GroupByFunctionClause(neon.query.HOUR, timeField, 'hour');
+				var yearGroupClause = new neon.query.GroupByFunctionClause(neon.query.YEAR, $scope.dateField, 'year');
+				var monthGroupClause = new neon.query.GroupByFunctionClause(neon.query.MONTH, $scope.dateField, 'month');
+				var dayGroupClause = new neon.query.GroupByFunctionClause(neon.query.DAY, $scope.dateField, 'day');
+				var hourGroupClause = new neon.query.GroupByFunctionClause(neon.query.HOUR, $scope.dateField, 'hour');
 
 				var query = new neon.query.Query()
 				    .selectFrom($scope.databaseName, $scope.tableName)
-				    .where(timeField, '!=', null)
+				    .where($scope.dateField, '!=', null)
 				    .groupBy(yearGroupClause, monthGroupClause, dayGroupClause, hourGroupClause);
 
 				query.aggregate(neon.query.COUNT, '*', 'count');
-				query.aggregate(neon.query.MIN, timeField, 'date');
+				query.aggregate(neon.query.MIN, $scope.dateField, 'date');
 				query.sortBy('date', neon.query.ASCENDING);
 
 				connectionService.getActiveConnection().executeQuery(query, function(queryResults) {
@@ -150,8 +155,7 @@ angular.module('timelineSelectorDirective', []).directive('timelineSelector', ['
 					var startDate = new Date(Date.UTC(rawData[0].year, rawData[0].month - 1, rawData[0].day, rawData[0].hour));
 					var endDate = new Date(Date.UTC(rawData[rawLength - 1].year, rawData[rawLength - 1].month - 1, 
 						rawData[rawLength - 1].day, rawData[rawLength - 1].hour));
-					// var startDate = new Date(rawData[0].date);
-					// var endDate = new Date(rawData[rawData.length - 1].date);
+					
 					var numBuckets = Math.ceil(Math.abs(endDate - startDate) / MILLIS_IN_HOUR) + 1;
 					var startTime = startDate.getTime();
 
@@ -173,9 +177,28 @@ angular.module('timelineSelectorDirective', []).directive('timelineSelector', ['
 				return data;
 			};
 
+			// Watch for brush changes and set the appropriate neon filter.
+			$scope.$watch('brush', function(newVal) {
+				// If we have a new value and a messenger is ready, set the new filter.
+				if (newVal && $scope.messenger && connectionService.getActiveConnection()) {
+					console.log("newVal" + newVal);
+					console.log("Brushing from " + newVal[0] + " to " + newVal[1]);
+					if (newVal === undefined || (newVal.length < 2) || (newVal[0].getTime() === newVal[1].getTime())) {
+						$scope.messenger.clearFilters($scope.filterKey);
+					} else {
+						var startFilterClause = neon.query.where($scope.dateField, '>=', newVal[0]);
+			            var endFilterClause = neon.query.where($scope.dateField, '<', newVal[1]);
+			            var clauses = [startFilterClause, endFilterClause];
+			            var filterClause = neon.query.and.apply(this, clauses);
+			            var filter = new neon.query.Filter().selectFrom($scope.databaseName, $scope.tableName).where(filterClause);
+
+			            $scope.messenger.replaceFilter($scope.filterKey, filter);
+					}
+				}
+			}, true);
+
 			// Wait for neon to be ready, the create our messenger and intialize the view and data.
 			neon.ready(function () {
-				$scope.messenger = new neon.eventing.Messenger();
 				$scope.initialize();
 			});
 

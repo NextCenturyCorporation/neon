@@ -1,4 +1,29 @@
+/*
+ * Copyright 2014 Next Century Corporation
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ */
 charts = charts || {};
+/**
+ * This directive adds a timeline chart to the DOM using the D3 library.  
+ * The timeline will scale its x-axis labels based upon the amount of time covered in
+ * the data to be plotted.  The timeline uses an area plot to show the change in values over time
+ * on a broad scale.  It is meant for relative analysis and not detailed analysis.  To that end,
+ * y-axis labels are not 
+ * 
+ * @class neonDemo.directives.barchart
+ * @constructor
+ */
 charts.TimelineSelectorChart = function (element, configuration)
 {
 	// Create a default data set when we have no records to display.  It defaults to a year from present day.
@@ -12,6 +37,8 @@ charts.TimelineSelectorChart = function (element, configuration)
 
     // Cache our element.
 	this.element = element;
+	this.brushHandler = undefined;
+
 	var self = this; // for internal d3 functions
     
 	this.configure = function(configuration)
@@ -24,6 +51,36 @@ charts.TimelineSelectorChart = function (element, configuration)
 		return this;
 	}
 
+    var wrapBrushHandler = function(brush, handler) {
+    	return function() {
+	    	if (brush && handler) {
+	    		handler(brush.extent());
+	    	}
+	    }
+    };
+
+    this.addBrushHandler = function(handler) {
+    	if (typeof(handler) === 'function') {
+    		this.brushHandler = handler;
+    		if (this.brush) {
+    			this.brush.on("brushed", wrapBrushHandler(this.brush, handler));
+    		}
+    	}
+    }
+
+    this.removeBrushHandler = function() {
+    	this.brushHandler = undefined;
+    	this.brush.on("brushed");
+    }
+
+
+    /**
+     * This will re-render the control with the given values.  This is a costly method and calls to it should be minimized
+     * where possible.  Also, it is destructive in that the entire chart and associated time selector brush are recreated.
+     * Currently, this has the side effect of removing any brush handlers that were previously added.  Handlers should be
+     * reattached after this renders.
+     * TODO: Consider caching the handlers to automatically re-attach them after a render.
+     */
 	this.render = function(values)
 	{
 		var data = DEFAULT_DATA;
@@ -43,9 +100,12 @@ charts.TimelineSelectorChart = function (element, configuration)
 		var xAxis = d3.svg.axis().scale(x).orient("bottom"),
 		    yAxis = d3.svg.axis().scale(y).orient("left").ticks(1);
 
-		var brush = d3.svg.brush()
-			.x(x)
-		    .on("brushend", brushed);
+        // Save the brush as an instance variable to allow interaction on it by client code.
+		this.brush = d3.svg.brush().x(x);
+
+		if (this.brushHandler) {
+		    this.brush.on("brushend", wrapBrushHandler(this.brush, this.brushHandler));
+		}
 
 		var area = d3.svg.area()
 		    .x(function(d) { return x(d.date); })
@@ -119,7 +179,7 @@ charts.TimelineSelectorChart = function (element, configuration)
 
 		var gBrush = context.append("g")
 			.attr("class", "brush")
-			.call(brush);
+			.call(this.brush);
 
         gBrush.selectAll("rect")
 		    .attr("y", -6)
