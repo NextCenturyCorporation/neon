@@ -46,6 +46,8 @@ angular.module('timelineSelectorDirective', []).directive('timelineSelector', ['
 
             // Cache the number of milliseconds in an hour for processing.
             var MILLIS_IN_HOUR = 1000 * 60 * 60;
+            var MILLIS_IN_DAYS = MILLIS_IN_HOUR * 24;
+
 			element.addClass('timeline-selector');
 
 			/** 
@@ -60,6 +62,10 @@ angular.module('timelineSelectorDirective', []).directive('timelineSelector', ['
 				// Default our time data to an empty array.
 				$scope.data = [];
 				$scope.brush = [];
+				$scope.startDate = undefined;
+				$scope.endDate = undefined;
+				$scope.referenceDate = undefined;
+				$scope.recordCount = 0;
 				$scope.filterKey = neon.widget.getInstanceId("timlineFilter");
 				$scope.messenger = new neon.eventing.Messenger();
 
@@ -129,6 +135,36 @@ angular.module('timelineSelectorDirective', []).directive('timelineSelector', ['
 			};
 
 			/**
+             * Updates the chart header with the record count and dates from the given start index to the end index
+             * of the data array.
+             * @param {Number} startIdx The first bucket in the time data to use.
+             * @param {Number} endIdx The last bucket in the time data to use.
+             * @method updateChartHeader
+             */
+            $scope.updateChartHeader = function(startDate, endDate) {
+        		// Handle bound conditions.
+				var startIdx = Math.floor(Math.abs($scope.referenceDate - startDate) / MILLIS_IN_HOUR);
+				var endIdx = Math.floor(Math.abs($scope.referenceDate - endDate) / MILLIS_IN_HOUR);
+
+				// Update the header information.
+				var total = 0;
+				for (var i = startIdx; i <= endIdx; i++) {
+					total += $scope.data[i].value;
+				}
+				$scope.startDate = $scope.data[startIdx].date;
+				$scope.startDate = new Date($scope.startDate.getUTCFullYear(),
+					$scope.startDate.getUTCMonth(),
+					$scope.startDate.getUTCDate(),
+					$scope.startDate.getUTCHours() );
+				$scope.endDate = new Date($scope.data[endIdx].date.getTime() + MILLIS_IN_HOUR);
+				$scope.endDate = new Date($scope.endDate.getUTCFullYear(),
+					$scope.endDate.getUTCMonth(),
+					$scope.endDate.getUTCDate(),
+					$scope.endDate.getUTCHours() );
+				$scope.recordCount = total;
+            }
+
+			/**
 			 * Updates the data bound to the chart managed by this directive.  This will trigger a change in 
 			 * the chart's visualization.
 			 * @param {Object} queryResults Results returned from a Neon query.
@@ -137,6 +173,7 @@ angular.module('timelineSelectorDirective', []).directive('timelineSelector', ['
 			 */
 			$scope.updateChartData = function(queryResults) {
 				$scope.data = $scope.createTimelineData(queryResults);
+				$scope.updateChartHeader($scope.data[0].date, $scope.data[$scope.data.length - 1].date);
 			};
 
 			/**
@@ -160,13 +197,25 @@ angular.module('timelineSelectorDirective', []).directive('timelineSelector', ['
                 // If we have at least 2 values, setup the data buckets for them.
 				if (rawLength > 1) {
 					// Determine the number of hour buckets.
-					var startDate = new Date(Date.UTC(rawData[0].year, rawData[0].month - 1, rawData[0].day, rawData[0].hour));
-					var endDate = new Date(Date.UTC(rawData[rawLength - 1].year, rawData[rawLength - 1].month - 1, 
-						rawData[rawLength - 1].day, rawData[rawLength - 1].hour));
-					
+					// var startDate = new Date(Date.UTC(rawData[0].year, rawData[0].month - 1, rawData[0].day, rawData[0].hour));
+					// var endDate = new Date(Date.UTC(rawData[rawLength - 1].year, rawData[rawLength - 1].month - 1, 
+					// 	rawData[rawLength - 1].day, rawData[rawLength - 1].hour));
+					var startDate = new Date(rawData[0].date);
+					var endDate = new Date(rawData[rawLength - 1].date);
+					startDate.setUTCMinutes(0);
+					startDate.setUTCSeconds(0);
+					startDate.setUTCMilliseconds(0);
+					endDate.setUTCMinutes(0);
+					endDate.setUTCSeconds(0);
+					endDate.setUTCMilliseconds(0);
+
 					var numBuckets = Math.ceil(Math.abs(endDate - startDate) / MILLIS_IN_HOUR) + 1;
 					var startTime = startDate.getTime();
 
+					// Cache the start date of the first bucket for later calculations.
+					$scope.referenceDate = startDate;
+
+					// Initialize our time buckets.
 					for (var i = 0; i < numBuckets; i++) {
 						data[i] = {
 							date: new Date(startTime + (MILLIS_IN_HOUR * i)),
@@ -191,8 +240,12 @@ angular.module('timelineSelectorDirective', []).directive('timelineSelector', ['
 				if (newVal && $scope.messenger && connectionService.getActiveConnection()) {
 
 					if (newVal === undefined || (newVal.length < 2) || (newVal[0].getTime() === newVal[1].getTime())) {
+						$scope.updateChartHeader($scope.data[0].date, $scope.data[$scope.data.length - 1].date);
 						$scope.messenger.clearSelection($scope.filterKey);
 					} else {
+						// Update the chart header
+						$scope.updateChartHeader(newVal[0], newVal[1]);
+
 						// Since we created our time buckets with times representing the start of an hour, we need to add an hour
 						// to the time representing our last selected hour bucket to get all the records that occur in that hour.
 						var startFilterClause = neon.query.where($scope.dateField, '>=', newVal[0]);

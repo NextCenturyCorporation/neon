@@ -101,7 +101,6 @@ charts.TimelineSelectorChart = function (element, configuration)
 		}
 
 		// Date formatters used by the xAxis and summary header.
-		var parseDate = d3.time.format("%b %Y").parse;
         var summaryDateFormat = d3.time.format("%B %d, %Y");
 
         // Setup the axes and their scales.
@@ -147,14 +146,8 @@ charts.TimelineSelectorChart = function (element, configuration)
         x.domain(d3.extent(data.map(function(d) { return d.date; })));
 		y.domain([0, d3.max(data.map(function(d) { return d.value; }))]);
 
-        // Clear the old contents by replacing innerhtml with the summary header.
-		d3.select(this.element).html('<h3><span class="count count-large text-primary">' 
-			+ totalRecords
-			+ '</span> records from '
-			+ summaryDateFormat(xMin)
-			+ ' to '
-			+ summaryDateFormat(xMax)
-			+ '</h3>');
+        // Clear the old contents by replacing innerhtml.
+		d3.select(this.element).html('');
 
         // Append our chart graphics
 		var svg = d3.select(this.element)
@@ -200,11 +193,6 @@ charts.TimelineSelectorChart = function (element, configuration)
         	.append("path")
         	.attr("d", resizePath);
 
-		function type(d) {
-		  d.date = parseDate(d.date);
-		  d.value = +d.value;
-		  return d;
-		}
 	};
 
 	// initialization

@@ -1,3 +1,8 @@
 <div class="well well-blank">
+    <h3><span class="count count-large text-primary">{{recordCount | number}}</span> records 
+    {{ (startDate) ? ' from ' : ''}}
+    {{ (startDate) ? (startDate.toISOString() | date: 'MMM d, yyyy HH:mm') + 'Z' : ''}}
+    {{ (endDate) ? ' to ' : ''}}
+    {{ (endDate) ? (endDate.toISOString() | date:'MMM d, yyyy HH:mm') + 'Z' : ''}}</h3>
 	<div timeline-selector-chart timeline-data="data" timeline-brush='brush'></div>
 </div>
