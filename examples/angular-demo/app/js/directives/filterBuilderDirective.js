@@ -37,13 +37,6 @@ angular.module('filterBuilderDirective', []).directive('filterBuilder', ['Connec
 
 		},
 		link: function($scope, el, attr) {
-			$scope.filterTable = new neon.query.FilterTable();
-			// Use a single session based filter key for this directive instance to allow multiple
-			// filter sets to be used in the same application.
-			$scope.filterTable.setFilterKey(neon.widget.getInstanceId());
-			$scope.selectedField = "Select Field";
-			$scope.andClauses = true;
-			$scope.selectedOperator = $scope.filterTable.operatorOptions[0] || '=';
 
 			/**
 			 * Event handler for connection changed events issued over Neon's messaging channels.
@@ -88,6 +81,15 @@ angular.module('filterBuilderDirective', []).directive('filterBuilder', ['Connec
 			 * @method initialize
 			 */
 			$scope.initialize = function() {
+				$scope.messenger = new neon.eventing.Messenger();
+				$scope.filterTable = new neon.query.FilterTable();
+				// Use a single session based filter key for this directive instance to allow multiple
+				// filter sets to be used in the same application.
+				$scope.filterTable.setFilterKey(neon.widget.getInstanceId("filterBuilder"));
+				$scope.selectedField = "Select Field";
+				$scope.andClauses = true;
+				$scope.selectedOperator = $scope.filterTable.operatorOptions[0] || '=';
+
 				$scope.messenger.events({
 					activeConnectionChanged: onConnectionChanged,
 					activeDatasetChanged: onDatasetChanged
@@ -203,7 +205,6 @@ angular.module('filterBuilderDirective', []).directive('filterBuilder', ['Connec
 
 			// Wait for neon to be ready, the create our messenger and intialize the view and data.
 			neon.ready(function () {
-				$scope.messenger = new neon.eventing.Messenger();
 				$scope.initialize();
 			});
 		}

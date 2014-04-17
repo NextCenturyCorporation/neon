@@ -16,6 +16,7 @@
 		<!-- Directive styles -->
 		<link rel="stylesheet" type="text/css" href="css/directives/circularHeatChart.css">
 		<link rel="stylesheet" type="text/css" href="css/directives/barchart.css">
+		<link rel="stylesheet" type="text/css" href="css/directives/timelineSelectorChart.css">
 
 		<!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
 		<!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
@@ -177,10 +178,7 @@
 		<div class="container">
 
 		<!-- Timeline -->
-		<div class="well well-blank">
-			<h3><span class="count count-large text-primary">233,312</span> tweets from February 1, 2014 to March 31, 2014</h3>
-			<!-- chart container here -->
-		</div>
+		<div timeline-selector></div>
 
 		<div class="row">
 
@@ -204,48 +202,30 @@
 				<!-- Sentiment chart -->
 				<div class="well">
 
-					<div class="dropdown pull-right">
-						<a class="btn btn-lg text-muted dropdown-toggle" data-toggle="dropdown">
-							<span class="glyphicon glyphicon-cog"></span>
-							<span class="caret"></span>
-						</a>
-						<div class="dropdown-menu panel-body">
-
-							<div class="form-group">
-								<label>Chart Type</label>
-								<div class="btn-group" data-toggle="buttons">
-									<label class="btn btn-default active">
-										<input type="radio" name="chartType" id="chartType_column" checked>
-										<span class="glyphicon glyphicon-stats"></span>
-									</label>
-									<label class="btn btn-default">
-										<input type="radio" name="chartType" id="chartType_line">
-										<span class="glyphicon glyphicon-ok"></span>
-									</label>
-								</div>
-							</div>
-
-							<div class="form-group">
-								<label>Show Unknown</label>
-								<div class="btn-group" data-toggle="buttons">
-									<label class="btn btn-default active">
-										<input type="radio" name="boolean" id="boolean_and" checked> ON
-									</label>
-									<label class="btn btn-default">
-										<input type="radio" name="boolean" id="boolean_or"> OFF
-									</label>
-								</div>
-							</div>
-
+					<div class="form-inline">
+						<div class="form-group">
+						  <select class="form-control">
+						  	<option value ="">Select X-Axis</option>
+						  </select>
+						</div>
+						<div class="form-group">
+						  <select class="form-control">
+						  	<option value ="">Select Y-Axis</option>
+						  </select>
+						</div>
+						<div class="form-group">
+						  <select class="form-control">
+						  	<option value ="count">Count</option>
+						  	<option value ="sum">Sum</option>
+						  	<option value ="average">Average</option>
+						  </select>
+						</div>
+						<div class="form-group">
+						  <button type="button" class="btn btn-default">
+						    Update
+						  </button>
 						</div>
 					</div>
-
-					<h4>
-						<span class="count-group"><span class="count count-large text-primary">3%</span> positive</span>
-						<span class="count-group"><span class="count count-large text-danger">5%</span> negative</span>
-						<span class="count-group"><span class="count count-large text-success">10%</span> neutral</span>
-						<span class="count-group"><span class="count count-large text-muted">82%</span> unknown</span>
-					</h4>
 
 					<!-- FIXME x and y based on sample data. -->
 					<!-- Need to figure out how we are working these for different datasets -->
@@ -283,6 +263,7 @@
 		<!-- Include our custom Angular components here for now. -->
 		<script src="js/namespaces.js"></script>
 		<script src="js/charts/barchart.js"></script>
+		<script src="js/charts/timelineSelectorChart.js"></script>
 
 		<script src="js/app.js"></script>
 		<script src="js/connectionService.js"></script>
@@ -293,6 +274,8 @@
 		<script src="js/charts/circularHeatChart.js"></script>
 		<script src="js/directives/circularHeatChart.js"></script>
 		<script src="js/directives/circularHeatForm.js"></script>
+		<script src="js/directives/timelineSelectorChart.js"></script>
+		<script src="js/directives/timelineSelector.js"></script>
 		<script src="js/directives/barchartDirective.js"></script>
 		<script src="js/directives/fieldSelector.js"></script>
 	</body>
