@@ -1,3 +1,4 @@
+'use strict';
 /*
  * Copyright 2014 Next Century Corporation
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -24,7 +25,7 @@ charts = charts || {};
  * This class is modeled after portions of the <a href="http://bl.ocks.org/mbostock/1667367#index.html">Focus
  * + Context via Brushing</a> D3 JS example.
  *
- * @class neonDemo.directives.barchart
+ * @class charts.TimelineSelectorChart
  * @constructor
  */
 charts.TimelineSelectorChart = function (element, configuration)
@@ -44,6 +45,20 @@ charts.TimelineSelectorChart = function (element, configuration)
 
 	var self = this; // for internal d3 functions
     
+    /** 
+     * Initializes the internal attributes of the chart.  A configuration object can be provided to 
+     * override defaults.
+     * @param {Object} configuration
+     * @param {Number} configuration.height
+     * @param {Object} configuration.margin Margin overrides for each side
+     * @param {Number} configuration.margin.bottom
+     * @param {Number} configuration.margin.left
+     * @param {Number} configuration.margin.right 
+     * @param {Number} configuration.margin.top 
+     * @param {Number} configuration.width
+     * @return charts.TimelineSelectorChart
+     * @method configure
+     */
 	this.configure = function(configuration)
 	{
 		this.config = configuration || {};
@@ -54,6 +69,15 @@ charts.TimelineSelectorChart = function (element, configuration)
 		return this;
 	}
 
+	/**
+	 * Since the default brush handlers return no data, this will allow client code to assign a handler to the brush end event.
+	 * This function wraps that handler and injects the current brush extent into its arguments.
+	 * @param {d3.svg.brush} brush The brush to query for extents.
+	 * @param {function} handler A brush handler.  The extent date objects will be passed to the handler as an array in a single argument
+	 * @return {function}
+	 * @method wrapBrushHandler
+	 * @private
+	 */
     var wrapBrushHandler = function(brush, handler) {
     	return function() {
 	    	if (brush && handler) {
@@ -62,6 +86,11 @@ charts.TimelineSelectorChart = function (element, configuration)
 	    }
     };
 
+    /**
+     * Adds a brush end handler to the timeline chart.
+     * @param {function} handler A brush handler.  The extent date objects will be passed to the handler as an array in a single argument
+     * @method addBrushHandler
+     */
     this.addBrushHandler = function(handler) {
     	if (typeof(handler) === 'function') {
     		this.brushHandler = handler;
@@ -71,11 +100,19 @@ charts.TimelineSelectorChart = function (element, configuration)
     	}
     }
 
+    /**
+     * Removes the brush end handler from the timeline's brush.
+     * @method removeBrushHandler
+     */
     this.removeBrushHandler = function() {
     	this.brushHandler = undefined;
     	this.brush.on("brushed");
     }
 
+    /**
+     * Clears the brush from the timeline.
+     * @method clearBrush
+     */
     this.clearBrush = function() {
     	this.brush.clear();
     	d3.select(this.element).select('.brush').call(this.brush);
