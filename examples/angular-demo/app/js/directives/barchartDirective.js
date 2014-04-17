@@ -49,8 +49,19 @@ barchart.directive('barchart', ['ConnectionService', function(connectionService)
 
 			$scope.messenger.events({
 				activeDatasetChanged: onDatasetChanged,
-				filtersChanged: onFiltersChanged
+				filtersChanged: onFiltersChanged,
+				selectionChanged: onSelectionChanged
 			});
+		};
+
+        /**
+		 * Event handler for selection changed events issued over Neon's messaging channels.
+		 * @param {Object} message A Neon selection changed message.
+		 * @method onSelectionChanged
+		 * @private
+		 */ 
+		var onSelectionChanged = function(message) {
+			$scope.queryForData();
 		};
 
 		var onFiltersChanged = function(message) {
@@ -71,6 +82,7 @@ barchart.directive('barchart', ['ConnectionService', function(connectionService)
 			var query = new neon.query.Query()
 			    .selectFrom($scope.databaseName, $scope.tableName)
 			    .where(xAxis,'!=', null)
+			    .selectionOnly()
 			    .groupBy(xAxis);
 
 			if(yAxis) {

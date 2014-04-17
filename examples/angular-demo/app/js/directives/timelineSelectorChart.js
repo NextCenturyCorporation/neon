@@ -31,22 +31,40 @@ angular.module('timelineSelectorChartDirective', []).directive('timelineSelector
 	return {
 		restrict: 'EA',
 		scope: {
-            timelineData: '='
+            timelineData: '=',
+            timelineBrush: '='
         },
 		link: function($scope, element, attrs) {          
 
             // Initialize the chart.
             $scope.chart = new charts.TimelineSelectorChart(element[0]);
 
+            // Add a brush handler.
+            $scope.chart.addBrushHandler(function(data) {
+                // Wrap our data change in $apply since this is fired from a D3 event and outside of
+                // angular's digest cycle.
+                $scope.$apply(function() {
+                    $scope.timelineBrush = data;
+                })  
+            });
+
             // Render an initial empty view.
             $scope.chart.render([]);
 
-            // If our data updates, reset our internal value fields and render the new view.
+            // If our data updates, reset our internal value fields and render the new view
+            // and clear the brush.
             $scope.$watch('timelineData', function(newVal) {
                 if (newVal && (newVal.length > 0)) {
                     $scope.chart.render(newVal);
+                    $scope.timelineBrush = [];
                 }
             }, true);
+
+            $scope.$watch('timelineBrush', function(newVal) {
+                if (newVal && newVal.length === 0) {
+                    $scope.chart.clearBrush();
+                }
+            })
         }
 	}
 });
