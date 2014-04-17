@@ -19,8 +19,11 @@ charts = charts || {};
  * The timeline will scale its x-axis labels based upon the amount of time covered in
  * the data to be plotted.  The timeline uses an area plot to show the change in values over time
  * on a broad scale.  It is meant for relative analysis and not detailed analysis.  To that end,
- * y-axis labels are not 
+ * y-axis labels are not displayed by default.
  * 
+ * This class is modeled after portions of the <a href="http://bl.ocks.org/mbostock/1667367#index.html">Focus
+ * + Context via Brushing</a> D3 JS example.
+ *
  * @class neonDemo.directives.barchart
  * @constructor
  */
@@ -44,8 +47,8 @@ charts.TimelineSelectorChart = function (element, configuration)
 	this.configure = function(configuration)
 	{
 		this.config = configuration || {};
-		this.config.margin = this.config.margin || {top: 10, right: 5, bottom: 20, left: 5};
-		this.config.width = this.config.width  || 800;
+		this.config.margin = this.config.margin || {top: 10, right: 15, bottom: 20, left: 15};
+		this.config.width = this.config.width  || 1000;
 		this.config.height = this.config.height || 40;
 
 		return this;
@@ -84,7 +87,10 @@ charts.TimelineSelectorChart = function (element, configuration)
      * where possible.  Also, it is destructive in that the entire chart and associated time selector brush are recreated.
      * Currently, this has the side effect of removing any brush handlers that were previously added.  Handlers should be
      * reattached after this renders.
-     * TODO: Consider caching the handlers to automatically re-attach them after a render.
+     * @param {Array} values An array of objects that consiste of a date and value field
+     * @param {Date} values.date A date which will make up a value for the x-axis
+     * @param {Number} values.value A number which will be plotted on the y-axis
+     * @method render
      */
 	this.render = function(values)
 	{
@@ -95,11 +101,10 @@ charts.TimelineSelectorChart = function (element, configuration)
 		}
 
 		// Date formatters used by the xAxis and summary header.
-		var parseDate = d3.time.format("%b %Y").parse;
         var summaryDateFormat = d3.time.format("%B %d, %Y");
 
         // Setup the axes and their scales.
-		var x = d3.time.scale().range([0, this.config.width]),
+		var x = d3.time.scale.utc().range([0, this.config.width]),
 		    y = d3.scale.linear().range([this.config.height, 0]);
 
 		var xAxis = d3.svg.axis().scale(x).orient("bottom"),
@@ -141,14 +146,8 @@ charts.TimelineSelectorChart = function (element, configuration)
         x.domain(d3.extent(data.map(function(d) { return d.date; })));
 		y.domain([0, d3.max(data.map(function(d) { return d.value; }))]);
 
-        // Clear the old contents by replacing innerhtml with the summary header.
-		d3.select(this.element).html('<h3><span class="count count-large text-primary">' 
-			+ totalRecords
-			+ '</span> records from '
-			+ summaryDateFormat(xMin)
-			+ ' to '
-			+ summaryDateFormat(xMax)
-			+ '</h3>');
+        // Clear the old contents by replacing innerhtml.
+		d3.select(this.element).html('');
 
         // Append our chart graphics
 		var svg = d3.select(this.element)
@@ -194,18 +193,6 @@ charts.TimelineSelectorChart = function (element, configuration)
         	.append("path")
         	.attr("d", resizePath);
 
-		function brushed() {
-			console.log("WE BRUSHED!");
-		  //x.domain(brush.empty() ? x2.domain() : brush.extent());
-		  //focus.select(".area").attr("d", area);
-		  //focus.select(".x.axis").call(xAxis);
-		}
-
-		function type(d) {
-		  d.date = parseDate(d.date);
-		  d.value = +d.value;
-		  return d;
-		}
 	};
 
 	// initialization

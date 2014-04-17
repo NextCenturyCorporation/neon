@@ -52,6 +52,17 @@ barchart.directive('barchart', ['ConnectionService', function(connectionService)
 				filtersChanged: onFiltersChanged,
 				selectionChanged: onSelectionChanged
 			});
+
+			$scope.$watch('attrX', function(newValue, oldValue) {
+				if($scope.databaseName && $scope.tableName) {
+					$scope.queryForData();
+				}
+			});
+			$scope.$watch('attrY', function(newValue, oldValue) {
+				if($scope.databaseName && $scope.tableName) {
+					$scope.queryForData();
+				}
+			});
 		};
 
         /**
@@ -75,9 +86,9 @@ barchart.directive('barchart', ['ConnectionService', function(connectionService)
 
 		$scope.queryForData = function() {
 			var xAxis = connectionService.getFieldMapping($scope.database, $scope.tableName, "x-axis");
-			    xAxis = xAxis.mapping || $scope.attrX;
+			    xAxis = $scope.attrX || xAxis.mapping;
 			var yAxis = connectionService.getFieldMapping($scope.database, $scope.tableName, "y-axis")
-			    yAxis = yAxis.mapping || $scope.attrY;
+			    yAxis = $scope.attrY || yAxis.mapping;
 
 			var query = new neon.query.Query()
 			    .selectFrom($scope.databaseName, $scope.tableName)

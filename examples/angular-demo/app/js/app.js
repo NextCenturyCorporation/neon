@@ -22,7 +22,8 @@ var neonDemo = angular.module('neonDemo', [
 	'filterBuilderDirective',
 	'circularHeatChartDirective',
 	'circularHeatFormDirective',
+	'barchartDirective',
+	'fieldSelectorDirective',
 	'timelineSelectorChartDirective',
-	'timelineSelectorDirective',
-	'barchartDirective'
+	'timelineSelectorDirective'
 ]);
