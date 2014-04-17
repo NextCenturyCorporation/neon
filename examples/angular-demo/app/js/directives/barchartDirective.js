@@ -63,6 +63,11 @@ barchart.directive('barchart', ['ConnectionService', function(connectionService)
 					$scope.queryForData();
 				}
 			});
+			$scope.$watch('barType', function(newValue, oldValue) {
+				if($scope.databaseName && $scope.tableName) {
+					$scope.queryForData();
+				}
+			});
 		};
 
         /**
@@ -70,7 +75,7 @@ barchart.directive('barchart', ['ConnectionService', function(connectionService)
 		 * @param {Object} message A Neon selection changed message.
 		 * @method onSelectionChanged
 		 * @private
-		 */ 
+		 */
 		var onSelectionChanged = function(message) {
 			$scope.queryForData();
 		};
@@ -91,15 +96,22 @@ barchart.directive('barchart', ['ConnectionService', function(connectionService)
 			    yAxis = $scope.attrY || yAxis.mapping;
 
 			var query = new neon.query.Query()
-			    .selectFrom($scope.databaseName, $scope.tableName)
-			    .where(xAxis,'!=', null)
-			    .selectionOnly()
-			    .groupBy(xAxis);
+				.selectFrom($scope.databaseName, $scope.tableName)
+				.where(xAxis,'!=', null)
+				.selectionOnly()
+				.groupBy(xAxis);
+
+			var queryType;
+			if($scope.barType === 'count') {
+				queryType = neon.query.COUNT;
+			} else if($scope.barType === 'sum') {
+				queryType = neon.query.SUM;
+			}
 
 			if(yAxis) {
-				query.aggregate(neon.query.COUNT, yAxis, COUNT_FIELD_NAME);
+				query.aggregate(queryType, yAxis, COUNT_FIELD_NAME);
 			} else {
-				query.aggregate(neon.query.COUNT, '*', COUNT_FIELD_NAME);
+				query.aggregate(queryType, '*', COUNT_FIELD_NAME);
 			}
 
 			connectionService.getActiveConnection().executeQuery(query, function(queryResults) {
@@ -142,7 +154,8 @@ barchart.directive('barchart', ['ConnectionService', function(connectionService)
 		restrict: 'E',
 		scope: {
 			attrX: '=',
-			attrY: '='
+			attrY: '=',
+			barType: '='
 		},
 		link: link
 	};

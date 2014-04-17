@@ -204,34 +204,22 @@
 
 					<div class="form-inline">
 						<div class="form-group">
-						  <select class="form-control">
-						  	<option value ="">Select X-Axis</option>
-						  </select>
+							<fieldselector target-var="xAxisField" label-text="'X axis:'" default-mapping="'x-axis'"></fieldSelector>
 						</div>
 						<div class="form-group">
-						  <select class="form-control">
-						  	<option value ="">Select Y-Axis</option>
-						  </select>
+							<fieldselector target-var="yAxisField" label-text="'Y axis:'" default-mapping="'y-axis'"></fieldSelector>
 						</div>
 						<div class="form-group">
-						  <select class="form-control">
-						  	<option value ="count">Count</option>
-						  	<option value ="sum">Sum</option>
-						  	<option value ="average">Average</option>
-						  </select>
-						</div>
-						<div class="form-group">
-						  <button type="button" class="btn btn-default">
-						    Update
-						  </button>
+							<select ng-model="barType" class="form-control">
+								<option value="count">Count</option>
+								<option value="sum">Sum</option>
+								<option value="average">Average</option>
+								<option value="none">None</option>
+							</select>
 						</div>
 					</div>
 
-					<!-- FIXME x and y based on sample data. -->
-					<!-- Need to figure out how we are working these for different datasets -->
-					<fieldselector target-var="xAxisField" label-text="'X axis:'" default-mapping="'x-axis'"></fieldSelector>
-					<fieldselector target-var="yAxisField" label-text="'Y axis:'" default-mapping="'y-axis'"></fieldSelector>
-					<barchart attr-x="xAxisField" attr-y="yAxisField"></barchart>
+					<barchart attr-x="xAxisField" attr-y="yAxisField" bar-type='barType'></barchart>
 				</div>
 
 				<!-- Map -->

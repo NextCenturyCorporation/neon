@@ -58,7 +58,7 @@ fieldSelector.directive('fieldselector', ['ConnectionService', function(connecti
 	};
 
 	return {
-		template: '<label>{{labelText}}</label><select ng-model="targetVar" ng-options="field for field in fields"></select>',
+		template: '<label>{{labelText}}</label><select ng-model="targetVar" ng-options="field for field in fields" class="form-control"></select>',
 		restrict: 'E',
 		scope: {
 			targetVar: '=',
