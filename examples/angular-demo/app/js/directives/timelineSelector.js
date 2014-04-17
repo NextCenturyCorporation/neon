@@ -16,7 +16,12 @@
  */
 
 /**
- * This Angular JS directive adds a timeline.
+ * This Angular JS directive adds a timeline selector to a page.  The timeline selector uses the Neon
+ * API to query the currently selected data source the number of records matched by current Neon filters.
+ * These records are binned by hour to display the number of records available temporally.  Additionally,
+ * the timeline includes a brushing tool that allows a user to select a time range.  The time range is
+ * set as a Neon selection filter which will limit the records displayed by any visualization that
+ * filters their datasets with the active selection.
  * 
  * @example
  *    &lt;timeline-selector&gt;&lt;/timeline-selector&gt;<br>
@@ -71,7 +76,7 @@ angular.module('timelineSelectorDirective', []).directive('timelineSelector', ['
 			 * @private
 			 */ 
 			var onFiltersChanged = function(message) {
-				// Clear our filters against the last table before requesting data.
+				// Clear our filters against the last table and filter before requesting data.
 				$scope.messenger.clearSelection();
 				$scope.queryForChartData();
 			};
@@ -184,13 +189,14 @@ angular.module('timelineSelectorDirective', []).directive('timelineSelector', ['
 			$scope.$watch('brush', function(newVal) {
 				// If we have a new value and a messenger is ready, set the new filter.
 				if (newVal && $scope.messenger && connectionService.getActiveConnection()) {
-					console.log("newVal" + newVal);
-					console.log("Brushing from " + newVal[0] + " to " + newVal[1]);
+
 					if (newVal === undefined || (newVal.length < 2) || (newVal[0].getTime() === newVal[1].getTime())) {
 						$scope.messenger.clearSelection($scope.filterKey);
 					} else {
+						// Since we created our time buckets with times representing the start of an hour, we need to add an hour
+						// to the time representing our last selected hour bucket to get all the records that occur in that hour.
 						var startFilterClause = neon.query.where($scope.dateField, '>=', newVal[0]);
-			            var endFilterClause = neon.query.where($scope.dateField, '<', newVal[1]);
+			            var endFilterClause = neon.query.where($scope.dateField, '<', new Date(newVal[1].getTime() + MILLIS_IN_HOUR));
 			            var clauses = [startFilterClause, endFilterClause];
 			            var filterClause = neon.query.and.apply(this, clauses);
 			            var filter = new neon.query.Filter().selectFrom($scope.databaseName, $scope.tableName).where(filterClause);
