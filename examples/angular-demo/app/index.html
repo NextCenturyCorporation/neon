@@ -52,7 +52,7 @@
 					<ul class="nav navbar-nav">
 						<li>
 							<a data-toggle="collapse" data-parent="#trays" href="#filter-tray" class="collapsed">
-								<span class="glyphicon glyphicon-filter"></span> 
+								<span class="glyphicon glyphicon-filter"></span>
 								Create Filters
 								<span class="label label-primary">3</span>
 							</a>
@@ -249,7 +249,9 @@
 
 					<!-- FIXME x and y based on sample data. -->
 					<!-- Need to figure out how we are working these for different datasets -->
-					<barchart attr-x="'time'" attr-y="'magnitude'"></barchart>
+					<fieldselector target-var="xAxisField" label-text="'X axis:'" default-mapping="'x-axis'"></fieldSelector>
+					<fieldselector target-var="yAxisField" label-text="'Y axis:'" default-mapping="'y-axis'"></fieldSelector>
+					<barchart attr-x="xAxisField" attr-y="yAxisField"></barchart>
 				</div>
 
 				<!-- Map -->
@@ -291,7 +293,7 @@
 		<script src="js/charts/circularHeatChart.js"></script>
 		<script src="js/directives/circularHeatChart.js"></script>
 		<script src="js/directives/circularHeatForm.js"></script>
-
 		<script src="js/directives/barchartDirective.js"></script>
+		<script src="js/directives/fieldSelector.js"></script>
 	</body>
 </html>
