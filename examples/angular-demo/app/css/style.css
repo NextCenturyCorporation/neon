@@ -215,8 +215,8 @@ a.navbar-text:focus{
 .navbar-default .navbar-nav > li > a{
 	margin-right: 40px;
 	color: #39b54a;
-	border-bottom: 3px solid #39b54a;
-	padding: 15px 0 12px;
+	border-bottom: 2px solid #39b54a;
+	padding: 15px 0 13px;
 }
 
 .navbar-default .navbar-nav > li > a.collapsed,

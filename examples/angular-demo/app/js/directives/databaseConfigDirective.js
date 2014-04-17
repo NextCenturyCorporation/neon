@@ -21,6 +21,12 @@ databaseConfig.directive('databaseConfig', ['ConnectionService', function(connec
 			hostnameInput: "localhost",
 			selectedDb: "mydb",
 			selectedTable: "sample"
+		},{
+			name: "Twitter",
+			datastoreSelect: "mongo",
+			hostnameInput: "localhost",
+			selectedDb: "mydb",
+			selectedTable: "gbSmall"
 		}];
 
 		var connection;
