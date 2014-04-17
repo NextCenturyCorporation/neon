@@ -11,8 +11,10 @@
     </form>
     <h3><span class="count count-large text-primary">{{recordCount | number}}</span> records 
     {{ (startDate) ? ' from ' : ''}}
-    {{ (startDate) ? (startDate.toISOString() | date: 'MMM d, yyyy HH:mm') + 'Z' : ''}}
+    {{ (startDate && granularity === 'hour') ? (startDate.toISOString() | date: 'MMM d, yyyy HH:mm') + ' Z' : ''}}
+    {{ (startDate && granularity === 'day') ? (startDate.toISOString() | date: 'MMMM d, yyyy') + ' Z' : ''}}
     {{ (endDate) ? ' to ' : ''}}
-    {{ (endDate) ? (endDate.toISOString() | date:'MMM d, yyyy HH:mm') + 'Z' : ''}}</h3>
+    {{ (endDate && granularity === 'hour') ? (endDate.toISOString() | date:'MMM d, yyyy HH:mm') + ' Z' : ''}}
+    {{ (endDate && granularity === 'day') ? (endDate.toISOString() | date:'MMMM d, yyyy') + ' Z' : ''}}</h3>
 	<div timeline-selector-chart timeline-data="data" timeline-brush='brush'></div>
 </div>

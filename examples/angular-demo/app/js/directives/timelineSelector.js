@@ -163,7 +163,7 @@ angular.module('timelineSelectorDirective', []).directive('timelineSelector', ['
 					total += $scope.data[i].value;
 				}
 
-				if ($scope.granularity === DAY) {
+				if ($scope.granularity === HOUR) {
 					$scope.startDate = $scope.data[startIdx].date;
 					$scope.startDate = new Date($scope.startDate.getUTCFullYear(),
 						$scope.startDate.getUTCMonth(),
@@ -175,7 +175,7 @@ angular.module('timelineSelectorDirective', []).directive('timelineSelector', ['
 						$scope.endDate.getUTCDate(),
 						$scope.endDate.getUTCHours() );
 				}
-				else if ($scope.granularity === HOUR) {
+				else if ($scope.granularity === DAY) {
 					$scope.startDate = $scope.data[startIdx].date;
 					$scope.startDate = new Date($scope.startDate.getUTCFullYear(),
 						$scope.startDate.getUTCMonth(),
@@ -223,7 +223,7 @@ angular.module('timelineSelectorDirective', []).directive('timelineSelector', ['
 
                 // If we have at least 2 values, setup the data buckets for them.
 				if (rawLength > 1) {
-					// Determine the number of hour buckets.
+					// Determine the number of hour buckets along with the start and end dates for our buckets.
 					// var startDate = new Date(Date.UTC(rawData[0].year, rawData[0].month - 1, rawData[0].day, rawData[0].hour));
 					// var endDate = new Date(Date.UTC(rawData[rawLength - 1].year, rawData[rawLength - 1].month - 1, 
 					// 	rawData[rawLength - 1].day, rawData[rawLength - 1].hour));
@@ -235,6 +235,11 @@ angular.module('timelineSelectorDirective', []).directive('timelineSelector', ['
 					endDate.setUTCMinutes(0);
 					endDate.setUTCSeconds(0);
 					endDate.setUTCMilliseconds(0);
+
+					if ($scope.granularity === DAY) {
+						startDate.setUTCHours(0);
+						endDate.setUTCHours(0);
+					}
 
 					var numBuckets = Math.ceil(Math.abs(endDate - startDate) / $scope.millisMultiplier) + 1;
 					var startTime = startDate.getTime();
