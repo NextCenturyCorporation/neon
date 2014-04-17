@@ -1,12 +1,14 @@
 <div class="well well-blank">
+    <form>
 	<div class="btn-group pull-right">
-      <label class="btn btn-default active">
-        <input type="radio" style="display:none"> Day
+      <label class="btn btn-default active" ng-class="{true: 'active', false: ''}[granularity === 'day']">
+        <input type="radio" style="display:none" ng-model="granularity" value="day"> Day
       </label>
-      <label class="btn btn-default">
-        <input type="radio" style="display:none"> Hour
+      <label class="btn btn-default" ng-class="{true: 'active', false: ''}[granularity === 'hour']">
+        <input type="radio" style="display:none" ng-model="granularity" value="hour"> Hour
       </label>
     </div>
+    </form>
     <h3><span class="count count-large text-primary">{{recordCount | number}}</span> records 
     {{ (startDate) ? ' from ' : ''}}
     {{ (startDate) ? (startDate.toISOString() | date: 'MMM d, yyyy HH:mm') + 'Z' : ''}}

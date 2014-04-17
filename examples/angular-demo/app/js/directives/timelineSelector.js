@@ -46,7 +46,9 @@ angular.module('timelineSelectorDirective', []).directive('timelineSelector', ['
 
             // Cache the number of milliseconds in an hour for processing.
             var MILLIS_IN_HOUR = 1000 * 60 * 60;
-            var MILLIS_IN_DAYS = MILLIS_IN_HOUR * 24;
+            var MILLIS_IN_DAY = MILLIS_IN_HOUR * 24;
+            var HOUR = "hour";
+            var DAY = "day";
 
 			element.addClass('timeline-selector');
 
@@ -65,6 +67,8 @@ angular.module('timelineSelectorDirective', []).directive('timelineSelector', ['
 				$scope.startDate = undefined;
 				$scope.endDate = undefined;
 				$scope.referenceDate = undefined;
+				$scope.granularity = DAY;
+				$scope.millisMultiplier = MILLIS_IN_DAY;
 				$scope.recordCount = 0;
 				$scope.filterKey = neon.widget.getInstanceId("timlineFilter");
 				$scope.messenger = new neon.eventing.Messenger();
@@ -119,7 +123,14 @@ angular.module('timelineSelectorDirective', []).directive('timelineSelector', ['
 				var query = new neon.query.Query()
 				    .selectFrom($scope.databaseName, $scope.tableName)
 				    .where($scope.dateField, '!=', null)
-				    .groupBy(yearGroupClause, monthGroupClause, dayGroupClause, hourGroupClause);
+
+				// Group by the appropriate granularity.
+				if ($scope.granularity === DAY) {
+				    query.groupBy(yearGroupClause, monthGroupClause, dayGroupClause);
+				}
+				else if ($scope.granularity === HOUR) {
+					query.groupBy(yearGroupClause, monthGroupClause, dayGroupClause, hourGroupClause);
+				}
 
 				query.aggregate(neon.query.COUNT, '*', 'count');
 				query.aggregate(neon.query.MIN, $scope.dateField, 'date');
@@ -143,24 +154,39 @@ angular.module('timelineSelectorDirective', []).directive('timelineSelector', ['
              */
             $scope.updateChartHeader = function(startDate, endDate) {
         		// Handle bound conditions.
-				var startIdx = Math.floor(Math.abs($scope.referenceDate - startDate) / MILLIS_IN_HOUR);
-				var endIdx = Math.floor(Math.abs($scope.referenceDate - endDate) / MILLIS_IN_HOUR);
+				var startIdx = Math.floor(Math.abs($scope.referenceDate - startDate) / $scope.millisMultiplier);
+				var endIdx = Math.floor(Math.abs($scope.referenceDate - endDate) / $scope.millisMultiplier);
 
 				// Update the header information.
 				var total = 0;
 				for (var i = startIdx; i <= endIdx; i++) {
 					total += $scope.data[i].value;
 				}
-				$scope.startDate = $scope.data[startIdx].date;
-				$scope.startDate = new Date($scope.startDate.getUTCFullYear(),
-					$scope.startDate.getUTCMonth(),
-					$scope.startDate.getUTCDate(),
-					$scope.startDate.getUTCHours() );
-				$scope.endDate = new Date($scope.data[endIdx].date.getTime() + MILLIS_IN_HOUR);
-				$scope.endDate = new Date($scope.endDate.getUTCFullYear(),
-					$scope.endDate.getUTCMonth(),
-					$scope.endDate.getUTCDate(),
-					$scope.endDate.getUTCHours() );
+
+				if ($scope.granularity === DAY) {
+					$scope.startDate = $scope.data[startIdx].date;
+					$scope.startDate = new Date($scope.startDate.getUTCFullYear(),
+						$scope.startDate.getUTCMonth(),
+						$scope.startDate.getUTCDate(),
+						$scope.startDate.getUTCHours() );
+					$scope.endDate = new Date($scope.data[endIdx].date.getTime() + MILLIS_IN_HOUR);
+					$scope.endDate = new Date($scope.endDate.getUTCFullYear(),
+						$scope.endDate.getUTCMonth(),
+						$scope.endDate.getUTCDate(),
+						$scope.endDate.getUTCHours() );
+				}
+				else if ($scope.granularity === HOUR) {
+					$scope.startDate = $scope.data[startIdx].date;
+					$scope.startDate = new Date($scope.startDate.getUTCFullYear(),
+						$scope.startDate.getUTCMonth(),
+						$scope.startDate.getUTCDate());
+					$scope.endDate = new Date($scope.data[endIdx].date.getTime() + MILLIS_IN_DAY);
+					$scope.endDate = new Date($scope.endDate.getUTCFullYear(),
+						$scope.endDate.getUTCMonth(),
+						$scope.endDate.getUTCDate());
+				}
+
+
 				$scope.recordCount = total;
             }
 
@@ -186,6 +212,7 @@ angular.module('timelineSelectorDirective', []).directive('timelineSelector', ['
 			$scope.createTimelineData = function(queryResults){
 				var rawData = queryResults.data;
 				var data = [];
+				var i = 0;
 
 				// If we have only 1 value, create a range for it.
 				if (rawData.length === 1) {
@@ -209,16 +236,16 @@ angular.module('timelineSelectorDirective', []).directive('timelineSelector', ['
 					endDate.setUTCSeconds(0);
 					endDate.setUTCMilliseconds(0);
 
-					var numBuckets = Math.ceil(Math.abs(endDate - startDate) / MILLIS_IN_HOUR) + 1;
+					var numBuckets = Math.ceil(Math.abs(endDate - startDate) / $scope.millisMultiplier) + 1;
 					var startTime = startDate.getTime();
 
 					// Cache the start date of the first bucket for later calculations.
 					$scope.referenceDate = startDate;
 
 					// Initialize our time buckets.
-					for (var i = 0; i < numBuckets; i++) {
+					for (i = 0; i < numBuckets; i++) {
 						data[i] = {
-							date: new Date(startTime + (MILLIS_IN_HOUR * i)),
+							date: new Date(startTime + ($scope.millisMultiplier * i)),
 							value: 0 
 						}
 					}
@@ -228,11 +255,26 @@ angular.module('timelineSelectorDirective', []).directive('timelineSelector', ['
 					var resultDate;
 					for (i = 0; i < rawLength; i++) {
 						resultDate = new Date(rawData[i].date);
-						data[Math.floor(Math.abs(resultDate - startDate) / MILLIS_IN_HOUR)].value = rawData[i].count;
+						data[Math.floor(Math.abs(resultDate - startDate) / $scope.millisMultiplier)].value = rawData[i].count;
 					}
 				}
 				return data;
 			};
+
+			// Update the millis multipler when the granularity is changed.
+			$scope.$watch('granularity', function(newVal, oldVal) {
+				if (newVal && newVal !== oldVal) {
+					if (newVal === DAY) {
+						$scope.millisMultiplier = MILLIS_IN_DAY;
+					}
+					else if (newVal === HOUR) {
+						$scope.millisMultiplier = MILLIS_IN_HOUR;
+					}
+					// Clear our filters against the last table and filter before requesting data.
+					$scope.messenger.clearSelection();
+					$scope.queryForChartData();
+				}
+			});
 
 			// Watch for brush changes and set the appropriate neon filter.
 			$scope.$watch('brush', function(newVal) {
@@ -249,7 +291,7 @@ angular.module('timelineSelectorDirective', []).directive('timelineSelector', ['
 						// Since we created our time buckets with times representing the start of an hour, we need to add an hour
 						// to the time representing our last selected hour bucket to get all the records that occur in that hour.
 						var startFilterClause = neon.query.where($scope.dateField, '>=', newVal[0]);
-			            var endFilterClause = neon.query.where($scope.dateField, '<', new Date(newVal[1].getTime() + MILLIS_IN_HOUR));
+			            var endFilterClause = neon.query.where($scope.dateField, '<', new Date(newVal[1].getTime() + $scope.millisMultiplier));
 			            var clauses = [startFilterClause, endFilterClause];
 			            var filterClause = neon.query.and.apply(this, clauses);
 			            var filter = new neon.query.Filter().selectFrom($scope.databaseName, $scope.tableName).where(filterClause);
