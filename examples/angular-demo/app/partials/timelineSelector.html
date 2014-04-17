@@ -1,4 +1,12 @@
 <div class="well well-blank">
+	<div class="btn-group pull-right">
+      <label class="btn btn-default active">
+        <input type="radio" style="display:none"> Day
+      </label>
+      <label class="btn btn-default">
+        <input type="radio" style="display:none"> Hour
+      </label>
+    </div>
     <h3><span class="count count-large text-primary">{{recordCount | number}}</span> records 
     {{ (startDate) ? ' from ' : ''}}
     {{ (startDate) ? (startDate.toISOString() | date: 'MMM d, yyyy HH:mm') + 'Z' : ''}}
