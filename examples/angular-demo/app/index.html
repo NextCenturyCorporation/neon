@@ -18,6 +18,7 @@
 		<link rel="stylesheet" type="text/css" href="css/directives/barchart.css">
 		<link rel="stylesheet" type="text/css" href="css/directives/timelineSelector.css">
 		<link rel="stylesheet" type="text/css" href="css/directives/timelineSelectorChart.css">
+		<link rel="stylesheet" type="text/css" href="css/directives/heatMap.css">
 
 		<!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
 		<!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
@@ -222,7 +223,7 @@
 				</div>
 
 				<!-- Map -->
-				<div heat-map></div>
+				<div heat-map class="well"></div>
 
 			</div>
 		</div>
@@ -244,16 +245,22 @@
 		<!-- Include third party libs -->
 		<script src="lib/d3/d3.v3.min.js"></script>
 		<script src="lib/bootstrap/bootstrap.min.js"></script>
+		<script src="lib/openlayers/OpenLayers.js"></script>
+		<script src="lib/openlayers/heatmap/heatmap.js"></script>
+		<script src="lib/openlayers/heatmap/heatmap-openlayers.js"></script>
+		
 
-		<!-- Include our custom Angular components here for now. -->
+		<!-- Include required non-angular support modules -->
 		<script src="js/namespaces.js"></script>
 		<script src="js/charts/barchart.js"></script>
 		<script src="js/charts/timelineSelectorChart.js"></script>
+		<script src="js/coremap/coremap.js"></script>
 
+		<!-- Include our custom Angular components here for now. -->
 		<script src="js/app.js"></script>
 		<script src="js/connectionService.js"></script>
 		<script src="js/neonDemoController.js"></script>
-
+	    
 		<script src="js/directives/databaseConfigDirective.js"></script>
 		<script src="js/directives/filterBuilderDirective.js"></script>
 		<script src="js/charts/circularHeatChart.js"></script>

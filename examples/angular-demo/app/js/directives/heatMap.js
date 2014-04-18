@@ -59,6 +59,25 @@ angular.module('heatMapDirective', []).directive('heatMap', ['ConnectionService'
 
 				// Default our time data to an empty array.
 				$scope.data = [];
+
+				// Setup our map.
+				$scope.mapId = uuid();
+				element.append('<div id="' + $scope.mapId + '" class="map"></div>');
+		        $scope.map = new coreMap.Map($scope.mapId, {
+		        	height: 500,
+		        	width: "100%",
+		        	responsive: false
+		        });
+		        // installOptionsPanels();
+		        // setMapMappingFunctions();
+		        // setLayerChangeListener();
+		        // setApplyFiltersListener();
+		        $scope.map.draw();
+		        $scope.map.register("moveend", this, function() {
+		        	console.log("map moved");
+		        });
+
+	            // Setup our messenger.
 				$scope.messenger = new neon.eventing.Messenger();
 
 				$scope.messenger.events({
