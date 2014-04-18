@@ -86,7 +86,7 @@ angular.module('heatMapDirective', []).directive('heatMap', ['ConnectionService'
 			};
 
             var onMoved = function(message) {
-            	//$scope.queryForMapData();
+            	$scope.queryForMapData();
             };
 
 			/**
@@ -248,6 +248,7 @@ angular.module('heatMapDirective', []).directive('heatMap', ['ConnectionService'
 			$scope.$watch('latitudeField', function(newVal, oldVal) {
 				if (newVal && newVal !== oldVal) {
 					$scope.map.latitudeMapping = newVal;
+					$scope.map.draw();
 				}
 			});
 
@@ -255,6 +256,7 @@ angular.module('heatMapDirective', []).directive('heatMap', ['ConnectionService'
 			$scope.$watch('longitudeField', function(newVal, oldVal) {
 				if (newVal && newVal !== oldVal) {
 					$scope.map.longitudeMapping = newVal;
+					$scope.map.draw();
 				}
 			});
 
