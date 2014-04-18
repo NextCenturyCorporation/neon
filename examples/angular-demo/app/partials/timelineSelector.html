@@ -9,13 +9,13 @@
       </label>
     </div>
     </form>
-    <h3><span class="count count-large text-primary">{{recordCount | number}}</span> records 
-    {{ (startDate) ? ' from ' : ''}}
-    {{ (startDate && granularity === 'hour') ? (startDate.toISOString() | date: 'MMM d, yyyy HH:mm') : ''}}
-    {{ (startDate && granularity === 'day') ? (startDate.toISOString() | date: 'MMMM d, yyyy') : ''}}
-    {{ (endDate) ? ' to ' : ''}}
-    {{ (endDate && granularity === 'hour') ? (endDate.toISOString() | date:'MMM d, yyyy HH:mm') : ''}}
-    {{ (endDate && granularity === 'day') ? (endDate.toISOString() | date:'MMMM d, yyyy') : ''}}
-    {{ (startDate) ? '(Z)' : ''}}</h3>
+    <h3><span class="count count-large text-primary" ng-bind="recordCount | number"></span> records 
+    <span ng-bind="(startDate) ? ' from ' : ''"></span>
+    <span ng-bind="(startDate && granularity === 'hour') ? (startDate.toISOString() | date: 'MMM d, yyyy HH:mm') : ''"></span>
+    <span ng-bind="(startDate && granularity === 'day') ? (startDate.toISOString() | date: 'MMMM d, yyyy') : ''"></span>
+    <span ng-bind="(endDate) ? ' to ' : ''"></span>
+    <span ng-bind="(endDate && granularity === 'hour') ? (endDate.toISOString() | date:'MMM d, yyyy HH:mm') : ''"></span>
+    <span ng-bind="(endDate && granularity === 'day') ? (endDate.toISOString() | date:'MMMM d, yyyy') : ''"></span>
+    <span ng-bind="(startDate) ? '(Z)' : ''"></span></h3>
 	<div timeline-selector-chart timeline-data="data" timeline-brush='brush'></div>
 </div>
