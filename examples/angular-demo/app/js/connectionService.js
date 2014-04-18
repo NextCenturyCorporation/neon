@@ -45,6 +45,9 @@ angular.module('neonDemo.services', []).factory('ConnectionService', ['$filter',
 						}, {
 							name: "color-by",
 							mapping: "magnitudeType"
+						},{
+							name: "size-by",
+							mapping: "magnitude"
 						}]
 					},{
 						name: "gbSmall",
@@ -65,6 +68,9 @@ angular.module('neonDemo.services', []).factory('ConnectionService', ['$filter',
 							mapping: "sentiment"
 						}, {
 							name: "color-by",
+							mapping: "sentiment"
+						},{
+							name: "size-by",
 							mapping: "retweet_count"
 						}]
 					}]

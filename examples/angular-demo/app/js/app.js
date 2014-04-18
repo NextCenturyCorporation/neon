@@ -25,5 +25,6 @@ var neonDemo = angular.module('neonDemo', [
 	'barchartDirective',
 	'fieldSelectorDirective',
 	'timelineSelectorChartDirective',
-	'timelineSelectorDirective'
+	'timelineSelectorDirective',
+	'heatMapDirective'
 ]);
