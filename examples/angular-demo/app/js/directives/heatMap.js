@@ -73,17 +73,30 @@ angular.module('heatMapDirective', []).directive('heatMap', ['ConnectionService'
 		        // setLayerChangeListener();
 		        // setApplyFiltersListener();
 		        $scope.map.draw();
-		        $scope.map.register("moveend", this, function() {
-		        	console.log("map moved");
-		        });
+		        $scope.map.register("moveend", this, onMoved);
 
 	            // Setup our messenger.
 				$scope.messenger = new neon.eventing.Messenger();
 
 				$scope.messenger.events({
 					activeDatasetChanged: onDatasetChanged,
-					filtersChanged: onFiltersChanged
+					filtersChanged: onFiltersChanged,
+					selectionChanged: onSelectionChanged
 				});
+			};
+
+            var onMoved = function(message) {
+            	//$scope.queryForMapData();
+            };
+
+			/**
+			 * Event handler for selection changed events issued over Neon's messaging channels.
+			 * @param {Object} message A Neon selection changed message.
+			 * @method onSelectionChanged
+			 * @private
+			 */ 
+			var onSelectionChanged = function(message) {
+				$scope.queryForMapData();
 			};
 
 			/**
@@ -108,6 +121,14 @@ angular.module('heatMapDirective', []).directive('heatMap', ['ConnectionService'
 			var onDatasetChanged = function(message) {
 				$scope.databaseName = message.database;
 				$scope.tableName = message.table;
+				$scope.latitudeField = "";
+		        $scope.latitudeField = "";
+		        $scope.longitudeField = "";
+		        $scope.longitudeField = "";
+		        $scope.colorByField = "";
+		        $scope.colorByField = "";
+		        $scope.sizeByField = "";
+		        $scope.sizeByField = "";
 
 				// Repopulate the field selectors and get the default values.
 				connectionService.getActiveConnection().getFieldNames($scope.tableName, function(results) {
@@ -121,6 +142,7 @@ angular.module('heatMapDirective', []).directive('heatMap', ['ConnectionService'
 				        $scope.colorByField = $scope.colorByField.mapping || $scope.fields[0];
 				        $scope.sizeByField = connectionService.getFieldMapping($scope.database, $scope.tableName, "size-by");
 				        $scope.sizeByField = $scope.sizeByField.mapping || $scope.fields[0];
+				        $scope.queryForMapData();
 				    });
 				});
 			};
@@ -140,18 +162,16 @@ angular.module('heatMapDirective', []).directive('heatMap', ['ConnectionService'
 			 * @method queryForMapData
 			 */
 			$scope.queryForMapData = function() {
-				$scope.dateField = connectionService.getFieldMapping($scope.database, $scope.tableName, "date");
-				$scope.dateField = $scope.dateField.mapping || 'date';
 
-				var query = new neon.query.Query()
-				    .selectFrom($scope.databaseName, $scope.tableName)
+				if ($scope.latitudeField !== "" && $scope.longitudeField !== "") {
+					var query = $scope.buildQuery();
 
-				connectionService.getActiveConnection().executeQuery(query, function(queryResults) {
-					$scope.$apply(function(){
-						$scope.brush = [];
-						$scope.updateMapData(queryResults);
+					connectionService.getActiveConnection().executeQuery(query, function(queryResults) {
+						$scope.$apply(function(){
+							$scope.updateMapData(queryResults);
+						});
 					});
-				});
+				}
 			};
 
 			/**
@@ -162,35 +182,100 @@ angular.module('heatMapDirective', []).directive('heatMap', ['ConnectionService'
 			 * @method updateMapData
 			 */
 			$scope.updateMapData = function(queryResults) {
-				$scope.data = $scope.createMapData(queryResults);
+				$scope.map.setData(queryResults.data);
+				$scope.map.draw();
 			};
+
+            $scope.buildQuery = function() {
+            	var where = $scope.createFilterFromExtent();
+		        var query = new neon.query.Query().selectFrom($scope.databaseName, $scope.tableName).where(where);
+		        var groupByFields = [$scope.latitudeField, $scope.longitudeField];
+
+		        if ($scope.colorByField) {
+		            groupByFields.push($scope.colorByField);
+		            query = query.groupBy($scope.latitudeField, $scope.longitudeField, $scope.colorByField).selectionOnly();
+		        }
+		        else {
+		        	query = query.groupBy($scope.latitudeField, $scope.longitudeField).selectionOnly();
+		        }
+
+		        if ($scope.sizeByField) {
+		            query.aggregate(neon.query.SUM, $scope.sizeByField, $scope.sizeByField);
+		        }
+		        else {
+		            query.aggregate(neon.query.COUNT, '*', coreMap.Map.DEFAULT_SIZE_MAPPING);
+		        }
+
+		        return query;
+		    }
 
 			/**
-			 * Creates a new data array used to populate our map.  This function is used
-			 * as or by Neon query handlers.
-			 * @param {Object} queryResults Results returned from a Neon query.
-			 * @param {Array} queryResults.data The aggregate numbers for the heat chart cells.
-			 * @method createMapData
+			 * Create a Neon query to pull data limited to the current extent of the map.
+			 * @method createFilterFromExtent
 			 */
-			$scope.createMapData = function(queryResults){
-				var rawData = queryResults.data;
-				var data = [];
-				var i = 0;
+			$scope.createFilterFromExtent = function() {
+		        var extent = $scope.map.getExtent();
 
-				return data;
-			};
+		        var leftClause = neon.query.where($scope.longitudeField, ">=", extent.minimumLongitude);
+		        var rightClause = neon.query.where($scope.longitudeField, "<=", extent.maximumLongitude);
+		        var bottomClause = neon.query.where($scope.latitudeField, ">=", extent.minimumLatitude);
+		        var topClause = neon.query.where($scope.latitudeField, "<=", extent.maximumLatitude);
+		        var filterClause = neon.query.and(leftClause, rightClause, bottomClause, topClause);
 
-			// Update the millis multipler when the granularity is changed.
-			$scope.$watch('sizeByField', function(newVal, oldVal) {
+		        //Deal with different dateline crossing scenarios.
+		        if (extent.minimumLongitude < -180 && extent.maximumLongitude > 180) {
+		            filterClause = neon.query.and(topClause, bottomClause);
+		        }
+		        else if (extent.minimumLongitude < -180) {
+		            leftClause = neon.query.where($scope.longitudeField, ">=", extent.minimumLongitude + 360);
+		            var leftDateLine = neon.query.where($scope.longitudeField, "<=", 180);
+		            var rightDateLine = neon.query.where($scope.longitudeField, ">=", -180);
+		            var datelineClause = neon.query.or(neon.query.and(leftClause, leftDateLine), neon.query.and(rightClause, rightDateLine));
+		            filterClause = neon.query.and(topClause, bottomClause, datelineClause);
+		        }
+		        else if (extent.maximumLongitude > 180) {
+		            rightClause = neon.query.where($scope.longitudeField, "<=", extent.maximumLongitude - 360);
+		            var rightDateLine = neon.query.where($scope.longitudeField, ">=", -180);
+		            var leftDateLine = neon.query.where($scope.longitudeField, "<=", 180);
+		            var datelineClause = neon.query.or(neon.query.and(leftClause, leftDateLine), neon.query.and(rightClause, rightDateLine));
+		            filterClause = neon.query.and(topClause, bottomClause, datelineClause);
+		        }
+		        return filterClause;
+		       // return new neon.query.Filter().selectFrom(databaseName, tableName).where(filterClause);
+		    }
+
+			// Update the latitude field used by the map.
+			$scope.$watch('latitudeField', function(newVal, oldVal) {
 				if (newVal && newVal !== oldVal) {
-					$scope.queryForMapData();
+					$scope.map.latitudeMapping = newVal;
 				}
 			});
 
-			// Update the millis multipler when the granularity is changed.
+			// Update the longitude field used by the map.
+			$scope.$watch('longitudeField', function(newVal, oldVal) {
+				if (newVal && newVal !== oldVal) {
+					$scope.map.longitudeMapping = newVal;
+				}
+			});
+
+			// Update the sizing field used by the map.
+			$scope.$watch('sizeByField', function(newVal, oldVal) {
+				if (newVal !== oldVal) {
+					if (newVal) {
+						$scope.map.sizeMapping = newVal;
+					} 
+					else {
+						$scope.map.sizeMapping = coreMap.Map.DEFAULT_SIZE_MAPPING;
+					}
+					$scope.map.draw();
+				}
+			});
+
+			// Update the coloring field used by the map.
 			$scope.$watch('colorByField', function(newVal, oldVal) {
 				if (newVal && newVal !== oldVal) {
-					$scope.queryForMapData();
+					$scope.map.categoryMapping = newVal;
+					$scope.map.draw();
 				}
 			});
 

@@ -9,7 +9,7 @@
             connection.use("mydb");
 
 
-            var query = new neon.query.Query().selectFrom("sample").limit(5);
+            var query = new neon.query.Query().selectFrom("sample").groupBy("magnitudeType", "magnitude");
 
             //Execute the query and display the results.
             connection.executeQuery(query, function (result) {
