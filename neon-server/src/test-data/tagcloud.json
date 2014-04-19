@@ -1,0 +1,17 @@
+[
+    {
+        "_id": "6137b623a9f279d831b6fb86",
+        "tags": ["tag1","tag2","tag3"],
+        "otherfield": "ignoreme"
+    },
+    {
+        "_id": "6137b623a9f279d831b6fb87",
+        "tags": ["tag2"],
+        "otherfield": "ignoreme2"
+    },
+    {
+        "_id": "6137b623a9f279d831b6fb88",
+        "tags": ["tag2","tag3"],
+        "otherfield": "ignoreme3"
+    },
+]

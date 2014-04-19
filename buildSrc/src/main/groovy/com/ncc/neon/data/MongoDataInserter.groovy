@@ -30,12 +30,13 @@ class MongoDataInserter extends DefaultTask{
     String host = "localhost"
     String databaseName = "concurrencytest"
     String tableName = "records"
+    String dataFileName = ALL_DATA_FILENAME
 
     @TaskAction
     void run(){
         def db = new MongoClient(host).getDB(databaseName)
         def collection = db.getCollection(tableName)
-        def dbList = parseJSON("/mongo-json/${ALL_DATA_FILENAME}")
+        def dbList = parseJSON("/mongo-json/${dataFileName}")
         collection.insert(dbList)
         collection.ensureIndex(new BasicDBObject("location", "2dsphere"))
     }

@@ -135,6 +135,8 @@ dependencies {
     compile 'com.google.code.tempus-fugit:tempus-fugit:1.1'
     compile project(":metadata")
 
+    compile 'org.jongo:jongo:1.0'
+
     providedCompile 'javax.servlet:javax.servlet-api:3.0.1'
 
     runtime 'cglib:cglib:2.2.2'
@@ -231,9 +233,11 @@ task generateMongoJson {
     def outputDir = "${testDataDir}/mongo-json"
     inputs.files { testDataInputFileTree }
     outputs.dir { outputDir }
-    // mongo only needs the data file for input. it uses the rest of the standard json files for test verification
+    // mongo only needs the data files for input. it uses the rest of the standard json files for test verification
     doLast {
-        new MongoJSONGenerator().generateJson(testDataDir, outputDir, ~/data.json/)
+        def mongoJsonGenerator = new MongoJSONGenerator()
+        mongoJsonGenerator.generateJson(testDataDir, outputDir, ~/data.json/)
+        mongoJsonGenerator.generateJson(testDataDir, outputDir, ~/tagcloud.json/)
     }
 }
 

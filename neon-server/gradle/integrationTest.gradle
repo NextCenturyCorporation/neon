@@ -49,11 +49,11 @@ task integrationTest(type: Test) {
 
     // TODO: NEON-960 workaround
     if (isMongoOnly()) {
-        dependsOn 'insertMongoDataIntegrationTest'
+        dependsOn 'insertMongoDataIntegrationTest','insertMongoDataTagCloudTest'
     } else if (isSharkOnly()) {
         dependsOn 'insertSharkDataIntegrationTest'
     } else {
-        dependsOn 'insertMongoDataIntegrationTest', 'insertSharkDataIntegrationTest'
+        dependsOn 'insertMongoDataIntegrationTest', 'insertMongoDataTagCloudTest', 'insertSharkDataIntegrationTest'
     }
 
     testClassesDir = sourceSets.integrationTest.output.classesDir
@@ -81,6 +81,25 @@ task deleteMongoDataIntegrationTestBeforeInsert(type: com.ncc.neon.data.MongoDat
     databaseName = 'neonintegrationtest'
 }
 
+// separate out the tag cloud data insert/delete since they are not yet part of the core functionality
+// of neon and are mongo specific
+task insertMongoDataTagCloudTest(type: com.ncc.neon.data.MongoDataInserter) {
+    dependsOn 'deleteMongoDataTagCloudTestBeforeInsert', 'generateMongoJson'
+    host = getMongoHost()
+    databaseName = 'neonmongotagcloud'
+    dataFileName = 'tagcloud.json'
+}
+
+task deleteMongoDataTagCloudTestBeforeInsert(type: com.ncc.neon.data.MongoDataDeleter) {
+    host = getMongoHost()
+    databaseName = 'neonmongotagcloud'
+}
+
+task deleteMongoDataTagCloudTest(type: com.ncc.neon.data.MongoDataDeleter) {
+    host = getMongoHost()
+    databaseName = 'neonmongotagcloud'
+}
+
 task insertSharkDataIntegrationTest(type: com.ncc.neon.data.SharkDataInserter) {
     dependsOn 'deleteSharkDataIntegrationTestBeforeInsert', 'generateSharkCSV', 'generateSharkJson'
     host = getSharkHost()
@@ -96,11 +115,11 @@ task deleteSharkDataIntegrationTestBeforeInsert(type: com.ncc.neon.data.SharkDat
 task afterIntegrationTest {
     // TODO: NEON-960 workaround
     if (isMongoOnly()) {
-        dependsOn 'deleteMongoDataIntegrationTest'
+        dependsOn 'deleteMongoDataIntegrationTest', 'deleteMongoDataTagCloudTest'
     } else if (isSharkOnly()) {
         dependsOn 'deleteSharkDataIntegrationTest'
     } else {
-        dependsOn 'deleteMongoDataIntegrationTest', 'deleteSharkDataIntegrationTest'
+        dependsOn 'deleteMongoDataIntegrationTest', 'deleteMongoDataTagCloudTest', 'deleteSharkDataIntegrationTest'
     }
 }
 
