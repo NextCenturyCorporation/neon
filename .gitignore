@@ -1,7 +1,7 @@
 # generated files
 neon-server/src/test-data/mongo-json/
-neon-server/src/test-data/hive-json/
-neon-server/src/test-data/hive-csv/
+neon-server/src/test-data/shark-json/
+neon-server/src/test-data/shark-csv/
 package.json
 
 # grunt files
