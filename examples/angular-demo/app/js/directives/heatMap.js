@@ -56,6 +56,7 @@ angular.module('heatMapDirective', []).directive('heatMap', ['ConnectionService'
 				$scope.longitudeField = '';
 				$scope.sizeByField = '';
 				$scope.colorByField = '';
+				$scope.showPoints = true;
 				$scope.error = '';
 
 				// Default our time data to an empty array.
@@ -83,6 +84,10 @@ angular.module('heatMapDirective', []).directive('heatMap', ['ConnectionService'
 					filtersChanged: onFiltersChanged,
 					selectionChanged: onSelectionChanged
 				});
+
+				// Enable the tooltips.
+				$(element).find('label.btn-default').tooltip();
+
 			};
 
             var onMoved = function(message) {
@@ -274,15 +279,27 @@ angular.module('heatMapDirective', []).directive('heatMap', ['ConnectionService'
 					else {
 						$scope.map.sizeMapping = coreMap.Map.DEFAULT_SIZE_MAPPING;
 					}
-					$scope.map.draw();
+					$scope.queryForMapData();
 				}
 			});
 
 			// Update the coloring field used by the map.
 			$scope.$watch('colorByField', function(newVal, oldVal) {
-				if (newVal && newVal !== oldVal) {
-					$scope.map.categoryMapping = newVal;
-					$scope.map.draw();
+				if (newVal !== oldVal) {
+					if (newVal) {
+						$scope.map.categoryMapping = newVal;
+					} 
+					else {
+						$scope.map.categoryMapping = undefined;
+					}
+					$scope.queryForMapData();
+				}
+			});
+
+			// Toggle the points and clusters view when the user toggles between them.
+			$scope.$watch('showPoints', function(newVal, oldVal) {
+				if (newVal !== oldVal) {
+					$scope.map.toggleLayers();
 				}
 			});
 
