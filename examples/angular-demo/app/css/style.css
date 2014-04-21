@@ -159,10 +159,37 @@ a:focus{
 	BUTTONS
 ================ */
 
+.btn {
+    font-size: 12px;
+    font-weight: bold;
+    line-height: 20px;
+    padding: 6px 16px;
+    text-transform: uppercase;
+}
+.btn-group .btn,
+.input-group-btn .btn{
+	padding: 6px 12px;
+}
+.btn .glyphicon {
+    font-size: 14px;
+    line-height: 16px;
+}
+.btn-default{
+	color: #555555;
+}
 .btn-default:focus{
     background-color: #FFFFFF;
     border-color: #CCCCCC;
     color: #333333;
+}
+.btn-default:hover,
+.btn-default:focus,
+.btn-default:active{
+	color: #333333;
+}
+.btn-default.active,
+.open .dropdown-toggle.btn-default{
+	color: #555555;
 }
 .btn-primary,
 .label-primary{
@@ -312,8 +339,15 @@ a.navbar-text:focus{
     padding: 6px 0;
     line-height: 1;
 }
+.filter-tray .delete .glyphicon{
+	font-size: 18px;
+}
 .filter-tray .delete:hover{
 	color: #C2360D;
+}
+.filter-tray .btn-group .btn{
+	font-size: 12px;
+	line-height: 20px;
 }
 
 /* ================
@@ -420,11 +454,11 @@ label{
     z-index: 9999;
 }
 .database-overlay{
-	z-index: 9000;
+	z-index: 1049;
 }
 .overlay-above{
 	position: relative;
-	z-index: 9001;
+	z-index: 1050;
 }
 .overlay-container .spinner{
 	position: fixed;
