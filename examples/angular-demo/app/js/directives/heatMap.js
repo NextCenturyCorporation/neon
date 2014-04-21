@@ -274,15 +274,20 @@ angular.module('heatMapDirective', []).directive('heatMap', ['ConnectionService'
 					else {
 						$scope.map.sizeMapping = coreMap.Map.DEFAULT_SIZE_MAPPING;
 					}
-					$scope.map.draw();
+					$scope.queryForMapData();
 				}
 			});
 
 			// Update the coloring field used by the map.
 			$scope.$watch('colorByField', function(newVal, oldVal) {
-				if (newVal && newVal !== oldVal) {
-					$scope.map.categoryMapping = newVal;
-					$scope.map.draw();
+				if (newVal !== oldVal) {
+					if (newVal) {
+						$scope.map.categoryMapping = newVal;
+					} 
+					else {
+						$scope.map.categoryMapping = undefined;
+					}
+					$scope.queryForMapData();
 				}
 			});
 
