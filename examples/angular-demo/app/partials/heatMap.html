@@ -23,7 +23,7 @@
 		    ng-options="field for field in fields">
 		</select>
 	</div>
-	<span class="bg-danger" ng-class="{true: 'show', false: 'hidden'}[error && error.length > 0]" ng-bind="error">foo</span>
+	<span class="bg-danger" ng-class="{true: 'show', false: 'hidden'}[error !== undefined && error.length > 0]" ng-bind="error">foo</span>
 </div>
 
 <!-- chart directive here -->

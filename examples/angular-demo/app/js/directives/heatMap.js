@@ -86,7 +86,9 @@ angular.module('heatMapDirective', []).directive('heatMap', ['ConnectionService'
 			};
 
             var onMoved = function(message) {
-            	$scope.queryForMapData();
+            	// Commenting out for now until we decide whether or not to filter data queries based on visible area.
+            	// May need to make this a user-toggleable capability.
+            	// $scope.queryForMapData();
             };
 
 			/**
@@ -188,8 +190,10 @@ angular.module('heatMapDirective', []).directive('heatMap', ['ConnectionService'
 			};
 
             $scope.buildQuery = function() {
-            	var where = $scope.createFilterFromExtent();
-		        var query = new neon.query.Query().selectFrom($scope.databaseName, $scope.tableName).where(where);
+            	// Commenting out the use of the where clause for now.  Filtering on visible area requires
+            	// re-issuing the query whenever a pan/zoom is performed which can greatly slow map movements.
+            	// var where = $scope.createFilterFromExtent();
+		        var query = new neon.query.Query().selectFrom($scope.databaseName, $scope.tableName);
 		        var groupByFields = [$scope.latitudeField, $scope.longitudeField];
 
 		        if ($scope.colorByField) {
