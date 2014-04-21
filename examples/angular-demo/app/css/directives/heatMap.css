@@ -22,3 +22,8 @@
 .heat-map .map-field-form {
 	margin-bottom: 20px;
 }
+
+.heat-map .bg-danger {
+	padding: 4px;
+	margin-top: 20px;
+}

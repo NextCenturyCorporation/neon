@@ -56,6 +56,7 @@ angular.module('heatMapDirective', []).directive('heatMap', ['ConnectionService'
 				$scope.longitudeField = '';
 				$scope.sizeByField = '';
 				$scope.colorByField = '';
+				$scope.error = '';
 
 				// Default our time data to an empty array.
 				$scope.data = [];
@@ -68,10 +69,9 @@ angular.module('heatMapDirective', []).directive('heatMap', ['ConnectionService'
 		        	width: "100%",
 		        	responsive: false
 		        });
-		        // installOptionsPanels();
 		        // setMapMappingFunctions();
 		        // setLayerChangeListener();
-		        // setApplyFiltersListener();
+
 		        $scope.map.draw();
 		        $scope.map.register("moveend", this, onMoved);
 
@@ -182,7 +182,8 @@ angular.module('heatMapDirective', []).directive('heatMap', ['ConnectionService'
 			 * @method updateMapData
 			 */
 			$scope.updateMapData = function(queryResults) {
-				$scope.map.setData(queryResults.data);
+				var result = $scope.map.setData(queryResults.data);
+				$scope.error = result.message;
 				$scope.map.draw();
 			};
 

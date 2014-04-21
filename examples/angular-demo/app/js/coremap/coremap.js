@@ -158,16 +158,27 @@ coreMap.Map.prototype.reset = function(){
  * Sets the map's data.
  * @param mapData the data to be set. This should be an array of points. The points may be specified
  * in any way, This component uses the mapping objects to map each array element to latitude, longitude, size and color.
+ * @param {Array} An array of data objects to plot
+ * @return {Object} result
+ * @return {Boolean} results.success  True if the map accepts the data; false if there are too many points to plot.
+ * @return {String} result.message Empty string if no error; otherwise, an error message is returned.
  * @method setData
  */
 
 coreMap.Map.prototype.setData = function(mapData){
     if(mapData.length >= coreMap.Map.DEFAULT_DATA_LIMIT){
-        console.log(mapData.length);
-        console.error("Unable to set data. The map cannot handle more than " + coreMap.Map.DEFAULT_DATA_LIMIT + " points");
+        return { 
+            success: false,
+            message: "Unable to update data. The map cannot handle more than " + coreMap.Map.DEFAULT_DATA_LIMIT + " points."
+                + "  Please select a smaller data set."
+        };
     }
     else{
         this.data = mapData;
+        return {
+            success: true,
+            message: ""
+        };
     }
 };
 
