@@ -1,16 +1,4 @@
 <div class="form-inline map-field-form">
-	<div class="form-group sr-only">
-		<label>Lat</label>
-		<select class="form-control" ng-model="latitudeField" ng-disabled="!(fields.length > 0)" 
-		    ng-options="field for field in fields">
-		</select>
-	</div>
-	<div class="form-group sr-only">
-		<label>Lon</label>
-		<select class="form-control" ng-model="longitudeField" ng-disabled="!(fields.length > 0)" 
-		    ng-options="field for field in fields">
-		</select>
-	</div>
 	<div class="form-group">
 		<label>Size by</label>
 		<select class="form-control" ng-model="sizeByField" ng-disabled="!(fields.length > 0)" 
@@ -23,7 +11,19 @@
 		    ng-options="field for field in fields">
 		</select>
 	</div>
-	<span class="bg-danger" ng-class="{true: 'show', false: 'hidden'}[error !== undefined && error.length > 0]" ng-bind="error">foo</span>
+	<div class="form-group sr-only">
+		<label>Lat</label>
+		<select class="form-control" ng-model="latitudeField" ng-disabled="!(fields.length > 0)" 
+		    ng-options="field for field in fields">
+		</select>
+	</div>
+	<div class="form-group sr-only">
+		<label>Lon</label>
+		<select class="form-control" ng-model="longitudeField" ng-disabled="!(fields.length > 0)" 
+		    ng-options="field for field in fields">
+		</select>
+	</div>
+	<span class="alert alert-danger" ng-class="{true: 'show', false: 'hidden'}[error !== undefined && error.length > 0]" ng-bind="error">foo</span>
 </div>
 
 <!-- chart directive here -->
