@@ -120,9 +120,15 @@ h5, .h5,
 h6, .h6{
 	color: #888888;
 }
+a,
 .text-primary{
 	color: #39b54a;
 }
+a:hover,
+a:focus{
+	color: #2F9F3E;
+}
+
 .text-success{
 	color: #3681CC;
 }
@@ -136,6 +142,9 @@ h6, .h6{
 }
 .label{
 	padding: 0.2em 0.6em;
+}
+.hidden{
+	display: none !important;
 }
 
 /* Fixes for modal in header */
@@ -354,6 +363,16 @@ a.navbar-text:focus{
 }
 
 /* ================
+	ALERTS
+================ */
+
+.alert-danger {
+	background: none;
+	border-color: #C2360D;
+	color: #C2360D;
+}
+
+/* ================
 	TABLES
 ================ */
 
@@ -379,6 +398,13 @@ label{
 	color: #777777;
 	text-transform: uppercase;
 }
+.form-inline .form-group label{
+	margin-left: 10px;
+	margin-right: 5px;
+}
+.form-inline .form-group:first-child label{
+	margin-left: 0px;
+}
 
 /* ================
 	OVERLAY
@@ -394,11 +420,11 @@ label{
     z-index: 9999;
 }
 .database-overlay{
-	z-index: 1;
+	z-index: 9000;
 }
 .overlay-above{
 	position: relative;
-	z-index: 2;
+	z-index: 9001;
 }
 .overlay-container .spinner{
 	position: fixed;

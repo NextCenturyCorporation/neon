@@ -23,7 +23,35 @@
 	margin-bottom: 20px;
 }
 
-.heat-map .bg-danger {
-	padding: 4px;
+.heat-map .alert {
 	margin-top: 20px;
+	display: none;
+	padding: 6px;
+}
+
+.heat-map .olMap {
+	border: 1px solid #bbbbbb;
+	border-radius: 2px;
+	box-shadow: 0 1px 4px rgba(154, 154, 154, 0.3);
+}
+
+.heat-map .olControlAttribution{
+	bottom: 0;
+	color: #555;
+	text-shadow: 0 1px 0 rgba(255,255,255,0.5);
+}
+
+.heat-map .olControlZoom a{
+	background-color: rgba(57, 181, 74, 0.7);
+	font-size: 20px;
+	font-family: "Open Sans", Helvetica, arial, sans-serif;
+	line-height: 24px;
+}
+
+.heat-map .olControlZoom a:hover{
+	background-color: rgba(57, 181, 74, 1);
+}
+
+.heat-map .olControlZoom{
+	background: none;
 }
