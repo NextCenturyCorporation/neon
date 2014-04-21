@@ -56,6 +56,7 @@ angular.module('heatMapDirective', []).directive('heatMap', ['ConnectionService'
 				$scope.longitudeField = '';
 				$scope.sizeByField = '';
 				$scope.colorByField = '';
+				$scope.showPoints = true;
 				$scope.error = '';
 
 				// Default our time data to an empty array.
@@ -83,6 +84,10 @@ angular.module('heatMapDirective', []).directive('heatMap', ['ConnectionService'
 					filtersChanged: onFiltersChanged,
 					selectionChanged: onSelectionChanged
 				});
+
+				// Enable the tooltips.
+				$(element).find('label.btn-default').tooltip();
+
 			};
 
             var onMoved = function(message) {
@@ -288,6 +293,13 @@ angular.module('heatMapDirective', []).directive('heatMap', ['ConnectionService'
 						$scope.map.categoryMapping = undefined;
 					}
 					$scope.queryForMapData();
+				}
+			});
+
+			// Toggle the points and clusters view when the user toggles between them.
+			$scope.$watch('showPoints', function(newVal, oldVal) {
+				if (newVal !== oldVal) {
+					$scope.map.toggleLayers();
 				}
 			});
 
