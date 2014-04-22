@@ -20,7 +20,11 @@
 }
 
 .timeline-selector h3 {
-  margin-top: 0px;
-  margin-bottom: 0px;
+    margin-bottom: 10px;
+    margin-top: -10px;
+}
+
+.timeline-selector .btn-group {
+    margin-top: 10px;
 }
 
