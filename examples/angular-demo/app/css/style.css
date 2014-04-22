@@ -154,6 +154,10 @@ a:focus{
 .collapsing {
     position: static;
 }
+.modal-backdrop{
+	background: none;
+	z-index: auto;
+}
 
 /* ================
 	BUTTONS
