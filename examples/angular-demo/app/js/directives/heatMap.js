@@ -57,6 +57,7 @@ angular.module('heatMapDirective', []).directive('heatMap', ['ConnectionService'
 				$scope.sizeByField = '';
 				$scope.colorByField = '';
 				$scope.showPoints = true;
+				$scope.cacheMap = false;
 				$scope.error = '';
 
 				// Default our time data to an empty array.
@@ -302,6 +303,19 @@ angular.module('heatMapDirective', []).directive('heatMap', ['ConnectionService'
 					$scope.map.toggleLayers();
 				}
 			});
+
+			// Handle toggling map caching.
+			$scope.$watch('cacheMap', function(newVal, oldVal) {
+				if (newVal !== oldVal) {
+					if (newVal) {
+						$scope.map.clearCache();
+						$scope.map.toggleCaching();
+					}
+					else {
+						$scope.map.toggleCaching();
+					}
+				}
+			})
 
 			// Wait for neon to be ready, the create our messenger and intialize the view and data.
 			neon.ready(function () {

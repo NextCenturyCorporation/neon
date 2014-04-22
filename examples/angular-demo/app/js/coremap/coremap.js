@@ -167,6 +167,7 @@ coreMap.Map.prototype.reset = function(){
 
 coreMap.Map.prototype.setData = function(mapData){
     if(mapData.length >= coreMap.Map.DEFAULT_DATA_LIMIT){
+        this.data = [];
         return { 
             success: false,
             message: "Unable to update data. The map cannot handle more than " + coreMap.Map.DEFAULT_DATA_LIMIT + " points."
@@ -411,12 +412,31 @@ coreMap.Map.prototype.getValueFromDataElement = function(mapping, element){
     return element[mapping];
 };
 
+coreMap.Map.prototype.toggleCaching = function() {
+    this.caching = !this.caching;
+    if (this.caching) {
+        this.cacheReader.deactivate();
+        this.cacheWriter.activate();
+    }
+    else {
+        this.cacheReader.activate();
+        this.cacheWriter.deactivate();
+    }
+}
+
+// clear the LocaleStorage used by the browser to store data for this.
+coreMap.Map.prototype.clearCache = function() {
+    OpenLayers.Control.CacheWrite.clearCache();
+    console.log("Cleared the map cache.");
+}
+
 /**
  * Initializes the map.
  * @method initializeMap
  */
 
 coreMap.Map.prototype.initializeMap = function(){
+    OpenLayers.ProxyHost = "proxy.cgi?url=";
     $('#' + this.elementId).css({
         width: this.width,
         height: this.height
@@ -430,7 +450,7 @@ coreMap.Map.prototype.initializeMap = function(){
  */
 
 coreMap.Map.prototype.setupLayers = function(){
-    var baseLayer = new OpenLayers.Layer.OSM();
+    var baseLayer = new OpenLayers.Layer.OSM("OSM", null, {});
     this.map.addLayer(baseLayer);
 
     var style = {
@@ -449,6 +469,25 @@ coreMap.Map.prototype.setupLayers = function(){
     this.map.addLayer(this.pointsLayer);
     this.map.addLayer(this.heatmapLayer);
     this.currentLayer = this.pointsLayer;
+
+    // Create a cache reader and writer.  Use default reader
+    // settings to read from cache first.
+    this.cacheReader = new OpenLayers.Control.CacheRead();
+
+    this.cacheWriter = new OpenLayers.Control.CacheWrite({
+        imageFormat: "image/png",
+        eventListeners: {
+            cachefull: function() {
+                console.log("Map cache is full.  Will not cache again until the cache is cleared.");
+                alert("Cache Full.  Re-enable caching to clear the cache and start building a new set");
+                this.toggleCaching();
+            }
+        }
+    });
+
+    //this.cacheWriter.addLayer(baseLayer);
+    this.map.addControl(this.cacheReader);
+    this.map.addControl(this.cacheWriter);
 };
 
 /**
