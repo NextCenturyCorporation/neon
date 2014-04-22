@@ -238,6 +238,11 @@ a.navbar-text:focus{
 	border: 0;
 	box-shadow: 0 1px 2px rgba(0, 0, 0, 0.15);
 }
+.navbar-default.affix{
+	top: 0;
+	width: 100%;
+	z-index: 1040;
+}
 .navbar-text{
 	margin: 8px;
 	font-weight: 300;
@@ -292,10 +297,15 @@ a.navbar-text:focus{
 ================ */
 
 .tray{
-	margin-top: -30px;
 	border-top: 0;
 	margin-bottom: 30px;
 	background-color: #FAFAFA;
+	border-width: 0 0 1px;
+	border-radius: 0;
+	position: fixed;
+	top: 50px;
+	width: 100%;
+	z-index: 1030;
 }
 .tray .table{
 	margin-bottom: 0;

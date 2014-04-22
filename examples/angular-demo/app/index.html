@@ -30,45 +30,47 @@
 	<body ng-controller="neonDemoController">
 		<!-- Header -->
 		<!-- This could be made into either a directive or a partial -->
-		<div role="navigation" class="navbar navbar-default navbar-static-top">
-			<div class="container">
+		<nav role="navigation" class="navbar">
+			<div class="navbar-default navbar-static-top affix">
+				<div class="container">
 
 
-				<button data-target=".navbar-collapse" data-toggle="collapse" class="navbar-toggle pull-left" type="button">
-					<span class="sr-only">Toggle navigation</span>
-					<span class="icon-bar"></span>
-					<span class="icon-bar"></span>
-					<span class="icon-bar"></span>
-				</button>
+					<button data-target=".navbar-collapse" data-toggle="collapse" class="navbar-toggle pull-left" type="button">
+						<span class="sr-only">Toggle navigation</span>
+						<span class="icon-bar"></span>
+						<span class="icon-bar"></span>
+						<span class="icon-bar"></span>
+					</button>
 
-				<a target="_blank" href="http://neonframework.org/" class="navbar-text pull-right">
-					Powered by <img class="brand-image" src="img/Neon_60x34.png"></img>
-				</a>
+					<a target="_blank" href="http://neonframework.org/" class="navbar-text pull-right">
+						Powered by <img class="brand-image" src="img/Neon_60x34.png"></img>
+					</a>
 
-				<div class="clearfix visible-xs"></div>
+					<div class="clearfix visible-xs"></div>
 
-				<div class="navbar-collapse collapse">
+					<div class="navbar-collapse collapse">
 
-					<!-- Database Config -->
-					<!--div ng-include="'partials/start.html'"></div-->
-					<database-config></database-config>
-					<ul class="nav navbar-nav">
-						<li>
-							<a data-toggle="collapse" data-parent="#trays" href="#filter-tray" class="collapsed">
-								<span class="glyphicon glyphicon-filter"></span>
-								Create Filters
-								<span class="label label-primary">3</span>
-							</a>
-						</li>
-						<li>
-							<a data-toggle="collapse" data-parent="#trays" href="#data-tray" class="collapsed">
-								<span class="glyphicon glyphicon-list"></span> See Data
-							</a>
-						</li>
-					</ul>
+						<!-- Database Config -->
+						<!--div ng-include="'partials/start.html'"></div-->
+						<database-config></database-config>
+						<ul class="nav navbar-nav">
+							<li>
+								<a data-toggle="collapse" data-parent="#trays" href="#filter-tray" class="collapsed">
+									<span class="glyphicon glyphicon-filter"></span>
+									Create Filters
+									<span class="label label-primary">3</span>
+								</a>
+							</li>
+							<li>
+								<a data-toggle="collapse" data-parent="#trays" href="#data-tray" class="collapsed">
+									<span class="glyphicon glyphicon-list"></span> See Data
+								</a>
+							</li>
+						</ul>
+					</div>
 				</div>
 			</div>
-		</div>
+		</nav>
 
 
 		<!-- THESE TRAYS SHOULD BE DIRECTIVES EVENTUALLY -->
