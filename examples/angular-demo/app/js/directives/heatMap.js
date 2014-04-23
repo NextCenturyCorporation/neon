@@ -20,10 +20,10 @@
  * a Neon connection should be plotted.
  * 
  * @example
- *    &lt;timeline-selector&gt;&lt;/map&gt;<br>
- *    &lt;div map&gt;&lt;/div&gt;
+ *    &lt;heat-map&gt;&lt;/heat-map&gt;<br>
+ *    &lt;div heat-map&gt;&lt;/div&gt;
  * 
- * @class neonDemo.directives.map
+ * @class neonDemo.directives.heatMap
  * @constructor
  */
 angular.module('heatMapDirective', []).directive('heatMap', ['ConnectionService',
