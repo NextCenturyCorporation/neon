@@ -465,10 +465,13 @@ coreMap.Map.prototype.setupLayers = function(){
     var options = {isBaseLayer: false, opacity: 0.3, projection: coreMap.Map.SOURCE_PROJECTION};
     this.heatmapLayer = new OpenLayers.Layer.Heatmap("Heatmap Layer", this.map, baseLayer, heatmapOptions, options);
 
-
-    this.map.addLayer(this.pointsLayer);
     this.map.addLayer(this.heatmapLayer);
-    this.currentLayer = this.pointsLayer;
+    this.map.addLayer(this.pointsLayer);
+
+    // Default the heatmap to be visible.
+    this.heatmapLayer.toggle();
+    this.pointsLayer.setVisibility(false);
+    this.currentLayer = this.heatmapLayer;
 
     // Create a cache reader and writer.  Use default reader
     // settings to read from cache first.

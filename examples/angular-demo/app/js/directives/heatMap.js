@@ -56,7 +56,7 @@ angular.module('heatMapDirective', []).directive('heatMap', ['ConnectionService'
 				$scope.longitudeField = '';
 				$scope.sizeByField = '';
 				$scope.colorByField = '';
-				$scope.showPoints = true;
+				$scope.showPoints = false;
 				$scope.cacheMap = false;
 				$scope.error = '';
 
