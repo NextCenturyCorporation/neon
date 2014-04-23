@@ -226,10 +226,40 @@ charts.TimelineSelectorChart = function (element, configuration)
 		    .attr("y", -6)
 		    .attr("height", this.config.height + 7);
 
+        gBrush.selectAll(".e")
+        	.append("rect")
+        	.attr("x", 0)
+        	.attr("y", -6)
+        	.attr("width", 1000)
+        	.attr("height", this.config.height + 7)
+        	.attr("class", "mask");
+
+        gBrush.selectAll(".w")
+        	.append("rect")
+        	.attr("x", -1000)
+        	.attr("y", -6)
+        	.attr("width", 1000)
+        	.attr("height", this.config.height + 7)
+        	.attr("class", "mask");
+
+        gBrush.selectAll(".e")
+        	.append("rect")
+        	.attr("y", -6)
+        	.attr("width", 1)
+        	.attr("height", this.config.height + 6)
+        	.attr("class", "resize-divider");
+
+        gBrush.selectAll(".w")
+        	.append("rect")
+        	.attr("x", -1)
+        	.attr("y", -6)
+        	.attr("width", 1)
+        	.attr("height", this.config.height + 6)
+        	.attr("class", "resize-divider");
+
         gBrush.selectAll(".resize")
         	.append("path")
         	.attr("d", resizePath);
-
 	};
 
 	// initialization

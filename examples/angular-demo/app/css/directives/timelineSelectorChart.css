@@ -97,3 +97,14 @@
   fill: #777777;
   font-size: 0.9em;
 }
+.timeline-selector-chart .brush .mask{
+  fill: #f1f1f1;
+  fill-opacity: 0.7;
+}
+.timeline-selector-chart .brush .extent{
+  fill-opacity: 0;
+}
+.timeline-selector-chart .brush .resize-divider{
+  fill: black;
+  fill-opacity: 0.2;
+}
