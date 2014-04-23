@@ -95,7 +95,7 @@ charts.TimelineSelectorChart = function (element, configuration)
     	if (typeof(handler) === 'function') {
     		this.brushHandler = handler;
     		if (this.brush) {
-    			this.brush.on("brushed", wrapBrushHandler(this.brush, handler));
+    			this.brush.on("brushend", wrapBrushHandler(this.brush, handler));
     		}
     	}
     }
@@ -106,7 +106,7 @@ charts.TimelineSelectorChart = function (element, configuration)
      */
     this.removeBrushHandler = function() {
     	this.brushHandler = undefined;
-    	this.brush.on("brushed");
+    	this.brush.on("brushend");
     }
 
     /**
@@ -118,6 +118,25 @@ charts.TimelineSelectorChart = function (element, configuration)
     	d3.select(this.element).select('.brush').call(this.brush);
     }
 
+    /**
+     * Updates the positions of the east and west timeline masks for unselected areas.
+     * @method updateMask
+     */
+	this.updateMask = function() {
+		var brush = $(this);
+		var xPos = brush.find('.extent').attr('x');
+		var extentWidth = brush.find('.extent').attr('width');
+
+		// If brush extent has been cleared, reset mask positions
+		if(extentWidth == "0" || extentWidth === undefined){
+			brush.find('.mask-west').attr('x', -2000);
+			brush.find('.mask-east').attr('x', brush[0].getBoundingClientRect().width);
+		}else{
+			// Otherwise, update mask positions to new extent location
+			brush.find('.mask-west').attr('x', parseFloat(xPos)-2000);
+			brush.find('.mask-east').attr('x', parseFloat(xPos)+parseFloat(extentWidth));
+		}
+	}
 
     /**
      * This will re-render the control with the given values.  This is a costly method and calls to it should be minimized
@@ -148,7 +167,7 @@ charts.TimelineSelectorChart = function (element, configuration)
 		    yAxis = d3.svg.axis().scale(y).orient("left").ticks(1);
 
         // Save the brush as an instance variable to allow interaction on it by client code.
-		this.brush = d3.svg.brush().x(x);
+		this.brush = d3.svg.brush().x(x).on("brush", this.updateMask);
 
 		if (this.brushHandler) {
 		    this.brush.on("brushend", wrapBrushHandler(this.brush, this.brushHandler));
@@ -175,7 +194,7 @@ charts.TimelineSelectorChart = function (element, configuration)
 	            + "M" + (4.5 * x) + "," + (y + 8)
 	            + "V" + (2 * y - 8);
 	      }
-        
+
         var xMin = d3.min(data.map(function(d) { return d.date; }));
         var xMax = d3.max(data.map(function(d) { return d.date; }));
         var totalRecords = d3.sum(data.map(function(d) { return d.value }));
@@ -219,28 +238,27 @@ charts.TimelineSelectorChart = function (element, configuration)
 		//	.call(yAxis);
 
 		var gBrush = context.append("g")
-			.attr("class", "brush")
-			.call(this.brush);
+			.attr("class", "brush");
+
+		gBrush.append("rect")
+        	.attr("x", this.config.width)
+        	.attr("y", -6)
+        	.attr("width", 2000)
+        	.attr("height", this.config.height + 7)
+        	.attr("class", "mask mask-east");
+
+        gBrush.append("rect")
+        	.attr("x", -2000)
+        	.attr("y", -6)
+        	.attr("width", 2000)
+        	.attr("height", this.config.height + 7)
+        	.attr("class", "mask mask-west");
+
+		gBrush.call(this.brush);
 
         gBrush.selectAll("rect")
 		    .attr("y", -6)
 		    .attr("height", this.config.height + 7);
-
-        gBrush.selectAll(".e")
-        	.append("rect")
-        	.attr("x", 0)
-        	.attr("y", -6)
-        	.attr("width", 1000)
-        	.attr("height", this.config.height + 7)
-        	.attr("class", "mask");
-
-        gBrush.selectAll(".w")
-        	.append("rect")
-        	.attr("x", -1000)
-        	.attr("y", -6)
-        	.attr("width", 1000)
-        	.attr("height", this.config.height + 7)
-        	.attr("class", "mask");
 
         gBrush.selectAll(".e")
         	.append("rect")
