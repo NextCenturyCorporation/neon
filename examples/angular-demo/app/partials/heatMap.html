@@ -1,45 +1,75 @@
-<div class="form-inline map-field-form">
-	<div class="form-group">
-		<label>Size by</label>
-		<select class="form-control" ng-model="sizeByField" ng-disabled="!(fields.length > 0)" 
-		    ng-options="field for field in fields">
-		</select>
+<div class="map-field-form">
+
+	<div class="chart-options pull-right">
+		<a class="btn btn-lg text-muted collapsed" data-toggle="collapse" data-target="#chart-options" data-animation=false>
+		  <span class="glyphicon glyphicon-cog"></span>
+		  <span class="caret"></span>
+		</a>
+		<div id="chart-options" class="popover bottom">
+
+			<div class="arrow"></div>
+			<div class="popover-content">
+				<div class="form-group">
+					<label>Cache</label>
+					<div class="btn-group">
+						<label class="btn btn-default" ng-class="{true: 'active', false: ''}[cacheMap]">
+							<input type="radio" ng-model="cacheMap" style="display:none" ng-value="true">
+							ON
+						</label>
+						<label class="btn btn-default" ng-class="{true: '', false: 'active'}[cacheMap]">
+							<input type="radio" ng-model="cacheMap" style="display:none" ng-value="false"> 
+							OFF
+						</label>
+					</div>
+					<div class="clearfix"></div>
+				</div>
+
+				<div class="form-group">
+					<label>Point Mode</label>
+					<div class="btn-group">
+						<label class="btn btn-default active" ng-class="{true: 'active', false: ''}[showPoints]" data-toggle="tooltip" data-placement="top" title="Points"  data-container="body" data-trigger="hover focus">
+							<input type="radio" ng-model="showPoints" style="display:none" ng-value="true">
+							<span class="glyphicon glyphicon-map-marker"></span>
+						</label>
+						<label class="btn btn-default" ng-class="{true: '', false: 'active'}[showPoints]"
+						data-toggle="tooltip" data-placement="top" title="Clusters" data-container="body" data-trigger="hover focus">
+							<input type="radio" ng-model="showPoints" style="display:none" ng-value="false"> 
+							<span class="glyphicon glyphicon-cloud"></span>
+						</label>
+					</div>
+					<div class="clearfix"></div>
+				</div>
+			</div>
+		</div>
 	</div>
-	<div class="form-group">
-		<label>Color by</label>
-		<select class="form-control" ng-model="colorByField" ng-disabled="!(fields.length > 0)" 
-		    ng-options="field for field in fields">
-		</select>
+
+	<div class="form-inline">
+		<div class="form-group">
+			<label>Size by</label>
+			<select class="form-control" ng-model="sizeByField" ng-disabled="!(fields.length > 0)" 
+			    ng-options="field for field in fields">
+			</select>
+		</div>
+		<div class="form-group">
+			<label>Color by</label>
+			<select class="form-control" ng-model="colorByField" ng-disabled="!(fields.length > 0)" 
+			    ng-options="field for field in fields">
+			</select>
+		</div>
+		<div class="form-group sr-only">
+			<label>Lat</label>
+			<select class="form-control" ng-model="latitudeField" ng-disabled="!(fields.length > 0)" 
+			    ng-options="field for field in fields">
+			</select>
+		</div>
+		<div class="form-group sr-only">
+			<label>Lon</label>
+			<select class="form-control" ng-model="longitudeField" ng-disabled="!(fields.length > 0)" 
+			    ng-options="field for field in fields">
+			</select>
+		</div>
 	</div>
-	<div class="form-group sr-only">
-		<label>Lat</label>
-		<select class="form-control" ng-model="latitudeField" ng-disabled="!(fields.length > 0)" 
-		    ng-options="field for field in fields">
-		</select>
-	</div>
-	<div class="form-group sr-only">
-		<label>Lon</label>
-		<select class="form-control" ng-model="longitudeField" ng-disabled="!(fields.length > 0)" 
-		    ng-options="field for field in fields">
-		</select>
-	</div>
-	<div class="form-group">
-        <label>Cache</label>
-        <input type="checkbox" class="form-control" ng-model="cacheMap">
-    </div>
-	<div class="btn-group pull-right" >
-      <label class="btn btn-default active" ng-class="{true: 'active', false: ''}[showPoints]" 
-          data-toggle="tooltip" data-placement="top" title="Points"  data-container="body" data-trigger="hover focus">
-        <input type="radio" ng-model="showPoints" style="display:none" ng-value="true">
-        <span class="glyphicon glyphicon-map-marker"></span>
-      </label>
-      <label class="btn btn-default" ng-class="{true: '', false: 'active'}[showPoints]"
-          data-toggle="tooltip" data-placement="top" title="Clusters" data-container="body" data-trigger="hover focus">
-        <input type="radio" ng-model="showPoints" style="display:none" ng-value="false"> 
-        <span class="glyphicon glyphicon-cloud"></span>
-      </label>
-    </div>
-	</div>
+    
 	<span class="alert alert-danger" ng-class="{true: 'show', false: 'hidden'}[error !== undefined && error.length > 0]" ng-bind="error">foo</span>
 </div>
 

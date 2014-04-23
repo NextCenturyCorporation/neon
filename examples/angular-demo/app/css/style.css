@@ -170,12 +170,21 @@ a:focus{
     padding: 6px 16px;
     text-transform: uppercase;
 }
+.btn-lg,
+.btn-group-lg > .btn {
+	padding: 10px 20px;
+	font-size: 18px;
+	line-height: 1.33;
+}
 .btn-group .btn,
 .input-group-btn .btn{
 	padding: 6px 12px;
 }
 .btn .glyphicon {
     font-size: 14px;
+}
+.btn-lg .glyphicon {
+    font-size: inherit;
 }
 .btn-default{
 	color: #555555;
@@ -222,6 +231,52 @@ a:focus{
 .open .dropdown-toggle.btn-danger {
     background-color: #AA1E13;
     border-color: #AA1E13;
+}
+
+.chart-options > a{
+	padding: 5px;
+	color: #39b54a;
+}
+.chart-options > a.collapsed{
+	color: #999999;
+}	
+.chart-options > a:hover{
+	color: #39b54a;
+}
+.chart-options > a:active,
+.chart-options > a.active{
+	box-shadow: none;
+}
+.chart-options .popover{
+	left: auto;
+	right: 19px;
+    top: 60px;
+    margin-top: 0;
+
+    background: none;
+    padding: 10px;
+    border: 0;
+    border-radius: 0;
+    box-shadow: none;
+}
+.chart-options .popover-content {
+	background-color: #FFFFFF;
+    padding: 15px 15px 0;
+    border: 1px solid rgba(0, 0, 0, 0.2);
+    border-radius: 6px;
+    box-shadow: 0 5px 10px rgba(0, 0, 0, 0.2);
+}
+.chart-options .popover > .arrow{
+	left: auto;
+	right: 30px;
+	top: 0;
+}
+.chart-options .btn-group{
+	display: block;
+}
+.chart-options .collapsing{
+   	position: absolute;
+   	display: block;
 }
 
 
@@ -373,6 +428,7 @@ a.navbar-text:focus{
 	border: 1px solid #D6D6D6;
 	margin-bottom: 30px;
 	padding: 30px;
+	position: relative;
 }
 .well-blank{
 	background: none;
@@ -448,6 +504,9 @@ label{
 .form-inline .form-group label{
 	margin-left: 10px;
 	margin-right: 5px;
+}
+.form-inline .form-group .btn-group label.btn{
+	margin-right: 0px;
 }
 .form-inline .form-group:first-child label{
 	margin-left: 0px;
