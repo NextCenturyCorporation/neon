@@ -25,18 +25,19 @@
 				</div>
 
 				<div class="form-group">
-					<label>Point Mode</label>
-					<div class="btn-group">
-						<label class="btn btn-default active" ng-class="{true: 'active', false: ''}[showPoints]" data-toggle="tooltip" data-placement="top" title="Points"  data-container="body" data-trigger="hover focus">
-							<input type="radio" ng-model="showPoints" style="display:none" ng-value="true">
-							<span class="glyphicon glyphicon-map-marker"></span>
-						</label>
-						<label class="btn btn-default" ng-class="{true: '', false: 'active'}[showPoints]"
-						data-toggle="tooltip" data-placement="top" title="Clusters" data-container="body" data-trigger="hover focus">
-							<input type="radio" ng-model="showPoints" style="display:none" ng-value="false"> 
-							<span class="glyphicon glyphicon-cloud"></span>
-						</label>
-					</div>
+					<label>Map Layer</label>
+					<div class="btn-group pull-right" >
+				      <label class="btn btn-default" ng-class="{true: 'active', false: ''}[showPoints]" 
+				          data-toggle="tooltip" data-placement="top" title="Points"  data-container="body" data-trigger="hover focus">
+				        <input type="radio" ng-model="showPoints" style="display:none" ng-value="true">
+				        <span class="glyphicon glyphicon-map-marker"></span>
+				      </label>
+				      <label class="btn btn-default active" ng-class="{true: '', false: 'active'}[showPoints]"
+				          data-toggle="tooltip" data-placement="top" title="Clusters" data-container="body" data-trigger="hover focus">
+				        <input type="radio" ng-model="showPoints" style="display:none" ng-value="false"> 
+				        <span class="glyphicon glyphicon-cloud"></span>
+				      </label>
+				    </div>
 					<div class="clearfix"></div>
 				</div>
 			</div>

@@ -26,5 +26,6 @@ var neonDemo = angular.module('neonDemo', [
 	'fieldSelectorDirective',
 	'timelineSelectorChartDirective',
 	'timelineSelectorDirective',
-	'heatMapDirective'
+	'heatMapDirective',
+	'queryResultsTableDirective'
 ]);

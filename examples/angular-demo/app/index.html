@@ -19,6 +19,7 @@
 		<link rel="stylesheet" type="text/css" href="css/directives/timelineSelector.css">
 		<link rel="stylesheet" type="text/css" href="css/directives/timelineSelectorChart.css">
 		<link rel="stylesheet" type="text/css" href="css/directives/heatMap.css">
+		<link rel="stylesheet" type="text/css" href="css/directives/queryResultsTable.css">
 
 		<!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
 		<!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
@@ -80,103 +81,7 @@
 			<div id="filter-tray" filter-builder class="tray filter-tray panel panel-default collapse"></div>
 
 			<!-- See Data tray -->
-			<div id="data-tray" class="tray panel panel-default collapse">
-				<div class="container panel-body">
-
-					<h4 class="pull-left">Showing <span class="count text-primary">4,421</span> of 344,214 rows</h4>
-
-					<div class="pull-right">
-						<input type="text" class="form-control" placeholder="Search">
-					</div>
-
-					<div class="clearfix"></div>
-
-					<div class="table-responsive">
-					<table class="table table-striped">
-						<thead>
-							<tr>
-								<th>Field</th>
-								<th>Field</th>
-								<th>Field</th>
-								<th>Field</th>
-							</tr>
-						</thead>
-						<tbody>
-							<tr>
-								<td>Value</td>
-								<td>Value</td>
-								<td>Value</td>
-								<td>Value</td>
-							</tr>
-							<tr>
-								<td>Value</td>
-								<td>Value</td>
-								<td>Value</td>
-								<td>Value</td>
-							</tr>
-							<tr>
-								<td>Value</td>
-								<td>Value</td>
-								<td>Value</td>
-								<td>Value</td>
-							</tr>
-							<tr>
-								<td>Value</td>
-								<td>Value</td>
-								<td>Value</td>
-								<td>Value</td>
-							</tr>
-							<tr>
-								<td>Value</td>
-								<td>Value</td>
-								<td>Value</td>
-								<td>Value</td>
-							</tr>
-							<tr>
-								<td>Value</td>
-								<td>Value</td>
-								<td>Value</td>
-								<td>Value</td>
-							</tr>
-							<tr>
-								<td>Value</td>
-								<td>Value</td>
-								<td>Value</td>
-								<td>Value</td>
-							</tr>
-							<tr>
-								<td>Value</td>
-								<td>Value</td>
-								<td>Value</td>
-								<td>Value</td>
-							</tr>
-							<tr>
-								<td>Value</td>
-								<td>Value</td>
-								<td>Value</td>
-								<td>Value</td>
-							</tr>
-							<tr>
-								<td>Value</td>
-								<td>Value</td>
-								<td>Value</td>
-								<td>Value</td>
-							</tr>
-							<tr>
-								<td>Value</td>
-								<td>Value</td>
-								<td>Value</td>
-								<td>Value</td>
-							</tr>
-
-						</tbody>
-					</table>
-					</div>
-
-				</div>
-			</div>
-
-		</div>
+			<div id="data-tray" query-results-table class="tray panel panel-default collapse"></div>
 
 		<!-- DASHBOARD CONTENT -->
 		<div class="container">
@@ -273,5 +178,6 @@
 		<script src="js/directives/barchartDirective.js"></script>
 		<script src="js/directives/fieldSelector.js"></script>
 		<script src="js/directives/heatMap.js"></script>
+		<script src="js/directives/queryResultsTable.js"></script>
 	</body>
 </html>
