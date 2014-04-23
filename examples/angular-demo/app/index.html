@@ -73,9 +73,8 @@
 			</div>
 		</nav>
 
-
-		<!-- THESE TRAYS SHOULD BE DIRECTIVES EVENTUALLY -->
-		<div id="trays">
+		<!-- Trays -->
+		<div class="panel-group" id="trays">
 
 			<!-- Filter Builder tray -->
 			<div id="filter-tray" filter-builder class="tray filter-tray panel panel-default collapse"></div>
@@ -83,57 +82,59 @@
 			<!-- See Data tray -->
 			<div id="data-tray" query-results-table class="tray panel panel-default collapse"></div>
 
+		</div>
+
 		<!-- DASHBOARD CONTENT -->
 		<div class="container">
 
-		<!-- Timeline -->
-		<div timeline-selector></div>
+			<!-- Timeline -->
+			<div timeline-selector></div>
 
-		<div class="row">
+			<div class="row">
 
-			<!-- Left column -->
-			<div class="col-md-4">
+				<!-- Left column -->
+				<div class="col-md-4">
 
-				<!-- Circular heat chart -->
-				<div circular-heat-form></div>
+					<!-- Circular heat chart -->
+					<div circular-heat-form></div>
 
-				<!-- Tag cloud -->
-				<div class="well">
-					<h4>Popular Hashtags</h4>
-					<!-- chart container here -->
-				</div>
-
-			</div>
-
-			<!-- Right column -->
-			<div class="col-md-8">
-
-				<!-- Sentiment chart -->
-				<div class="well">
-
-					<div class="form-inline">
-						<div class="form-group">
-							<fieldselector target-var="xAxisField" label-text="'X axis:'" default-mapping="'x-axis'"></fieldSelector>
-						</div>
-						<div class="form-group">
-							<fieldselector target-var="yAxisField" label-text="'Y axis:'" default-mapping="'y-axis'"></fieldSelector>
-						</div>
-						<div class="form-group">
-							<select ng-model="barType" class="form-control">
-								<option value="count">Count</option>
-								<option value="sum">Sum</option>
-							</select>
-						</div>
+					<!-- Tag cloud -->
+					<div class="well">
+						<h4>Popular Hashtags</h4>
+						<!-- chart container here -->
 					</div>
 
-					<barchart attr-x="xAxisField" attr-y="yAxisField" bar-type='barType'></barchart>
 				</div>
 
-				<!-- Map -->
-				<div heat-map class="well"></div>
+				<!-- Right column -->
+				<div class="col-md-8">
 
+					<!-- Sentiment chart -->
+					<div class="well">
+
+						<div class="form-inline">
+							<div class="form-group">
+								<fieldselector target-var="xAxisField" label-text="'X axis:'" default-mapping="'x-axis'"></fieldSelector>
+							</div>
+							<div class="form-group">
+								<fieldselector target-var="yAxisField" label-text="'Y axis:'" default-mapping="'y-axis'"></fieldSelector>
+							</div>
+							<div class="form-group">
+								<select ng-model="barType" class="form-control">
+									<option value="count">Count</option>
+									<option value="sum">Sum</option>
+								</select>
+							</div>
+						</div>
+
+						<barchart attr-x="xAxisField" attr-y="yAxisField" bar-type='barType'></barchart>
+					</div>
+
+					<!-- Map -->
+					<div heat-map class="well"></div>
+
+				</div>
 			</div>
-		</div>
 
 		</div>
 
