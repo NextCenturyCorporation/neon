@@ -107,6 +107,8 @@ barchart.directive('barchart', ['ConnectionService', function(connectionService)
 				queryType = neon.query.COUNT;
 			} else if($scope.barType === 'sum') {
 				queryType = neon.query.SUM;
+			} else if($scope.barType === 'avg') {
+				queryType = neon.query.AVG;
 			}
 
 			if(yAxis) {
