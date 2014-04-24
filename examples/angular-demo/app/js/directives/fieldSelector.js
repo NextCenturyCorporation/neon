@@ -22,7 +22,7 @@ fieldSelector.directive('fieldselector', ['ConnectionService', function(connecti
 		var messenger = new neon.eventing.Messenger();
 		$scope.database = '';
 		$scope.tableName = '';
-		$scope.fields = ["test1", "test2"];
+		$scope.fields = [];
 		$scope.tmp = "";
 
 		//add select

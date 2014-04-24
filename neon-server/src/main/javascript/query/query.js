@@ -68,7 +68,7 @@ neon.query.MIN = 'min';
 
 /**
  * The aggregation operation to get the average value
- * @property MAX
+ * @property AVG
  * @type {String}
  */
 neon.query.AVG = 'avg';

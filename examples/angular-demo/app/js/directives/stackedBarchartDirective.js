@@ -17,18 +17,18 @@
  */
 
 /**
- * This directive adds a barchart to the DOM and drives the visualization data from
+ * This directive adds a barchart with stacked bars to the DOM and drives the visualization data from
  * whatever database and table are currently selected in neon.  This directive accomplishes that
  * by using getting a neon connection from a connection service and listening for
  * neon system events (e.g., data tables changed).  On these events, it requeries the active
  * connection for data and updates applies the change to its scope.  The contained
  * barchart will update as a result.
- * @class neonDemo.directives.barchart
+ * @class neonDemo.directives.stackedbarchart
  * @constructor
  */
-var barchart = angular.module('barchartDirective', []);
+var barchart = angular.module('stackedBarchartDirective', []);
 
-barchart.directive('barchart', ['ConnectionService', function(connectionService) {
+barchart.directive('stackedbarchart', ['ConnectionService', function(connectionService) {
 	var COUNT_FIELD_NAME = 'Count';
 
 	var link = function($scope, el, attr) {
@@ -37,7 +37,7 @@ barchart.directive('barchart', ['ConnectionService', function(connectionService)
 		var messenger = new neon.eventing.Messenger();
 		$scope.database = '';
 		$scope.tableName = '';
-		$scope.barType = $scope.barType || 'count';
+		$scope.barType = /*$scope.barType ||*/'count'; //Changed because negative values break the display
 		$scope.fields = [];
 		$scope.xAxisSelect = $scope.fields[0] ? $scope.fields[0] : '';
 
@@ -90,15 +90,20 @@ barchart.directive('barchart', ['ConnectionService', function(connectionService)
 			$scope.tableName = message.table;
 		};
 
-		$scope.queryForData = function() {
+		var queryData = function(yRuleComparator, yRuleVal, next) {
 			var xAxis = connectionService.getFieldMapping($scope.database, $scope.tableName, "x-axis");
-			    xAxis = $scope.attrX || xAxis.mapping;
+				xAxis = $scope.attrX || xAxis.mapping;
 			var yAxis = connectionService.getFieldMapping($scope.database, $scope.tableName, "y-axis")
-			    yAxis = $scope.attrY || yAxis.mapping;
+				yAxis = $scope.attrY || yAxis.mapping;
+			if (!yAxis) {
+				yAxis = COUNT_FIELD_NAME;
+			}
+			var yMin = ($scope.barType ? COUNT_FIELD_NAME : yAxis) + "-min";
 
 			var query = new neon.query.Query()
 				.selectFrom($scope.databaseName, $scope.tableName)
 				.where(xAxis,'!=', null)
+				.where(yAxis, yRuleComparator, yRuleVal)
 				.selectionOnly()
 				.groupBy(xAxis);
 
@@ -112,14 +117,86 @@ barchart.directive('barchart', ['ConnectionService', function(connectionService)
 			}
 
 			if(yAxis) {
-				query.aggregate(queryType, yAxis, COUNT_FIELD_NAME);
+				query.aggregate(queryType, yAxis, ($scope.barType ? COUNT_FIELD_NAME : yAxis));
 			} else {
-				query.aggregate(queryType, '*', COUNT_FIELD_NAME);
+				query.aggregate(queryType, '*', ($scope.barType ? COUNT_FIELD_NAME : yAxis));
 			}
 
 			connectionService.getActiveConnection().executeQuery(query, function(queryResults) {
-				$scope.$apply(function(){
-					doDrawChart(queryResults);
+				next(queryResults);
+			});
+		}
+
+		$scope.queryForData = function() {
+			var xAxis = connectionService.getFieldMapping($scope.database, $scope.tableName, "x-axis");
+				xAxis = $scope.attrX || xAxis.mapping;
+			var yAxis = connectionService.getFieldMapping($scope.database, $scope.tableName, "y-axis")
+				yAxis = $scope.attrY || yAxis.mapping;
+			if (!yAxis) {
+				yAxis = COUNT_FIELD_NAME;
+			}
+
+			var yField = ($scope.barType ? COUNT_FIELD_NAME : yAxis);
+			var yMin = yField + "-min";
+
+
+			var results = {data:[]};
+
+			queryData('>', 0, function(posResults) {
+				for(var i = 0; i < posResults.data.length; i++) {
+					posResults.data[i][yMin] = 0;
+				}
+				queryData('<', 0, function(negResults) {
+					//sort both by x
+					var pos = posResults.data.sort(function(a, b) {
+						return a[xAxis].localeCompare(b[xAxis]);
+					});
+					var neg = negResults.data.sort(function(a, b) {
+						return a[xAxis].localeCompare(b[xAxis]);
+					});
+
+					var i = 0;
+					var j = 0;
+					var total;
+					while(i < pos.length || j < neg.length) {
+						if(i < pos.length && j < neg.length) {
+							if(pos[i][xAxis] === neg[j][xAxis]) {
+								//total
+								total = pos[i][yField] + neg[j][yField];
+								//1 -> 0-1
+								pos[i][yMin] = 0;
+								//2 -> 1-2
+								//neg[j][yMin] = pos[i][yField]; //FIXME there is an error causing the second bar height to be wrong
+								neg[j][yField] = total;
+
+								results.data.push(pos[i]);
+								i++;
+								results.data.push(neg[j]);
+								j++;
+							} else {
+								// push lesser x
+								if(pos[i][xAxis].localeCompare(neg[j][xAxis]) < 0) {
+									results.data.push(pos[i]);
+									i++;
+								} else {
+									results.data.push(neg[j]);
+									j++;
+								}
+							}
+						} else {
+							if(i < pos.length) {
+								results.data.push(pos[i]);
+								i++;
+							} else {
+								results.data.push(neg[j]);
+								j++;
+							}
+						}
+					}
+
+					$scope.$apply(function() {
+						doDrawChart(results);
+					});
 				});
 			});
 		};
@@ -132,17 +209,22 @@ barchart.directive('barchart', ['ConnectionService', function(connectionService)
 			charts.BarChart.destroy(el[0], '.barchart');
 
 			var xAxis = connectionService.getFieldMapping($scope.database, $scope.tableName, "x-axis");
-			    xAxis = xAxis.mapping || $scope.attrX;
+				xAxis = xAxis.mapping || $scope.attrX;
 			var yAxis = connectionService.getFieldMapping($scope.database, $scope.tableName, "y-axis")
-			    yAxis = yAxis.mapping || $scope.attrY;
-
+				yAxis = yAxis.mapping || $scope.attrY;
 			if (!yAxis) {
 				yAxis = COUNT_FIELD_NAME;
-			} else {
-				yAxis = COUNT_FIELD_NAME;
 			}
+			var yMin = ($scope.barType ? COUNT_FIELD_NAME : yAxis) + "-min";
 
-			var opts = { "data": data.data, "x": xAxis, "y": yAxis, responsive: false};
+			var opts = {
+				data: data.data,
+				x: xAxis,
+				y: ($scope.barType ? COUNT_FIELD_NAME : yAxis),
+				yMin: yMin,
+				stacked: true,
+				responsive: false
+			};
 			var chart = new charts.BarChart(el[0], '.barchart', opts).draw();
 		};
 
