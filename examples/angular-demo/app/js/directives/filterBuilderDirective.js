@@ -203,6 +203,12 @@ angular.module('filterBuilderDirective', []).directive('filterBuilder', ['Connec
             	}
             });
 
+            $scope.$watch('filterTable', function(newVal, oldVal) {
+            	if (newVal != oldVal) {
+            		$(el).find('.tray-mirror.filter-tray .inner').height($('#filter-tray > .container').outerHeight(true));
+            	}
+            }, true);
+
 			// Wait for neon to be ready, the create our messenger and intialize the view and data.
 			neon.ready(function () {
 				$scope.initialize();
