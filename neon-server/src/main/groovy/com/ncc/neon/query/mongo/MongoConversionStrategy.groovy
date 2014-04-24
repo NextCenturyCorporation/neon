@@ -70,7 +70,9 @@ class MongoConversionStrategy {
         return whereClauses
     }
 
-    private static def createWhereClausesForFilters(DataSet dataSet, def filterCache) {
+    // TODO: These methods are public to support the MongoMapService demo
+
+    static def createWhereClausesForFilters(DataSet dataSet, def filterCache) {
         def whereClauses = []
 
         List<Filter> filters = filterCache.getFiltersForDataset(dataSet)
@@ -94,7 +96,7 @@ class MongoConversionStrategy {
         return params
     }
 
-    private static DBObject buildMongoWhereClause(List whereClauses) {
+    static DBObject buildMongoWhereClause(List whereClauses) {
         if (!whereClauses) {
             return new BasicDBObject()
         }

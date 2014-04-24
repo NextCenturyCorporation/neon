@@ -15,9 +15,11 @@
  */
 
 package com.ncc.neon.services.demo
+
 import com.mongodb.DB
 import com.mongodb.DBObject
 import groovy.transform.CompileStatic
+import org.jongo.Aggregate
 import org.jongo.Jongo
 import org.jongo.MongoCollection
 import org.jongo.ResultHandler
@@ -28,11 +30,15 @@ import org.jongo.ResultHandler
 @CompileStatic
 class MongoTagCloudBuilder {
 
+    // TODO: Extract methods - this class is a mess
+
     private MongoTagCloudBuilder() {}
+
+    // TODO: Convert this to use the mongo java driver and then factor in other neon filters/selection
 
     @SuppressWarnings("MethodSize") // ignore since Jongo requires us to break the query into some longer parts. that makes the method longer, but it's still straight forward@SuppressWarnings("MethodSize") // ignore since Jongo requires us to break the query into some longer parts (and this is a demo class). that makes the method longer, but it's still straight forward
     @SuppressWarnings("ExplicitCallToAndMethod")  // codenarc falsely reports this when using the "and" method in Jongo
-    static Map<String,Integer> getTagCounts(DB database, String collectionName, String arrayField) {
+    static Map<String, Integer> getTagCounts(DB database, String collectionName, String arrayField, int limit) {
         Jongo jongo = new Jongo(database)
         MongoCollection collection = jongo.getCollection(collectionName)
 
@@ -50,12 +56,14 @@ class MongoTagCloudBuilder {
         // highest count first
         String sort = '{"$sort":{"count":-1}}'
 
-        // TODO: Add support for limit
-
         // the query is already sorted, so use a linkedhashmap instead of a sorted map since the insertion order will
         // be sorted
         Map<String, Integer> tagCounts = [:]
-        collection.aggregate(arrayProjection).and(unwind).and(group).and(sort).map(new ResultHandler<Void>() {
+        Aggregate aggregate = collection.aggregate(arrayProjection).and(unwind).and(group).and(sort)
+        if (limit > 0) {
+            aggregate = aggregate.and('{"$limit":' + limit + '}')
+        }
+        aggregate.map(new ResultHandler<Void>() {
             @Override
             public Void map(DBObject result) {
                 tagCounts[(String) result.get("_id")] = ((Number) result.get("count")).intValue()
