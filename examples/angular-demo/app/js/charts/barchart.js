@@ -79,42 +79,46 @@
  *
  */
 charts.BarChart = function (rootElement, selector, opts) {
-    opts = opts || {};
-    this.chartSelector_ = selector;
-    this.element = d3.select(rootElement).select(selector);
+	opts = opts || {};
+	this.chartSelector_ = selector;
+	this.element = d3.select(rootElement).select(selector);
 
-    if (!opts.responsive) {
-        this.userSetWidth_ = opts.width;
-        this.userSetHeight_ = opts.height;
-    }
+	this.isStacked = opts.stacked;
 
-    this.xAttribute_ = opts.x;
-    this.xLabel_ = opts.xLabel || this.determineXLabel_();
-    this.yAttribute_ = opts.y;
-    this.yLabel_ = opts.yLabel || this.determineYLabel_();
-    this.margin = $.extend({}, charts.BarChart.DEFAULT_MARGIN_, opts.margin || {});
+	if (!opts.responsive) {
+		this.userSetWidth_ = opts.width;
+		this.userSetHeight_ = opts.height;
+	}
 
-    this.viewboxXMin = 0;
-    this.viewboxYMin = 0;
-    this.viewboxXMax = 618;
-    this.viewboxYMax = 270;
+	this.xAttribute_ = opts.x;
+	this.xLabel_ = opts.xLabel || this.determineXLabel_();
+	this.yAttribute_ = opts.y;
+	this.yMinAttribute_ = opts.yMin;
+	this.yLabel_ = opts.yLabel || this.determineYLabel_();
+	this.margin = $.extend({}, charts.BarChart.DEFAULT_MARGIN_, opts.margin || {});
 
-    if (opts.init) {
-        opts.init.call(this, opts);
-    }
+	this.viewboxXMin = 0;
+	this.viewboxYMin = 0;
+	this.viewboxXMax = 618;
+	this.viewboxYMax = 270;
 
-    // tick formatting/values may be undefined in which case d3's default will be used
-    this.tickFormat_ = opts.tickFormat;
-    this.tickValues_ = this.computeTickValues_(opts.tickValues);
-    this.categories = this.createCategories_(opts.categories ? opts.categories : this.createCategoriesFromUniqueValues_, opts.data);
-    this.data_ = this.aggregateData_(opts.data);
+	if (opts.init) {
+		opts.init.call(this, opts);
+	}
 
-    this.preparePropertiesForDrawing_();
-    this.style_ = $.extend({}, charts.BarChart.DEFAULT_STYLE_, opts.style);
+	// tick formatting/values may be undefined in which case d3's default will be used
+	this.tickFormat_ = opts.tickFormat;
+	this.tickValues_ = this.computeTickValues_(opts.tickValues);
+	this.categories = this.createCategories_(opts.categories ? opts.categories : this.createCategoriesFromUniqueValues_, opts.data);
 
-    if (opts.responsive) {
-        this.redrawOnResize_();
-    }
+	this.data_ = this.aggregateData_(opts.data);
+
+	this.preparePropertiesForDrawing_();
+	this.style_ = $.extend({}, charts.BarChart.DEFAULT_STYLE_, opts.style);
+
+	if (opts.responsive) {
+		this.redrawOnResize_();
+	}
 };
 
 charts.BarChart.DEFAULT_HEIGHT_ = 300;
@@ -166,126 +170,126 @@ charts.BarChart.STRING_KEY_ = 'string';
  * @protected
  */
 charts.BarChart.prototype.categoryForItem = function (item) {
-    if (typeof this.xAttribute_ === 'function') {
-        return this.xAttribute_.call(this, item);
-    }
-    return item[this.xAttribute_];
+	if (typeof this.xAttribute_ === 'function') {
+		return this.xAttribute_.call(this, item);
+	}
+	return item[this.xAttribute_];
 };
 
 charts.BarChart.prototype.determineXLabel_ = function () {
-    if (typeof this.xAttribute_ === 'string') {
-        return this.xAttribute_;
-    }
-    return 'x';
+	if (typeof this.xAttribute_ === 'string') {
+		return this.xAttribute_;
+	}
+	return 'x';
 };
 
 charts.BarChart.prototype.determineYLabel_ = function () {
-    return this.yAttribute_ ? this.yAttribute_ : "Count";
+	return this.yAttribute_ ? this.yAttribute_ : "Count";
 };
 
 charts.BarChart.prototype.createCategories_ = function (categories, data) {
-    if (typeof categories === 'function') {
-        return categories.call(this, data);
-    }
-    return categories;
+	if (typeof categories === 'function') {
+		return categories.call(this, data);
+	}
+	return categories;
 };
 
 charts.BarChart.prototype.computeTickValues_ = function (tickValues) {
-    if (typeof tickValues === 'function') {
-        return tickValues.call(this);
-    }
-    return tickValues;
+	if (typeof tickValues === 'function') {
+		return tickValues.call(this);
+	}
+	return tickValues;
 };
 
 charts.BarChart.prototype.determineVeiwboxString = function() {
-    return this.viewboxXMin + " " + this.viewboxYMin + " " + this.viewboxXMax + " " + this.viewboxYMax;
+	return this.viewboxXMin + " " + this.viewboxYMin + " " + this.viewboxXMax + " " + this.viewboxYMax;
 };
 
 charts.BarChart.prototype.createCategoriesFromUniqueValues_ = function (data) {
-    var me = this;
-    return _.chain(data)
-        .map(function (item) {
-            return me.categoryForItem(item);
-        })
-        .unique()
-        .filter(function (item) {
-            return !_.isNull(item) && !_.isUndefined(item);
-        })
-        .sort(charts.BarChart.sortComparator_)
-        .value();
+	var me = this;
+	return _.chain(data)
+		.map(function (item) {
+			return me.categoryForItem(item);
+		})
+		.unique()
+		.filter(function (item) {
+			return !_.isNull(item) && !_.isUndefined(item);
+		})
+		.sort(charts.BarChart.sortComparator_)
+		.value();
 };
 
 charts.BarChart.sortComparator_ = function (a, b) {
-    if (a instanceof Date && b instanceof Date) {
-        return charts.BarChart.compareValues_(a.getTime(), b.getTime());
-    }
-    return charts.BarChart.compareValues_(a, b);
+	if (a instanceof Date && b instanceof Date) {
+		return charts.BarChart.compareValues_(a.getTime(), b.getTime());
+	}
+	return charts.BarChart.compareValues_(a, b);
 };
 
 charts.BarChart.compareValues_ = function (a, b) {
-    if (a < b) {
-        return -1;
-    }
-    if (a > b) {
-        return 1;
-    }
-    return 0;
+	if (a < b) {
+		return -1;
+	}
+	if (a > b) {
+		return 1;
+	}
+	return 0;
 };
 
 charts.BarChart.prototype.createXScale_ = function () {
-    return d3.scale.ordinal()
-        .domain(this.categories)
-        .rangeRoundBands([0, this.width - this.hMargin_]);
+	return d3.scale.ordinal()
+		.domain(this.categories)
+		.rangeRoundBands([0, this.width - this.hMargin_]);
 };
 
 charts.BarChart.prototype.createYScale_ = function () {
-    var maxCount = d3.max(this.data_, function (d) {
-        return d.values;
-    });
+	var maxCount = d3.max(this.data_, function (d) {
+		return d.values;
+	});
 
-    // may be NaN if no data
-    if (!maxCount) {
-        maxCount = 0;
-    }
-    return d3.scale.linear()
-        .domain([0, maxCount])
-        .rangeRound([this.height - this.vMargin_, 0]);
+	// may be NaN if no data
+	if (!maxCount) {
+		maxCount = 0;
+	}
+	return d3.scale.linear()
+		.domain([0, maxCount])
+		.rangeRound([this.height - this.vMargin_, 0]);
 };
 
 charts.BarChart.prototype.computePlotWidth_ = function () {
-    if (this.categories.length > 0) {
-        return this.x.rangeBand() * this.categories.length;
-    }
-    return this.width;
+	if (this.categories.length > 0) {
+		return this.x.rangeBand() * this.categories.length;
+	}
+	return this.width;
 };
 
 charts.BarChart.prototype.createXAxis_ = function () {
-    var xAxis = d3.svg.axis()
-        .scale(this.x)
-        .orient('bottom');
+	var xAxis = d3.svg.axis()
+		.scale(this.x)
+		.orient('bottom');
 
-    if (this.tickFormat_) {
-        xAxis = xAxis.tickFormat(this.tickFormat_);
-    }
-    if (this.tickValues_) {
-        xAxis = xAxis.tickValues(this.tickValues_);
-    }
+	if (this.tickFormat_) {
+		xAxis = xAxis.tickFormat(this.tickFormat_);
+	}
+	if (this.tickValues_) {
+		xAxis = xAxis.tickValues(this.tickValues_);
+	}
 
-    return xAxis;
+	return xAxis;
 };
 
 charts.BarChart.prototype.createYAxis_ = function () {
-    return d3.svg.axis()
-        .scale(this.y)
-        .orient('left')
-        .tickFormat(charts.BarChart.createYAxisTickFormat_())
-        .tickValues(this.y.domain());
+	return d3.svg.axis()
+		.scale(this.y)
+		.orient('left')
+		.tickFormat(charts.BarChart.createYAxisTickFormat_())
+		.tickValues(this.y.domain());
 };
 
 charts.BarChart.createYAxisTickFormat_ = function () {
-    return function (val) {
-        return val === 0 ? val : d3.format('.2s')(val);
-    };
+	return function (val) {
+		return val === 0 ? val : d3.format('.2s')(val);
+	};
 };
 
 /**
@@ -294,34 +298,34 @@ charts.BarChart.createYAxisTickFormat_ = function () {
  * @return {charts.BarChart} This bar chart
  */
 charts.BarChart.prototype.draw = function () {
-    this.preparePropertiesForDrawing_();
-    $(this.element[0]).empty();
-    if (this.plotWidth === 0) {
-        this.displayError();
-    }
-    else {
-        var chart = this.drawChartSVG_();
-        this.bindData_(chart);
-        this.drawXAxis_(chart);
-        this.drawYAxis_(chart);
-    }
+	this.preparePropertiesForDrawing_();
+	$(this.element[0]).empty();
+	if (this.plotWidth === 0) {
+		this.displayError();
+	}
+	else {
+		var chart = this.drawChartSVG_();
+		this.bindData_(chart);
+		this.drawXAxis_(chart);
+		this.drawYAxis_(chart);
+	}
 
-    return this;
+	return this;
 };
 
 charts.BarChart.prototype.preparePropertiesForDrawing_ = function () {
 
-    this.width = this.determineWidth_(this.element);
-    this.height = this.determineHeight_(this.element);
-    this.setMargins_();
-    this.x = this.createXScale_();
-    // set the width to be as close to the user specified size (but not larger) so the bars divide evenly into
-    // the plot area
-    this.plotWidth = this.computePlotWidth_();
-    this.x.rangeRoundBands([0, this.plotWidth]);
-    this.y = this.createYScale_();
-    this.xAxis_ = this.createXAxis_();
-    this.yAxis_ = this.createYAxis_();
+	this.width = this.determineWidth_(this.element);
+	this.height = this.determineHeight_(this.element);
+	this.setMargins_();
+	this.x = this.createXScale_();
+	// set the width to be as close to the user specified size (but not larger) so the bars divide evenly into
+	// the plot area
+	this.plotWidth = this.computePlotWidth_();
+	this.x.rangeRoundBands([0, this.plotWidth]);
+	this.y = this.createYScale_();
+	this.xAxis_ = this.createXAxis_();
+	this.yAxis_ = this.createYAxis_();
 };
 
 /**
@@ -329,74 +333,79 @@ charts.BarChart.prototype.preparePropertiesForDrawing_ = function () {
  * @method displayError
  */
 charts.BarChart.prototype.displayError = function () {
-    $(this.element[0]).append("<div class='error-text'>" +
-        "You've attempted to draw a chart with too many categories.<br/>" +
-        "Reduce the number of categories or increase the width of the chart to " +
-        this.categories.length + " pixels.</div>");
+	$(this.element[0]).append("<div class='error-text'>" +
+		"You've attempted to draw a chart with too many categories.<br/>" +
+		"Reduce the number of categories or increase the width of the chart to " +
+		this.categories.length + " pixels.</div>");
 };
 
 charts.BarChart.prototype.drawChartSVG_ = function () {
-    var chart = this.element
-        .append('svg')
-        .attr("viewBox", this.determineVeiwboxString())
-        .attr('id', 'plot')
-        .append('g')
-        .attr('transform', 'translate(' + this.margin.left + ',' + this.margin.top + ')');
-    return chart;
+	var chart = this.element
+		.append('svg')
+		.attr("viewBox", this.determineVeiwboxString())
+		.attr('id', 'plot')
+		.append('g')
+		.attr('transform', 'translate(' + this.margin.left + ',' + this.margin.top + ')');
+	return chart;
 };
 
 charts.BarChart.prototype.bindData_ = function (chart) {
-    var me = this;
-    var bars = chart.selectAll(charts.BarChart.SVG_ELEMENT_)
-        .data(this.data_)
-        .enter().append(charts.BarChart.SVG_ELEMENT_)
-        .attr('class', charts.BarChart.BAR_CLASS_ + ' ' + charts.BarChart.ACTIVE_BAR_CLASS_)
-        .attr('x', function (d) {
-            return me.x(d.key);
-        })
-        .attr('y', function (d) {
-            return me.y(d.values);
-        })
-        .attr('width', this.x.rangeBand())
-        .attr('height', function (d) {
-            return me.height - me.vMargin_ - me.y(d.values);
-        })
-        // using the same color for the border of the bars as the svg background gives separation for adjacent bars
-        .attr('stroke', '#FFFFFF')
-        .on('mouseover', function (d) {
-            me.toggleHoverStyle_(d3.select(this), true);
-            me.showTooltip_(d, d3.mouse(this));
-        })
-        .on('mouseout', function () {
-            me.toggleHoverStyle_(d3.select(this), false);
-            me.hideTooltip_();
-        });
-    // initially all bars active, so just apply the active style
-    this.applyStyle_(bars, charts.BarChart.ACTIVE_STYLE_KEY_);
+	var me = this;
+
+	var bars = chart.selectAll(charts.BarChart.SVG_ELEMENT_)
+		.data(this.data_)
+		.enter().append(charts.BarChart.SVG_ELEMENT_)
+		.attr('class', charts.BarChart.BAR_CLASS_ + ' ' + charts.BarChart.ACTIVE_BAR_CLASS_)
+		.attr('x', function (d) {
+			return me.x(d.key);
+		})
+		.attr('y', function (d) {
+			return me.y(d.values);
+		})
+		.attr('width', this.x.rangeBand())
+		.attr('height', function (d) {
+			if(me.yMinAttribute_ && d[me.yMinAttribute_]) {
+				return me.y(d[me.yMinAttribute_]);
+			} else {
+				return me.height - me.vMargin_ - me.y(d.values);
+			}
+		})
+		// using the same color for the border of the bars as the svg background gives separation for adjacent bars
+		.attr('stroke', '#FFFFFF')
+		.on('mouseover', function (d) {
+			me.toggleHoverStyle_(d3.select(this), true);
+			me.showTooltip_(d, d3.mouse(this));
+		})
+		.on('mouseout', function () {
+			me.toggleHoverStyle_(d3.select(this), false);
+			me.hideTooltip_();
+		});
+	// initially all bars active, so just apply the active style
+	this.applyStyle_(bars, charts.BarChart.ACTIVE_STYLE_KEY_);
 };
 
 charts.BarChart.prototype.toggleHoverStyle_ = function (selection, hover) {
-    selection.classed(charts.BarChart.HOVER_BAR_CLASS_, hover);
+	selection.classed(charts.BarChart.HOVER_BAR_CLASS_, hover);
 
-    // when hovering, apply the hover style, otherwise revert the style based on the current class
-    var style;
-    if (hover) {
-        style = charts.BarChart.HOVER_STYLE_KEY_;
-    }
-    else {
-        style = selection.classed(charts.BarChart.ACTIVE_BAR_CLASS_) ?
-            charts.BarChart.ACTIVE_STYLE_KEY_ : charts.BarChart.INACTIVE_STYLE_KEY_;
-    }
+	// when hovering, apply the hover style, otherwise revert the style based on the current class
+	var style;
+	if (hover) {
+		style = charts.BarChart.HOVER_STYLE_KEY_;
+	}
+	else {
+		style = selection.classed(charts.BarChart.ACTIVE_BAR_CLASS_) ?
+			charts.BarChart.ACTIVE_STYLE_KEY_ : charts.BarChart.INACTIVE_STYLE_KEY_;
+	}
 
-    this.applyStyle_(selection, style);
+	this.applyStyle_(selection, style);
 };
 
 charts.BarChart.prototype.applyStyle_ = function (selection, styleKey) {
-    var attrMap = this.style_[styleKey];
-    Object.keys(attrMap).forEach(function (key) {
-        var attrVal = attrMap[key];
-        selection.attr(key, attrVal);
-    });
+	var attrMap = this.style_[styleKey];
+	Object.keys(attrMap).forEach(function (key) {
+		var attrVal = attrMap[key];
+		selection.attr(key, attrVal);
+	});
 };
 
 /**
@@ -406,78 +415,78 @@ charts.BarChart.prototype.applyStyle_ = function (selection, styleKey) {
  * @method setInactive
  */
 charts.BarChart.prototype.setInactive = function (predicate) {
-    var allBars = d3.selectAll('.' + charts.BarChart.BAR_CLASS_);
+	var allBars = d3.selectAll('.' + charts.BarChart.BAR_CLASS_);
 
-    // remove existing active/inactive classes then toggle on the correct one. this allows us to keep any other
-    // classes (rather than just replacing the class with inactive/active)
-    allBars.classed(charts.BarChart.INACTIVE_BAR_CLASS_, false);
-    allBars.classed(charts.BarChart.ACTIVE_BAR_CLASS_, false);
+	// remove existing active/inactive classes then toggle on the correct one. this allows us to keep any other
+	// classes (rather than just replacing the class with inactive/active)
+	allBars.classed(charts.BarChart.INACTIVE_BAR_CLASS_, false);
+	allBars.classed(charts.BarChart.ACTIVE_BAR_CLASS_, false);
 
-    // set any matching the predicate to inactive
-    allBars.classed(charts.BarChart.INACTIVE_BAR_CLASS_, predicate);
+	// set any matching the predicate to inactive
+	allBars.classed(charts.BarChart.INACTIVE_BAR_CLASS_, predicate);
 
-    // those that are not inactive are set to active
-    d3.selectAll('.' + charts.BarChart.BAR_CLASS_ + ':not(.' + charts.BarChart.INACTIVE_BAR_CLASS_ + ')')
-        .classed(charts.BarChart.ACTIVE_BAR_CLASS_, true);
+	// those that are not inactive are set to active
+	d3.selectAll('.' + charts.BarChart.BAR_CLASS_ + ':not(.' + charts.BarChart.INACTIVE_BAR_CLASS_ + ')')
+		.classed(charts.BarChart.ACTIVE_BAR_CLASS_, true);
 
-    // update the rendered bars
-    this.applyStyle_(d3.selectAll('.' + charts.BarChart.ACTIVE_BAR_CLASS_), charts.BarChart.ACTIVE_STYLE_KEY_);
-    this.applyStyle_(d3.selectAll('.' + charts.BarChart.INACTIVE_BAR_CLASS_), charts.BarChart.INACTIVE_STYLE_KEY_);
+	// update the rendered bars
+	this.applyStyle_(d3.selectAll('.' + charts.BarChart.ACTIVE_BAR_CLASS_), charts.BarChart.ACTIVE_STYLE_KEY_);
+	this.applyStyle_(d3.selectAll('.' + charts.BarChart.INACTIVE_BAR_CLASS_), charts.BarChart.INACTIVE_STYLE_KEY_);
 };
 
 charts.BarChart.prototype.showTooltip_ = function (item, mouseLocation) {
-    var xValue = this.tickFormat_ ? this.tickFormat_(item.key) : item.key;
+	var xValue = this.tickFormat_ ? this.tickFormat_(item.key) : item.key;
 
-    var tooltip = this.element.append("div")
-    .property('id', charts.BarChart.TOOLTIP_ID_)
-    .classed({'charttooltip':true});
+	var tooltip = this.element.append("div")
+	.property('id', charts.BarChart.TOOLTIP_ID_)
+	.classed({'charttooltip':true});
 
-    tooltip.append("div").html('<strong>' + this.xLabel_ + ':</strong> ' + xValue)
-    .append("div").html('<strong>' + this.yLabel_ + ':</strong> ' + item.values);
-    $(tooltip[0]).hide();
-    this.positionTooltip_(tooltip, mouseLocation);
-    $(tooltip[0]).fadeIn(500);
+	tooltip.append("div").html('<strong>' + this.xLabel_ + ':</strong> ' + xValue)
+	.append("div").html('<strong>' + this.yLabel_ + ':</strong> ' + item.values);
+	$(tooltip[0]).hide();
+	this.positionTooltip_(tooltip, mouseLocation);
+	$(tooltip[0]).fadeIn(500);
 };
 
 charts.BarChart.prototype.positionTooltip_ = function (tooltip, mouseLocation) {
-    // the extra 35px in the next two variables is needed to account for the padding of .charttooltip
-    var chartHeight = $(this.element[0]).height() - 35;
-    var spaceNeeded = $(".charttooltip").height() + 35;
+	// the extra 35px in the next two variables is needed to account for the padding of .charttooltip
+	var chartHeight = $(this.element[0]).height() - 35;
+	var spaceNeeded = $(".charttooltip").height() + 35;
 
-    var top = mouseLocation[1] + 35;
+	var top = mouseLocation[1] + 35;
 
-    tooltip.style('top', top + 'px')
-    .style('left', mouseLocation[0] + 'px');
+	tooltip.style('top', top + 'px')
+	.style('left', mouseLocation[0] + 'px');
 };
 
 charts.BarChart.prototype.hideTooltip_ = function () {
-    $('#' + charts.BarChart.TOOLTIP_ID_).remove();
+	$('#' + charts.BarChart.TOOLTIP_ID_).remove();
 };
 
 charts.BarChart.prototype.drawXAxis_ = function (chart) {
-    var axis = chart.append('g')
-        .attr('class', 'x axis')
-        .attr('transform', 'translate(0,' + (this.height - this.vMargin_) + ')')
-        .call(this.xAxis_);
+	var axis = chart.append('g')
+		.attr('class', 'x axis')
+		.attr('transform', 'translate(0,' + (this.height - this.vMargin_) + ')')
+		.call(this.xAxis_);
 
-    axis.selectAll("text")
-    .style("text-anchor", "end")
-    .attr("dx", "-.8em")
-    .attr("dy", ".15em")
-    .attr("transform", function(d) {
-        return "rotate(-60)";
-    });
+	axis.selectAll("text")
+	.style("text-anchor", "end")
+	.attr("dx", "-.8em")
+	.attr("dy", ".15em")
+	.attr("transform", function(d) {
+		return "rotate(-60)";
+	});
 
-    this.viewboxYMax = this.viewboxYMax + $(this.element[0]).find('g.x')[0].getBoundingClientRect().height
-    $(this.element[0]).children('svg')[0].setAttribute("viewBox", this.determineVeiwboxString());
+	this.viewboxYMax = this.viewboxYMax + $(this.element[0]).find('g.x')[0].getBoundingClientRect().height
+	$(this.element[0]).children('svg')[0].setAttribute("viewBox", this.determineVeiwboxString());
 
-    return axis;
+	return axis;
 };
 
 charts.BarChart.prototype.drawYAxis_ = function (chart) {
-    chart.append('g')
-        .attr('class', 'y axis')
-        .call(this.yAxis_);
+	chart.append('g')
+		.attr('class', 'y axis')
+		.call(this.yAxis_);
 };
 
 /**
@@ -489,8 +498,8 @@ charts.BarChart.prototype.drawYAxis_ = function (chart) {
  * and the number of items in that category period respectively
  */
 charts.BarChart.prototype.aggregateData_ = function (data) {
-    var aggregated = this.rollupDataByCategory_(data);
-    return this.removeDataWithNoMatchingCategory_(aggregated);
+	var aggregated = this.rollupDataByCategory_(data);
+	return this.removeDataWithNoMatchingCategory_(aggregated);
 };
 
 /**
@@ -500,55 +509,86 @@ charts.BarChart.prototype.aggregateData_ = function (data) {
  * @private
  */
 charts.BarChart.prototype.rollupDataByCategory_ = function (data) {
-    var me = this;
+	var me = this;
 
-    // if the attributes are non-strings, they must be converted because d3 rolls them up as strings, so
-    // check for those cases
-    var keyTypes;
+	// if the attributes are non-strings, they must be converted because d3 rolls them up as strings, so
+	// check for those cases
+	var keyTypes;
 
-    var aggregated = d3.nest().key(function (d) {
-        var category = me.categoryForItem(d);
-        if (keyTypes !== charts.BarChart.STRING_KEY_) {
-            var keyType = charts.BarChart.keyType_(category);
-            // the first time we see a value, set that as the key type
-            if (!keyTypes) {
-                keyTypes = keyType;
-            }
-            // if the key type has changed across values, just treat everything as strings
-            else if (keyType !== keyTypes) {
-                keyTypes = charts.BarChart.STRING_KEY_;
-            }
-            // d3 will convert the date to a string, which loses any milliseconds. so convert it to a time. it will get
-            // converted back after the rollup is done
-            if (category instanceof Date) {
-                category = category.getTime();
-            }
-        }
-        return category;
-    }).rollup(function (d) {
-            return d3.sum(d, function (el) {
-                return me.yAttribute_ ? el[me.yAttribute_] : 1;
-            });
-        }).entries(data);
+	if(me.isStacked) {
+		for(var i = 0; i < data.length; i++) {
+			var category = me.categoryForItem(data[i]);
+			if (keyTypes !== charts.BarChart.STRING_KEY_) {
+				var keyType = charts.BarChart.keyType_(category);
+				// the first time we see a value, set that as the key type
+				if (!keyTypes) {
+					keyTypes = keyType;
+				}
+				// if the key type has changed across values, just treat everything as strings
+				else if (keyType !== keyTypes) {
+					keyTypes = charts.BarChart.STRING_KEY_;
+				}
+				// d3 will convert the date to a string, which loses any milliseconds. so convert it to a time. it will get
+				// converted back after the rollup is done
+				if (category instanceof Date) {
+					category = category.getTime();
+				}
+			}
 
-    return charts.BarChart.transformByKeyTypes_(aggregated, keyTypes);
+			data[i].key = category;
+			data[i].values = data[i][me.yAttribute_];
+		}
+
+		data = data.sort(function(a,b) {
+			return b.values - a.values;
+		});
+
+		return charts.BarChart.transformByKeyTypes_(data, keyTypes);
+	} else {
+		var aggregated = d3.nest().key(function (d) {
+			var category = me.categoryForItem(d);
+			if (keyTypes !== charts.BarChart.STRING_KEY_) {
+				var keyType = charts.BarChart.keyType_(category);
+				// the first time we see a value, set that as the key type
+				if (!keyTypes) {
+					keyTypes = keyType;
+				}
+				// if the key type has changed across values, just treat everything as strings
+				else if (keyType !== keyTypes) {
+					keyTypes = charts.BarChart.STRING_KEY_;
+				}
+				// d3 will convert the date to a string, which loses any milliseconds. so convert it to a time. it will get
+				// converted back after the rollup is done
+				if (category instanceof Date) {
+					category = category.getTime();
+				}
+			}
+			return category;
+		}).rollup(function (d) {
+			return d3.sum(d, function (el) {
+				return me.yAttribute_ ? el[me.yAttribute_] : 1;
+			});
+		}).entries(data);
+
+		return charts.BarChart.transformByKeyTypes_(aggregated, keyTypes);
+	}
 };
 
 charts.BarChart.keyType_ = function (value) {
-    if (_.isNumber(value)) {
-        return charts.BarChart.NUMERIC_KEY_;
-    }
+	if (_.isNumber(value)) {
+		return charts.BarChart.NUMERIC_KEY_;
+	}
 
-    if (_.isDate(value)) {
-        return charts.BarChart.DATE_KEY_;
-    }
+	if (_.isDate(value)) {
+		return charts.BarChart.DATE_KEY_;
+	}
 
-    if (_.isBoolean(value)) {
-        return charts.BarChart.BOOLEAN_KEY_;
-    }
+	if (_.isBoolean(value)) {
+		return charts.BarChart.BOOLEAN_KEY_;
+	}
 
-    // treat everything else as strings. if the user passes an object, results will be unpredictable
-    return charts.BarChart.STRING_KEY_;
+	// treat everything else as strings. if the user passes an object, results will be unpredictable
+	return charts.BarChart.STRING_KEY_;
 
 };
 
@@ -561,46 +601,46 @@ charts.BarChart.keyType_ = function (value) {
  * @method transformByKeyTypes_
  */
 charts.BarChart.transformByKeyTypes_ = function (aggregatedData, keyTypes) {
-    if (keyTypes === charts.BarChart.DATE_KEY_) {
-        return charts.BarChart.mapKeysToDates_(aggregatedData);
-    }
+	if (keyTypes === charts.BarChart.DATE_KEY_) {
+		return charts.BarChart.mapKeysToDates_(aggregatedData);
+	}
 
-    if (keyTypes === charts.BarChart.NUMERIC_KEY_) {
-        return charts.BarChart.mapKeysToNumbers_(aggregatedData);
-    }
+	if (keyTypes === charts.BarChart.NUMERIC_KEY_) {
+		return charts.BarChart.mapKeysToNumbers_(aggregatedData);
+	}
 
-    if (keyTypes === charts.BarChart.BOOLEAN_KEY_) {
-        return charts.BarChart.mapKeysToBooleans_(aggregatedData);
-    }
+	if (keyTypes === charts.BarChart.BOOLEAN_KEY_) {
+		return charts.BarChart.mapKeysToBooleans_(aggregatedData);
+	}
 
-    return aggregatedData;
+	return aggregatedData;
 };
 
 
 charts.BarChart.mapKeysToDates_ = function (aggregatedData) {
-    return aggregatedData.map(function (d) {
-        d.key = new Date(+d.key);
-        return d;
-    });
+	return aggregatedData.map(function (d) {
+		d.key = new Date(+d.key);
+		return d;
+	});
 };
 
 charts.BarChart.mapKeysToNumbers_ = function (aggregatedData) {
-    return aggregatedData.map(function (d) {
-        d.key = +d.key;
-        return d;
-    });
+	return aggregatedData.map(function (d) {
+		d.key = +d.key;
+		return d;
+	});
 };
 
 charts.BarChart.mapKeysToBooleans_ = function (aggregatedData) {
-    return aggregatedData.map(function (d) {
-        d.key = (d.key.toLowerCase() === 'true');
-        return d;
-    });
+	return aggregatedData.map(function (d) {
+		d.key = (d.key.toLowerCase() === 'true');
+		return d;
+	});
 };
 
 charts.BarChart.prototype.setMargins_ = function () {
-    this.hMargin_ = this.margin.left + this.margin.right;
-    this.vMargin_ = this.margin.top + this.margin.bottom;
+	this.hMargin_ = this.margin.left + this.margin.right;
+	this.vMargin_ = this.margin.top + this.margin.bottom;
 
 };
 
@@ -612,53 +652,53 @@ charts.BarChart.prototype.setMargins_ = function () {
  * @method removeDataWithNoMatchingCategory_
  */
 charts.BarChart.prototype.removeDataWithNoMatchingCategory_ = function (aggregatedData) {
-    var me = this;
-    return _.reject(aggregatedData, function (item) {
-        var key = item.key;
+	var me = this;
+	return _.reject(aggregatedData, function (item) {
+		var key = item.key;
 
-        return _.isUndefined(_.find(me.categories, function (category) {
-            // dates won't compare with === since they are different object, so compare using the time values
-            if (key instanceof Date && category instanceof Date) {
-                return category.getTime() === key.getTime();
-            }
-            return category === key;
-        }));
-    });
+		return _.isUndefined(_.find(me.categories, function (category) {
+			// dates won't compare with === since they are different object, so compare using the time values
+			if (key instanceof Date && category instanceof Date) {
+				return category.getTime() === key.getTime();
+			}
+			return category === key;
+		}));
+	});
 };
 
 charts.BarChart.prototype.determineWidth_ = function (element) {
-    if (this.userSetWidth_) {
-        return this.userSetWidth_;
-    }
-    else if ($(element[0]).width() !== 0) {
-        return $(element[0]).width() - this.hMargin_;
-    }
-    return charts.BarChart.DEFAULT_WIDTH_;
+	if (this.userSetWidth_) {
+		return this.userSetWidth_;
+	}
+	else if ($(element[0]).width() !== 0) {
+		return $(element[0]).width() - this.hMargin_;
+	}
+	return charts.BarChart.DEFAULT_WIDTH_;
 };
 
 charts.BarChart.prototype.determineHeight_ = function (element) {
-    if (this.userSetHeight_) {
-        return this.userSetHeight_;
-    }
-    else if ($(element[0]).height() !== 0) {
-        return $(element[0]).height();
-    }
-    return charts.BarChart.DEFAULT_HEIGHT_;
+	if (this.userSetHeight_) {
+		return this.userSetHeight_;
+	}
+	else if ($(element[0]).height() !== 0) {
+		return $(element[0]).height();
+	}
+	return charts.BarChart.DEFAULT_HEIGHT_;
 };
 
 charts.BarChart.prototype.redrawOnResize_ = function () {
-    var me = this;
+	var me = this;
 
-    function drawChart() {
-        me.draw();
-    }
+	function drawChart() {
+		me.draw();
+	}
 
-    //Debounce is needed because browser resizes fire this resize even multiple times.
-    $(window).resize(_.debounce(drawChart, 100));
+	//Debounce is needed because browser resizes fire this resize even multiple times.
+	$(window).resize(_.debounce(drawChart, 100));
 
 };
 
 charts.BarChart.destroy = function(el, selector) {
-    var element = d3.select(el).select(selector);
-    $(element[0]).empty();
+	var element = d3.select(el).select(selector);
+	$(element[0]).empty();
 };

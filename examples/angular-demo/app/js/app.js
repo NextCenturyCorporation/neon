@@ -23,6 +23,7 @@ var neonDemo = angular.module('neonDemo', [
 	'circularHeatChartDirective',
 	'circularHeatFormDirective',
 	'barchartDirective',
+	'stackedBarchartDirective',
 	'fieldSelectorDirective',
 	'timelineSelectorChartDirective',
 	'timelineSelectorDirective',

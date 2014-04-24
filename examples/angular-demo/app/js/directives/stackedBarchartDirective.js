@@ -26,9 +26,9 @@
  * @class neonDemo.directives.barchart
  * @constructor
  */
-var barchart = angular.module('barchartDirective', []);
+var barchart = angular.module('stackedBarchartDirective', []);
 
-barchart.directive('barchart', ['ConnectionService', function(connectionService) {
+barchart.directive('stackedbarchart', ['ConnectionService', function(connectionService) {
 	var COUNT_FIELD_NAME = 'Count';
 
 	var link = function($scope, el, attr) {
@@ -91,6 +91,11 @@ barchart.directive('barchart', ['ConnectionService', function(connectionService)
 		};
 
 		$scope.queryForData = function() {
+			//FIXME need to query for each of he sentiment levels?
+
+			//for testing use a set array of datas
+
+
 			var xAxis = connectionService.getFieldMapping($scope.database, $scope.tableName, "x-axis");
 			    xAxis = $scope.attrX || xAxis.mapping;
 			var yAxis = connectionService.getFieldMapping($scope.database, $scope.tableName, "y-axis")
@@ -117,6 +122,22 @@ barchart.directive('barchart', ['ConnectionService', function(connectionService)
 
 			connectionService.getActiveConnection().executeQuery(query, function(queryResults) {
 				$scope.$apply(function(){
+					//TODO figure out the mins and save it to the data object
+						//lowest is 0 - #1
+						//second id #1 - #1+#2
+						//third is #1+#2 - #1+#2+#3
+					queryResults = {data:[{
+						"yyyy-mm": "1", sentiment: 1, "sentiment-min": 0
+					},{
+						"yyyy-mm": "1", sentiment: 2, "sentiment-min": 1
+					},{
+						"yyyy-mm": "2", sentiment: 2, "sentiment-min": 0
+					},{
+						"yyyy-mm": "2", sentiment: 3, "sentiment-min": 2
+					},{
+						"yyyy-mm": "3", sentiment: 2, "sentiment-min": 0
+					}]};
+
 					doDrawChart(queryResults);
 				});
 			});
@@ -130,17 +151,23 @@ barchart.directive('barchart', ['ConnectionService', function(connectionService)
 			charts.BarChart.destroy(el[0], '.barchart');
 
 			var xAxis = connectionService.getFieldMapping($scope.database, $scope.tableName, "x-axis");
-			    xAxis = xAxis.mapping || $scope.attrX;
+				xAxis = xAxis.mapping || $scope.attrX;
 			var yAxis = connectionService.getFieldMapping($scope.database, $scope.tableName, "y-axis")
-			    yAxis = yAxis.mapping || $scope.attrY;
+				yAxis = yAxis.mapping || $scope.attrY;
+			var yMin = yAxis + "-min";
 
 			if (!yAxis) {
 				yAxis = COUNT_FIELD_NAME;
-			} else {
-				yAxis = COUNT_FIELD_NAME;
 			}
 
-			var opts = { "data": data.data, "x": xAxis, "y": yAxis, responsive: false};
+			var opts = {
+				data: data.data,
+				x: xAxis,
+				y: yAxis,
+				yMin: yMin,
+				stacked: true,
+				responsive: false
+			};
 			var chart = new charts.BarChart(el[0], '.barchart', opts).draw();
 		};
 
