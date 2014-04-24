@@ -101,7 +101,11 @@ angular.module('timelineSelectorDirective', []).directive('timelineSelector', ['
 			 */ 
 			var onDatasetChanged = function(message) {
 				// Clear our filters against the last table before requesting data.
-				$scope.messenger.clearSelection($scope.filterKey);
+				// Commented out for now.  As the filter builder clears filters after
+				// a new dataset is selected, our filter change handler will clear the selection.
+				// Doing it here was well results in multiple selection events triggering redundant 
+				// queries.
+				//$scope.messenger.clearSelection($scope.filterKey);
 
 				$scope.databaseName = message.database;
 				$scope.tableName = message.table;

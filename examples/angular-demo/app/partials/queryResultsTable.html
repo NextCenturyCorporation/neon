@@ -1,14 +1,24 @@
 <div class="container panel-body">
 
-	<h4 class="pull-left">Showing <span class="count text-primary">4,421</span> of 344,214 rows</h4>
+	<h4 class="pull-left">Showing <span class="count text-primary" ng-bind="tableOptions.data.length"></span> of 344,214 rows</h4>
 
-	<div class="pull-right">
-		<input type="text" class="form-control" placeholder="Search">
-	</div>
+	<div class="form-inline pull-right">
+	    <form name="dataTableForm">
+	        <div class="form-group">
+			    <label>Limit</label>
+			    <input type="number" min="1" name="limitInput" class="form-control" ng-model="limit"
+			        ng-class="{true: '', false: 'has-error'}[dataTableForm.limitInput.$error.number]">
+		    </div>
+	        <button type="button" class="btn btn-default refresh" ng-click="queryForData()">
+	            <span class="glyphicon glyphicon-refresh"></span>
+	        </button>
+	    </form>
+    </div>
 
 	<div class="clearfix"></div>
 
-	<div class="table-responsive">
+	<div class="query-results-grid">
+	<div class="query-results-grid table-responsive">
 	<table class="table table-striped">
 		<thead>
 			<tr>
@@ -31,61 +41,6 @@
 				<td>Value</td>
 				<td>Value</td>
 			</tr>
-			<tr>
-				<td>Value</td>
-				<td>Value</td>
-				<td>Value</td>
-				<td>Value</td>
-			</tr>
-			<tr>
-				<td>Value</td>
-				<td>Value</td>
-				<td>Value</td>
-				<td>Value</td>
-			</tr>
-			<tr>
-				<td>Value</td>
-				<td>Value</td>
-				<td>Value</td>
-				<td>Value</td>
-			</tr>
-			<tr>
-				<td>Value</td>
-				<td>Value</td>
-				<td>Value</td>
-				<td>Value</td>
-			</tr>
-			<tr>
-				<td>Value</td>
-				<td>Value</td>
-				<td>Value</td>
-				<td>Value</td>
-			</tr>
-			<tr>
-				<td>Value</td>
-				<td>Value</td>
-				<td>Value</td>
-				<td>Value</td>
-			</tr>
-			<tr>
-				<td>Value</td>
-				<td>Value</td>
-				<td>Value</td>
-				<td>Value</td>
-			</tr>
-			<tr>
-				<td>Value</td>
-				<td>Value</td>
-				<td>Value</td>
-				<td>Value</td>
-			</tr>
-			<tr>
-				<td>Value</td>
-				<td>Value</td>
-				<td>Value</td>
-				<td>Value</td>
-			</tr>
-
 		</tbody>
 	</table>
 	</div>
