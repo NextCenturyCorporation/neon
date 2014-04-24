@@ -15,53 +15,72 @@
  */
 
 package com.ncc.neon.services.demo
+
+import com.mongodb.BasicDBObject
 import com.mongodb.DB
 import com.mongodb.DBObject
 import groovy.transform.CompileStatic
-import org.jongo.Jongo
-import org.jongo.MongoCollection
-import org.jongo.ResultHandler
+import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.stereotype.Component
 
 /**
  * Builds a tag/frequency count from array fields in a mongo database
  */
 @CompileStatic
+@Component
 class MongoTagCloudBuilder {
 
     private MongoTagCloudBuilder() {}
 
-    @SuppressWarnings("MethodSize") // ignore since Jongo requires us to break the query into some longer parts. that makes the method longer, but it's still straight forward@SuppressWarnings("MethodSize") // ignore since Jongo requires us to break the query into some longer parts (and this is a demo class). that makes the method longer, but it's still straight forward
-    @SuppressWarnings("ExplicitCallToAndMethod")  // codenarc falsely reports this when using the "and" method in Jongo
-    static Map<String,Integer> getTagCounts(DB database, String collectionName, String arrayField) {
-        Jongo jongo = new Jongo(database)
-        MongoCollection collection = jongo.getCollection(collectionName)
+    // TODO: Add a match on the other neon filters
 
-        // TODO: Add a match on the other neon filters
+    @Autowired
+    private MongoNeonHelper mongoNeonHelper
 
-        // get only the array field since that's all we need for the tag cloud
-        String arrayProjection = '{$project:{"' + arrayField + '":1}}'
 
-        // unwind the array to aggregate on the individual entries
-        String unwind = '{$unwind:"$' + arrayField + '"}'
+    @SuppressWarnings("MethodSize")
+    Map<String, Integer> getTagCounts(DB database, String collectionName, String arrayField, int limit) {
+        List<BasicDBObject> aggregationOps = []
 
-        // count the tags
-        String group = '{"$group": {"_id": "$' + arrayField + '", "count": {"$sum": 1}}}'
+        DBObject matchQuery = mongoNeonHelper.mergeWithNeonFilters(new BasicDBObject(), database.name, collectionName)
+        if ( !((BasicDBObject)matchQuery).isEmpty()) {
+            DBObject match = new BasicDBObject('$match',matchQuery)
+            aggregationOps << match
+        }
 
-        // highest count first
-        String sort = '{"$sort":{"count":-1}}'
+        DBObject project = new BasicDBObject('$project', new BasicDBObject(arrayField, 1))
+        aggregationOps << project
 
-        // TODO: Add support for limit
+        DBObject unwind = new BasicDBObject('$unwind', '$' + arrayField)
+        aggregationOps << unwind
+
+        DBObject groupFields = new BasicDBObject()
+        groupFields.put('_id', '$' + arrayField)
+        groupFields.put('count', new BasicDBObject('$sum', 1))
+        DBObject group = new BasicDBObject('$group', groupFields)
+        aggregationOps << group
+
+        DBObject sort = new BasicDBObject('$sort', new BasicDBObject('count', -1))
+        aggregationOps << sort
+
+        if (limit > 0) {
+            aggregationOps << new BasicDBObject('$limit', limit)
+        }
 
         // the query is already sorted, so use a linkedhashmap instead of a sorted map since the insertion order will
         // be sorted
         Map<String, Integer> tagCounts = [:]
-        collection.aggregate(arrayProjection).and(unwind).and(group).and(sort).map(new ResultHandler<Void>() {
-            @Override
-            public Void map(DBObject result) {
-                tagCounts[(String) result.get("_id")] = ((Number) result.get("count")).intValue()
-                return null
-            }
-        })
+
+
+        Iterator<DBObject> results = database.getCollection(collectionName).aggregate(aggregationOps[0],
+                aggregationOps[1..aggregationOps.size()-1].toArray(new DBObject[0])).results().iterator()
+        while (results.hasNext()) {
+            DBObject row = results.next()
+            String tag = (String) row.get('_id')
+            int count = ((Number) row.get('count')).intValue()
+            tagCounts[tag] = count
+        }
+
         return tagCounts
 
     }

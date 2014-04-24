@@ -1,4 +1,3 @@
-'use strict';
 /*
  * Copyright 2014 Next Century Corporation
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -15,19 +14,14 @@
  *
  */
 
-var neonDemo = angular.module('neonDemo', [
-	'neonDemo.controllers',
-	'neonDemo.services',
-	'configurationDirective',
-	'filterBuilderDirective',
-	'circularHeatChartDirective',
-	'circularHeatFormDirective',
-	'barchartDirective',
-	'stackedBarchartDirective',
-	'fieldSelectorDirective',
-	'timelineSelectorChartDirective',
-	'timelineSelectorDirective',
-	'heatMapDirective',
-	'queryResultsTableDirective',
-    'tagCloudDirective'
-]);
+package com.ncc.neon.services.demo
+
+import groovy.transform.Immutable
+
+@Immutable
+class TagCountPair {
+
+    final String tag
+    final int count
+
+}

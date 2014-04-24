@@ -22,10 +22,7 @@ import com.ncc.neon.connect.DataSources
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
 
-import javax.ws.rs.GET
-import javax.ws.rs.Path
-import javax.ws.rs.Produces
-import javax.ws.rs.QueryParam
+import javax.ws.rs.*
 /**
  * A web service that generates a frequency map of values from an array
  */
@@ -36,16 +33,27 @@ public class MongoTagCloudService {
     @Autowired
     private ConnectionManager connectionManager
 
+    @Autowired
+    private MongoTagCloudBuilder tagBuilder
+
     @GET
     @Path("tagcounts")
-    @Produces( "application/json;charset=UTF-8" )
-    public Map<String, Integer> getTile(@QueryParam("host") String host,
+    @Produces("application/json;charset=UTF-8")
+    public List<TagCountPair> getTile(@QueryParam("host") String host,
                                         @QueryParam("db") String databaseName,
                                         @QueryParam("collection") String collectionName,
-                                        @QueryParam("arrayfield") String arrayField) {
-
+                                        @QueryParam("arrayfield") String arrayField,
+                                        @DefaultValue("50") @QueryParam("limit") int limit
+    ) {
         connectionManager.currentRequest = (new ConnectionInfo(dataSource: DataSources.mongo, host: host))
         DB database = connectionManager.connection.mongo.getDB(databaseName)
-        return MongoTagCloudBuilder.getTagCounts(database,collectionName,arrayField)
+        Map<String,Integer> tagCounts = tagBuilder.getTagCounts(database, collectionName, arrayField, limit)
+
+        // put in a list so it stays ordered on the javascript side
+        List<TagCountPair> tagCountList = []
+        tagCounts.each { tag, count ->
+            tagCountList << new TagCountPair(tag,count)
+        }
+        return tagCountList
     }
 }

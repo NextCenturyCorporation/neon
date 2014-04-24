@@ -172,10 +172,8 @@ angular.module('queryResultsTableDirective', []).directive('queryResultsTable', 
                 $scope.tableOptions = $scope.createOptions(queryResults);
 
                 $scope.table = new tables.Table("#" + $scope.tableId, $scope.tableOptions).draw().registerSelectionListener(onSelection);
-                //$scope.table.refreshLayout();
-                //sizeTableToRemainingSpace();
-          //       var dataView = new Slick.Data.DataView();
-    // dataView.setItems(queryResults.data, "#" + $scope.tableId);
+                $scope.table.refreshLayout();
+
             };
 
             $scope.buildQuery = function() {
