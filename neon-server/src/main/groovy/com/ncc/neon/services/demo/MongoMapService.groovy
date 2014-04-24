@@ -15,7 +15,6 @@
  */
 
 package com.ncc.neon.services.demo
-
 import com.mongodb.BasicDBList
 import com.mongodb.BasicDBObject
 import com.mongodb.DBObject
@@ -24,12 +23,9 @@ import com.ncc.neon.connect.ConnectionInfo
 import com.ncc.neon.connect.ConnectionManager
 import com.ncc.neon.connect.DataSources
 import com.ncc.neon.connect.MongoConnectionClient
-import com.ncc.neon.query.filter.DataSet
-import com.ncc.neon.query.filter.FilterState
-import com.ncc.neon.query.filter.SelectionState
-import com.ncc.neon.query.mongo.MongoConversionStrategy
 import groovy.transform.CompileStatic
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.stereotype.Component
 
 import javax.ws.rs.DefaultValue
 import javax.ws.rs.GET
@@ -41,28 +37,22 @@ import java.awt.AlphaComposite
 import java.awt.Color
 import java.awt.Graphics2D
 import java.awt.image.BufferedImage
-
 /**
  * A web service that generates map data from a mongo database
  */
 @CompileStatic
 @Path("/mongomap")
-@org.springframework.stereotype.Component
+@Component
 public class MongoMapService {
 
     // TODO: Extract methods - this is really long right now
     // TODO: Assumes one layer in LAYERS - is that ok?
 
-
-
     @Autowired
     private ConnectionManager connectionManager
 
     @Autowired
-    private FilterState filterState
-
-    @Autowired
-    private SelectionState selectionState
+    private MongoNeonHelper mongoNeonHelper
 
     // Note these params are all in CAPS because openlayers puts its params in caps and this keeps them consistent
 
@@ -110,23 +100,7 @@ public class MongoMapService {
         DBObject box = new BasicDBObject('$box', [[minLon, minLat], [maxLon, maxLat]])
         DBObject geoWithin = new BasicDBObject('$geoWithin', box)
         DBObject matchQuery = new BasicDBObject('location', geoWithin)
-
-        // hook into some private methods here that will use neon's filters/selection since this query can't yet be executed through neon
-        DataSet dataSet = new DataSet(databaseName: databaseName, tableName: collectionName)
-        List neonFiltersAndSelection = []
-
-        neonFiltersAndSelection.addAll(MongoConversionStrategy.createWhereClausesForFilters(dataSet, filterState))
-
-        // the demo only shows selected data - right now selection is basically a temporary filter so only show selected
-        neonFiltersAndSelection.addAll(MongoConversionStrategy.createWhereClausesForFilters(dataSet, selectionState))
-
-        // TODO: Do we need to flatten  - the lists added to this should be empty, but it looks like this list contains 2 empty list objects if not flattened first
-        neonFiltersAndSelection = neonFiltersAndSelection.flatten()
-
-        if (neonFiltersAndSelection) {
-            DBObject matchNeonFilters = MongoConversionStrategy.buildMongoWhereClause((List) neonFiltersAndSelection)
-            matchQuery = new BasicDBObject('$and', [matchNeonFilters, matchQuery])
-        }
+        matchQuery = mongoNeonHelper.mergeWithNeonFilters(matchQuery, databaseName, collectionName)
 
         DBObject match = new BasicDBObject('$match', matchQuery)
 

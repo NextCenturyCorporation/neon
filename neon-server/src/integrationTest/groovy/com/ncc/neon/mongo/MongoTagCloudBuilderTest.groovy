@@ -18,8 +18,12 @@ package com.ncc.neon.mongo
 
 import com.mongodb.DB
 import com.mongodb.MongoClient
+import com.ncc.neon.query.filter.FilterState
+import com.ncc.neon.query.filter.SelectionState
+import com.ncc.neon.services.demo.MongoNeonHelper
 import com.ncc.neon.services.demo.MongoTagCloudBuilder
 import org.junit.AfterClass
+import org.junit.Before
 import org.junit.BeforeClass
 import org.junit.Test
 
@@ -29,12 +33,13 @@ import org.junit.Test
 class MongoTagCloudBuilderTest {
 
 
-    // TODO: This is duplicated from the build
     private static DB db
 
+    private MongoTagCloudBuilder tagBuilder
 
     @BeforeClass
     static void beforeClass() {
+        // TODO: This is duplicated from the build
         db = new MongoClient(System.getProperty("mongo.host")).getDB("neonmongotagcloud")
     }
 
@@ -43,10 +48,19 @@ class MongoTagCloudBuilderTest {
         db.mongo.close()
     }
 
+    @Before
+    void before() {
+        tagBuilder = new MongoTagCloudBuilder()
+        MongoNeonHelper neonHelper = new MongoNeonHelper()
+        neonHelper.filterState = new FilterState()
+        neonHelper.selectionState = new SelectionState()
+        tagBuilder.mongoNeonHelper = neonHelper
+    }
+
 
     @Test
     void "tag frequencies"() {
-        Map<String,Integer> counts = MongoTagCloudBuilder.getTagCounts(db,"records","tags",3)
+        Map<String,Integer> counts = tagBuilder.getTagCounts(db,"records","tags",3)
 
         assert counts.size() == 3
 
@@ -59,7 +73,7 @@ class MongoTagCloudBuilderTest {
 
     @Test
     void "tag frequencies with limit"() {
-        Map<String,Integer> counts = MongoTagCloudBuilder.getTagCounts(db,"records","tags",2)
+        Map<String,Integer> counts = tagBuilder.getTagCounts(db,"records","tags",2)
 
         assert counts.size() == 2
 
@@ -75,5 +89,6 @@ class MongoTagCloudBuilderTest {
         assert entry.value == count
 
     }
+
 }
 

@@ -99,10 +99,7 @@
 					<div circular-heat-form></div>
 
 					<!-- Tag cloud -->
-					<div class="well">
-						<h4>Popular Hashtags</h4>
-						<!-- chart container here -->
-					</div>
+                    <tag-cloud tag-field="'hashtags'"></tag-cloud>
 
 				</div>
 
@@ -158,7 +155,7 @@
 		<script src="lib/openlayers/OpenLayers.js"></script>
 		<script src="lib/openlayers/heatmap/heatmap.js"></script>
 		<script src="lib/openlayers/heatmap/heatmap-openlayers.js"></script>
-
+        <script src="lib/jquery.tagcloud.js"></script>
 
 		<!-- Include required non-angular support modules -->
 		<script src="js/namespaces.js"></script>
@@ -183,5 +180,6 @@
 		<script src="js/directives/fieldSelector.js"></script>
 		<script src="js/directives/heatMap.js"></script>
 		<script src="js/directives/queryResultsTable.js"></script>
+        <script src="js/directives/tagCloudDirective.js"></script>
 	</body>
 </html>

@@ -33,10 +33,13 @@ public class MongoTagCloudService {
     @Autowired
     private ConnectionManager connectionManager
 
+    @Autowired
+    private MongoTagCloudBuilder tagBuilder
+
     @GET
     @Path("tagcounts")
     @Produces("application/json;charset=UTF-8")
-    public Map<String, Integer> getTile(@QueryParam("host") String host,
+    public List<TagCountPair> getTile(@QueryParam("host") String host,
                                         @QueryParam("db") String databaseName,
                                         @QueryParam("collection") String collectionName,
                                         @QueryParam("arrayfield") String arrayField,
@@ -44,6 +47,13 @@ public class MongoTagCloudService {
     ) {
         connectionManager.currentRequest = (new ConnectionInfo(dataSource: DataSources.mongo, host: host))
         DB database = connectionManager.connection.mongo.getDB(databaseName)
-        return MongoTagCloudBuilder.getTagCounts(database, collectionName, arrayField, limit)
+        Map<String,Integer> tagCounts = tagBuilder.getTagCounts(database, collectionName, arrayField, limit)
+
+        // put in a list so it stays ordered on the javascript side
+        List<TagCountPair> tagCountList = []
+        tagCounts.each { tag, count ->
+            tagCountList << new TagCountPair(tag,count)
+        }
+        return tagCountList
     }
 }

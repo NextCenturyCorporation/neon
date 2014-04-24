@@ -135,10 +135,6 @@ dependencies {
     compile 'com.google.code.tempus-fugit:tempus-fugit:1.1'
     compile project(":metadata")
 
-    compile 'org.jongo:jongo:1.0'
-    compile 'joda-time:joda-time:2.3'
-
-
     providedCompile 'javax.servlet:javax.servlet-api:3.0.1'
 
     runtime 'cglib:cglib:2.2.2'
