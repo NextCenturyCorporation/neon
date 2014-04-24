@@ -17,13 +17,13 @@
  */
 
 /**
- * This directive adds a barchart to the DOM and drives the visualization data from
+ * This directive adds a barchart with stacked bars to the DOM and drives the visualization data from
  * whatever database and table are currently selected in neon.  This directive accomplishes that
  * by using getting a neon connection from a connection service and listening for
  * neon system events (e.g., data tables changed).  On these events, it requeries the active
  * connection for data and updates applies the change to its scope.  The contained
  * barchart will update as a result.
- * @class neonDemo.directives.barchart
+ * @class neonDemo.directives.stackedbarchart
  * @constructor
  */
 var barchart = angular.module('stackedBarchartDirective', []);
@@ -92,7 +92,6 @@ barchart.directive('stackedbarchart', ['ConnectionService', function(connectionS
 
 		$scope.queryForData = function() {
 			//FIXME need to query for each of he sentiment levels?
-
 			//for testing use a set array of datas
 
 
@@ -101,46 +100,46 @@ barchart.directive('stackedbarchart', ['ConnectionService', function(connectionS
 			var yAxis = connectionService.getFieldMapping($scope.database, $scope.tableName, "y-axis")
 			    yAxis = $scope.attrY || yAxis.mapping;
 
-			var query = new neon.query.Query()
-				.selectFrom($scope.databaseName, $scope.tableName)
-				.where(xAxis,'!=', null)
-				.selectionOnly()
-				.groupBy(xAxis);
+			// var query = new neon.query.Query()
+			// 	.selectFrom($scope.databaseName, $scope.tableName)
+			// 	.where(xAxis,'!=', null)
+			// 	.selectionOnly()
+			// 	.groupBy(xAxis);
 
-			var queryType;
-			if($scope.barType === 'count') {
-				queryType = neon.query.COUNT;
-			} else if($scope.barType === 'sum') {
-				queryType = neon.query.SUM;
-			}
+			// var queryType;
+			// if($scope.barType === 'count') {
+			// 	queryType = neon.query.COUNT;
+			// } else if($scope.barType === 'sum') {
+			// 	queryType = neon.query.SUM;
+			// }
 
-			if(yAxis) {
-				query.aggregate(queryType, yAxis, COUNT_FIELD_NAME);
-			} else {
-				query.aggregate(queryType, '*', COUNT_FIELD_NAME);
-			}
+			// if(yAxis) {
+			// 	query.aggregate(queryType, yAxis, COUNT_FIELD_NAME);
+			// } else {
+			// 	query.aggregate(queryType, '*', COUNT_FIELD_NAME);
+			// }
 
-			connectionService.getActiveConnection().executeQuery(query, function(queryResults) {
+			// connectionService.getActiveConnection().executeQuery(query, function(queryResults) {
 				$scope.$apply(function(){
 					//TODO figure out the mins and save it to the data object
 						//lowest is 0 - #1
 						//second id #1 - #1+#2
 						//third is #1+#2 - #1+#2+#3
 					queryResults = {data:[{
-						"yyyy-mm": "1", sentiment: 1, "sentiment-min": 0
+						"yyyy-mm": "3", sentiment: 1, "sentiment-min": 0
 					},{
-						"yyyy-mm": "1", sentiment: 2, "sentiment-min": 1
+						"yyyy-mm": "3", sentiment: 5, "sentiment-min": 1
+					},{
+						"yyyy-mm": "1", sentiment: 2, "sentiment-min": 0
+					},{
+						"yyyy-mm": "1", sentiment: 3, "sentiment-min": 2
 					},{
 						"yyyy-mm": "2", sentiment: 2, "sentiment-min": 0
-					},{
-						"yyyy-mm": "2", sentiment: 3, "sentiment-min": 2
-					},{
-						"yyyy-mm": "3", sentiment: 2, "sentiment-min": 0
 					}]};
 
 					doDrawChart(queryResults);
 				});
-			});
+			//});
 		};
 
 		var drawBlankChart = function() {
