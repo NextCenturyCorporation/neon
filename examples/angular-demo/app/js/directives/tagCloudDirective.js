@@ -56,8 +56,8 @@ angular.module('tagCloudDirective', []).directive('tagCloud', ['ConnectionServic
 
                     // setup tag cloud color/size changes
                     $.fn.tagcloud.defaults = {
-                        size: {start: 14, end: 18, unit: 'pt'},
-                        color: {start: '#cde', end: '#f52'}
+                        size: {start: 12, end: 22, unit: 'pt'},
+                        color: {start: '#aaaaaa', end: '#2f9f3e'}
                     };
 
                 };
@@ -107,7 +107,7 @@ angular.module('tagCloudDirective', []).directive('tagCloud', ['ConnectionServic
                         $scope.inProgress = true;
                         if ($scope.tagField !== '') {
                             var host = connectionService.getActiveConnection().host_;
-                            var url = neon.serviceUrl('mongotagcloud', 'tagcounts', '?host=' + host + "&db=" + $scope.databaseName + "&collection=" + $scope.tableName + "&arrayfield=" + $scope.tagField + "&limit=10");
+                            var url = neon.serviceUrl('mongotagcloud', 'tagcounts', '?host=' + host + "&db=" + $scope.databaseName + "&collection=" + $scope.tableName + "&arrayfield=" + $scope.tagField + "&limit=30");
                             neon.util.ajaxUtils.doGet(url, {
                                 success: function (tagCounts) {
                                     $scope.$apply(function () {
