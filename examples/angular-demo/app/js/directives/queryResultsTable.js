@@ -48,10 +48,16 @@ angular.module('queryResultsTableDirective', []).directive('queryResultsTable', 
              * @method initialize
              */
             $scope.initialize = function() {
+            	$scope.ASCENDING = neon.query.ASCENDING;
+            	$scope.DESCENDING = neon.query.DESCENDING;
+
                 $scope.databaseName = '';
                 $scope.tableName = '';
                 $scope.fields = [];
+                $scope.sortByField = '';
+                $scope.sortDirection = neon.query.ASCENDING;
                 $scope.limit = 500;
+                $scope.totalRows = 0;
                 $scope.error = '';
 
                 // Default our data table to be empty.  Generate a unique ID for it 
@@ -109,6 +115,7 @@ angular.module('queryResultsTableDirective', []).directive('queryResultsTable', 
              */ 
             var onSelectionChanged = function(message) {
                 $scope.queryForData();
+                $scope.queryForTotalRows();
             };
 
             /**
@@ -133,6 +140,14 @@ angular.module('queryResultsTableDirective', []).directive('queryResultsTable', 
             var onDatasetChanged = function(message) {
                 $scope.databaseName = message.database;
                 $scope.tableName = message.table;
+
+                connectionService.getActiveConnection().getFieldNames($scope.tableName, function(results) {
+				    $scope.$apply(function() {
+				        populateFieldNames(results);
+				        $scope.sortByField = connectionService.getFieldMapping($scope.database, $scope.tableName, "sort-by");
+				        $scope.sortByField = $scope.sortByField.mapping || $scope.fields[0];
+				    });
+				});
             };
 
             /**
@@ -161,6 +176,23 @@ angular.module('queryResultsTableDirective', []).directive('queryResultsTable', 
             };
 
             /**
+             * Triggers a Neon query that will aggregate the time data for the currently selected dataset.
+             * @method queryForData
+             */
+            $scope.queryForTotalRows = function() {
+
+                var query = new neon.query.Query().selectFrom($scope.databaseName, $scope.tableName)
+                    .aggregate(neon.query.COUNT, '*', 'count');
+
+
+                connectionService.getActiveConnection().executeQuery(query, function(queryResults) {
+                    $scope.$apply(function(){
+                        $scope.totalRows = queryResults.data[0].count;
+                    });
+                });
+            };
+
+            /**
              * Updates the data bound to the table managed by this directive.  This will trigger a change in 
              * the chart's visualization.
              * @param {Object} queryResults Results returned from a Neon query.
@@ -168,7 +200,7 @@ angular.module('queryResultsTableDirective', []).directive('queryResultsTable', 
              * @method updateData
              */
             $scope.updateData = function(queryResults) {
-                // TODO: handle the new data.
+                // Handle the new data.
                 $scope.tableOptions = $scope.createOptions(queryResults);
 
                 $scope.table = new tables.Table("#" + $scope.tableId, $scope.tableOptions).draw().registerSelectionListener(onSelection);
@@ -176,9 +208,15 @@ angular.module('queryResultsTableDirective', []).directive('queryResultsTable', 
 
             };
 
+            /**
+             * Builds a query to pull a limited set of records that match any existing filter sets.
+             * @return neon.query.Query
+             * @method buildQuery
+             */
             $scope.buildQuery = function() {
                 var query = new neon.query.Query().selectFrom($scope.databaseName, $scope.tableName);
                 query.limit($scope.limit);
+                query.sortBy($scope.sortByField, $scope.sortDirection);
 
                 return query;
             }

@@ -1,9 +1,25 @@
 <div class="container panel-body">
 
-	<h4 class="pull-left">Showing <span class="count text-primary" ng-bind="tableOptions.data.length"></span> of 344,214 rows</h4>
+	<h4 class="pull-left">Showing 
+		<span class="count text-primary" ng-bind="tableOptions.data.length"></span> of 
+		<span ng-bind="totalRows"></span>
+	</h4>
 
 	<div class="form-inline pull-right">
 	    <form name="dataTableForm">
+	        <div class="form-group">
+	        	<label>Sort By</label>
+		        <select class="form-control" ng-model="sortByField" ng-disabled="!(fields.length > 0)" ng-options="field for field in fields">
+		        </select>
+		    </div>
+	    	<div class="btn-group" >
+		        <label class="btn btn-default active" ng-class="{true: 'active', false: ''}[sortDirection === ASCENDING]">
+		          <input type="radio" ng-model="sortDirection" style="display:none" ng-value="ASCENDING"> ASC
+		        </label>
+		        <label class="btn btn-default" ng-class="{true: 'active', false: ''}[sortDirection === DESCENDING]">
+		          <input type="radio" ng-model="sortDirection" style="display:none" ng-value="DESCENDING"> DESC
+		        </label>
+	        </div>
 	        <div class="form-group">
 			    <label>Limit</label>
 			    <input type="number" min="1" name="limitInput" class="form-control" ng-model="limit"

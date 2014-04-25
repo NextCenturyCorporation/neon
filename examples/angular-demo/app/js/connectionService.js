@@ -48,6 +48,9 @@ angular.module('neonDemo.services', []).factory('ConnectionService', ['$filter',
 						},{
 							name: "size-by",
 							mapping: "magnitude"
+						},{
+							name: "sort-by",
+							mapping: "time"
 						}]
 					},{
 						name: "gbSmall",
@@ -72,6 +75,9 @@ angular.module('neonDemo.services', []).factory('ConnectionService', ['$filter',
 						},{
 							name: "size-by",
 							mapping: "retweet_count"
+						},{
+							name: "sort-by",
+							mapping: "created_at"
 						}]
 					}]
 				}]
