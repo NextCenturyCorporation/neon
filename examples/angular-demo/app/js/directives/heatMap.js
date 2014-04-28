@@ -33,7 +33,8 @@ angular.module('heatMapDirective', []).directive('heatMap', ['ConnectionService'
 		templateUrl: 'partials/heatMap.html',
 		restrict: 'EA',
 		scope: {
-
+            // map of categories to colors used for the legend
+            colorMappings: '&'
 		},
 		controller: function($scope) {
 
@@ -59,9 +60,6 @@ angular.module('heatMapDirective', []).directive('heatMap', ['ConnectionService'
 				$scope.showPoints = false;
 				$scope.cacheMap = false;
 				$scope.error = '';
-
-				// Default our time data to an empty array.
-				$scope.data = [];
 
 				// Setup our map.
 				$scope.mapId = uuid();
@@ -193,6 +191,8 @@ angular.module('heatMapDirective', []).directive('heatMap', ['ConnectionService'
 				var result = $scope.map.setData(queryResults.data);
 				$scope.error = result.message;
 				$scope.map.draw();
+                // color mappings need to be updated after drawing since they are set during drawing
+                $scope.colorMappings = $scope.map.getColorMappings();
 			};
 
             $scope.buildQuery = function() {

@@ -15,7 +15,6 @@
  */
 
 
-
 var coreMap = coreMap || {};
 
 /**
@@ -61,14 +60,16 @@ var coreMap = coreMap || {};
  *     var map = new coreMap.Map('map', opts);
  *     map.draw();
  *
-**/
+ **/
 
-coreMap.Map = function(elementId, opts){
+coreMap.Map = function (elementId, opts) {
     opts = opts || {};
 
     this.elementId = elementId;
     this.selector = $(elementId);
     this.data = opts.data;
+    // mapping of categories to colors
+    this.colors = {};
 
     this.latitudeMapping = opts.latitudeMapping || coreMap.Map.DEFAULT_LATITUDE_MAPPING;
     this.longitudeMapping = opts.longitudeMapping || coreMap.Map.DEFAULT_LONGITUDE_MAPPING;
@@ -78,7 +79,7 @@ coreMap.Map = function(elementId, opts){
     this.colorScale = d3.scale.category20();
     this.responsive = true;
 
-    if(opts.responsive === false){
+    if (opts.responsive === false) {
         this.responsive = false;
     }
 
@@ -121,16 +122,17 @@ coreMap.Map.DESTINATION_PROJECTION = new OpenLayers.Projection("EPSG:900913");
  * @method draw
  */
 
-coreMap.Map.prototype.draw = function(){
+coreMap.Map.prototype.draw = function () {
     var me = this;
 
     var heatmapData = [];
     var mapData = [];
+    me.colors = {};
     _.each(this.data, function (element) {
         var longitude = me.getValueFromDataElement(me.longitudeMapping, element);
         var latitude = me.getValueFromDataElement(me.latitudeMapping, element);
 
-        if($.isNumeric(latitude) && $.isNumeric(longitude)){
+        if ($.isNumeric(latitude) && $.isNumeric(longitude)) {
             heatmapData.push(me.createHeatmapDataPoint(element, longitude, latitude));
             mapData.push(me.createPointsLayerDataPoint(element, longitude, latitude));
         }
@@ -146,7 +148,7 @@ coreMap.Map.prototype.draw = function(){
  * @method reset
  */
 
-coreMap.Map.prototype.reset = function(){
+coreMap.Map.prototype.reset = function () {
     this.setData([]);
     this.draw();
     this.map.setCenter(new OpenLayers.LonLat(0, 0));
@@ -165,16 +167,16 @@ coreMap.Map.prototype.reset = function(){
  * @method setData
  */
 
-coreMap.Map.prototype.setData = function(mapData){
-    if(mapData.length >= coreMap.Map.DEFAULT_DATA_LIMIT){
+coreMap.Map.prototype.setData = function (mapData) {
+    if (mapData.length >= coreMap.Map.DEFAULT_DATA_LIMIT) {
         this.data = [];
-        return { 
+        return {
             success: false,
             message: "Unable to update data. The map cannot handle more than " + coreMap.Map.DEFAULT_DATA_LIMIT + " points."
                 + "  Please select a smaller data set."
         };
     }
-    else{
+    else {
         this.data = mapData;
         return {
             success: true,
@@ -183,18 +185,30 @@ coreMap.Map.prototype.setData = function(mapData){
     }
 };
 
+coreMap.Map.prototype.getColorMappings = function () {
+    var me = this;
+
+    // convert to an array that is in alphabetical order for consistent iteration order
+    var sortedColors = [];
+    for ( key in this.colors ) {
+        var color = me.colors[key];
+        sortedColors.push( { 'color' : color, 'category' : key});
+    };
+    return sortedColors;
+};
+
 /**
  * Toggles visibility between the points layer and heatmap layer.
  * @method toggleLayers
  */
 
-coreMap.Map.prototype.toggleLayers = function(){
-    if(this.currentLayer === this.pointsLayer){
+coreMap.Map.prototype.toggleLayers = function () {
+    if (this.currentLayer === this.pointsLayer) {
         this.pointsLayer.setVisibility(false);
         this.heatmapLayer.toggle();
         this.currentLayer = this.heatmapLayer;
     }
-    else{
+    else {
         this.heatmapLayer.toggle();
         this.pointsLayer.setVisibility(true);
         this.currentLayer = this.pointsLayer;
@@ -207,7 +221,7 @@ coreMap.Map.prototype.toggleLayers = function(){
  * @method getExtent
  */
 
-coreMap.Map.prototype.getExtent = function(){
+coreMap.Map.prototype.getExtent = function () {
     var extent = this.map.getExtent();
     extent.transform(coreMap.Map.DESTINATION_PROJECTION, coreMap.Map.SOURCE_PROJECTION);
     var llPoint = new OpenLayers.LonLat(extent.left, extent.bottom);
@@ -233,7 +247,7 @@ coreMap.Map.prototype.getExtent = function(){
  * @method zoomToExtent
  */
 
-coreMap.Map.prototype.zoomToExtent = function(extent) {
+coreMap.Map.prototype.zoomToExtent = function (extent) {
     var llPoint = new OpenLayers.LonLat(extent['minimumLongitude'], extent['minimumLatitude']);
     var urPoint = new OpenLayers.LonLat(extent['maximumLongitude'], extent['maximumLatitude']);
 
@@ -251,7 +265,7 @@ coreMap.Map.prototype.zoomToExtent = function(extent) {
  * @method register
  */
 
-coreMap.Map.prototype.register = function(type, obj, listener) {
+coreMap.Map.prototype.register = function (type, obj, listener) {
     this.map.events.register(type, obj, listener);
 };
 
@@ -265,7 +279,7 @@ coreMap.Map.prototype.register = function(type, obj, listener) {
  * @method createHeatmapDataPoint
  */
 
-coreMap.Map.prototype.createHeatmapDataPoint = function(element, longitude, latitude){
+coreMap.Map.prototype.createHeatmapDataPoint = function (element, longitude, latitude) {
     var count = this.getValueFromDataElement(this.sizeMapping, element);
     var point = new OpenLayers.LonLat(longitude, latitude);
 
@@ -284,7 +298,7 @@ coreMap.Map.prototype.createHeatmapDataPoint = function(element, longitude, lati
  * @method createPointsLayerDataPoint
  */
 
-coreMap.Map.prototype.createPointsLayerDataPoint = function(element, longitude, latitude){
+coreMap.Map.prototype.createPointsLayerDataPoint = function (element, longitude, latitude) {
     var point = new OpenLayers.Geometry.Point(longitude, latitude);
     point.transform(coreMap.Map.SOURCE_PROJECTION, coreMap.Map.DESTINATION_PROJECTION);
     var feature = new OpenLayers.Feature.Vector(point);
@@ -299,7 +313,7 @@ coreMap.Map.prototype.createPointsLayerDataPoint = function(element, longitude, 
  * @method stylePoint
  */
 
-coreMap.Map.prototype.stylePoint = function(element){
+coreMap.Map.prototype.stylePoint = function (element) {
     var radius = this.calculateRadius(element);
     var color = this.calculateColor(element);
 
@@ -314,7 +328,7 @@ coreMap.Map.prototype.stylePoint = function(element){
  * @method createPointStyleObject
  */
 
-coreMap.Map.prototype.createPointStyleObject = function(color, radius){
+coreMap.Map.prototype.createPointStyleObject = function (color, radius) {
     color = color || coreMap.Map.DEFAULT_COLOR;
     radius = radius || coreMap.Map.MIN_RADIUS;
 
@@ -335,16 +349,16 @@ coreMap.Map.prototype.createPointStyleObject = function(color, radius){
  * @method calculateRadius
  */
 
-coreMap.Map.prototype.calculateRadius = function(element){
+coreMap.Map.prototype.calculateRadius = function (element) {
     var minValue = this.minValue(this.data, this.sizeMapping);
     var maxValue = this.maxValue(this.data, this.sizeMapping);
-    if(maxValue - minValue === 0){
+    if (maxValue - minValue === 0) {
         return coreMap.Map.MIN_RADIUS;
     }
 
     var size = this.getValueFromDataElement(this.sizeMapping, element);
     var radius = coreMap.Map.MIN_RADIUS;
-    if(size >= 1) {
+    if (size >= 1) {
         var slope = 10 / (maxValue - minValue);
         radius = Math.round(slope * size + 5);
     }
@@ -358,13 +372,24 @@ coreMap.Map.prototype.calculateRadius = function(element){
  * @method calculateColor
  */
 
-coreMap.Map.prototype.calculateColor = function(element){
+coreMap.Map.prototype.calculateColor = function (element) {
     var category = this.getValueFromDataElement(this.categoryMapping, element);
+    var color;
 
-    if(!category){
-        return coreMap.Map.DEFAULT_COLOR;
+    if (category) {
+        color = this.colorScale(category);
     }
-    return this.colorScale(category);
+    else {
+        category = '(Uncategorized)';
+        color = coreMap.Map.DEFAULT_COLOR;
+    }
+
+    // store the color in the registry so we know the color/category mappings
+    if (!(this.colors.hasOwnProperty(category))) {
+        this.colors[category] = color;
+    }
+
+    return color
 };
 
 /**
@@ -375,7 +400,7 @@ coreMap.Map.prototype.calculateColor = function(element){
  * @method minValue
  */
 
-coreMap.Map.prototype.minValue = function(data, mapping) {
+coreMap.Map.prototype.minValue = function (data, mapping) {
     var me = this;
     return d3.min(data, function (el) {
         return me.getValueFromDataElement(mapping, el);
@@ -390,7 +415,7 @@ coreMap.Map.prototype.minValue = function(data, mapping) {
  * @method maxValue
  */
 
-coreMap.Map.prototype.maxValue = function(data, mapping) {
+coreMap.Map.prototype.maxValue = function (data, mapping) {
     var me = this;
     return d3.max(data, function (el) {
         return me.getValueFromDataElement(mapping, el);
@@ -405,14 +430,14 @@ coreMap.Map.prototype.maxValue = function(data, mapping) {
  * @method getValueFromDataElement
  */
 
-coreMap.Map.prototype.getValueFromDataElement = function(mapping, element){
+coreMap.Map.prototype.getValueFromDataElement = function (mapping, element) {
     if (typeof mapping === 'function') {
         return mapping.call(this, element);
     }
     return element[mapping];
 };
 
-coreMap.Map.prototype.toggleCaching = function() {
+coreMap.Map.prototype.toggleCaching = function () {
     this.caching = !this.caching;
     if (this.caching) {
         this.cacheReader.deactivate();
@@ -425,7 +450,7 @@ coreMap.Map.prototype.toggleCaching = function() {
 }
 
 // clear the LocaleStorage used by the browser to store data for this.
-coreMap.Map.prototype.clearCache = function() {
+coreMap.Map.prototype.clearCache = function () {
     OpenLayers.Control.CacheWrite.clearCache();
     console.log("Cleared the map cache.");
 }
@@ -435,7 +460,7 @@ coreMap.Map.prototype.clearCache = function() {
  * @method initializeMap
  */
 
-coreMap.Map.prototype.initializeMap = function(){
+coreMap.Map.prototype.initializeMap = function () {
     OpenLayers.ProxyHost = "proxy.cgi?url=";
     $('#' + this.elementId).css({
         width: this.width,
@@ -449,7 +474,7 @@ coreMap.Map.prototype.initializeMap = function(){
  * @method setupLayers
  */
 
-coreMap.Map.prototype.setupLayers = function(){
+coreMap.Map.prototype.setupLayers = function () {
     var baseLayer = new OpenLayers.Layer.OSM("OSM", null, {});
     this.map.addLayer(baseLayer);
 
@@ -480,7 +505,7 @@ coreMap.Map.prototype.setupLayers = function(){
     this.cacheWriter = new OpenLayers.Control.CacheWrite({
         imageFormat: "image/png",
         eventListeners: {
-            cachefull: function() {
+            cachefull: function () {
                 console.log("Map cache is full.  Will not cache again until the cache is cleared.");
                 alert("Cache Full.  Re-enable caching to clear the cache and start building a new set");
                 this.toggleCaching();
