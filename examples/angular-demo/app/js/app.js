@@ -28,5 +28,6 @@ var neonDemo = angular.module('neonDemo', [
 	'timelineSelectorChartDirective',
 	'timelineSelectorDirective',
 	'heatMapDirective',
-	'queryResultsTableDirective'
+	'queryResultsTableDirective',
+    'tagCloudDirective'
 ]);

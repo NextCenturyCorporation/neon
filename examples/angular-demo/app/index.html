@@ -1,62 +1,65 @@
 <!doctype html>
 <html lang="en" ng-app="neonDemo">
-	<head>
-		<meta charset="utf-8">
-		<meta http-equiv="X-UA-Compatible" content="IE=edge">
-			<meta name="viewport" content="width=device-width, initial-scale=1">
-		<title>Neon</title>
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+            <meta name="viewport" content="width=device-width, initial-scale=1">
+        <title>Neon</title>
 
-		<link type="image/png" rel="shortcut icon" href="img/Neon_16x16.png">
+        <link type="image/png" rel="shortcut icon" href="img/Neon_16x16.png">
 
-		<link rel="stylesheet" type="text/css" href="css/bootstrap/bootstrap.min.css">
+        <link rel="stylesheet" type="text/css" href="css/bootstrap/bootstrap.min.css">
+        <link rel="stylesheet" type="text/css" href="css/slickgrid/slick.grid.css">
+        <link rel="stylesheet" type="text/css" href="css/smoothness/jquery-ui-1.8.16.custom.css">
 
-		<!-- Custom Stylesheet -->
-		<link href="css/style.css" rel="stylesheet">
+        <!-- Custom Stylesheet -->
+        <link href="css/style.css" rel="stylesheet">
 
-		<!-- Directive styles -->
-		<link rel="stylesheet" type="text/css" href="css/directives/circularHeatChart.css">
-		<link rel="stylesheet" type="text/css" href="css/directives/barchart.css">
-		<link rel="stylesheet" type="text/css" href="css/directives/timelineSelector.css">
-		<link rel="stylesheet" type="text/css" href="css/directives/timelineSelectorChart.css">
-		<link rel="stylesheet" type="text/css" href="css/directives/heatMap.css">
-		<link rel="stylesheet" type="text/css" href="css/directives/queryResultsTable.css">
+        <!-- Directive styles -->
+        <link rel="stylesheet" type="text/css" href="css/directives/circularHeatChart.css">
+        <link rel="stylesheet" type="text/css" href="css/directives/barchart.css">
+        <link rel="stylesheet" type="text/css" href="css/directives/timelineSelector.css">
+        <link rel="stylesheet" type="text/css" href="css/directives/timelineSelectorChart.css">
+        <link rel="stylesheet" type="text/css" href="css/directives/heatMap.css">
+        <link rel="stylesheet" type="text/css" href="css/directives/queryResultsTable.css">
+        <link rel="stylesheet" type="text/css" href="css/directives/tagCloud.css">
 
-		<!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
-		<!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
-		<!--[if lt IE 9]>
-		<script src="lib/html5shiv.js"></script>
-		<script src="lib/respond.min.js"></script>
-		<![endif]-->
-	</head>
-	<body ng-controller="neonDemoController">
-		<!-- Header -->
-		<!-- This could be made into either a directive or a partial -->
-		<nav role="navigation" class="navbar">
-			<div class="navbar-default navbar-static-top affix">
-				<div class="container">
+        <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+        <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+        <!--[if lt IE 9]>
+        <script src="lib/html5shiv.js"></script>
+        <script src="lib/respond.min.js"></script>
+        <![endif]-->
+    </head>
+    <body ng-controller="neonDemoController">
+        <!-- Header -->
+        <!-- This could be made into either a directive or a partial -->
+        <nav role="navigation" class="navbar">
+            <div class="navbar-default navbar-static-top affix">
+                <div class="container">
 
 
-					<button data-target=".navbar-collapse" data-toggle="collapse" class="navbar-toggle pull-left" type="button">
-						<span class="sr-only">Toggle navigation</span>
-						<span class="icon-bar"></span>
-						<span class="icon-bar"></span>
-						<span class="icon-bar"></span>
-					</button>
+                    <button data-target=".navbar-collapse" data-toggle="collapse" class="navbar-toggle pull-left" type="button">
+                        <span class="sr-only">Toggle navigation</span>
+                        <span class="icon-bar"></span>
+                        <span class="icon-bar"></span>
+                        <span class="icon-bar"></span>
+                    </button>
 
-					<a target="_blank" href="http://neonframework.org/" class="navbar-text pull-right">
-						Powered by <img class="brand-image" src="img/Neon_60x34.png"></img>
-					</a>
+                    <a target="_blank" href="http://neonframework.org/" class="navbar-text pull-right">
+                        Powered by <img class="brand-image" src="img/Neon_60x34.png"></img>
+                    </a>
 
-					<div class="clearfix visible-xs"></div>
+                    <div class="clearfix visible-xs"></div>
 
-					<div class="navbar-collapse collapse">
+                    <div class="navbar-collapse collapse">
 
 						<!-- Database Config -->
 						<!--div ng-include="'partials/start.html'"></div-->
 						<database-config></database-config>
 						<ul class="nav navbar-nav">
 							<li>
-								<a data-toggle="collapse" data-parent="#trays" href="#filter-tray" class="collapsed">
+								<a data-toggle="collapse" data-parent="#trays" href=".filter-tray" class="collapsed">
 									<span class="glyphicon glyphicon-filter"></span>
 									Create Filters
 									<span class="label label-primary">3</span>
@@ -73,44 +76,41 @@
 			</div>
 		</nav>
 
-		<!-- Trays -->
-		<div class="panel-group" id="trays">
+        <!-- Trays -->
+        <div class="panel-group" id="trays">
 
 			<!-- Filter Builder tray -->
-			<div id="filter-tray" filter-builder class="tray filter-tray panel panel-default collapse"></div>
+			<div filter-builder></div>
 
-			<!-- See Data tray -->
-			<div id="data-tray" query-results-table class="tray panel panel-default collapse"></div>
+            <!-- See Data tray -->
+            <div id="data-tray" query-results-table class="tray panel panel-default collapse"></div>
 
-		</div>
+        </div>
 
-		<!-- DASHBOARD CONTENT -->
-		<div class="container">
+        <!-- DASHBOARD CONTENT -->
+        <div class="container">
 
-			<!-- Timeline -->
-			<div timeline-selector></div>
+            <!-- Timeline -->
+            <div timeline-selector></div>
 
-			<div class="row">
+            <div class="row">
 
-				<!-- Left column -->
-				<div class="col-md-4">
+                <!-- Left column -->
+                <div class="col-md-4">
 
-					<!-- Circular heat chart -->
-					<div circular-heat-form></div>
+                    <!-- Circular heat chart -->
+                    <div circular-heat-form></div>
 
 					<!-- Tag cloud -->
-					<div class="well">
-						<h4>Popular Hashtags</h4>
-						<!-- chart container here -->
-					</div>
+                    <tag-cloud tag-field="'hashtags'"></tag-cloud>
 
-				</div>
+                </div>
 
-				<!-- Right column -->
-				<div class="col-md-8">
+                <!-- Right column -->
+                <div class="col-md-8">
 
-					<!-- Sentiment chart -->
-					<div class="well">
+                    <!-- Sentiment chart -->
+                    <div class="well">
 
 						<div class="form-inline">
 							<div class="form-group">
@@ -132,39 +132,48 @@
 						<barchart attr-x="xAxisField" attr-y="yAxisField" bar-type='barType'></barchart>
 					</div>
 
-					<!-- Map -->
-					<div heat-map class="well"></div>
+                    <!-- Map -->
+                    <div heat-map class="well"></div>
 
-				</div>
-			</div>
+                </div>
+            </div>
 
-		</div>
+        </div>
 
-		<!-- In production use:
-		<script src="//ajax.googleapis.com/ajax/libs/angularjs/x.x.x/angular.min.js"></script>
-		-->
+        <!-- In production use:
+        <script src="//ajax.googleapis.com/ajax/libs/angularjs/x.x.x/angular.min.js"></script>
+        -->
 
-	 	<!-- Including neon before angular here as neon has lodash and jquery wrapped into it.  If this is
-	 	     loaded first, angular should pick up the included jQuery. -->
-		<script src="/neon/js/neon.js"></script>
-		<script src="js/neon-extensions/filtertable.js"></script>
+         <!-- Including neon before angular here as neon has lodash and jquery wrapped into it.  If this is
+              loaded first, angular should pick up the included jQuery. -->
+        <script src="/neon/js/neon.js"></script>
+        <script src="js/neon-extensions/filtertable.js"></script>
 
-		<!-- <script src="lib/jquery-1.11.0.min.js"></script> -->
-		<script src="lib/angular/angular.min.js"></script>
+        <!-- <script src="lib/jquery-1.11.0.min.js"></script> -->
+        <script src="lib/angular/angular.min.js"></script>
 
-		<!-- Include third party libs -->
-		<script src="lib/d3/d3.v3.min.js"></script>
-		<script src="lib/bootstrap/bootstrap.min.js"></script>
-		<script src="lib/openlayers/OpenLayers.js"></script>
-		<script src="lib/openlayers/heatmap/heatmap.js"></script>
-		<script src="lib/openlayers/heatmap/heatmap-openlayers.js"></script>
+        <!-- Include third party libs -->
+        <script src="lib/d3/d3.v3.min.js"></script>
+        <script src="lib/bootstrap/bootstrap.min.js"></script>
+        <script src="lib/openlayers/OpenLayers.js"></script>
+        <script src="lib/openlayers/heatmap/heatmap.js"></script>
+        <script src="lib/openlayers/heatmap/heatmap-openlayers.js"></script>
+        <script src="lib/jquery.tagcloud.js"></script>
+        <script src="lib/jquery/jquery.event.drag-2.2.js"></script>
+        <script src="lib/jquery/jquery-ui-1.8.16.custom.min.js"></script>
+        <script src="lib/slickgrid/slick.core.js"></script>
+        <script src="lib/slickgrid/slick.grid.js"></script>
+        <script src="lib/slickgrid/slick.dataview.js"></script>
+        <script src="lib/mergesort/merge-sort.js"></script>
+        <script src="lib/slickgrid/plugins/slick.autotooltips.js"></script>
+        <script src="lib/slickgrid/plugins/slick.rowselectionmodel.js"></script>
 
-
-		<!-- Include required non-angular support modules -->
-		<script src="js/namespaces.js"></script>
-		<script src="js/charts/barchart.js"></script>
-		<script src="js/charts/timelineSelectorChart.js"></script>
-		<script src="js/coremap/coremap.js"></script>
+        <!-- Include required non-angular support modules -->
+        <script src="js/namespaces.js"></script>
+        <script src="js/charts/barchart.js"></script>
+        <script src="js/charts/timelineSelectorChart.js"></script>
+        <script src="js/coremap/coremap.js"></script>
+        <script src="js/tables/table.js"></script>
 
 		<!-- Include our custom Angular components here for now. -->
 		<script src="js/app.js"></script>
@@ -183,5 +192,6 @@
 		<script src="js/directives/fieldSelector.js"></script>
 		<script src="js/directives/heatMap.js"></script>
 		<script src="js/directives/queryResultsTable.js"></script>
+        <script src="js/directives/tagCloudDirective.js"></script>
 	</body>
 </html>

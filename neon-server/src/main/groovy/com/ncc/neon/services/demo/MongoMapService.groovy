@@ -15,42 +15,49 @@
  */
 
 package com.ncc.neon.services.demo
+import com.mongodb.BasicDBList
+import com.mongodb.BasicDBObject
 import com.mongodb.DBObject
+import com.mongodb.MongoClient
 import com.ncc.neon.connect.ConnectionInfo
 import com.ncc.neon.connect.ConnectionManager
 import com.ncc.neon.connect.DataSources
 import com.ncc.neon.connect.MongoConnectionClient
 import groovy.transform.CompileStatic
-import org.jongo.Jongo
-import org.jongo.MongoCollection
-import org.jongo.ResultHandler
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.stereotype.Component
 
+import javax.ws.rs.DefaultValue
 import javax.ws.rs.GET
 import javax.ws.rs.Path
 import javax.ws.rs.Produces
 import javax.ws.rs.QueryParam
 import javax.ws.rs.core.Response
-import java.awt.*
+import java.awt.AlphaComposite
+import java.awt.Color
+import java.awt.Graphics2D
 import java.awt.image.BufferedImage
 /**
  * A web service that generates map data from a mongo database
  */
 @CompileStatic
 @Path("/mongomap")
-@org.springframework.stereotype.Component
+@Component
 public class MongoMapService {
 
-    // TODO: This radius should be calculated based on zoom factor so it's not tiny when zoomed in
-    private static final int DOT_RADIUS = 5
+    // TODO: Extract methods - this is really long right now
+    // TODO: Assumes one layer in LAYERS - is that ok?
 
     @Autowired
     private ConnectionManager connectionManager
 
+    @Autowired
+    private MongoNeonHelper mongoNeonHelper
+
     // Note these params are all in CAPS because openlayers puts its params in caps and this keeps them consistent
 
-    @SuppressWarnings("MethodSize") // ignore since Jongo requires us to break the query into some longer parts. that makes the method longer, but it's still straight forward@SuppressWarnings("MethodSize") // ignore since Jongo requires us to break the query into some longer parts (and this is a demo class). that makes the method longer, but it's still straight forward
-    @SuppressWarnings("ExplicitCallToAndMethod")  // codenarc falsely reports this when using the "and" method in Jongo
+    // TODO: Can probably remove the ExplicitCall error
+    @SuppressWarnings("MethodSize")
     @GET
     @Path("tile")
     @Produces("image/png")
@@ -58,16 +65,14 @@ public class MongoMapService {
                             @QueryParam("DB") String databaseName,
                             @QueryParam("LAYERS") String collectionName,
                             @QueryParam("BBOX") String bbox, @QueryParam("WIDTH") int width,
-                            @QueryParam("HEIGHT") final int height) {
+                            @QueryParam("HEIGHT") final int height,
+                            @DefaultValue("0.5f") @QueryParam("MINALPHA") final float minAlpha,
+                            @DefaultValue("100") @QueryParam("MAXCOUNT") final int maxCount
 
-        // TODO: We might need to reproject the bounding box depending on the projection of the base map
+    ) {
+
 
         connectionManager.currentRequest = (new ConnectionInfo(dataSource: DataSources.mongo, host: host))
-
-        Jongo jongo = new Jongo(((MongoConnectionClient)connectionManager.connection).mongo.getDB(databaseName))
-
-        // TODO: Assumes one layer in LAYERS - is that ok?
-        MongoCollection collection = jongo.getCollection(collectionName)
 
         String[] bboxParts = bbox.split(",")
         //xmin/ymin/xmax/ymax
@@ -79,40 +84,102 @@ public class MongoMapService {
         float pxPerDegreeLon = (float) (width / (maxLon - minLon))
         float pxPerDegreeLat = (float) (height / (maxLat - minLat))
 
+
+        int dotRadius
+        int minDegrees = (int) Math.min((maxLon - minLon), (maxLat - minLat))
+        if (minDegrees >= 22.5) {
+            dotRadius = 8
+        } else {
+            dotRadius = 16
+        }
+
         // TODO: This isn't well tested yet
         // TODO: Assumes fields named location, latitude and longitude. We should be able to get latitude and longitude from location, and not have to store them separately
         // TODO: Modify the query to add the x/y counts and use that for the point density
 
-        // TODO: Need to apply additional neon filters
-        // matches only the bounds in the current tile. there should be an index on a field named "location"
-        String matchBounds = '{$match : { location : { $geoWithin : { $box : [[' + minLon + ',' + minLat + '],[' + maxLon + ',' + maxLat + ']] } }}}'
+        DBObject box = new BasicDBObject('$box', [[minLon, minLat], [maxLon, maxLat]])
+        DBObject geoWithin = new BasicDBObject('$geoWithin', box)
+        DBObject matchQuery = new BasicDBObject('location', geoWithin)
+        matchQuery = mongoNeonHelper.mergeWithNeonFilters(matchQuery, databaseName, collectionName)
 
-        // computes the x/y pixel locations for each location in the tile
-        String computeXY = '{$project: { x: {$multiply:[' + pxPerDegreeLon + ', {$subtract:["$longitude",' + minLon + ']} ]}, y: {$multiply:[' + pxPerDegreeLat + ', {$subtract:["$latitude",' + minLat + ']} ]} }}'
+        DBObject match = new BasicDBObject('$match', matchQuery)
 
-        // takes the floor of the x/y so they can be grouped by pixel. mongo aggregation doesn't offer a floor function, so this takes a floor
-        // by doing num-num%1 (or num - -1*(num%1) when negative so the floor rounds toward negative infinity)
-        String floorXY = '{$project: { x : { $cond: [{ $gte: ["$x", 0] },{$subtract:["$x",{$mod:["$x",1]}]},{$subtract:["$x",{$multiply:[{$mod:["$x",1]},-1]}]}]},y : { $cond: [{ $gte: ["$y", 0] },{$subtract:["$y",{$mod:["$y",1]}]},{$subtract:["$y",{$multiply:[{$mod:["$y",1]},-1]}]}]}}}'
+        DBObject lon = new BasicDBObject('$subtract', ['$longitude', minLon])
+        DBObject x = new BasicDBObject('$multiply', [pxPerDegreeLon, lon])
 
-        String groupByXY = '{"$group": {"_id":{x:"$x",y:"$y"}}}'
+        DBObject lat = new BasicDBObject('$subtract', ['$latitude', minLat])
+        DBObject y = new BasicDBObject('$multiply', [pxPerDegreeLat, lat])
 
-        // TODO: Replace this with opengl rendering (see TilingRenderer in the gltiles project) - maybe not for the demo though since it adds extra dependencies that may not be necessary
+        DBObject modX = new BasicDBObject('$mod', [x, 1])
+        DBObject floorXPos = new BasicDBObject('$subtract', [x, modX])
+        DBObject multNegOneModX = new BasicDBObject('$multiply', [-1, floorXPos])
+        DBObject floorXNeg = new BasicDBObject('$subtract', [x, multNegOneModX])
+        BasicDBList gteZeroXArgs = new BasicDBList()
+        gteZeroXArgs.add(x)
+        gteZeroXArgs.add(0)
+        DBObject gteZeroX = new BasicDBObject('$gte', [x, 0])
+
+
+        DBObject modY = new BasicDBObject('$mod', [y, 1])
+        DBObject floorYPos = new BasicDBObject('$subtract', [y, modY])
+        DBObject multNegOneModY = new BasicDBObject('$multiply', [-1, floorYPos])
+        DBObject floorYNeg = new BasicDBObject('$subtract', [y, multNegOneModY])
+        BasicDBList gteZeroYArgs = new BasicDBList()
+        gteZeroYArgs.add(y)
+        gteZeroYArgs.add(0)
+        DBObject gteZeroY = new BasicDBObject('$gte', [y, 0])
+
+        BasicDBList xConditions = new BasicDBList()
+        xConditions.add(gteZeroX)
+        xConditions.add(floorXPos)
+        xConditions.add(floorXNeg)
+        DBObject condX = new BasicDBObject('$cond', xConditions)
+
+        BasicDBList yConditions = new BasicDBList()
+        yConditions.add(gteZeroY)
+        yConditions.add(floorYPos)
+        yConditions.add(floorYNeg)
+        DBObject condY = new BasicDBObject('$cond', yConditions)
+
+        DBObject fields = new BasicDBObject()
+        fields.put("x", condX)
+        fields.put("y", condY)
+        DBObject project = new BasicDBObject('$project', fields)
+
+        DBObject idField = new BasicDBObject()
+        idField.put("x", '$x')
+        idField.put("y", '$y')
+        DBObject groupFields = new BasicDBObject("_id", idField)
+        groupFields.append("count", new BasicDBObject('$sum', 1))
+        DBObject group = new BasicDBObject('$group', groupFields)
+
         BufferedImage image = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB)
         Graphics2D graphics = image.createGraphics()
-        graphics.setColor(Color.RED)
-        collection.aggregate(matchBounds).and(computeXY).and(floorXY).and(groupByXY).map(new ResultHandler<Void>() {
-            @Override
-            public Void map(DBObject result) {
-                // TODO: Is the DOT_RADIUS being subtracted in the right direction for the height?
-                DBObject id = (DBObject) result.get("_id")
-                graphics.fillOval(((Number) id.get("x")).intValue() - DOT_RADIUS,
-                        height - ((Number) id.get("y")).intValue() - DOT_RADIUS,
-                        DOT_RADIUS, DOT_RADIUS)
-                return null
+
+        graphics.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 1.0f))
+
+        // TODO: Replace this with opengl rendering (see TilingRenderer in the gltiles project) - maybe not for the demo though since it adds extra dependencies that may not be necessary
+        MongoClient mongo = ((MongoConnectionClient) connectionManager.connection).mongo
+        Iterator<DBObject> results = mongo.getDB(databaseName).getCollection(collectionName).aggregate(match, project, group).results().iterator()
+        while (results.hasNext()) {
+            DBObject row = results.next()
+            DBObject id = (DBObject) row.get("_id")
+            int count = ((Number) row.get("count")).intValue()
+            // assume 0 as a min count
+            float pct = (float) count / (float) maxCount
+            float alpha = pct * (1.0f - minAlpha) + minAlpha
+            if ( alpha > 1.0f ) {
+                alpha = 1.0f
             }
-        })
+            else if ( alpha < 0.0f ) {
+                alpha = 0.0f
+            }
+            graphics.setColor(new Color(1f,0f,0f,alpha))
+            graphics.fillOval(((Number) id.get("x")).intValue() - dotRadius,
+                    height - ((Number) id.get("y")).intValue() - dotRadius,
+                    dotRadius, dotRadius)
+        }
         return Response.ok(image).build()
     }
-
 
 }

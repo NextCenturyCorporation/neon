@@ -27,145 +27,205 @@
  * @constructor
  */
 angular.module('queryResultsTableDirective', []).directive('queryResultsTable', ['ConnectionService',
-	function(connectionService) {
+    function(connectionService) {
 
-	return {
-		templateUrl: 'partials/queryResultsTable.html',
-		restrict: 'EA',
-		scope: {
+    return {
+        templateUrl: 'partials/queryResultsTable.html',
+        restrict: 'EA',
+        scope: {
 
-		},
-		controller: function($scope) {
+        },
+        controller: function($scope) {
 
-		},
-		link: function($scope, element, attr) {
+        },
+        link: function($scope, element, attr) {
 
-			element.addClass('query-results-table');
+            element.addClass('query-results-table');
 
-			/** 
-			 * Initializes the name of the directive's scope variables 
-			 * and the Neon Messenger used to monitor data change events.
-			 * @method initialize
-			 */
-			$scope.initialize = function() {
-				// Defaulting the expected date field to 'date'.
-				$scope.databaseName = '';
-				$scope.tableName = '';
-				$scope.fields = [];
-				$scope.error = '';
+            /** 
+             * Initializes the name of the directive's scope variables 
+             * and the Neon Messenger used to monitor data change events.
+             * @method initialize
+             */
+            $scope.initialize = function() {
+            	$scope.ASCENDING = neon.query.ASCENDING;
+            	$scope.DESCENDING = neon.query.DESCENDING;
 
-				// Default our time data to an empty array.
-				$scope.data = [];
+                $scope.databaseName = '';
+                $scope.tableName = '';
+                $scope.fields = [];
+                $scope.sortByField = '';
+                $scope.sortDirection = neon.query.ASCENDING;
+                $scope.limit = 500;
+                $scope.totalRows = 0;
+                $scope.error = '';
 
-	            // Setup our messenger.
-				$scope.messenger = new neon.eventing.Messenger();
+                // Default our data table to be empty.  Generate a unique ID for it 
+                // and pass that to the tables.Table object.
+                $scope.data = [];
+                $scope.tableId = 'query-results-' + uuid();
+                var $tableDiv = $(element).find('.query-results-grid');
+                var options = $scope.createOptions([]);
 
-				$scope.messenger.events({
-					activeDatasetChanged: onDatasetChanged,
-					filtersChanged: onFiltersChanged,
-					selectionChanged: onSelectionChanged
-				});
+                $tableDiv.attr("id", $scope.tableId);
 
-			};
+                // Setup our messenger.
+                $scope.messenger = new neon.eventing.Messenger();
 
-			/**
-			 * Event handler for selection changed events issued over Neon's messaging channels.
-			 * @param {Object} message A Neon selection changed message.
-			 * @method onSelectionChanged
-			 * @private
-			 */ 
-			var onSelectionChanged = function(message) {
-				$scope.queryForData();
-			};
+                $scope.messenger.events({
+                    activeDatasetChanged: onDatasetChanged,
+                    filtersChanged: onFiltersChanged,
+                    selectionChanged: onSelectionChanged
+                });
 
-			/**
-			 * Event handler for filter changed events issued over Neon's messaging channels.
-			 * @param {Object} message A Neon filter changed message.
-			 * @method onFiltersChanged
-			 * @private
-			 */ 
-			var onFiltersChanged = function(message) {
-				// Clear our filters against the last table and filter before requesting data.
-				$scope.queryForData();
-			};
+            };
 
-			/**
-			 * Event handler for dataset changed events issued over Neon's messaging channels.
-			 * @param {Object} message A Neon dataset changed message.
-			 * @param {String} message.database The database that was selected.
-			 * @param {String} message.table The table within the database that was selected.
-			 * @method onDatasetChanged
-			 * @private
-			 */ 
-			var onDatasetChanged = function(message) {
-				$scope.databaseName = message.database;
-				$scope.tableName = message.table;
-				$scope.latitudeField = "";
-		        $scope.latitudeField = "";
-		        $scope.longitudeField = "";
-		        $scope.longitudeField = "";
-		        $scope.colorByField = "";
-		        $scope.colorByField = "";
-		        $scope.sizeByField = "";
-		        $scope.sizeByField = "";
+            $scope.createOptions = function(data) {
+                var _id = "_id";
+                var has_id = true;
 
-				// Repopulate the field selectors and get the default values.
-				connectionService.getActiveConnection().getFieldNames($scope.tableName, function(results) {
+                _.each(data.data, function (element) {
+                    if (!(_.has(element, _id))) {
+                        has_id = false;
+                    }
+                });
+
+                var options = {data: data.data};
+
+                if (has_id) {
+                    options.id = _id;
+                }
+                return options;
+            };
+
+            /**
+             * Event handler for a user selecting fields in the data table.
+             * @method onSelection
+             * @private
+             */
+            var onSelection = function() {
+                console.log("user selected something in the table.");
+            };
+
+            /**
+             * Event handler for selection changed events issued over Neon's messaging channels.
+             * @param {Object} message A Neon selection changed message.
+             * @method onSelectionChanged
+             * @private
+             */ 
+            var onSelectionChanged = function(message) {
+                $scope.queryForData();
+                $scope.queryForTotalRows();
+            };
+
+            /**
+             * Event handler for filter changed events issued over Neon's messaging channels.
+             * @param {Object} message A Neon filter changed message.
+             * @method onFiltersChanged
+             * @private
+             */ 
+            var onFiltersChanged = function(message) {
+                // Clear our filters against the last table and filter before requesting data.
+                //$scope.queryForData();
+            };
+
+            /**
+             * Event handler for dataset changed events issued over Neon's messaging channels.
+             * @param {Object} message A Neon dataset changed message.
+             * @param {String} message.database The database that was selected.
+             * @param {String} message.table The table within the database that was selected.
+             * @method onDatasetChanged
+             * @private
+             */ 
+            var onDatasetChanged = function(message) {
+                $scope.databaseName = message.database;
+                $scope.tableName = message.table;
+
+                connectionService.getActiveConnection().getFieldNames($scope.tableName, function(results) {
 				    $scope.$apply(function() {
 				        populateFieldNames(results);
-				       
-				        $scope.queryForData();
+				        $scope.sortByField = connectionService.getFieldMapping($scope.database, $scope.tableName, "sort-by");
+				        $scope.sortByField = $scope.sortByField.mapping || $scope.fields[0];
 				    });
 				});
-			};
+            };
 
-			/**
-			 * Helper method for setting the fields available for filter clauses.
-			 * @param {Array} fields An array of field name strings.
-			 * @method populateFieldNames
-			 * @private
-			 */
-			var populateFieldNames = function(fields) {
-				$scope.fields = fields;
-			};
+            /**
+             * Helper method for setting the fields available for filter clauses.
+             * @param {Array} fields An array of field name strings.
+             * @method populateFieldNames
+             * @private
+             */
+            var populateFieldNames = function(fields) {
+                $scope.fields = fields;
+            };
 
-			/**
-			 * Triggers a Neon query that will aggregate the time data for the currently selected dataset.
-			 * @method queryForData
-			 */
-			$scope.queryForData = function() {
+            /**
+             * Triggers a Neon query that will aggregate the time data for the currently selected dataset.
+             * @method queryForData
+             */
+            $scope.queryForData = function() {
 
-				var query = $scope.buildQuery();
+                var query = $scope.buildQuery();
 
-				connectionService.getActiveConnection().executeQuery(query, function(queryResults) {
-					$scope.$apply(function(){
-						$scope.updateData(queryResults);
-					});
-				});
-			};
+                connectionService.getActiveConnection().executeQuery(query, function(queryResults) {
+                    $scope.$apply(function(){
+                        $scope.updateData(queryResults);
+                    });
+                });
+            };
 
-			/**
-			 * Updates the data bound to the table managed by this directive.  This will trigger a change in 
-			 * the chart's visualization.
-			 * @param {Object} queryResults Results returned from a Neon query.
-			 * @param {Array} queryResults.data The aggregate numbers for the heat chart cells.
-			 * @method updateData
-			 */
-			$scope.updateData = function(queryResults) {
-				// TODO: handle the new data.
-			};
+            /**
+             * Triggers a Neon query that will aggregate the time data for the currently selected dataset.
+             * @method queryForData
+             */
+            $scope.queryForTotalRows = function() {
 
+                var query = new neon.query.Query().selectFrom($scope.databaseName, $scope.tableName)
+                    .aggregate(neon.query.COUNT, '*', 'count');
+
+
+                connectionService.getActiveConnection().executeQuery(query, function(queryResults) {
+                    $scope.$apply(function(){
+                        $scope.totalRows = queryResults.data[0].count;
+                    });
+                });
+            };
+
+            /**
+             * Updates the data bound to the table managed by this directive.  This will trigger a change in 
+             * the chart's visualization.
+             * @param {Object} queryResults Results returned from a Neon query.
+             * @param {Array} queryResults.data The aggregate numbers for the heat chart cells.
+             * @method updateData
+             */
+            $scope.updateData = function(queryResults) {
+                // Handle the new data.
+                $scope.tableOptions = $scope.createOptions(queryResults);
+
+                $scope.table = new tables.Table("#" + $scope.tableId, $scope.tableOptions).draw().registerSelectionListener(onSelection);
+                $scope.table.refreshLayout();
+
+            };
+
+            /**
+             * Builds a query to pull a limited set of records that match any existing filter sets.
+             * @return neon.query.Query
+             * @method buildQuery
+             */
             $scope.buildQuery = function() {
-		        var query = new neon.query.Query().selectFrom($scope.databaseName, $scope.tableName);
+                var query = new neon.query.Query().selectFrom($scope.databaseName, $scope.tableName);
+                query.limit($scope.limit);
+                query.sortBy($scope.sortByField, $scope.sortDirection);
 
-		        return query;
-		    }
+                return query;
+            }
 
-			// Wait for neon to be ready, the create our messenger and intialize the view and data.
-			neon.ready(function () {
-				$scope.initialize();
-			});
+            // Wait for neon to be ready, the create our messenger and intialize the view and data.
+            neon.ready(function () {
+                $scope.initialize();
+            });
 
-		}
-	};
+        }
+    };
 }]);

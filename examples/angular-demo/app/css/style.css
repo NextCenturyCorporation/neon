@@ -290,7 +290,7 @@ a.navbar-text:focus{
 	color: #333333;
 }
 .navbar{
-	margin-bottom: 30px;
+	margin-bottom: 0;
 }
 .navbar-default{
 	background-color: #FFFFFF;
@@ -376,6 +376,9 @@ a.navbar-text:focus{
 }
 .tray .container > .pull-right{
 	margin-top: 5px;
+}
+.panel-group {
+	margin-bottom: 0px;
 }
 
 /* FILTER TRAY */
