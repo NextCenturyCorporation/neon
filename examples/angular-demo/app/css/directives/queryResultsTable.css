@@ -18,6 +18,7 @@
     min-height: 200px;
     height: 300px;
     width: 1140px;
+   
 }
 
 .query-results-grid, .query-results-grid:before, .query-results-grid:after, .query-results-grid *, .query-results-grid *:before, .query-results-grid *:after {

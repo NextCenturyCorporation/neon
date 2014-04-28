@@ -90,7 +90,9 @@ angular.module('queryResultsTableDirective', []).directive('queryResultsTable', 
                     }
                 });
 
-                var options = {data: data.data};
+                var options = {
+                    data: data.data
+                };
 
                 if (has_id) {
                     options.id = _id;
@@ -216,7 +218,9 @@ angular.module('queryResultsTableDirective', []).directive('queryResultsTable', 
             $scope.buildQuery = function() {
                 var query = new neon.query.Query().selectFrom($scope.databaseName, $scope.tableName);
                 query.limit($scope.limit);
-                query.sortBy($scope.sortByField, $scope.sortDirection);
+                if ($scope.sortByField !== "undefined" && $scope.sortByField.length > 0) {
+                    query.sortBy($scope.sortByField, $scope.sortDirection);
+                }
 
                 return query;
             }
