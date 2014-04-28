@@ -355,7 +355,13 @@ charts.BarChart.prototype.bindData_ = function (chart) {
 	var bars = chart.selectAll(charts.BarChart.SVG_ELEMENT_)
 		.data(this.data_)
 		.enter().append(charts.BarChart.SVG_ELEMENT_)
-		.attr('class', charts.BarChart.BAR_CLASS_ + ' ' + charts.BarChart.ACTIVE_BAR_CLASS_)
+		.attr('class', function(d) {
+			var classString = charts.BarChart.BAR_CLASS_ + ' ' + charts.BarChart.ACTIVE_BAR_CLASS_;
+			if(d.classString) {
+				classString = classString + ' ' + d.classString;
+			}
+			return classString;
+		})
 		.attr('x', function (d) {
 			return me.x(d.key);
 		})
@@ -365,6 +371,8 @@ charts.BarChart.prototype.bindData_ = function (chart) {
 		.attr('width', this.x.rangeBand())
 		.attr('height', function (d) {
 			if(me.yMinAttribute_ && d[me.yMinAttribute_]) {
+				console.log(me.y(d[me.yMinAttribute_]));
+
 				return me.height - me.vMargin_ - me.y(d[me.yMinAttribute_]);
 			} else {
 				return me.height - me.vMargin_ - me.y(d.values);
@@ -436,13 +444,14 @@ charts.BarChart.prototype.setInactive = function (predicate) {
 
 charts.BarChart.prototype.showTooltip_ = function (item, mouseLocation) {
 	var xValue = this.tickFormat_ ? this.tickFormat_(item.key) : item.key;
+	var yValue = this.isStacked ? (item.values - item[this.yMinAttribute_]) : item.values
 
 	var tooltip = this.element.append("div")
 	.property('id', charts.BarChart.TOOLTIP_ID_)
 	.classed({'charttooltip':true});
 
 	tooltip.append("div").html('<strong>' + this.xLabel_ + ':</strong> ' + xValue)
-	.append("div").html('<strong>' + this.yLabel_ + ':</strong> ' + item.values);
+	.append("div").html('<strong>' + this.yLabel_ + ':</strong> ' + yValue);
 	$(tooltip[0]).hide();
 	this.positionTooltip_(tooltip, mouseLocation);
 	$(tooltip[0]).fadeIn(500);

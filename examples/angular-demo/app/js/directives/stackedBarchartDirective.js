@@ -158,6 +158,10 @@ barchart.directive('stackedbarchart', ['ConnectionService', function(connectionS
 					var i = 0;
 					var j = 0;
 					var total;
+
+					var positiveClass = "positive-bar";
+					var negativeClass = "negative-bar";
+
 					while(i < pos.length || j < neg.length) {
 						if(i < pos.length && j < neg.length) {
 							if(pos[i][xAxis] === neg[j][xAxis]) {
@@ -166,28 +170,34 @@ barchart.directive('stackedbarchart', ['ConnectionService', function(connectionS
 								//1 -> 0-1
 								pos[i][yMin] = 0;
 								//2 -> 1-2
-								//neg[j][yMin] = pos[i][yField]; //FIXME there is an error causing the second bar height to be wrong
+								neg[j][yMin] = pos[i][yField]; //FIXME there is an error causing the second bar height to be wrong
 								neg[j][yField] = total;
 
+								pos[i].classString = positiveClass;
 								results.data.push(pos[i]);
 								i++;
+								neg[j].classString = negativeClass;
 								results.data.push(neg[j]);
 								j++;
 							} else {
 								// push lesser x
 								if(pos[i][xAxis].localeCompare(neg[j][xAxis]) < 0) {
+									pos[i].classString = positiveClass;
 									results.data.push(pos[i]);
 									i++;
 								} else {
+									neg[j].classString = negativeClass;
 									results.data.push(neg[j]);
 									j++;
 								}
 							}
 						} else {
 							if(i < pos.length) {
+								pos[i].classString = positiveClass;
 								results.data.push(pos[i]);
 								i++;
 							} else {
+								neg[j].classString = negativeClass;
 								results.data.push(neg[j]);
 								j++;
 							}
