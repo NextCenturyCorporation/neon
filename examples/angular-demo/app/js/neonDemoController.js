@@ -20,4 +20,13 @@ angular.module('neonDemo.controllers', []).controller('neonDemoController', ['$s
 		// TODO: Put any top level demo controller logic here.  This is stubbed out
 		// for now for testing purposes.
 
+		$scope.seeData = false;
+
+		// Simple handler used by the app's main index page to determine when the user
+		// wants to "see data" or not.  Essentially, this is used to sync an angular scope
+		// variable with the collapsed state of a div whose view is managed by Bootstrap
+		// hooks.
+		$scope.toggleSeeData = function() {
+			$scope.seeData = !$scope.seeData;
+		}
 	}]);

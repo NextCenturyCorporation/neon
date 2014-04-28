@@ -66,11 +66,16 @@
 									<span class="label label-primary">3</span>
 								</a>
 							</li>
-							<li>
+							<!-- <li>
 								<a data-toggle="collapse" data-parent="#trays" href="#data-tray" class="collapsed">
 									<span class="glyphicon glyphicon-list"></span> See Data
 								</a>
-							</li>
+							</li> -->
+                            <li>
+                                <a data-toggle="collapse" data-parent="#trays" href="#data-tray" class="collapsed" ng-click="toggleSeeData()">
+                                    <span class="glyphicon glyphicon-list"></span> See Data
+                                </a>
+                            </li>
 						</ul>
 					</div>
 				</div>
@@ -84,7 +89,8 @@
 			<div filter-builder></div>
 
             <!-- See Data tray -->
-            <div id="data-tray" query-results-table class="tray panel panel-default collapse"></div>
+            <!-- <div id="data-tray" query-results-table class="tray panel panel-default collapse"></div> -->
+            <div id="data-tray" query-results-table class="tray panel panel-default collapse" show-data="seeData"></div>
 
         </div>
 

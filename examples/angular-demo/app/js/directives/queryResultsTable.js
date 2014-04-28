@@ -33,7 +33,7 @@ angular.module('queryResultsTableDirective', []).directive('queryResultsTable', 
         templateUrl: 'partials/queryResultsTable.html',
         restrict: 'EA',
         scope: {
-
+            showData: '='
         },
         controller: function($scope) {
 
@@ -128,7 +128,7 @@ angular.module('queryResultsTableDirective', []).directive('queryResultsTable', 
              */ 
             var onFiltersChanged = function(message) {
                 // Clear our filters against the last table and filter before requesting data.
-                //$scope.queryForData();
+                $scope.queryForData();
             };
 
             /**
@@ -167,14 +167,15 @@ angular.module('queryResultsTableDirective', []).directive('queryResultsTable', 
              * @method queryForData
              */
             $scope.queryForData = function() {
+                if ($scope.showData) {
+                    var query = $scope.buildQuery();
 
-                var query = $scope.buildQuery();
-
-                connectionService.getActiveConnection().executeQuery(query, function(queryResults) {
-                    $scope.$apply(function(){
-                        $scope.updateData(queryResults);
+                    connectionService.getActiveConnection().executeQuery(query, function(queryResults) {
+                        $scope.$apply(function(){
+                            $scope.updateData(queryResults);
+                        });
                     });
-                });
+                }
             };
 
             /**
@@ -224,6 +225,17 @@ angular.module('queryResultsTableDirective', []).directive('queryResultsTable', 
 
                 return query;
             }
+
+            // KLUDGE: Watch for changes to showData if it goes from false to true, we want to requery for data to 
+            // trigger the data table to be recreated.  While deferring data queries to when the user want to display them
+            // is benefitial for initial application load, it can interfere with animations tied to whether or not this is
+            // displayed.  The other reason to query for data on show is because of issues with SlickGrid.  It does not 
+            // display proper scrolling and sizing behavior if it is rendered while not visible.
+            $scope.$watch('showData', function(newVal, oldVal) {
+                if(newVal) {
+                    $scope.queryForData();
+                }
+            });
 
             // Wait for neon to be ready, the create our messenger and intialize the view and data.
             neon.ready(function () {
