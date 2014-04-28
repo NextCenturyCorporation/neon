@@ -51,9 +51,7 @@ tables.Table = function (tableSelector, opts) {
     this.tableSelector_ = tableSelector;
     this.idField_ = opts.id;
     this.options_ = opts.gridOptions || {};
-    this.options_.forceFitColumns = false;
-    this.options_.enableColumnReorder = false;
-    this.options_.forceSyncScrolling = true;
+    
     var data = opts.data;
     var columns = opts.columns ? opts.columns : tables.Table.computeColumnNames_(data);
 
@@ -192,7 +190,6 @@ tables.Table.prototype.draw = function () {
     this.table_ = new Slick.Grid(this.tableSelector_, this.dataView_, this.columns_, this.options_);
     this.addSortSupport_();
     this.table_.registerPlugin(new Slick.AutoTooltips({ enableForHeaderCells: true }));
-    this.table_.autosizeColumns();
 
     return this;
 };
