@@ -202,8 +202,17 @@ angular.module('timelineSelectorDirective', []).directive('timelineSelector', ['
 			 * @method updateChartData
 			 */
 			$scope.updateChartData = function(queryResults) {
-				$scope.data = $scope.createTimelineData(queryResults);
-				$scope.updateChartHeader($scope.data[0].date, $scope.data[$scope.data.length - 1].date);
+
+				if (queryResults.data.length > 0) {
+				    $scope.data = $scope.createTimelineData(queryResults);	
+					$scope.updateChartHeader($scope.data[0].date, $scope.data[$scope.data.length - 1].date);
+				}
+				else {
+					$scope.data = $scope.createTimelineData(queryResults);
+					$scope.startDate = undefined;
+					$scope.endDate = undefined;
+					$scope.recordCount = 0;
+				}
 			};
 
 			/**
@@ -217,55 +226,61 @@ angular.module('timelineSelectorDirective', []).directive('timelineSelector', ['
 				var rawData = queryResults.data;
 				var data = [];
 				var i = 0;
+				var rawLength = rawData.length;
+
+				// If we have no values, use our dates if they existed or now.
+				if (rawLength === 0) {
+					rawData[0] = {
+						date: new Date(),
+						count: 0
+					}
+				}
 
 				// If we have only 1 value, create a range for it.
-				if (rawData.length === 1) {
+				if (rawLength === 1) {
 					rawData[1] = rawData[0]; 
 				}
 
-				var rawLength = rawData.length;
+				rawLength = rawData.length;
+                // Setup the data buckets for them.
+				// Determine the number of hour buckets along with the start and end dates for our buckets.
+				// var startDate = new Date(Date.UTC(rawData[0].year, rawData[0].month - 1, rawData[0].day, rawData[0].hour));
+				// var endDate = new Date(Date.UTC(rawData[rawLength - 1].year, rawData[rawLength - 1].month - 1, 
+				// 	rawData[rawLength - 1].day, rawData[rawLength - 1].hour));
+				var startDate = new Date(rawData[0].date);
+				var endDate = new Date(rawData[rawLength - 1].date);
+				startDate.setUTCMinutes(0);
+				startDate.setUTCSeconds(0);
+				startDate.setUTCMilliseconds(0);
+				endDate.setUTCMinutes(0);
+				endDate.setUTCSeconds(0);
+				endDate.setUTCMilliseconds(0);
 
-                // If we have at least 2 values, setup the data buckets for them.
-				if (rawLength > 1) {
-					// Determine the number of hour buckets along with the start and end dates for our buckets.
-					// var startDate = new Date(Date.UTC(rawData[0].year, rawData[0].month - 1, rawData[0].day, rawData[0].hour));
-					// var endDate = new Date(Date.UTC(rawData[rawLength - 1].year, rawData[rawLength - 1].month - 1, 
-					// 	rawData[rawLength - 1].day, rawData[rawLength - 1].hour));
-					var startDate = new Date(rawData[0].date);
-					var endDate = new Date(rawData[rawLength - 1].date);
-					startDate.setUTCMinutes(0);
-					startDate.setUTCSeconds(0);
-					startDate.setUTCMilliseconds(0);
-					endDate.setUTCMinutes(0);
-					endDate.setUTCSeconds(0);
-					endDate.setUTCMilliseconds(0);
+				if ($scope.granularity === DAY) {
+					startDate.setUTCHours(0);
+					endDate.setUTCHours(0);
+				}
 
-					if ($scope.granularity === DAY) {
-						startDate.setUTCHours(0);
-						endDate.setUTCHours(0);
+				var numBuckets = Math.ceil(Math.abs(endDate - startDate) / $scope.millisMultiplier) + 1;
+				var startTime = startDate.getTime();
+
+				// Cache the start date of the first bucket for later calculations.
+				$scope.referenceDate = startDate;
+
+				// Initialize our time buckets.
+				for (i = 0; i < numBuckets; i++) {
+					data[i] = {
+						date: new Date(startTime + ($scope.millisMultiplier * i)),
+						value: 0 
 					}
+				}
 
-					var numBuckets = Math.ceil(Math.abs(endDate - startDate) / $scope.millisMultiplier) + 1;
-					var startTime = startDate.getTime();
-
-					// Cache the start date of the first bucket for later calculations.
-					$scope.referenceDate = startDate;
-
-					// Initialize our time buckets.
-					for (i = 0; i < numBuckets; i++) {
-						data[i] = {
-							date: new Date(startTime + ($scope.millisMultiplier * i)),
-							value: 0 
-						}
-					}
-
-					// Fill our rawData into the appropriate hour buckets.
-					var diff = 0;
-					var resultDate;
-					for (i = 0; i < rawLength; i++) {
-						resultDate = new Date(rawData[i].date);
-						data[Math.floor(Math.abs(resultDate - startDate) / $scope.millisMultiplier)].value = rawData[i].count;
-					}
+				// Fill our rawData into the appropriate hour buckets.
+				var diff = 0;
+				var resultDate;
+				for (i = 0; i < rawLength; i++) {
+					resultDate = new Date(rawData[i].date);
+					data[Math.floor(Math.abs(resultDate - startDate) / $scope.millisMultiplier)].value = rawData[i].count;
 				}
 				return data;
 			};
