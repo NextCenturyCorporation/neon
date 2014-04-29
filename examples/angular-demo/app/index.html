@@ -72,7 +72,7 @@
 								</a>
 							</li> -->
                             <li>
-                                <a data-toggle="collapse" data-parent="#trays" href="#data-tray" class="collapsed" ng-click="toggleSeeData()">
+                                <a data-toggle="collapse" data-parent="#trays" href=".data-tray" class="collapsed" ng-click="toggleSeeData()">
                                     <span class="glyphicon glyphicon-list"></span> See Data
                                 </a>
                             </li>
@@ -89,8 +89,7 @@
 			<div filter-builder></div>
 
             <!-- See Data tray -->
-            <!-- <div id="data-tray" query-results-table class="tray panel panel-default collapse"></div> -->
-            <div id="data-tray" query-results-table class="tray panel panel-default collapse" show-data="seeData"></div>
+            <div query-results-table show-data="seeData"></div>
 
         </div>
 
