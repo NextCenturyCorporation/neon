@@ -108,6 +108,7 @@ barchart.directive('stackedbarchart', ['ConnectionService', function(connectionS
 				.groupBy(xAxis);
 
 			var queryType;
+			$scope.barType = 'count';
 			if($scope.barType === 'count') {
 				queryType = neon.query.COUNT;
 			} else if($scope.barType === 'sum') {
