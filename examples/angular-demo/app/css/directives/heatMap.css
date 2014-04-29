@@ -56,3 +56,32 @@
 .heat-map .olControlZoom{
 	background: none;
 }
+
+.map-legend {
+    margin-top: 20px;
+}
+.map-legend .map-legend-item {
+    color: #555555;
+    display: inline-block;
+    margin-right: 15px;
+}
+.map-legend .map-legend-icon {
+    border-radius: 2px;
+    display: inline-block;
+    height: 1em;
+    vertical-align: middle;
+    width: 1em;
+}
+
+.heat-legend{
+	margin: 0;
+}
+.heat-legend .map-legend-item {
+    color: #777777;
+}
+.heat-legend .map-legend-text {
+    margin: 0 5px;
+}
+.heat-legend .map-legend-item .map-legend-text:first-child {
+    margin-left: 0;
+}

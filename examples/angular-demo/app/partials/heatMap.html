@@ -1,11 +1,5 @@
 <div class="map-field-form">
 
-    <!-- MAP LEGEND PLACEHOLDER
-    <div class="map-legend" ng-class="{true: '', false: 'hidden'}[showPoints]">
-        <div class="map-legend-item" ng-repeat="colorMapping in colorMappings">{{colorMapping.color}} {{colorMapping.category}}</div>
-    </div> -->
-   
-
     <div class="chart-options pull-right">
 		<a class="btn btn-lg text-muted collapsed" data-toggle="collapse" data-target="#chart-options" data-animation=false>
 		  <span class="glyphicon glyphicon-cog"></span>
@@ -49,7 +43,7 @@
 		</div>
 	</div>
 
-	<div class="form-inline">
+	<div class="form-inline" ng-class="{true: '', false: 'hidden'}[showPoints]">
 		<div class="form-group">
 			<label>Size by</label>
 			<select class="form-control" ng-model="sizeByField" ng-disabled="!(fields.length > 0)" 
@@ -75,6 +69,28 @@
 			</select>
 		</div>
 	</div>
+
+	<div class="map-legend heat-legend" ng-class="{true: 'hidden', false: ''}[showPoints]">
+        <div class="map-legend-item">
+        	<span class="map-legend-text">High</span>
+        	<span class="map-legend-icon" style="background-color: #fb5c44"></span>
+        	<span class="map-legend-icon" style="background-color: #e9ed3d"></span>
+        	<span class="map-legend-icon" style="background-color: #65f13d"></span>
+        	<span class="map-legend-icon" style="background-color: #55cde9"></span>
+        	<span class="map-legend-icon" style="background-color: #6374e5"></span>
+        	<span class="map-legend-text">Low</span>
+        </div>
+    </div>
+
+	<div class="map-legend" ng-class="{true: '', false: 'hidden'}[showPoints]">
+        <div class="map-legend-item" ng-repeat="colorMapping in colorMappings|limitTo:10">
+        	<span class="map-legend-icon" style="background-color: {{colorMapping.color}}"></span>
+        	<span class="map-legend-text">{{colorMapping.category}}</span>
+        </div>
+        <div class="map-legend-item" ng-class="{true: '', false: 'hidden'}[colorMappings.length > 10]">
+        	<span class="map-legend-text text-muted">...and {{colorMappings.length-10}} more</span>
+        </div>
+    </div>
     
 	<span class="alert alert-danger" ng-class="{true: 'show', false: 'hidden'}[error !== undefined && error.length > 0]" ng-bind="error">foo</span>
 </div>
