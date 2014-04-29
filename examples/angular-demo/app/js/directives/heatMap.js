@@ -60,6 +60,9 @@ angular.module('heatMapDirective', []).directive('heatMap', ['ConnectionService'
 				$scope.showPoints = false;
 				$scope.cacheMap = false;
 				$scope.error = '';
+				$scope.needToQuery = false;
+				$scope.queryingForData = false;
+
                 $scope.filterKey = neon.widget.getInstanceId("map");
 
 				// Setup our map.
@@ -71,8 +74,6 @@ angular.module('heatMapDirective', []).directive('heatMap', ['ConnectionService'
 		        	responsive: false,
                     onZoomRect: onZoomChanged
 		        });
-		        // setMapMappingFunctions();
-		        // setLayerChangeListener();
 
 		        $scope.map.draw();
 		        $scope.map.register("moveend", this, onMoved);
@@ -104,6 +105,7 @@ angular.module('heatMapDirective', []).directive('heatMap', ['ConnectionService'
 			 * @private
 			 */ 
 			var onSelectionChanged = function(message) {
+				$scope.needToQuery = true;
 				$scope.queryForMapData();
 			};
 
@@ -115,6 +117,7 @@ angular.module('heatMapDirective', []).directive('heatMap', ['ConnectionService'
 			 */ 
 			var onFiltersChanged = function(message) {
 				// Clear our filters against the last table and filter before requesting data.
+				$scope.needToQuery = true;
 				$scope.queryForMapData();
 			};
 
@@ -159,9 +162,9 @@ angular.module('heatMapDirective', []).directive('heatMap', ['ConnectionService'
 				        $scope.colorByField = $scope.colorByField.mapping || $scope.fields[0];
 				        $scope.sizeByField = connectionService.getFieldMapping($scope.database, $scope.tableName, "size-by");
 				        $scope.sizeByField = $scope.sizeByField.mapping || $scope.fields[0];
-				        $scope.queryForMapData();
 				    });
 				});
+				$scope.queryForMapData();
 			};
 
 			/**
@@ -198,12 +201,23 @@ angular.module('heatMapDirective', []).directive('heatMap', ['ConnectionService'
 			 * @method queryForMapData
 			 */
 			$scope.queryForMapData = function() {
-				if ($scope.latitudeField !== "" && $scope.longitudeField !== "") {
+				if ($scope.latitudeField !== "" && $scope.longitudeField !== "" && !$scope.queryingForData) {
+					$scope.queryingForData = true;
+					$scope.needToQuery = false;
 					var query = $scope.buildQuery();
 
 					connectionService.getActiveConnection().executeQuery(query, function(queryResults) {
 						$scope.$apply(function(){
-							$scope.updateMapData(queryResults);
+							$scope.queryingForData = false;
+
+							// If other update requests came in while we were querying, we are in a dirty state.
+							// Re-query.  Otherwise, we're clear to draw the data.
+							if ($scope.needToQuery) {
+								$scope.queryForMapData();
+							}
+							else {
+								$scope.updateMapData(queryResults);
+							}
 						});
 					});
 				}
@@ -225,7 +239,7 @@ angular.module('heatMapDirective', []).directive('heatMap', ['ConnectionService'
 			};
 
             $scope.buildQuery = function() {
-		        var query = new neon.query.Query().selectFrom($scope.databaseName, $scope.tableName);
+		        var query = new neon.query.Query().selectFrom($scope.databaseName, $scope.tableName).selectionOnly();
 		        var groupByFields = [$scope.latitudeField, $scope.longitudeField];
 
 		        if ($scope.colorByField) {
@@ -306,6 +320,7 @@ angular.module('heatMapDirective', []).directive('heatMap', ['ConnectionService'
 					else {
 						$scope.map.sizeMapping = coreMap.Map.DEFAULT_SIZE_MAPPING;
 					}
+					$scope.needToQuery = true;
 					$scope.queryForMapData();
 				}
 			});
@@ -319,6 +334,7 @@ angular.module('heatMapDirective', []).directive('heatMap', ['ConnectionService'
 					else {
 						$scope.map.categoryMapping = undefined;
 					}
+					$scope.needToQuery = true;
 					$scope.queryForMapData();
 				}
 			});
