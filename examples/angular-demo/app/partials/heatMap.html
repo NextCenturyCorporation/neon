@@ -83,12 +83,12 @@
     </div>
 
 	<div class="map-legend" ng-class="{true: '', false: 'hidden'}[showPoints]">
-        <div class="map-legend-item" ng-repeat="colorMapping in colorMappings|limitTo:10">
+        <div class="map-legend-item" ng-repeat="colorMapping in colorMappings|limitTo:20">
         	<span class="map-legend-icon" style="background-color: {{colorMapping.color}}"></span>
         	<span class="map-legend-text">{{colorMapping.category}}</span>
         </div>
-        <div class="map-legend-item" ng-class="{true: '', false: 'hidden'}[colorMappings.length > 10]">
-        	<span class="map-legend-text text-muted">...and {{colorMappings.length-10}} more</span>
+        <div class="map-legend-item" ng-class="{true: '', false: 'hidden'}[colorMappings.length > 20]">
+        	<span class="map-legend-text text-muted">...and {{colorMappings.length-20}} more</span>
         </div>
     </div>
     
