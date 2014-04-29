@@ -60,6 +60,7 @@ angular.module('heatMapDirective', []).directive('heatMap', ['ConnectionService'
 				$scope.showPoints = false;
 				$scope.cacheMap = false;
 				$scope.error = '';
+                $scope.filterKey = neon.widget.getInstanceId("map");
 
 				// Setup our map.
 				$scope.mapId = uuid();
@@ -67,7 +68,8 @@ angular.module('heatMapDirective', []).directive('heatMap', ['ConnectionService'
 		        $scope.map = new coreMap.Map($scope.mapId, {
 		        	height: 500,
 		        	width: "100%",
-		        	responsive: false
+		        	responsive: false,
+                    onZoomRect: onZoomChanged
 		        });
 		        // setMapMappingFunctions();
 		        // setLayerChangeListener();
@@ -116,6 +118,11 @@ angular.module('heatMapDirective', []).directive('heatMap', ['ConnectionService'
 				$scope.queryForMapData();
 			};
 
+            var onZoomChanged = function(extent) {
+                var filter = $scope.createFilterFromExtent(extent);
+                $scope.messenger.replaceFilter($scope.filterKey, filter);
+            }
+
 			/**
 			 * Event handler for dataset changed events issued over Neon's messaging channels.
 			 * @param {Object} message A Neon dataset changed message.
@@ -136,7 +143,11 @@ angular.module('heatMapDirective', []).directive('heatMap', ['ConnectionService'
 		        $scope.sizeByField = "";
 		        $scope.sizeByField = "";
 
-				// Repopulate the field selectors and get the default values.
+                // Clear our filters against the last table before requesting data.
+                $scope.messenger.removeFilter($scope.filterKey);
+
+
+                // Repopulate the field selectors and get the default values.
 				connectionService.getActiveConnection().getFieldNames($scope.tableName, function(results) {
 				    $scope.$apply(function() {
 				        populateFieldNames(results);
@@ -163,12 +174,30 @@ angular.module('heatMapDirective', []).directive('heatMap', ['ConnectionService'
 				$scope.fields = fields;
 			};
 
+            var boundsToExtent = function(bounds) {
+                var llPoint = new OpenLayers.LonLat(bounds.left, bounds.bottom);
+                var urPoint = new OpenLayers.LonLat(bounds.right, bounds.top);
+
+                var minLon = Math.min(llPoint.lon, urPoint.lon);
+                var maxLon = Math.max(llPoint.lon, urPoint.lon);
+
+                var minLat = Math.min(llPoint.lat, urPoint.lat);
+                var maxLat = Math.max(llPoint.lat, urPoint.lat);
+
+                return {
+                    minimumLatitude: minLat,
+                    minimumLongitude: minLon,
+                    maximumLatitude: maxLat,
+                    maximumLongitude: maxLon
+                };
+
+            }
+
 			/**
 			 * Triggers a Neon query that will aggregate the time data for the currently selected dataset.
 			 * @method queryForMapData
 			 */
 			$scope.queryForMapData = function() {
-
 				if ($scope.latitudeField !== "" && $scope.longitudeField !== "") {
 					var query = $scope.buildQuery();
 
@@ -196,9 +225,6 @@ angular.module('heatMapDirective', []).directive('heatMap', ['ConnectionService'
 			};
 
             $scope.buildQuery = function() {
-            	// Commenting out the use of the where clause for now.  Filtering on visible area requires
-            	// re-issuing the query whenever a pan/zoom is performed which can greatly slow map movements.
-            	// var where = $scope.createFilterFromExtent();
 		        var query = new neon.query.Query().selectFrom($scope.databaseName, $scope.tableName);
 		        var groupByFields = [$scope.latitudeField, $scope.longitudeField];
 
@@ -224,8 +250,8 @@ angular.module('heatMapDirective', []).directive('heatMap', ['ConnectionService'
 			 * Create a Neon query to pull data limited to the current extent of the map.
 			 * @method createFilterFromExtent
 			 */
-			$scope.createFilterFromExtent = function() {
-		        var extent = $scope.map.getExtent();
+			$scope.createFilterFromExtent = function(bounds) {
+		        var extent = boundsToExtent(bounds);
 
 		        var leftClause = neon.query.where($scope.longitudeField, ">=", extent.minimumLongitude);
 		        var rightClause = neon.query.where($scope.longitudeField, "<=", extent.maximumLongitude);
@@ -251,8 +277,8 @@ angular.module('heatMapDirective', []).directive('heatMap', ['ConnectionService'
 		            var datelineClause = neon.query.or(neon.query.and(leftClause, leftDateLine), neon.query.and(rightClause, rightDateLine));
 		            filterClause = neon.query.and(topClause, bottomClause, datelineClause);
 		        }
-		        return filterClause;
-		       // return new neon.query.Filter().selectFrom(databaseName, tableName).where(filterClause);
+
+		       return new neon.query.Filter().selectFrom($scope.databaseName, $scope.tableName).where(filterClause);
 		    }
 
 			// Update the latitude field used by the map.

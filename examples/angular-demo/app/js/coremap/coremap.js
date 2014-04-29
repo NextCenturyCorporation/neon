@@ -75,6 +75,7 @@ coreMap.Map = function (elementId, opts) {
     this.longitudeMapping = opts.longitudeMapping || coreMap.Map.DEFAULT_LONGITUDE_MAPPING;
     this.sizeMapping = opts.sizeMapping || coreMap.Map.DEFAULT_SIZE_MAPPING;
     this.categoryMapping = opts.categoryMapping;
+    this.onZoomRect = opts.onZoomRect;
 
     this.colorScale = d3.scale.category20();
     this.responsive = true;
@@ -95,7 +96,7 @@ coreMap.Map = function (elementId, opts) {
 
     this.initializeMap();
     this.setupLayers();
-    this.map.zoomToMaxExtent();
+    this.resetZoom();
     this.heatmapLayer.toggle();
 };
 
@@ -151,9 +152,13 @@ coreMap.Map.prototype.draw = function () {
 coreMap.Map.prototype.reset = function () {
     this.setData([]);
     this.draw();
-    this.map.setCenter(new OpenLayers.LonLat(0, 0));
-    this.map.zoomToMaxExtent();
+    this.resetZoom();
+};
 
+
+coreMap.Map.prototype.resetZoom = function() {
+    this.map.zoomToMaxExtent();
+    this.map.setCenter(new OpenLayers.LonLat(0, 0), 1);
 };
 
 /**
@@ -190,10 +195,11 @@ coreMap.Map.prototype.getColorMappings = function () {
 
     // convert to an array that is in alphabetical order for consistent iteration order
     var sortedColors = [];
-    for ( key in this.colors ) {
+    for (key in this.colors) {
         var color = me.colors[key];
-        sortedColors.push( { 'color' : color, 'category' : key});
-    };
+        sortedColors.push({ 'color': color, 'category': key});
+    }
+
     return sortedColors;
 };
 
@@ -215,47 +221,6 @@ coreMap.Map.prototype.toggleLayers = function () {
     }
 };
 
-/**
- * Get the current viewable extent.
- * @return {Object} An object that contains the minimum and maximum latitudes and longitudes currently shown.
- * @method getExtent
- */
-
-coreMap.Map.prototype.getExtent = function () {
-    var extent = this.map.getExtent();
-    extent.transform(coreMap.Map.DESTINATION_PROJECTION, coreMap.Map.SOURCE_PROJECTION);
-    var llPoint = new OpenLayers.LonLat(extent.left, extent.bottom);
-    var urPoint = new OpenLayers.LonLat(extent.right, extent.top);
-
-    var minLon = Math.min(llPoint.lon, urPoint.lon);
-    var maxLon = Math.max(llPoint.lon, urPoint.lon);
-
-    var minLat = Math.min(llPoint.lat, urPoint.lat);
-    var maxLat = Math.max(llPoint.lat, urPoint.lat);
-
-    return {
-        minimumLatitude: minLat,
-        minimumLongitude: minLon,
-        maximumLatitude: maxLat,
-        maximumLongitude: maxLon
-    };
-};
-
-/**
- * Sets the viewable extent of the map.
- * @param {Object} extent An object containing the bounds of the viewable extent.
- * @method zoomToExtent
- */
-
-coreMap.Map.prototype.zoomToExtent = function (extent) {
-    var llPoint = new OpenLayers.LonLat(extent['minimumLongitude'], extent['minimumLatitude']);
-    var urPoint = new OpenLayers.LonLat(extent['maximumLongitude'], extent['maximumLatitude']);
-
-    llPoint.transform(coreMap.Map.SOURCE_PROJECTION, coreMap.Map.DESTINATION_PROJECTION);
-    urPoint.transform(coreMap.Map.SOURCE_PROJECTION, coreMap.Map.DESTINATION_PROJECTION);
-
-    this.map.zoomToExtent([llPoint.lon, llPoint.lat, urPoint.lon, urPoint.lat]);
-};
 
 /**
  * Registers a listener for a particular map event.
@@ -467,7 +432,82 @@ coreMap.Map.prototype.initializeMap = function () {
         height: this.height
     });
     this.map = new OpenLayers.Map(this.elementId);
+    this.configureFilterOnZoomRectangle();
 };
+
+coreMap.Map.prototype.configureFilterOnZoomRectangle = function () {
+    var me = this;
+    var control = new OpenLayers.Control();
+    // this is copied from the OpenLayers.Control.ZoomBox, but that doesn't provide a way to hook in, so we had to copy
+    // it here to provide a callback after zooming
+    OpenLayers.Util.extend(control, {
+        draw: function () {
+            // this Handler.Box will intercept the shift-mousedown
+            // before Control.MouseDefault gets to see it
+            this.box = new OpenLayers.Handler.Box(control,
+                {"done": this.notice},
+                {keyMask: OpenLayers.Handler.MOD_SHIFT});
+            this.box.activate();
+        },
+
+        notice: function (position) {
+            if (position instanceof OpenLayers.Bounds) {
+                var bounds,
+                    targetCenterPx = position.getCenterPixel();
+                if (!this.out) {
+                    var minXY = this.map.getLonLatFromPixel({
+                        x: position.left,
+                        y: position.bottom
+                    });
+                    var maxXY = this.map.getLonLatFromPixel({
+                        x: position.right,
+                        y: position.top
+                    });
+                    bounds = new OpenLayers.Bounds(minXY.lon, minXY.lat,
+                        maxXY.lon, maxXY.lat);
+                } else {
+                    var pixWidth = position.right - position.left;
+                    var pixHeight = position.bottom - position.top;
+                    var zoomFactor = Math.min((this.map.size.h / pixHeight),
+                        (this.map.size.w / pixWidth));
+                    var extent = this.map.getExtent();
+                    var center = this.map.getLonLatFromPixel(targetCenterPx);
+                    var xmin = center.lon - (extent.getWidth() / 2) * zoomFactor;
+                    var xmax = center.lon + (extent.getWidth() / 2) * zoomFactor;
+                    var ymin = center.lat - (extent.getHeight() / 2) * zoomFactor;
+                    var ymax = center.lat + (extent.getHeight() / 2) * zoomFactor;
+                    bounds = new OpenLayers.Bounds(xmin, ymin, xmax, ymax);
+                }
+                // always zoom in/out
+                var lastZoom = this.map.getZoom(),
+                    size = this.map.getSize(),
+                    centerPx = {x: size.w / 2, y: size.h / 2},
+                    zoom = this.map.getZoomForExtent(bounds),
+                    oldRes = this.map.getResolution(),
+                    newRes = this.map.getResolutionForZoom(zoom);
+                if (oldRes == newRes) {
+                    this.map.setCenter(this.map.getLonLatFromPixel(targetCenterPx));
+                } else {
+                    var zoomOriginPx = {
+                        x: (oldRes * targetCenterPx.x - newRes * centerPx.x) /
+                            (oldRes - newRes),
+                        y: (oldRes * targetCenterPx.y - newRes * centerPx.y) /
+                            (oldRes - newRes)
+                    };
+                    this.map.zoomTo(zoom, zoomOriginPx);
+                }
+                if (lastZoom == this.map.getZoom() && this.alwaysZoom == true) {
+                    this.map.zoomTo(lastZoom + (this.out ? -1 : 1));
+                }
+                if ( me.onZoomRect ) {
+                    // switch destination and source here since we're projecting back into lat/lon
+                    me.onZoomRect.call(me, bounds.transform(coreMap.Map.DESTINATION_PROJECTION, coreMap.Map.SOURCE_PROJECTION));
+                }
+            }
+        }
+    });
+    this.map.addControl(control);
+}
 
 /**
  * Initializes the map layers and adds the base layer.
@@ -475,7 +515,7 @@ coreMap.Map.prototype.initializeMap = function () {
  */
 
 coreMap.Map.prototype.setupLayers = function () {
-    var baseLayer = new OpenLayers.Layer.OSM("OSM", null, {});
+    var baseLayer = new OpenLayers.Layer.OSM("OSM", null, {wrapDateLine:false});
     this.map.addLayer(baseLayer);
 
     var style = {
