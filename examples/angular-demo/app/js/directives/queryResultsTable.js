@@ -33,7 +33,7 @@ angular.module('queryResultsTableDirective', []).directive('queryResultsTable', 
         templateUrl: 'partials/queryResultsTable.html',
         restrict: 'EA',
         scope: {
-
+            showData: '='
         },
         controller: function($scope) {
 
@@ -58,6 +58,7 @@ angular.module('queryResultsTableDirective', []).directive('queryResultsTable', 
                 $scope.sortDirection = neon.query.ASCENDING;
                 $scope.limit = 500;
                 $scope.totalRows = 0;
+                $scope.needsToQuery = true;  // State variable to be used in conjunctino with showData to determine when to query.
                 $scope.error = '';
 
                 // Default our data table to be empty.  Generate a unique ID for it 
@@ -90,7 +91,14 @@ angular.module('queryResultsTableDirective', []).directive('queryResultsTable', 
                     }
                 });
 
-                var options = {data: data.data};
+                var options = {
+                    data: data.data,
+                    gridOptions: {
+                        forceFitColumns: false,
+                        enableColumnReorder: true,
+                        forceSyncScrolling: true
+                    }
+                };
 
                 if (has_id) {
                     options.id = _id;
@@ -114,8 +122,10 @@ angular.module('queryResultsTableDirective', []).directive('queryResultsTable', 
              * @private
              */ 
             var onSelectionChanged = function(message) {
-                $scope.queryForData();
-                $scope.queryForTotalRows();
+                // $scope.needsToQuery = true;
+
+                // $scope.queryForData();
+                // $scope.queryForTotalRows();
             };
 
             /**
@@ -126,7 +136,9 @@ angular.module('queryResultsTableDirective', []).directive('queryResultsTable', 
              */ 
             var onFiltersChanged = function(message) {
                 // Clear our filters against the last table and filter before requesting data.
-                //$scope.queryForData();
+                $scope.needsToQuery = true;
+                $scope.queryForTotalRows();
+                $scope.queryForData();
             };
 
             /**
@@ -140,6 +152,7 @@ angular.module('queryResultsTableDirective', []).directive('queryResultsTable', 
             var onDatasetChanged = function(message) {
                 $scope.databaseName = message.database;
                 $scope.tableName = message.table;
+                $scope.needsToQuery = true;
 
                 connectionService.getActiveConnection().getFieldNames($scope.tableName, function(results) {
 				    $scope.$apply(function() {
@@ -161,18 +174,35 @@ angular.module('queryResultsTableDirective', []).directive('queryResultsTable', 
             };
 
             /**
-             * Triggers a Neon query that will aggregate the time data for the currently selected dataset.
+             * Forces a data query regardless of the current need to query for data.
+             * @method refreshData
+             */
+            $scope.refreshData = function() {
+                $scope.needsToQuery = true;
+                $scope.queryForData();
+            }
+
+            /**
+             * Triggers a Neon query that pull the a number of records that match the current Neon connection
+             * and filter set.  The query will be limited by the record number and sorted by the field
+             * selected in this directive's form.  This directive includes support for a show-data directive attribute 
+             * that binds to a scope variable and controls table display.  If the bound variable evaulates to false,
+             * no data table is generated.  queryForData will not issue a query until the directive thinks it needs to 
+             * poll for data and should show data.
+             * Resets internal "need to query" state to false.  
              * @method queryForData
              */
             $scope.queryForData = function() {
+                if ($scope.showData && $scope.needsToQuery) {
+                    var query = $scope.buildQuery();
 
-                var query = $scope.buildQuery();
-
-                connectionService.getActiveConnection().executeQuery(query, function(queryResults) {
-                    $scope.$apply(function(){
-                        $scope.updateData(queryResults);
+                    connectionService.getActiveConnection().executeQuery(query, function(queryResults) {
+                        $scope.$apply(function(){
+                            $scope.updateData(queryResults);
+                            $scope.needsToQuery = false;
+                        });
                     });
-                });
+                }
             };
 
             /**
@@ -187,10 +217,20 @@ angular.module('queryResultsTableDirective', []).directive('queryResultsTable', 
 
                 connectionService.getActiveConnection().executeQuery(query, function(queryResults) {
                     $scope.$apply(function(){
-                        $scope.totalRows = queryResults.data[0].count;
+                        if (queryResults.data.length > 0) {
+                            $scope.totalRows = queryResults.data[0].count;
+                        }
+                        else {
+                            $scope.totalRows = 0;
+                        }
                     });
                 });
             };
+
+            /**
+             * Refresh query forces a fresh query for data given the current sorting and limiting selections.
+             * @method refreshQuery
+             */
 
             /**
              * Updates the data bound to the table managed by this directive.  This will trigger a change in 
@@ -216,10 +256,23 @@ angular.module('queryResultsTableDirective', []).directive('queryResultsTable', 
             $scope.buildQuery = function() {
                 var query = new neon.query.Query().selectFrom($scope.databaseName, $scope.tableName);
                 query.limit($scope.limit);
-                query.sortBy($scope.sortByField, $scope.sortDirection);
+                if ($scope.sortByField !== "undefined" && $scope.sortByField.length > 0) {
+                    query.sortBy($scope.sortByField, $scope.sortDirection);
+                }
 
                 return query;
             }
+
+            // KLUDGE: Watch for changes to showData if it goes from false to true, we want to requery for data to 
+            // trigger the data table to be recreated.  While deferring data queries to when the user want to display them
+            // is benefitial for initial application load, it can interfere with animations tied to whether or not this is
+            // displayed.  The other reason to query for data on show is because of issues with SlickGrid.  It does not 
+            // display proper scrolling and sizing behavior if it is rendered while not visible.
+            $scope.$watch('showData', function(newVal, oldVal) {
+                if(newVal) {
+                    $scope.queryForData();
+                }
+            });
 
             // Wait for neon to be ready, the create our messenger and intialize the view and data.
             neon.ready(function () {

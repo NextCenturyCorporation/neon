@@ -51,6 +51,7 @@ tables.Table = function (tableSelector, opts) {
     this.tableSelector_ = tableSelector;
     this.idField_ = opts.id;
     this.options_ = opts.gridOptions || {};
+    
     var data = opts.data;
     var columns = opts.columns ? opts.columns : tables.Table.computeColumnNames_(data);
 

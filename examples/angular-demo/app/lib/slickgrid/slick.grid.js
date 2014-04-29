@@ -561,7 +561,11 @@ if (typeof Slick === "undefined") {
 
         var header = $("<div class='ui-state-default slick-header-column' />")
             .html("<span class='slick-column-name'>" + m.name + "</span>")
-            .width(m.width - headerColumnWidthDiff)
+            // NEON MODIFICATION: Changing to fix a problem with incorrect column sizes on initial display
+            // in Firefox and after column reordering.
+            // See https://github.com/mleibman/SlickGrid/issues/742 for a further description.
+            //
+            .outerWidth(m.width - headerColumnWidthDiff)
             .attr("id", "" + uid + m.id)
             .attr("title", m.toolTip || "")
             .data("column", m)
