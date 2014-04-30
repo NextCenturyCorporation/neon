@@ -27,14 +27,14 @@
  * @class neonDemo.directives.filterBuilder
  * @constructor
  */
-angular.module('filterBuilderDirective', []).directive('filterBuilder', ['ConnectionService', 
-	function(connectionService) {
+angular.module('filterBuilderDirective', []).directive('filterBuilder', ['ConnectionService', 'FilterCountService',
+	function(connectionService, filterCountService) {
 
 	return {
 		templateUrl: 'partials/filterBuilder.html',
 		restrict: 'EA',
+        controller: 'neonDemoController',
 		scope: {
-
 		},
 		link: function($scope, el, attr) {
 
@@ -208,6 +208,10 @@ angular.module('filterBuilderDirective', []).directive('filterBuilder', ['Connec
             		$(el).find('.tray-mirror.filter-tray .inner').height($('#filter-tray > .container').outerHeight(true));
             	}
             }, true);
+
+            $scope.$watch('filterTable.filterState.data', function(rows) {
+                filterCountService.setCount(rows.length);
+            },true);
 
 			// Wait for neon to be ready, the create our messenger and intialize the view and data.
 			neon.ready(function () {

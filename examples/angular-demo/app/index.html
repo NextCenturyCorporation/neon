@@ -64,7 +64,7 @@
 								<a data-toggle="collapse" data-parent="#trays" href=".filter-tray" class="collapsed">
 									<span class="glyphicon glyphicon-filter"></span>
 									Create Filters
-									<span class="label label-primary">3</span>
+									<span class="label label-primary">{{filterCount}}</span>
 								</a>
 							</li>
 							<!-- <li>
@@ -188,6 +188,7 @@
 		<!-- Include our custom Angular components here for now. -->
 		<script src="js/app.js"></script>
 		<script src="js/connectionService.js"></script>
+        <script src="js/filterCountService.js"></script>
 		<script src="js/neonDemoController.js"></script>
 
 		<script src="js/directives/databaseConfigDirective.js"></script>

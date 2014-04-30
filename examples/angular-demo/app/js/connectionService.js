@@ -14,7 +14,9 @@
  * limitations under the License.
  *
  */
-angular.module('neonDemo.services', []).factory('ConnectionService', ['$filter',
+
+var services = angular.module('neonDemo.services',[]);
+services.factory('ConnectionService', ['$filter',
 	function($filter) {
 
 		var activeConnection = undefined;

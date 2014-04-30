@@ -15,12 +15,12 @@
  *
  */
 
-angular.module('neonDemo.controllers', []).controller('neonDemoController', ['$scope', 
-	function($scope) {
-		// TODO: Put any top level demo controller logic here.  This is stubbed out
-		// for now for testing purposes.
+angular.module('neonDemo.controllers', []).controller('neonDemoController', ['$scope', 'FilterCountService',
+	function($scope, filterCountService) {
 
 		$scope.seeData = false;
+        $scope.filterCount = 0;
+        $scope.filterCountService = filterCountService;
 
 		// Simple handler used by the app's main index page to determine when the user
 		// wants to "see data" or not.  Essentially, this is used to sync an angular scope
@@ -29,4 +29,10 @@ angular.module('neonDemo.controllers', []).controller('neonDemoController', ['$s
 		$scope.toggleSeeData = function() {
 			$scope.seeData = !$scope.seeData;
 		}
+
+        $scope.$watch('filterCountService.getCount()', function(count) {
+            $scope.filterCount = count;
+        })
+
+
 	}]);
