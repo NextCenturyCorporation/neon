@@ -159,6 +159,13 @@ a:focus{
 	z-index: auto;
 }
 
+/* Additional wider layouts */
+@media (min-width: 1460px) {
+	.container{
+		width: 1430px;
+	}
+}
+
 /* ================
 	BUTTONS
 ================ */
@@ -237,6 +244,11 @@ a:focus{
 
 .filter-reset .btn{
 	padding: 3px 12px;
+	color: #777777;
+	color: rgba(0,0,0,0.5);
+}
+.filter-reset .btn:hover{
+	color: #333333;
 }
 .filter-reset .btn .glyphicon{
 	font-size: 12px;

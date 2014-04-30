@@ -59,7 +59,6 @@ angular.module('heatMapDirective', []).directive('heatMap', ['ConnectionService'
 				$scope.colorByField = '';
 				$scope.showPoints = false;
 				$scope.cacheMap = false;
-				$scope.error = '';
 				$scope.needToQuery = false;
 				$scope.queryingForData = false;
 
@@ -241,8 +240,7 @@ angular.module('heatMapDirective', []).directive('heatMap', ['ConnectionService'
 			 * @method updateMapData
 			 */
 			$scope.updateMapData = function(queryResults) {
-				var result = $scope.map.setData(queryResults.data);
-				$scope.error = result.message;
+				$scope.map.setData(queryResults.data);
 				$scope.map.draw();
                 // color mappings need to be updated after drawing since they are set during drawing
                 $scope.colorMappings = $scope.map.getColorMappings();

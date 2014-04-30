@@ -71,7 +71,7 @@
 	</div>
 
 	<div class="filter-reset pull-right" ng-class="{true: '', false: 'hidden'}[showFilter]">
-		<a class="btn btn-danger" ng-click="clearFilter()">
+		<a class="btn bg-danger" ng-click="clearFilter()">
 			Filter <span class="glyphicon glyphicon-remove"></span>
 		</a>
 	</div>
@@ -97,10 +97,11 @@
         	<span class="map-legend-text text-muted">...and {{colorMappings.length-20}} more</span>
         </div>
     </div>
-    
+
     <div class="clearfix"></div>
 
 	<span class="alert alert-danger" ng-class="{true: 'show', false: 'hidden'}[error !== undefined && error.length > 0]" ng-bind="error">foo</span>
+
 </div>
 
 <!-- chart directive here -->
