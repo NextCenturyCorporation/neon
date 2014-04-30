@@ -122,10 +122,9 @@ angular.module('queryResultsTableDirective', []).directive('queryResultsTable', 
              * @private
              */ 
             var onSelectionChanged = function(message) {
-                // $scope.needsToQuery = true;
-
-                // $scope.queryForData();
-                // $scope.queryForTotalRows();
+                $scope.needsToQuery = true;
+                $scope.queryForData();
+                $scope.queryForTotalRows();
             };
 
             /**
@@ -211,7 +210,7 @@ angular.module('queryResultsTableDirective', []).directive('queryResultsTable', 
              */
             $scope.queryForTotalRows = function() {
 
-                var query = new neon.query.Query().selectFrom($scope.databaseName, $scope.tableName)
+                var query = new neon.query.Query().selectFrom($scope.databaseName, $scope.tableName).selectionOnly()
                     .aggregate(neon.query.COUNT, '*', 'count');
 
 
@@ -254,7 +253,7 @@ angular.module('queryResultsTableDirective', []).directive('queryResultsTable', 
              * @method buildQuery
              */
             $scope.buildQuery = function() {
-                var query = new neon.query.Query().selectFrom($scope.databaseName, $scope.tableName);
+                var query = new neon.query.Query().selectFrom($scope.databaseName, $scope.tableName).selectionOnly();
                 query.limit($scope.limit);
                 if ($scope.sortByField !== "undefined" && $scope.sortByField.length > 0) {
                     query.sortBy($scope.sortByField, $scope.sortDirection);

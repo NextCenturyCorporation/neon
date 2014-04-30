@@ -82,7 +82,8 @@ barchart.directive('barchart', ['ConnectionService', function(connectionService)
 		};
 
 		var onFiltersChanged = function(message) {
-			$scope.queryForData();
+			// COMMENTING OUT AS PER NEON-1081
+			// $scope.queryForData();
 		};
 
 		var onDatasetChanged = function(message) {

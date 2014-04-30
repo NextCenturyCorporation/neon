@@ -67,6 +67,8 @@ angular.module('circularHeatFormDirective', []).directive('circularHeatForm', ['
 
 			var HOURS_IN_WEEK = 168;
 			var HOURS_IN_DAY = 24;
+			// Defaulting the expected date field to 'created_at' as that works best with our twitter datasets.
+			var DEFAULT_DATE_FIELD = 'created_at';
 
 			/** 
 			 * Initializes the name of the date field used to query the current dataset
@@ -74,8 +76,7 @@ angular.module('circularHeatFormDirective', []).directive('circularHeatForm', ['
 			 * @method initialize
 			 */
 			$scope.initialize = function() {
-				// Defaulting the expected date field to 'time'.
-				$scope.dateField = 'time';
+				$scope.dateField = DEFAULT_DATE_FIELD;
 
 				$scope.messenger.events({
 					activeDatasetChanged: onDatasetChanged,
@@ -125,7 +126,8 @@ angular.module('circularHeatFormDirective', []).directive('circularHeatForm', ['
 			 * @private
 			 */ 
 			var onFiltersChanged = function(message) {
-				$scope.queryForChartData();
+				// COMMENTING OUT AS PER NEON-1081
+				//$scope.queryForChartData();
 			};
 
 			/**
@@ -150,7 +152,7 @@ angular.module('circularHeatFormDirective', []).directive('circularHeatForm', ['
 				// connection service or some mapping service.  Two example below, one commented out.
 				//var dateField = $scope.getDateField();
 				var dateField = connectionService.getFieldMapping($scope.databaseName, $scope.tableName, "date");
-				dateField = dateField.mapping;
+				dateField = dateField.mapping || DEFAULT_DATE_FIELD;
 
 				if (!dateField) {
 					$scope.updateChartData({data: []});
