@@ -67,13 +67,14 @@ coreMap.Map = function (elementId, opts) {
 
     this.elementId = elementId;
     this.selector = $(elementId);
-    this.data = opts.data;
+
     // mapping of categories to colors
     this.colors = {};
 
     this.latitudeMapping = opts.latitudeMapping || coreMap.Map.DEFAULT_LATITUDE_MAPPING;
     this.longitudeMapping = opts.longitudeMapping || coreMap.Map.DEFAULT_LONGITUDE_MAPPING;
     this.sizeMapping = opts.sizeMapping || coreMap.Map.DEFAULT_SIZE_MAPPING;
+
     this.categoryMapping = opts.categoryMapping;
     this.onZoomRect = opts.onZoomRect;
 
@@ -97,10 +98,9 @@ coreMap.Map = function (elementId, opts) {
     this.initializeMap();
     this.setupLayers();
     this.resetZoom();
+    this.setData(opts.data || []);
     this.heatmapLayer.toggle();
 };
-
-coreMap.Map.DEFAULT_DATA_LIMIT = 8000;
 
 coreMap.Map.DEFAULT_WIDTH = 1024;
 coreMap.Map.DEFAULT_HEIGHT = 680;
@@ -156,7 +156,7 @@ coreMap.Map.prototype.reset = function () {
 };
 
 
-coreMap.Map.prototype.resetZoom = function() {
+coreMap.Map.prototype.resetZoom = function () {
     this.map.zoomToMaxExtent();
     this.map.setCenter(new OpenLayers.LonLat(0, 0), 1);
 };
@@ -166,29 +166,23 @@ coreMap.Map.prototype.resetZoom = function() {
  * @param mapData the data to be set. This should be an array of points. The points may be specified
  * in any way, This component uses the mapping objects to map each array element to latitude, longitude, size and color.
  * @param {Array} An array of data objects to plot
- * @return {Object} result
- * @return {Boolean} results.success  True if the map accepts the data; false if there are too many points to plot.
- * @return {String} result.message Empty string if no error; otherwise, an error message is returned.
  * @method setData
  */
 
 coreMap.Map.prototype.setData = function (mapData) {
-    if (mapData.length >= coreMap.Map.DEFAULT_DATA_LIMIT) {
-        this.data = [];
-        return {
-            success: false,
-            message: "Unable to update data. The map cannot handle more than " + coreMap.Map.DEFAULT_DATA_LIMIT + " points."
-                + "  Please select a smaller data set."
-        };
-    }
-    else {
-        this.data = mapData;
-        return {
-            success: true,
-            message: ""
-        };
-    }
+    this.data = mapData;
+    this.updateRadii();
 };
+
+/**
+ * Updates the min/max radii values for the point layer
+ * @method updateRadii
+ */
+coreMap.Map.prototype.updateRadii = function () {
+    this.minRadius = this.calculateMinRadius();
+    this.maxRadius = this.calculateMaxRadius();
+};
+
 
 coreMap.Map.prototype.getColorMappings = function () {
     var me = this;
@@ -315,17 +309,19 @@ coreMap.Map.prototype.createPointStyleObject = function (color, radius) {
  */
 
 coreMap.Map.prototype.calculateRadius = function (element) {
-    var minValue = this.minValue(this.data, this.sizeMapping);
-    var maxValue = this.maxValue(this.data, this.sizeMapping);
-    if (maxValue - minValue === 0) {
+    // TODO: Review this function and make sure radius is being properly calculated and document what it is doing
+    if ( this.minRadius === this.maxRadius ) {
         return coreMap.Map.MIN_RADIUS;
     }
 
     var size = this.getValueFromDataElement(this.sizeMapping, element);
     var radius = coreMap.Map.MIN_RADIUS;
     if (size >= 1) {
-        var slope = 10 / (maxValue - minValue);
-        radius = Math.round(slope * size + 5);
+        var slope = 10 / (this.maxRadius - this.minRadius);
+        var computedRadius = Math.round(slope * size + 5);
+        if (computedRadius > radius) {
+            radius = computedRadius;
+        }
     }
     return radius;
 };
@@ -358,32 +354,28 @@ coreMap.Map.prototype.calculateColor = function (element) {
 };
 
 /**
- * Calculate the minimum value of the data, using one of the mapping functions.
- * @param {Object} data The array of data elements.
- * @param {String | Function} mapping The mapping from data element object to value.
+ * Calculate the radius of the smallest element in the data
  * @return {number} The minimum value in the data
- * @method minValue
+ * @method calculateMinRadius
  */
 
-coreMap.Map.prototype.minValue = function (data, mapping) {
+coreMap.Map.prototype.calculateMinRadius = function () {
     var me = this;
-    return d3.min(data, function (el) {
-        return me.getValueFromDataElement(mapping, el);
+    return d3.min(me.data, function (el) {
+        return me.getValueFromDataElement(me.sizeMapping, el);
     });
 };
 
 /**
- * Calculate the maximum value of the data, using one of the mapping functions.
- * @param {Object} data The array of data elements.
- * @param {String | Function} mapping The mapping from data element object to value.
+ * Calculate the radius of the largest element in the data
  * @return {number} The maximum value in the data
- * @method maxValue
+ * @method calculateMaxRadius
  */
 
-coreMap.Map.prototype.maxValue = function (data, mapping) {
+coreMap.Map.prototype.calculateMaxRadius = function () {
     var me = this;
-    return d3.max(data, function (el) {
-        return me.getValueFromDataElement(mapping, el);
+    return d3.max(me.data, function (el) {
+        return me.getValueFromDataElement(me.sizeMapping, el);
     });
 };
 
@@ -499,7 +491,7 @@ coreMap.Map.prototype.configureFilterOnZoomRectangle = function () {
                 if (lastZoom == this.map.getZoom() && this.alwaysZoom == true) {
                     this.map.zoomTo(lastZoom + (this.out ? -1 : 1));
                 }
-                if ( me.onZoomRect ) {
+                if (me.onZoomRect) {
                     // switch destination and source here since we're projecting back into lat/lon
                     me.onZoomRect.call(me, bounds.transform(coreMap.Map.DESTINATION_PROJECTION, coreMap.Map.SOURCE_PROJECTION));
                 }
@@ -515,7 +507,7 @@ coreMap.Map.prototype.configureFilterOnZoomRectangle = function () {
  */
 
 coreMap.Map.prototype.setupLayers = function () {
-    var baseLayer = new OpenLayers.Layer.OSM("OSM", null, {wrapDateLine:false});
+    var baseLayer = new OpenLayers.Layer.OSM("OSM", null, {wrapDateLine: false});
     this.map.addLayer(baseLayer);
 
     var style = {
