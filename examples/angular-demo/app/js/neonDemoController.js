@@ -14,25 +14,34 @@
  * limitations under the License.
  *
  */
-
+/**
+ * This provides a bare-bones controller for the primary portion of index.html, the main page of the 
+ * application.
+ *
+ * @class neonDemo.controllers.neonDemoController
+ * @constructor
+ */
 angular.module('neonDemo.controllers', []).controller('neonDemoController', ['$scope', 'FilterCountService',
 	function($scope, filterCountService) {
 
 		$scope.seeData = false;
         $scope.filterCount = 0;
-        $scope.filterCountService = filterCountService;
 
-		// Simple handler used by the app's main index page to determine when the user
-		// wants to "see data" or not.  Essentially, this is used to sync an angular scope
-		// variable with the collapsed state of a div whose view is managed by Bootstrap
-		// hooks.
+        /**
+         * Simple toggle method for tracking whether or not the data table tray should be visible.
+         * At present, this is used to sync an angular scope variable with the collapsed state of a div
+         * whose visiblity is managed by Bootstrap hooks.
+         * @method toggleSeeData
+         */
 		$scope.toggleSeeData = function() {
 			$scope.seeData = !$scope.seeData;
-		}
+		};
 
-        $scope.$watch('filterCountService.getCount()', function(count) {
+		// Watch for changes in the filter counts and update the filter badge binding.
+        $scope.$watch(function() {
+        	return filterCountService.getCount();
+        }, function(count) {
             $scope.filterCount = count;
-        })
-
+        });
 
 	}]);

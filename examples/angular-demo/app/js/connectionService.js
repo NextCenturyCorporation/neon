@@ -14,7 +14,14 @@
  * limitations under the License.
  *
  */
-
+/**
+ * This provides an Angular service for managing simple meta data about Neon Connection objects.
+ * As this is meant for demonstrative purposes, the meta data is simply hard-coded to 1 or 2 example
+ * datasets meant to be loaded in a local Mongo instance. 
+ *
+ * @class neonDemo.services.ConnectionService
+ * @constructor
+ */
 var services = angular.module('neonDemo.services',[]);
 services.factory('ConnectionService', ['$filter',
 	function($filter) {
@@ -90,18 +97,46 @@ services.factory('ConnectionService', ['$filter',
 
 		var service = {};
 
+		/**
+		 * Sets the active connection.  Any client code can ask for the active connection rather than creating a new one.
+		 * @param {neon.query.Connection} connection
+		 * @method setActiveConnection
+		 */
 		service.setActiveConnection = function(connection) {
 			activeConnection = connection;
 		};
 
+		/**
+		 * Returns the active connection. 
+		 * @return {neon.query.Connection}
+		 * @method getActiveConnection
+		 */
 		service.getActiveConnection = function() {
 			return activeConnection;
 		};
 
+		/**
+		 * Returns connection meta-data related to a particular host.
+		 * @param {neon.query.Connection} name
+		 * @return {Object} Meta data json object describing that host.
+		 * @method getActiveConnectionInformation
+		 */
 		service.getActiveConnectionInformation = function(name) {
 			return $filter('filter')(connectionInformation, { "host": activeConnection.host_ }); 
 		}
 
+		/**
+		 * Returns connection meta-data related to a particular host.  Allows client code to ask if there is a mapping
+		 * for common visualization fields to a particular table field.  For example, "latitude" values may stored in
+		 * a "lat_val" column or visulizations may want to "size-by" a "magnitude" column in a table of earthquake data.
+		 * @param {String} database
+		 * @param {String} table
+		 * @param {String} field
+		 * @return {Object} retVal A valid mapping object if present in the meta data associated with a connection
+		 * @return {String} retVal.name The requested field type
+		 * @return {String} retVal.mapping The column in the table which contains data of the requested type
+		 * @method getFieldMapping
+		 */
 		service.getFieldMapping = function(database, table, field) {
 			var connectionInfo = (activeConnection) ? $filter('filter')(connectionInformation, { "host": activeConnection.host_ }) : [];
 			if (connectionInfo.length > 0) {
