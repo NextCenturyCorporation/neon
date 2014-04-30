@@ -75,7 +75,7 @@ class MongoConvertQueryTest extends AbstractConversionTest {
     }
 
     @Override
-    protected void assertQueryWithOrWhereClauseaAndFilter(query) {
+    protected void assertQueryWithOrWhereClauseAndFilter(query) {
         assert query.query == simpleQuery
         BasicDBObject orClause = createOrClause()
         BasicDBObject filterClause = new BasicDBObject(FIELD_NAME, FIELD_VALUE)

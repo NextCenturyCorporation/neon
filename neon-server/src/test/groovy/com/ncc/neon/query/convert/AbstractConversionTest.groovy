@@ -90,7 +90,7 @@ abstract class AbstractConversionTest {
         givenSelectionStateHasOneFilter()
         givenQueryHasOrWhereClause()
         def query = convertQuery(simpleQuery,new QueryOptions(ignoreFilters: false, selectionOnly: true))
-        assertQueryWithOrWhereClauseaAndFilter(query)
+        assertQueryWithOrWhereClauseAndFilter(query)
     }
 
     @Test
@@ -106,7 +106,7 @@ abstract class AbstractConversionTest {
         givenFilterStateHasOneFilter()
         givenQueryHasOrWhereClause()
         def query = convertQuery(simpleQuery)
-        assertQueryWithOrWhereClauseaAndFilter(query)
+        assertQueryWithOrWhereClauseAndFilter(query)
     }
 
     @Test
@@ -204,7 +204,7 @@ abstract class AbstractConversionTest {
 
     protected abstract void assertQueryWithGroupByClauses(query)
 
-    protected abstract void assertQueryWithOrWhereClauseaAndFilter(query)
+    protected abstract void assertQueryWithOrWhereClauseAndFilter(query)
 
     protected abstract void assertQueryWithWhereNullClause(query)
 
