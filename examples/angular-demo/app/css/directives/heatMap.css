@@ -14,19 +14,18 @@
  *
  */
 
-.heat-map {
-	margin:auto;
-	display:block;
+.heat-map .map-field-form {
+	margin-bottom: 10px;
 }
 
-.heat-map .map-field-form {
-	margin-bottom: 20px;
+.heat-map .map-field-form .filter-reset{
+	margin-right: 10px;
 }
 
 .heat-map .alert {
-	margin-top: 20px;
 	display: none;
 	padding: 6px;
+	margin-top: 3px;
 }
 
 .heat-map .olMap {
@@ -53,13 +52,15 @@
 	background-color: rgba(57, 181, 74, 1);
 }
 
-.map-legend {
-    margin-top: 20px;
+.map-legend{
+	margin-bottom: 10px;
+	min-height: 25px;
 }
 .map-legend .map-legend-item {
     color: #555555;
     display: inline-block;
     margin-right: 15px;
+    margin-top: 5px;
 }
 .map-legend .map-legend-icon {
     border-radius: 2px;
@@ -69,9 +70,6 @@
     width: 1em;
 }
 
-.heat-legend{
-	margin: 0;
-}
 .heat-legend .map-legend-item {
     color: #777777;
 }

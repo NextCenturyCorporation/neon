@@ -233,8 +233,19 @@ a:focus{
     border-color: #AA1E13;
 }
 
+/* Filter reset tag buttons */
+
+.filter-reset .btn{
+	padding: 3px 12px;
+}
+.filter-reset .btn .glyphicon{
+	font-size: 12px;
+}
+
+/* Chart dropdown menu */
+
 .chart-options > a{
-	padding: 5px;
+	padding: 2px 5px;
 	color: #39b54a;
 }
 .chart-options > a.collapsed{

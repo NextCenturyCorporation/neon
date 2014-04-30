@@ -61,6 +61,7 @@ angular.module('heatMapDirective', []).directive('heatMap', ['ConnectionService'
 				$scope.cacheMap = false;
 				$scope.error = '';
                 $scope.filterKey = neon.widget.getInstanceId("map");
+                $scope.showFilter = false;
 
 				// Setup our map.
 				$scope.mapId = uuid();
@@ -120,8 +121,17 @@ angular.module('heatMapDirective', []).directive('heatMap', ['ConnectionService'
 
             var onZoomChanged = function(extent) {
                 var filter = $scope.createFilterFromExtent(extent);
-                $scope.messenger.replaceFilter($scope.filterKey, filter);
-            }
+                $scope.messenger.replaceFilter($scope.filterKey, filter, function(){
+					$scope.$apply(function() {
+						// Show the Clear Filter button.
+						$scope.showFilter = true;
+						$scope.error = "";
+					});
+		        }, function() {
+		        	// Notify the user of the error.
+		        	$scope.error = "Error: Failed to create filter.";
+		        });
+            };
 
 			/**
 			 * Event handler for dataset changed events issued over Neon's messaging channels.
@@ -279,7 +289,24 @@ angular.module('heatMapDirective', []).directive('heatMap', ['ConnectionService'
 		        }
 
 		       return new neon.query.Filter().selectFrom($scope.databaseName, $scope.tableName).where(filterClause);
-		    }
+		    };
+
+		    /**
+			 * Clear Neon query to pull data limited to the current extent of the map.
+			 * @method clearFilter
+			 */
+			$scope.clearFilter = function() {
+				$scope.messenger.removeFilter($scope.filterKey, function(){
+					$scope.$apply(function() {
+						// Show the Clear Filter button.
+						$scope.showFilter = false;
+						$scope.error = "";
+					});
+		        }, function() {
+		        	// Notify the user of the error.
+		        	$scope.error = "Error: Failed to clear filter.";
+		        });
+			};
 
 			// Update the latitude field used by the map.
 			$scope.$watch('latitudeField', function(newVal, oldVal) {
