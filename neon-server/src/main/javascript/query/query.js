@@ -30,6 +30,9 @@ neon.query.Query = function () {
     this.ignoreFilters_ = false;
     this.selectionOnly_ = false;
 
+    // use this to ignore specific filters
+    this.ignoredFilterIds_ = [];
+
     this.groupByClauses = [];
     this.isDistinct = false;
     this.aggregates = [];
@@ -319,10 +322,17 @@ neon.query.Query.prototype.transform = function (transformObj) {
 /**
  * Sets the query to ignore any filters that are currently applied
  * @method ignoreFilters
+ * @param {Array} [filterIds] An optional list of specific filter ids to ignore. If specified, only these filters will
+ * be ignored. Otherwise, all will be ignored.
  * @return {neon.query.Query} This query object
  */
-neon.query.Query.prototype.ignoreFilters = function () {
-    this.ignoreFilters_ = true;
+neon.query.Query.prototype.ignoreFilters = function (filterIds) {
+    if ( filterIds ) {
+        this.ignoredFilterIds_= filterIds;
+    }
+    else {
+        this.ignoreFilters_ = true;
+    }
     return this;
 };
 

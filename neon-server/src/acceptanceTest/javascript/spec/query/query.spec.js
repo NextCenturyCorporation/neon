@@ -81,7 +81,7 @@ describe('query mapping', function () {
     it('can use a multiple arguments in the select statement to override the database', function () {
         // set the connection to another database and the fully qualified database name should override it
         connection.use("invalidDatabase");
-        var query = new neon.query.Query().selectFrom(databaseName,tableName);
+        var query = new neon.query.Query().selectFrom(databaseName, tableName);
         assertQueryResults(query, allData);
     });
 
@@ -233,6 +233,26 @@ describe('query mapping', function () {
                                 assertQueryResults(baseQuery(), allData);
                             });
                         });
+                    });
+                });
+            });
+        });
+    });
+
+    it('ignore specific filters', function () {
+        var dcStateFilterId = "dcStateFilter";
+        var salaryFilterId = "salaryFilterId";
+        sendMessageAndWait(neon.eventing.Messenger.prototype.addFilter, [dcStateFilterId, dcStateFilter]);
+        runs(function () {
+            runs(function () {
+                // apply another filter and make sure both are applied
+                var salaryFilter = baseFilter().where('salary', '>', 85000);
+                sendMessageAndWait(neon.eventing.Messenger.prototype.addFilter, [salaryFilterId, salaryFilter]);
+                runs(function () {
+                    assertQueryResults(baseQuery().ignoreFilters([dcStateFilterId, salaryFilterId]), allData);
+                    sendMessageAndWait(neon.eventing.Messenger.prototype.clearFilters);
+                    runs(function () {
+                        assertQueryResults(baseQuery(), allData);
                     });
                 });
             });
@@ -521,12 +541,12 @@ describe('query mapping', function () {
         queryGroup.addQuery(query2);
         queryGroup.addQuery(query3);
         sendMessageAndWait(neon.eventing.Messenger.prototype.addFilter, [filterId, dcStateFilter]);
-        runs(function() {
+        runs(function () {
             var expectedData = getJSONFixture('queryGroupFiltered.json');
             assertQueryGroupResults(queryGroup, expectedData);
-            runs(function() {
+            runs(function () {
                 sendMessageAndWait(neon.eventing.Messenger.prototype.removeFilter, filterId);
-                runs(function() {
+                runs(function () {
                     expectedData = getJSONFixture('queryGroup.json');
                     assertQueryGroupResults(queryGroup, expectedData);
                 });
@@ -545,10 +565,10 @@ describe('query mapping', function () {
         queryGroup.addQuery(query3);
         queryGroup.ignoreFilters();
         sendMessageAndWait(neon.eventing.Messenger.prototype.addFilter, [filterId, dcStateFilter]);
-        runs(function() {
+        runs(function () {
             var expectedData = getJSONFixture('queryGroup.json');
             assertQueryGroupResults(queryGroup, expectedData);
-            runs(function() {
+            runs(function () {
                 sendMessageAndWait(neon.eventing.Messenger.prototype.removeFilter, filterId);
             });
         });
@@ -566,16 +586,15 @@ describe('query mapping', function () {
         queryGroup.addQuery(query3);
         queryGroup.selectionOnly();
         sendMessageAndWait(neon.eventing.Messenger.prototype.addSelection, [filterId, dcStateFilter]);
-        runs(function() {
+        runs(function () {
             // queryGroupFiltered.json is used since we select the same data we filter on in the tests
             var expectedData = getJSONFixture('queryGroupFiltered.json');
             assertQueryGroupResults(queryGroup, expectedData);
-            runs(function() {
+            runs(function () {
                 sendMessageAndWait(neon.eventing.Messenger.prototype.removeSelection, filterId);
             });
         });
     });
-
 
 
     it('gets column metadata', function () {

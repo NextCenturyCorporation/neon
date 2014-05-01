@@ -158,6 +158,13 @@ neon.query.Connection.prototype.executeQueryService_ = function (query, successC
     if (query.ignoreFilters_) {
         opts.push("ignoreFilters=true");
     }
+    else if ( query.ignoredFilterIds_ ) {
+        var filterIds = [];
+        query.ignoredFilterIds_.forEach(function(id) {
+            filterIds.push("ignoredFilterIds[]=" + id);
+        });
+        opts.push(filterIds.join("&"));
+    }
     if (query.selectionOnly_) {
         opts.push("selectionOnly=true");
     }

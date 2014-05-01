@@ -15,6 +15,7 @@
  */
 
 package com.ncc.neon.query.mongo
+
 import com.mongodb.BasicDBObject
 import com.mongodb.DBObject
 import com.ncc.neon.query.Query
@@ -23,11 +24,10 @@ import com.ncc.neon.query.clauses.AndWhereClause
 import com.ncc.neon.query.clauses.SelectClause
 import com.ncc.neon.query.filter.DataSet
 import com.ncc.neon.query.filter.Filter
+import com.ncc.neon.query.filter.FilterKey
 import com.ncc.neon.query.filter.FilterState
 import com.ncc.neon.query.filter.SelectionState
 import groovy.transform.Immutable
-
-
 
 /**
  * Converts a Query object into a BasicDbObject
@@ -61,7 +61,7 @@ class MongoConversionStrategy {
         }
         DataSet dataSet = new DataSet(databaseName: query.databaseName, tableName: query.tableName)
         if (!options.ignoreFilters) {
-            whereClauses.addAll(createWhereClausesForFilters(dataSet, filterState))
+            whereClauses.addAll(createWhereClausesForFilters(dataSet, filterState, options.ignoredFilterIds))
         }
         if (options.selectionOnly) {
             whereClauses.addAll(createWhereClausesForFilters(dataSet, selectionState))
@@ -71,14 +71,17 @@ class MongoConversionStrategy {
     }
 
     // TODO: These methods are public to support the MongoMapService demo
-
-    static def createWhereClausesForFilters(DataSet dataSet, def filterCache) {
+    static def createWhereClausesForFilters(DataSet dataSet, def filterCache, def ignoredFilterIds = []) {
         def whereClauses = []
 
-        List<Filter> filters = filterCache.getFiltersForDataset(dataSet)
-        filters.each {
-            if (it.whereClause) {
-                whereClauses << it.whereClause
+        List<FilterKey> filterKeys = filterCache.getFilterKeysForDataset(dataSet)
+        filterKeys.each {
+            String id = it.id
+            if (!ignoredFilterIds.contains(id)) {
+                Filter filter = it.filter
+                if (filter.whereClause) {
+                    whereClauses << filter.whereClause
+                }
             }
         }
         return whereClauses

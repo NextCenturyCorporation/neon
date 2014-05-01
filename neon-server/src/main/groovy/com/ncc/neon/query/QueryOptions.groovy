@@ -21,8 +21,11 @@ package com.ncc.neon.query
  */
 class QueryOptions {
     /** default options that applies filters to the query */
-    public static final QueryOptions DEFAULT_OPTIONS = new QueryOptions(ignoreFilters: false, selectionOnly: false)
+    public static final QueryOptions DEFAULT_OPTIONS = new QueryOptions()
 
-    boolean ignoreFilters
-    boolean selectionOnly
+    boolean ignoreFilters = false
+    boolean selectionOnly = false
+
+    /** ignores these particular filters only (ignoreFilters takes precedence). this is useful if a visualization wants to ignore its own filters */
+    Set<String> ignoredFilterIds = [] as HashSet
 }

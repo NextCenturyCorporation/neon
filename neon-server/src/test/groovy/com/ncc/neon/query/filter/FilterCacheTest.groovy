@@ -101,6 +101,22 @@ class FilterCacheTest {
         assert filterCache.getFiltersForDataset(dataSet) == []
     }
 
+    @Test
+    void "get filter keys for dataset"() {
+        Filter filterA = addEmptyFilter("filterA")
+        Filter filterB = addEmptyFilter("filterB")
+        List<FilterKey> filterKeys = filterCache.getFilterKeysForDataset(dataSet)
+
+        // no guaranteed order for the filters so sort them first
+        Collections.sort(filterKeys, [compare: {key1,key2 -> key1.id <=> key2.id}] as Comparator)
+
+        assert filterKeys[0].id == "filterA"
+        assert filterKeys[0].filter == filterA
+
+        assert filterKeys[1].id == "filterB"
+        assert filterKeys[1].filter == filterB
+    }
+
     private createFilterFromWhereClause(WhereClause whereClause, DataSet ds = dataSet) {
         return new Filter(databaseName: ds.databaseName, tableName: ds.tableName, whereClause: whereClause)
     }
