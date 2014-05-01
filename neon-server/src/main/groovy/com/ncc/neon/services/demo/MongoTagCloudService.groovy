@@ -39,7 +39,7 @@ public class MongoTagCloudService {
     @GET
     @Path("tagcounts")
     @Produces("application/json;charset=UTF-8")
-    public List<TagCountPair> getTile(@QueryParam("host") String host,
+    public List<TagCountPair> getTagCounts(@QueryParam("host") String host,
                                         @QueryParam("db") String databaseName,
                                         @QueryParam("collection") String collectionName,
                                         @QueryParam("arrayfield") String arrayField,
