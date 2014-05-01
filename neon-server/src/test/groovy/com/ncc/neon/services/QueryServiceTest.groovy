@@ -43,7 +43,7 @@ class QueryServiceTest {
 
     @Test
     void "execute query"() {
-        QueryResult result = queryService.executeQuery(HOST, DATABASE_TYPE, false, false, new Query())
+        QueryResult result = queryService.executeQuery(HOST, DATABASE_TYPE, false, false, [] as Set, new Query())
         assert result.data == [["key1": "val1"], ["key2": 2]]
     }
 

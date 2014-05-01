@@ -443,6 +443,27 @@ abstract class AbstractQueryExecutorIntegrationTest {
     }
 
     @Test
+    void "ignore specific filters"() {
+        String dcStateFilterId = "dcStateFilterId"
+        def dcStateFilter = createFilterWithWhereClause(new SingularWhereClause(lhs: 'state', operator: '=', rhs: 'DC'))
+        def dcStateFilterKey = new FilterKey(id: dcStateFilterId, filter: dcStateFilter)
+        queryExecutor.filterState.addFilter(dcStateFilterKey)
+
+        def salaryFilterId = "salaryFilterId"
+        def salaryFilter = createFilterWithWhereClause(new SingularWhereClause(lhs: 'salary', operator: '>', rhs: 85000))
+        def salaryFilterKey = new FilterKey(id: salaryFilterId, filter: salaryFilter)
+        queryExecutor.filterState.addFilter(salaryFilterKey)
+
+        def result = queryExecutor.execute(ALL_DATA_QUERY, new QueryOptions(ignoredFilterIds: [dcStateFilterId,salaryFilterId] as HashSet))
+        assertUnorderedQueryResult(getAllData(), result)
+
+        // clear the filters, and there should be no filters applied
+        queryExecutor.filterState.clearAllFilters()
+        result = queryExecutor.execute(ALL_DATA_QUERY, QueryOptions.DEFAULT_OPTIONS)
+        assertUnorderedQueryResult(getAllData(), result)
+    }
+
+    @Test
     void "clear filters"() {
         String filterId = "filterId"
         def dcStateFilter = createFilterWithWhereClause(new SingularWhereClause(lhs: 'state', operator: '=', rhs: 'DC'))

@@ -20,6 +20,7 @@ import com.ncc.neon.query.QueryOptions
 import com.ncc.neon.query.clauses.*
 import com.ncc.neon.query.filter.DataSet
 import com.ncc.neon.query.filter.Filter
+import com.ncc.neon.query.filter.FilterKey
 import com.ncc.neon.query.filter.FilterState
 import com.ncc.neon.query.filter.SelectionState
 import groovy.transform.Immutable
@@ -99,7 +100,7 @@ class SharkConversionStrategy {
         }
         DataSet dataSet = new DataSet(databaseName: query.databaseName, tableName: query.tableName)
         if (!options.ignoreFilters) {
-            whereClauses.addAll(createWhereClausesForFilters(dataSet, filterState))
+            whereClauses.addAll(createWhereClausesForFilters(dataSet, filterState, options.ignoredFilterIds))
         }
         if (options.selectionOnly) {
             whereClauses.addAll(createWhereClausesForFilters(dataSet, selectionState))
@@ -108,13 +109,17 @@ class SharkConversionStrategy {
         return whereClauses
     }
 
-    private static def createWhereClausesForFilters(DataSet dataSet, def filterCache) {
+    private static def createWhereClausesForFilters(DataSet dataSet, def filterCache, def ignoredFilterIds = []) {
         def whereClauses = []
 
-        List<Filter> filters = filterCache.getFiltersForDataset(dataSet)
-        filters.each {
-            if (it.whereClause) {
-                whereClauses << it.whereClause
+        List<FilterKey> filterKeys = filterCache.getFilterKeysForDataset(dataSet)
+        filterKeys.each {
+            String id = it.id
+            if (!ignoredFilterIds.contains(id)) {
+                Filter filter = it.filter
+                if (filter.whereClause) {
+                    whereClauses << filter.whereClause
+                }
             }
         }
         return whereClauses

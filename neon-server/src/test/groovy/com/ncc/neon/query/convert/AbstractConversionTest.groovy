@@ -180,6 +180,14 @@ abstract class AbstractConversionTest {
         assertQueryWithWhereNotNullClause(query)
     }
 
+    @Test
+    void "test ignoring specific filter"() {
+        givenFilterStateHasOneFilter()
+        def query = convertQuery(simpleQuery, new QueryOptions(ignoredFilterIds: ["filterA"] as HashSet))
+        assertSimplestConvertQuery(query)
+
+    }
+
     private def convertQuery(query, queryOptions = QueryOptions.DEFAULT_OPTIONS) {
         return doConvertQuery(query, queryOptions)
     }

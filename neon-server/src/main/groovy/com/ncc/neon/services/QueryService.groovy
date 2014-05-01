@@ -53,6 +53,7 @@ class QueryService {
      * @param databaseType the type of database
      * @param includeFilters If filters should be ignored and all data should be returned. Defaults to false.
      * @param selectionOnly If only data that is currently selected should be returned. Defaults to false.
+     * @param ignoredFilterIds If any specific filters should be ignored (only used if includeFilters is false)
      * @param query The query being executed
      * @return The result of the query
      */
@@ -64,8 +65,10 @@ class QueryService {
                              @PathParam("databaseType") String databaseType,
                              @DefaultValue("false") @QueryParam("ignoreFilters") boolean ignoreFilters,
                              @DefaultValue("false") @QueryParam("selectionOnly") boolean selectionOnly,
+                             @QueryParam("ignoredFilterIds") Set<String> ignoredFilterIds,
                              Query query) {
-        return execute(host, databaseType, query, new QueryOptions(ignoreFilters: ignoreFilters, selectionOnly: selectionOnly))
+        return execute(host, databaseType, query, new QueryOptions(ignoreFilters: ignoreFilters,
+                selectionOnly: selectionOnly, ignoredFilterIds: (ignoredFilterIds ?: ([] as Set))))
     }
 
     /**
