@@ -60,14 +60,16 @@
 						<database-config></database-config>
 						<ul class="nav navbar-nav">
 							<li>
-								<a data-toggle="collapse" data-parent="#trays" href=".filter-tray" class="collapsed">
+								<a data-toggle="collapse" data-parent="#trays" href=".filter-tray" class="collapsed"
+                                    ng-click="toggleCreateFilters()">
 									<span class="glyphicon glyphicon-filter"></span>
 									Create Filters
 									<span class="label label-primary" ng-bind="filterCount" ng-class="{true: '', false: 'hidden'}[filterCount > 0]"></span>
 								</a>
 							</li>
                             <li>
-                                <a data-toggle="collapse" data-parent="#trays" href=".data-tray" class="collapsed" ng-click="toggleSeeData()">
+                                <a data-toggle="collapse" data-parent="#trays" href=".data-tray" class="collapsed" 
+                                   ng-click="toggleSeeData()">
                                     <span class="glyphicon glyphicon-list"></span> See Data
                                 </a>
                             </li>

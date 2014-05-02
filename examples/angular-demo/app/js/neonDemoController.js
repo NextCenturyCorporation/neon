@@ -21,11 +21,32 @@
  * @class neonDemo.controllers.neonDemoController
  * @constructor
  */
-angular.module('neonDemo.controllers', []).controller('neonDemoController', ['$scope', 'FilterCountService',
-	function($scope, filterCountService) {
+angular.module('neonDemo.controllers', []).controller('neonDemoController', ['$scope', '$timeout', 'FilterCountService',
+	function($scope, $timeout, filterCountService) {
 
 		$scope.seeData = false;
+        $scope.createFilters = false;
         $scope.filterCount = 0;
+
+        /**
+         * Simple toggle method for tracking whether or not the create filters tray should be visible.
+         * At present, this is used to sync an angular scope variable with the collapsed state of a div
+         * whose visiblity is managed by Bootstrap hooks.
+         * @method toggleCreateFilters
+         */
+        $scope.toggleCreateFilters = function() {
+            $scope.createFilters = !$scope.createFilters;
+            if ($scope.createFilters && $scope.seeData) {
+                // using timeout here to execute a jquery event outside of apply().  This is necessary
+                // to avoid the event occuring within an apply() cycle and triggering another
+                // update which calls apply() since the side-effects of the click would change
+                // things that are watched in index.html.
+                $timeout(function() {
+                    $($("[href='.data-tray']")[0]).click();  
+                }, 5, false);
+                
+            }
+        };
 
         /**
          * Simple toggle method for tracking whether or not the data table tray should be visible.
@@ -35,6 +56,15 @@ angular.module('neonDemo.controllers', []).controller('neonDemoController', ['$s
          */
 		$scope.toggleSeeData = function() {
 			$scope.seeData = !$scope.seeData;
+            if ($scope.createFilters && $scope.seeData) {
+                // using timeout here to execute a jquery event outside of apply().  This is necessary
+                // to avoid the event occuring within an apply() cycle and triggering another
+                // update which calls apply() since the side-effects of the click would change
+                // things that are watched in index.html.
+                $timeout(function() {
+                    $($("[href='.filter-tray']")[0]).click();  
+                }, 5, false);
+            }
 		};
 
 		// Watch for changes in the filter counts and update the filter badge binding.
