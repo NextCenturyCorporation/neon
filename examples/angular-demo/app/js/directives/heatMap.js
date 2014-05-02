@@ -353,6 +353,7 @@ angular.module('heatMapDirective', []).directive('heatMap', ['ConnectionService'
 			// Update the coloring field used by the map.
 			$scope.$watch('colorByField', function(newVal, oldVal) {
 				if (newVal !== oldVal) {
+					$scope.map.resetColorMappings();
 					if (newVal) {
 						$scope.map.categoryMapping = newVal;
 					} 
