@@ -150,18 +150,22 @@ angular.module('timelineSelectorDirective', []).directive('timelineSelector', ['
 			};
 
 			/**
-             * Updates the chart header with the record count and dates from the given start index to the end index
+             * Updates the chart start/end times to use as a Neon selection and their associated conversion for displaying in
+             * UTC. The display value for the total records is updates as well.
              * of the data array.
-             * @param {Number} startIdx The first bucket in the time data to use.
-             * @param {Number} endIdx The last bucket in the time data to use.
-             * @method updateChartHeader
+             * @param {Number} startDate The date from which we find the first date bucket to count.
+             * @param {Number} endDate The date from which we find the last date bucket to count.
+             * @method updateChartTimesAndTotal
              */
-            $scope.updateChartHeader = function(startDate, endDate) {
+            $scope.updateChartTimesAndTotal = function(startDate, endDate) {
         		// Handle bound conditions.
 				var startIdx = Math.floor(Math.abs($scope.referenceDate - startDate) / $scope.millisMultiplier);
 				var endIdx = Math.floor(Math.abs($scope.referenceDate - endDate) / $scope.millisMultiplier);
 
-				// Update the header information.
+				// Update the start/end times and totals used for the Neon selection and their
+				// display versions.  Since Angular formats dates as local values, we create new display values
+				// for the appropriate month/day/hours we want to appear in this directive's associated partial.
+				// This essentially shifts the display times from local to the value we want to appear in UTC time.
 				var total = 0;
 				for (var i = startIdx; i <= endIdx; i++) {
 					total += $scope.data[i].value;
@@ -169,29 +173,32 @@ angular.module('timelineSelectorDirective', []).directive('timelineSelector', ['
 
 				if ($scope.granularity === HOUR) {
 					$scope.startDate = $scope.data[startIdx].date;
-					$scope.startDate = new Date($scope.startDate.getUTCFullYear(),
+					$scope.startDateForDisplay = new Date($scope.startDate.getUTCFullYear(),
 						$scope.startDate.getUTCMonth(),
 						$scope.startDate.getUTCDate(),
 						$scope.startDate.getUTCHours() );
 					$scope.endDate = new Date($scope.data[endIdx].date.getTime() + MILLIS_IN_HOUR);
-					$scope.endDate = new Date($scope.endDate.getUTCFullYear(),
+					$scope.endDateForDisplay = new Date($scope.endDate.getUTCFullYear(),
 						$scope.endDate.getUTCMonth(),
 						$scope.endDate.getUTCDate(),
 						$scope.endDate.getUTCHours() );
 				}
 				else if ($scope.granularity === DAY) {
 					$scope.startDate = $scope.data[startIdx].date;
-					$scope.startDate = new Date($scope.startDate.getUTCFullYear(),
+					$scope.startDateForDisplay = new Date($scope.startDate.getUTCFullYear(),
 						$scope.startDate.getUTCMonth(),
 						$scope.startDate.getUTCDate());
 					$scope.endDate = new Date($scope.data[endIdx].date.getTime() + MILLIS_IN_DAY);
-					$scope.endDate = new Date($scope.endDate.getUTCFullYear(),
+					$scope.endDateForDisplay = new Date($scope.endDate.getUTCFullYear(),
 						$scope.endDate.getUTCMonth(),
 						$scope.endDate.getUTCDate());
 				}
 
-
 				$scope.recordCount = total;
+            }
+
+            $scope.convertDateForDisplay = function(date) {
+            	return 
             }
 
 			/**
@@ -205,7 +212,7 @@ angular.module('timelineSelectorDirective', []).directive('timelineSelector', ['
 
 				if (queryResults.data.length > 0) {
 				    $scope.data = $scope.createTimelineData(queryResults);	
-					$scope.updateChartHeader($scope.data[0].date, $scope.data[$scope.data.length - 1].date);
+					$scope.updateChartTimesAndTotal($scope.data[0].date, $scope.data[$scope.data.length - 1].date);
 				}
 				else {
 					$scope.data = $scope.createTimelineData(queryResults);
@@ -306,16 +313,16 @@ angular.module('timelineSelectorDirective', []).directive('timelineSelector', ['
 				if (newVal && $scope.messenger && connectionService.getActiveConnection()) {
 
 					if (newVal === undefined || (newVal.length < 2) || (newVal[0].getTime() === newVal[1].getTime())) {
-						$scope.updateChartHeader($scope.data[0].date, $scope.data[$scope.data.length - 1].date);
+						$scope.updateChartTimesAndTotal($scope.data[0].date, $scope.data[$scope.data.length - 1].date);
 						$scope.messenger.clearSelection($scope.filterKey);
 					} else {
 						// Update the chart header
-						$scope.updateChartHeader(newVal[0], newVal[1]);
+						$scope.updateChartTimesAndTotal(newVal[0], newVal[1]);
 
 						// Since we created our time buckets with times representing the start of an hour, we need to add an hour
 						// to the time representing our last selected hour bucket to get all the records that occur in that hour.
-						var startFilterClause = neon.query.where($scope.dateField, '>=', newVal[0]);
-			            var endFilterClause = neon.query.where($scope.dateField, '<', new Date(newVal[1].getTime() + $scope.millisMultiplier));
+			   			var startFilterClause = neon.query.where($scope.dateField, '>=', $scope.startDate);
+			            var endFilterClause = neon.query.where($scope.dateField, '<', $scope.endDate);
 			            var clauses = [startFilterClause, endFilterClause];
 			            var filterClause = neon.query.and.apply(this, clauses);
 			            var filter = new neon.query.Filter().selectFrom($scope.databaseName, $scope.tableName).where(filterClause);
