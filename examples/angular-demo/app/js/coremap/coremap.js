@@ -78,7 +78,30 @@ coreMap.Map = function (elementId, opts) {
     this.categoryMapping = opts.categoryMapping;
     this.onZoomRect = opts.onZoomRect;
 
-    this.colorScale = d3.scale.category20();
+    //this.colorScale = d3.scale.category20();
+    this.colorRange = [
+        '#39b54a',
+        '#3662CC',
+        '#C23333',
+        "#ff7f0e",
+        "#9467bd",
+        "#8c564b",
+        "#e377c2",
+        "#7f7f7f",
+        "#bcbd22",
+        "#17becf",
+        "#98df8a",
+        "#aec7e8",
+        "#ff9896",
+        "#ffbb78",
+        "#c5b0d5",
+        "#c49c94",
+        "#f7b6d2",
+        "#c7c7c7",
+        "#dbdb8d",
+        "#9edae5"
+    ];
+    this.colorScale = d3.scale.ordinal().range(this.colorRange);
     this.responsive = true;
 
     if (opts.responsive === false) {
@@ -195,6 +218,14 @@ coreMap.Map.prototype.getColorMappings = function () {
     }
 
     return sortedColors;
+};
+
+/**
+ * Resets all assigned color mappings.
+ * @method resetColorMappings
+ */
+coreMap.Map.prototype.resetColorMappings = function () {
+    this.colorScale = d3.scale.ordinal().range(this.colorRange);
 };
 
 /**
