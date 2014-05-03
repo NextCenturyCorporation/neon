@@ -17,5 +17,5 @@
     <span ng-bind="(endDateForDisplay && granularity === 'hour') ? (endDateForDisplay.toISOString() | date:'MMM d, yyyy HH:mm') : ''"></span>
     <span ng-bind="(endDateForDisplay && granularity === 'day') ? (endDateForDisplay.toISOString() | date:'MMMM d, yyyy') : ''"></span>
     <span ng-bind="(startDateForDisplay) ? '(Z)' : ''"></span></h3>
-	<div timeline-selector-chart timeline-data="data" timeline-brush='brush'></div>
+	<div timeline-selector-chart timeline-data="data" timeline-brush='brush' extent-dirty='extentDirty'></div>
 </div>

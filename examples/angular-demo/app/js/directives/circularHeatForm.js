@@ -80,8 +80,7 @@ angular.module('circularHeatFormDirective', []).directive('circularHeatForm', ['
 
 				$scope.messenger.events({
 					activeDatasetChanged: onDatasetChanged,
-					filtersChanged: onFiltersChanged,
-					selectionChanged: onSelectionChanged
+					filtersChanged: onFiltersChanged
 				});
 			};
 
@@ -109,15 +108,6 @@ angular.module('circularHeatFormDirective', []).directive('circularHeatForm', ['
 				$scope.maxTime = "";
 			}
 
-			/**
-			 * Event handler for selection changed events issued over Neon's messaging channels.
-			 * @param {Object} message A Neon selection changed message.
-			 * @method onSelectionChanged
-			 * @private
-			 */ 
-			var onSelectionChanged = function(message) {
-				$scope.queryForChartData();
-			};
 
 			/**
 			 * Event handler for filter changed events issued over Neon's messaging channels.
@@ -126,8 +116,7 @@ angular.module('circularHeatFormDirective', []).directive('circularHeatForm', ['
 			 * @private
 			 */ 
 			var onFiltersChanged = function(message) {
-				// COMMENTING OUT AS PER NEON-1081
-				//$scope.queryForChartData();
+				$scope.queryForChartData();
 			};
 
 			/**
@@ -141,6 +130,7 @@ angular.module('circularHeatFormDirective', []).directive('circularHeatForm', ['
 			var onDatasetChanged = function(message) {
 				$scope.databaseName = message.database;
 				$scope.tableName = message.table;
+                $scope.queryForChartData();
 			};
 
 			/**
@@ -169,7 +159,6 @@ angular.module('circularHeatFormDirective', []).directive('circularHeatForm', ['
 					.selectFrom($scope.databaseName, $scope.tableName)
 					.groupBy(groupByDayClause, groupByHourClause)
 					.where($scope.dateField, '!=', null)
-					.selectionOnly()
 					.aggregate(neon.query.COUNT, '*', 'count');
 
 				// Issue the query and provide a success handler that will forcefully apply an update to the chart.

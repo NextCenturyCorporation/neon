@@ -124,6 +124,24 @@ describe('messenger', function () {
         );
     });
 
+
+    it('should not publish the filter event when clearing filters silently', function() {
+        var channelCallback = jasmine.createSpy('channelCallback');
+        var successCallback =  jasmine.createSpy('successCallback');
+        neon.mock.AjaxMockUtils.mockNextAjaxCall({});
+
+        var subscriber = new neon.eventing.Messenger();
+        subscriber.subscribe(neon.eventing.channels.FILTERS_CHANGED, channelCallback);
+
+        var publisher = new neon.eventing.Messenger();
+        publisher.clearFiltersSilently(successCallback);
+
+        expect(channelCallback).not.toHaveBeenCalled();
+        expect(successCallback).toHaveBeenCalled();
+
+    });
+
+
     it('should publish add selection', function () {
         var filter = new neon.query.Filter().selectFrom(databaseName, tableName);
         testResultsPublishedToChannel(

@@ -39,9 +39,6 @@ angular.module('tagCloudDirective', []).directive('tagCloud', ['ConnectionServic
                     $scope.databaseName = '';
                     $scope.tableName = '';
 
-                    // TODO: Temporary workaround for NEON-1069 - too many events being fired
-                    $scope.inProgress = false;
-
                     // data will be a list of tag name/counts in descending order
                     $scope.data = [];
 
@@ -50,8 +47,7 @@ angular.module('tagCloudDirective', []).directive('tagCloud', ['ConnectionServic
 
                     $scope.messenger.events({
                         activeDatasetChanged: onDatasetChanged,
-                        filtersChanged: onFiltersChanged,
-                        selectionChanged: onSelectionChanged
+                        filtersChanged: onFiltersChanged
                     });
 
                     // setup tag cloud color/size changes
@@ -62,15 +58,6 @@ angular.module('tagCloudDirective', []).directive('tagCloud', ['ConnectionServic
 
                 };
 
-                /**
-                 * Event handler for selection changed events issued over Neon's messaging channels.
-                 * @param {Object} message A Neon selection changed message.
-                 * @method onSelectionChanged
-                 * @private
-                 */
-                var onSelectionChanged = function (message) {
-                    $scope.queryForTags();
-                };
 
                 /**
                  * Event handler for filter changed events issued over Neon's messaging channels.
@@ -95,6 +82,7 @@ angular.module('tagCloudDirective', []).directive('tagCloud', ['ConnectionServic
                     $scope.tableName = message.table;
                     // check if the field was passed in, otherwise check the mapping. if neither is found leave it empty
                     $scope.tagField = $scope.tagField || connectionService.getFieldMapping($scope.databaseName, $scope.tableName, "tags").mapping || '';
+                    $scope.queryForTags();
                 };
 
                 /**
@@ -102,21 +90,16 @@ angular.module('tagCloudDirective', []).directive('tagCloud', ['ConnectionServic
                  * @method queryForTags
                  */
                 $scope.queryForTags = function () {
-                    // TODO: use in progress for temporary workaround for NEON-1069
-                    if (!$scope.inProgress) {
-                        $scope.inProgress = true;
-                        if ($scope.tagField !== '') {
-                            var host = connectionService.getActiveConnection().host_;
-                            var url = neon.serviceUrl('mongotagcloud', 'tagcounts', 'host=' + host + "&db=" + $scope.databaseName + "&collection=" + $scope.tableName + "&arrayfield=" + $scope.tagField + "&limit=30");
-                            neon.util.ajaxUtils.doGet(url, {
-                                success: function (tagCounts) {
-                                    $scope.$apply(function () {
-                                        $scope.updateTagData(tagCounts)
-                                        $scope.inProgress = false;
-                                    });
-                                }
-                            });
-                        }
+                    if ($scope.tagField !== '') {
+                        var host = connectionService.getActiveConnection().host_;
+                        var url = neon.serviceUrl('mongotagcloud', 'tagcounts', 'host=' + host + "&db=" + $scope.databaseName + "&collection=" + $scope.tableName + "&arrayfield=" + $scope.tagField + "&limit=30");
+                        neon.util.ajaxUtils.doGet(url, {
+                            success: function (tagCounts) {
+                                $scope.$apply(function () {
+                                    $scope.updateTagData(tagCounts)
+                                });
+                            }
+                        });
                     }
                 };
 
@@ -129,7 +112,7 @@ angular.module('tagCloudDirective', []).directive('tagCloud', ['ConnectionServic
                 $scope.updateTagData = function (tagCounts) {
                     $scope.data = tagCounts;
                     // style the tags after they are displayed
-                    $timeout(function() {
+                    $timeout(function () {
                         element.find('.tag').tagcloud();
                     });
                 };
