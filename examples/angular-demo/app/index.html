@@ -129,7 +129,7 @@
                             </div>
                         </div>
 
-                        <div class="form-inline">
+                        <div class="form-inline pull-left" style="margin-right: 20px;">
                             <div class="form-group">
                                 <select ng-model="chartType" class="form-control" ng-init="chartType = 'bar'">
                                     <option value="bar">Bar</option>
@@ -137,6 +137,19 @@
                                 </select>
                             </div>
                         </div>
+
+                        <div class="legend pull-left" ng-hide="chartType != 'line'">
+                            <div class="legend-item">
+                                <span class="legend-icon" style="background-color: #39b54a"></span>
+                                <span class="legend-text">Positive</span>
+                            </div>
+                            <div class="legend-item">
+                                <span class="legend-icon" style="background-color: #C2360D"></span>
+                                <span class="legend-text">Negative</span>
+                            </div>
+                        </div>
+
+                        <div class="clearfix"></div>
 
                         <!--stackedbarchart attr-x="xAxisField" attr-y="yAxisField" bar-type='barType'></stackedbarchart-->
                         <barchart attr-x="xAxisField" attr-y="yAxisField" bar-type='barType' ng-hide="chartType === 'line'"></barchart>

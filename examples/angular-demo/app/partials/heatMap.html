@@ -76,25 +76,25 @@
 		</a>
 	</div>
 
-	<div class="map-legend heat-legend" ng-class="{true: 'hidden', false: ''}[showPoints]">
-        <div class="map-legend-item">
-        	<span class="map-legend-text">High</span>
-        	<span class="map-legend-icon" style="background-color: #fb5c44"></span>
-        	<span class="map-legend-icon" style="background-color: #e9ed3d"></span>
-        	<span class="map-legend-icon" style="background-color: #65f13d"></span>
-        	<span class="map-legend-icon" style="background-color: #55cde9"></span>
-        	<span class="map-legend-icon" style="background-color: #6374e5"></span>
-        	<span class="map-legend-text">Low</span>
+	<div class="legend legend-scale" ng-class="{true: 'hidden', false: ''}[showPoints]">
+        <div class="legend-item">
+        	<span class="legend-text">High</span>
+        	<span class="legend-icon" style="background-color: #fb5c44"></span>
+        	<span class="legend-icon" style="background-color: #e9ed3d"></span>
+        	<span class="legend-icon" style="background-color: #65f13d"></span>
+        	<span class="legend-icon" style="background-color: #55cde9"></span>
+        	<span class="legend-icon" style="background-color: #6374e5"></span>
+        	<span class="legend-text">Low</span>
         </div>
     </div>
 
-	<div class="map-legend" ng-class="{true: '', false: 'hidden'}[showPoints]">
-        <div class="map-legend-item" ng-repeat="colorMapping in colorMappings|limitTo:20">
-        	<span class="map-legend-icon" style="background-color: {{colorMapping.color}}"></span>
-        	<span class="map-legend-text">{{colorMapping.category}}</span>
+	<div class="legend" ng-class="{true: '', false: 'hidden'}[showPoints]">
+        <div class="legend-item" ng-repeat="colorMapping in colorMappings|limitTo:20">
+        	<span class="legend-icon" style="background-color: {{colorMapping.color}}"></span>
+        	<span class="legend-text">{{colorMapping.category}}</span>
         </div>
-        <div class="map-legend-item" ng-class="{true: '', false: 'hidden'}[colorMappings.length > 20]">
-        	<span class="map-legend-text text-muted">...and {{colorMappings.length-20}} more</span>
+        <div class="legend-item" ng-class="{true: '', false: 'hidden'}[colorMappings.length > 20]">
+        	<span class="legend-text text-muted">...and {{colorMappings.length-20}} more</span>
         </div>
     </div>
 
