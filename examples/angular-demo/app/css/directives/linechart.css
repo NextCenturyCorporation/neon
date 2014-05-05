@@ -1,7 +1,10 @@
+.linechart svg{
+	font-size: 10px;
+}
 .axis path,
 .axis line {
   fill: none;
-  stroke: #000;
+  stroke: #cccccc;
   shape-rendering: crispEdges;
 }
 
@@ -12,13 +15,13 @@
 .line {
   fill: none;
   stroke: steelblue;
-  stroke-width: 1.5px;
+  stroke-width: 2px;
 }
 
 .line.positiveLine {
-  stroke: #9999FF;
+  stroke: #39b54a;
 }
 
 .line.negativeLine {
-  stroke: #FF9999;
+  stroke: #C2360D;
 }

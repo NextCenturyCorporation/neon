@@ -42,7 +42,7 @@ charts.LineChart = function (rootElement, selector, opts) {
 
 charts.LineChart.DEFAULT_HEIGHT = 300;
 charts.LineChart.DEFAULT_WIDTH = 600;
-charts.LineChart.DEFAULT_MARGIN = {top: 20, bottom: 30, left: 50, right: 20};
+charts.LineChart.DEFAULT_MARGIN = {top: 20, bottom: 30, left: 30, right: 20};
 charts.LineChart.DEFAULT_STYLE = {};
 
 
