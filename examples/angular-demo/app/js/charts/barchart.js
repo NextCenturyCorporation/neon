@@ -87,8 +87,8 @@ charts.BarChart = function (rootElement, selector, opts) {
 
 	if (!opts.responsive) {
 		this.userSetWidth_ = opts.width;
-		this.userSetHeight_ = opts.height;
 	}
+	this.userSetHeight_ = opts.height;
 
 	this.xAttribute_ = opts.x;
 	this.xLabel_ = opts.xLabel || this.determineXLabel_();
@@ -123,7 +123,7 @@ charts.BarChart = function (rootElement, selector, opts) {
 
 charts.BarChart.DEFAULT_HEIGHT_ = 300;
 charts.BarChart.DEFAULT_WIDTH_ = 600;
-charts.BarChart.DEFAULT_MARGIN_ = {top: 20, bottom: 30, left: 30, right: 20};
+charts.BarChart.DEFAULT_MARGIN_ = {top: 20, bottom: 30, left: 30, right: 0};
 charts.BarChart.TOOLTIP_ID_ = 'tooltip';
 charts.BarChart.SVG_ELEMENT_ = 'rect';
 charts.BarChart.ACTIVE_STYLE_KEY_ = 'active';
@@ -314,7 +314,6 @@ charts.BarChart.prototype.draw = function () {
 };
 
 charts.BarChart.prototype.preparePropertiesForDrawing_ = function () {
-
 	this.width = this.determineWidth_(this.element);
 	this.height = this.determineHeight_(this.element);
 	this.setMargins_();
@@ -342,7 +341,7 @@ charts.BarChart.prototype.displayError = function () {
 charts.BarChart.prototype.drawChartSVG_ = function () {
 	var chart = this.element
 		.append('svg')
-		.attr("viewBox", this.determineVeiwboxString())
+		//.attr("viewBox", this.determineVeiwboxString())
 		.attr('id', 'plot')
 		.append('g')
 		.attr('transform', 'translate(' + this.margin.left + ',' + this.margin.top + ')');
@@ -486,8 +485,9 @@ charts.BarChart.prototype.drawXAxis_ = function (chart) {
 		return "rotate(-60)";
 	});
 
-	this.viewboxYMax = this.viewboxYMax + $(this.element[0]).find('g.x')[0].getBoundingClientRect().height
-	$(this.element[0]).children('svg')[0].setAttribute("viewBox", this.determineVeiwboxString());
+	this.viewboxYMax = this.viewboxYMax + $(this.element[0]).find('g.x')[0].getBoundingClientRect().height;
+	//$(this.element[0]).children('svg')[0].setAttribute("viewBox", this.determineVeiwboxString());
+	$(this.element[0]).height(270 + $(this.element[0]).find('g.x')[0].getBoundingClientRect().height);
 
 	return axis;
 };
@@ -680,7 +680,7 @@ charts.BarChart.prototype.determineWidth_ = function (element) {
 		return this.userSetWidth_;
 	}
 	else if ($(element[0]).width() !== 0) {
-		return $(element[0]).width() - this.hMargin_;
+		return $(element[0]).width();
 	}
 	return charts.BarChart.DEFAULT_WIDTH_;
 };
@@ -703,11 +703,12 @@ charts.BarChart.prototype.redrawOnResize_ = function () {
 	}
 
 	//Debounce is needed because browser resizes fire this resize even multiple times.
-	$(window).resize(_.debounce(drawChart, 100));
+	$(window).resize(_.debounce(drawChart, 10));
 
 };
 
 charts.BarChart.destroy = function(el, selector) {
 	var element = d3.select(el).select(selector);
+
 	$(element[0]).empty();
 };

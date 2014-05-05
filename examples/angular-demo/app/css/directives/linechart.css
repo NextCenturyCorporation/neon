@@ -1,0 +1,27 @@
+.linechart svg{
+	font-size: 10px;
+}
+.axis path,
+.axis line {
+  fill: none;
+  stroke: #cccccc;
+  shape-rendering: crispEdges;
+}
+
+.x.axis path {
+  display: none;
+}
+
+.line {
+  fill: none;
+  stroke: steelblue;
+  stroke-width: 2px;
+}
+
+.line.positiveLine {
+  stroke: #39b54a;
+}
+
+.line.negativeLine {
+  stroke: #C2360D;
+}

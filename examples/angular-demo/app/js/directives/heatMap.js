@@ -302,6 +302,7 @@ angular.module('heatMapDirective', []).directive('heatMap', ['ConnectionService'
                 $scope.clearFilter = function () {
                     $scope.messenger.removeFilter($scope.filterKey, function () {
                         $scope.$apply(function () {
+                            $scope.queryForMapData();
                             $scope.hideClearFilterButton();
                         });
                     }, function () {
