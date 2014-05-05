@@ -709,5 +709,6 @@ charts.BarChart.prototype.redrawOnResize_ = function () {
 
 charts.BarChart.destroy = function(el, selector) {
 	var element = d3.select(el).select(selector);
+
 	$(element[0]).empty();
 };

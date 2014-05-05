@@ -7,18 +7,19 @@
         <title>Neon</title>
 
         <link type="image/png" rel="shortcut icon" href="img/Neon_16x16.png">
-        
+
         <link rel="stylesheet" type="text/css" href="css/bootstrap/bootstrap.min.css">
         <!-- <link rel="stylesheet" type="text/css" href="css/smoothness/jquery-ui-1.8.16.custom.css"> -->
         <link rel="stylesheet" type="text/css" href="css/ui-lightness/jquery-ui-1.10.4.min.css">
         <link rel="stylesheet" type="text/css" href="css/slickgrid/slick.grid.css">
-        
+
         <!-- Custom Stylesheet -->
         <link href="css/style.css" rel="stylesheet">
 
         <!-- Directive styles -->
         <link rel="stylesheet" type="text/css" href="css/directives/circularHeatChart.css">
         <link rel="stylesheet" type="text/css" href="css/directives/barchart.css">
+        <link rel="stylesheet" type="text/css" href="css/directives/linechart.css">
         <link rel="stylesheet" type="text/css" href="css/directives/stackedBarChart.css">
         <link rel="stylesheet" type="text/css" href="css/directives/timelineSelector.css">
         <link rel="stylesheet" type="text/css" href="css/directives/timelineSelectorChart.css">
@@ -136,7 +137,9 @@
 						</div>
 
 						<!--stackedbarchart attr-x="xAxisField" attr-y="yAxisField" bar-type='barType'></stackedbarchart-->
-						<barchart attr-x="xAxisField" attr-y="yAxisField" bar-type='barType'></barchart>
+                        <barchart attr-x="xAxisField" attr-y="yAxisField" bar-type='barType'></barchart>
+						<!--linechart attr-x="xAxisField" attr-y="yAxisField" total-type='barType'></linechart-->
+
 					</div>
 
                     <!-- Map -->
@@ -161,7 +164,7 @@
 
         <!-- Include third party libs -->
         <script src="lib/d3/d3.v3.min.js"></script>
-        
+
         <script src="lib/openlayers/OpenLayers.js"></script>
         <script src="lib/openlayers/heatmap/heatmap.js"></script>
         <script src="lib/openlayers/heatmap/heatmap-openlayers.js"></script>
@@ -181,6 +184,7 @@
         <!-- Include required non-angular support modules -->
         <script src="js/namespaces.js"></script>
         <script src="js/charts/barchart.js"></script>
+        <script src="js/charts/linechart.js"></script>
         <script src="js/charts/timelineSelectorChart.js"></script>
         <script src="js/coremap/coremap.js"></script>
         <script src="js/tables/table.js"></script>
@@ -198,7 +202,8 @@
 		<script src="js/directives/timelineSelectorChart.js"></script>
 		<script src="js/directives/timelineSelector.js"></script>
 		<script src="js/directives/barchartDirective.js"></script>
-		<script src="js/directives/stackedBarchartDirective.js"></script>
+        <script src="js/directives/stackedBarchartDirective.js"></script>
+		<script src="js/directives/linechartDirective.js"></script>
 		<script src="js/directives/fieldSelector.js"></script>
 		<script src="js/directives/heatMap.js"></script>
 		<script src="js/directives/queryResultsTable.js"></script>
