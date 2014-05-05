@@ -702,13 +702,15 @@ charts.BarChart.prototype.redrawOnResize_ = function () {
 		me.draw();
 	}
 
-	//Debounce is needed because browser resizes fire this resize even multiple times.
-	$(window).resize(_.debounce(drawChart, 10));
+	// Debounce is needed because browser resizes fire this resize even multiple times.
+	// Cache the handler so we can remove it from the window on destroy.
+	this.resizeHandler_ = _.debounce(drawChart, 10);
+	$(window).resize(this.resizeHandler_);
 
 };
 
 charts.BarChart.destroy = function(el, selector) {
 	var element = d3.select(el).select(selector);
-
+	$(window).off('resize', this.resizeHandler_);
 	$(element[0]).empty();
 };
