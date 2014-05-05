@@ -80,7 +80,7 @@ barchart.directive('barchart', ['ConnectionService', '$timeout', function(connec
 			$scope.databaseName = message.database;
 			$scope.tableName = message.table;
             $timeout(function() {
-                $scope.initializing = true;
+                $scope.initializing = false;
                 $scope.queryForData();
             });
 
