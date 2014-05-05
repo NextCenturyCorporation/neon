@@ -161,7 +161,7 @@ neon.query.Connection.prototype.executeQueryService_ = function (query, successC
     else if ( query.ignoredFilterIds_ ) {
         var filterIds = [];
         query.ignoredFilterIds_.forEach(function(id) {
-            filterIds.push("ignoredFilterIds[]=" + id);
+            filterIds.push("ignoredFilterIds=" + id);
         });
         opts.push(filterIds.join("&"));
     }
