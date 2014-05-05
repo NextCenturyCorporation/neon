@@ -14,3 +14,11 @@
   stroke: steelblue;
   stroke-width: 1.5px;
 }
+
+.line.positiveLine {
+  stroke: #9999FF;
+}
+
+.line.negativeLine {
+  stroke: #FF9999;
+}

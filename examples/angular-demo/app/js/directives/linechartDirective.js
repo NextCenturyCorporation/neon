@@ -89,7 +89,7 @@ linechart.directive('linechart', ['ConnectionService', function(connectionServic
 			$scope.tableName = message.table;
 		};
 
-		$scope.queryForData = function() {
+		var query = function(comparator, comparisionValue, callback) {
 			var xAxis = connectionService.getFieldMapping($scope.database, $scope.tableName, "x-axis");
 			    xAxis = $scope.attrX || xAxis.mapping;
 			var yAxis = connectionService.getFieldMapping($scope.database, $scope.tableName, "y-axis")
@@ -98,18 +98,11 @@ linechart.directive('linechart', ['ConnectionService', function(connectionServic
 			var query = new neon.query.Query()
 				.selectFrom($scope.databaseName, $scope.tableName)
 				.where(xAxis,'!=', null)
-				.where(yAxis, '>', 0)
-				.selectionOnly()
+				.where(yAxis, comparator, comparisionValue)
+				//.selectionOnly()
 				.groupBy(xAxis);
 
-			var queryType;
-			// if($scope.barType === 'count') {
-				queryType = neon.query.COUNT;
-			// } else if($scope.barType === 'sum') {
-			// 	queryType = neon.query.SUM;
-			// } else if($scope.barType === 'avg') {
-			// 	queryType = neon.query.AVG;
-			// }
+			var queryType = neon.query.COUNT;
 
 			if(yAxis) {
 				query.aggregate(queryType, yAxis, yAxis);
@@ -117,10 +110,24 @@ linechart.directive('linechart', ['ConnectionService', function(connectionServic
 				query.aggregate(queryType, '*', COUNT_FIELD_NAME);
 			}
 
-			connectionService.getActiveConnection().executeQuery(query, function(queryResults) {
-				$scope.$apply(function(){
-					drawChart();
-					drawLine(queryResults);
+			connectionService.getActiveConnection().executeQuery(query, callback);
+		};
+
+		$scope.queryForData = function() {
+			query('>', 0, function(posResults) {
+				query('<', 0, function(negResults) {
+					var data = [{
+						data: posResults.data,
+						classString: "positiveLine"
+					},{
+						data: negResults.data,
+						classString: "negativeLine"
+					}];
+
+					$scope.$apply(function(){
+						drawChart();
+						drawLine(data);
+					});
 				});
 			});
 		};
@@ -141,9 +148,7 @@ linechart.directive('linechart', ['ConnectionService', function(connectionServic
 		};
 
 		var drawLine = function(data) {
-			//charts.BarChart.destroy(el[0], '.barchart');
-
-			$scope.chart.drawLine(data.data);
+			$scope.chart.drawLine(data);
 		};
 
 		neon.ready(function () {

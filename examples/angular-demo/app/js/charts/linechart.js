@@ -94,9 +94,6 @@ charts.LineChart.prototype.drawChart = function() {
 
 	//me.x = d3.time.scale().range([0, me.width]);
 
-
-
-
 	me.svg = me.element.append("svg")
 		.attr("width", me.width + me.margin.left + me.margin.right)
 		.attr("height", me.height + me.margin.top + me.margin.bottom)
@@ -104,25 +101,24 @@ charts.LineChart.prototype.drawChart = function() {
 		.attr("transform", "translate(" + me.margin.left + "," + me.margin.top + ")");
 };
 
-charts.LineChart.prototype.drawLine = function(data) {
+charts.LineChart.prototype.drawLine = function(opts) {
 	var me = this;
 
-	me.categories = me.createCategories(data);
+	if(!($.isArray(opts))) {
+		opts = [opts];
+	}
 
-	//sort data
-	data = data.sort(function(a,b) {
-		if(a[me.xAttribute] < b[me.xAttribute]) {
-			return -1;
-		} else if(a[me.xAttribute] === b[me.xAttribute]) {
-			return 0;
-		} else {
-			return 1;
-		}
-	});
+	var fullDataSet = [];
+	//get list of all data
+	for(var i = 0; i < opts.length; i++) {
+		fullDataSet = fullDataSet.concat(opts[i].data);
+	}
+
+	me.categories = me.createCategories(fullDataSet);
 
 	me.x =  d3.scale.ordinal()
 		.domain(me.categories)
-		.rangeRoundBands([0, me.width]);
+		.rangePoints([0, me.width],.25);
 
 	var xAxis = d3.svg.axis()
 		.scale(me.x)
@@ -133,21 +129,13 @@ charts.LineChart.prototype.drawLine = function(data) {
 		.attr("transform", "translate(0," + me.height + ")")
 		.call(xAxis);
 
-	var line = d3.svg.line()
-		.x(function(d) { return me.x(d[me.xAttribute]); })
-		.y(function(d) { return me.y(d[me.yAttribute]); });
-
-	/*for(var i = 0; i< data.length; i++) {
-		data[i].date = parseDate(data[i].date);
-	}*/
-
 	me.y = d3.scale.linear().range([me.height, 0]);
 
 	var yAxis = d3.svg.axis()
 		.scale(me.y)
 		.orient("left");
 
-	me.y.domain([0, d3.max(data, function(d) { return d[me.yAttribute]; })]);
+	me.y.domain([0, d3.max(fullDataSet, function(d) { return d[me.yAttribute]; })]);
 
 	me.svg.append("g")
 		.attr("class", "y axis")
@@ -159,14 +147,33 @@ charts.LineChart.prototype.drawLine = function(data) {
 		.style("text-anchor", "end")
 		.text(me.yAttribute);
 
-	console.log(data);
+	var cls;
+	var data;
+	var line;
+	for(var i = 0; i < opts.length; i++) {
+		cls = "line" + (opts[i].classString ? " " + opts[i].classString : "");
+		data = opts[i].data;
 
+		data = data.sort(function(a,b) {
+			if(a[me.xAttribute] < b[me.xAttribute]) {
+				return -1;
+			} else if(a[me.xAttribute] === b[me.xAttribute]) {
+				return 0;
+			} else {
+				return 1;
+			}
+		});
 
-	me.svg.append("path")
+		line = d3.svg.line()
+		.x(function(d) {
+			return me.x(d[me.xAttribute]); })
+		.y(function(d) { return me.y(d[me.yAttribute]); });
+
+		me.svg.append("path")
 		.datum(data)
-		.attr("class", "line")
+		.attr("class", cls)
 		.attr("d", line);
-		//.attr("transform", "translate(" + me.margin.left + ",0)");
+	}
 };
 
 charts.LineChart.destroy = function(el, selector) {
