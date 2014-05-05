@@ -349,24 +349,18 @@ angular.module('timelineSelectorDirective', []).directive('timelineSelector', ['
 
                         if ($scope.brush.length > 0) {
                             var newBrushStart = $scope.brush[0];
-                            var newBrushEnd = $scope.brush[1];
+                            // Set the brush to one millisecond back when changing resolutions back to what we had.
+                            // Otherwise, our brush will drift forward in time on consecutive granularity changes due to the 
+                            // nature of having to zero out the value and calculating the start point of the next day/hour.
+                            var newBrushEnd = new Date($scope.brush[1].getTime() - 1);
 
-                            console.log(newBrushEnd.toUTCString());
-                            // if we were in the middle of an interval on the right side of the timeline, round that up so we don't potentially lose items that were already selected
-                            //if ($scope.brush[1] > newBrushEnd) {
-                            if (oldVal === "hour" && newVal ==="day") {
-                                newBrushEnd = new Date($scope.zeroOutDate(newBrushEnd).getTime() + $scope.millisMultiplier);
-                            }
-                            // else if (oldVal === "day" && newVal === "hour") {
-                            // 	console.log("hey");
-                            // }
+                            // Get the zero'd version of the proper end date.
+                            newBrushEnd = new Date($scope.zeroOutDate(newBrushEnd.getTime() + $scope.millisMultiplier));
+
                             if ( newBrushStart.getTime() !== $scope.brush[0].getTime() || newBrushEnd.getTime() !== $scope.brush[1].getTime()) {
                                 $scope.brush = [newBrushStart,newBrushEnd];
                             }
-                            //else {
-                                // if the brush hasn't changed, we still want to update with the new granularity numbers
-                                $scope.queryForChartData();
-                            //}
+                            $scope.queryForChartData();
 
                         }
                         else {

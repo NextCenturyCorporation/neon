@@ -137,6 +137,9 @@ coreMap.Map.DEFAULT_COLOR = "#00ff00";
 coreMap.Map.DEFAULT_STROKE_COLOR = "#ffffff";
 coreMap.Map.MIN_RADIUS = 3;
 coreMap.Map.MAX_RADIUS = 13;
+coreMap.Map.BOX_COLOR = "#ff0000";
+coreMap.Map.BOX_WIDTH = 2;
+coreMap.Map.BOX_OPACITY = 0.5;
 
 coreMap.Map.SOURCE_PROJECTION = new OpenLayers.Projection("EPSG:4326");
 coreMap.Map.DESTINATION_PROJECTION = new OpenLayers.Projection("EPSG:900913");
@@ -341,7 +344,7 @@ coreMap.Map.prototype.createPointStyleObject = function (color, radius) {
 
 coreMap.Map.prototype.calculateRadius = function (element) {
     // TODO: Review this function and make sure radius is being properly calculated and document what it is doing
-    if ( this.minRadius === this.maxRadius ) {
+    if (this.minRadius === this.maxRadius) {
         return coreMap.Map.MIN_RADIUS;
     }
 
@@ -547,6 +550,8 @@ coreMap.Map.prototype.setupLayers = function () {
             OpenLayers.Feature.Vector.style["default"]
         ))
     };
+    // lets clients draw boxes on the map
+    this.boxLayer = new OpenLayers.Layer.Boxes();
     this.pointsLayer = new OpenLayers.Layer.Vector("Points Layer", style);
 
     var heatmapOptions = {visible: true, radius: 10};
@@ -555,6 +560,7 @@ coreMap.Map.prototype.setupLayers = function () {
 
     this.map.addLayer(this.heatmapLayer);
     this.map.addLayer(this.pointsLayer);
+    this.map.addLayer(this.boxLayer);
 
     // Default the heatmap to be visible.
     this.heatmapLayer.toggle();
@@ -579,6 +585,28 @@ coreMap.Map.prototype.setupLayers = function () {
     //this.cacheWriter.addLayer(baseLayer);
     this.map.addControl(this.cacheReader);
     this.map.addControl(this.cacheWriter);
+};
+
+/**
+ * Draws a box with the specified bounds
+ * @param {Object} bounds An object with 4 parameters, left, bottom, right and top
+ * @return {Object} The object representing the box so it can be removed
+ */
+coreMap.Map.prototype.drawBox = function (bounds) {
+    var box = new OpenLayers.Marker.Box(
+        new OpenLayers.Bounds(bounds.left, bounds.bottom, bounds.right, bounds.top).transform(coreMap.Map.SOURCE_PROJECTION,coreMap.Map.DESTINATION_PROJECTION),
+        coreMap.Map.BOX_COLOR, coreMap.Map.BOX_WIDTH);
+    box.div.style.opacity = coreMap.Map.BOX_OPACITY;
+    this.boxLayer.addMarker(box);
+    return box;
+};
+
+/**
+ * Removes the box that was added with drawBox
+ * @param box
+ */
+coreMap.Map.prototype.removeBox = function (box) {
+    this.boxLayer.removeMarker(box);
 };
 
 /**
