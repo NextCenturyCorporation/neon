@@ -27,6 +27,8 @@
     margin: auto;
 }
 
-.circularheatchart svg .segment {
-    fill: black;
+.circularheatchart svg .segment,
+.circularheatchart svg .radial {
+    fill: #444444;
 }
+
