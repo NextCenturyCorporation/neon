@@ -246,9 +246,13 @@ charts.TimelineSelectorChart = function (element, configuration) {
             .attr("transform", "translate(0," + (this.config.height + 2) + ")")
             .call(xAxis);
 
-        //context.append("g")
-        //	.attr("class", "y axis")
-        //	.call(yAxis);
+        var tick = $('.x.axis').find('.tick.major').first();
+        var transform = tick.attr('transform');
+        var parts  = /translate\(\s*([^\s,)]+)[ ,]([^\s,)]+)/.exec(transform);
+        var firstX = parts[1];
+
+        if(firstX > (tick.width()/2))
+            tick.find('text').css('text-anchor', 'start');
 
         var gBrush = context.append("g")
             .attr("class", "brush");
