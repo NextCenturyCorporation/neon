@@ -51,31 +51,3 @@
 .heat-map .olControlZoom a:hover{
 	background-color: rgba(57, 181, 74, 1);
 }
-
-.map-legend{
-	margin-bottom: 10px;
-	min-height: 25px;
-}
-.map-legend .map-legend-item {
-    color: #555555;
-    display: inline-block;
-    margin-right: 15px;
-    margin-top: 5px;
-}
-.map-legend .map-legend-icon {
-    border-radius: 2px;
-    display: inline-block;
-    height: 1em;
-    vertical-align: middle;
-    width: 1em;
-}
-
-.heat-legend .map-legend-item {
-    color: #777777;
-}
-.heat-legend .map-legend-text {
-    margin: 0 5px;
-}
-.heat-legend .map-legend-item .map-legend-text:first-child {
-    margin-left: 0;
-}

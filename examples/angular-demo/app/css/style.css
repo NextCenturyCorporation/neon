@@ -302,6 +302,35 @@ a:focus{
    	display: block;
 }
 
+/* Chart legend */
+
+.legend{
+	margin-bottom: 10px;
+	min-height: 25px;
+}
+.legend .legend-item {
+    color: #555555;
+    display: inline-block;
+    margin-right: 15px;
+    margin-top: 5px;
+}
+.legend .legend-icon {
+    border-radius: 2px;
+    display: inline-block;
+    height: 1em;
+    vertical-align: middle;
+    width: 1em;
+}
+.legend-scale .legend-item {
+    color: #777777;
+}
+.legend-scale .legend-text {
+    margin: 0 5px;
+}
+.legend-scale .legend-item .legend-text:first-child {
+    margin-left: 0;
+}
+
 
 /* ================
 	NAVBAR
