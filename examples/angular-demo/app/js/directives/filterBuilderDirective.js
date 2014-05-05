@@ -78,6 +78,7 @@ angular.module('filterBuilderDirective', []).directive('filterBuilder', ['Connec
 			 * @method initialize
 			 */
 			$scope.initialize = function() {
+				$scope.fields = [];
 				$scope.messenger = new neon.eventing.Messenger();
 				$scope.filterTable = new neon.query.FilterTable();
 				// Use a single session based filter key for this directive instance to allow multiple
@@ -103,7 +104,13 @@ angular.module('filterBuilderDirective', []).directive('filterBuilder', ['Connec
 
 				var filter = $scope.filterTable.buildFilterFromData($scope.databaseName, $scope.tableName, $scope.andClauses);
 				$scope.messenger.replaceFilter($scope.filterTable.filterKey, filter, function(){
-					//$scope.$apply();
+					// On succesful filter, reset the user input on the add filter row so it's obvious which rows
+					// are filters and which is the primary Add Filter row.
+					$scope.$apply(function() {
+						$scope.selectedField = $scope.fields[0];
+						$scope.selectedOperator = $scope.filterTable.operatorOptions[0];
+						$scope.selectedValue = "";
+					});
 		        }, function() {
 		        	$scope.$apply(function() {
 			        	// Error handler:  the addition to the filter failed.  Remove it.
