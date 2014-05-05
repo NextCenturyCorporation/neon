@@ -127,9 +127,9 @@ barchart.directive('barchart', ['ConnectionService', '$timeout', function(connec
 			charts.BarChart.destroy(el[0], '.barchart');
 
 			var xAxis = connectionService.getFieldMapping($scope.database, $scope.tableName, "x-axis");
-			    xAxis = xAxis.mapping || $scope.attrX;
+			    xAxis = $scope.attrX || xAxis.mapping;
 			var yAxis = connectionService.getFieldMapping($scope.database, $scope.tableName, "y-axis")
-			    yAxis = yAxis.mapping || $scope.attrY;
+			    yAxis = $scope.attrY || yAxis.mapping;
 
 			if (!yAxis) {
 				yAxis = COUNT_FIELD_NAME;
