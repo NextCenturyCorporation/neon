@@ -123,7 +123,7 @@ charts.BarChart = function (rootElement, selector, opts) {
 
 charts.BarChart.DEFAULT_HEIGHT_ = 300;
 charts.BarChart.DEFAULT_WIDTH_ = 600;
-charts.BarChart.DEFAULT_MARGIN_ = {top: 20, bottom: 30, left: 30, right: 20};
+charts.BarChart.DEFAULT_MARGIN_ = {top: 20, bottom: 30, left: 30, right: 0};
 charts.BarChart.TOOLTIP_ID_ = 'tooltip';
 charts.BarChart.SVG_ELEMENT_ = 'rect';
 charts.BarChart.ACTIVE_STYLE_KEY_ = 'active';
@@ -680,7 +680,7 @@ charts.BarChart.prototype.determineWidth_ = function (element) {
 		return this.userSetWidth_;
 	}
 	else if ($(element[0]).width() !== 0) {
-		return $(element[0]).width() + 20;
+		return $(element[0]).width();
 	}
 	return charts.BarChart.DEFAULT_WIDTH_;
 };
