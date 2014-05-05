@@ -190,7 +190,9 @@ angular.module('timelineSelectorDirective', []).directive('timelineSelector', ['
                     // for the appropriate month/day/hours we want to appear in this directive's associated partial.
                     // This essentially shifts the display times from local to the value we want to appear in UTC time.
                     var total = 0;
-                    for (var i = startIdx; i <= endIdx; i++) {
+                    // endIdx points to the start of the day/hour just after the buckets we want to count, so do not
+                    // include the bucket at endIdx.
+                    for (var i = startIdx; i < endIdx; i++) {
                         total += $scope.data[i].value;
                     }
 
@@ -349,18 +351,22 @@ angular.module('timelineSelectorDirective', []).directive('timelineSelector', ['
                             var newBrushStart = $scope.brush[0];
                             var newBrushEnd = $scope.brush[1];
 
-
+                            console.log(newBrushEnd.toUTCString());
                             // if we were in the middle of an interval on the right side of the timeline, round that up so we don't potentially lose items that were already selected
-                            if ($scope.brush[1] > newBrushEnd) {
-                                newBrushEnd = new Date(newBrushEnd.getTime() + $scope.millisMultiplier);
+                            //if ($scope.brush[1] > newBrushEnd) {
+                            if (oldVal === "hour" && newVal ==="day") {
+                                newBrushEnd = new Date($scope.zeroOutDate(newBrushEnd).getTime() + $scope.millisMultiplier);
                             }
+                            // else if (oldVal === "day" && newVal === "hour") {
+                            // 	console.log("hey");
+                            // }
                             if ( newBrushStart.getTime() !== $scope.brush[0].getTime() || newBrushEnd.getTime() !== $scope.brush[1].getTime()) {
                                 $scope.brush = [newBrushStart,newBrushEnd];
                             }
-                            else {
+                            //else {
                                 // if the brush hasn't changed, we still want to update with the new granularity numbers
                                 $scope.queryForChartData();
-                            }
+                            //}
 
                         }
                         else {
