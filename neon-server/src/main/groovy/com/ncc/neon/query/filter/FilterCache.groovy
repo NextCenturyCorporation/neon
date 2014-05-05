@@ -81,4 +81,18 @@ class FilterCache implements Serializable {
         }
     }
 
+    /**
+     * Gets the filter keys (filter + id) for the specified dataset. This is similar to getFiltersForDataset except
+     * that it returns the whole filter key
+     * @param dataSet
+     * @return
+     */
+    List<FilterKey> getFilterKeysForDataset(DataSet dataSet) {
+        return cache.findResults { k, v ->
+            if (v.dataSet == dataSet) {
+                return v
+            }
+        }
+    }
+
 }

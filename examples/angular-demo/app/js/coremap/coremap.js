@@ -67,16 +67,41 @@ coreMap.Map = function (elementId, opts) {
 
     this.elementId = elementId;
     this.selector = $(elementId);
-    this.data = opts.data;
+
     // mapping of categories to colors
     this.colors = {};
 
     this.latitudeMapping = opts.latitudeMapping || coreMap.Map.DEFAULT_LATITUDE_MAPPING;
     this.longitudeMapping = opts.longitudeMapping || coreMap.Map.DEFAULT_LONGITUDE_MAPPING;
     this.sizeMapping = opts.sizeMapping || coreMap.Map.DEFAULT_SIZE_MAPPING;
-    this.categoryMapping = opts.categoryMapping;
 
-    this.colorScale = d3.scale.category20();
+    this.categoryMapping = opts.categoryMapping;
+    this.onZoomRect = opts.onZoomRect;
+
+    //this.colorScale = d3.scale.category20();
+    this.colorRange = [
+        '#39b54a',
+        '#3662CC',
+        '#C23333',
+        "#ff7f0e",
+        "#9467bd",
+        "#8c564b",
+        "#e377c2",
+        "#7f7f7f",
+        "#bcbd22",
+        "#17becf",
+        "#98df8a",
+        "#aec7e8",
+        "#ff9896",
+        "#ffbb78",
+        "#c5b0d5",
+        "#c49c94",
+        "#f7b6d2",
+        "#c7c7c7",
+        "#dbdb8d",
+        "#9edae5"
+    ];
+    this.colorScale = d3.scale.ordinal().range(this.colorRange);
     this.responsive = true;
 
     if (opts.responsive === false) {
@@ -95,11 +120,10 @@ coreMap.Map = function (elementId, opts) {
 
     this.initializeMap();
     this.setupLayers();
-    this.map.zoomToMaxExtent();
+    this.resetZoom();
+    this.setData(opts.data || []);
     this.heatmapLayer.toggle();
 };
-
-coreMap.Map.DEFAULT_DATA_LIMIT = 8000;
 
 coreMap.Map.DEFAULT_WIDTH = 1024;
 coreMap.Map.DEFAULT_HEIGHT = 680;
@@ -151,9 +175,13 @@ coreMap.Map.prototype.draw = function () {
 coreMap.Map.prototype.reset = function () {
     this.setData([]);
     this.draw();
-    this.map.setCenter(new OpenLayers.LonLat(0, 0));
-    this.map.zoomToMaxExtent();
+    this.resetZoom();
+};
 
+
+coreMap.Map.prototype.resetZoom = function () {
+    this.map.zoomToMaxExtent();
+    this.map.setCenter(new OpenLayers.LonLat(0, 0), 1);
 };
 
 /**
@@ -161,40 +189,43 @@ coreMap.Map.prototype.reset = function () {
  * @param mapData the data to be set. This should be an array of points. The points may be specified
  * in any way, This component uses the mapping objects to map each array element to latitude, longitude, size and color.
  * @param {Array} An array of data objects to plot
- * @return {Object} result
- * @return {Boolean} results.success  True if the map accepts the data; false if there are too many points to plot.
- * @return {String} result.message Empty string if no error; otherwise, an error message is returned.
  * @method setData
  */
 
 coreMap.Map.prototype.setData = function (mapData) {
-    if (mapData.length >= coreMap.Map.DEFAULT_DATA_LIMIT) {
-        this.data = [];
-        return {
-            success: false,
-            message: "Unable to update data. The map cannot handle more than " + coreMap.Map.DEFAULT_DATA_LIMIT + " points."
-                + "  Please select a smaller data set."
-        };
-    }
-    else {
-        this.data = mapData;
-        return {
-            success: true,
-            message: ""
-        };
-    }
+    this.data = mapData;
+    this.updateRadii();
 };
+
+/**
+ * Updates the min/max radii values for the point layer
+ * @method updateRadii
+ */
+coreMap.Map.prototype.updateRadii = function () {
+    this.minRadius = this.calculateMinRadius();
+    this.maxRadius = this.calculateMaxRadius();
+};
+
 
 coreMap.Map.prototype.getColorMappings = function () {
     var me = this;
 
     // convert to an array that is in alphabetical order for consistent iteration order
     var sortedColors = [];
-    for ( key in this.colors ) {
+    for (key in this.colors) {
         var color = me.colors[key];
-        sortedColors.push( { 'color' : color, 'category' : key});
-    };
+        sortedColors.push({ 'color': color, 'category': key});
+    }
+
     return sortedColors;
+};
+
+/**
+ * Resets all assigned color mappings.
+ * @method resetColorMappings
+ */
+coreMap.Map.prototype.resetColorMappings = function () {
+    this.colorScale = d3.scale.ordinal().range(this.colorRange);
 };
 
 /**
@@ -215,47 +246,6 @@ coreMap.Map.prototype.toggleLayers = function () {
     }
 };
 
-/**
- * Get the current viewable extent.
- * @return {Object} An object that contains the minimum and maximum latitudes and longitudes currently shown.
- * @method getExtent
- */
-
-coreMap.Map.prototype.getExtent = function () {
-    var extent = this.map.getExtent();
-    extent.transform(coreMap.Map.DESTINATION_PROJECTION, coreMap.Map.SOURCE_PROJECTION);
-    var llPoint = new OpenLayers.LonLat(extent.left, extent.bottom);
-    var urPoint = new OpenLayers.LonLat(extent.right, extent.top);
-
-    var minLon = Math.min(llPoint.lon, urPoint.lon);
-    var maxLon = Math.max(llPoint.lon, urPoint.lon);
-
-    var minLat = Math.min(llPoint.lat, urPoint.lat);
-    var maxLat = Math.max(llPoint.lat, urPoint.lat);
-
-    return {
-        minimumLatitude: minLat,
-        minimumLongitude: minLon,
-        maximumLatitude: maxLat,
-        maximumLongitude: maxLon
-    };
-};
-
-/**
- * Sets the viewable extent of the map.
- * @param {Object} extent An object containing the bounds of the viewable extent.
- * @method zoomToExtent
- */
-
-coreMap.Map.prototype.zoomToExtent = function (extent) {
-    var llPoint = new OpenLayers.LonLat(extent['minimumLongitude'], extent['minimumLatitude']);
-    var urPoint = new OpenLayers.LonLat(extent['maximumLongitude'], extent['maximumLatitude']);
-
-    llPoint.transform(coreMap.Map.SOURCE_PROJECTION, coreMap.Map.DESTINATION_PROJECTION);
-    urPoint.transform(coreMap.Map.SOURCE_PROJECTION, coreMap.Map.DESTINATION_PROJECTION);
-
-    this.map.zoomToExtent([llPoint.lon, llPoint.lat, urPoint.lon, urPoint.lat]);
-};
 
 /**
  * Registers a listener for a particular map event.
@@ -350,17 +340,19 @@ coreMap.Map.prototype.createPointStyleObject = function (color, radius) {
  */
 
 coreMap.Map.prototype.calculateRadius = function (element) {
-    var minValue = this.minValue(this.data, this.sizeMapping);
-    var maxValue = this.maxValue(this.data, this.sizeMapping);
-    if (maxValue - minValue === 0) {
+    // TODO: Review this function and make sure radius is being properly calculated and document what it is doing
+    if ( this.minRadius === this.maxRadius ) {
         return coreMap.Map.MIN_RADIUS;
     }
 
     var size = this.getValueFromDataElement(this.sizeMapping, element);
     var radius = coreMap.Map.MIN_RADIUS;
     if (size >= 1) {
-        var slope = 10 / (maxValue - minValue);
-        radius = Math.round(slope * size + 5);
+        var slope = 10 / (this.maxRadius - this.minRadius);
+        var computedRadius = Math.round(slope * size + 5);
+        if (computedRadius > radius) {
+            radius = computedRadius;
+        }
     }
     return radius;
 };
@@ -393,32 +385,28 @@ coreMap.Map.prototype.calculateColor = function (element) {
 };
 
 /**
- * Calculate the minimum value of the data, using one of the mapping functions.
- * @param {Object} data The array of data elements.
- * @param {String | Function} mapping The mapping from data element object to value.
+ * Calculate the radius of the smallest element in the data
  * @return {number} The minimum value in the data
- * @method minValue
+ * @method calculateMinRadius
  */
 
-coreMap.Map.prototype.minValue = function (data, mapping) {
+coreMap.Map.prototype.calculateMinRadius = function () {
     var me = this;
-    return d3.min(data, function (el) {
-        return me.getValueFromDataElement(mapping, el);
+    return d3.min(me.data, function (el) {
+        return me.getValueFromDataElement(me.sizeMapping, el);
     });
 };
 
 /**
- * Calculate the maximum value of the data, using one of the mapping functions.
- * @param {Object} data The array of data elements.
- * @param {String | Function} mapping The mapping from data element object to value.
+ * Calculate the radius of the largest element in the data
  * @return {number} The maximum value in the data
- * @method maxValue
+ * @method calculateMaxRadius
  */
 
-coreMap.Map.prototype.maxValue = function (data, mapping) {
+coreMap.Map.prototype.calculateMaxRadius = function () {
     var me = this;
-    return d3.max(data, function (el) {
-        return me.getValueFromDataElement(mapping, el);
+    return d3.max(me.data, function (el) {
+        return me.getValueFromDataElement(me.sizeMapping, el);
     });
 };
 
@@ -467,7 +455,82 @@ coreMap.Map.prototype.initializeMap = function () {
         height: this.height
     });
     this.map = new OpenLayers.Map(this.elementId);
+    this.configureFilterOnZoomRectangle();
 };
+
+coreMap.Map.prototype.configureFilterOnZoomRectangle = function () {
+    var me = this;
+    var control = new OpenLayers.Control();
+    // this is copied from the OpenLayers.Control.ZoomBox, but that doesn't provide a way to hook in, so we had to copy
+    // it here to provide a callback after zooming
+    OpenLayers.Util.extend(control, {
+        draw: function () {
+            // this Handler.Box will intercept the shift-mousedown
+            // before Control.MouseDefault gets to see it
+            this.box = new OpenLayers.Handler.Box(control,
+                {"done": this.notice},
+                {keyMask: OpenLayers.Handler.MOD_SHIFT});
+            this.box.activate();
+        },
+
+        notice: function (position) {
+            if (position instanceof OpenLayers.Bounds) {
+                var bounds,
+                    targetCenterPx = position.getCenterPixel();
+                if (!this.out) {
+                    var minXY = this.map.getLonLatFromPixel({
+                        x: position.left,
+                        y: position.bottom
+                    });
+                    var maxXY = this.map.getLonLatFromPixel({
+                        x: position.right,
+                        y: position.top
+                    });
+                    bounds = new OpenLayers.Bounds(minXY.lon, minXY.lat,
+                        maxXY.lon, maxXY.lat);
+                } else {
+                    var pixWidth = position.right - position.left;
+                    var pixHeight = position.bottom - position.top;
+                    var zoomFactor = Math.min((this.map.size.h / pixHeight),
+                        (this.map.size.w / pixWidth));
+                    var extent = this.map.getExtent();
+                    var center = this.map.getLonLatFromPixel(targetCenterPx);
+                    var xmin = center.lon - (extent.getWidth() / 2) * zoomFactor;
+                    var xmax = center.lon + (extent.getWidth() / 2) * zoomFactor;
+                    var ymin = center.lat - (extent.getHeight() / 2) * zoomFactor;
+                    var ymax = center.lat + (extent.getHeight() / 2) * zoomFactor;
+                    bounds = new OpenLayers.Bounds(xmin, ymin, xmax, ymax);
+                }
+                // always zoom in/out
+                var lastZoom = this.map.getZoom(),
+                    size = this.map.getSize(),
+                    centerPx = {x: size.w / 2, y: size.h / 2},
+                    zoom = this.map.getZoomForExtent(bounds),
+                    oldRes = this.map.getResolution(),
+                    newRes = this.map.getResolutionForZoom(zoom);
+                if (oldRes == newRes) {
+                    this.map.setCenter(this.map.getLonLatFromPixel(targetCenterPx));
+                } else {
+                    var zoomOriginPx = {
+                        x: (oldRes * targetCenterPx.x - newRes * centerPx.x) /
+                            (oldRes - newRes),
+                        y: (oldRes * targetCenterPx.y - newRes * centerPx.y) /
+                            (oldRes - newRes)
+                    };
+                    this.map.zoomTo(zoom, zoomOriginPx);
+                }
+                if (lastZoom == this.map.getZoom() && this.alwaysZoom == true) {
+                    this.map.zoomTo(lastZoom + (this.out ? -1 : 1));
+                }
+                if (me.onZoomRect) {
+                    // switch destination and source here since we're projecting back into lat/lon
+                    me.onZoomRect.call(me, bounds.transform(coreMap.Map.DESTINATION_PROJECTION, coreMap.Map.SOURCE_PROJECTION));
+                }
+            }
+        }
+    });
+    this.map.addControl(control);
+}
 
 /**
  * Initializes the map layers and adds the base layer.
@@ -475,7 +538,7 @@ coreMap.Map.prototype.initializeMap = function () {
  */
 
 coreMap.Map.prototype.setupLayers = function () {
-    var baseLayer = new OpenLayers.Layer.OSM("OSM", null, {});
+    var baseLayer = new OpenLayers.Layer.OSM("OSM", null, {wrapDateLine: false});
     this.map.addLayer(baseLayer);
 
     var style = {

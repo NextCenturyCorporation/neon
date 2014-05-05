@@ -17,7 +17,7 @@
 package com.ncc.neon.query.mongo
 
 import com.mongodb.DBObject
-import com.ncc.neon.query.TabularQueryResult
+import com.ncc.neon.query.result.TabularQueryResult
 
 
 

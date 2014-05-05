@@ -21,31 +21,32 @@
  * @example
  *    &lt;timeline-selector-chart cell-values="data"&gt;&lt;/timeline-selector&gt;<br>
  *    &lt;div timeline-selector-chart cell-values="data"&gt;&lt;/div&gt;
-  *
+ *
  * @see neonDemo.charts.timelineSelectorChart
  * @class neonDemo.directives.timelineSelectorChart
  * @constructor
  */
-angular.module('timelineSelectorChartDirective', []).directive('timelineSelectorChart', function() {
+angular.module('timelineSelectorChartDirective', []).directive('timelineSelectorChart', function () {
 
-	return {
-		restrict: 'EA',
-		scope: {
+    return {
+        restrict: 'EA',
+        scope: {
             timelineData: '=',
-            timelineBrush: '='
+            timelineBrush: '=',
+            extentDirty: '='
         },
-		link: function($scope, element, attrs) {          
+        link: function ($scope, element, attrs) {
 
             // Initialize the chart.
             $scope.chart = new charts.TimelineSelectorChart(element[0]);
 
             // Add a brush handler.
-            $scope.chart.addBrushHandler(function(data) {
+            $scope.chart.addBrushHandler(function (data) {
                 // Wrap our data change in $apply since this is fired from a D3 event and outside of
                 // angular's digest cycle.
-                $scope.$apply(function() {
+                $scope.$apply(function () {
                     $scope.timelineBrush = data;
-                })  
+                })
             });
 
             // Render an initial empty view.
@@ -53,19 +54,26 @@ angular.module('timelineSelectorChartDirective', []).directive('timelineSelector
 
             // If our data updates, reset our internal value fields and render the new view
             // and clear the brush.
-            $scope.$watch('timelineData', function(newVal) {
+            $scope.$watch('timelineData', function (newVal) {
                 if (newVal && (newVal.length > 0)) {
                     $scope.chart.render(newVal);
-                    $scope.timelineBrush = [];
+                    $scope.chart.renderExtent($scope.timelineBrush);
                 }
             }, true);
 
-            $scope.$watch('timelineBrush', function(newVal) {
+            $scope.$watch('timelineBrush', function (newVal) {
                 if (newVal && newVal.length === 0) {
                     $scope.chart.clearBrush();
                 }
+            });
+
+            $scope.$watch('extentDirty', function(newVal) {
+                if (newVal) {
+                    $scope.extentDirty = false;
+                    $scope.chart.renderExtent($scope.timelineBrush);
+                }
             })
         }
-	}
+    }
 });
 

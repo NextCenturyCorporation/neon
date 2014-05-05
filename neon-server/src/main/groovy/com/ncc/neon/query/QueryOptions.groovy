@@ -16,17 +16,16 @@
 
 package com.ncc.neon.query
 
-import groovy.transform.Immutable
-
-
-
-@Immutable
+/**
+ * Options for modifying a query
+ */
 class QueryOptions {
-    static final QueryOptions ALL_DATA = new QueryOptions(true, true)
-    static final QueryOptions FILTERED_DATA = new QueryOptions(false, true)
-    static final QueryOptions FILTERED_AND_SELECTED_DATA = new QueryOptions(false, false)
+    /** default options that applies filters to the query */
+    public static final QueryOptions DEFAULT_OPTIONS = new QueryOptions()
 
-    final boolean disregardFilters
-    final boolean disregardSelection
+    boolean ignoreFilters = false
+    boolean selectionOnly = false
 
+    /** ignores these particular filters only (ignoreFilters takes precedence). this is useful if a visualization wants to ignore its own filters */
+    Set<String> ignoredFilterIds = [] as HashSet
 }

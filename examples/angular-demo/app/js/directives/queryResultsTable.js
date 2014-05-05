@@ -58,7 +58,6 @@ angular.module('queryResultsTableDirective', []).directive('queryResultsTable', 
                 $scope.sortDirection = neon.query.ASCENDING;
                 $scope.limit = 500;
                 $scope.totalRows = 0;
-                $scope.needsToQuery = true;  // State variable to be used in conjunctino with showData to determine when to query.
                 $scope.error = '';
 
                 // Default our data table to be empty.  Generate a unique ID for it 
@@ -75,8 +74,7 @@ angular.module('queryResultsTableDirective', []).directive('queryResultsTable', 
 
                 $scope.messenger.events({
                     activeDatasetChanged: onDatasetChanged,
-                    filtersChanged: onFiltersChanged,
-                    selectionChanged: onSelectionChanged
+                    filtersChanged: onFiltersChanged
                 });
 
             };
@@ -107,36 +105,19 @@ angular.module('queryResultsTableDirective', []).directive('queryResultsTable', 
             };
 
             /**
-             * Event handler for a user selecting fields in the data table.
-             * @method onSelection
-             * @private
-             */
-            var onSelection = function() {
-                console.log("user selected something in the table.");
-            };
-
-            /**
-             * Event handler for selection changed events issued over Neon's messaging channels.
-             * @param {Object} message A Neon selection changed message.
-             * @method onSelectionChanged
-             * @private
-             */ 
-            var onSelectionChanged = function(message) {
-                // $scope.needsToQuery = true;
-
-                // $scope.queryForData();
-                // $scope.queryForTotalRows();
-            };
-
-            /**
              * Event handler for filter changed events issued over Neon's messaging channels.
              * @param {Object} message A Neon filter changed message.
              * @method onFiltersChanged
              * @private
              */ 
             var onFiltersChanged = function(message) {
-                // Clear our filters against the last table and filter before requesting data.
-                $scope.needsToQuery = true;
+                updateRowsAndCount();
+            };
+
+            /**
+             * Updates the data and the count of total rows in the data
+             */
+            var updateRowsAndCount = function() {
                 $scope.queryForTotalRows();
                 $scope.queryForData();
             };
@@ -152,14 +133,14 @@ angular.module('queryResultsTableDirective', []).directive('queryResultsTable', 
             var onDatasetChanged = function(message) {
                 $scope.databaseName = message.database;
                 $scope.tableName = message.table;
-                $scope.needsToQuery = true;
 
                 connectionService.getActiveConnection().getFieldNames($scope.tableName, function(results) {
 				    $scope.$apply(function() {
 				        populateFieldNames(results);
 				        $scope.sortByField = connectionService.getFieldMapping($scope.database, $scope.tableName, "sort-by");
 				        $scope.sortByField = $scope.sortByField.mapping || $scope.fields[0];
-				    });
+                        updateRowsAndCount();
+                    });
 				});
             };
 
@@ -178,7 +159,6 @@ angular.module('queryResultsTableDirective', []).directive('queryResultsTable', 
              * @method refreshData
              */
             $scope.refreshData = function() {
-                $scope.needsToQuery = true;
                 $scope.queryForData();
             }
 
@@ -193,13 +173,12 @@ angular.module('queryResultsTableDirective', []).directive('queryResultsTable', 
              * @method queryForData
              */
             $scope.queryForData = function() {
-                if ($scope.showData && $scope.needsToQuery) {
+                if ($scope.showData) {
                     var query = $scope.buildQuery();
 
                     connectionService.getActiveConnection().executeQuery(query, function(queryResults) {
                         $scope.$apply(function(){
                             $scope.updateData(queryResults);
-                            $scope.needsToQuery = false;
                         });
                     });
                 }
@@ -243,7 +222,7 @@ angular.module('queryResultsTableDirective', []).directive('queryResultsTable', 
                 // Handle the new data.
                 $scope.tableOptions = $scope.createOptions(queryResults);
 
-                $scope.table = new tables.Table("#" + $scope.tableId, $scope.tableOptions).draw().registerSelectionListener(onSelection);
+                $scope.table = new tables.Table("#" + $scope.tableId, $scope.tableOptions).draw();//.registerSelectionListener(onSelection);
                 $scope.table.refreshLayout();
 
             };

@@ -201,6 +201,22 @@ neon.eventing.Messenger.prototype.clearFilters = function (successCallback, erro
 };
 
 /**
+ * Clears all filters but does not notify other widgets that the filters have been changed. This is useful if this is
+ * part of another event that may result in the widgets updating themselves
+ * @method clearFiltersSilently
+ */
+neon.eventing.Messenger.prototype.clearFiltersSilently = function (successCallback, errorCallback) {
+    return neon.util.ajaxUtils.doPost(
+        neon.serviceUrl('filterservice', 'clearfilters'),
+        {
+            success: successCallback,
+            error: errorCallback
+        }
+    );
+};
+
+
+/**
  * Adds any elements matching the filter to the current selection. This will fire a selection changed event to notify
  * other widgets that the selection has changed.
  * @param {String} id The id of the selection to apply. A typical value to use for the id is the return value of

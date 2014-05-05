@@ -15,16 +15,14 @@
  */
 
 package com.ncc.neon.query.shark
-
 import com.ncc.neon.connect.ConnectionManager
+import com.ncc.neon.connect.JdbcClient
 import com.ncc.neon.query.*
+import com.ncc.neon.query.executor.AbstractQueryExecutor
 import com.ncc.neon.query.filter.FilterState
 import com.ncc.neon.query.filter.SelectionState
-import com.ncc.neon.connect.JdbcClient
-import com.ncc.neon.query.Transform
-import com.ncc.neon.transform.Transformer
-import com.ncc.neon.transform.TransformerNotFoundException
-import com.ncc.neon.transform.TransformerRegistry
+import com.ncc.neon.query.result.QueryResult
+import com.ncc.neon.query.result.TabularQueryResult
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
@@ -32,15 +30,10 @@ import org.springframework.stereotype.Component
 
 import java.sql.SQLException
 
-
-
 @Component
-class SharkQueryExecutor implements QueryExecutor {
+class SharkQueryExecutor extends AbstractQueryExecutor {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SharkQueryExecutor)
-
-    @Autowired
-    TransformerRegistry registry
 
     @Autowired
     private FilterState filterState
@@ -51,44 +44,16 @@ class SharkQueryExecutor implements QueryExecutor {
     @Autowired
     private ConnectionManager connectionManager
 
-    @Override
-    QueryResult execute(Query query, QueryOptions options) {
-        return runAndRelease { client -> executeQuery(client, query, options) }
-    }
-
-    private QueryResult executeQuery(JdbcClient client, Query query, QueryOptions options) {
-        SharkConversionStrategy conversionStrategy = new SharkConversionStrategy(filterState: filterState, selectionState: selectionState)
-        String sharkQuery = conversionStrategy.convertQuery(query, options)
-        LOGGER.debug("Query: {}", sharkQuery)
-        int offset = query.offsetClause ? query.offsetClause.offset : 0
-        List<Map> resultList = client.executeQuery(sharkQuery, offset)
-        QueryResult result = new TabularQueryResult(resultList)
-        return transform(query.transform, result)
-    }
-
-    QueryResult transform(Transform transform, QueryResult queryResult) {
-        if(!transform){
-            return queryResult
-        }
-
-        String transformName = transform.transformName
-        Transformer transformer = registry.getTransformer(transformName)
-        if(!transformer){
-            throw new TransformerNotFoundException("Transform ${transformName} does not exist.")
-        }
-
-        return transformer.convert(queryResult, transform.params)
-    }
 
     @Override
-    QueryResult execute(QueryGroup queryGroup, QueryOptions options) {
+    QueryResult doExecute(Query query, QueryOptions options) {
         return runAndRelease { client ->
-            TabularQueryResult queryResult = new TabularQueryResult()
-            queryGroup.queries.each {
-                def result = executeQuery(client, it, options)
-                queryResult.data.addAll(result.data)
-            }
-            return queryResult
+            SharkConversionStrategy conversionStrategy = new SharkConversionStrategy(filterState: filterState, selectionState: selectionState)
+            String sharkQuery = conversionStrategy.convertQuery(query, options)
+            LOGGER.debug("Query: {}", sharkQuery)
+            int offset = query.offsetClause ? query.offsetClause.offset : 0
+            List<Map> resultList = client.executeQuery(sharkQuery, offset)
+            return  new TabularQueryResult(resultList)
         }
     }
 

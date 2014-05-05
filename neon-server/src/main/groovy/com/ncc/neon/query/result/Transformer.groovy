@@ -14,13 +14,15 @@
  *
  */
 
-package com.ncc.neon.query
-
-
+package com.ncc.neon.query.result
 /**
- * The result of executing a query
+ * Transforms a QueryResult into another QueryResult.
  */
-public interface QueryResult {
 
-    def getData()
+interface Transformer {
+
+    QueryResult convert(QueryResult queryResult, def params)
+
+    String getName()
+
 }

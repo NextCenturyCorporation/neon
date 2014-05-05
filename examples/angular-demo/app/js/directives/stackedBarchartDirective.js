@@ -50,8 +50,7 @@ barchart.directive('stackedbarchart', ['ConnectionService', function(connectionS
 
 			$scope.messenger.events({
 				activeDatasetChanged: onDatasetChanged,
-				filtersChanged: onFiltersChanged,
-				selectionChanged: onSelectionChanged
+				filtersChanged: onFiltersChanged
 			});
 
 			$scope.$watch('attrX', function(newValue, oldValue) {
@@ -71,16 +70,6 @@ barchart.directive('stackedbarchart', ['ConnectionService', function(connectionS
 			});
 		};
 
-        /**
-		 * Event handler for selection changed events issued over Neon's messaging channels.
-		 * @param {Object} message A Neon selection changed message.
-		 * @method onSelectionChanged
-		 * @private
-		 */
-		var onSelectionChanged = function(message) {
-			$scope.queryForData();
-		};
-
 		var onFiltersChanged = function(message) {
 			$scope.queryForData();
 		};
@@ -88,7 +77,9 @@ barchart.directive('stackedbarchart', ['ConnectionService', function(connectionS
 		var onDatasetChanged = function(message) {
 			$scope.databaseName = message.database;
 			$scope.tableName = message.table;
-		};
+            $scope.queryForData();
+
+        };
 
 		var queryData = function(yRuleComparator, yRuleVal, next) {
 			var xAxis = connectionService.getFieldMapping($scope.database, $scope.tableName, "x-axis");
@@ -104,7 +95,6 @@ barchart.directive('stackedbarchart', ['ConnectionService', function(connectionS
 				.selectFrom($scope.databaseName, $scope.tableName)
 				.where(xAxis,'!=', null)
 				.where(yAxis, yRuleComparator, yRuleVal)
-				.selectionOnly()
 				.groupBy(xAxis);
 
 			var queryType;

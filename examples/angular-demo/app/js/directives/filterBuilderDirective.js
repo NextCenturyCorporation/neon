@@ -27,14 +27,14 @@
  * @class neonDemo.directives.filterBuilder
  * @constructor
  */
-angular.module('filterBuilderDirective', []).directive('filterBuilder', ['ConnectionService', 
-	function(connectionService) {
+angular.module('filterBuilderDirective', []).directive('filterBuilder', ['ConnectionService', 'FilterCountService',
+	function(connectionService, filterCountService) {
 
 	return {
 		templateUrl: 'partials/filterBuilder.html',
 		restrict: 'EA',
+        controller: 'neonDemoController',
 		scope: {
-
 		},
 		link: function($scope, el, attr) {
 
@@ -59,9 +59,6 @@ angular.module('filterBuilderDirective', []).directive('filterBuilder', ['Connec
 			var onDatasetChanged = function(message) {
 				// Clear the filter table.
 				$scope.filterTable.clearFilterState();
-
-				// Clear our filters against the last table before requesting data.
-				$scope.messenger.removeFilter($scope.filterTable.getFilterKey());
 
 				// Save the new database and table name; Fetch the new table fields.
 				$scope.databaseName = message.database;
@@ -110,7 +107,7 @@ angular.module('filterBuilderDirective', []).directive('filterBuilder', ['Connec
 		        }, function() {
 		        	$scope.$apply(function() {
 			        	// Error handler:  the addition to the filter failed.  Remove it.
-			        	$scope.filterTable.removeFilterRow(filterTable.filterState.data.length - 1);
+			        	$scope.filterTable.removeFilterRow($scope.filterTable.filterState.data.length - 1);
 
 			        	// TODO: Notify the user.
 			        });
@@ -208,6 +205,10 @@ angular.module('filterBuilderDirective', []).directive('filterBuilder', ['Connec
             		$(el).find('.tray-mirror.filter-tray .inner').height($('#filter-tray > .container').outerHeight(true));
             	}
             }, true);
+
+            $scope.$watch('filterTable.filterState.data', function(rows) {
+                filterCountService.setCount(rows.length);
+            },true);
 
 			// Wait for neon to be ready, the create our messenger and intialize the view and data.
 			neon.ready(function () {

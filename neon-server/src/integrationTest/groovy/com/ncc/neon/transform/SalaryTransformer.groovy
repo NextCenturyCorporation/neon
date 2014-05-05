@@ -14,9 +14,10 @@
  *
  */
 
-package com.ncc.neon.transform
-import com.ncc.neon.query.QueryResult
-import com.ncc.neon.query.TabularQueryResult
+package com.ncc.neon.query.transform
+import com.ncc.neon.query.result.QueryResult
+import com.ncc.neon.query.result.TabularQueryResult
+import com.ncc.neon.query.result.Transformer
 
 
 class SalaryTransformer implements Transformer{

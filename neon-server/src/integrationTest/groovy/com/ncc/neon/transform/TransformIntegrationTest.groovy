@@ -14,13 +14,14 @@
  *
  */
 
-package com.ncc.neon.transform
+package com.ncc.neon.query.transform
 import com.ncc.neon.IntegrationTestContext
 import com.ncc.neon.connect.ConnectionInfo
 import com.ncc.neon.connect.DataSources
 import com.ncc.neon.query.Query
 import com.ncc.neon.query.QueryOptions
-import com.ncc.neon.query.Transform
+import com.ncc.neon.query.result.Transform
+import com.ncc.neon.query.result.TransformerNotFoundException
 import com.ncc.neon.query.filter.Filter
 import com.ncc.neon.query.mongo.MongoQueryExecutor
 import org.junit.Before
@@ -67,12 +68,12 @@ class TransformIntegrationTest {
     @Test(expected = TransformerNotFoundException)
     void "bad transform throws exception"(){
         Query query = new Query(filter: ALL_DATA_FILTER, transform: BAD_TRANSFORM)
-        mongoQueryExecutor.execute(query, QueryOptions.FILTERED_DATA)
+        mongoQueryExecutor.execute(query, QueryOptions.DEFAULT_OPTIONS)
     }
 
     @Test
     void "salary transform alters salaries"() {
-        def result = mongoQueryExecutor.execute(TRANSFORM_ALL_DATA_QUERY, QueryOptions.FILTERED_DATA)
+        def result = mongoQueryExecutor.execute(TRANSFORM_ALL_DATA_QUERY, QueryOptions.DEFAULT_OPTIONS)
         result.data.each{ Map<String, Object> row ->
             String idString = row.get("_id").toString()
             assert row.get("salary") == getExpectedSalary(idString)

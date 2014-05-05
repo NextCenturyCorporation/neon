@@ -18,7 +18,7 @@ package com.ncc.neon.query.mongo
 
 import com.mongodb.DBCursor
 import com.mongodb.MongoClient
-import com.ncc.neon.query.QueryResult
+import com.ncc.neon.query.result.QueryResult
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 

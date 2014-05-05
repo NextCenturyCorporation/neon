@@ -1,5 +1,6 @@
+'use strict';
 /*
- * Copyright 2013 Next Century Corporation
+ * Copyright 2014 Next Century Corporation
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -14,20 +15,25 @@
  *
  */
 
-package com.ncc.neon.query
-
-import groovy.transform.Canonical
-
-
-
 /**
- * Provides a way to look up a Transformer. The transformName should be the
- * fully qualified class name of the Transformer implementation. Parameters can be any object
- * that configures the Transformer's convert() method.
+ * A service that provides the number of filters currently applied through the filter builder
  */
 
-@Canonical
-class Transform {
-    String transformName
-    def params
-}
+var services = angular.module('neonDemo.services');
+services.factory('FilterCountService',
+    function () {
+
+        var count = 0;
+        var service = {};
+
+        service.setCount = function (newCount) {
+            count = newCount;
+        }
+
+        service.getCount = function () {
+            return count;
+        }
+
+        return service;
+    }
+);

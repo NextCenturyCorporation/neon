@@ -21,6 +21,8 @@ import com.ncc.neon.connect.ConnectionManager
 import com.ncc.neon.connect.DataSources
 import com.ncc.neon.metadata.model.ColumnMetadata
 import com.ncc.neon.query.*
+import com.ncc.neon.query.executor.QueryExecutor
+import com.ncc.neon.query.result.QueryResult
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
 
@@ -49,6 +51,9 @@ class QueryService {
      * This takes into account the user's current filters so the results will be limited by these if they exist.
      * @param host The host the database is running on
      * @param databaseType the type of database
+     * @param includeFilters If filters should be ignored and all data should be returned. Defaults to false.
+     * @param selectionOnly If only data that is currently selected should be returned. Defaults to false.
+     * @param ignoredFilterIds If any specific filters should be ignored (only used if includeFilters is false)
      * @param query The query being executed
      * @return The result of the query
      */
@@ -57,9 +62,13 @@ class QueryService {
     @Produces(MediaType.APPLICATION_JSON)
     @Path("query/{host}/{databaseType}")
     QueryResult executeQuery(@PathParam("host") String host,
-                            @PathParam("databaseType") String databaseType,
-                            Query query) {
-        return execute(host, databaseType, query, QueryOptions.FILTERED_DATA)
+                             @PathParam("databaseType") String databaseType,
+                             @DefaultValue("false") @QueryParam("ignoreFilters") boolean ignoreFilters,
+                             @DefaultValue("false") @QueryParam("selectionOnly") boolean selectionOnly,
+                             @QueryParam("ignoredFilterIds") Set<String> ignoredFilterIds,
+                             Query query) {
+        return execute(host, databaseType, query, new QueryOptions(ignoreFilters: ignoreFilters,
+                selectionOnly: selectionOnly, ignoredFilterIds: (ignoredFilterIds ?: ([] as Set))))
     }
 
     /**
@@ -67,6 +76,8 @@ class QueryService {
      * This takes into account the user's current filters so the results will be limited by these if they exist.
      * @param host The host the database is running on
      * @param databaseType the type of database
+     * @param includeFilters If filters should be ignored and all data should be returned. Defaults to false.
+     * @param selectionOnly If only data that is currently selected should be returned. Defaults to false.
      * @param query A collection of queries. The results of the queries will be appended together.
      * @return The result of the query
      */
@@ -75,79 +86,11 @@ class QueryService {
     @Produces(MediaType.APPLICATION_JSON)
     @Path("querygroup/{host}/{databaseType}")
     QueryResult executeQueryGroup(@PathParam("host") String host,
-                                 @PathParam("databaseType") String databaseType,
-                                 QueryGroup query) {
-        return execute(host, databaseType, query, QueryOptions.FILTERED_DATA)
-    }
-
-    /**
-     * Executes a query for selected items against the supplied connection
-     * This takes into account the user's current filters so the results will be limited by these if they exist.
-     * @param host The host the database is running on
-     * @param databaseType the type of database
-     * @param query The query being executed
-     * @return The result of the query
-     */
-    @POST
-    @Consumes(MediaType.APPLICATION_JSON)
-    @Produces(MediaType.APPLICATION_JSON)
-    @Path("querywithselectiononly/{host}/{databaseType}")
-    QueryResult executeQueryWithSelectionOnly(@PathParam("host") String host,
-                                             @PathParam("databaseType") String databaseType,
-                                             Query query) {
-        return execute(host, databaseType, query, QueryOptions.FILTERED_AND_SELECTED_DATA)
-    }
-
-    /**
-     * Executes a group of queries for selected items against the supplied connection
-     * This takes into account the user's current filters so the results will be limited by these if they exist.
-     * @param host The host the database is running on
-     * @param databaseType the type of database
-     * @param query A collection of queries. The results of the queries will be appended together.
-     * @return The result of the query
-     */
-    @POST
-    @Consumes(MediaType.APPLICATION_JSON)
-    @Produces(MediaType.APPLICATION_JSON)
-    @Path("querygroupwithselectiononly/{host}/{databaseType}")
-    QueryResult executeQueryGroupWithSelectionOnly(@PathParam("host") String host,
-                                                  @PathParam("databaseType") String databaseType,
-                                                  QueryGroup query) {
-        return execute(host, databaseType, query, QueryOptions.FILTERED_AND_SELECTED_DATA)
-    }
-
-    /**
-     * Executes a query against the supplied connection ignoring the current filters and selection.
-     * @param host The host the database is running on
-     * @param databaseType the type of database
-     * @param query The query being executed
-     * @return The result of the query
-     */
-    @POST
-    @Consumes(MediaType.APPLICATION_JSON)
-    @Produces(MediaType.APPLICATION_JSON)
-    @Path("querydisregardfilters/{host}/{databaseType}")
-    QueryResult executeQueryDisregardFilters(@PathParam("host") String host,
-                                            @PathParam("databaseType") String databaseType,
-                                            Query query) {
-        return execute(host, databaseType, query, QueryOptions.ALL_DATA)
-    }
-
-    /**
-     * Executes a group of queries against the supplied connection ignoring the current filters and selection.
-     * @param host The host the database is running on
-     * @param databaseType the type of database
-     * @param query A collection of queries. The results of the queries will be appended together.
-     * @return The result of the query
-     */
-    @POST
-    @Consumes(MediaType.APPLICATION_JSON)
-    @Produces(MediaType.APPLICATION_JSON)
-    @Path("querygroupdisregardfilters/{host}/{databaseType}")
-    QueryResult executeQueryGroupDisregardFilters(@PathParam("host") String host,
-                                                 @PathParam("databaseType") String databaseType,
-                                                 QueryGroup query) {
-        return execute(host, databaseType, query, QueryOptions.ALL_DATA)
+                                  @PathParam("databaseType") String databaseType,
+                                  @DefaultValue("false") @QueryParam("ignoreFilters") boolean ignoreFilters,
+                                  @DefaultValue("false") @QueryParam("selectionOnly") boolean selectionOnly,
+                                  QueryGroup query) {
+        return execute(host, databaseType, query, new QueryOptions(ignoreFilters: ignoreFilters, selectionOnly: selectionOnly))
     }
 
     /**

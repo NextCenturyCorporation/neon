@@ -18,6 +18,7 @@ package com.ncc.neon.query
 
 import com.ncc.neon.query.clauses.*
 import com.ncc.neon.query.filter.Filter
+import com.ncc.neon.query.result.Transform
 import groovy.transform.ToString
 import org.codehaus.jackson.annotate.JsonIgnoreProperties
 
@@ -28,7 +29,7 @@ import org.codehaus.jackson.annotate.JsonIgnoreProperties
  * The query is translated to a data source specific operation which returns the appropriate data.
  */
 @ToString(includeNames = true)
-@JsonIgnoreProperties(value = ['ignoreFilters_', 'selectionOnly_'])
+@JsonIgnoreProperties(value = ['ignoreFilters_', 'selectionOnly_', 'ignoredFilterIds_'])
 class Query {
 
     Filter filter

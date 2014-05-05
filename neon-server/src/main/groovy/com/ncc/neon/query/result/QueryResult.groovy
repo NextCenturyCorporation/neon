@@ -14,26 +14,13 @@
  *
  */
 
-package com.ncc.neon.query
-
-import org.junit.Test
+package com.ncc.neon.query.result
 
 
+/**
+ * The result of executing a query
+ */
+public interface QueryResult {
 
-
-class QueryOptionsTest {
-
-    @Test
-    void "all data" (){
-        QueryOptions options = QueryOptions.ALL_DATA
-        assert options.disregardFilters
-        assert options.disregardSelection
-    }
-
-    @Test
-    void "filtered and selected data" (){
-        QueryOptions options = QueryOptions.FILTERED_AND_SELECTED_DATA
-        assert !options.disregardFilters
-        assert !options.disregardSelection
-    }
+    def getData()
 }

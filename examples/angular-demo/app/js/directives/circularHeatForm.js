@@ -67,6 +67,8 @@ angular.module('circularHeatFormDirective', []).directive('circularHeatForm', ['
 
 			var HOURS_IN_WEEK = 168;
 			var HOURS_IN_DAY = 24;
+			// Defaulting the expected date field to 'created_at' as that works best with our twitter datasets.
+			var DEFAULT_DATE_FIELD = 'created_at';
 
 			/** 
 			 * Initializes the name of the date field used to query the current dataset
@@ -74,13 +76,11 @@ angular.module('circularHeatFormDirective', []).directive('circularHeatForm', ['
 			 * @method initialize
 			 */
 			$scope.initialize = function() {
-				// Defaulting the expected date field to 'time'.
-				$scope.dateField = 'time';
+				$scope.dateField = DEFAULT_DATE_FIELD;
 
 				$scope.messenger.events({
 					activeDatasetChanged: onDatasetChanged,
-					filtersChanged: onFiltersChanged,
-					selectionChanged: onSelectionChanged
+					filtersChanged: onFiltersChanged
 				});
 			};
 
@@ -108,15 +108,6 @@ angular.module('circularHeatFormDirective', []).directive('circularHeatForm', ['
 				$scope.maxTime = "";
 			}
 
-			/**
-			 * Event handler for selection changed events issued over Neon's messaging channels.
-			 * @param {Object} message A Neon selection changed message.
-			 * @method onSelectionChanged
-			 * @private
-			 */ 
-			var onSelectionChanged = function(message) {
-				$scope.queryForChartData();
-			};
 
 			/**
 			 * Event handler for filter changed events issued over Neon's messaging channels.
@@ -139,6 +130,7 @@ angular.module('circularHeatFormDirective', []).directive('circularHeatForm', ['
 			var onDatasetChanged = function(message) {
 				$scope.databaseName = message.database;
 				$scope.tableName = message.table;
+                $scope.queryForChartData();
 			};
 
 			/**
@@ -150,7 +142,7 @@ angular.module('circularHeatFormDirective', []).directive('circularHeatForm', ['
 				// connection service or some mapping service.  Two example below, one commented out.
 				//var dateField = $scope.getDateField();
 				var dateField = connectionService.getFieldMapping($scope.databaseName, $scope.tableName, "date");
-				dateField = dateField.mapping;
+				dateField = dateField.mapping || DEFAULT_DATE_FIELD;
 
 				if (!dateField) {
 					$scope.updateChartData({data: []});
@@ -167,7 +159,6 @@ angular.module('circularHeatFormDirective', []).directive('circularHeatForm', ['
 					.selectFrom($scope.databaseName, $scope.tableName)
 					.groupBy(groupByDayClause, groupByHourClause)
 					.where($scope.dateField, '!=', null)
-					.selectionOnly()
 					.aggregate(neon.query.COUNT, '*', 'count');
 
 				// Issue the query and provide a success handler that will forcefully apply an update to the chart.

@@ -14,22 +14,17 @@
  *
  */
 
-package com.ncc.neon.query
+package com.ncc.neon.query.result
+
+
+
 /**
- * Query results of a tabular data store.
- * This is represented as a list of rows, where a row is a map of column names to values.
+ * Thrown when a transform name does not match any transformers in the TransformerRegistry
  */
-class TabularQueryResult implements QueryResult{
 
-    final List<Map<String, Object>> data
+class TransformerNotFoundException extends RuntimeException{
 
-    public TabularQueryResult() {
-        this([])
-    }
-
-    public TabularQueryResult(List<Map<String, Object>> table){
-        this.data = table
+    TransformerNotFoundException(String message){
+        super(message)
     }
 }
-
-

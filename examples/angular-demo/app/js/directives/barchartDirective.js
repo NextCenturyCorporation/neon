@@ -28,7 +28,7 @@
  */
 var barchart = angular.module('barchartDirective', []);
 
-barchart.directive('barchart', ['ConnectionService', function(connectionService) {
+barchart.directive('barchart', ['ConnectionService', '$timeout', function(connectionService, $timeout) {
 	var COUNT_FIELD_NAME = 'Count';
 
 	var link = function($scope, el, attr) {
@@ -40,6 +40,7 @@ barchart.directive('barchart', ['ConnectionService', function(connectionService)
 		$scope.barType = $scope.barType || 'count';
 		$scope.fields = [];
 		$scope.xAxisSelect = $scope.fields[0] ? $scope.fields[0] : '';
+        $scope.initializing = false;
 
 		var COUNT_FIELD_NAME = 'Count';
 		var clientId;
@@ -50,35 +51,24 @@ barchart.directive('barchart', ['ConnectionService', function(connectionService)
 
 			$scope.messenger.events({
 				activeDatasetChanged: onDatasetChanged,
-				filtersChanged: onFiltersChanged,
-				selectionChanged: onSelectionChanged
+				filtersChanged: onFiltersChanged
 			});
 
 			$scope.$watch('attrX', function(newValue, oldValue) {
-				if($scope.databaseName && $scope.tableName) {
+				if(!$scope.initializing && $scope.databaseName && $scope.tableName) {
 					$scope.queryForData();
 				}
 			});
 			$scope.$watch('attrY', function(newValue, oldValue) {
-				if($scope.databaseName && $scope.tableName) {
+				if(!$scope.initializing && $scope.databaseName && $scope.tableName) {
 					$scope.queryForData();
 				}
 			});
 			$scope.$watch('barType', function(newValue, oldValue) {
-				if($scope.databaseName && $scope.tableName) {
+				if(!$scope.initializing && $scope.databaseName && $scope.tableName) {
 					$scope.queryForData();
 				}
 			});
-		};
-
-        /**
-		 * Event handler for selection changed events issued over Neon's messaging channels.
-		 * @param {Object} message A Neon selection changed message.
-		 * @method onSelectionChanged
-		 * @private
-		 */
-		var onSelectionChanged = function(message) {
-			$scope.queryForData();
 		};
 
 		var onFiltersChanged = function(message) {
@@ -86,8 +76,14 @@ barchart.directive('barchart', ['ConnectionService', function(connectionService)
 		};
 
 		var onDatasetChanged = function(message) {
+            $scope.initializing = true;
 			$scope.databaseName = message.database;
 			$scope.tableName = message.table;
+            $timeout(function() {
+                $scope.initializing = true;
+                $scope.queryForData();
+            });
+
 		};
 
 		$scope.queryForData = function() {
@@ -99,7 +95,6 @@ barchart.directive('barchart', ['ConnectionService', function(connectionService)
 			var query = new neon.query.Query()
 				.selectFrom($scope.databaseName, $scope.tableName)
 				.where(xAxis,'!=', null)
-				.selectionOnly()
 				.groupBy(xAxis);
 
 			var queryType;

@@ -15,7 +15,13 @@
  */
 
 
-package com.ncc.neon.query
+package com.ncc.neon.query.executor
+
+import com.ncc.neon.query.Query
+import com.ncc.neon.query.QueryGroup
+import com.ncc.neon.query.QueryOptions
+import com.ncc.neon.query.result.QueryResult
+
 /**
  * Executes a query against a generic data source
  */
