@@ -81,8 +81,8 @@ task deleteMongoDataIntegrationTestBeforeInsert(type: com.ncc.neon.data.MongoDat
     databaseName = 'neonintegrationtest'
 }
 
-// separate out the tag cloud data insert/delete since they are not yet part of the core functionality
-// of neon and are mongo specific
+
+// TODO: NEON-1106, NEON-1107 the tag cloud data insert/delete are only here because neon does not fully support the queries needed for the tag cloud
 task insertMongoDataTagCloudTest(type: com.ncc.neon.data.MongoDataInserter) {
     dependsOn 'deleteMongoDataTagCloudTestBeforeInsert', 'generateMongoJson'
     host = getMongoHost()
