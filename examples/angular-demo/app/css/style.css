@@ -556,15 +556,28 @@ label{
 	color: #777777;
 	text-transform: uppercase;
 }
-.form-inline .form-group label{
+.form-inline .form-group > label,
+.form-inline .form-input-group > label{
 	margin-left: 10px;
 	margin-right: 5px;
 }
 .form-inline .form-group .btn-group label.btn{
 	margin-right: 0px;
 }
-.form-inline .form-group:first-child label{
+.form-inline .form-group:first-child > label,
+.form-inline .form-input-group:first-child > label{
 	margin-left: 0px;
+}
+.form-inline .form-input-group > label{
+	float: left;
+	margin-top: 9px;
+	margin-right: 10px;
+}
+.form-inline .form-input-group {
+	display: inline-block;
+	margin-bottom: 0;
+	vertical-align: middle;
+	width: 350px;
 }
 
 /* ================
