@@ -217,11 +217,10 @@ angular.module('timelineSelectorDirective', []).directive('timelineSelector', ['
                         $scope.startDateForDisplay = new Date(displayStartDate.getUTCFullYear(),
                             displayStartDate.getUTCMonth(),
                             displayStartDate.getUTCDate());
-                        $scope.endDateForDisplay = new Date(displayEndDate.getUTCFullYear(),
+                        $scope.endDateForDisplay = new Date(new Date(displayEndDate.getUTCFullYear(),
                             displayEndDate.getUTCMonth(),
-                            displayEndDate.getUTCDate());
+                            displayEndDate.getUTCDate()).getTime() - 1);
                     }
-
 
                     $scope.recordCount = total;
                 }
@@ -274,7 +273,7 @@ angular.module('timelineSelectorDirective', []).directive('timelineSelector', ['
                         if (queryResults.data.length > 0) {
                             $scope.referenceStartDate = new Date(queryResults.data[0][$scope.dateField]);
                             if ($scope.referenceEndDate !== undefined) {
-                                success();
+                                $scope.$apply(success);
                             }
                         }
                     });
@@ -287,7 +286,7 @@ angular.module('timelineSelectorDirective', []).directive('timelineSelector', ['
                         if (queryResults.data.length > 0) {
                             $scope.referenceEndDate = new Date(queryResults.data[0][$scope.dateField]);
                             if ($scope.referenceStartDate !== undefined) {
-                                success();
+                                $scope.$apply(success);
                             }
                         }
                     });
