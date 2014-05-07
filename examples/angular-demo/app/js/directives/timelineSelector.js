@@ -219,7 +219,7 @@ angular.module('timelineSelectorDirective', []).directive('timelineSelector', ['
                             displayStartDate.getUTCDate());
                         $scope.endDateForDisplay = new Date(displayEndDate.getUTCFullYear(),
                             displayEndDate.getUTCMonth(),
-                            displayEndDate.getUTCDate());
+                            displayEndDate.getUTCDate() - 1);
                     }
 
 
