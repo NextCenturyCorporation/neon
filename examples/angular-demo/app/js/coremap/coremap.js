@@ -81,8 +81,8 @@ coreMap.Map = function (elementId, opts) {
     //this.colorScale = d3.scale.category20();
     this.colorRange = [
         '#39b54a',
-        '#3662CC',
         '#C23333',
+        '#3662CC',
         "#ff7f0e",
         "#9467bd",
         "#8c564b",
@@ -91,8 +91,8 @@ coreMap.Map = function (elementId, opts) {
         "#bcbd22",
         "#17becf",
         "#98df8a",
-        "#aec7e8",
         "#ff9896",
+        "#aec7e8",
         "#ffbb78",
         "#c5b0d5",
         "#c49c94",
