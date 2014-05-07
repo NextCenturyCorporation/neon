@@ -366,8 +366,14 @@ angular.module('timelineSelectorDirective', []).directive('timelineSelector', ['
 
                     // Initialize our time buckets.
                     for (i = 0; i < numBuckets; i++) {
+                        // Calculate the start date for a bucket (e.g., 01:00, 02:00) using the millisMultiplier.  
+                        // Also calculate the temporal midpoint of that bucket by adding 1/2 the multiplier to get the
+                        // point on the timeline at which we want to display the count for that time bucket.
+                        // For the 01:00 to 01:59 time bucket, we want to display the aggregate value at the
+                        // perceived center of the bucket, 01:30, on the timeline graph.
+                        var bucketGraphDate = new Date(startTime + ($scope.millisMultiplier * i) + ($scope.millisMultiplier / 2));
                         data[i] = {
-                            date: new Date(startTime + ($scope.millisMultiplier * i)),
+                            date: bucketGraphDate,
                             value: 0
                         }
                     }
