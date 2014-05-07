@@ -143,10 +143,10 @@ angular.module('timelineSelectorDirective', []).directive('timelineSelector', ['
                     }
 
                     query.aggregate(neon.query.COUNT, '*', 'count');
+                    // TODO: Does this need to be an aggregate on the date field? What is MIN doing or is this just an arbitrary function to include the date with the query?
                     query.aggregate(neon.query.MIN, $scope.dateField, 'date');
                     query.sortBy('date', neon.query.ASCENDING);
                     query.ignoreFilters([$scope.filterKey]);
-
                     connectionService.getActiveConnection().executeQuery(query, function (queryResults) {
                         $scope.$apply(function () {
                             $scope.updateChartData(queryResults);
@@ -174,16 +174,21 @@ angular.module('timelineSelectorDirective', []).directive('timelineSelector', ['
                         extentStartDate = $scope.startDate;
                         extentEndDate = $scope.endDate;
                     }
+
                     // can happen when switching between granularities on edge cases
-                    if ( extentStartDate < $scope.startDate ) {
+                    if (extentStartDate < $scope.startDate) {
                         extentStartDate = $scope.startDate;
                     }
-                    if ( extentEndDate > $scope.endDate ) {
+
+                    if (extentEndDate > $scope.endDate) {
                         extentEndDate = $scope.endDate;
                     }
 
+                    extentStartDate = $scope.zeroOutDate(extentStartDate);
+                    extentEndDate = $scope.roundUpBucket(extentEndDate);
+
                     var startIdx = Math.floor(Math.abs($scope.startDate - extentStartDate) / $scope.millisMultiplier);
-                    var endIdx = Math.floor(Math.abs($scope.startDate- extentEndDate) / $scope.millisMultiplier);
+                    var endIdx = Math.floor(Math.abs($scope.startDate - extentEndDate) / $scope.millisMultiplier);
 
                     // Update the start/end times and totals used for the Neon selection and their
                     // display versions.  Since Angular formats dates as local values, we create new display values
@@ -235,18 +240,22 @@ angular.module('timelineSelectorDirective', []).directive('timelineSelector', ['
                 $scope.updateChartData = function (queryResults) {
 
                     if (queryResults.data.length > 0) {
+                        var updateDatesCallback = function () {
+                            if ($scope.startDate === undefined || $scope.endDate === undefined) {
+                                $scope.updateDates();
+                            }
+                            $scope.data = $scope.createTimelineData(queryResults);
+                            $scope.updateChartTimesAndTotal();
+                        };
+
                         // on the initial query, setup the start/end bounds
-                        if ( $scope.referenceStartDate === undefined ) {
-                            $scope.referenceStartDate = new Date(queryResults.data[0].date);
+                        if ($scope.referenceStartDate === undefined || $scope.referenceEndDate === undefined) {
+                            $scope.getMinMaxDates(updateDatesCallback);
                         }
-                        if ( $scope.referenceEndDate === undefined ) {
-                            $scope.referenceEndDate = new Date(queryResults.data[queryResults.data.length-1].date);
+                        else {
+                            updateDatesCallback();
                         }
-                        if ($scope.startDate === undefined || $scope.endDate === undefined) {
-                            $scope.updateDates();
-                        }
-                        $scope.data = $scope.createTimelineData(queryResults);
-                        $scope.updateChartTimesAndTotal();
+
                     }
                     else {
                         $scope.data = $scope.createTimelineData(queryResults);
@@ -254,6 +263,36 @@ angular.module('timelineSelectorDirective', []).directive('timelineSelector', ['
                     }
                 };
 
+                $scope.getMinMaxDates = function (success) {
+                    // TODO: neon doesn't yet support a more efficient way to just get the min/max fields without aggregating
+                    // TODO: This could be done better with a promise framework - just did this in a pinch for a demo
+                    var minDateQuery = new neon.query.Query()
+                        .selectFrom($scope.databaseName, $scope.tableName)
+                        .where($scope.dateField, '!=', null).sortBy($scope.dateField, neon.query.ASCENDING).limit(1);
+
+                    connectionService.getActiveConnection().executeQuery(minDateQuery, function (queryResults) {
+                        if (queryResults.data.length > 0) {
+                            $scope.referenceStartDate = new Date(queryResults.data[0][$scope.dateField]);
+                            if ($scope.referenceEndDate !== undefined) {
+                                success();
+                            }
+                        }
+                    });
+
+                    var maxDateQuery = new neon.query.Query()
+                        .selectFrom($scope.databaseName, $scope.tableName)
+                        .where($scope.dateField, '!=', null).sortBy($scope.dateField, neon.query.DESCENDING).limit(1);
+
+                    connectionService.getActiveConnection().executeQuery(maxDateQuery, function (queryResults) {
+                        if (queryResults.data.length > 0) {
+                            $scope.referenceEndDate = new Date(queryResults.data[0][$scope.dateField]);
+                            if ($scope.referenceStartDate !== undefined) {
+                                success();
+                            }
+                        }
+                    });
+
+                };
 
                 /**
                  * Updates the starts/end dates based on the chart granularity
@@ -277,6 +316,15 @@ angular.module('timelineSelectorDirective', []).directive('timelineSelector', ['
                         zeroed.setUTCHours(0);
                     }
                     return zeroed;
+                };
+
+                /**
+                 * Rounds the date up to the beginning of the next bucket
+                 * @param date
+                 * @returns {Date}
+                 */
+                $scope.roundUpBucket = function (date) {
+                    return $scope.zeroOutDate(new Date(date.getTime() - 1 + $scope.millisMultiplier));
                 };
 
                 /**
@@ -325,7 +373,6 @@ angular.module('timelineSelectorDirective', []).directive('timelineSelector', ['
                     }
 
                     // Fill our rawData into the appropriate hour buckets.
-                    var diff = 0;
                     var resultDate;
                     for (i = 0; i < rawLength; i++) {
                         resultDate = new Date(rawData[i].date);
@@ -352,13 +399,10 @@ angular.module('timelineSelectorDirective', []).directive('timelineSelector', ['
                             // Set the brush to one millisecond back when changing resolutions back to what we had.
                             // Otherwise, our brush will drift forward in time on consecutive granularity changes due to the 
                             // nature of having to zero out the value and calculating the start point of the next day/hour.
-                            var newBrushEnd = new Date($scope.brush[1].getTime() - 1);
+                            var newBrushEnd = $scope.roundUpBucket($scope.brush[1]);
 
-                            // Get the zero'd version of the proper end date.
-                            newBrushEnd = new Date($scope.zeroOutDate(newBrushEnd.getTime() + $scope.millisMultiplier));
-
-                            if ( newBrushStart.getTime() !== $scope.brush[0].getTime() || newBrushEnd.getTime() !== $scope.brush[1].getTime()) {
-                                $scope.brush = [newBrushStart,newBrushEnd];
+                            if (newBrushStart.getTime() !== $scope.brush[0].getTime() || newBrushEnd.getTime() !== $scope.brush[1].getTime()) {
+                                $scope.brush = [newBrushStart, newBrushEnd];
                             }
                             $scope.queryForChartData();
 
@@ -379,7 +423,7 @@ angular.module('timelineSelectorDirective', []).directive('timelineSelector', ['
                         if (newVal === undefined || newVal.length < 2 || newVal[0].getTime() === newVal[1].getTime()) {
                             // may be undefined when a new dataset is being loaded
                             if ($scope.startDate !== undefined && $scope.endDate !== undefined) {
-                                startExtent =$scope.startDate;
+                                startExtent = $scope.startDate;
                                 endExtent = $scope.endDate;
                                 $scope.brush = [];
                                 $scope.extentDirty = true;
@@ -392,8 +436,9 @@ angular.module('timelineSelectorDirective', []).directive('timelineSelector', ['
                             startExtent = newVal[0];
                             endExtent = newVal[1];
                         }
-                        var startFilterClause = neon.query.where($scope.dateField, '>=',  $scope.zeroOutDate(startExtent));
-                        var endFilterClause = neon.query.where($scope.dateField, '<',  $scope.zeroOutDate(endExtent));
+
+                        var startFilterClause = neon.query.where($scope.dateField, '>=', $scope.zeroOutDate(startExtent));
+                        var endFilterClause = neon.query.where($scope.dateField, '<', $scope.roundUpBucket(endExtent));
                         var clauses = [startFilterClause, endFilterClause];
                         var filterClause = neon.query.and.apply(this, clauses);
                         var filter = new neon.query.Filter().selectFrom($scope.databaseName, $scope.tableName).where(filterClause);

@@ -137,9 +137,6 @@ coreMap.Map.DEFAULT_COLOR = "#00ff00";
 coreMap.Map.DEFAULT_STROKE_COLOR = "#ffffff";
 coreMap.Map.MIN_RADIUS = 3;
 coreMap.Map.MAX_RADIUS = 13;
-    // '#39b54a',
-    // '#3662CC',
-    // '#C23333',
 coreMap.Map.BOX_COLOR = "#39b54a";
 coreMap.Map.BOX_WIDTH = 2;
 coreMap.Map.BOX_OPACITY = 1;
