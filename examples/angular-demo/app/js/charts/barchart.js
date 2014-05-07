@@ -370,8 +370,6 @@ charts.BarChart.prototype.bindData_ = function (chart) {
 		.attr('width', this.x.rangeBand())
 		.attr('height', function (d) {
 			if(me.yMinAttribute_ && d[me.yMinAttribute_]) {
-				console.log(me.y(d[me.yMinAttribute_]));
-
 				return me.height - me.vMargin_ - me.y(d[me.yMinAttribute_]);
 			} else {
 				return me.height - me.vMargin_ - me.y(d.values);

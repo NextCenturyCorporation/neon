@@ -243,6 +243,7 @@ a:focus{
 /* Filter reset tag buttons */
 
 .filter-reset .btn{
+	border: 1px solid #e4b9b9;
 	padding: 3px 12px;
 	color: #777777;
 	color: rgba(0,0,0,0.5);

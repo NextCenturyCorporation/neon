@@ -141,7 +141,7 @@ linechart.directive('linechart', ['ConnectionService', function(connectionServic
 				yAxis = COUNT_FIELD_NAME;
 			}
 
-			var opts = {"x": xAxis, "y": yAxis, responsive: false};
+			var opts = {"x": xAxis, "y": yAxis, responsive: true};
 			charts.LineChart.destroy(el[0], '.linechart');
 			$scope.chart = new charts.LineChart(el[0], '.linechart', opts);
 			$scope.chart.drawChart();
