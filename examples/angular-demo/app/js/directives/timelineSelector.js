@@ -381,6 +381,15 @@ angular.module('timelineSelectorDirective', []).directive('timelineSelector', ['
                     return data;
                 };
 
+                /**
+                 * Clears the timeline brush and filter.
+                 * @method clearBrush
+                 */
+                $scope.clearBrush = function () {
+                    $scope.brush = [];
+                    $scope.messenger.removeFilter($scope.filterKey);
+                };
+
                 // Update the millis multipler when the granularity is changed.
                 $scope.$watch('granularity', function (newVal, oldVal) {
                     if (newVal && newVal !== oldVal) {

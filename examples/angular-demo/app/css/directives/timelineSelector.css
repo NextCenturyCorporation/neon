@@ -25,7 +25,10 @@
     margin-top: -10px;
 }
 
-.timeline-selector .btn-group {
+.timeline-selector .btn-group{
     margin-top: 10px;
 }
 
+.timeline-selector .filter-reset{
+	margin: 13px 15px 0 0;
+}
