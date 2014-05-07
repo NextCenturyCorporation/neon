@@ -60,9 +60,6 @@ angular.module('heatMapDirective', []).directive('heatMap', ['ConnectionService'
                     $scope.cacheMap = false;
                     $scope.initializing = true;
 
-
-
-
                     $scope.filterKey = neon.widget.getInstanceId("map");
                     $scope.showFilter = false;
 
@@ -145,7 +142,11 @@ angular.module('heatMapDirective', []).directive('heatMap', ['ConnectionService'
                     $scope.colorByField = "";
                     $scope.sizeByField = "";
                     $scope.sizeByField = "";
+
+                    // Clear the zoom Rect from the map before reinitializing it.
+                    clearZoomRect();
                     $scope.zoomRectBounds = undefined;
+
                     // used to track the id of the rectangle drawn on the map so it can be removed when a new box is drawn
                     $scope.zoomRectId = undefined;
                     $scope.hideClearFilterButton();
