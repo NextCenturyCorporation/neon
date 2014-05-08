@@ -48,6 +48,12 @@
     margin-right: -15px;
   }
 }
+@media (min-width: 1460px) {
+  .timeline-selector-chart {
+    margin-left: -20px;
+    margin-right: -20px;
+  }
+}
 .timeline-selector-chart svg {
 	font: 10px sans-serif;
     width: 100%;
