@@ -42,6 +42,10 @@ angular.module('tagCloudDirective', []).directive('tagCloud', ['ConnectionServic
                     // data will be a list of tag name/counts in descending order
                     $scope.data = [];
 
+                    $scope.filterKey = neon.widget.getInstanceId("tagcloud");
+                    $scope.filterTags = [];
+                    $scope.showFilter = false;
+
                     // Setup our messenger.
                     $scope.messenger = new neon.eventing.Messenger();
 
@@ -115,6 +119,96 @@ angular.module('tagCloudDirective', []).directive('tagCloud', ['ConnectionServic
                     $timeout(function () {
                         element.find('.tag').tagcloud();
                     });
+                };
+
+                /**
+                 * Ensures that the tag filter includes the argument, and updates the tag cloud if necessary.
+                 * @param tagName {String} the tag that should be filtered on, e.g., "#lol"
+                 * @method addTagFilter
+                 */
+                $scope.addTagFilter = function(tagName) {
+                    if ($scope.filterTags.indexOf(tagName) == -1) {
+                        var tags = $scope.filterTags.slice(0);
+                        tags.push(tagName);
+                        $scope.setTagFilter(tags);
+                    }
+                };
+
+                /**
+                 * Changes this directive's neon filter to use the ones provided in the argument.
+                 * @param tags {Array} an array of tag strings, e.g., ["#lol", "#sad"]
+                 * @method setTagFilter
+                 */
+                $scope.setTagFilter = function(tags) {
+                    var tagFilter = $scope.createFilterForTags(tags);
+                    $scope.applyFilter(tagFilter, tags);
+                };
+
+                /**
+                 * Creates a neon filter select object that has a where clause that "and"s all of the tags together
+                 * @param tagNames {Array} an array of tag strings that records must have to pass the filter
+                 * @returns {Object} a neon select statement
+                 * @method createFilterForTags
+                 */
+                $scope.createFilterForTags = function(tagNames) {
+                    var filterClauses = tagNames.map(function(tagName) {
+                        return neon.query.where($scope.tagField, "=", tagName);
+                    });
+                    var filterClause = filterClauses.length > 1 ? neon.query.and.apply(neon.query, filterClauses) : filterClauses[0];
+                    return new neon.query.Filter().selectFrom($scope.databaseName, $scope.tableName).where(filterClause);
+                };
+
+                /**
+                 * Applies the specified filter and updates the directive's state on success
+                 * @param filter {Object} the neon filter to apply
+                 * @param tagNames {Array} this must be the array of tag names that corresponds to the filter
+                 * @method applyFilter
+                 */
+                $scope.applyFilter = function(filter, tagNames) {
+                    $scope.messenger.replaceFilter($scope.filterKey, filter, function () {
+                        $scope.$apply(function () {
+                            $scope.queryForTags();
+                            // Show the Clear Filter button.
+                            $scope.showFilter = true;
+                            $scope.filterTags = tagNames;
+                            $scope.error = "";
+                        });
+                    }, function () {
+                        // Notify the user of the error.
+                        $scope.error = "Error: Failed to apply the filter.";
+                    });
+                };
+
+                /**
+                 * Removes the neon filter for this directive and updates this object's internal state.
+                 * @method clearTagFilters
+                 */
+                $scope.clearTagFilters = function() {
+                    $scope.messenger.removeFilter($scope.filterKey, function () {
+                        $scope.$apply(function () {
+                            $scope.showFilter = false;
+                            $scope.filterTags = [];
+                            $scope.error = "";
+                            $scope.queryForTags();
+                        });
+                    }, function () {
+                        // Notify the user of the error.
+                        $scope.error = "Error: Failed to clear filter.";
+                    });
+                };
+
+                /**
+                 * Remove a particular tag from the neon filter and update the internal state.
+                 * @param tagName {String} the tag to remove from the filter, e.g., "#lol"
+                 * @method removeFilter
+                 */
+                $scope.removeFilter = function(tagName) {
+                    var tags = _.without($scope.filterTags, tagName)
+                    if (tags.length > 0) {
+                        $scope.setTagFilter(tags);
+                    } else {
+                        $scope.clearTagFilters();
+                    }
                 };
 
                 // Wait for neon to be ready, the create our messenger and intialize the view and data.
