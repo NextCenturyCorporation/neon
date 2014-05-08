@@ -175,7 +175,7 @@ charts.LineChart.prototype.drawLine = function(opts) {
 	var data;
 	var line;
 	for(var i = 0; i < opts.length; i++) {
-		cls = "line" + (opts[i].classString ? " " + opts[i].classString : "");
+		cls = (opts[i].classString ? " " + opts[i].classString : "");
 		data = opts[i].data;
 
 		data = data.sort(function(a,b) {
@@ -195,8 +195,18 @@ charts.LineChart.prototype.drawLine = function(opts) {
 
 		me.svg.append("path")
 		.datum(data)
-		.attr("class", cls)
+		.attr("class", "line" + cls)
 		.attr("d", line);
+
+		if(data.length < 40){
+			me.svg.selectAll("dot")
+	            .data(data)
+	          .enter().append("circle")
+	            .attr("class", "dot" + cls)
+	            .attr("r", 4)
+	            .attr("cx", function(d) { return me.x(d[me.xAttribute]); })
+	            .attr("cy", function(d) { return me.y(d[me.yAttribute]); });
+	    }
 	}
 };
 
