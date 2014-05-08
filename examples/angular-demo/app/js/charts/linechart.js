@@ -138,20 +138,43 @@ charts.LineChart.prototype.drawLine = function(opts) {
 		fullDataSet = fullDataSet.concat(opts[i].data);
 	}
 
-	me.categories = me.createCategories(fullDataSet);
+	//me.categories = me.createCategories(fullDataSet);
+	var parseDate = d3.time.format("%Y-%m-%d").parse;
 
-	me.x =  d3.scale.ordinal()
+	fullDataSet.forEach(function(d) {
+		d.date = parseDate(d[me.xAttribute]);
+	});
+
+	/*me.x =  d3.scale.ordinal()
 		.domain(me.categories)
-		.rangePoints([0, (me.width - (me.margin.left + me.margin.right))],.25);
+		.rangePoints([0, (me.width - (me.margin.left + me.margin.right))],.25);*/
+	me.x = d3.time.scale()
+	.range([0, (me.width - (me.margin.left + me.margin.right))],.25);
+
+	var extent = d3.extent(fullDataSet, function(d) { return d.date; });
+
+	me.x.domain(d3.extent(fullDataSet, function(d) { return d.date; }));
 
 	var xAxis = d3.svg.axis()
 		.scale(me.x)
-		.orient("bottom");
+		.orient("bottom")
+		.ticks(d3.time.day);
 
-	me.svg.append("g")
+	var xAxisElement = me.svg.append("g")
 		.attr("class", "x axis")
 		.attr("transform", "translate(0," + (me.height - (me.margin.top + me.margin.bottom)) + ")")
 		.call(xAxis);
+
+	xAxisElement.selectAll("text")
+	.style("text-anchor", "end")
+	.attr("dx", "-.8em")
+	.attr("dy", ".15em")
+	.attr("transform", function(d) {
+		return "rotate(-60)";
+	});
+
+	//$(this.element[0]).height(310 + $(this.element[0]).find('g.x')[0].getBoundingClientRect().height);
+	$(this.element[0]).children('svg').height(280 + $(this.element[0]).find('g.x')[0].getBoundingClientRect().height);
 
 	me.y = d3.scale.linear().range([(me.height - (me.margin.top + me.margin.bottom)), 0]);
 
@@ -178,6 +201,15 @@ charts.LineChart.prototype.drawLine = function(opts) {
 		cls = "line" + (opts[i].classString ? " " + opts[i].classString : "");
 		data = opts[i].data;
 
+		console.log(me.x.ticks());
+		me.x.ticks().map(function(bucket) {
+			return _.find(data, {date: bucket}) || {date: bucket, value: 0};
+		});
+
+		data.forEach(function(d) {
+			d.date = parseDate(d[me.xAttribute]);
+		});
+
 		data = data.sort(function(a,b) {
 			if(a[me.xAttribute] < b[me.xAttribute]) {
 				return -1;
@@ -189,8 +221,7 @@ charts.LineChart.prototype.drawLine = function(opts) {
 		});
 
 		line = d3.svg.line()
-		.x(function(d) {
-			return me.x(d[me.xAttribute]); })
+		.x(function(d) { return me.x(d.date); })
 		.y(function(d) { return me.y(d[me.yAttribute]); });
 
 		me.svg.append("path")
