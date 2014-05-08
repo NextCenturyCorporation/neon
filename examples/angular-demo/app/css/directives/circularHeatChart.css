@@ -29,6 +29,6 @@
 
 .circularheatchart svg .segment,
 .circularheatchart svg .radial {
-    fill: #444444;
+    fill: #777777;
+	font-weight: bold;
 }
-
