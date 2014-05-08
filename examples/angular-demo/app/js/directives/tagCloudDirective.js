@@ -110,11 +110,14 @@ angular.module('tagCloudDirective', []).directive('tagCloud', ['ConnectionServic
                 /**
                  * Updates the data bound to the tag cloud managed by this directive.  This will trigger a change in
                  * the chart's visualization.
-                 * @param {Object} tagCloud A mapping of tag names to their counts
+                 * @param {Array} tagCounts An array of objects with "tag" and "count" properties for the tag
+                 * name and number of occurrences.
                  * @method updateTagData
                  */
                 $scope.updateTagData = function (tagCounts) {
-                    $scope.data = tagCounts;
+                    $scope.data = tagCounts.filter(function(elem) {
+                        return $scope.filterTags.indexOf(elem.tag) == -1;
+                    });
                     // style the tags after they are displayed
                     $timeout(function () {
                         element.find('.tag').tagcloud();
