@@ -22,6 +22,10 @@
 .filter-tags .filter-reset{
 	display: inline-block;
 	margin-right: 10px;
+	
+}
+.filter-tags .filter-reset .btn{
+	text-transform: none;
 }
 .tagcloud{
 	text-align: center;
@@ -29,4 +33,9 @@
 .tagcloud .tag {
 	display: inline-block;
 	padding: 4px 8px;
+	cursor: pointer;
+}
+.tagcloud .tag:hover{
+	color: #333333 !important;
+	text-decoration: none;
 }
