@@ -59,9 +59,9 @@ angular.module('heatMapDirective', []).directive('heatMap', ['ConnectionService'
                     $scope.showPoints = false;
                     $scope.cacheMap = false;
                     $scope.initializing = true;
-
                     $scope.filterKey = neon.widget.getInstanceId("map");
                     $scope.showFilter = false;
+                    $scope.dataBounds = undefined;
 
                     // Setup our map.
                     $scope.mapId = uuid();
@@ -152,7 +152,7 @@ angular.module('heatMapDirective', []).directive('heatMap', ['ConnectionService'
                     // Clear the zoom Rect from the map before reinitializing it.
                     clearZoomRect();
 
-                    //$scope.zoomRectId = undefined;
+                    $scope.dataBounds = undefined;
                     $scope.hideClearFilterButton();
 
                     // Repopulate the field selectors and get the default values.
@@ -204,8 +204,8 @@ angular.module('heatMapDirective', []).directive('heatMap', ['ConnectionService'
 
                 };
 
-                var clearZoomRect = function() {
-                    if ( $scope.zoomRectId !== undefined ) {
+                var clearZoomRect = function () {
+                    if ($scope.zoomRectId !== undefined) {
                         $scope.map.removeBox($scope.zoomRectId);
                         $scope.zoomRectId = undefined;
                     }
@@ -253,11 +253,58 @@ angular.module('heatMapDirective', []).directive('heatMap', ['ConnectionService'
                  * @method updateMapData
                  */
                 $scope.updateMapData = function (queryResults) {
-                    $scope.map.setData(queryResults.data);
+                    var data = queryResults.data;
+                    $scope.map.setData(data);
                     $scope.draw();
+                    if ($scope.dataBounds === undefined) {
+                        $scope.dataBounds = $scope.computeDataBounds(data);
+                        $scope.zoomToDataBounds();
+                    }
+
                     // color mappings need to be updated after drawing since they are set during drawing
                     $scope.colorMappings = $scope.map.getColorMappings();
                 };
+
+                /**
+                 * Zooms the map to the current data bounds
+                 */
+                $scope.zoomToDataBounds = function () {
+                    $scope.map.zoomToBounds($scope.dataBounds);
+                };
+
+                /**
+                 * Computes the minimum bounding rect to bound the data
+                 * @param data
+                 */
+                $scope.computeDataBounds = function (data) {
+                    if (data.length === 0) {
+                        return {left: -180, bottom: -90, right: 180, top: 90};
+                    }
+                    else {
+                        var minLon = 180;
+                        var minLat = 90;
+                        var maxLon = -180;
+                        var maxLat = -90;
+                        data.forEach(function (d) {
+                            var lat = d[$scope.latitudeField];
+                            var lon = d[$scope.longitudeField];
+                            if (lon < minLon) {
+                                minLon = lon;
+                            }
+                            if (lon > maxLon) {
+                                maxLon = lon;
+                            }
+                            if (lat < minLat) {
+                                minLat = lat;
+                            }
+                            if (lat > maxLat) {
+                                maxLat = lat;
+                            }
+                        });
+                        return { left: minLon, bottom: minLat, right: maxLon, top: maxLat};
+                    }
+
+                }
 
                 $scope.buildQuery = function () {
                     var query = new neon.query.Query().selectFrom($scope.databaseName, $scope.tableName)
@@ -331,6 +378,7 @@ angular.module('heatMapDirective', []).directive('heatMap', ['ConnectionService'
                             clearZoomRect();
                             $scope.queryForMapData();
                             $scope.hideClearFilterButton();
+                            $scope.zoomToDataBounds();
                         });
                     }, function () {
                         // Notify the user of the error.

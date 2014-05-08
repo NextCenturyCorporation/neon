@@ -1,18 +1,13 @@
 <div class="well" >
     <h4 class="sr-only">Popular Hashtags</h4>
-    <!--<div class="filter-tags" ng-class="{true: '', false: 'hidden'}[showFilter]">
-    	<div class="filter-reset">
-			<a class="btn bg-danger" ng-click="clearFilter()">
-			#halloween <span class="glyphicon glyphicon-remove"></span>
+    <div class="filter-tags" ng-class="{true: '', false: 'hidden'}[showFilter]">
+    	<div class="filter-reset" ng-repeat="tagName in filterTags">
+			<a class="btn bg-danger" ng-click="removeFilter(tagName)">
+			{{tagName}}<span class="glyphicon glyphicon-remove"></span>
 			</a>
 		</div>
-		<div class="filter-reset">
-			<a class="btn bg-danger" ng-click="clearFilter()">
-			#snow <span class="glyphicon glyphicon-remove"></span>
-			</a>
-		</div>
-    </div>-->
+    </div>
     <div class="tagcloud">
-        <div class="tag" ng-repeat="tagCount in data" rel="{{tagCount.count}}">{{tagCount.tag}}</div>
+        <a ng-click="addTagFilter(tagCount.tag)" class="tag" ng-repeat="tagCount in data" rel="{{tagCount.count}}">{{tagCount.tag}}</a>
     </div>
 </div>

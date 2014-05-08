@@ -610,6 +610,14 @@ coreMap.Map.prototype.removeBox = function (box) {
 };
 
 /**
+ * Zooms to the specified bounding rectangle
+ * @param {Object} bounds An object with 4 parameters, left, bottom, right and top
+ */
+coreMap.Map.prototype.zoomToBounds = function(bounds) {
+    this.map.zoomToExtent(new OpenLayers.Bounds(bounds.left, bounds.bottom, bounds.right, bounds.top).transform(coreMap.Map.SOURCE_PROJECTION,coreMap.Map.DESTINATION_PROJECTION));
+};
+
+/**
  * Add a resize listener on the window to redraw the map
  * @method redrawOnResize
  */
