@@ -111,7 +111,13 @@ angular.module('heatMapDirective', []).directive('heatMap', ['ConnectionService'
                     $scope.messenger.replaceFilter($scope.filterKey, filter, function () {
                         $scope.$apply(function () {
                             $scope.queryForMapData();
-                            $scope.zoomRectBounds = {left: extent.minimumLongitude, bottom:extent.minimumLatitude, right: extent.maximumLongitude, top: extent.maximumLatitude};
+                            drawZoomRect({
+                                left: extent.minimumLongitude, 
+                                bottom:extent.minimumLatitude, 
+                                right: extent.maximumLongitude, 
+                                top: extent.maximumLatitude
+                            });
+
                             // Show the Clear Filter button.
                             $scope.showFilter = true;
                             $scope.error = "";
@@ -145,10 +151,8 @@ angular.module('heatMapDirective', []).directive('heatMap', ['ConnectionService'
 
                     // Clear the zoom Rect from the map before reinitializing it.
                     clearZoomRect();
-                    $scope.zoomRectBounds = undefined;
 
-                    // used to track the id of the rectangle drawn on the map so it can be removed when a new box is drawn
-                    $scope.zoomRectId = undefined;
+                    //$scope.zoomRectId = undefined;
                     $scope.hideClearFilterButton();
 
                     // Repopulate the field selectors and get the default values.
@@ -198,14 +202,24 @@ angular.module('heatMapDirective', []).directive('heatMap', ['ConnectionService'
                         maximumLongitude: maxLon
                     };
 
-                }
+                };
 
                 var clearZoomRect = function() {
                     if ( $scope.zoomRectId !== undefined ) {
                         $scope.map.removeBox($scope.zoomRectId);
                         $scope.zoomRectId = undefined;
                     }
-                }
+                };
+
+                var drawZoomRect = function(rect) {
+                    // Clear the old rect.
+                    clearZoomRect();
+
+                    // Draw the new rect
+                    if (rect !== undefined) {
+                        $scope.zoomRectId = $scope.map.drawBox(rect);
+                    }
+                };
 
                 /**
                  * Triggers a Neon query that will aggregate the time data for the currently selected dataset.
@@ -314,7 +328,7 @@ angular.module('heatMapDirective', []).directive('heatMap', ['ConnectionService'
                 $scope.clearFilter = function () {
                     $scope.messenger.removeFilter($scope.filterKey, function () {
                         $scope.$apply(function () {
-                            $scope.zoomRectBounds = undefined;
+                            clearZoomRect();
                             $scope.queryForMapData();
                             $scope.hideClearFilterButton();
                         });
@@ -387,16 +401,6 @@ angular.module('heatMapDirective', []).directive('heatMap', ['ConnectionService'
                         }
                     }
                 });
-
-                $scope.$watch('zoomRectBounds', function (newVal) {
-                    clearZoomRect();
-
-                    // newVal may be undefined when clearing out the box
-                    if (newVal !== undefined) {
-                        $scope.zoomRectId = $scope.map.drawBox(newVal);
-                    }
-                });
-
 
                 // Wait for neon to be ready, the create our messenger and intialize the view and data.
                 neon.ready(function () {
