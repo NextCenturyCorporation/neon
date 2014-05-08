@@ -59,130 +59,21 @@
 
 						<!-- Database Config -->
 						<database-config></database-config>
-						<ul class="nav navbar-nav">
-							<li>
-								<a data-toggle="collapse" data-parent="#trays" href=".filter-tray" class="collapsed"
-									ng-click="toggleCreateFilters()">
-									<span class="glyphicon glyphicon-filter"></span>
-									Create Filters
-									<span class="label label-primary" ng-bind="filterCount" ng-class="{true: '', false: 'hidden'}[filterCount > 0]"></span>
-								</a>
-							</li>
-							<li>
-								<a data-toggle="collapse" data-parent="#trays" href=".data-tray" class="collapsed"
-								   ng-click="toggleSeeData()">
-									<span class="glyphicon glyphicon-list"></span> View Data
-								</a>
-							</li>
-						</ul>
 					</div>
 				</div>
 			</div>
 		</nav>
 
-		<!-- Trays -->
-		<div class="panel-group" id="trays">
-
-			<!-- Filter Builder tray -->
-			<div filter-builder></div>
-
-			<!-- See Data tray -->
-			<div query-results-table show-data="seeData"></div>
-
-		</div>
-
-		<!-- DASHBOARD CONTENT -->
-		<div class="container">
-
-			<!-- Timeline -->
-			<div timeline-selector></div>
-
-			<div class="row">
-
-				<!-- Left column -->
-				<div class="col-md-6">
-
-                    <!-- Sentiment chart -->
-                    <div class="well">
-                        <div class="chart-options pull-right">
-                            <a class="btn btn-lg text-muted collapsed" data-toggle="collapse" data-target="#chart-options" data-animation=false>
-                              <span class="glyphicon glyphicon-cog"></span>
-                              <span class="caret"></span>
-                            </a>
-                            <div id="chart-options" class="popover bottom">
-                                <div class="arrow"></div>
-                                <div class="popover-content">
-                                    <div class="form-group">
-                                        <fieldselector target-var="xAxisField" label-text="'X axis:'" default-mapping="'x-axis'"></fieldSelector>
-                                    </div>
-                                    <div class="form-group">
-                                        <fieldselector target-var="yAxisField" label-text="'Y axis:'" default-mapping="'y-axis'"></fieldSelector>
-                                    </div>
-                                    <div class="form-group" ng-hide="chartType === 'line'">
-                                        <select ng-model="barType" class="form-control">
-                                            <option value="count">Count</option>
-                                            <option value="sum">Sum</option>
-                                            <option value="avg">Avg</option>
-                                        </select>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="form-inline pull-left" style="margin-right: 20px;">
-                            <div class="form-group">
-                                <select ng-model="chartType" class="form-control" ng-init="chartType = 'line'">
-                                    <option value="bar">Bar</option>
-                                    <option value="line">Line</option>
-                                </select>
-                            </div>
-                        </div>
-
-                        <div class="legend pull-left" ng-hide="chartType != 'line'">
-                            <div class="legend-item">
-                                <span class="legend-icon" style="background-color: #39b54a"></span>
-                                <span class="legend-text">Positive</span>
-                            </div>
-                            <div class="legend-item">
-                                <span class="legend-icon" style="background-color: #C2360D"></span>
-                                <span class="legend-text">Negative</span>
-                            </div>
-                        </div>
-
-                        <div class="clearfix"></div>
-
-                        <!--stackedbarchart attr-x="xAxisField" attr-y="yAxisField" bar-type='barType'></stackedbarchart-->
-                        <barchart attr-x="xAxisField" attr-y="yAxisField" bar-type='barType' ng-hide="chartType === 'line'"></barchart>
-                        <linechart attr-x="xAxisField" attr-y="yAxisField" total-type='barType' ng-hide="chartType !== 'line'"></linechart>
-
-                    </div>
-
-					<!-- Circular heat chart -->
-					<div circular-heat-form></div>
-
-				</div>
-
-				<!-- Right column -->
-				<div class="col-md-6">
-
-					<!-- Map -->
-					<div heat-map class="well"></div>
-
-                    <!-- Tag cloud -->
-                    <tag-cloud tag-field="'hashtags'"></tag-cloud>
-
-				</div>
-			</div>
-
-		</div>
-
 		<!-- In production use:
 		<script src="//ajax.googleapis.com/ajax/libs/angularjs/x.x.x/angular.min.js"></script>
 		-->
 
-		 <!-- Including neon before angular here as neon has lodash and jquery wrapped into it.  If this is
+		<!-- Including neon before angular here as neon has lodash and jquery wrapped into it.  If this is
 			  loaded first, angular should pick up the included jQuery. -->
         <script src="lib/owf/owf-widget-debug.js"></script>
+        <script type="text/javascript">
+        	OWF.relayFile = 'js/eventing/rpc_relay.uncompressed.html';
+        </script>
 		<script src="/neon/js/neon.js"></script>
 		
 

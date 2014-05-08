@@ -2,11 +2,7 @@ var databaseConfig = angular.module('configurationDirective', []);
 
 databaseConfig.directive('databaseConfig', ['ConnectionService', function (connectionService) {
     var link = function ($scope, el, attr) {
-        var messenger = new neon.eventing.Messenger();
         el.addClass('databaseConfig');
-
-        $scope.datastoreSelect = $scope.storeSelect || 'mongo';
-        $scope.hostnameInput = $scope.hostName || 'localhost';
 
         $scope.showDbTable = false;
         $scope.databases = [];
@@ -32,23 +28,27 @@ databaseConfig.directive('databaseConfig', ['ConnectionService', function (conne
             }
         ];
 
-        var connection;
+        $scope.initialize = function() {
+            $scope.messenger = new neon.eventing.Messenger();
+            $scope.datastoreSelect = $scope.storeSelect || 'mongo';
+            $scope.hostnameInput = $scope.hostName || 'localhost';
+        }
 
         $scope.connectToDatastore = function () {
             $scope.showDbTable = true;
 
             // Connect to the datastore.
-            connection = new neon.query.Connection();
-            connection.connect($scope.datastoreSelect, $scope.hostnameInput);
+            $scope.connection = new neon.query.Connection();
+            $scope.connection.connect($scope.datastoreSelect, $scope.hostnameInput);
 
             // Save the connection in the connection service for reuse by other directives.
-            connectionService.setActiveConnection(connection);
+            connectionService.setActiveConnection($scope.connection);
 
             // Flag that we're connected for the front-end controls enable/disable code.
             $scope.isConnected = true;
 
             // Pull in the databse names.
-            connection.getDatabaseNames(function (results) {
+            $scope.connection.getDatabaseNames(function (results) {
                 $scope.$apply(function () {
                     populateDatabaseDropdown(results);
                 });
@@ -79,8 +79,8 @@ databaseConfig.directive('databaseConfig', ['ConnectionService', function (conne
         };
 
         $scope.selectDatabase = function () {
-            connection.use($scope.selectedDb);
-            connection.getTableNames(populateTableDropdown);
+            $scope.connection.use($scope.selectedDb);
+            $scope.connection.getTableNames(populateTableDropdown);
         };
 
         var populateTableDropdown = function (tables) {
@@ -89,7 +89,7 @@ databaseConfig.directive('databaseConfig', ['ConnectionService', function (conne
         };
 
         $scope.connectToDatabase = function () {
-            messenger.clearFiltersSilently(function () {
+            $scope.messenger.clearFiltersSilently(function () {
                 $scope.broadcastActiveDataset();
             });
         };
@@ -104,11 +104,19 @@ databaseConfig.directive('databaseConfig', ['ConnectionService', function (conne
             // TODO: Alter or eliminate this when the Connection class in Neon is changed to emit
             // dataset selections.
             var message = {
+                "datastore": $scope.datastoreSelect,
+                "hostname": $scope.hostnameInput,
                 "database": $scope.selectedDb,
-                "table": $scope.selectedTable
+                "table": $scope.selectedTable,
             };
-            messenger.publish(neon.eventing.channels.ACTIVE_DATASET_CHANGED, message);
+            $scope.messenger.publish(neon.eventing.channels.ACTIVE_DATASET_CHANGED, message);
         }
+
+        // Wait for neon to be ready, the create our messenger and intialize the view and data.
+        neon.ready(function () {
+            $scope.initialize();
+        });
+
     }
 
     return {

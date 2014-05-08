@@ -54,7 +54,10 @@ fieldSelector.directive('fieldselector', ['ConnectionService', function(connecti
 
 		};
 
-		initialize();
+		// Wait for neon to be ready, the create our messenger and intialize the view and data.
+		neon.ready(function () {
+			initialize();
+		});
 	};
 
 	return {
