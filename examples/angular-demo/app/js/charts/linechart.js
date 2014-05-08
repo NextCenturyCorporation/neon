@@ -35,7 +35,7 @@ charts.LineChart = function (rootElement, selector, opts) {
 
 charts.LineChart.DEFAULT_HEIGHT = 300;
 charts.LineChart.DEFAULT_WIDTH = 600;
-charts.LineChart.DEFAULT_MARGIN = {top: 20, bottom: 30, left: 40, right: 20};
+charts.LineChart.DEFAULT_MARGIN = {top: 20, bottom: 30, left: 35, right: 20};
 charts.LineChart.DEFAULT_STYLE = {};
 
 
@@ -173,13 +173,13 @@ charts.LineChart.prototype.drawLine = function(opts) {
 
 	me.svg.append("g")
 		.attr("class", "y axis")
-		.call(yAxis)
-	.append("text")
-		.attr("transform", "rotate(-90)")
-		.attr("y", 6)
-		.attr("dy", ".71em")
-		.style("text-anchor", "end")
-		.text(me.yAttribute);
+		.call(yAxis);
+	// .append("text")
+	// 	.attr("transform", "rotate(-90)")
+	// 	.attr("y", 6)
+	// 	.attr("dy", ".71em")
+	// 	.style("text-anchor", "end")
+	// 	.text(me.yAttribute);
 
 	var cls;
 	var data;
