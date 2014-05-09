@@ -45,6 +45,7 @@ angular.module('tagCloudDirective', []).directive('tagCloud', ['ConnectionServic
                     $scope.filterKey = neon.widget.getInstanceId("tagcloud");
                     $scope.filterTags = [];
                     $scope.showFilter = false;
+                    $scope.$watchCollection('filterTags', $scope.setTagFilter);
 
                     // Setup our messenger.
                     $scope.messenger = new neon.eventing.Messenger();
@@ -128,20 +129,25 @@ angular.module('tagCloudDirective', []).directive('tagCloud', ['ConnectionServic
                  */
                 $scope.addTagFilter = function(tagName) {
                     if ($scope.filterTags.indexOf(tagName) === -1) {
-                        var tags = $scope.filterTags.slice(0);
-                        tags.push(tagName);
-                        $scope.setTagFilter(tags);
+                        $scope.filterTags.push(tagName);
                     }
                 };
 
                 /**
-                 * Changes the filter to use the ones provided in the argument.
-                 * @param tags {Array} an array of tag strings, e.g., ["#lol", "#sad"]
+                 * Changes the filter to use the ones provided in the first argument.
+                 * @param tagNames {Array} an array of tag strings, e.g., ["#lol", "#sad"]
+                 * @param oldTagNames {Array} the old array of tag names
                  * @method setTagFilter
                  */
-                $scope.setTagFilter = function(tags) {
-                    var tagFilter = $scope.createFilterForTags(tags);
-                    $scope.applyFilter(tagFilter, tags);
+                $scope.setTagFilter = function(tagNames, oldTagNames) {
+                    if (tagNames !== oldTagNames) {
+                        if (tagNames.length > 0) {
+                            var tagFilter = $scope.createFilterForTags(tagNames);
+                            $scope.applyFilter(tagFilter);
+                        } else {
+                            $scope.clearTagFilters();
+                        }
+                    }
                 };
 
                 /**
@@ -161,16 +167,14 @@ angular.module('tagCloudDirective', []).directive('tagCloud', ['ConnectionServic
                 /**
                  * Applies the specified filter and updates the visualization on success
                  * @param filter {Object} the neon filter to apply
-                 * @param tagNames {Array} this must be the array of tag names that corresponds to the filter
                  * @method applyFilter
                  */
-                $scope.applyFilter = function(filter, tagNames) {
+                $scope.applyFilter = function(filter) {
                     $scope.messenger.replaceFilter($scope.filterKey, filter, function () {
                         $scope.$apply(function () {
                             $scope.queryForTags();
                             // Show the Clear Filter button.
                             $scope.showFilter = true;
-                            $scope.filterTags = tagNames;
                             $scope.error = "";
                         });
                     }, function () {
@@ -187,7 +191,6 @@ angular.module('tagCloudDirective', []).directive('tagCloud', ['ConnectionServic
                     $scope.messenger.removeFilter($scope.filterKey, function () {
                         $scope.$apply(function () {
                             $scope.showFilter = false;
-                            $scope.filterTags = [];
                             $scope.error = "";
                             $scope.queryForTags();
                         });
@@ -203,12 +206,7 @@ angular.module('tagCloudDirective', []).directive('tagCloud', ['ConnectionServic
                  * @method removeFilter
                  */
                 $scope.removeFilter = function(tagName) {
-                    var tags = _.without($scope.filterTags, tagName)
-                    if (tags.length > 0) {
-                        $scope.setTagFilter(tags);
-                    } else {
-                        $scope.clearTagFilters();
-                    }
+                    $scope.filterTags = _.without($scope.filterTags, tagName)
                 };
 
                 // Wait for neon to be ready, the create our messenger and intialize the view and data.
