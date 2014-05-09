@@ -137,17 +137,17 @@ linechart.directive('linechart', ['ConnectionService', function(connectionServic
 					var posRange, negRange;
 
 					if(posResults.data.length > 0 && negResults.data.length > 0) {
-						posRange = d3.extent(posResults.data, function(d) { return d[xAxis]});
-						negRange = d3.extent(negResults.data, function(d) { return d[xAxis]});
+						posRange = d3.extent(posResults.data, function(d) { return new Date(d[xAxis])});
+						negRange = d3.extent(negResults.data, function(d) { return new Date(d[xAxis])});
 
-						minDate = new Date(Math.min(new Date(posRange[0]), new Date(negRange[0])));
-						maxDate = new Date(Math.max(new Date(posRange[1]), new Date(negRange[1])));
+						minDate = new Date(Math.min(posRange[0], negRange[0]));
+						maxDate = new Date(Math.max(posRange[1], negRange[1]));
 					} else if(posResults.data.length > 0) {
-						posRange = d3.extent(posResults.data, function(d) { return d[xAxis]});
+						posRange = d3.extent(posResults.data, function(d) { return new Date(d[xAxis])});
 						minDate = posRange[0];
 						maxDate = posRange[1];
 					} else if(negResults.data.length > 0) {
-						negRange = d3.extent(negResults.data, function(d) { return d[xAxis]});
+						negRange = d3.extent(negResults.data, function(d) { return new Date(d[xAxis])});
 						minDate = posRange[0];
 						maxDate = posRange[1];
 					} else {
