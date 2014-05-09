@@ -121,7 +121,7 @@ charts.BarChart = function (rootElement, selector, opts) {
 	}
 };
 
-charts.BarChart.DEFAULT_HEIGHT_ = 300;
+charts.BarChart.DEFAULT_HEIGHT_ = 250;
 charts.BarChart.DEFAULT_WIDTH_ = 600;
 charts.BarChart.DEFAULT_MARGIN_ = {top: 20, bottom: 30, left: 30, right: 0};
 charts.BarChart.TOOLTIP_ID_ = 'tooltip';
@@ -282,6 +282,7 @@ charts.BarChart.prototype.createYAxis_ = function () {
 	return d3.svg.axis()
 		.scale(this.y)
 		.orient('left')
+		.ticks(3)
 		.tickFormat(charts.BarChart.createYAxisTickFormat_())
 		.tickValues(this.y.domain());
 };
@@ -485,7 +486,7 @@ charts.BarChart.prototype.drawXAxis_ = function (chart) {
 
 	this.viewboxYMax = this.viewboxYMax + $(this.element[0]).find('g.x')[0].getBoundingClientRect().height;
 	//$(this.element[0]).children('svg')[0].setAttribute("viewBox", this.determineVeiwboxString());
-	$(this.element[0]).height(270 + $(this.element[0]).find('g.x')[0].getBoundingClientRect().height);
+	$(this.element[0]).height(this.height - this.margin.bottom + $(this.element[0]).find('g.x')[0].getBoundingClientRect().height);
 
 	return axis;
 };
@@ -702,13 +703,11 @@ charts.BarChart.prototype.redrawOnResize_ = function () {
 
 	// Debounce is needed because browser resizes fire this resize even multiple times.
 	// Cache the handler so we can remove it from the window on destroy.
-	this.resizeHandler_ = _.debounce(drawChart, 10);
-	$(window).resize(this.resizeHandler_);
-
+	me.resizeHandler_ = _.debounce(drawChart, 10);
+	$(window).resize(me.resizeHandler_);
 };
 
-charts.BarChart.destroy = function(el, selector) {
-	var element = d3.select(el).select(selector);
+charts.BarChart.prototype.destroy = function() {
 	$(window).off('resize', this.resizeHandler_);
-	$(element[0]).empty();
+	$(this.element[0]).empty();
 };

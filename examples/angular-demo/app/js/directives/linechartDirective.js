@@ -40,6 +40,7 @@ linechart.directive('linechart', ['ConnectionService', function(connectionServic
 		$scope.totalType = /*$scope.totalType ||*/ 'count';
 		$scope.fields = [];
 		$scope.xAxisSelect = $scope.fields[0] ? $scope.fields[0] : '';
+		$scope.chart = undefined;
 
 		var COUNT_FIELD_NAME = 'Count';
 
@@ -49,8 +50,8 @@ linechart.directive('linechart', ['ConnectionService', function(connectionServic
 
 			$scope.messenger.events({
 				activeDatasetChanged: onDatasetChanged,
-				filtersChanged: onFiltersChanged,
-				selectionChanged: onSelectionChanged
+				filtersChanged: onFiltersChanged
+				//selectionChanged: onSelectionChanged
 			});
 
 			$scope.$watch('attrX', function(newValue, oldValue) {
@@ -68,9 +69,20 @@ linechart.directive('linechart', ['ConnectionService', function(connectionServic
 					$scope.queryForData();
 				}
 			});
+
+			// Detect if anything in the digest cycle altered our visibility and redraw our chart if necessary.
+			// Note, this supports the angular hide method and would need to be augmented to catch
+			// any other hiding mechanisms.
+			$scope.$watch(function() {
+				return $(el).hasClass('ng-hide');
+			}, function(hidden) {
+				if (!hidden && $scope.chart) {
+					$scope.chart.redraw();
+				}
+			});
 		};
 
-        /**
+		/**
 		 * Event handler for selection changed events issued over Neon's messaging channels.
 		 * @param {Object} message A Neon selection changed message.
 		 * @method onSelectionChanged
@@ -90,10 +102,10 @@ linechart.directive('linechart', ['ConnectionService', function(connectionServic
 		};
 
 		var query = function(comparator, comparisionValue, callback) {
-			var xAxis = connectionService.getFieldMapping($scope.database, $scope.tableName, "x-axis");
-			    xAxis = $scope.attrX || xAxis.mapping;
+			var xAxis = connectionService.getFieldMapping($scope.database, $scope.tableName, "line-x-axis");
+				xAxis = xAxis.mapping;
 			var yAxis = connectionService.getFieldMapping($scope.database, $scope.tableName, "y-axis")
-			    yAxis = $scope.attrY || yAxis.mapping;
+				yAxis = yAxis.mapping;
 
 			var query = new neon.query.Query()
 				.selectFrom($scope.databaseName, $scope.tableName)
@@ -114,13 +126,43 @@ linechart.directive('linechart', ['ConnectionService', function(connectionServic
 		};
 
 		$scope.queryForData = function() {
+			var xAxis = connectionService.getFieldMapping($scope.database, $scope.tableName, "line-x-axis");
+				xAxis = xAxis.mapping;
+			var yAxis = connectionService.getFieldMapping($scope.database, $scope.tableName, "y-axis")
+				yAxis = yAxis.mapping;
+
 			query('>', 0, function(posResults) {
 				query('<', 0, function(negResults) {
+					var minDate, maxDate;
+					var posRange, negRange;
+
+					if(posResults.data.length > 0 && negResults.data.length > 0) {
+						posRange = d3.extent(posResults.data, function(d) { return new Date(d[xAxis])});
+						negRange = d3.extent(negResults.data, function(d) { return new Date(d[xAxis])});
+
+						minDate = new Date(Math.min(posRange[0], negRange[0]));
+						maxDate = new Date(Math.max(posRange[1], negRange[1]));
+					} else if(posResults.data.length > 0) {
+						posRange = d3.extent(posResults.data, function(d) { return new Date(d[xAxis])});
+						minDate = posRange[0];
+						maxDate = posRange[1];
+					} else if(negResults.data.length > 0) {
+						negRange = d3.extent(negResults.data, function(d) { return new Date(d[xAxis])});
+						minDate = posRange[0];
+						maxDate = posRange[1];
+					} else {
+						minDate = new Date();//new Date().getTime() - (1000 * 60 * 60 * 24));
+						maxDate = new Date();
+					}
+
+					posResults = zeroPadData(posResults, xAxis, yAxis, minDate, maxDate);
+					negResults = zeroPadData(negResults, xAxis, yAxis, minDate, maxDate);
+
 					var data = [{
-						data: posResults.data,
+						data: posResults,
 						classString: "positiveLine"
 					},{
-						data: negResults.data,
+						data: negResults,
 						classString: "negativeLine"
 					}];
 
@@ -132,23 +174,72 @@ linechart.directive('linechart', ['ConnectionService', function(connectionServic
 			});
 		};
 
+		var zeroPadData = function(data, xField, yField, minDate, maxDate) {
+			data = data.data;
+
+			var start = zeroOutDate(minDate);
+			var end = zeroOutDate(maxDate);
+
+			var dayMillis = (1000 * 60 * 60 * 24);
+			var numBuckets = Math.ceil(Math.abs(end - start) / dayMillis) + 1;
+
+			var startTime = start.getTime();
+
+			// Initialize our time buckets.
+			var resultData = [];
+			for(var i = 0; i < numBuckets; i++) {
+				var bucketGraphDate = new Date(startTime + (dayMillis * i));
+				resultData[i] = {};
+				resultData[i][xField] = bucketGraphDate;
+				resultData[i][yField] = 0;
+			}
+
+			var indexDate;
+
+			for (i = 0; i < data.length; i++) {
+				indexDate = new Date(data[i][xField]);
+
+				resultData[Math.floor(Math.abs(indexDate - start) / dayMillis)][yField] = data[i][yField];
+			}
+
+			return resultData;
+		}
+
 		var drawChart = function() {
-			var xAxis = connectionService.getFieldMapping($scope.database, $scope.tableName, "x-axis");
-			xAxis = $scope.attrX || xAxis.mapping;
+			var xAxis = connectionService.getFieldMapping($scope.database, $scope.tableName, "line-x-axis");
+			xAxis = xAxis.mapping;
 			var yAxis = connectionService.getFieldMapping($scope.database, $scope.tableName, "y-axis")
-			yAxis = $scope.attrY || yAxis.mapping;
+			yAxis = yAxis.mapping;
 			if (!yAxis) {
 				yAxis = COUNT_FIELD_NAME;
 			}
 
 			var opts = {"x": xAxis, "y": yAxis, responsive: true};
-			charts.LineChart.destroy(el[0], '.linechart');
+
+			// Destroy the old chart and rebuild it.
+			if ($scope.chart) {
+				$scope.chart.destroy();	
+			}
 			$scope.chart = new charts.LineChart(el[0], '.linechart', opts);
 			$scope.chart.drawChart();
 		};
 
 		var drawLine = function(data) {
 			$scope.chart.drawLine(data);
+		};
+
+		/**
+		 * Sets the minutes, seconds and millis to 0. If the granularity of the date is day, then the hours are also zeroed
+		 * @param date
+		 * @returns {Date}
+		 */
+		var zeroOutDate = function (date) {
+			var zeroed = new Date(date);
+			zeroed.setUTCMinutes(0);
+			zeroed.setUTCSeconds(0);
+			zeroed.setUTCMilliseconds(0);
+			zeroed.setUTCHours(0);
+			return zeroed;
 		};
 
 		neon.ready(function () {

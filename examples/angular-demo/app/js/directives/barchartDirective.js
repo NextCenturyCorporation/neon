@@ -41,6 +41,7 @@ barchart.directive('barchart', ['ConnectionService', '$timeout', function(connec
 		$scope.fields = [];
 		$scope.xAxisSelect = $scope.fields[0] ? $scope.fields[0] : '';
         $scope.initializing = false;
+        $scope.chart = undefined;
 
 		var COUNT_FIELD_NAME = 'Count';
 		var clientId;
@@ -69,6 +70,17 @@ barchart.directive('barchart', ['ConnectionService', '$timeout', function(connec
 					$scope.queryForData();
 				}
 			});
+
+			// Detect if anything in the digest cycle altered our visibility and redraw our chart if necessary.
+			// Note, this supports the angular hide method and would need to be augmented to catch
+			// any other hiding mechanisms.
+			$scope.$watch(function() {
+				return $(el).hasClass('ng-hide');
+			}, function(hidden) {
+				if (!hidden && $scope.chart) {
+					$scope.chart.draw();
+				}
+			});
 		};
 
 		var onFiltersChanged = function(message) {
@@ -87,7 +99,7 @@ barchart.directive('barchart', ['ConnectionService', '$timeout', function(connec
 		};
 
 		$scope.queryForData = function() {
-			var xAxis = connectionService.getFieldMapping($scope.database, $scope.tableName, "x-axis");
+			var xAxis = connectionService.getFieldMapping($scope.database, $scope.tableName, "bar-x-axis");
 			    xAxis = $scope.attrX || xAxis.mapping;
 			var yAxis = connectionService.getFieldMapping($scope.database, $scope.tableName, "y-axis")
 			    yAxis = $scope.attrY || yAxis.mapping;
@@ -124,9 +136,12 @@ barchart.directive('barchart', ['ConnectionService', '$timeout', function(connec
 		};
 
 		var doDrawChart = function(data) {
-			charts.BarChart.destroy(el[0], '.barchart');
+			// Destroy the old chart and rebuild it.
+			if ($scope.chart) {
+				$scope.chart.destroy();	
+			}
 
-			var xAxis = connectionService.getFieldMapping($scope.database, $scope.tableName, "x-axis");
+			var xAxis = connectionService.getFieldMapping($scope.database, $scope.tableName, "bar-x-axis");
 			    xAxis = $scope.attrX || xAxis.mapping;
 			var yAxis = connectionService.getFieldMapping($scope.database, $scope.tableName, "y-axis")
 			    yAxis = $scope.attrY || yAxis.mapping;
@@ -137,8 +152,8 @@ barchart.directive('barchart', ['ConnectionService', '$timeout', function(connec
 				yAxis = COUNT_FIELD_NAME;
 			}
 
-			var opts = { "data": data.data, "x": xAxis, "y": yAxis, responsive: true, height: 300};
-			var chart = new charts.BarChart(el[0], '.barchart', opts).draw();
+			var opts = { "data": data.data, "x": xAxis, "y": yAxis, responsive: true, height: 250};
+			$scope.chart = new charts.BarChart(el[0], '.barchart', opts).draw();
 		};
 
 		neon.ready(function () {

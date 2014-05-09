@@ -15,14 +15,14 @@
  */
 
 .filter-tags {
-	padding-bottom: 20px;
+	padding-bottom: 10px;
 	margin-bottom: 10px;
 	border-bottom: 1px solid #e1e1e1;
 }
 .filter-tags .filter-reset{
 	display: inline-block;
 	margin-right: 10px;
-	
+	margin-bottom: 10px;
 }
 .filter-tags .filter-reset .btn{
 	text-transform: none;
@@ -38,4 +38,10 @@
 .tagcloud .tag:hover{
 	color: #333333 !important;
 	text-decoration: none;
+}
+
+@media (min-width: 1860px) {
+	.tagcloud {
+		font-size: 12px;
+	}
 }
