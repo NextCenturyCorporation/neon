@@ -113,9 +113,16 @@
                                 <div class="arrow"></div>
                                 <div class="popover-content">
                                     <div class="form-group">
+                                        <label>Chart Type</label>
+                                        <select ng-model="chartType" class="form-control" ng-init="chartType = 'line'">
+                                            <option value="bar">Bar</option>
+                                            <option value="line">Line</option>
+                                        </select>
+                                    </div>
+                                    <div class="form-group" ng-hide="chartType === 'line'">
                                         <fieldselector target-var="xAxisField" label-text="'X axis:'" default-mapping="'x-axis'"></fieldSelector>
                                     </div>
-                                    <div class="form-group">
+                                    <div class="form-group" ng-hide="chartType === 'line'">
                                         <fieldselector target-var="yAxisField" label-text="'Y axis:'" default-mapping="'y-axis'"></fieldSelector>
                                     </div>
                                     <div class="form-group" ng-hide="chartType === 'line'">
@@ -129,16 +136,7 @@
                             </div>
                         </div>
 
-                        <div class="form-inline pull-left" style="margin-right: 20px;">
-                            <div class="form-group">
-                                <select ng-model="chartType" class="form-control" ng-init="chartType = 'line'">
-                                    <option value="bar">Bar</option>
-                                    <option value="line">Line</option>
-                                </select>
-                            </div>
-                        </div>
-
-                        <div class="legend pull-left" ng-hide="chartType != 'line'">
+                        <div class="legend" ng-hide="chartType != 'line'">
                             <div class="legend-item">
                                 <span class="legend-icon" style="background-color: #39b54a"></span>
                                 <span class="legend-text">Positive</span>
@@ -146,6 +144,13 @@
                             <div class="legend-item">
                                 <span class="legend-icon" style="background-color: #C2360D"></span>
                                 <span class="legend-text">Negative</span>
+                            </div>
+                        </div>
+
+                        <div class="legend" ng-hide="chartType != 'bar'">
+                            <div class="legend-item">
+                                <span class="legend-icon" style="background-color: #39b54a"></span>
+                                <span class="legend-text">{{yAxisField}} {{barType}}</span>
                             </div>
                         </div>
 

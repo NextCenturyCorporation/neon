@@ -215,7 +215,7 @@ charts.LineChart.prototype.drawLine = function(opts) {
 	          .enter().append("circle")
 	            .attr("class", "dot" + cls)
 	            .attr("r", 4)
-	            .attr("cx", function(d) { return me.x(d[me.xAttribute]); })
+	            .attr("cx", function(d) { return me.x(d.date); })
 	            .attr("cy", function(d) { return me.y(d[me.yAttribute]); });
 	    }
 	}
