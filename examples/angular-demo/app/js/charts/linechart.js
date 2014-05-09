@@ -20,9 +20,7 @@ charts.LineChart = function (rootElement, selector, opts) {
 	this.element = d3.select(rootElement).select(selector);
 
 	this.xAttribute = opts.x;
-	//this.xLabel = opts.xLabel || this.determineXLabel();
 	this.yAttribute = opts.y;
-	//this.yLabel = opts.yLabel || this.determineYLabel();
 	this.margin = $.extend({}, charts.LineChart.DEFAULT_MARGIN, opts.margin || {});
 
 	this.categories = [];
@@ -107,11 +105,9 @@ charts.LineChart.prototype.drawChart = function() {
 	me.height = me.determineHeight(me.element);
 	me.width = me.determineWidth(me.element);
 
-	//me.x = d3.time.scale().range([0, me.width]);
-
 	me.svg = me.element.append("svg")
-		.attr("width", me.width)// + me.margin.left + me.margin.right)
-		.attr("height", me.height) //+ me.margin.top + me.margin.bottom)
+		.attr("width", me.width)
+		.attr("height", me.height)
 	.append("g")
 		.attr("transform", "translate(" + me.margin.left + "," + me.margin.top + ")");
 };
@@ -134,10 +130,9 @@ charts.LineChart.prototype.drawLine = function(opts) {
 	me.x = d3.time.scale.utc()
 	.range([0, (me.width - (me.margin.left + me.margin.right))],.25);
 
-	// var extent = d3.extent(fullDataSet, function(d) { return d.date; });
 	var extent = d3.extent(fullDataSet.map(function (d) {
-            return d[me.xAttribute];
-        }));
+		return d[me.xAttribute];
+	}));
 
 	me.x.domain(d3.extent(fullDataSet, function(d) { return d[me.xAttribute]; }));
 
@@ -160,7 +155,6 @@ charts.LineChart.prototype.drawLine = function(opts) {
 		return "rotate(-60)";
 	});
 
-	//$(this.element[0]).height(310 + $(this.element[0]).find('g.x')[0].getBoundingClientRect().height);
 	$(this.element[0]).children('svg').height(280 + $(this.element[0]).find('g.x')[0].getBoundingClientRect().height);
 
 	me.y = d3.scale.linear().range([(me.height - (me.margin.top + me.margin.bottom)), 0]);
