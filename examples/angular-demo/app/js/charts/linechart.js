@@ -20,19 +20,10 @@ charts.LineChart = function (rootElement, selector, opts) {
 	this.element = d3.select(rootElement).select(selector);
 
 	this.xAttribute = opts.x;
-	//this.xLabel = opts.xLabel || this.determineXLabel();
 	this.yAttribute = opts.y;
-	//this.yLabel = opts.yLabel || this.determineYLabel();
 	this.margin = $.extend({}, charts.LineChart.DEFAULT_MARGIN, opts.margin || {});
 
 	this.categories = [];
-
-	/*this.viewboxXMin = 0;
-	this.viewboxYMin = 0;
-	this.viewboxXMax = 618;
-	this.viewboxYMax = 270;*/
-
-	//this.style = $.extend({}, charts.LineChart.DEFAULT_STYLE, opts.style);
 
 	if (opts.responsive) {
 		this.redrawOnResize();
@@ -114,11 +105,9 @@ charts.LineChart.prototype.drawChart = function() {
 	me.height = me.determineHeight(me.element);
 	me.width = me.determineWidth(me.element);
 
-	//me.x = d3.time.scale().range([0, me.width]);
-
 	me.svg = me.element.append("svg")
-		.attr("width", me.width)// + me.margin.left + me.margin.right)
-		.attr("height", me.height) //+ me.margin.top + me.margin.bottom)
+		.attr("width", me.width)
+		.attr("height", me.height)
 	.append("g")
 		.attr("transform", "translate(" + me.margin.left + "," + me.margin.top + ")");
 };
@@ -138,20 +127,36 @@ charts.LineChart.prototype.drawLine = function(opts) {
 		fullDataSet = fullDataSet.concat(opts[i].data);
 	}
 
-	me.categories = me.createCategories(fullDataSet);
+	me.x = d3.time.scale.utc()
+	.range([0, (me.width - (me.margin.left + me.margin.right))],.25);
 
-	me.x =  d3.scale.ordinal()
-		.domain(me.categories)
-		.rangePoints([0, (me.width - (me.margin.left + me.margin.right))],.25);
+	var extent = d3.extent(fullDataSet.map(function (d) {
+		return d[me.xAttribute];
+	}));
+
+	me.x.domain(d3.extent(fullDataSet, function(d) { return d[me.xAttribute]; }));
 
 	var xAxis = d3.svg.axis()
 		.scale(me.x)
-		.orient("bottom");
+		.orient("bottom")
+		.ticks(Math.round(me.width/100));
+		//.tickFormat(d3.time.format("%b %d, %Y"))
+		// .ticks(d3.time.days, 1);
 
-	me.svg.append("g")
+	var xAxisElement = me.svg.append("g")
 		.attr("class", "x axis")
 		.attr("transform", "translate(0," + (me.height - (me.margin.top + me.margin.bottom)) + ")")
 		.call(xAxis);
+
+	// xAxisElement.selectAll("text")
+	// .style("text-anchor", "end")
+	// .attr("dx", "-.8em")
+	// .attr("dy", ".15em")
+	// .attr("transform", function(d) {
+	// 	return "rotate(-60)";
+	// });
+
+	$(this.element[0]).children('svg').height(280 + $(this.element[0]).find('g.x')[0].getBoundingClientRect().height);
 
 	me.y = d3.scale.linear().range([(me.height - (me.margin.top + me.margin.bottom)), 0]);
 
@@ -178,10 +183,18 @@ charts.LineChart.prototype.drawLine = function(opts) {
 		cls = (opts[i].classString ? " " + opts[i].classString : "");
 		data = opts[i].data;
 
+		me.x.ticks().map(function(bucket) {
+			return _.find(data, {date: bucket}) || {date: bucket, value: 0};
+		});
+
+		data.forEach(function(d) {
+			d.date = d[me.xAttribute];
+		});
+
 		data = data.sort(function(a,b) {
-			if(a[me.xAttribute] < b[me.xAttribute]) {
+			if(a.date < b.date) {
 				return -1;
-			} else if(a[me.xAttribute] === b[me.xAttribute]) {
+			} else if(a.date === b.date) {
 				return 0;
 			} else {
 				return 1;
@@ -189,8 +202,7 @@ charts.LineChart.prototype.drawLine = function(opts) {
 		});
 
 		line = d3.svg.line()
-		.x(function(d) {
-			return me.x(d[me.xAttribute]); })
+		.x(function(d) { return me.x(d.date); })
 		.y(function(d) { return me.y(d[me.yAttribute]); });
 
 		me.svg.append("path")
@@ -204,7 +216,7 @@ charts.LineChart.prototype.drawLine = function(opts) {
 	          .enter().append("circle")
 	            .attr("class", "dot" + cls)
 	            .attr("r", 4)
-	            .attr("cx", function(d) { return me.x(d[me.xAttribute]); })
+	            .attr("cx", function(d) { return me.x(d.date); })
 	            .attr("cy", function(d) { return me.y(d[me.yAttribute]); });
 	    }
 	}
