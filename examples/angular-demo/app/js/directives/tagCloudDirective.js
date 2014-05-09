@@ -57,7 +57,7 @@ angular.module('tagCloudDirective', []).directive('tagCloud', ['ConnectionServic
 
                     // setup tag cloud color/size changes
                     $.fn.tagcloud.defaults = {
-                        size: {start: 14, end: 26, unit: 'pt'},
+                        size: {start: 130, end: 250, unit: '%'},
                         color: {start: '#aaaaaa', end: '#2f9f3e'}
                     };
 

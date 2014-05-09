@@ -165,6 +165,47 @@ a:focus{
 		width: 1430px;
 	}
 }
+@media (min-width: 1860px) {
+	.container {
+		width: 1830px;
+	}
+	.col-xxl-1{
+		width: 8.33333333%;
+	}
+	.col-xxl-2{
+		width: 16.66666667%;
+	}
+	.col-xxl-3{
+		width: 25%;
+	}
+	.col-xxl-4{
+		width: 33.33333333%;
+	}
+	.col-xxl-5{
+		width: 41.66666667%;
+	}
+	.col-xxl-6{
+		width: 50%;
+	}
+	.col-xxl-7{
+		width: 58.33333333%;
+	}
+	.col-xxl-8{
+		width: 66.66666667%;
+	}
+	.col-xxl-9{
+		width: 75%;
+	}
+	.col-xxl-10{
+		width: 83.33333333%;
+	}
+	.col-xxl-11{
+		width: 91.66666667%;
+	}
+	.col-xxl-12{
+		width: 100%;
+	}
+}
 
 /* ================
 	BUTTONS

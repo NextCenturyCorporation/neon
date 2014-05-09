@@ -39,3 +39,9 @@
 	color: #333333 !important;
 	text-decoration: none;
 }
+
+@media (min-width: 1860px) {
+	.tagcloud {
+		font-size: 12px;
+	}
+}
