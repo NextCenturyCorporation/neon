@@ -46,6 +46,7 @@ angular.module('tagCloudDirective', []).directive('tagCloud', ['ConnectionServic
                     $scope.filterTags = [];
                     $scope.showFilter = false;
                     $scope.$watchCollection('filterTags', $scope.setTagFilter);
+                    $scope.andTags = true;
 
                     // Setup our messenger.
                     $scope.messenger = new neon.eventing.Messenger();
@@ -57,7 +58,7 @@ angular.module('tagCloudDirective', []).directive('tagCloud', ['ConnectionServic
 
                     // setup tag cloud color/size changes
                     $.fn.tagcloud.defaults = {
-                        size: {start: 14, end: 26, unit: 'pt'},
+                        size: {start: 130, end: 250, unit: '%'},
                         color: {start: '#aaaaaa', end: '#2f9f3e'}
                     };
 
@@ -115,7 +116,14 @@ angular.module('tagCloudDirective', []).directive('tagCloud', ['ConnectionServic
                  * @method updateTagData
                  */
                 $scope.updateTagData = function (tagCounts) {
-                    $scope.data = tagCounts;
+
+                    if($scope.andTags)
+                        $scope.data = tagCounts.filter(function(elem) {
+                            return $scope.filterTags.indexOf(elem.tag) == -1;
+                        });
+                    else
+                        $scope.data = tagCounts;
+
                     // style the tags after they are displayed
                     $timeout(function () {
                         element.find('.tag').tagcloud();
@@ -160,7 +168,10 @@ angular.module('tagCloudDirective', []).directive('tagCloud', ['ConnectionServic
                     var filterClauses = tagNames.map(function(tagName) {
                         return neon.query.where($scope.tagField, "=", tagName);
                     });
-                    var filterClause = filterClauses.length > 1 ? neon.query.or.apply(neon.query, filterClauses) : filterClauses[0];
+                    if($scope.andTags)
+                        var filterClause = filterClauses.length > 1 ? neon.query.and.apply(neon.query, filterClauses) : filterClauses[0];
+                    else
+                        var filterClause = filterClauses.length > 1 ? neon.query.or.apply(neon.query, filterClauses) : filterClauses[0];
                     return new neon.query.Filter().selectFrom($scope.databaseName, $scope.tableName).where(filterClause);
                 };
 
@@ -208,6 +219,13 @@ angular.module('tagCloudDirective', []).directive('tagCloud', ['ConnectionServic
                 $scope.removeFilter = function(tagName) {
                     $scope.filterTags = _.without($scope.filterTags, tagName)
                 };
+
+                // Toggle the points and clusters view when the user toggles between them.
+                $scope.$watch('andTags', function (newVal, oldVal) {
+                    if (newVal !== oldVal) {
+                        $scope.setTagFilter($scope.filterTags);
+                    }
+                });
 
                 // Wait for neon to be ready, the create our messenger and intialize the view and data.
                 neon.ready(function () {
