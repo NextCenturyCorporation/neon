@@ -86,11 +86,11 @@ angular.module('tagCloudDirective', []).directive('tagCloud', ['ConnectionServic
                     $scope.tableName = message.table;
                     // check if the field was passed in, otherwise check the mapping. if neither is found leave it empty
                     $scope.tagField = $scope.tagField || connectionService.getFieldMapping($scope.databaseName, $scope.tableName, "tags").mapping || '';
-                    $scope.queryForTags();
+                    $scope.clearTagFilters();
                 };
 
                 /**
-                 * Triggers a Neon query that will aggregate the most popular tags in the tag cloud
+                 * Triggers a query that will aggregate the most popular tags in the tag cloud
                  * @method queryForTags
                  */
                 $scope.queryForTags = function () {
@@ -108,8 +108,7 @@ angular.module('tagCloudDirective', []).directive('tagCloud', ['ConnectionServic
                 };
 
                 /**
-                 * Updates the data bound to the tag cloud managed by this directive.  This will trigger a change in
-                 * the chart's visualization.
+                 * Updates the the tag cloud visualization.
                  * @param {Array} tagCounts An array of objects with "tag" and "count" properties for the tag
                  * name and number of occurrences.
                  * @method updateTagData
@@ -128,7 +127,7 @@ angular.module('tagCloudDirective', []).directive('tagCloud', ['ConnectionServic
                  * @method addTagFilter
                  */
                 $scope.addTagFilter = function(tagName) {
-                    if ($scope.filterTags.indexOf(tagName) == -1) {
+                    if ($scope.filterTags.indexOf(tagName) === -1) {
                         var tags = $scope.filterTags.slice(0);
                         tags.push(tagName);
                         $scope.setTagFilter(tags);
@@ -136,7 +135,7 @@ angular.module('tagCloudDirective', []).directive('tagCloud', ['ConnectionServic
                 };
 
                 /**
-                 * Changes this directive's neon filter to use the ones provided in the argument.
+                 * Changes the filter to use the ones provided in the argument.
                  * @param tags {Array} an array of tag strings, e.g., ["#lol", "#sad"]
                  * @method setTagFilter
                  */
@@ -146,7 +145,7 @@ angular.module('tagCloudDirective', []).directive('tagCloud', ['ConnectionServic
                 };
 
                 /**
-                 * Creates a neon filter select object that has a where clause that "and"s all of the tags together
+                 * Creates a filter select object that has a where clause that "or"s all of the tags together
                  * @param tagNames {Array} an array of tag strings that records must have to pass the filter
                  * @returns {Object} a neon select statement
                  * @method createFilterForTags
@@ -160,7 +159,7 @@ angular.module('tagCloudDirective', []).directive('tagCloud', ['ConnectionServic
                 };
 
                 /**
-                 * Applies the specified filter and updates the directive's state on success
+                 * Applies the specified filter and updates the visualization on success
                  * @param filter {Object} the neon filter to apply
                  * @param tagNames {Array} this must be the array of tag names that corresponds to the filter
                  * @method applyFilter
@@ -181,7 +180,7 @@ angular.module('tagCloudDirective', []).directive('tagCloud', ['ConnectionServic
                 };
 
                 /**
-                 * Removes the neon filter for this directive and updates this object's internal state.
+                 * Removes the filter and updates.
                  * @method clearTagFilters
                  */
                 $scope.clearTagFilters = function() {
@@ -199,7 +198,7 @@ angular.module('tagCloudDirective', []).directive('tagCloud', ['ConnectionServic
                 };
 
                 /**
-                 * Remove a particular tag from the neon filter and update the internal state.
+                 * Remove a particular tag from the filter and update.
                  * @param tagName {String} the tag to remove from the filter, e.g., "#lol"
                  * @method removeFilter
                  */
