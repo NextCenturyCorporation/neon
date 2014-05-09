@@ -40,6 +40,7 @@ linechart.directive('linechart', ['ConnectionService', function(connectionServic
 		$scope.totalType = /*$scope.totalType ||*/ 'count';
 		$scope.fields = [];
 		$scope.xAxisSelect = $scope.fields[0] ? $scope.fields[0] : '';
+		$scope.chart = undefined;
 
 		var COUNT_FIELD_NAME = 'Count';
 
@@ -203,7 +204,11 @@ linechart.directive('linechart', ['ConnectionService', function(connectionServic
 			}
 
 			var opts = {"x": xAxis, "y": yAxis, responsive: true};
-			charts.LineChart.destroy(el[0], '.linechart');
+
+			// Destroy the old chart and rebuild it.
+			if ($scope.chart) {
+				$scope.chart.destroy();	
+			}
 			$scope.chart = new charts.LineChart(el[0], '.linechart', opts);
 			$scope.chart.drawChart();
 		};

@@ -41,6 +41,7 @@ barchart.directive('barchart', ['ConnectionService', '$timeout', function(connec
 		$scope.fields = [];
 		$scope.xAxisSelect = $scope.fields[0] ? $scope.fields[0] : '';
         $scope.initializing = false;
+        $scope.chart = undefined;
 
 		var COUNT_FIELD_NAME = 'Count';
 		var clientId;
@@ -124,7 +125,10 @@ barchart.directive('barchart', ['ConnectionService', '$timeout', function(connec
 		};
 
 		var doDrawChart = function(data) {
-			charts.BarChart.destroy(el[0], '.barchart');
+			// Destroy the old chart and rebuild it.
+			if ($scope.chart) {
+				$scope.chart.destroy();	
+			}
 
 			var xAxis = connectionService.getFieldMapping($scope.database, $scope.tableName, "bar-x-axis");
 			    xAxis = $scope.attrX || xAxis.mapping;
@@ -138,7 +142,7 @@ barchart.directive('barchart', ['ConnectionService', '$timeout', function(connec
 			}
 
 			var opts = { "data": data.data, "x": xAxis, "y": yAxis, responsive: true, height: 250};
-			var chart = new charts.BarChart(el[0], '.barchart', opts).draw();
+			$scope.chart = new charts.BarChart(el[0], '.barchart', opts).draw();
 		};
 
 		neon.ready(function () {

@@ -240,8 +240,7 @@ charts.LineChart.prototype.redrawOnResize = function () {
 
 };
 
-charts.LineChart.destroy = function(el, selector) {
-	var element = d3.select(el).select(selector);
+charts.LineChart.prototype.destroy = function() {
 	$(window).off('resize', this.resizeHandler);
-	$(element[0]).empty();
+	$(this.element[0]).empty();
 };
