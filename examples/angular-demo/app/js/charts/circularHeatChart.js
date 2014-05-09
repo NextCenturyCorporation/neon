@@ -65,7 +65,7 @@ function circularHeatChart(element, configuration) {
                 .append("text")
                 .append("textPath")
                 .attr("xlink:href", function(d, i) {return "#radial-label-path-"+id+"-"+i;})
-                .style("font-size", 0.6 * segmentHeight + 'px')
+                .style("font-size", 0.5 * segmentHeight + 'px')
                 .text(function(d) {return d;});
 
             //Segment labels
@@ -87,7 +87,7 @@ function circularHeatChart(element, configuration) {
                 .append("textPath")
                 .attr("xlink:href", "#segment-label-path-"+id)
                 .attr("startOffset", function(d, i) {return i * 100 / numSegments + "%";})
-                .style("font-size", 0.7 * segmentHeight + 'px')
+                .style("font-size", 0.5 * segmentHeight + 'px')
                 .text(function(d) {return d;});
         });
 

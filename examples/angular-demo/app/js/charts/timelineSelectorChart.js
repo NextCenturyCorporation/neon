@@ -130,7 +130,7 @@ charts.TimelineSelectorChart = function (element, configuration) {
 
         // If brush extent has been cleared, reset mask positions
         if (extentWidth == "0" || extentWidth === undefined) {
-            brush.find('.mask-west').attr('x', -2000);
+            brush.find('.mask-west').attr('x', -2050);
             brush.find('.mask-east').attr('x', brush[0].getBoundingClientRect().width);
         } else {
             // Otherwise, update mask positions to new extent location
@@ -265,7 +265,7 @@ charts.TimelineSelectorChart = function (element, configuration) {
             .attr("class", "mask mask-east");
 
         gBrush.append("rect")
-            .attr("x", -2000)
+            .attr("x", -2050)
             .attr("y", -6)
             .attr("width", 2000)
             .attr("height", this.config.height + 7)

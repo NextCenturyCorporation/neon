@@ -15,7 +15,7 @@
 .line {
   fill: none;
   stroke: steelblue;
-  stroke-width: 2px;
+  stroke-width: 3px;
 }
 
 .line.positiveLine {
@@ -23,5 +23,18 @@
 }
 
 .line.negativeLine {
+  stroke: #C2360D;
+}
+
+.linechart .dot{
+    stroke: #39b54a;
+    stroke-width: 3px;
+    fill: #FFFFFF;
+}
+.dot.positiveLine {
+  stroke: #39b54a;
+}
+
+.dot.negativeLine {
   stroke: #C2360D;
 }
