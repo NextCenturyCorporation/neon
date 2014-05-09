@@ -45,6 +45,7 @@ angular.module('tagCloudDirective', []).directive('tagCloud', ['ConnectionServic
                     $scope.filterKey = neon.widget.getInstanceId("tagcloud");
                     $scope.filterTags = [];
                     $scope.showFilter = false;
+                    $scope.$watchCollection('filterTags', $scope.setTagFilter);
 
                     // Setup our messenger.
                     $scope.messenger = new neon.eventing.Messenger();
@@ -86,11 +87,11 @@ angular.module('tagCloudDirective', []).directive('tagCloud', ['ConnectionServic
                     $scope.tableName = message.table;
                     // check if the field was passed in, otherwise check the mapping. if neither is found leave it empty
                     $scope.tagField = $scope.tagField || connectionService.getFieldMapping($scope.databaseName, $scope.tableName, "tags").mapping || '';
-                    $scope.queryForTags();
+                    $scope.clearTagFilters();
                 };
 
                 /**
-                 * Triggers a Neon query that will aggregate the most popular tags in the tag cloud
+                 * Triggers a query that will aggregate the most popular tags in the tag cloud
                  * @method queryForTags
                  */
                 $scope.queryForTags = function () {
@@ -108,16 +109,13 @@ angular.module('tagCloudDirective', []).directive('tagCloud', ['ConnectionServic
                 };
 
                 /**
-                 * Updates the data bound to the tag cloud managed by this directive.  This will trigger a change in
-                 * the chart's visualization.
+                 * Updates the the tag cloud visualization.
                  * @param {Array} tagCounts An array of objects with "tag" and "count" properties for the tag
                  * name and number of occurrences.
                  * @method updateTagData
                  */
                 $scope.updateTagData = function (tagCounts) {
-                    $scope.data = tagCounts.filter(function(elem) {
-                        return $scope.filterTags.indexOf(elem.tag) == -1;
-                    });
+                    $scope.data = tagCounts;
                     // style the tags after they are displayed
                     $timeout(function () {
                         element.find('.tag').tagcloud();
@@ -130,25 +128,30 @@ angular.module('tagCloudDirective', []).directive('tagCloud', ['ConnectionServic
                  * @method addTagFilter
                  */
                 $scope.addTagFilter = function(tagName) {
-                    if ($scope.filterTags.indexOf(tagName) == -1) {
-                        var tags = $scope.filterTags.slice(0);
-                        tags.push(tagName);
-                        $scope.setTagFilter(tags);
+                    if ($scope.filterTags.indexOf(tagName) === -1) {
+                        $scope.filterTags.push(tagName);
                     }
                 };
 
                 /**
-                 * Changes this directive's neon filter to use the ones provided in the argument.
-                 * @param tags {Array} an array of tag strings, e.g., ["#lol", "#sad"]
+                 * Changes the filter to use the ones provided in the first argument.
+                 * @param tagNames {Array} an array of tag strings, e.g., ["#lol", "#sad"]
+                 * @param oldTagNames {Array} the old array of tag names
                  * @method setTagFilter
                  */
-                $scope.setTagFilter = function(tags) {
-                    var tagFilter = $scope.createFilterForTags(tags);
-                    $scope.applyFilter(tagFilter, tags);
+                $scope.setTagFilter = function(tagNames, oldTagNames) {
+                    if (tagNames !== oldTagNames) {
+                        if (tagNames.length > 0) {
+                            var tagFilter = $scope.createFilterForTags(tagNames);
+                            $scope.applyFilter(tagFilter);
+                        } else {
+                            $scope.clearTagFilters();
+                        }
+                    }
                 };
 
                 /**
-                 * Creates a neon filter select object that has a where clause that "and"s all of the tags together
+                 * Creates a filter select object that has a where clause that "or"s all of the tags together
                  * @param tagNames {Array} an array of tag strings that records must have to pass the filter
                  * @returns {Object} a neon select statement
                  * @method createFilterForTags
@@ -157,23 +160,21 @@ angular.module('tagCloudDirective', []).directive('tagCloud', ['ConnectionServic
                     var filterClauses = tagNames.map(function(tagName) {
                         return neon.query.where($scope.tagField, "=", tagName);
                     });
-                    var filterClause = filterClauses.length > 1 ? neon.query.and.apply(neon.query, filterClauses) : filterClauses[0];
+                    var filterClause = filterClauses.length > 1 ? neon.query.or.apply(neon.query, filterClauses) : filterClauses[0];
                     return new neon.query.Filter().selectFrom($scope.databaseName, $scope.tableName).where(filterClause);
                 };
 
                 /**
-                 * Applies the specified filter and updates the directive's state on success
+                 * Applies the specified filter and updates the visualization on success
                  * @param filter {Object} the neon filter to apply
-                 * @param tagNames {Array} this must be the array of tag names that corresponds to the filter
                  * @method applyFilter
                  */
-                $scope.applyFilter = function(filter, tagNames) {
+                $scope.applyFilter = function(filter) {
                     $scope.messenger.replaceFilter($scope.filterKey, filter, function () {
                         $scope.$apply(function () {
                             $scope.queryForTags();
                             // Show the Clear Filter button.
                             $scope.showFilter = true;
-                            $scope.filterTags = tagNames;
                             $scope.error = "";
                         });
                     }, function () {
@@ -183,14 +184,13 @@ angular.module('tagCloudDirective', []).directive('tagCloud', ['ConnectionServic
                 };
 
                 /**
-                 * Removes the neon filter for this directive and updates this object's internal state.
+                 * Removes the filter and updates.
                  * @method clearTagFilters
                  */
                 $scope.clearTagFilters = function() {
                     $scope.messenger.removeFilter($scope.filterKey, function () {
                         $scope.$apply(function () {
                             $scope.showFilter = false;
-                            $scope.filterTags = [];
                             $scope.error = "";
                             $scope.queryForTags();
                         });
@@ -201,17 +201,12 @@ angular.module('tagCloudDirective', []).directive('tagCloud', ['ConnectionServic
                 };
 
                 /**
-                 * Remove a particular tag from the neon filter and update the internal state.
+                 * Remove a particular tag from the filter and update.
                  * @param tagName {String} the tag to remove from the filter, e.g., "#lol"
                  * @method removeFilter
                  */
                 $scope.removeFilter = function(tagName) {
-                    var tags = _.without($scope.filterTags, tagName)
-                    if (tags.length > 0) {
-                        $scope.setTagFilter(tags);
-                    } else {
-                        $scope.clearTagFilters();
-                    }
+                    $scope.filterTags = _.without($scope.filterTags, tagName)
                 };
 
                 // Wait for neon to be ready, the create our messenger and intialize the view and data.
