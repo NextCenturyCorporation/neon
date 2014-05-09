@@ -115,9 +115,7 @@ angular.module('tagCloudDirective', []).directive('tagCloud', ['ConnectionServic
                  * @method updateTagData
                  */
                 $scope.updateTagData = function (tagCounts) {
-                    $scope.data = tagCounts.filter(function(elem) {
-                        return $scope.filterTags.indexOf(elem.tag) == -1;
-                    });
+                    $scope.data = tagCounts;
                     // style the tags after they are displayed
                     $timeout(function () {
                         element.find('.tag').tagcloud();
@@ -157,7 +155,7 @@ angular.module('tagCloudDirective', []).directive('tagCloud', ['ConnectionServic
                     var filterClauses = tagNames.map(function(tagName) {
                         return neon.query.where($scope.tagField, "=", tagName);
                     });
-                    var filterClause = filterClauses.length > 1 ? neon.query.and.apply(neon.query, filterClauses) : filterClauses[0];
+                    var filterClause = filterClauses.length > 1 ? neon.query.or.apply(neon.query, filterClauses) : filterClauses[0];
                     return new neon.query.Filter().selectFrom($scope.databaseName, $scope.tableName).where(filterClause);
                 };
 
