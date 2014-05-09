@@ -69,6 +69,17 @@ linechart.directive('linechart', ['ConnectionService', function(connectionServic
 					$scope.queryForData();
 				}
 			});
+
+			// Detect if anything in the digest cycle altered our visibility and redraw our chart if necessary.
+			// Note, this supports the angular hide method and would need to be augmented to catch
+			// any other hiding mechanisms.
+			$scope.$watch(function() {
+				return $(el).hasClass('ng-hide');
+			}, function(hidden) {
+				if (!hidden && $scope.chart) {
+					$scope.chart.redraw();
+				}
+			});
 		};
 
 		/**

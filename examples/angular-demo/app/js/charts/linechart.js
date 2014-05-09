@@ -223,14 +223,19 @@ charts.LineChart.prototype.drawLine = function(opts) {
 	}
 };
 
+charts.LineChart.prototype.redraw = function() {
+	var me = this;
+	me.drawChart();
+	if(me.data) {
+		me.drawLine(me.data);
+	}
+};
+
 charts.LineChart.prototype.redrawOnResize = function () {
 	var me = this;
 
 	function drawChart() {
-		me.drawChart();
-		if(me.data) {
-			me.drawLine(me.data);
-		}
+		me.redraw();
 	}
 
 	// Debounce is needed because browser resizes fire this resize even multiple times.
