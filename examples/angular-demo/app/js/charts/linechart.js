@@ -33,7 +33,7 @@ charts.LineChart = function (rootElement, selector, opts) {
 
 charts.LineChart.DEFAULT_HEIGHT = 250;
 charts.LineChart.DEFAULT_WIDTH = 600;
-charts.LineChart.DEFAULT_MARGIN = {top: 20, bottom: 30, left: 35, right: 20};
+charts.LineChart.DEFAULT_MARGIN = {top: 20, bottom: 20, left: 35, right: 20};
 charts.LineChart.DEFAULT_STYLE = {};
 
 
@@ -156,7 +156,7 @@ charts.LineChart.prototype.drawLine = function(opts) {
 	// 	return "rotate(-60)";
 	// });
 
-	$(this.element[0]).children('svg').height(this.height - this.margin.bottom + $(this.element[0]).find('g.x')[0].getBoundingClientRect().height);
+	//$(this.element[0]).children('svg').height(this.height - this.margin.bottom + $(this.element[0]).find('g.x')[0].getBoundingClientRect().height);
 
 	me.y = d3.scale.linear().range([(me.height - (me.margin.top + me.margin.bottom)), 0]);
 
