@@ -137,7 +137,7 @@ barchart.directive('barchart', ['ConnectionService', '$timeout', function(connec
 				yAxis = COUNT_FIELD_NAME;
 			}
 
-			var opts = { "data": data.data, "x": xAxis, "y": yAxis, responsive: true, height: 300};
+			var opts = { "data": data.data, "x": xAxis, "y": yAxis, responsive: true, height: 250};
 			var chart = new charts.BarChart(el[0], '.barchart', opts).draw();
 		};
 

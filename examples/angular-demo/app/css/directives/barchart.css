@@ -75,7 +75,7 @@ svg .tick {
 .chart-div {
     margin: auto;
     display: block;
-    min-height: 308px;
+    min-height: 250px;
 }
 
 .error-text {
