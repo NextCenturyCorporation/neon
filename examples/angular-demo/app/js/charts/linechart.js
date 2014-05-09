@@ -27,13 +27,6 @@ charts.LineChart = function (rootElement, selector, opts) {
 
 	this.categories = [];
 
-	/*this.viewboxXMin = 0;
-	this.viewboxYMin = 0;
-	this.viewboxXMax = 618;
-	this.viewboxYMax = 270;*/
-
-	//this.style = $.extend({}, charts.LineChart.DEFAULT_STYLE, opts.style);
-
 	if (opts.responsive) {
 		this.redrawOnResize();
 	}
@@ -135,20 +128,24 @@ charts.LineChart.prototype.drawLine = function(opts) {
 	var fullDataSet = [];
 	//get list of all data
 	for(var i = 0; i < opts.length; i++) {
-		fullDataSet = fullDataSet.concat(opts[i]);
+		fullDataSet = fullDataSet.concat(opts[i].data);
 	}
 
 	me.x = d3.time.scale.utc()
 	.range([0, (me.width - (me.margin.left + me.margin.right))],.25);
 
-	var extent = d3.extent(fullDataSet, function(d) { return d.date; });
+	// var extent = d3.extent(fullDataSet, function(d) { return d.date; });
+	var extent = d3.extent(fullDataSet.map(function (d) {
+            return d[me.xAttribute];
+        }));
 
-	me.x.domain(d3.extent(fullDataSet, function(d) { return d.date; }));
+	me.x.domain(d3.extent(fullDataSet, function(d) { return d[me.xAttribute]; }));
 
 	var xAxis = d3.svg.axis()
 		.scale(me.x)
 		.orient("bottom")
-		.ticks(d3.time.day);
+		//.tickFormat(d3.time.format("%b %d, %Y"))
+		// .ticks(d3.time.days, 1);
 
 	var xAxisElement = me.svg.append("g")
 		.attr("class", "x axis")
@@ -191,7 +188,6 @@ charts.LineChart.prototype.drawLine = function(opts) {
 		cls = (opts[i].classString ? " " + opts[i].classString : "");
 		data = opts[i].data;
 
-		console.log(me.x.ticks());
 		me.x.ticks().map(function(bucket) {
 			return _.find(data, {date: bucket}) || {date: bucket, value: 0};
 		});
@@ -199,11 +195,6 @@ charts.LineChart.prototype.drawLine = function(opts) {
 		data.forEach(function(d) {
 			d.date = d[me.xAttribute];
 		});
-
-		console.log(data[0].date);
-		console.log(typeof(data[0].date));
-
-		console.log(me.x(new Date(data[0].date)));
 
 		data = data.sort(function(a,b) {
 			if(a.date < b.date) {
