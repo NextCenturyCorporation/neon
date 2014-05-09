@@ -46,7 +46,10 @@ services.factory('ConnectionService', ['$filter',
 							name: "longitude",
 							mapping: "longitude"
 						}, {
-							name: "x-axis",
+							name: "line-x-axis",
+							mapping: "time"
+						}, {
+							name: "bar-x-axis",
 							mapping: "time"
 						}, {
 							name: "y-axis",
@@ -73,17 +76,20 @@ services.factory('ConnectionService', ['$filter',
 							name: "longitude",
 							mapping: "longitude"
 						}, {
-							name: "x-axis",
+							name: "line-x-axis",
+							mapping: "yyyy-mm-dd"
+						}, {
+							name: "bar-x-axis",
 							mapping: "yyyy-mm"
 						}, {
 							name: "y-axis",
 							mapping: "sentiment"
 						}, {
 							name: "color-by",
-							mapping: "sentiment"
+							mapping: "sentimentType"
 						},{
 							name: "size-by",
-							mapping: "retweet_count"
+							mapping: "sentiment"
 						},{
 							name: "sort-by",
 							mapping: "created_at"

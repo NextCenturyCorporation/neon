@@ -90,7 +90,7 @@ linechart.directive('linechart', ['ConnectionService', function(connectionServic
 		};
 
 		var query = function(comparator, comparisionValue, callback) {
-			var xAxis = connectionService.getFieldMapping($scope.database, $scope.tableName, "x-axis");
+			var xAxis = connectionService.getFieldMapping($scope.database, $scope.tableName, "line-x-axis");
 				xAxis = xAxis.mapping;
 			var yAxis = connectionService.getFieldMapping($scope.database, $scope.tableName, "y-axis")
 				yAxis = yAxis.mapping;
@@ -114,7 +114,7 @@ linechart.directive('linechart', ['ConnectionService', function(connectionServic
 		};
 
 		$scope.queryForData = function() {
-			var xAxis = connectionService.getFieldMapping($scope.database, $scope.tableName, "x-axis");
+			var xAxis = connectionService.getFieldMapping($scope.database, $scope.tableName, "line-x-axis");
 				xAxis = xAxis.mapping;
 			var yAxis = connectionService.getFieldMapping($scope.database, $scope.tableName, "y-axis")
 				yAxis = yAxis.mapping;
@@ -194,7 +194,7 @@ linechart.directive('linechart', ['ConnectionService', function(connectionServic
 		}
 
 		var drawChart = function() {
-			var xAxis = connectionService.getFieldMapping($scope.database, $scope.tableName, "x-axis");
+			var xAxis = connectionService.getFieldMapping($scope.database, $scope.tableName, "line-x-axis");
 			xAxis = xAxis.mapping;
 			var yAxis = connectionService.getFieldMapping($scope.database, $scope.tableName, "y-axis")
 			yAxis = yAxis.mapping;

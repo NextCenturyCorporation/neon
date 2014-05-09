@@ -139,6 +139,7 @@ charts.LineChart.prototype.drawLine = function(opts) {
 	var xAxis = d3.svg.axis()
 		.scale(me.x)
 		.orient("bottom")
+		.ticks(Math.round(me.width/100));
 		//.tickFormat(d3.time.format("%b %d, %Y"))
 		// .ticks(d3.time.days, 1);
 
@@ -147,13 +148,13 @@ charts.LineChart.prototype.drawLine = function(opts) {
 		.attr("transform", "translate(0," + (me.height - (me.margin.top + me.margin.bottom)) + ")")
 		.call(xAxis);
 
-	xAxisElement.selectAll("text")
-	.style("text-anchor", "end")
-	.attr("dx", "-.8em")
-	.attr("dy", ".15em")
-	.attr("transform", function(d) {
-		return "rotate(-60)";
-	});
+	// xAxisElement.selectAll("text")
+	// .style("text-anchor", "end")
+	// .attr("dx", "-.8em")
+	// .attr("dy", ".15em")
+	// .attr("transform", function(d) {
+	// 	return "rotate(-60)";
+	// });
 
 	$(this.element[0]).children('svg').height(280 + $(this.element[0]).find('g.x')[0].getBoundingClientRect().height);
 

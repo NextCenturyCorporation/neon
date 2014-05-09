@@ -87,7 +87,7 @@ barchart.directive('barchart', ['ConnectionService', '$timeout', function(connec
 		};
 
 		$scope.queryForData = function() {
-			var xAxis = connectionService.getFieldMapping($scope.database, $scope.tableName, "x-axis");
+			var xAxis = connectionService.getFieldMapping($scope.database, $scope.tableName, "bar-x-axis");
 			    xAxis = $scope.attrX || xAxis.mapping;
 			var yAxis = connectionService.getFieldMapping($scope.database, $scope.tableName, "y-axis")
 			    yAxis = $scope.attrY || yAxis.mapping;
@@ -126,7 +126,7 @@ barchart.directive('barchart', ['ConnectionService', '$timeout', function(connec
 		var doDrawChart = function(data) {
 			charts.BarChart.destroy(el[0], '.barchart');
 
-			var xAxis = connectionService.getFieldMapping($scope.database, $scope.tableName, "x-axis");
+			var xAxis = connectionService.getFieldMapping($scope.database, $scope.tableName, "bar-x-axis");
 			    xAxis = $scope.attrX || xAxis.mapping;
 			var yAxis = connectionService.getFieldMapping($scope.database, $scope.tableName, "y-axis")
 			    yAxis = $scope.attrY || yAxis.mapping;
