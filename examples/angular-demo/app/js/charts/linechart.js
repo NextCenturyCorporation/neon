@@ -135,20 +135,10 @@ charts.LineChart.prototype.drawLine = function(opts) {
 	var fullDataSet = [];
 	//get list of all data
 	for(var i = 0; i < opts.length; i++) {
-		fullDataSet = fullDataSet.concat(opts[i].data);
+		fullDataSet = fullDataSet.concat(opts[i]);
 	}
 
-	//me.categories = me.createCategories(fullDataSet);
-	var parseDate = d3.time.format("%Y-%m-%d").parse;
-
-	fullDataSet.forEach(function(d) {
-		d.date = parseDate(d[me.xAttribute]);
-	});
-
-	/*me.x =  d3.scale.ordinal()
-		.domain(me.categories)
-		.rangePoints([0, (me.width - (me.margin.left + me.margin.right))],.25);*/
-	me.x = d3.time.scale()
+	me.x = d3.time.scale.utc()
 	.range([0, (me.width - (me.margin.left + me.margin.right))],.25);
 
 	var extent = d3.extent(fullDataSet, function(d) { return d.date; });
@@ -207,13 +197,18 @@ charts.LineChart.prototype.drawLine = function(opts) {
 		});
 
 		data.forEach(function(d) {
-			d.date = parseDate(d[me.xAttribute]);
+			d.date = d[me.xAttribute];
 		});
 
+		console.log(data[0].date);
+		console.log(typeof(data[0].date));
+
+		console.log(me.x(new Date(data[0].date)));
+
 		data = data.sort(function(a,b) {
-			if(a[me.xAttribute] < b[me.xAttribute]) {
+			if(a.date < b.date) {
 				return -1;
-			} else if(a[me.xAttribute] === b[me.xAttribute]) {
+			} else if(a.date === b.date) {
 				return 0;
 			} else {
 				return 1;
