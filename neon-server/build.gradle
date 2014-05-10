@@ -220,10 +220,11 @@ test {
     systemProperties props
 }
 
-jacocoTestReport {
+jacocoFullTestReport {
     description = "Generates the neon Jacoco test coverage report"
     group = JavaBasePlugin.VERIFICATION_GROUP
     dependsOn integrationTest
+
     executionData = files("$buildDir/jacoco/integrationTest.exec", "$buildDir/jacoco/test.exec")
     classDirectories = files(sourceSets.main.output.classesDir)
     sourceDirectories = files(sourceSets.main.output.classesDir)
