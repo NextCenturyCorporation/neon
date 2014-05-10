@@ -153,6 +153,7 @@ war {
 }
 
 task watch(type: com.ncc.common.GruntTask) {
+    description = "Wrapper around grunt's watch task to rebuild javascript files if any change"
     background = true
     gruntArgs "watch", "--outfile=${jsOutputFile}"
 }
@@ -213,12 +214,15 @@ jettyRun {
 }
 
 test {
+    description = "Runs the neon unit tests"
     def props = [:]
     props['unit.test'] = true
     systemProperties props
 }
 
-task jacocoFullTestReport(type: JacocoReport) {
+jacocoTestReport {
+    description = "Generates the neon Jacoco test coverage report"
+    group = JavaBasePlugin.VERIFICATION_GROUP
     dependsOn integrationTest
     executionData = files("$buildDir/jacoco/integrationTest.exec", "$buildDir/jacoco/test.exec")
     classDirectories = files(sourceSets.main.output.classesDir)
@@ -228,6 +232,7 @@ task jacocoFullTestReport(type: JacocoReport) {
 // helper functions for generating data for the tests. this is used by several of the gradle files that configure the tests
 
 task generateMongoJson {
+    description = "Generates json files with mongo specific constructs that are used for validating mongo test results"
     def outputDir = "${testDataDir}/mongo-json"
     inputs.files { testDataInputFileTree }
     outputs.dir { outputDir }
@@ -238,6 +243,7 @@ task generateMongoJson {
 }
 
 task generateSharkJson {
+    description = "Generates json files with shark specific constructs that are used for validating shark test results"
     def outputDir = "${testDataDir}/shark-json"
     inputs.files { testDataInputFileTree }
     outputs.dir { outputDir }
@@ -247,6 +253,7 @@ task generateSharkJson {
 }
 
 task generateSharkCSV {
+    description = "Generates csv files for inserting test data into shark"
     def outputDir = "${testDataDir}/shark-csv"
     def inputFile = new File(testDataDir, 'data.json')
     inputs.file { inputFile }

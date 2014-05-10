@@ -27,6 +27,7 @@ dependencies {
 }
 
 task generateMongoDatabaseMetadata(type: org.gradle.api.tasks.JavaExec) {
+    description = "Runs a script to generate metadata for a mongo database/collection"
     main = "com.ncc.neon.metadata.store.script.MongoColumnMetadataScript"
     args = [checkAndGetProperty("metadataDatabase"),
             checkAndGetProperty("metadataTable"),
@@ -34,6 +35,11 @@ task generateMongoDatabaseMetadata(type: org.gradle.api.tasks.JavaExec) {
             checkAndGetProperty("metadataHost"),
             checkAndGetProperty("metadataPort")].findAll()
     classpath = sourceSets.main.runtimeClasspath
+}
+
+jacocoTestReport {
+    description = "Generates the metadata Jacoco test coverage report"
+    group = JavaBasePlugin.VERIFICATION_GROUP
 }
 
 private String checkAndGetProperty(String property) {

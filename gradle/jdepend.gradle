@@ -29,3 +29,12 @@ jdependMain.doLast {
     }
 }
 
+// configure jdepend tasks to be in the correct task group
+sourceSets.each { sourceSet ->
+    def name = sourceSet.name
+    // this set should only have one element for each source set
+    def jdependTasks = project.getTasksByName("jdepend${name.capitalize()}", false)
+    jdependTasks.each { task ->
+        task.group = JavaBasePlugin.VERIFICATION_GROUP
+    }
+}

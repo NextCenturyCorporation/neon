@@ -35,7 +35,7 @@ project.ext {
 
 task('deployToTomcat', type: Copy) {
     dependsOn war
-    description = "Copies the project's war file to the neon server tomcat webapps dir"
+    description = "Copies neon's war file to the neon server tomcat webapps dir"
     group = DEPLOY_GROUP
 
     doFirst {
@@ -67,7 +67,7 @@ remotes {
 
 task 'remoteTomcatDeploy'(type: SshTask) {
     dependsOn war
-    description = "Copies the project's war file to the neon server tomcat webapps dir on a remote serer"
+    description = "Copies the neon war file to the neon server tomcat webapps dir on a remote serer"
     group = DEPLOY_GROUP
     doFirst {
         validateNeonServer()
