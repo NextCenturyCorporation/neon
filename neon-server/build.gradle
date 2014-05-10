@@ -220,7 +220,7 @@ test {
     systemProperties props
 }
 
-jacocoFullTestReport {
+task jacocoFullTestReport(type: JacocoReport) {
     description = "Generates the neon Jacoco test coverage report"
     group = JavaBasePlugin.VERIFICATION_GROUP
     dependsOn integrationTest

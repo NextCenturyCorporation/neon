@@ -37,11 +37,6 @@ task generateMongoDatabaseMetadata(type: org.gradle.api.tasks.JavaExec) {
     classpath = sourceSets.main.runtimeClasspath
 }
 
-jacocoTestReport {
-    description = "Generates the metadata Jacoco test coverage report"
-    group = JavaBasePlugin.VERIFICATION_GROUP
-}
-
 private String checkAndGetProperty(String property) {
     return project.hasProperty(property) ? project.getProperty(property) : null
 }
