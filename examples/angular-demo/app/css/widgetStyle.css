@@ -8,6 +8,9 @@ body{
 	margin: 0;
 	padding-bottom: 0;
 }
+.well-blank{
+	padding: 30px 30px 0;
+}
 .container{
 	max-width: none;
 	width: auto;
@@ -15,7 +18,7 @@ body{
 
 /* Circular heat chart */
 .circularheatchart svg {
-	max-width: 500px;
+	max-width: 400px;
 }
 
 /* Data Selector */
@@ -123,4 +126,15 @@ body{
 /* View Data tray */
 .query-results-grid{
 	height: 210px;
+}
+
+/* Timeline selector */
+.timeline-selector{
+	margin: 0;
+}
+.timeline-selector .btn-group{
+	margin-top: 0;
+}
+.timeline-selector-chart .brush .mask{
+	fill: #FFFFFF;
 }
