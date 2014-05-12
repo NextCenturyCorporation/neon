@@ -24,7 +24,7 @@ databaseConfig.directive('databaseConfig', ['ConnectionService', function (conne
                 datastoreSelect: "mongo",
                 hostnameInput: "localhost",
                 selectedDb: "mydb",
-                selectedTable: "gbSmall"
+                selectedTable: "gbDate"
             }
         ];
 

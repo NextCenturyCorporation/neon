@@ -65,7 +65,7 @@ services.factory('ConnectionService', ['$filter',
 							mapping: "time"
 						}]
 					},{
-						name: "gbSmall",
+						name: "gbDate",
 						fields: [{
 							name: "date",
 							mapping: "created_at"
