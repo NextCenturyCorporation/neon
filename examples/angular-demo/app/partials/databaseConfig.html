@@ -37,7 +37,9 @@
 			<div class="modal-body">
 
         <div class="row">
+
           <div class="col-md-6">
+
             <div class="form-group">
               <label for="datastore-select">Datastore Type</label>
               <select id="datastore-select" class="form-control" ng-model="datastoreSelect">
@@ -45,34 +47,35 @@
       					<option value="hive">Hive</option>
       				</select>
             </div>
+
+            <div class="form-group">
+              <label for="database-select">Database Name</label>
+              <select id="database-select" class="form-control" ng-change="selectDatabase()" ng-model="selectedDb" ng-options="db for db in databases" ng-disabled="!(isConnected)">
+                <option value="">Select Database</option>
+              </select>
+            </div>
+
           </div>
+
           <div class="col-md-6">
+
             <div class="form-group">
               <label for="hostname-input">Datastore Host Name</label>
               <div class="input-group">
-              	<input class="form-control" type="text" id="hostname-input" ng-model="hostnameInput" />
+                <input class="form-control" type="text" id="hostname-input" ng-model="hostnameInput" />
                 <span class="input-group-btn">
                   <button class="btn btn-default" id="datastore-button" ng-click="connectToDatastore()">Continue</button>
                 </span>
               </div>
             </div>
-          </div>
-        </div>
-        <div class="row">
-          <div class="col-md-6">
-            <div class="form-group">
-              <label for="database-select">Database Name</label>
-              <select id="database-select" class="form-control" ng-change="selectDatabase()" ng-model="selectedDb" ng-options="db for db in databases" ng-disabled="!(isConnected)">
-      					<option value="">Select Database</option>
-      				</select>
-            </div>
-          </div>
-          <div class="col-md-6">
+
             <div class="form-group">
               <label for="table-select">Table Name</label>
               <select id="table-select" class="form-control" ng-model="selectedTable" ng-disabled="!(dbTables.length > 0)" ng-options="table for table in dbTables"></select>
             </div>
+
           </div>
+
         </div>
 
 			</div>
