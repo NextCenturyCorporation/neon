@@ -77,7 +77,15 @@ barchart.directive('stackedbarchart', ['ConnectionService', function(connectionS
 		var onDatasetChanged = function(message) {
 			$scope.databaseName = message.database;
 			$scope.tableName = message.table;
-            $scope.queryForData();
+
+            // if there is no active connection, try to make one.
+			connectionService.connectToDataset(message.datastore, message.hostname, message.database);
+
+			// Pull data.
+			var connection = connectionService.getActiveConnection();
+			if (connection) {
+				$scope.queryForData();
+			}
 
         };
 

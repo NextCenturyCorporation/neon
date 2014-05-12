@@ -133,6 +133,12 @@ angular.module('circularHeatFormDirective', []).directive('circularHeatForm', ['
 
 				// if there is no active connection, try to make one.
 				connectionService.connectToDataset(message.datastore, message.hostname, message.database);
+
+				// Pull data.
+				var connection = connectionService.getActiveConnection();
+				if (connection) {
+					$scope.queryForChartData();
+				}
 			};
 
 			/**
