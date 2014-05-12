@@ -91,7 +91,7 @@ body{
 	visibility: hidden;
 }
 .databaseConfig .modal .modal-body{
-	padding-bottom: 10px;
+	padding-bottom: 5px;
 }
 .databaseConfig .modal .modal-footer{
 	border: 0;
@@ -101,6 +101,16 @@ body{
 }
 .databaseConfig .modal .modal-footer .btn-default{
 	display: none;
+}
+@media (min-width: 1200px) {
+	.databaseConfig .form-group {
+		float: left;
+		width: 50%;
+		padding: 0 15px;
+	}
+	.databaseConfig .col-md-6 {
+		padding: 0;
+	}
 }
 
 /* Filter Builder tray */
@@ -121,11 +131,6 @@ body{
 }
 .tray .panel-body{
 	padding-bottom: 0;
-}
-
-/* View Data tray */
-.query-results-grid{
-	height: 210px;
 }
 
 /* Timeline selector */
