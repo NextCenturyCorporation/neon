@@ -99,6 +99,9 @@ linechart.directive('linechart', ['ConnectionService', function(connectionServic
 		var onDatasetChanged = function(message) {
 			$scope.databaseName = message.database;
 			$scope.tableName = message.table;
+
+			// if there is no active connection, try to make one.
+			connectionService.connectToDataset(message.datastore, message.hostname, message.database);
 		};
 
 		var query = function(comparator, comparisionValue, callback) {

@@ -131,19 +131,8 @@ angular.module('circularHeatFormDirective', []).directive('circularHeatForm', ['
 				$scope.databaseName = message.database;
 				$scope.tableName = message.table;
 
-				// if there is no active connection, make one.
-				var connection = connectionService.getActiveConnection();
-				if (!connection && message.database && message.table) {
-					connection = new neon.query.Connection();
-					connection.connect(message.datastore, message.hostname);
-					connection.use(message.database);
-
-					connectionService.setActiveConnection(connection);
-				}
-				// Query for data only if we have a connection.
-				if (connection) {
-                	$scope.queryForChartData();
-                }
+				// if there is no active connection, try to make one.
+				connectionService.connectToDataset(message.datastore, message.hostname, message.database);
 			};
 
 			/**
