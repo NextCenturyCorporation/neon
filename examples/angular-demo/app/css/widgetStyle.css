@@ -7,6 +7,10 @@ body{
 	border: 0;
 	margin: 0;
 }
+.container{
+	max-width: none;
+	width: auto;
+}
 
 /* Circular heat chart */
 .circularheatchart svg {
@@ -14,7 +18,7 @@ body{
 }
 
 /* Data Selector */
-.modal-open{
+.databaseConfig .modal-open{
 	overflow: auto;
 }
 .databaseConfig .database-overlay{
@@ -93,4 +97,23 @@ body{
 }
 .databaseConfig .modal .modal-footer .btn-default{
 	display: none;
+}
+
+/* Filter Builder */
+.tray {
+	position: relative;
+	display: block;
+	top: auto;
+	background-color: #FFFFFF;
+	border: 0;
+	box-shadow: none;
+}
+.filter-tray .filter{
+	background-color: #f1f1f1;
+}
+.filter-tray .filter-new {
+	background: none;
+}
+.tray .panel-body{
+	padding-bottom: 0;
 }
