@@ -65,6 +65,36 @@ services.factory('ConnectionService', ['$filter',
 							mapping: "time"
 						}]
 					},{
+						name: "most_active",
+						fields: [{
+							name: "date",
+							mapping: "created_at"
+						}, {
+							name: "latitude",
+							mapping: "latitude"
+						}, {
+							name: "longitude",
+							mapping: "longitude"
+						}, {
+							name: "line-x-axis",
+							mapping: "user_id"
+						}, {
+							name: "bar-x-axis",
+							mapping: "user_id"
+						}, {
+							name: "y-axis",
+							mapping: "sentiment"
+						}, {
+							name: "color-by",
+							mapping: "sentimentType"
+						},{
+							name: "size-by",
+							mapping: "sentiment"
+						},{
+							name: "sort-by",
+							mapping: "created_at"
+						}]
+					},{
 						name: "gbDate",
 						fields: [{
 							name: "date",
