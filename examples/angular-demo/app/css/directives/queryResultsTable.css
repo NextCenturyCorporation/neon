@@ -62,3 +62,25 @@
 .query-results-grid .slick-header .slick-sortable-placeholder{
 	background: #cccccc;
 }
+
+@media (max-width: 767px) {
+	.data-tray h4.pull-left{
+		float: none;
+	}
+	.data-tray .form-inline .form-group {
+		display: inline-block;
+		margin-bottom: 0;
+		vertical-align: middle;
+	}
+	.data-tray .form-inline .form-input-group{
+		margin-bottom: 15px;
+	}
+	.data-tray .form-inline .form-control {
+		display: inline-block;
+		width: auto;
+		vertical-align: middle;
+	}
+	.data-tray .input-group .form-control {
+		width: 100%;
+	}
+}
