@@ -64,12 +64,19 @@ angular.module('filterBuilderDirective', []).directive('filterBuilder', ['Connec
 				$scope.databaseName = message.database;
 				$scope.tableName = message.table;
 
-				connectionService.getActiveConnection().getFieldNames($scope.tableName, function(results) {
-				    $scope.$apply(function() {
-				        populateFieldNames(results);
-				        $scope.selectedField = results[0];
-				    });
-				});
+				// if there is no active connection, try to make one.
+				connectionService.connectToDataset(message.datastore, message.hostname, message.database);
+
+				// Query for data only if we have an active connection.
+				var connection = connectionService.getActiveConnection();
+				if (connection) {
+                	connection.getFieldNames($scope.tableName, function(results) {
+					    $scope.$apply(function() {
+					        populateFieldNames(results);
+					        $scope.selectedField = results[0];
+					    });
+					});
+                }
 			};
 
 			/** 

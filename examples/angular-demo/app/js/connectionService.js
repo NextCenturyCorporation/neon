@@ -65,6 +65,36 @@ services.factory('ConnectionService', ['$filter',
 							mapping: "time"
 						}]
 					},{
+						name: "most_active",
+						fields: [{
+							name: "date",
+							mapping: "created_at"
+						}, {
+							name: "latitude",
+							mapping: "latitude"
+						}, {
+							name: "longitude",
+							mapping: "longitude"
+						}, {
+							name: "line-x-axis",
+							mapping: "user_id"
+						}, {
+							name: "bar-x-axis",
+							mapping: "user_id"
+						}, {
+							name: "y-axis",
+							mapping: "sentiment"
+						}, {
+							name: "color-by",
+							mapping: "sentimentType"
+						},{
+							name: "size-by",
+							mapping: "sentiment"
+						},{
+							name: "sort-by",
+							mapping: "created_at"
+						}]
+					},{
 						name: "gbDate",
 						fields: [{
 							name: "date",
@@ -102,6 +132,27 @@ services.factory('ConnectionService', ['$filter',
 		];
 
 		var service = {};
+
+		/** 
+		 * Establish a Neon connection to a particular datset.
+		 * @param {String} databaseType 
+		 * @param {String} host
+		 * @param {String} database
+		 */
+		service.connectToDataset = function(databaseType, host, database) {
+			if (!activeConnection) {
+				activeConnection = new neon.query.Connection();
+			} 
+			
+			// Connect to the specified server.
+			if (databaseType && host) {
+				activeConnection.connect(databaseType, host);
+			}
+
+			// Use the given database if present.  If datbase is undefined, this will
+			// will be passed along, clearing out the table database field.
+			activeConnection.use(database);
+		};
 
 		/**
 		 * Sets the active connection.  Any client code can ask for the active connection rather than creating a new one.

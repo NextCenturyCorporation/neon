@@ -88,7 +88,13 @@ angular.module('tagCloudDirective', []).directive('tagCloud', ['ConnectionServic
                     $scope.tableName = message.table;
                     // check if the field was passed in, otherwise check the mapping. if neither is found leave it empty
                     $scope.tagField = $scope.tagField || connectionService.getFieldMapping($scope.databaseName, $scope.tableName, "tags").mapping || '';
+
+                    // if there is no active connection, try to make one.
+                    connectionService.connectToDataset(message.datastore, message.hostname, message.database);
+
+                    // Pull data.
                     $scope.clearTagFilters();
+                    
                 };
 
                 /**

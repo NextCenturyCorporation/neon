@@ -91,9 +91,17 @@ barchart.directive('barchart', ['ConnectionService', '$timeout', function(connec
             $scope.initializing = true;
 			$scope.databaseName = message.database;
 			$scope.tableName = message.table;
+
+			// if there is no active connection, try to make one.
+			connectionService.connectToDataset(message.datastore, message.hostname, message.database);
+
+			// Pull data.
+			var connection = connectionService.getActiveConnection();
             $timeout(function() {
                 $scope.initializing = false;
-                $scope.queryForData();
+                if (connection) {
+                	$scope.queryForData();
+                }
             });
 
 		};
