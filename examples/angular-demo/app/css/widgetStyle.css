@@ -26,10 +26,19 @@ body{
 }
 .circularheatchart{
 	height: calc(100% - 82px);
+	min-height: 150px;
 }
 .circularheatchart svg {
 	max-width: 100%;
 	max-height: 100%;
+	min-width: 150px;
+	min-height: 150px;
+}
+@media (max-width: 650px) {
+	.circularheatform h4{
+		font-size: 14px;
+		margin-bottom: 15px;
+	}
 }
 
 /* Data Selector */
@@ -179,6 +188,14 @@ body{
 }
 
 /* Timeline selector */
+.timeline-selector,
+.timeline-selector .well{
+	height: 100%;
+}
+.timeline-selector-chart{
+	height: calc(100% - 71px);
+	min-height: 50px;
+}
 .timeline-selector{
 	margin: 0;
 }
@@ -188,6 +205,19 @@ body{
 .timeline-selector-chart .brush .mask{
 	fill: #FFFFFF;
 }
+.timeline-selector-chart .axis path {
+    stroke: #FFFFFF;
+}
+@media (max-width: 891px) {
+	.timeline-selector h3 {
+		font-size: 20px;
+	}
+}
+@media (max-width: 767px) {
+	.timeline-selector h3 {
+		font-size: 17px;
+	}
+}
 
 /* Heat map */
 .heat-map{
@@ -195,4 +225,6 @@ body{
 }
 .heat-map .olMap {
 	height: calc(100% - 74px) !important;
+	min-height: 120px;
+	min-width: 120px;
 }

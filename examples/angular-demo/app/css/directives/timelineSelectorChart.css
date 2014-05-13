@@ -17,6 +17,8 @@
 .timeline-selector-chart {
 	margin: 5px -15px 0;
 	display:block;
+  min-height: 40px;
+  height: 70px;
 }
 .timeline-selector-chart svg {
 	font: 10px sans-serif;
@@ -65,7 +67,6 @@
 
 .timeline-selector-chart .tick text{
   fill: #777777;
-  font-size: 0.9em;
 }
 .timeline-selector-chart .brush .mask{
   fill: #f1f1f1;
@@ -79,7 +80,7 @@
   fill-opacity: 0.3;
 }
 
-@media (max-width: 500px) {
+/*@media (max-width: 500px) {
   .timeline-selector-chart {
     margin-left: -4px;
     margin-right: -4px;
@@ -135,4 +136,4 @@
   .timeline-selector-chart .tick text{
     font-size: 0.65em;
   }
-}
+}*/
