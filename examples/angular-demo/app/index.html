@@ -154,7 +154,9 @@
                                 <div class="legend" ng-hide="chartType != 'bar'">
                                     <div class="legend-item">
                                         <span class="legend-icon" style="background-color: #39b54a"></span>
-                                        <span class="legend-text">{{yAxisField}} {{barType}}</span>
+                                        <span class="legend-text" ng-show="barType === 'avg'">Average {{yAxisField}}</span>
+                                        <span class="legend-text" ng-show="barType === 'sum'">{{yAxisField}}</span>
+                                        <span class="legend-text" ng-show="barType === 'count'">Count</span>
                                     </div>
                                 </div>
 
