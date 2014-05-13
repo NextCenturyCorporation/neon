@@ -17,15 +17,6 @@
 		<link href="css/style.css" rel="stylesheet">
 
 		<!-- Directive styles -->
-		<link rel="stylesheet" type="text/css" href="css/directives/circularHeatChart.css">
-		<link rel="stylesheet" type="text/css" href="css/directives/barchart.css">
-		<link rel="stylesheet" type="text/css" href="css/directives/linechart.css">
-		<link rel="stylesheet" type="text/css" href="css/directives/stackedBarChart.css">
-		<link rel="stylesheet" type="text/css" href="css/directives/timelineSelector.css">
-		<link rel="stylesheet" type="text/css" href="css/directives/timelineSelectorChart.css">
-		<link rel="stylesheet" type="text/css" href="css/directives/heatMap.css">
-		<link rel="stylesheet" type="text/css" href="css/directives/queryResultsTable.css">
-		<link rel="stylesheet" type="text/css" href="css/directives/tagCloud.css">
 
 		<!-- Special widget styles -->
 		<link rel="stylesheet" type="text/css" href="css/widgetStyle.css">
@@ -51,57 +42,67 @@
         <script src="lib/owf/owf-widget-debug.js"></script>
 		<script src="/neon/js/neon.js"></script>
 		
-
 		<script src="lib/jquery/jquery-1.11.0.min.js"></script>
 		<script src="lib/angular/angular.min.js"></script>
 
 		<!-- Include third party libs -->
 		<script src="lib/d3/d3.v3.min.js"></script>
-
-		<script src="lib/openlayers/OpenLayers.js"></script>
-		<script src="lib/openlayers/heatmap/heatmap.js"></script>
-		<script src="lib/openlayers/heatmap/heatmap-openlayers.js"></script>
-		<script src="lib/jquery.tagcloud.js"></script>
-		<script src="lib/jquery/jquery.event.drag-2.2.js"></script>
-		<script src="lib/jquery/jquery.event.drop-2.2.js"></script>
-		<!-- <script src="lib/jquery/jquery-ui-1.8.16.custom.min.js"></script> -->
-		<script src="lib/jquery/jquery-ui-1.10.4.min.js"></script>
-		<script src="lib/slickgrid/slick.core.js"></script>
-		<script src="lib/slickgrid/slick.grid.js"></script>
-		<script src="lib/slickgrid/slick.dataview.js"></script>
-		<script src="lib/mergesort/merge-sort.js"></script>
-		<script src="lib/slickgrid/plugins/slick.autotooltips.js"></script>
-		<script src="lib/slickgrid/plugins/slick.rowselectionmodel.js"></script>
 		<script src="lib/bootstrap/bootstrap.min.js"></script>
 
 		<!-- Include required non-angular support modules -->
         <script src="js/neon-extensions/filtertable.js"></script>
 		<script src="js/namespaces.js"></script>
-		<script src="js/charts/barchart.js"></script>
-		<script src="js/charts/linechart.js"></script>
-		<script src="js/charts/timelineSelectorChart.js"></script>
-		<script src="js/coremap/coremap.js"></script>
 		<script src="js/tables/table.js"></script>
 
-		<!-- Include our custom Angular components here for now. -->
-		<script src="js/app.js"></script>
+		<!-- Setup our widget's OWF handlers and trigger the angular code -->
+		<script type="text/javascript">
+			// -----------------------------------
+			// Initialize the close handlers. 
+			// -----------------------------------
+
+			OWF.ready(function () {	
+
+				// -----------------------------------
+			    // Hide the body when the widget is not visible.
+			    // -----------------------------------
+			    var widgetState = Ozone.state.WidgetState.getInstance({
+			        onStateEventReceived: function(sender, msg) {
+			            var event = msg.eventName;
+
+			            if(event === 'activate' || event === 'show') {
+			                $(document.body).show();
+			            }
+			            else if(event === 'hide') {
+			                $(document.body).hide();
+			            }
+			        }
+			    });
+
+			    // listen for  activate and hide events so that we can
+			    // hide our body.  Some browsers, specifically Chrome, continues
+			    // to render iframes with elments that use specific webkit transforms
+			    // even when they are hidden.  This impact many Map packages and some
+			    // SVG packages.  The work around for this is to hide our widget body
+			    // on hide events.
+			    widgetState.addStateEventListeners({
+			        events: ['activate', 'hide', 'show']
+			    });
+			    
+			    OWF.notifyWidgetReady();
+			});
+
+			var neonDemo = angular.module('neonDemo', [
+				'neonDemo.controllers',
+				'neonDemo.services',
+				'filterBuilderDirective'
+			]);
+
+		</script>
+
 		<script src="js/connectionService.js"></script>
 		<script src="js/filterCountService.js"></script>
 		<script src="js/neonDemoController.js"></script>
 
-		<script src="js/directives/databaseConfigDirective.js"></script>
 		<script src="js/directives/filterBuilderDirective.js"></script>
-		<script src="js/charts/circularHeatChart.js"></script>
-		<script src="js/directives/circularHeatChart.js"></script>
-		<script src="js/directives/circularHeatForm.js"></script>
-		<script src="js/directives/timelineSelectorChart.js"></script>
-		<script src="js/directives/timelineSelector.js"></script>
-		<script src="js/directives/barchartDirective.js"></script>
-		<script src="js/directives/stackedBarchartDirective.js"></script>
-		<script src="js/directives/linechartDirective.js"></script>
-		<script src="js/directives/fieldSelector.js"></script>
-		<script src="js/directives/heatMap.js"></script>
-		<script src="js/directives/queryResultsTable.js"></script>
-		<script src="js/directives/tagCloudDirective.js"></script>
 	</body>
 </html>
