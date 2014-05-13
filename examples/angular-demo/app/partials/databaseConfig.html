@@ -48,13 +48,6 @@
       				</select>
             </div>
 
-            <div class="form-group">
-              <label for="database-select">Database Name</label>
-              <select id="database-select" class="form-control" ng-change="selectDatabase()" ng-model="selectedDb" ng-options="db for db in databases" ng-disabled="!(isConnected)">
-                <option value="">Select Database</option>
-              </select>
-            </div>
-
           </div>
 
           <div class="col-md-6">
@@ -68,6 +61,25 @@
                 </span>
               </div>
             </div>
+
+          </div>
+
+        </div>
+
+        <div class="row">
+
+          <div class="col-md-6">
+
+            <div class="form-group">
+              <label for="database-select">Database Name</label>
+              <select id="database-select" class="form-control" ng-change="selectDatabase()" ng-model="selectedDb" ng-options="db for db in databases" ng-disabled="!(isConnected)">
+                <option value="">Select Database</option>
+              </select>
+            </div>
+
+          </div>
+
+          <div class="col-md-6">
 
             <div class="form-group">
               <label for="table-select">Table Name</label>

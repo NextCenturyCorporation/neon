@@ -62,3 +62,51 @@
 .query-results-grid .slick-header .slick-sortable-placeholder{
 	background: #cccccc;
 }
+
+@media (max-width: 767px) {
+	.data-tray h4.pull-left,
+	.data-tray .form-inline,
+	.data-tray .form-inline .form-input-group > label{
+		float: none !important;
+	}
+	.data-tray .form-inline{
+		margin-top: 15px !important;
+		margin-bottom: 10px;
+	}
+	.data-tray .form-inline .form-group {
+		display: inline-block;
+		margin-bottom: 0;
+		vertical-align: middle;
+		width: 20%;
+	}
+	.data-tray .form-inline .form-group > label,
+	.data-tray .form-inline .form-input-group > label{
+		display: block;
+		margin-top: 0;
+		margin-left: 0;
+	}
+	.data-tray .form-inline .form-input-group{
+		width: 55%;
+		padding-right: 10px;
+	}
+	.data-tray .form-inline .form-control {
+		display: inline-block;
+		width: 100%;
+		vertical-align: middle;
+	}
+	.data-tray .input-group .form-control {
+		width: 100%;
+	}
+	.data-tray .refresh {
+		margin-top: 21px;
+	}
+}
+@media (min-width: 768px) and (max-width: 991px) {
+	.data-tray h4.pull-left,
+	.data-tray .form-inline{
+		float: none !important;
+	}
+	.data-tray .form-inline{
+		margin-bottom: 5px;
+	}
+}

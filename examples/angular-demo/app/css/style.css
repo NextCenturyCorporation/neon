@@ -403,6 +403,13 @@ a.navbar-text:focus{
 .navbar-text img{
 	margin-left: 6px;
 }
+.navbar-nav {
+	float: left;
+	margin: 0;
+}
+.navbar-nav > li {
+	float: left;
+}
 
 
 .navbar-default .navbar-nav > li > a{
@@ -439,9 +446,22 @@ a.navbar-text:focus{
 }
 
 @media (max-width: 767px) {
+	.navbar-text{
+		display: none;
+	}
 	.navbar-default .navbar-nav > li > a{
-		margin-right: 0;
-		padding: 15px 30px 12px;
+		margin-right: 30px;
+	}
+	.navbar-nav .open .dropdown-menu {
+		position: absolute;
+		float: left;
+		width: auto;
+		margin: 2px 0 0;
+		background-color: #fff;
+		border: 1px solid #ccc;
+		border: 1px solid rgba(0,0,0,.15);
+		-webkit-box-shadow: 0 6px 12px rgba(0,0,0,.175);
+		box-shadow: 0 6px 12px rgba(0,0,0,.175);
 	}
 }
 
@@ -513,6 +533,41 @@ a.navbar-text:focus{
 .filter-tray .btn-group .btn{
 	font-size: 12px;
 	line-height: 20px;
+}
+@media (min-width: 500px) and (max-width: 767px) {
+	.filter-tray .form-inline .form-control {
+		display: inline-block;
+		width: 100%;
+		vertical-align: middle;
+	}
+	/*.filter-tray .form-inline .btn-primary {
+		display: inline-block;
+		width: 100%;
+		vertical-align: middle;
+		padding-left: 0;
+		padding-right: 0;
+	}*/
+	.filter-tray .form-inline .form-group {
+		display: inline-block;
+		margin-bottom: 0;
+		vertical-align: middle;
+		width: 22%;
+		margin: 0;
+		padding-right: 5px;
+	}
+	.filter-tray .form-inline .form-group.pull-right {
+		display: inline-block;
+		margin-bottom: 0;
+		vertical-align: middle;
+		width: auto;
+	}
+}
+@media (max-width: 499px){
+	.filter-tray .filter .form-group.pull-right {
+		position: absolute;
+		right: 25px;
+		margin-top: -50px;
+	}
 }
 
 /* ================

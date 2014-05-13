@@ -42,40 +42,30 @@
 			<div class="navbar-default navbar-static-top affix">
 				<div class="container">
 
-					<button data-target=".navbar-collapse" data-toggle="collapse" class="navbar-toggle pull-left" type="button">
-						<span class="sr-only">Toggle navigation</span>
-						<span class="icon-bar"></span>
-						<span class="icon-bar"></span>
-						<span class="icon-bar"></span>
-					</button>
-
 					<a target="_blank" href="http://neonframework.org/" class="navbar-text pull-right">
 						Powered by <img class="brand-image" src="img/Neon_60x34.png"></img>
 					</a>
 
 					<div class="clearfix visible-xs"></div>
 
-					<div class="navbar-collapse collapse">
-
-						<!-- Database Config -->
-						<database-config></database-config>
-						<ul class="nav navbar-nav">
-							<li>
-								<a data-toggle="collapse" data-parent="#trays" href=".filter-tray" class="collapsed"
-									ng-click="toggleCreateFilters()">
-									<span class="glyphicon glyphicon-filter"></span>
-									Create Filters
-									<span class="label label-primary" ng-bind="filterCount" ng-class="{true: '', false: 'hidden'}[filterCount > 0]"></span>
-								</a>
-							</li>
-							<li>
-								<a data-toggle="collapse" data-parent="#trays" href=".data-tray" class="collapsed"
-								   ng-click="toggleSeeData()">
-									<span class="glyphicon glyphicon-list"></span> View Data
-								</a>
-							</li>
-						</ul>
-					</div>
+					<!-- Database Config -->
+					<database-config></database-config>
+					<ul class="nav navbar-nav">
+						<li>
+							<a data-toggle="collapse" data-parent="#trays" href=".filter-tray" class="collapsed"
+								ng-click="toggleCreateFilters()">
+								<span class="glyphicon glyphicon-filter"></span>
+								Create Filters
+								<span class="label label-primary" ng-bind="filterCount" ng-class="{true: '', false: 'hidden'}[filterCount > 0]"></span>
+							</a>
+						</li>
+						<li>
+							<a data-toggle="collapse" data-parent="#trays" href=".data-tray" class="collapsed"
+							   ng-click="toggleSeeData()">
+								<span class="glyphicon glyphicon-list"></span> View Data
+							</a>
+						</li>
+					</ul>
 				</div>
 			</div>
 		</nav>
@@ -154,7 +144,9 @@
                                 <div class="legend" ng-hide="chartType != 'bar'">
                                     <div class="legend-item">
                                         <span class="legend-icon" style="background-color: #39b54a"></span>
-                                        <span class="legend-text">{{yAxisField}} {{barType}}</span>
+                                        <span class="legend-text" ng-show="barType === 'avg'">Average {{yAxisField}}</span>
+                                        <span class="legend-text" ng-show="barType === 'sum'">{{yAxisField}}</span>
+                                        <span class="legend-text" ng-show="barType === 'count'">Count</span>
                                     </div>
                                 </div>
 
