@@ -139,13 +139,13 @@ body{
 		width: 100%;
 		vertical-align: middle;
 	}
-	.filter-tray .form-inline .btn-primary {
+	/*.filter-tray .form-inline .btn-primary {
 		display: inline-block;
 		width: 100%;
 		vertical-align: middle;
 		padding-left: 0;
 		padding-right: 0;
-	}
+	}*/
 	.filter-tray .form-inline .form-group {
 		display: inline-block;
 		margin-bottom: 0;
