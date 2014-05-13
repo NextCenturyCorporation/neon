@@ -46,12 +46,9 @@ linechart.directive('linechart', ['ConnectionService', function(connectionServic
 
 		var initialize = function() {
 
-			//drawChart();
-
 			$scope.messenger.events({
 				activeDatasetChanged: onDatasetChanged,
 				filtersChanged: onFiltersChanged
-				//selectionChanged: onSelectionChanged
 			});
 
 			$scope.$watch('attrX', function(newValue, oldValue) {
@@ -106,7 +103,7 @@ linechart.directive('linechart', ['ConnectionService', function(connectionServic
 			// Pull data.
 			var connection = connectionService.getActiveConnection();
 			if (connection) {
-				//$scope.queryForData();
+				$scope.queryForData();
 			}
 		};
 
