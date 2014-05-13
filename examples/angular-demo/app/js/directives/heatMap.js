@@ -87,6 +87,71 @@ angular.module('heatMapDirective', []).directive('heatMap', ['ConnectionService'
                     // Enable the tooltips.
                     $(element).find('label.btn-default').tooltip();
 
+                    // Setup the control watches.
+                    // Update the latitude field used by the map.
+                    $scope.$watch('latitudeField', function (newVal, oldVal) {
+                        if (newVal && newVal !== oldVal) {
+                            $scope.map.latitudeMapping = newVal;
+                            $scope.draw();
+                        }
+                    });
+
+                    // Update the longitude field used by the map.
+                    $scope.$watch('longitudeField', function (newVal, oldVal) {
+                        if (newVal && newVal !== oldVal) {
+                            $scope.map.longitudeMapping = newVal;
+                            $scope.draw();
+                        }
+                    });
+
+                    // Update the sizing field used by the map.
+                    $scope.$watch('sizeByField', function (newVal, oldVal) {
+                        if (newVal !== oldVal) {
+                            if (newVal) {
+                                $scope.map.sizeMapping = newVal;
+                            }
+                            else {
+                                $scope.map.sizeMapping = coreMap.Map.DEFAULT_SIZE_MAPPING;
+                            }
+
+                            $scope.queryForMapData();
+                        }
+                    });
+
+                    // Update the coloring field used by the map.
+                    $scope.$watch('colorByField', function (newVal, oldVal) {
+                        $scope.map.resetColorMappings();
+                        if (newVal !== oldVal) {
+                            if (newVal) {
+                                $scope.map.categoryMapping = newVal;
+                            }
+                            else {
+                                $scope.map.categoryMapping = undefined;
+                            }
+                            $scope.queryForMapData();
+                        }
+                    });
+
+                    // Toggle the points and clusters view when the user toggles between them.
+                    $scope.$watch('showPoints', function (newVal, oldVal) {
+                        if (newVal !== oldVal) {
+                            $scope.map.toggleLayers();
+                        }
+                    });
+
+                    // Handle toggling map caching.
+                    $scope.$watch('cacheMap', function (newVal, oldVal) {
+                        if (newVal !== oldVal) {
+                            if (newVal) {
+                                $scope.map.clearCache();
+                                $scope.map.toggleCaching();
+                            }
+                            else {
+                                $scope.map.toggleCaching();
+                            }
+                        }
+                    });
+
                 };
 
                 var onMoved = function (message) {
@@ -392,70 +457,6 @@ angular.module('heatMapDirective', []).directive('heatMap', ['ConnectionService'
                         $scope.error = "Error: Failed to clear filter.";
                     });
                 };
-
-                // Update the latitude field used by the map.
-                $scope.$watch('latitudeField', function (newVal, oldVal) {
-                    if (newVal && newVal !== oldVal) {
-                        $scope.map.latitudeMapping = newVal;
-                        $scope.draw();
-                    }
-                });
-
-                // Update the longitude field used by the map.
-                $scope.$watch('longitudeField', function (newVal, oldVal) {
-                    if (newVal && newVal !== oldVal) {
-                        $scope.map.longitudeMapping = newVal;
-                        $scope.draw();
-                    }
-                });
-
-                // Update the sizing field used by the map.
-                $scope.$watch('sizeByField', function (newVal, oldVal) {
-                    if (newVal !== oldVal) {
-                        if (newVal) {
-                            $scope.map.sizeMapping = newVal;
-                        }
-                        else {
-                            $scope.map.sizeMapping = coreMap.Map.DEFAULT_SIZE_MAPPING;
-                        }
-
-                        $scope.queryForMapData();
-                    }
-                });
-
-                // Update the coloring field used by the map.
-                $scope.$watch('colorByField', function (newVal, oldVal) {
-                    $scope.map.resetColorMappings();
-                    if (newVal !== oldVal) {
-                        if (newVal) {
-                            $scope.map.categoryMapping = newVal;
-                        }
-                        else {
-                            $scope.map.categoryMapping = undefined;
-                        }
-                        $scope.queryForMapData();
-                    }
-                });
-
-                // Toggle the points and clusters view when the user toggles between them.
-                $scope.$watch('showPoints', function (newVal, oldVal) {
-                    if (newVal !== oldVal) {
-                        $scope.map.toggleLayers();
-                    }
-                });
-
-                // Handle toggling map caching.
-                $scope.$watch('cacheMap', function (newVal, oldVal) {
-                    if (newVal !== oldVal) {
-                        if (newVal) {
-                            $scope.map.clearCache();
-                            $scope.map.toggleCaching();
-                        }
-                        else {
-                            $scope.map.toggleCaching();
-                        }
-                    }
-                });
 
                 // Wait for neon to be ready, the create our messenger and intialize the view and data.
                 neon.ready(function () {

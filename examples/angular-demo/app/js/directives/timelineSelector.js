@@ -305,8 +305,11 @@ angular.module('timelineSelectorDirective', []).directive('timelineSelector', ['
                  * Updates the starts/end dates based on the chart granularity
                  */
                 $scope.updateDates = function () {
-                    $scope.startDate = $scope.zeroOutDate($scope.referenceStartDate);
-                    $scope.endDate = $scope.zeroOutDate(new Date($scope.referenceEndDate.getTime() + $scope.millisMultiplier));
+                    // Updates depend on having valid reference dates which may not be the case during directive initialization
+                    if ($scope.referenceStartDate && $scope.referenceEndDate) {
+                        $scope.startDate = $scope.zeroOutDate($scope.referenceStartDate);
+                        $scope.endDate = $scope.zeroOutDate(new Date($scope.referenceEndDate.getTime() + $scope.millisMultiplier));
+                    }
                 };
 
                 /**

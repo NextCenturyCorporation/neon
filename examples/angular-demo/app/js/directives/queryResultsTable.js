@@ -181,13 +181,16 @@ angular.module('queryResultsTableDirective', []).directive('queryResultsTable', 
              */
             $scope.queryForData = function() {
                 if ($scope.showData) {
-                    var query = $scope.buildQuery();
+                    var connection = connectionService.getActiveConnection();
+                    if (connection) {
+                        var query = $scope.buildQuery();
 
-                    connectionService.getActiveConnection().executeQuery(query, function(queryResults) {
-                        $scope.$apply(function(){
-                            $scope.updateData(queryResults);
+                        connection.executeQuery(query, function(queryResults) {
+                            $scope.$apply(function(){
+                                $scope.updateData(queryResults);
+                            });
                         });
-                    });
+                    }
                 }
             };
 
