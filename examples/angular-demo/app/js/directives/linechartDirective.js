@@ -148,8 +148,8 @@ linechart.directive('linechart', ['ConnectionService', function(connectionServic
 						maxDate = posRange[1];
 					} else if(negResults.data.length > 0) {
 						negRange = d3.extent(negResults.data, function(d) { return new Date(d[xAxis])});
-						minDate = posRange[0];
-						maxDate = posRange[1];
+						minDate = negRange[0];
+						maxDate = negRange[1];
 					} else {
 						minDate = new Date();//new Date().getTime() - (1000 * 60 * 60 * 24));
 						maxDate = new Date();
@@ -218,7 +218,7 @@ linechart.directive('linechart', ['ConnectionService', function(connectionServic
 
 			// Destroy the old chart and rebuild it.
 			if ($scope.chart) {
-				$scope.chart.destroy();	
+				$scope.chart.destroy();
 			}
 			$scope.chart = new charts.LineChart(el[0], '.linechart', opts);
 			$scope.chart.drawChart();
