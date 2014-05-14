@@ -25,11 +25,12 @@ repositories {
 dependencies {
     compile 'org.json:json:20090211'
     compile 'org.mongodb:mongo-java-driver:2.11.3'
+
     // commons-daemon 1.0.3 throws a bad organisation error (directory structure and pom don't match), so use a different version
     compile 'commons-daemon:commons-daemon:1.0.5'
     compile 'joda-time:joda-time:2.1'
-
     compile 'com.mchange:c3p0:0.9.5-pre6'
+
     // these libraries are needed for the patched version of hive/shark that we use
     compile ':hive-cli:0.11.0-shark-SNAPSHOT'
     compile ':hive-common:0.11.0-shark-SNAPSHOT'

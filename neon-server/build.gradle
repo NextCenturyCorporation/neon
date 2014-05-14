@@ -62,8 +62,10 @@ project.ext {
 apply plugin: 'jetty'
 apply plugin: 'war'
 
+
 // these files need to be applied in order since there are dependencies between them
 apply from: "${rootDir}/gradle/sharedDependencies.gradle"
+apply from: "gradle/sharkDependencies.gradle"
 apply from: "${rootDir}/gradle/js.gradle"
 apply from: "gradle/integrationTest.gradle"
 apply from: "gradle/acceptanceTest.gradle"
@@ -100,39 +102,6 @@ dependencies {
         exclude module: 'groovy'
     }
     compile 'commons-lang:commons-lang:2.6'
-    compile('org.apache.hadoop:hadoop-common:2.0.0-cdh4.3.0') {
-        exclude group: 'org.mortbay.jetty'
-        exclude group: 'javax.servlet'
-        exclude group: 'javax.servlet.jsp'
-        exclude module: 'jasper-compiler'
-        exclude module: 'jasper-runtime'
-        // using log4j-over-slf4j
-        exclude module: 'log4j'
-        exclude module: 'slf4j-log4j12'
-    }
-    compile 'jline:jline:0.9.94'
-    compile 'com.googlecode.javaewah:JavaEWAH:0.3.2'
-    compile 'javolution:javolution:5.5.1'
-    compile 'com.github.stephenc.high-scale-lib:high-scale-lib:1.1.1'
-    compile 'com.yammer.metrics:metrics-core:2.1.2'
-    compile 'commons-dbcp:commons-dbcp:1.4'
-    compile 'org.datanucleus:datanucleus-api-jdo:3.2.1'
-    compile 'org.datanucleus:datanucleus-core:3.2.1'
-    compile 'org.datanucleus:datanucleus-rdbms:3.2.1'
-    compile 'javax.jdo:jdo2-api:2.3-ec'
-    compile 'org.apache.derby:derby:10.4.2.0'
-    compile('org.apache.thrift:libfb303:0.9.0') {
-        exclude group: 'javax.servlet'
-    }
-    compile 'org.apache.thrift:libthrift:0.9.0'
-    compile('org.apache.zookeeper:zookeeper:3.4.3') {
-        exclude group: 'javax.servlet'
-        // using log4j-over-slf4j
-        exclude module: 'log4j'
-        exclude module: 'slf4j-log4j12'
-
-    }
-    compile 'com.google.code.tempus-fugit:tempus-fugit:1.1'
     compile project(":metadata")
 
     providedCompile 'javax.servlet:javax.servlet-api:3.0.1'
