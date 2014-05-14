@@ -14,6 +14,9 @@ body{
 .well-blank{
 	padding: 20px 20px 0;
 }
+.well-map{
+	padding: 0;
+}
 .container{
 	max-width: none;
 	width: auto;
@@ -254,9 +257,11 @@ body{
 	height: 100%;
 }
 .heat-map .olMap {
-	height: calc(100% - 64px) !important;
+	height: calc(100% - 60px) !important;
 	min-height: 120px;
 	min-width: 120px;
+	border-radius: 0;
+	border-width: 1px 0 0;
 }
 
 /* Line chart */
