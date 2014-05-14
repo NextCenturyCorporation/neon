@@ -14,8 +14,15 @@
  *
  */
 
+.well-map{
+	padding: 0;
+}
+.well-map .chart-options .popover {
+	top: 45px;
+	right: 9px;
+}
 .heat-map .map-field-form {
-	margin-bottom: 10px;
+	padding: 15px 20px 10px;
 }
 
 .heat-map .map-field-form .filter-reset{
@@ -31,8 +38,8 @@
 .heat-map .olMap {
 	background-color: #b5d0d0;
 	border: 1px solid #bbbbbb;
-	border-radius: 2px;
-	box-shadow: 0 1px 4px rgba(154, 154, 154, 0.3);
+	border-radius: 0 0 4px 4px;
+	/*box-shadow: 0 1px 4px rgba(154, 154, 154, 0.3);*/
 }
 
 .heat-map .olControlAttribution{
