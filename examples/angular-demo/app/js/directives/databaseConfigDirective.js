@@ -9,6 +9,8 @@ databaseConfig.directive('databaseConfig', ['ConnectionService', function (conne
         $scope.hostnameInput = $scope.hostName || 'localhost';
 
         $scope.showDbTable = false;
+        $scope.selectedDb = null;
+        $scope.selectedTable = null;
         $scope.databases = [];
         $scope.dbTables = [];
         $scope.fields = [];
@@ -51,6 +53,12 @@ databaseConfig.directive('databaseConfig', ['ConnectionService', function (conne
             // Save the connection in the connection service for reuse by other directives.
             connectionService.setActiveConnection(connection);
 
+            // Clear the table names to force re-selection by the user.
+            $scope.databases = [];
+            $scope.dbTables = [];
+            $scope.selectedDb = null;
+            $scope.selectedTable = null;
+
             // Flag that we're connected for the front-end controls enable/disable code.
             $scope.isConnected = true;
 
@@ -82,17 +90,26 @@ databaseConfig.directive('databaseConfig', ['ConnectionService', function (conne
 
         var populateDatabaseDropdown = function (dbs) {
             $scope.databases = dbs;
-            //$scope.$apply();
         };
 
         $scope.selectDatabase = function () {
-            connection.use($scope.selectedDb);
-            connection.getTableNames(populateTableDropdown);
+            if ($scope.selectedDb) {
+                connection.use($scope.selectedDb);
+                connection.getTableNames(function(tables) {
+                    $scope.$apply(function() {
+                        populateTableDropdown(tables);
+                    });
+                });
+            }
+            else {
+                $scope.dbTables = [];
+            }
+
         };
 
         var populateTableDropdown = function (tables) {
+            $scope.selectedTable = null;
             $scope.dbTables = tables;
-            $scope.$apply();
         };
 
         $scope.connectToDatabase = function () {
