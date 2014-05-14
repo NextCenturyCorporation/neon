@@ -9,14 +9,18 @@ body{
 	box-shadow: none;
 	border: 0;
 	margin: 0;
-	padding-bottom: 0;
+	padding: 20px 20px 0;
 }
 .well-blank{
-	padding: 30px 30px 0;
+	padding: 20px 20px 0;
 }
 .container{
 	max-width: none;
 	width: auto;
+}
+.chart-options .popover {
+    right: 9px;
+    top: 48px;
 }
 
 /* Circular heat chart */
@@ -25,7 +29,7 @@ body{
 	height: 100%;
 }
 .circularheatchart{
-	height: calc(100% - 82px);
+	height: calc(100% - 72px);
 	min-height: 150px;
 }
 .circularheatchart svg {
@@ -143,6 +147,9 @@ body{
 	box-shadow: none;
 	margin: 0;
 }
+.tray .panel-body{
+	padding: 15px 20px;
+}
 .filter-tray .filter{
 	background-color: #f1f1f1;
 }
@@ -210,11 +217,14 @@ body{
 	height: 100%;
 }
 .timeline-selector-chart{
-	height: calc(100% - 71px);
+	height: calc(100% - 61px);
 	min-height: 50px;
 }
 .timeline-selector{
 	margin: 0;
+}
+.timeline-selector h3 {
+	margin-top: -7px;
 }
 .timeline-selector .btn-group{
 	margin-top: 0;
@@ -224,6 +234,9 @@ body{
 }
 .timeline-selector-chart .axis path {
     stroke: #FFFFFF;
+}
+.timeline-selector .filter-reset {
+	margin-top: 3px;
 }
 @media (max-width: 891px) {
 	.timeline-selector h3 {
@@ -241,7 +254,7 @@ body{
 	height: 100%;
 }
 .heat-map .olMap {
-	height: calc(100% - 74px) !important;
+	height: calc(100% - 64px) !important;
 	min-height: 120px;
 	min-width: 120px;
 }
