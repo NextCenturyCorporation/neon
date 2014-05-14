@@ -301,7 +301,7 @@ fieldset[disabled] .btn-primary.active {
 	padding: 5px 13px;
 	color: #777777;
 	color: rgba(0,0,0,0.5);
-	background-color: #e1e1e1;
+	background-color: #e9e9e9;
 }
 .filter-reset .btn:hover{
 	color: #333333;
