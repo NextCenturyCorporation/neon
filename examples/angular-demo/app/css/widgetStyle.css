@@ -258,3 +258,17 @@ body{
 	min-height: 120px;
 	min-width: 120px;
 }
+
+/* Line chart */
+.chart-well{
+	height: 100%;
+}
+.chart-well linechart{
+	display: block;
+	height: 250px;
+	height: calc(100% - 55px);
+	min-height: 75px;
+}
+.linechart{
+	height: 100%;
+}
