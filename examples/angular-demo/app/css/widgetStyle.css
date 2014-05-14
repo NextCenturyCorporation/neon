@@ -239,7 +239,10 @@ body{
     stroke: #FFFFFF;
 }
 .timeline-selector .filter-reset {
-	margin-top: 3px;
+	margin-top: 0px;
+}
+.timeline-selector .filter-reset .btn {
+	background-color: #e1e1e1;
 }
 @media (max-width: 891px) {
 	.timeline-selector h3 {
@@ -265,6 +268,10 @@ body{
 }
 .heat-map .map-field-form {
 	padding: 10px 15px 5px;
+}
+.well-map .chart-options .popover {
+    top: 38px;
+	right: 4px;
 }
 
 /* Line chart */
