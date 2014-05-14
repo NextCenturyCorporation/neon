@@ -151,7 +151,7 @@ body{
 	margin: 0;
 }
 .tray .panel-body{
-	padding: 15px 20px;
+	padding: 10px 20px;
 }
 .filter-tray .filter{
 	background-color: #f1f1f1;
@@ -257,11 +257,14 @@ body{
 	height: 100%;
 }
 .heat-map .olMap {
-	height: calc(100% - 60px) !important;
+	height: calc(100% - 50px) !important;
 	min-height: 120px;
 	min-width: 120px;
 	border-radius: 0;
 	border-width: 1px 0 0;
+}
+.heat-map .map-field-form {
+	padding: 10px 15px 5px;
 }
 
 /* Line chart */
