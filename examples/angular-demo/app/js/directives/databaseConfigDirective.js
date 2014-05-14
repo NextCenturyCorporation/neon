@@ -73,18 +73,18 @@ databaseConfig.directive('databaseConfig', ['ConnectionService', function (conne
         $scope.connectToPreset = function (server) {
             // Change name of active connection.
             $scope.activeServer = server.name;
+           
+            // Set datastore connection details and connect to the datastore.
             $scope.datastoreSelect = server.datastoreSelect;
             $scope.hostnameInput = server.hostnameInput;
-            $scope.selectedDb = server.selectedDb;
-            $scope.selectedTable = server.selectedTable;
-
-            // Set datastore connection details and connect to the datastore.
             $scope.connectToDatastore();
 
             // Set database name and get list of tables.
+            $scope.selectedDb = server.selectedDb;
             $scope.selectDatabase();
 
             // Set table name and initiate connection.
+            $scope.selectedTable = server.selectedTable;
             $scope.connectToDatabase();
         };
 
@@ -108,7 +108,6 @@ databaseConfig.directive('databaseConfig', ['ConnectionService', function (conne
         };
 
         var populateTableDropdown = function (tables) {
-            $scope.selectedTable = null;
             $scope.dbTables = tables;
         };
 
