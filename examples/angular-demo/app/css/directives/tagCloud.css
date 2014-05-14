@@ -29,6 +29,7 @@
 }
 .tagcloud{
 	text-align: center;
+	margin: -4px -8px;
 }
 .tagcloud .tag {
 	display: inline-block;
