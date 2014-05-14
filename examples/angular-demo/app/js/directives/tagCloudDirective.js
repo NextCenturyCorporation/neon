@@ -106,7 +106,7 @@ angular.module('tagCloudDirective', []).directive('tagCloud', ['ConnectionServic
                         var connection = connectionService.getActiveConnection();
                         if (connection) {
                             var host = connection.host_;
-                            var url = neon.serviceUrl('mongotagcloud', 'tagcounts', 'host=' + host + "&db=" + $scope.databaseName + "&collection=" + $scope.tableName + "&arrayfield=" + $scope.tagField + "&limit=30");
+                            var url = neon.serviceUrl('mongotagcloud', 'tagcounts', 'host=' + host + "&db=" + $scope.databaseName + "&collection=" + $scope.tableName + "&arrayfield=" + $scope.tagField + "&limit=40");
                             neon.util.ajaxUtils.doGet(url, {
                                 success: function (tagCounts) {
                                     $scope.$apply(function () {

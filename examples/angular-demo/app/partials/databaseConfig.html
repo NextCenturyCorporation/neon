@@ -83,7 +83,9 @@
 
             <div class="form-group">
               <label for="table-select">Table Name</label>
-              <select id="table-select" class="form-control" ng-model="selectedTable" ng-disabled="!(dbTables.length > 0)" ng-options="table for table in dbTables"></select>
+              <select id="table-select" class="form-control" ng-model="selectedTable" ng-disabled="!(dbTables.length > 0)" ng-options="table for table in dbTables">
+                <option value="">Select Table</option>
+              </select>
             </div>
 
           </div>
@@ -93,7 +95,9 @@
 			</div>
 			<div class="modal-footer">
 				<button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-				<button type="button" class="btn btn-primary" data-dismiss="modal" id="database-table-button" ng-click="continueClick()">Connect</button>
+				<button type="button" class="btn btn-primary" data-dismiss="modal" id="database-table-button" 
+            ng-disabled="selectedTable === null || selectedDb === null" 
+            ng-click="continueClick()">Connect</button>
 			</div>
 		</div>
 	</div>

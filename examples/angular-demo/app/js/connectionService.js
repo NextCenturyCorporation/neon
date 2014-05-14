@@ -77,7 +77,7 @@ services.factory('ConnectionService', ['$filter',
 							mapping: "longitude"
 						}, {
 							name: "line-x-axis",
-							mapping: "user_id"
+							mapping: "yyyy-mm-dd"
 						}, {
 							name: "bar-x-axis",
 							mapping: "user_id"

@@ -5,6 +5,8 @@ databaseConfig.directive('databaseConfig', ['ConnectionService', function (conne
         el.addClass('databaseConfig');
 
         $scope.showDbTable = false;
+        $scope.selectedDb = null;
+        $scope.selectedTable = null;
         $scope.databases = [];
         $scope.dbTables = [];
         $scope.fields = [];
@@ -51,6 +53,12 @@ databaseConfig.directive('databaseConfig', ['ConnectionService', function (conne
             // Save the connection in the connection service for reuse by other directives.
             connectionService.setActiveConnection($scope.connection);
 
+            // Clear the table names to force re-selection by the user.
+            $scope.databases = [];
+            $scope.dbTables = [];
+            $scope.selectedDb = null;
+            $scope.selectedTable = null;
+
             // Flag that we're connected for the front-end controls enable/disable code.
             $scope.isConnected = true;
 
@@ -65,34 +73,43 @@ databaseConfig.directive('databaseConfig', ['ConnectionService', function (conne
         $scope.connectToPreset = function (server) {
             // Change name of active connection.
             $scope.activeServer = server.name;
+           
+            // Set datastore connection details and connect to the datastore.
             $scope.datastoreSelect = server.datastoreSelect;
             $scope.hostnameInput = server.hostnameInput;
-            $scope.selectedDb = server.selectedDb;
-            $scope.selectedTable = server.selectedTable;
-
-            // Set datastore connection details and connect to the datastore.
             $scope.connectToDatastore();
 
             // Set database name and get list of tables.
+            $scope.selectedDb = server.selectedDb;
             $scope.selectDatabase();
 
             // Set table name and initiate connection.
+            $scope.selectedTable = server.selectedTable;
             $scope.connectToDatabase();
         };
 
         var populateDatabaseDropdown = function (dbs) {
             $scope.databases = dbs;
-            //$scope.$apply();
         };
 
         $scope.selectDatabase = function () {
-            $scope.connection.use($scope.selectedDb);
-            $scope.connection.getTableNames(populateTableDropdown);
+            // $scope.connection.use($scope.selectedDb);
+            // $scope.connection.getTableNames(populateTableDropdown);
+            if ($scope.selectedDb) {
+                $scope.connection.use($scope.selectedDb);
+                $scope.connection.getTableNames(function(tables) {
+                    $scope.$apply(function() {
+                        populateTableDropdown(tables);
+                    });
+                });
+            }
+            else {
+                $scope.dbTables = [];
+            }
         };
 
         var populateTableDropdown = function (tables) {
             $scope.dbTables = tables;
-            $scope.$apply();
         };
 
         $scope.connectToDatabase = function () {
