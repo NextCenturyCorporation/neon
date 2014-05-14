@@ -183,8 +183,25 @@ body{
 }
 
 /* Data tray */
+.query-results-table,
+.data-tray,
+.tray .panel-body {
+    height: 100%;
+}
 .query-results-grid {
-	height: 350px;
+	height: 300px;
+	height: calc(100% - 69px) !important;
+	min-height: 150px;
+}
+@media (min-width: 768px) and (max-width: 991px) {
+	.query-results-grid {
+		height: calc(100% - 108px) !important;
+	}
+}
+@media (max-width: 767px) {
+	.query-results-grid {
+		height: calc(100% - 140px) !important;
+	}
 }
 
 /* Timeline selector */
