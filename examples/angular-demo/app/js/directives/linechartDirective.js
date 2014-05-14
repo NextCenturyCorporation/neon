@@ -132,7 +132,21 @@ linechart.directive('linechart', ['ConnectionService', function(connectionServic
 				yAxis = yAxis.mapping;
 
 			query('>', 0, function(posResults) {
+				//this prevents an error in older mongo caused when the xAxis value is invalid as it is not
+				//included as a key in the response
+				for(var i = 0; i < posResults.data.length; i++) {
+					if(typeof(posResults.data[i][xAxis]) === 'undefined') {
+						posResults.data[i][xAxis] = null;
+					}
+				};
+
 				query('<', 0, function(negResults) {
+					for(var i = 0; i < negResults.data.length; i++) {
+						if(typeof(negResults.data[i][xAxis]) === 'undefined') {
+							negResults.data[i][xAxis] = null;
+						}
+					};
+
 					var minDate, maxDate;
 					var posRange, negRange;
 
