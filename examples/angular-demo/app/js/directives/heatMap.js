@@ -67,7 +67,7 @@ angular.module('heatMapDirective', []).directive('heatMap', ['ConnectionService'
                     $scope.mapId = uuid();
                     element.append('<div id="' + $scope.mapId + '" class="map"></div>');
                     $scope.map = new coreMap.Map($scope.mapId, {
-                        height: 400,
+                        height: 375,
                         width: "100%",
                         responsive: false,
                         onZoomRect: onZoomChanged
