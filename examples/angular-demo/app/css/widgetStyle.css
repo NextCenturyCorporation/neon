@@ -280,3 +280,15 @@ body{
 .linechart{
 	height: 100%;
 }
+
+/* Tag cloud */
+@media (max-width: 767px) {
+	.tagcloud {
+		font-size: 12px;
+	}
+}
+@media (max-width: 500px) {
+	.tagcloud {
+		font-size: 10px;
+	}
+}
