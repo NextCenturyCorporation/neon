@@ -223,24 +223,26 @@ charts.LineChart.prototype.drawLine = function(opts) {
 		.call(yAxis);
 
 	var tick = $('.linechart').find('.x.axis').find('.tick.major').first();
-    var transform = tick.attr('transform');
-    var parts  = /translate\(\s*([^\s,)]+)[ ,]([^\s,)]+)/.exec(transform);
-    var firstX = parseInt(parts[1]);
-    var threshold = (tick[0].getBBox().width/2);
+	if(tick.length != 0){
+	    var transform = tick.attr('transform');
+	    var parts  = /translate\(\s*([^\s,)]+)[ ,]([^\s,)]+)/.exec(transform);
+	    var firstX = parseInt(parts[1]);
+	    var threshold = (tick[0].getBBox().width/2);
 
-    if(firstX < threshold){
-        tick.find('text').css('text-anchor', 'start');
-    }
+	    if(firstX < threshold){
+	        tick.find('text').css('text-anchor', 'start');
+	    }
 
-   	tick = $('.linechart').find('.x.axis').find('.tick.major').last();
-    transform = tick.attr('transform');
-    parts  = /translate\(\s*([^\s,)]+)[ ,]([^\s,)]+)/.exec(transform);
-   	firstX = parseInt(parts[1]);
-    threshold = me.width - (tick[0].getBBox().width/2);
+	   	tick = $('.linechart').find('.x.axis').find('.tick.major').last();
+	    transform = tick.attr('transform');
+	    parts  = /translate\(\s*([^\s,)]+)[ ,]([^\s,)]+)/.exec(transform);
+	   	firstX = parseInt(parts[1]);
+	    threshold = me.width - (tick[0].getBBox().width/2);
 
-    if(firstX > threshold){
-        tick.find('text').css('text-anchor', 'end');
-    }
+	    if(firstX > threshold){
+	        tick.find('text').css('text-anchor', 'end');
+	    }
+	}
 };
 
 charts.LineChart.prototype.redraw = function() {
