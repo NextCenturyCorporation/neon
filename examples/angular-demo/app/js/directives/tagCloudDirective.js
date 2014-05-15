@@ -202,6 +202,7 @@ angular.module('tagCloudDirective', []).directive('tagCloud', ['ConnectionServic
                     $scope.messenger.removeFilter($scope.filterKey, function () {
                         $scope.$apply(function () {
                             $scope.showFilter = false;
+                            $scope.filterTags = [];
                             $scope.error = "";
                             $scope.queryForTags();
                         });
