@@ -33,7 +33,7 @@ charts.LineChart = function (rootElement, selector, opts) {
 
 charts.LineChart.DEFAULT_HEIGHT = 250;
 charts.LineChart.DEFAULT_WIDTH = 600;
-charts.LineChart.DEFAULT_MARGIN = {top: 20, bottom: 20, left: 35, right: 20};
+charts.LineChart.DEFAULT_MARGIN = {top: 20, bottom: 20, left: 0, right: 0};
 charts.LineChart.DEFAULT_STYLE = {};
 
 
@@ -140,42 +140,33 @@ charts.LineChart.prototype.drawLine = function(opts) {
 		.scale(me.x)
 		.orient("bottom")
 		.ticks(Math.round(me.width/100));
-		//.tickFormat(d3.time.format("%b %d, %Y"))
-		// .ticks(d3.time.days, 1);
 
 	var xAxisElement = me.svg.append("g")
 		.attr("class", "x axis")
 		.attr("transform", "translate(0," + (me.height - (me.margin.top + me.margin.bottom)) + ")")
 		.call(xAxis);
 
-	// xAxisElement.selectAll("text")
-	// .style("text-anchor", "end")
-	// .attr("dx", "-.8em")
-	// .attr("dy", ".15em")
-	// .attr("transform", function(d) {
-	// 	return "rotate(-60)";
-	// });
-
-	//$(this.element[0]).children('svg').height(this.height - this.margin.bottom + $(this.element[0]).find('g.x')[0].getBoundingClientRect().height);
-
 	me.y = d3.scale.linear().range([(me.height - (me.margin.top + me.margin.bottom)), 0]);
 
 	var yAxis = d3.svg.axis()
 		.scale(me.y)
-		.orient("left")
+		.orient("right")
 		.ticks(3);
 
 	me.y.domain([0, d3.max(fullDataSet, function(d) { return d[me.yAttribute]; })]);
 
-	me.svg.append("g")
-		.attr("class", "y axis")
-		.call(yAxis);
-	// .append("text")
-	// 	.attr("transform", "rotate(-90)")
-	// 	.attr("y", 6)
-	// 	.attr("dy", ".71em")
-	// 	.style("text-anchor", "end")
-	// 	.text(me.yAttribute);
+	var gridLines = me.svg.append("g").attr("class", "gridLines");
+
+	gridLines.selectAll("line.horizontalGrid").data(me.y.ticks(3)).enter()
+	    .append("line")
+	        .attr(
+	        {
+	            "class":"horizontalGrid",
+	            "x1" : me.margin.right,
+	            "x2" : me.width,
+	            "y1" : function(d){ return me.y(d);},
+	            "y2" : function(d){ return me.y(d);}
+	        });
 
 	var cls;
 	var data;
@@ -212,15 +203,44 @@ charts.LineChart.prototype.drawLine = function(opts) {
 		.attr("d", line);
 
 		if(data.length < 40){
+
+			var func = function(d) { return me.x(d.date); };
+			if(data.length == 1)
+				func = me.width/2;
+
 			me.svg.selectAll("dot")
 	            .data(data)
 	          .enter().append("circle")
 	            .attr("class", "dot" + cls)
 	            .attr("r", 4)
-	            .attr("cx", function(d) { return me.x(d.date); })
+	            .attr("cx", func)
 	            .attr("cy", function(d) { return me.y(d[me.yAttribute]); });
 	    }
 	}
+
+	var yAxisElement = me.svg.append("g")
+		.attr("class", "y axis")
+		.call(yAxis);
+
+	var tick = $('.linechart').find('.x.axis').find('.tick.major').first();
+    var transform = tick.attr('transform');
+    var parts  = /translate\(\s*([^\s,)]+)[ ,]([^\s,)]+)/.exec(transform);
+    var firstX = parseInt(parts[1]);
+    var threshold = (tick[0].getBBox().width/2);
+
+    if(firstX < threshold){
+        tick.find('text').css('text-anchor', 'start');
+    }
+
+   	tick = $('.linechart').find('.x.axis').find('.tick.major').last();
+    transform = tick.attr('transform');
+    parts  = /translate\(\s*([^\s,)]+)[ ,]([^\s,)]+)/.exec(transform);
+   	firstX = parseInt(parts[1]);
+    threshold = me.width - (tick[0].getBBox().width/2);
+
+    if(firstX > threshold){
+        tick.find('text').css('text-anchor', 'end');
+    }
 };
 
 charts.LineChart.prototype.redraw = function() {
