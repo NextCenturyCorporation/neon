@@ -28,8 +28,9 @@
         </div>
 
     	<div class="filter-reset" ng-repeat="tagName in filterTags">
-			<a class="btn bg-danger" ng-click="removeFilter(tagName)">
-			{{tagName}} <span class="glyphicon glyphicon-remove-circle"></span>
+			{{tagName}}
+            <a class="btn" ng-click="removeFilter(tagName)">
+			 <span class="glyphicon glyphicon-remove"></span>
 			</a>
 		</div>
     </div>
