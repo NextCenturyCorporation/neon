@@ -132,7 +132,21 @@ linechart.directive('linechart', ['ConnectionService', function(connectionServic
 				yAxis = yAxis.mapping;
 
 			query('>', 0, function(posResults) {
+				//this prevents an error in older mongo caused when the xAxis value is invalid as it is not
+				//included as a key in the response
+				for(var i = 0; i < posResults.data.length; i++) {
+					if(typeof(posResults.data[i][xAxis]) === 'undefined') {
+						posResults.data[i][xAxis] = null;
+					}
+				};
+
 				query('<', 0, function(negResults) {
+					for(var i = 0; i < negResults.data.length; i++) {
+						if(typeof(negResults.data[i][xAxis]) === 'undefined') {
+							negResults.data[i][xAxis] = null;
+						}
+					};
+
 					var minDate, maxDate;
 					var posRange, negRange;
 
@@ -148,8 +162,8 @@ linechart.directive('linechart', ['ConnectionService', function(connectionServic
 						maxDate = posRange[1];
 					} else if(negResults.data.length > 0) {
 						negRange = d3.extent(negResults.data, function(d) { return new Date(d[xAxis])});
-						minDate = posRange[0];
-						maxDate = posRange[1];
+						minDate = negRange[0];
+						maxDate = negRange[1];
 					} else {
 						minDate = new Date();//new Date().getTime() - (1000 * 60 * 60 * 24));
 						maxDate = new Date();
@@ -218,7 +232,7 @@ linechart.directive('linechart', ['ConnectionService', function(connectionServic
 
 			// Destroy the old chart and rebuild it.
 			if ($scope.chart) {
-				$scope.chart.destroy();	
+				$scope.chart.destroy();
 			}
 			$scope.chart = new charts.LineChart(el[0], '.linechart', opts);
 			$scope.chart.drawChart();
