@@ -296,20 +296,31 @@ fieldset[disabled] .btn-primary.active {
 
 /* Filter reset tag buttons */
 
-.filter-reset .btn{
-	border: 0;
-	padding: 5px 13px;
+.filter-reset {
+	font-weight: bold;
 	color: #777777;
 	color: rgba(0,0,0,0.5);
 	background-color: #e9e9e9;
+	padding-left: 11px;
+	border-radius: 4px;
+	font-size: 12px;
 }
-.filter-reset .btn:hover{
-	color: #333333;
-}
-.filter-reset .btn .glyphicon{
-	top: 2px;
-	margin-left: 2px;
+.filter-reset .btn {
+	border: 0;
+	padding: 8px;
 	color: #C2360D;
+	border-left: 1px solid #d9d9d9;
+	border-radius: 0 4px 4px 0;
+	margin-left: 7px;
+	line-height: 1;
+}
+.filter-reset .btn:hover {
+	background-color: #C2360D;
+	border-color: #AA1E13;
+	color: #FFFFFF;
+}
+.filter-reset .btn .glyphicon {
+	font-size: 12px;
 }
 
 /* Chart dropdown menu */
