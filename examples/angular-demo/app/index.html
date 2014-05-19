@@ -65,6 +65,11 @@
 								<span class="glyphicon glyphicon-list"></span> View Data
 							</a>
 						</li>
+                        <!-- <li>
+                            <a data-toggle="collapse" data-parent="#trays" href=".query-tray" class="collapsed">
+                                <span class="glyphicon glyphicon-pencil"></span> Write Query
+                            </a>
+                        </li> -->
 					</ul>
 				</div>
 			</div>
@@ -78,6 +83,48 @@
 
 			<!-- See Data tray -->
 			<div query-results-table show-data="seeData"></div>
+
+            <!-- Query Builder tray -->
+            <!-- <div>
+
+                <div class="tray-mirror query-tray collapse">
+                  <div class="inner" style="height: 223px"></div>
+                </div>
+                <div id="query-tray" class="tray query-tray panel panel-default collapse">
+
+                  <div class="container panel-body">
+
+                    <a class="pull-right" data-toggle="modal" href="#queryHelpModal">Help <span class="glyphicon glyphicon-question-sign"></span></a>
+
+                    <h4>Write your own query</h4>
+
+                    <textarea class="form-control" rows="5"></textarea>
+
+                    <button type="button" class="btn btn-primary pull-right">
+                      Run Query
+                    </button>
+
+                  </div>
+                </div>
+
+                <div class="modal fade" id="queryHelpModal" tabindex="-1" role="dialog" aria-labelledby="queryHelpModalLabel" aria-hidden="true">
+                    <div class="modal-dialog">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                                <h4 class="modal-title" id="queryHelpModalLabel">Custom Query Instructions</h4>
+                            </div>
+                            <div class="modal-body">
+                                Helpful info here.
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div> -->
 
 		</div>
 

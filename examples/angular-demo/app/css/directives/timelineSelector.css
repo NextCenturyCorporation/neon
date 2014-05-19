@@ -30,13 +30,9 @@
 }
 
 .timeline-selector .filter-reset{
-	margin: 10px 15px 0 0;
-}
-
-.timeline-selector .filter-reset .btn{
-	padding: 7px 16px;
+	margin: 12px 15px 0 0;
 	background-color: #dddddd;
 }
-.timeline-selector .filter-reset .btn:hover{
-    background-color: #e4b9b9;
+.timeline-selector .filter-reset .btn{
+	border-color: #cccccc;
 }
