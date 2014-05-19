@@ -71,7 +71,7 @@ class MongoConversionStrategy {
     }
 
 
-    private static def createWhereClausesForFilters(DataSet dataSet, def filterCache, def ignoredFilterIds = []) {S
+    private static def createWhereClausesForFilters(DataSet dataSet, def filterCache, def ignoredFilterIds = []) {
         def whereClauses = []
 
         List<FilterKey> filterKeys = filterCache.getFilterKeysForDataset(dataSet)
