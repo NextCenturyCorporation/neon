@@ -11,7 +11,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
+ *                       js.gra
  */
 
 /*global module:false*/
@@ -52,14 +52,14 @@ module.exports = function (grunt) {
     grunt.initConfig({
             // Metadata.
             pkg: grunt.file.readJSON('package.json'),
-            banner: '/*! <%= pkg.title || pkg.name %> */',
+            banner: '/*!  <%= pkg.title || pkg.name %> | Copyright 2013 <%= pkg.author %> | https://raw.githubusercontent.com/NextCenturyCorporation/neon/master/LICENSE.txt */' + grunt.util.linefeed,
             // Task configuration.
             concat: {
-                options: {
-                    banner: '<%= banner %>',
-                    stripBanners: true
-                },
                 nodeps: {
+                    options: {
+                        banner: '<%= banner %>',
+                        stripBanners: true
+                    },
                     src: [].concat([src('intro.js'), src('util/loggerUtils.js'), src('util/owfUtils.js'), src('eventing/owf/owfEventBus.js')]).concat(grunt.file.expand(src('**/*.js'), concatExcludes.map(function (file) {
                         return '!' + src(file);
                     }))),

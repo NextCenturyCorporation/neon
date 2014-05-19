@@ -66,6 +66,7 @@ task concatjs(type: GruntTask) {
 
 
 task installGruntDeps(type: Exec) {
+    description  'Installs javascript dependencies using npm'
     dependsOn 'createPackageJson'
     inputs.file "${projectDir}/package.json"
     outputs.dir "${projectDir}/node_modules"
@@ -73,6 +74,7 @@ task installGruntDeps(type: Exec) {
 }
 
 task createPackageJson(type: Copy) {
+    description = 'Creates a package.json file used by npm from a template that is shared by all projects'
     inputs.file "${rootDir}/package.json.template"
     outputs.file "${projectDir}/package.json"
     from rootDir

@@ -75,7 +75,7 @@ class SharkConvertQueryTest extends AbstractConversionTest {
     }
 
     @Override
-    protected void assertQueryWithOrWhereClauseaAndFilter(query) {
+    protected void assertQueryWithOrWhereClauseAndFilter(query) {
         assert query.toLowerCase() == "select * from ${DATABASE_NAME}.${TABLE_NAME} where ((${FIELD_NAME} = '${FIELD_VALUE}' or ${FIELD_NAME_2} = '${FIELD_VALUE}') AND ${FIELD_NAME} = '${FIELD_VALUE}')".toLowerCase()
     }
 

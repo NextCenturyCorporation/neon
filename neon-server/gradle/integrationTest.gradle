@@ -15,6 +15,8 @@
  */
 apply plugin: 'groovy'
 
+def TEST_GROUP = JavaBasePlugin.VERIFICATION_GROUP
+
 sourceSets {
     integrationTest {
         resources {
@@ -45,6 +47,8 @@ dependencies {
 }
 
 task integrationTest(type: Test) {
+    description = "Runs the neon integration tests"
+    group = TEST_GROUP
     dependsOn 'integrationTestClasses'
 
     // TODO: NEON-960 workaround
@@ -71,12 +75,16 @@ task integrationTest(type: Test) {
 
 
 task insertMongoDataIntegrationTest(type: com.ncc.neon.data.MongoDataInserter) {
+    group = TEST_GROUP
+    description = "Inserts test data used for mongo integration tests"
     dependsOn 'deleteMongoDataIntegrationTestBeforeInsert', 'generateMongoJson'
     host = getMongoHost()
     databaseName = 'neonintegrationtest'
 }
 
 task deleteMongoDataIntegrationTestBeforeInsert(type: com.ncc.neon.data.MongoDataDeleter) {
+    group = TEST_GROUP
+    description = "Deletes any old integration test data from mongo that may have been left around by previous tests"
     host = getMongoHost()
     databaseName = 'neonintegrationtest'
 }
@@ -101,6 +109,8 @@ task deleteMongoDataTagCloudTest(type: com.ncc.neon.data.MongoDataDeleter) {
 }
 
 task insertSharkDataIntegrationTest(type: com.ncc.neon.data.SharkDataInserter) {
+    group = TEST_GROUP
+    description = "Inserts test data used for shark integration tests"
     dependsOn 'deleteSharkDataIntegrationTestBeforeInsert', 'generateSharkCSV', 'generateSharkJson'
     host = getSharkHost()
     hdfsUrl = getHdfsUrl()
@@ -108,11 +118,15 @@ task insertSharkDataIntegrationTest(type: com.ncc.neon.data.SharkDataInserter) {
 }
 
 task deleteSharkDataIntegrationTestBeforeInsert(type: com.ncc.neon.data.SharkDataDeleter) {
+    group = TEST_GROUP
+    description = "Deletes any old integration test data from shark that may have been left around by previous tests"
     host = getSharkHost()
     databaseName = 'neonintegrationtest'
 }
 
 task afterIntegrationTest {
+    group = TEST_GROUP
+    description = "Cleans up test data after the integration tests"
     // TODO: NEON-960 workaround
     if (isMongoOnly()) {
         dependsOn 'deleteMongoDataIntegrationTest', 'deleteMongoDataTagCloudTest'
@@ -126,11 +140,15 @@ task afterIntegrationTest {
 integrationTest.finalizedBy afterIntegrationTest
 
 task deleteMongoDataIntegrationTest(type: com.ncc.neon.data.MongoDataDeleter) {
+    group = TEST_GROUP
+    description = "Deletes any integration test data from mongo"
     host = getMongoHost()
     databaseName = 'neonintegrationtest'
 }
 
 task deleteSharkDataIntegrationTest(type: com.ncc.neon.data.SharkDataDeleter) {
+    group = TEST_GROUP
+    description = "Deletes any integration test data from shark"
     host = getSharkHost()
     databaseName = 'neonintegrationtest'
 }

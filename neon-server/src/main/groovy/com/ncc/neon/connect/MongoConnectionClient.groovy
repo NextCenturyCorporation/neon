@@ -16,6 +16,7 @@
 
 package com.ncc.neon.connect
 import com.mongodb.MongoClient
+import com.ncc.neon.config.MongoConfigParser
 
 
 /**
@@ -27,7 +28,7 @@ class MongoConnectionClient implements ConnectionClient{
     private MongoClient mongo
 
     public MongoConnectionClient(ConnectionInfo info){
-        mongo = new MongoClient(info.host)
+        mongo = new MongoClient(MongoConfigParser.createServerAddresses(info.host))
     }
 
     MongoClient getMongo(){

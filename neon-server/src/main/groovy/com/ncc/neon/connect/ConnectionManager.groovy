@@ -34,6 +34,7 @@ class ConnectionManager {
     ConnectionClientFactory mongoConnectionFactory = new MongoConnectionClientFactory()
     ConnectionClientFactory sharkConnectionFactory = new JdbcConnectionClientFactory("org.apache.hive.jdbc.HiveDriver", "hive2")
 
+    // note this current request connection is a unique object per request (the bean has a request scope annotation on it)
     @Autowired
     private CurrentRequestConnection currentRequestConnection
 

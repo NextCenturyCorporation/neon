@@ -15,11 +15,6 @@
  */
 
 package com.ncc.neon.connect
-
-import java.util.concurrent.locks.Lock
-import java.util.concurrent.locks.ReadWriteLock
-import java.util.concurrent.locks.ReentrantReadWriteLock
-
 /**
  * Holds a ConnectionClient. This is used to only create the connection client when it is actually needed.
  * This class is threadsafe and initClient is guaranteed to only initialize the client once, even if called
@@ -28,9 +23,7 @@ import java.util.concurrent.locks.ReentrantReadWriteLock
 class ConnectionClientHolder {
 
 
-    private final ReadWriteLock rwLock = new ReentrantReadWriteLock()
-    private final Lock readLock = rwLock.readLock()
-    private final Lock writeLock = rwLock.writeLock()
+    private final Object lock = new Object()
     private final ConnectionClientFactory factory
     private volatile ConnectionClient connection
 
@@ -41,8 +34,7 @@ class ConnectionClientHolder {
 
 
     ConnectionClient initClient(ConnectionInfo connectionInfo) {
-        writeLock.lock()
-        try {
+        synchronized(lock) {
             // check for the client being initialized in case 2 users of this class both see the client as null
             // and try to initialize it
             if (!connection) {
@@ -50,18 +42,11 @@ class ConnectionClientHolder {
             }
             return connection
         }
-        finally {
-            writeLock.unlock()
-        }
     }
 
     ConnectionClient getConnection() {
-        readLock.lock()
-        try {
+        synchronized(lock) {
             return connection
-        }
-        finally {
-            readLock.unlock()
         }
     }
 
