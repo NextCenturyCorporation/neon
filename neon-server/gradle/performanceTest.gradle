@@ -22,7 +22,7 @@ apply plugin: 'jetty'
 
 def concurrencyTestSourceDir = 'src/concurrencyTest/scala'
 def concurrencyTestPort = 11402
-def GATLING_GROUP = "Gatling"
+def TEST_GROUP = JavaBasePlugin.VERIFICATION_GROUP
 
 sourceSets {
     concurrencyTest {
@@ -50,7 +50,7 @@ dependencies {
 
 task gatling {
     dependsOn 'concurrencyTestWar', 'insertDataIntoMongo', 'insertDataIntoShark'
-    group = GATLING_GROUP
+    group = TEST_GROUP
 
     doLast {
         sourceSets.concurrencyTest.output.classesDir.eachFileRecurse { file ->
@@ -97,8 +97,9 @@ def createSystemProperties(){
 }
 
 task concurrencyTestWar(type: org.gradle.api.plugins.jetty.JettyRunWar) {
+    description = "Launches an instance of neon used for concurrency tests"
     dependsOn 'concurrencyTestClasses'
-    group = GATLING_GROUP
+    group = TEST_GROUP
     daemon = true
     httpPort = concurrencyTestPort
     stopPort = httpPort + 2
@@ -114,39 +115,47 @@ processConcurrencyTestResources {
 }
 
 task insertDataIntoMongo(type: com.ncc.neon.data.MongoDataInserter) {
+    description = "Inserts data into mongo used by concurrency tests"
     dependsOn 'deleteDataFromMongoBeforeInsert', 'generateMongoJson'
     host = getMongoHost()
 }
 task deleteDataFromMongoBeforeInsert(type: com.ncc.neon.data.MongoDataDeleter) {
+    description = "Deletes any old concurrency test data from mongo that may have been left around by previous tests"
     host = getMongoHost()
 }
 
 task insertDataIntoShark(type: com.ncc.neon.data.SharkDataInserter) {
+    description = "Inserts data into shark used by concurrency tests"
     dependsOn 'deleteDataFromSharkBeforeInsert', 'generateSharkCSV', 'generateSharkJson'
     host = getSharkHost()
     hdfsUrl = getHdfsUrl()
 }
 task deleteDataFromSharkBeforeInsert(type: com.ncc.neon.data.SharkDataDeleter) {
+    description = "Deletes any old concurrent tests data from shark that may have been left around by previous tests"
     host = getSharkHost()
 }
 
 task deleteDataFromMongo(type: com.ncc.neon.data.MongoDataDeleter) {
+    description = "Deletes any concurrency test data from mongo"
     host = getMongoHost()
 }
 
 task deleteDataFromShark(type: com.ncc.neon.data.SharkDataDeleter) {
+    description = "Deletes any concurrency test data from shark"
     host = getSharkHost()
 }
 
 task afterGatlingTest{
-    group = GATLING_GROUP
+    description = "Cleans up any concurrency test data"
+    group = TEST_GROUP
     dependsOn 'stopGatlingJetty', 'deleteDataFromMongo', 'deleteDataFromShark'
 }
 
 gatling.finalizedBy afterGatlingTest
 
 task stopGatlingJetty(type: org.gradle.api.plugins.jetty.JettyStop) {
-    group = GATLING_GROUP
+    description = "Stops the instance of neon used for concurrency testing"
+    group = TEST_GROUP
     stopKey = 'stop'
     stopPort = concurrencyTestPort + 2
 }
