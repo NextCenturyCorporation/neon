@@ -25,9 +25,7 @@ import groovy.transform.ToString
  * A query clause to use when checking if a record is within a certain geographic distance of a point
  */
 @ToString(includeNames = true)
-class WithinDistanceClause implements WhereClause {
-    String locationField
-    LatLon center
-    double distance
-    DistanceUnit distanceUnit
+class GeoIntersectionClause implements WhereClause {
+	String locationField
+	LatLon[] points
 }

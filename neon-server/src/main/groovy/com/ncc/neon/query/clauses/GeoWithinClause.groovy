@@ -22,12 +22,11 @@ import groovy.transform.ToString
 
 
 /**
- * A query clause to use when checking if a record is within a certain geographic distance of a point
+ * A query clause to use when checking if a record is full contained within a certain
+ * geographic polygon defined by the given points
  */
 @ToString(includeNames = true)
-class WithinDistanceClause implements WhereClause {
-    String locationField
-    LatLon center
-    double distance
-    DistanceUnit distanceUnit
+class GeoWithinClause implements WhereClause {
+	String locationField
+	LatLon[] points
 }
