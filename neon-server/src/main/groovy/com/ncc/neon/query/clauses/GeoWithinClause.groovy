@@ -26,7 +26,7 @@ import groovy.transform.ToString
  * geographic polygon defined by the given points
  */
 @ToString(includeNames = true)
-class GeoWithinClause implements WhereClause {
+class GeoWithinClause extends GeoClause {
 	String locationField
-	LatLon[] points
+	LatLon[][] points // Must be polygon, so at least one array of 4+ points
 }

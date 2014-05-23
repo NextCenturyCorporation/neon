@@ -55,44 +55,49 @@ class MongoWhereClauseBuilder {
 	}
 
 	static def build(WithinDistanceClause clause) {
-		def geometry = new BasicDBObject("type", "Point")
-		geometry.put("coordinates", [clause.center.lonDegrees, clause.center.latDegrees])
+		def geometryDefinition = new BasicDBObject("type", "Point")
+		geometryDefinition.put("coordinates", clause.buildGeoJSONPoint(clause.center))
 
-		def near = new BasicDBObject('$near', geometry)
-		near.put('$maxDistance', clause.distance * clause.distanceUnit.meters)
-
+		def nearDefinition = new BasicDBObject('$geometry', geometryDefinition)
+		nearDefinition.put('$maxDistance', clause.distance * clause.distanceUnit.meters)
+		def near = new BasicDBObject('$near', nearDefinition)
 		return new BasicDBObject(clause.locationField, near)
 	}
 	
 	static def build(GeoIntersectionClause clause) {
-		def geoType
-		if(clause.points.length == 1) {
-			geoType = "Point"
-		} else if(clause.points.length == 2) {
-			geoType = "LineString"
-		} else {
-			geoType = "Polygon"
-		}
+		def geoType = determineGeometryType(clause)
+		def geometryDefinition = new BasicDBObject("type", geoType)
 		
-		def geometry = new BasicDBObject("type","geoType")
-		def coordinates = [];
+		def coordinates
 		if(geoType == "Point") {
-			coordinates = [clause.points[0].lonDegrees, clause.points[0].latDegrees];
+			coordinates = clause.buildGeoJSONPoint(clause.points[0][0])
 		} else {
-			clause.points.each {
-				coordinates.add([it.lonDegrees, it.latDegrees]);
-			}
+			coordinates = clause.buildGeoJSONLine(clause.points)
 		}
+		geometryDefinition.put("coordinates", coordinates)
 		
-		def intersection = new BasicDBObject('$geoIntersects', geometry)
-		
+		def geometryBlock = new BasicDBObject('$geometry', geometryDefinition)
+		def intersection = new BasicDBObject('$geoIntersects', geometryBlock)
 		return new BasicDBObject(clause.locationField, intersection)
 	}
 	
+	static def determineGeometryType(clause) {
+		if(clause.geometryType == "Point") {
+			return "Point"
+		} else if(clause.geometryType == "Line") {
+			return "LineString"
+		}
+		return "Polygon"
+	}
+	
 	static def build(GeoWithinClause clause) {
-		//FIXME: The GeoWithinClause body
-		//geoJSON polygon only
+		def geometryDefinition = new BasicDBObject("type", "Polygon")
 		
+		geometryDefinition.put("coordinates", clause.buildGeoJSONLine(clause.points))
+		
+		def geometryBlock = new BasicDBObject('$geometry', geometryDefinition)
+		def within = new BasicDBObject('$geoWithin', geometryBlock)
+		return new BasicDBObject(clause.locationField, within)
 	}
 
 	static def build(AndWhereClause clause) {

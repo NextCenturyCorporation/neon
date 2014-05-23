@@ -16,16 +16,15 @@
 
 package com.ncc.neon.query.clauses
 
-import com.ncc.neon.util.LatLon
 import groovy.transform.ToString
-
-
+import com.ncc.neon.util.LatLon
 
 /**
  * A query clause to use when checking if a record is within a certain geographic distance of a point
  */
 @ToString(includeNames = true)
-class GeoIntersectionClause implements WhereClause {
+class GeoIntersectionClause extends GeoClause{
 	String locationField
-	LatLon[] points
+	LatLon[][] points
+	String geometryType //Point, Line, or Polygon
 }
