@@ -71,8 +71,10 @@ class MongoWhereClauseBuilder {
 		def coordinates
 		if(geoType == "Point") {
 			coordinates = clause.buildGeoJSONPoint(clause.points[0][0])
+		} else if(geoType == "LineString") {
+			coordinates = clause.buildGeoJSONLine(clause.points[0])
 		} else {
-			coordinates = clause.buildGeoJSONLine(clause.points)
+			coordinates = clause.buildGeoJSONPointArray(clause.points)
 		}
 		geometryDefinition.put("coordinates", coordinates)
 		

@@ -7,18 +7,18 @@ class GeoClause implements WhereClause{
 		return [point.lonDegrees, point.latDegrees]
 	}
 	
-	def buildGeoJSONLine(LatLon[][] points) {
+	def buildGeoJSONPointArray(LatLon[][] points) {
 		def coordinates = []
 		points.each {
-			coordinates.add(buildGeoJSONPointArray(it))
+			coordinates.add(buildGeoJSONLine(it))
 		}
 		return coordinates
 	}
 	
-	def buildGeoJSONPointArray(LatLon[] pointArray) {
+	def buildGeoJSONLine(LatLon[] pointArray) {
 		def points = []
 		pointArray.each {
-			points.add([it.lonDegrees, it.latDegrees])
+			points.add(buildGeoJSONPoint(it))
 		}
 		return points
 	}
