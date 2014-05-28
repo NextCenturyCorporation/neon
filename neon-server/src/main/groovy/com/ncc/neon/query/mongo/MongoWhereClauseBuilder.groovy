@@ -95,7 +95,7 @@ class MongoWhereClauseBuilder {
 	static def build(GeoWithinClause clause) {
 		def geometryDefinition = new BasicDBObject("type", "Polygon")
 		
-		geometryDefinition.put("coordinates", clause.buildGeoJSONLine(clause.points))
+		geometryDefinition.put("coordinates", clause.buildGeoJSONPointArray(clause.points))
 		
 		def geometryBlock = new BasicDBObject('$geometry', geometryDefinition)
 		def within = new BasicDBObject('$geoWithin', geometryBlock)

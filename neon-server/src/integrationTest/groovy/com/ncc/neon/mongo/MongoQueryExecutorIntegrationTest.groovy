@@ -25,6 +25,7 @@ import com.ncc.neon.query.QueryOptions
 import com.ncc.neon.query.clauses.AndWhereClause
 import com.ncc.neon.query.clauses.DistanceUnit
 import com.ncc.neon.query.clauses.GeoIntersectionClause
+import com.ncc.neon.query.clauses.GeoWithinClause
 import com.ncc.neon.query.clauses.SingularWhereClause
 import com.ncc.neon.query.clauses.WithinDistanceClause
 import com.ncc.neon.query.filter.Filter
@@ -164,24 +165,43 @@ class MongoQueryExecutorIntegrationTest extends AbstractQueryExecutorIntegration
 	}
 	
 	@Test
-	 void "query intersection polygon"() {
-		 def latLonArray = new LatLon[1][5]
-		 latLonArray[0][0] = new LatLon(latDegrees: 12d, lonDegrees: 19d)
-		 latLonArray[0][1] = new LatLon(latDegrees: 12d, lonDegrees: 20d)
-		 latLonArray[0][2] = new LatLon(latDegrees: 11d, lonDegrees: 20d)
-		 latLonArray[0][3] = new LatLon(latDegrees: 11d, lonDegrees: 19d)
-		 latLonArray[0][4] = new LatLon(latDegrees: 12d, lonDegrees: 19d)
-		 def intersection = new GeoIntersectionClause(
-			 locationField: "location",
-			 points: latLonArray,
-			 geometryType: "Polygon"
-		 )
-		 
-		 def expected = rows(2,0)
-		 def query = new Query(filter: new Filter(databaseName: DATABASE_NAME, tableName: TABLE_NAME, whereClause: intersection))
-		 def result = queryExecutor.execute(query, QueryOptions.DEFAULT_OPTIONS)
-		 assertOrderedQueryResult(expected, result)
-	 }
+	void "query intersection polygon"() {
+		def latLonArray = new LatLon[1][5]
+		latLonArray[0][0] = new LatLon(latDegrees: 12d, lonDegrees: 19d)
+		latLonArray[0][1] = new LatLon(latDegrees: 12d, lonDegrees: 20d)
+		latLonArray[0][2] = new LatLon(latDegrees: 11d, lonDegrees: 20d)
+		latLonArray[0][3] = new LatLon(latDegrees: 11d, lonDegrees: 19d)
+		latLonArray[0][4] = new LatLon(latDegrees: 12d, lonDegrees: 19d)
+		def intersection = new GeoIntersectionClause(
+			locationField: "location",
+			points: latLonArray,
+			geometryType: "Polygon"
+		)
+		
+		def expected = rows(2,0)
+		def query = new Query(filter: new Filter(databaseName: DATABASE_NAME, tableName: TABLE_NAME, whereClause: intersection))
+		def result = queryExecutor.execute(query, QueryOptions.DEFAULT_OPTIONS)
+		assertOrderedQueryResult(expected, result)
+	}
+	 
+	@Test
+	void "query within polygon"() {
+		def latLonArray = new LatLon[1][5]
+		latLonArray[0][0] = new LatLon(latDegrees: 12d, lonDegrees: 19d)
+		latLonArray[0][1] = new LatLon(latDegrees: 12d, lonDegrees: 20d)
+		latLonArray[0][2] = new LatLon(latDegrees: 11d, lonDegrees: 20d)
+		latLonArray[0][3] = new LatLon(latDegrees: 11d, lonDegrees: 19d)
+		latLonArray[0][4] = new LatLon(latDegrees: 12d, lonDegrees: 19d)
+		def within = new GeoWithinClause(
+			locationField: "location",
+			points: latLonArray
+		)
+		
+		def expected = rows(2,0)
+		def query = new Query(filter: new Filter(databaseName: DATABASE_NAME, tableName: TABLE_NAME, whereClause: within))
+		def result = queryExecutor.execute(query, QueryOptions.DEFAULT_OPTIONS)
+		assertOrderedQueryResult(expected, result)
+	}
 
 	@Test(expected = NeonConnectionException)
 	void "exception thrown rather than trying to create an empty database"() {
