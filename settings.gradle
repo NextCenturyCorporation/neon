@@ -14,7 +14,7 @@
  *
  */
 
-include 'neon-server', 'metadata'
+include 'neon-server', 'metadata', 'examples'
 
 // the neon-server project is just output as neon.js/neon.war for simpler referencing
 project(":neon-server").name = 'neon'

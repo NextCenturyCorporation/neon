@@ -73,7 +73,7 @@ apply from: "gradle/performanceTest.gradle"
 
 apply from: "${rootDir}/gradle/groovy.gradle"
 apply from: "gradle/antlr.gradle"
-apply from: "gradle/deploy.gradle"
+apply from: "${rootDir}/gradle/deploy.gradle"
 
 sourceCompatibility = 1.7
 
