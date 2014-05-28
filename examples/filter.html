@@ -3,7 +3,10 @@
     <script src="http://localhost:8080/neon/js/neon.js"></script>
 
     <script>
-        neon.SERVER_URL = "http://localhost:8080/neon";
+        // Defaulting the Neon SERVER_URL to be under the neon context on the same host machine.
+        // If the neon application is loaded elsewhere, this can be changed as in the following example:
+        // neon.SERVER_URL = "http://localhost:8080/neon"
+        neon.SERVER_URL = "/neon";
         var connection = new neon.query.Connection();
         connection.connect(neon.query.Connection.MONGO,"localhost");
 
