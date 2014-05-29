@@ -32,6 +32,8 @@ classes/
 .settings
 .classpath
 target/
+metadata/bin
+neon-server/bin
 
 *.*~
 *.log
