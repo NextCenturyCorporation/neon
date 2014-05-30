@@ -362,6 +362,16 @@ neon.query.Query.prototype.withinDistance = function (locationField, center, dis
     return this;
 };
 
+neon.query.Query.prototype.geoIntersection = function (locationField, points, geometryType) {
+    this.filter.geoIntersection(locationField, points, geometryType);
+    return this;
+};
+
+neon.query.Query.prototype.geoWithin = function (locationField, points) {
+    this.filter.geoWithin(locationField, points);
+    return this;
+};
+
 /**
  * Creates a simple *where* clause for the query
  * @method where
@@ -412,6 +422,14 @@ neon.query.or = function (clauses) {
  */
 neon.query.withinDistance = function (locationField, center, distance, distanceUnit) {
     return new neon.query.WithinDistanceClause(locationField, center, distance, distanceUnit);
+};
+
+neon.query.geoIntersection = function (locationField, points, geometryType) {
+    return new neon.query.geoIntersectionClause(locationField, points, geometryType);
+};
+
+neon.query.geoWithin = function (locationField, points) {
+    return new neon.query.geoWithin(locationField, points);
 };
 
 /**
@@ -487,4 +505,17 @@ neon.query.WithinDistanceClause = function (locationField, center, distance, dis
     this.center = center;
     this.distance = distance;
     this.distanceUnit = distanceUnit;
+};
+
+neon.query.intersectionClause = function(locationField, points, geometryType) {
+	this.type = "geoIntersection";
+	this.locationField = locationField;
+	this.points = points;
+	this.geometryType = geometryType;
+};
+
+neon.query.withinClause = function(locationField, points) {
+	this.type = "geoIntersection";
+	this.locationField = locationField;
+	this.points = points;
 };
