@@ -468,10 +468,34 @@ coreMap.Map.prototype.configureFilterOnZoomRectangle = function () {
     // it here to provide a callback after zooming
     OpenLayers.Util.extend(control, {
         draw: function () {
+            // this Key Handler is works in conjunctions with the Box handler below.  It detects when the user
+            // has depressed the shift key and tells the map to update its sizing.  This is a work around for 
+            // zoomboxes being drawn in incorrect locations.  If any dom element higher in the page than a
+            // map changes height to reposition the map, the next time a user tries to draw a rectangle, it does
+            // not appear under the mouse cursor.  Rather, it is incorrectly drawn in proportion to the
+            // height change in other dom elements.  This forces a the map to recalculate its size on the key event
+            // that occurs just prior to the zoombox being drawn.  This may also trigger on other random shift-clicks
+            // but does not appears performant enough in a map that displays a few hundred thousand points.
+            this.keyHandler = new OpenLayers.Handler.Keyboard(control,
+               {
+                    "keydown": function(event) {
+                        if (event.keyCode === 16 && !this.waitingForShiftUp) {
+                            this.map.updateSize();
+                            this.waitingForShiftUp = true;
+                        }
+                    },
+                    "keyup": function(event) {
+                        if (event.keyCode === 16 && this.waitingForShiftUp) {
+                            this.waitingForShiftUp = false;
+                        }
+                    }
+               });
+            this.keyHandler.activate();
+
             // this Handler.Box will intercept the shift-mousedown
             // before Control.MouseDefault gets to see it
             this.box = new OpenLayers.Handler.Box(control,
-                {"done": this.notice},
+                { "done": this.notice },
                 {keyMask: OpenLayers.Handler.MOD_SHIFT});
             this.box.activate();
         },
