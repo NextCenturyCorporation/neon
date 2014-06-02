@@ -25,20 +25,20 @@
  * @constructor
  */
 neon.query.Query = function () {
-    this.filter = new neon.query.Filter();
-    this.fields = ['*'];
-    this.ignoreFilters_ = false;
-    this.selectionOnly_ = false;
+	this.filter = new neon.query.Filter();
+	this.fields = ['*'];
+	this.ignoreFilters_ = false;
+	this.selectionOnly_ = false;
 
-    // use this to ignore specific filters
-    this.ignoredFilterIds_ = [];
+	// use this to ignore specific filters
+	this.ignoredFilterIds_ = [];
 
-    this.groupByClauses = [];
-    this.isDistinct = false;
-    this.aggregates = [];
-    this.sortClauses = [];
-    this.limitClause = undefined;
-    this.transform = undefined;
+	this.groupByClauses = [];
+	this.isDistinct = false;
+	this.aggregates = [];
+	this.sortClauses = [];
+	this.limitClause = undefined;
+	this.transform = undefined;
 };
 
 /**
@@ -164,8 +164,8 @@ neon.query.MILE = 'mile';
  * @return {neon.query.Query} This query object
  */
 neon.query.Query.prototype.selectFrom = function (args) {
-    this.filter.selectFrom.apply(this.filter, arguments);
-    return this;
+	this.filter.selectFrom.apply(this.filter, arguments);
+	return this;
 };
 
 /**
@@ -178,8 +178,8 @@ neon.query.Query.prototype.selectFrom = function (args) {
  *     new neon.query.Query(...).withFields("field1","field2");
  */
 neon.query.Query.prototype.withFields = function (fields) {
-    this.fields = neon.util.arrayUtils.argumentsToArray(arguments);
-    return this;
+	this.fields = neon.util.arrayUtils.argumentsToArray(arguments);
+	return this;
 };
 
 /**
@@ -203,8 +203,8 @@ neon.query.Query.prototype.withFields = function (fields) {
  * @return {neon.query.Query} This query object
  */
 neon.query.Query.prototype.where = function () {
-    this.filter.where.apply(this.filter, arguments);
-    return this;
+	this.filter.where.apply(this.filter, arguments);
+	return this;
 };
 
 /**
@@ -218,20 +218,20 @@ neon.query.Query.prototype.where = function () {
  *    new neon.query.Query(...).groupBy('field1',averageAmount);
  */
 neon.query.Query.prototype.groupBy = function (fields) {
-    // even though internally each groupBy clause is a separate object (since single field and functions
-    // are processed differently), the user will think about a single groupBy operation which may include
-    // multiple fields, so this method does not append to the existing groupBy fields, but replaces them
-    this.groupByClauses.length = 0;
-    var me = this;
+	// even though internally each groupBy clause is a separate object (since single field and functions
+	// are processed differently), the user will think about a single groupBy operation which may include
+	// multiple fields, so this method does not append to the existing groupBy fields, but replaces them
+	this.groupByClauses.length = 0;
+	var me = this;
 
-    var list = neon.util.arrayUtils.argumentsToArray(arguments);
-    list.forEach(function (field) {
-        // if the user provided a string, convert that to the groupBy representation of a single field, otherwise,
-        // they provided a groupBy function so just use that
-        var clause = typeof field === 'string' ? new neon.query.GroupBySingleFieldClause(field) : field;
-        me.groupByClauses.push(clause);
-    });
-    return this;
+	var list = neon.util.arrayUtils.argumentsToArray(arguments);
+	list.forEach(function (field) {
+		// if the user provided a string, convert that to the groupBy representation of a single field, otherwise,
+		// they provided a groupBy function so just use that
+		var clause = typeof field === 'string' ? new neon.query.GroupBySingleFieldClause(field) : field;
+		me.groupByClauses.push(clause);
+	});
+	return this;
 };
 
 /**
@@ -246,9 +246,9 @@ neon.query.Query.prototype.groupBy = function (fields) {
  * @return {neon.query.Query} This query object
  */
 neon.query.Query.prototype.aggregate = function (aggregationOperation, aggregationField, name) {
-    var newFieldName = name != null ? name : (aggregationOperation + '(' + aggregationField + ')');
-    this.aggregates.push(new neon.query.FieldFunction(aggregationOperation, aggregationField, newFieldName));
-    return this;
+	var newFieldName = name != null ? name : (aggregationOperation + '(' + aggregationField + ')');
+	this.aggregates.push(new neon.query.FieldFunction(aggregationOperation, aggregationField, newFieldName));
+	return this;
 };
 
 /**
@@ -257,8 +257,8 @@ neon.query.Query.prototype.aggregate = function (aggregationOperation, aggregati
  * @return {neon.query.Query} This query object
  */
 neon.query.Query.prototype.distinct = function () {
-    this.isDistinct = true;
-    return this;
+	this.isDistinct = true;
+	return this;
 };
 
 /**
@@ -268,8 +268,8 @@ neon.query.Query.prototype.distinct = function () {
  * @return {neon.query.Query} This query object
  */
 neon.query.Query.prototype.limit = function (limit) {
-    this.limitClause = new neon.query.LimitClause(limit);
-    return this;
+	this.limitClause = new neon.query.LimitClause(limit);
+	return this;
 };
 
 /**
@@ -279,8 +279,8 @@ neon.query.Query.prototype.limit = function (limit) {
  * @return {neon.query.Query} This query object
  */
 neon.query.Query.prototype.offset = function (offset) {
-    this.offsetClause = new neon.query.OffsetClause(offset);
-    return this;
+	this.offsetClause = new neon.query.OffsetClause(offset);
+	return this;
 };
 
 /**
@@ -295,17 +295,17 @@ neon.query.Query.prototype.offset = function (offset) {
  *     new neon.query.Query(...).sortBy('field1',neon.query.ASC,'field2',neon.query.DESC);
  */
 neon.query.Query.prototype.sortBy = function (fieldName, sortOrder) {
-    // even though internally each sortBy clause is a separate object, the user will think about a single sortBy
-    // operation which may include multiple fields, so this method does not append to the existing
-    // sortBy fields, but replaces them
-    this.sortClauses.length = 0;
-    var list = neon.util.arrayUtils.argumentsToArray(arguments);
-    for (var i = 0; i < list.length; i += 2) {
-        var field = list[i];
-        var order = list[i + 1];
-        this.sortClauses.push(new neon.query.SortClause(field, order));
-    }
-    return this;
+	// even though internally each sortBy clause is a separate object, the user will think about a single sortBy
+	// operation which may include multiple fields, so this method does not append to the existing
+	// sortBy fields, but replaces them
+	this.sortClauses.length = 0;
+	var list = neon.util.arrayUtils.argumentsToArray(arguments);
+	for (var i = 0; i < list.length; i += 2) {
+		var field = list[i];
+		var order = list[i + 1];
+		this.sortClauses.push(new neon.query.SortClause(field, order));
+	}
+	return this;
 };
 
 /**
@@ -315,8 +315,8 @@ neon.query.Query.prototype.sortBy = function (fieldName, sortOrder) {
  * @return {neon.query.Query} This query object
  */
 neon.query.Query.prototype.transform = function (transformObj) {
-    this.transform = transformObj;
-    return this;
+	this.transform = transformObj;
+	return this;
 };
 
 /**
@@ -327,13 +327,13 @@ neon.query.Query.prototype.transform = function (transformObj) {
  * @return {neon.query.Query} This query object
  */
 neon.query.Query.prototype.ignoreFilters = function (filterIds) {
-    if ( filterIds ) {
-        this.ignoredFilterIds_= filterIds;
-    }
-    else {
-        this.ignoreFilters_ = true;
-    }
-    return this;
+	if ( filterIds ) {
+		this.ignoredFilterIds_= filterIds;
+	}
+	else {
+		this.ignoreFilters_ = true;
+	}
+	return this;
 };
 
 /**
@@ -342,8 +342,8 @@ neon.query.Query.prototype.ignoreFilters = function (filterIds) {
  * @return {neon.query.Query} This query object
  */
 neon.query.Query.prototype.selectionOnly = function () {
-    this.selectionOnly_ = true;
-    return this;
+	this.selectionOnly_ = true;
+	return this;
 };
 
 /**
@@ -358,8 +358,8 @@ neon.query.Query.prototype.selectionOnly = function () {
  * @return {neon.query.Query} This query object
  */
 neon.query.Query.prototype.withinDistance = function (locationField, center, distance, distanceUnit) {
-    this.filter.withinDistance(locationField, center, distance, distanceUnit);
-    return this;
+	this.filter.withinDistance(locationField, center, distance, distanceUnit);
+	return this;
 };
 
 /**
@@ -373,7 +373,7 @@ neon.query.Query.prototype.withinDistance = function (locationField, center, dis
  * @return {Object}
  */
 neon.query.where = function (fieldName, op, value) {
-    return new neon.query.WhereClause(fieldName, op, value);
+	return new neon.query.WhereClause(fieldName, op, value);
 };
 
 /**
@@ -385,7 +385,7 @@ neon.query.where = function (fieldName, op, value) {
  * @return {Object}
  */
 neon.query.and = function (clauses) {
-    return new neon.query.BooleanClause('and', neon.util.arrayUtils.argumentsToArray(arguments));
+	return new neon.query.BooleanClause('and', neon.util.arrayUtils.argumentsToArray(arguments));
 };
 
 /**
@@ -397,7 +397,7 @@ neon.query.and = function (clauses) {
  * @return {Object}
  */
 neon.query.or = function (clauses) {
-    return new neon.query.BooleanClause('or', neon.util.arrayUtils.argumentsToArray(arguments));
+	return new neon.query.BooleanClause('or', neon.util.arrayUtils.argumentsToArray(arguments));
 };
 
 /**
@@ -411,7 +411,17 @@ neon.query.or = function (clauses) {
  * @return {neon.query.WithinDistanceClause}
  */
 neon.query.withinDistance = function (locationField, center, distance, distanceUnit) {
-    return new neon.query.WithinDistanceClause(locationField, center, distance, distanceUnit);
+	return new neon.query.WithinDistanceClause(locationField, center, distance, distanceUnit);
+};
+
+neon.query.Query.prototype.geoIntersection = function (locationField, points, geometryType) {
+	this.filter.geoIntersection(locationField, points, geometryType);
+	return this;
+};
+
+neon.query.Query.prototype.geoWithin = function (locationField, points) {
+	this.filter.geoWithin(locationField, points);
+	return this;
 };
 
 /**
@@ -426,9 +436,9 @@ neon.query.withinDistance = function (locationField, center, distance, distanceU
  * @private
  */
 neon.query.FieldFunction = function (operation, field, name) {
-    this.operation = operation;
-    this.field = field;
-    this.name = name;
+	this.operation = operation;
+	this.field = field;
+	this.name = name;
 };
 
 /**
@@ -441,8 +451,8 @@ neon.query.FieldFunction = function (operation, field, name) {
  * @constructor
  */
 neon.query.GroupByFunctionClause = function (operation, field, name) {
-    this.type = 'function';
-    neon.query.FieldFunction.call(this, operation, field, name);
+	this.type = 'function';
+	neon.query.FieldFunction.call(this, operation, field, name);
 };
 // TODO: NEON-73 (Javascript inheritance library)
 neon.query.GroupByFunctionClause.prototype = new neon.query.FieldFunction();
@@ -450,41 +460,54 @@ neon.query.GroupByFunctionClause.prototype = new neon.query.FieldFunction();
 
 // These are not meant to be instantiated directly but rather by helper methods
 neon.query.GroupBySingleFieldClause = function (field) {
-    this.type = 'single';
-    this.field = field;
+	this.type = 'single';
+	this.field = field;
 };
 
 neon.query.BooleanClause = function (type, whereClauses) {
-    this.type = type;
-    this.whereClauses = whereClauses;
+	this.type = type;
+	this.whereClauses = whereClauses;
 };
 
 neon.query.WhereClause = function (lhs, operator, rhs) {
-    this.type = 'where';
-    this.lhs = lhs;
-    this.operator = operator;
-    this.rhs = rhs;
+	this.type = 'where';
+	this.lhs = lhs;
+	this.operator = operator;
+	this.rhs = rhs;
 
 };
 
 neon.query.SortClause = function (fieldName, sortOrder) {
-    this.fieldName = fieldName;
-    this.sortOrder = sortOrder;
+	this.fieldName = fieldName;
+	this.sortOrder = sortOrder;
 };
 
 neon.query.LimitClause = function (limit) {
-    this.limit = limit;
+	this.limit = limit;
 };
 
 neon.query.OffsetClause = function (offset) {
-    this.offset = offset;
+	this.offset = offset;
 };
 
 
 neon.query.WithinDistanceClause = function (locationField, center, distance, distanceUnit) {
-    this.type = 'withinDistance';
-    this.locationField = locationField;
-    this.center = center;
-    this.distance = distance;
-    this.distanceUnit = distanceUnit;
+	this.type = 'withinDistance';
+	this.locationField = locationField;
+	this.center = center;
+	this.distance = distance;
+	this.distanceUnit = distanceUnit;
+};
+
+neon.query.intersectionClause = function(locationField, points, geometryType) {
+	this.type = "geoIntersection";
+	this.locationField = locationField;
+	this.points = points;
+	this.geometryType = geometryType;
+};
+
+neon.query.withinClause = function(locationField, points) {
+	this.type = "geoIntersection";
+	this.locationField = locationField;
+	this.points = points;
 };
