@@ -25,10 +25,10 @@
  * @method createEventBus_
  */
 neon.eventing.createEventBus_ = function () {
-    if (neon.util.owfUtils.isRunningInOWF()) {
-        return new neon.eventing.owf.OWFEventBus();
-    }
-    return new neon.eventing.EventBus();
+	if (neon.util.owfUtils.isRunningInOWF()) {
+		return new neon.eventing.owf.OWFEventBus();
+	}
+	return new neon.eventing.EventBus();
 };
 
 /**
@@ -48,7 +48,7 @@ neon.eventing.eventBus_ = neon.eventing.createEventBus_();
  */
 
 neon.eventing.Messenger = function () {
-    this.id_ = uuid.v4();
+	this.id_ = uuid.v4();
 };
 
 /**
@@ -58,8 +58,8 @@ neon.eventing.Messenger = function () {
  * @method publish
  */
 neon.eventing.Messenger.prototype.publish = function (channel, message) {
-    var data = { payload: message, sender: this.id_ };
-    neon.eventing.eventBus_.publish(channel, data);
+	var data = { payload: message, sender: this.id_ };
+	neon.eventing.eventBus_.publish(channel, data);
 };
 
 /**
@@ -71,12 +71,12 @@ neon.eventing.Messenger.prototype.publish = function (channel, message) {
  * @method subscribe
  */
 neon.eventing.Messenger.prototype.subscribe = function (channel, callback) {
-    var me = this;
-    neon.eventing.eventBus_.subscribe(channel, function (message) {
-        if (message.sender !== me.id_) {
-            callback(message.payload);
-        }
-    });
+	var me = this;
+	neon.eventing.eventBus_.subscribe(channel, function (message) {
+		if (message.sender !== me.id_) {
+			callback(message.payload);
+		}
+	});
 };
 
 /**
@@ -85,7 +85,7 @@ neon.eventing.Messenger.prototype.subscribe = function (channel, callback) {
  * @method unsubscribe
  */
 neon.eventing.Messenger.prototype.unsubscribe = function (channel) {
-    neon.eventing.eventBus_.unsubscribe(channel);
+	neon.eventing.eventBus_.unsubscribe(channel);
 };
 
 /**
@@ -100,25 +100,25 @@ neon.eventing.Messenger.prototype.unsubscribe = function (channel) {
  * @method events
  */
 neon.eventing.Messenger.prototype.events = function (callbacks) {
-    var me = this;
-    var globalChannelConfigs = this.createGlobalChannelSubscriptions_(callbacks);
-    _.each(globalChannelConfigs, function (channelConfig) {
-        me.subscribe(channelConfig.channel, function (message) {
-                if (channelConfig.callback && typeof channelConfig.callback === 'function') {
-                    channelConfig.callback(message);
-                }
-            }
-        );
-    });
+	var me = this;
+	var globalChannelConfigs = this.createGlobalChannelSubscriptions_(callbacks);
+	_.each(globalChannelConfigs, function (channelConfig) {
+		me.subscribe(channelConfig.channel, function (message) {
+				if (channelConfig.callback && typeof channelConfig.callback === 'function') {
+					channelConfig.callback(message);
+				}
+			}
+		);
+	});
 };
 
 neon.eventing.Messenger.prototype.createGlobalChannelSubscriptions_ = function (neonCallbacks) {
-    // some of the callbacks may be null/undefined, which is ok since they will be ignored
-    return [
-        {channel: neon.eventing.channels.SELECTION_CHANGED, callback: neonCallbacks.selectionChanged},
-        {channel: neon.eventing.channels.FILTERS_CHANGED, callback: neonCallbacks.filtersChanged},
-        {channel: neon.eventing.channels.ACTIVE_DATASET_CHANGED, callback: neonCallbacks.activeDatasetChanged}
-    ];
+	// some of the callbacks may be null/undefined, which is ok since they will be ignored
+	return [
+		{channel: neon.eventing.channels.SELECTION_CHANGED, callback: neonCallbacks.selectionChanged},
+		{channel: neon.eventing.channels.FILTERS_CHANGED, callback: neonCallbacks.filtersChanged},
+		{channel: neon.eventing.channels.ACTIVE_DATASET_CHANGED, callback: neonCallbacks.activeDatasetChanged}
+	];
 };
 
 /**
@@ -134,15 +134,15 @@ neon.eventing.Messenger.prototype.createGlobalChannelSubscriptions_ = function (
  * @method addFilter
  */
 neon.eventing.Messenger.prototype.addFilter = function (id, filter, successCallback, errorCallback) {
-    var filterKey = this.createFilterKey_(id, filter);
-    return neon.util.ajaxUtils.doPostJSON(
-        filterKey,
-        neon.serviceUrl('filterservice', 'addfilter'),
-        {
-            success: this.createChannelCallback_(neon.eventing.channels.FILTERS_CHANGED, successCallback),
-            error: errorCallback
-        }
-    );
+	var filterKey = this.createFilterKey_(id, filter);
+	return neon.util.ajaxUtils.doPostJSON(
+		filterKey,
+		neon.serviceUrl('filterservice', 'addfilter'),
+		{
+			success: this.createChannelCallback_(neon.eventing.channels.FILTERS_CHANGED, successCallback),
+			error: errorCallback
+		}
+	);
 };
 
 /**
@@ -154,15 +154,16 @@ neon.eventing.Messenger.prototype.addFilter = function (id, filter, successCallb
  * @method removeFilter
  */
 neon.eventing.Messenger.prototype.removeFilter = function (id, successCallback, errorCallback) {
-    return neon.util.ajaxUtils.doPost(
-        neon.serviceUrl('filterservice', 'removefilter'),
-        {
-            success: this.createChannelCallback_(neon.eventing.channels.FILTERS_CHANGED, successCallback),
-            error: errorCallback,
-            data: id,
-            contentType: 'text/plain'
-        }
-    );
+	return neon.util.ajaxUtils.doPost(
+		neon.serviceUrl('filterservice', 'removefilter'),
+		{
+			success: this.createChannelCallback_(neon.eventing.channels.FILTERS_CHANGED, successCallback),
+			error: errorCallback,
+			data: id,
+			contentType: 'text/plain',
+			responseType: 'json'
+		}
+	);
 };
 
 /**
@@ -175,15 +176,15 @@ neon.eventing.Messenger.prototype.removeFilter = function (id, successCallback, 
  * @method replaceFilter
  */
 neon.eventing.Messenger.prototype.replaceFilter = function (id, filter, successCallback, errorCallback) {
-    var filterKey = this.createFilterKey_(id, filter);
-    return neon.util.ajaxUtils.doPostJSON(
-        filterKey,
-        neon.serviceUrl('filterservice', 'replacefilter'),
-        {
-            success: this.createChannelCallback_(neon.eventing.channels.FILTERS_CHANGED, successCallback),
-            error: errorCallback
-        }
-    );
+	var filterKey = this.createFilterKey_(id, filter);
+	return neon.util.ajaxUtils.doPostJSON(
+		filterKey,
+		neon.serviceUrl('filterservice', 'replacefilter'),
+		{
+			success: this.createChannelCallback_(neon.eventing.channels.FILTERS_CHANGED, successCallback),
+			error: errorCallback
+		}
+	);
 };
 
 /**
@@ -191,13 +192,14 @@ neon.eventing.Messenger.prototype.replaceFilter = function (id, filter, successC
  * @method clearFilters
  */
 neon.eventing.Messenger.prototype.clearFilters = function (successCallback, errorCallback) {
-    return neon.util.ajaxUtils.doPost(
-        neon.serviceUrl('filterservice', 'clearfilters'),
-        {
-            success: this.createChannelCallback_(neon.eventing.channels.FILTERS_CHANGED, successCallback),
-            error: errorCallback
-        }
-    );
+	return neon.util.ajaxUtils.doPost(
+		neon.serviceUrl('filterservice', 'clearfilters'),
+		{
+			success: this.createChannelCallback_(neon.eventing.channels.FILTERS_CHANGED, successCallback),
+			error: errorCallback,
+			responseType: 'json'
+		}
+	);
 };
 
 /**
@@ -206,13 +208,14 @@ neon.eventing.Messenger.prototype.clearFilters = function (successCallback, erro
  * @method clearFiltersSilently
  */
 neon.eventing.Messenger.prototype.clearFiltersSilently = function (successCallback, errorCallback) {
-    return neon.util.ajaxUtils.doPost(
-        neon.serviceUrl('filterservice', 'clearfilters'),
-        {
-            success: successCallback,
-            error: errorCallback
-        }
-    );
+	return neon.util.ajaxUtils.doPost(
+		neon.serviceUrl('filterservice', 'clearfilters'),
+		{
+			success: successCallback,
+			error: errorCallback,
+			responseType: 'json'
+		}
+	);
 };
 
 
@@ -227,16 +230,16 @@ neon.eventing.Messenger.prototype.clearFiltersSilently = function (successCallba
  * @method addSelection
  */
 neon.eventing.Messenger.prototype.addSelection = function (id, filter, successCallback, errorCallback) {
-    var filterKey = this.createFilterKey_(id, filter);
-    return neon.util.ajaxUtils.doPostJSON(
-        filterKey,
-        neon.serviceUrl('selectionservice', 'addselection'),
-        {
-            success: this.createChannelCallback_(neon.eventing.channels.SELECTION_CHANGED, successCallback),
-            error: errorCallback,
-            global: false
-        }
-    );
+	var filterKey = this.createFilterKey_(id, filter);
+	return neon.util.ajaxUtils.doPostJSON(
+		filterKey,
+		neon.serviceUrl('selectionservice', 'addselection'),
+		{
+			success: this.createChannelCallback_(neon.eventing.channels.SELECTION_CHANGED, successCallback),
+			error: errorCallback,
+			global: false
+		}
+	);
 };
 
 /**
@@ -248,16 +251,17 @@ neon.eventing.Messenger.prototype.addSelection = function (id, filter, successCa
  * @method removeSelection
  */
 neon.eventing.Messenger.prototype.removeSelection = function (id, successCallback, errorCallback) {
-    return neon.util.ajaxUtils.doPost(
-        neon.serviceUrl('selectionservice', 'removeselection'),
-        {
-            success:  this.createChannelCallback_(neon.eventing.channels.SELECTION_CHANGED, successCallback),
-            error: errorCallback,
-            global: false,
-            data: id,
-            contentType: 'text/plain'
-        }
-    );
+	return neon.util.ajaxUtils.doPost(
+		neon.serviceUrl('selectionservice', 'removeselection'),
+		{
+			success:  this.createChannelCallback_(neon.eventing.channels.SELECTION_CHANGED, successCallback),
+			error: errorCallback,
+			global: false,
+			data: id,
+			contentType: 'text/plain',
+			responseType: 'json'
+		}
+	);
 };
 
 /**
@@ -271,16 +275,16 @@ neon.eventing.Messenger.prototype.removeSelection = function (id, successCallbac
  */
 
 neon.eventing.Messenger.prototype.replaceSelection = function (id, filter, successCallback, errorCallback) {
-    var filterKey = this.createFilterKey_(id, filter);
-    return neon.util.ajaxUtils.doPostJSON(
-        filterKey,
-        neon.serviceUrl('selectionservice', 'replaceselection'),
-        {
-            success: this.createChannelCallback_(neon.eventing.channels.SELECTION_CHANGED, successCallback),
-            error: errorCallback,
-            global: false
-        }
-    );
+	var filterKey = this.createFilterKey_(id, filter);
+	return neon.util.ajaxUtils.doPostJSON(
+		filterKey,
+		neon.serviceUrl('selectionservice', 'replaceselection'),
+		{
+			success: this.createChannelCallback_(neon.eventing.channels.SELECTION_CHANGED, successCallback),
+			error: errorCallback,
+			global: false
+		}
+	);
 };
 
 /**
@@ -289,33 +293,34 @@ neon.eventing.Messenger.prototype.replaceSelection = function (id, filter, succe
  * @method clearSelection
  */
 neon.eventing.Messenger.prototype.clearSelection = function (successCallback, errorCallback) {
-    return neon.util.ajaxUtils.doPost(
-        neon.serviceUrl('selectionservice', 'clearselection'),
-        {
-            success: this.createChannelCallback_(neon.eventing.channels.SELECTION_CHANGED, successCallback),
-            error: errorCallback,
-            global: false
-        }
-    );
+	return neon.util.ajaxUtils.doPost(
+		neon.serviceUrl('selectionservice', 'clearselection'),
+		{
+			success: this.createChannelCallback_(neon.eventing.channels.SELECTION_CHANGED, successCallback),
+			error: errorCallback,
+			global: false,
+			responseType: 'json'
+		}
+	);
 };
 
 
 neon.eventing.Messenger.prototype.createFilterKey_ = function (id, filter) {
-    return {
-        id : id,
-        filter: filter
-    };
+	return {
+		id : id,
+		filter: filter
+	};
 };
 
 neon.eventing.Messenger.prototype.createChannelCallback_ = function (channelName, successCallback) {
-    var me = this;
-    var callback = function (results) {
-        // pass the results in the callback and publish them to the channel so callers can listen
-        // in either place
-        if (successCallback && typeof successCallback === 'function') {
-            successCallback(results);
-        }
-        me.publish(channelName, results || {});
-    };
-    return callback;
+	var me = this;
+	var callback = function (results) {
+		// pass the results in the callback and publish them to the channel so callers can listen
+		// in either place
+		if (successCallback && typeof successCallback === 'function') {
+			successCallback(results);
+		}
+		me.publish(channelName, results || {});
+	};
+	return callback;
 };
