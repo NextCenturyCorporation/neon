@@ -130,7 +130,7 @@ angular.module('timelineSelectorDirective', []).directive('timelineSelector', ['
                  * @method queryForChartData
                  */
                 $scope.queryForChartData = function () {
-                    $scope.dateField = connectionService.getFieldMapping($scope.database, $scope.tableName, "date");
+                    $scope.dateField = connectionService.getFieldMapping($scope.databaseName, $scope.tableName, "date");
                     $scope.dateField = $scope.dateField.mapping || 'date';
 
                     var yearGroupClause = new neon.query.GroupByFunctionClause(neon.query.YEAR, $scope.dateField, 'year');

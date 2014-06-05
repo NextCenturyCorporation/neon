@@ -230,13 +230,13 @@ angular.module('heatMapDirective', []).directive('heatMap', ['ConnectionService'
                         connection.getFieldNames($scope.tableName, function (results) {
                             $scope.$apply(function () {
                                 populateFieldNames(results);
-                                $scope.latitudeField = connectionService.getFieldMapping($scope.database, $scope.tableName, "latitude");
+                                $scope.latitudeField = connectionService.getFieldMapping($scope.databaseName, $scope.tableName, "latitude");
                                 $scope.latitudeField = $scope.latitudeField.mapping || $scope.fields[0];
-                                $scope.longitudeField = connectionService.getFieldMapping($scope.database, $scope.tableName, "longitude");
+                                $scope.longitudeField = connectionService.getFieldMapping($scope.databaseName, $scope.tableName, "longitude");
                                 $scope.longitudeField = $scope.longitudeField.mapping || $scope.fields[0];
-                                $scope.colorByField = connectionService.getFieldMapping($scope.database, $scope.tableName, "color-by");
+                                $scope.colorByField = connectionService.getFieldMapping($scope.databaseName, $scope.tableName, "color-by");
                                 $scope.colorByField = $scope.colorByField.mapping || $scope.fields[0];
-                                $scope.sizeByField = connectionService.getFieldMapping($scope.database, $scope.tableName, "size-by");
+                                $scope.sizeByField = connectionService.getFieldMapping($scope.databaseName, $scope.tableName, "size-by");
                                 $scope.sizeByField = $scope.sizeByField.mapping || $scope.fields[0];
                                 $timeout(function () {
                                     $scope.initializing = false;

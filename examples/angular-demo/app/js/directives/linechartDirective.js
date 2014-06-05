@@ -35,7 +35,7 @@ linechart.directive('linechart', ['ConnectionService', function(connectionServic
 		el.addClass('linechartDirective');
 
 		var messenger = new neon.eventing.Messenger();
-		$scope.database = '';
+		$scope.databaseName = '';
 		$scope.tableName = '';
 		$scope.totalType = /*$scope.totalType ||*/ 'count';
 		$scope.fields = [];
@@ -108,9 +108,9 @@ linechart.directive('linechart', ['ConnectionService', function(connectionServic
 		};
 
 		var query = function(comparator, comparisionValue, callback) {
-			var xAxis = connectionService.getFieldMapping($scope.database, $scope.tableName, "line-x-axis");
+			var xAxis = connectionService.getFieldMapping($scope.databaseName, $scope.tableName, "line-x-axis");
 				xAxis = xAxis.mapping;
-			var yAxis = connectionService.getFieldMapping($scope.database, $scope.tableName, "y-axis")
+			var yAxis = connectionService.getFieldMapping($scope.databaseName, $scope.tableName, "y-axis")
 				yAxis = yAxis.mapping;
 
 			var query = new neon.query.Query()
@@ -132,9 +132,9 @@ linechart.directive('linechart', ['ConnectionService', function(connectionServic
 		};
 
 		$scope.queryForData = function() {
-			var xAxis = connectionService.getFieldMapping($scope.database, $scope.tableName, "line-x-axis");
+			var xAxis = connectionService.getFieldMapping($scope.databaseName, $scope.tableName, "line-x-axis");
 				xAxis = xAxis.mapping;
-			var yAxis = connectionService.getFieldMapping($scope.database, $scope.tableName, "y-axis")
+			var yAxis = connectionService.getFieldMapping($scope.databaseName, $scope.tableName, "y-axis")
 				yAxis = yAxis.mapping;
 
 			query('>', 0, function(posResults) {
@@ -226,9 +226,9 @@ linechart.directive('linechart', ['ConnectionService', function(connectionServic
 		}
 
 		var drawChart = function() {
-			var xAxis = connectionService.getFieldMapping($scope.database, $scope.tableName, "line-x-axis");
+			var xAxis = connectionService.getFieldMapping($scope.databaseName, $scope.tableName, "line-x-axis");
 			xAxis = xAxis.mapping;
-			var yAxis = connectionService.getFieldMapping($scope.database, $scope.tableName, "y-axis")
+			var yAxis = connectionService.getFieldMapping($scope.databaseName, $scope.tableName, "y-axis")
 			yAxis = yAxis.mapping;
 			if (!yAxis) {
 				yAxis = COUNT_FIELD_NAME;
