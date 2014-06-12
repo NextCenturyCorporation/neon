@@ -15,11 +15,11 @@ databaseConfig.directive('databaseConfig', ['ConnectionService', function (conne
         $scope.activeServer = "Choose dataset";
         $scope.servers = [
             {
-                name: "Earthquake",
+                name: "Earthquakes",
                 datastoreSelect: "mongo",
                 hostnameInput: "localhost",
-                selectedDb: "mydb",
-                selectedTable: "sample"
+                selectedDb: "test",
+                selectedTable: "earthquakes"
             },
             {
                 name: "Twitter",

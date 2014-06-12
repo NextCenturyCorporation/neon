@@ -33,9 +33,9 @@ services.factory('ConnectionService', ['$filter',
 				type: "mongo",
 				host: "localhost",
 				mappings: [{
-					database: "mydb",
+					database: "test",
 					tables: [{
-						name: "sample",
+						name: "earthquakes",
 						fields: [{
 							name: "date",
 							mapping: "time"
@@ -50,16 +50,16 @@ services.factory('ConnectionService', ['$filter',
 							mapping: "time"
 						}, {
 							name: "bar-x-axis",
-							mapping: "time"
+							mapping: "net"
 						}, {
 							name: "y-axis",
-							mapping: "magnitude"
+							mapping: "mag"
 						}, {
 							name: "color-by",
-							mapping: "magnitudeType"
+							mapping: "magType"
 						},{
 							name: "size-by",
-							mapping: "magnitude"
+							mapping: "mag"
 						},{
 							name: "sort-by",
 							mapping: "time"
