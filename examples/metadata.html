@@ -1,0 +1,25 @@
+<html>
+<head>
+    <script src="http://localhost:8080/neon/js/neon.js"></script>
+
+    <script>
+        // Defaulting the Neon SERVER_URL to be under the neon context on the same host machine.
+        // If the neon application is loaded elsewhere, this can be changed as in the following example:
+        // neon.SERVER_URL = "http://localhost:8080/neon"
+        neon.SERVER_URL = "/neon";
+
+        //Execute the query and display the results.
+        neon.widget.getWidgetDatasetMetadata("database1", "table1", "widget1", function (result) {
+            $("#result").html(JSON.stringify(result));
+        });
+
+    </script>
+
+</head>
+
+<body>
+<p>Metadata:</p>
+<p id="result"></p>
+</body>
+
+</html>
