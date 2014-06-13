@@ -116,6 +116,7 @@ angular.module('circularHeatFormDirective', []).directive('circularHeatForm', ['
 			 * @private
 			 */ 
 			var onFiltersChanged = function(message) {
+				XDATA.activityLogger.logSystemActivity('CircularHeatForm - received neon filter changed event');
 				$scope.queryForChartData();
 			};
 
@@ -128,6 +129,8 @@ angular.module('circularHeatFormDirective', []).directive('circularHeatForm', ['
 			 * @private
 			 */ 
 			var onDatasetChanged = function(message) {
+				XDATA.activityLogger.logSystemActivity('CircularHeatForm - received neon dataset changed event');
+
 				$scope.databaseName = message.database;
 				$scope.tableName = message.table;
 
@@ -174,9 +177,12 @@ angular.module('circularHeatFormDirective', []).directive('circularHeatForm', ['
 				// If updateChartData is called from within angular code or triggered by handler within angular,
 				// then the apply is handled by angular.  Forcing apply inside updateChartData instead is error prone as it
 				// may cause an apply within a digest cycle when triggered by an angular event.
+				XDATA.activityLogger.logSystemActivity('CircularHeatForm - query for data');
 				connectionService.getActiveConnection().executeQuery(query, function(queryResults) {
+					XDATA.activityLogger.logSystemActivity('CircularHeatForm - data received');
 					$scope.$apply(function(){
 						$scope.updateChartData(queryResults);
+						XDATA.activityLogger.logSystemActivity('CircularHeatForm - display updated');
 					});
 				});
 
