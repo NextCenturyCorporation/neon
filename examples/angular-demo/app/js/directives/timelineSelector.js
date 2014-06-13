@@ -92,6 +92,7 @@ angular.module('timelineSelectorDirective', []).directive('timelineSelector', ['
                  * @private
                  */
                 var onFiltersChanged = function (message) {
+                    XDATA.activityLogger.logSystemActivity('TimelineSelector - received neon filter changed event');
                     $scope.queryForChartData();
                 };
 
@@ -104,6 +105,8 @@ angular.module('timelineSelectorDirective', []).directive('timelineSelector', ['
                  * @private
                  */
                 var onDatasetChanged = function (message) {
+                    XDATA.activityLogger.logSystemActivity('TimelineSelector - received neon dataset changed event');
+
                     $scope.databaseName = message.database;
                     $scope.tableName = message.table;
                     $scope.startDate = undefined;
