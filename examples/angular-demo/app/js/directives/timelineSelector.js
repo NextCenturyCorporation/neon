@@ -155,10 +155,18 @@ angular.module('timelineSelectorDirective', []).directive('timelineSelector', ['
                     query.aggregate(neon.query.MIN, $scope.dateField, 'date');
                     query.sortBy('date', neon.query.ASCENDING);
                     query.ignoreFilters([$scope.filterKey]);
+
+                    XDATA.activityLogger.logSystemActivity('TimelineSelector - query for data');
                     connectionService.getActiveConnection().executeQuery(query, function (queryResults) {
                         $scope.$apply(function () {
                             $scope.updateChartData(queryResults);
+                            XDATA.activityLogger.logSystemActivity('TimelineSelector - data received');
                         });
+                    }, function(error) {
+                        $scope.$apply(function () {
+                            $scope.updateChartData([]);
+                            XDATA.activityLogger.logSystemActivity('TimelineSelector - data requested failed');
+                        })
                     });
 
                 };
@@ -277,8 +285,10 @@ angular.module('timelineSelectorDirective', []).directive('timelineSelector', ['
                         .selectFrom($scope.databaseName, $scope.tableName)
                         .where($scope.dateField, '!=', null).sortBy($scope.dateField, neon.query.ASCENDING).limit(1);
 
+                    XDATA.activityLogger.logSystemActivity('TimelineSelector - query for minimum date');
                     connectionService.getActiveConnection().executeQuery(minDateQuery, function (queryResults) {
                         if (queryResults.data.length > 0) {
+                            XDATA.activityLogger.logSystemActivity('TimelineSelector - minimum date received');
                             $scope.referenceStartDate = new Date(queryResults.data[0][$scope.dateField]);
                             if ($scope.referenceEndDate !== undefined) {
                                 $scope.$apply(success);
@@ -290,8 +300,10 @@ angular.module('timelineSelectorDirective', []).directive('timelineSelector', ['
                         .selectFrom($scope.databaseName, $scope.tableName)
                         .where($scope.dateField, '!=', null).sortBy($scope.dateField, neon.query.DESCENDING).limit(1);
 
+                    XDATA.activityLogger.logSystemActivity('TimelineSelector - query for maximum date');
                     connectionService.getActiveConnection().executeQuery(maxDateQuery, function (queryResults) {
                         if (queryResults.data.length > 0) {
+                            XDATA.activityLogger.logSystemActivity('TimelineSelector - maximum date received');
                             $scope.referenceEndDate = new Date(queryResults.data[0][$scope.dateField]);
                             if ($scope.referenceStartDate !== undefined) {
                                 $scope.$apply(success);
@@ -351,14 +363,14 @@ angular.module('timelineSelectorDirective', []).directive('timelineSelector', ['
                     var rawLength = rawData.length;
 
                     // If we have no values, use our dates if they existed or now.
-                    if (rawLength === 0) {
+                    if (rawData.length === 0) {
                         rawData[0] = {
                             date: new Date(),
                             count: 0
                         }
                     }
                     // If we have only 1 value, create a range for it.
-                    else if (rawLength === 1) {
+                    if (rawData.length === 1) {
                         rawData[1] = rawData[0];
                         rawLength = 2;
                     }
@@ -368,8 +380,8 @@ angular.module('timelineSelectorDirective', []).directive('timelineSelector', ['
                     // var startDate = new Date(Date.UTC(rawData[0].year, rawData[0].month - 1, rawData[0].day, rawData[0].hour));
                     // var endDate = new Date(Date.UTC(rawData[rawLength - 1].year, rawData[rawLength - 1].month - 1,
                     // 	rawData[rawLength - 1].day, rawData[rawLength - 1].hour));
-                    var startDate = $scope.zeroOutDate($scope.startDate);
-                    var endDate = $scope.zeroOutDate($scope.endDate);
+                    var startDate = $scope.zeroOutDate($scope.startDate || rawData[0].date);
+                    var endDate = $scope.zeroOutDate($scope.endDate  || rawData[rawData.length - 1].date);
 
                     var numBuckets = Math.ceil(Math.abs(endDate - startDate) / $scope.millisMultiplier) + 1;
                     var startTime = startDate.getTime();
@@ -402,6 +414,10 @@ angular.module('timelineSelectorDirective', []).directive('timelineSelector', ['
                  * @method clearBrush
                  */
                 $scope.clearBrush = function () {
+                    XDATA.activityLogger.logUserActivity('Clear temporal filter', 'click',
+                        XDATA.activityLogger.WF_EXPLORE);
+                    XDATA.activityLogger.logSystemActivity('Removing Neon filter');
+
                     $scope.brush = [];
                     $scope.messenger.removeFilter($scope.filterKey);
                 };
@@ -409,6 +425,11 @@ angular.module('timelineSelectorDirective', []).directive('timelineSelector', ['
                 // Update the millis multipler when the granularity is changed.
                 $scope.$watch('granularity', function (newVal, oldVal) {
                     if (newVal && newVal !== oldVal) {
+                        XDATA.activityLogger.logUserActivity('Change timeline resolution', 'click',
+                            XDATA.activityLogger.WF_EXPLORE,
+                            {
+                                "resolution": newVal
+                            });
                         $scope.startDateForDisplay = undefined;
                         $scope.endDateForDisplay = undefined;
                         if (newVal === DAY) {
@@ -467,6 +488,9 @@ angular.module('timelineSelectorDirective', []).directive('timelineSelector', ['
                         var clauses = [startFilterClause, endFilterClause];
                         var filterClause = neon.query.and.apply(this, clauses);
                         var filter = new neon.query.Filter().selectFrom($scope.databaseName, $scope.tableName).where(filterClause);
+
+                        XDATA.activityLogger.logSystemActivity('Create/Replace neon filter');
+
                         $scope.messenger.replaceFilter($scope.filterKey, filter, $scope.queryForChartData);
                     }
                 }, true);
