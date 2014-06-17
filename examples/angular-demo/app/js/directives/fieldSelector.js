@@ -38,6 +38,7 @@ fieldSelector.directive('fieldselector', ['ConnectionService', function(connecti
 			$scope.database = message.database;
 			$scope.table = message.table;
 
+            connectionService.connectToDataset(message.datastore, message.hostname, message.database, message.table);
 			connectionService.getActiveConnection().getFieldNames($scope.table, function(results) {
 
 				$scope.$apply(function() {
@@ -46,7 +47,9 @@ fieldSelector.directive('fieldselector', ['ConnectionService', function(connecti
 			});
 
 			if($scope.defaultMapping) {
-				$scope.targetVar = connectionService.getFieldMapping($scope.database, $scope.table, $scope.defaultMapping).mapping;
+                connectionService.loadMetadata(function() {
+                    $scope.targetVar = connectionService.getFieldMapping($scope.defaultMapping);
+                });
 			}
 		};
 

@@ -93,24 +93,24 @@ barchart.directive('barchart', ['ConnectionService', '$timeout', function(connec
 			$scope.tableName = message.table;
 
 			// if there is no active connection, try to make one.
-			connectionService.connectToDataset(message.datastore, message.hostname, message.database);
+			connectionService.connectToDataset(message.datastore, message.hostname, message.database, message.table);
 
 			// Pull data.
 			var connection = connectionService.getActiveConnection();
             $timeout(function() {
                 $scope.initializing = false;
                 if (connection) {
-                	$scope.queryForData();
+                    connectionService.loadMetadata(function() {
+                        $scope.queryForData();
+                    });
                 }
             });
 
 		};
 
 		$scope.queryForData = function() {
-			var xAxis = connectionService.getFieldMapping($scope.database, $scope.tableName, "bar-x-axis");
-			    xAxis = $scope.attrX || xAxis.mapping;
-			var yAxis = connectionService.getFieldMapping($scope.database, $scope.tableName, "y-axis")
-			    yAxis = $scope.attrY || yAxis.mapping;
+			var xAxis = $scope.attrX || connectionService.getFieldMapping("bar_x_axis");
+			var yAxis = $scope.attrY || connectionService.getFieldMapping("y_axis")
 
 			var query = new neon.query.Query()
 				.selectFrom($scope.databaseName, $scope.tableName)
@@ -149,10 +149,8 @@ barchart.directive('barchart', ['ConnectionService', '$timeout', function(connec
 				$scope.chart.destroy();	
 			}
 
-			var xAxis = connectionService.getFieldMapping($scope.database, $scope.tableName, "bar-x-axis");
-			    xAxis = $scope.attrX || xAxis.mapping;
-			var yAxis = connectionService.getFieldMapping($scope.database, $scope.tableName, "y-axis")
-			    yAxis = $scope.attrY || yAxis.mapping;
+			var xAxis = $scope.attrX || connectionService.getFieldMapping("bar_x_axis");
+			var yAxis = $scope.attrY || connectionService.getFieldMapping("y_axis");
 
 			if (!yAxis) {
 				yAxis = COUNT_FIELD_NAME;

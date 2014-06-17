@@ -79,21 +79,21 @@ barchart.directive('stackedbarchart', ['ConnectionService', function(connectionS
 			$scope.tableName = message.table;
 
             // if there is no active connection, try to make one.
-			connectionService.connectToDataset(message.datastore, message.hostname, message.database);
+			connectionService.connectToDataset(message.datastore, message.hostname, message.database, message.table);
 
 			// Pull data.
 			var connection = connectionService.getActiveConnection();
 			if (connection) {
-				$scope.queryForData();
+                connectionService.loadMetadata(function() {
+                    $scope.queryForData();
+                });
 			}
 
         };
 
 		var queryData = function(yRuleComparator, yRuleVal, next) {
-			var xAxis = connectionService.getFieldMapping($scope.database, $scope.tableName, "x-axis");
-				xAxis = $scope.attrX || xAxis.mapping;
-			var yAxis = connectionService.getFieldMapping($scope.database, $scope.tableName, "y-axis")
-				yAxis = $scope.attrY || yAxis.mapping;
+			var xAxis = $scope.attrX || connectionService.getFieldMapping("x_axis");
+			var yAxis = $scope.attrY || connectionService.getFieldMapping("y_axis");
 			if (!yAxis) {
 				yAxis = COUNT_FIELD_NAME;
 			}
@@ -127,10 +127,8 @@ barchart.directive('stackedbarchart', ['ConnectionService', function(connectionS
 		}
 
 		$scope.queryForData = function() {
-			var xAxis = connectionService.getFieldMapping($scope.database, $scope.tableName, "x-axis");
-				xAxis = $scope.attrX || xAxis.mapping;
-			var yAxis = connectionService.getFieldMapping($scope.database, $scope.tableName, "y-axis")
-				yAxis = $scope.attrY || yAxis.mapping;
+			var xAxis = $scope.attrX || connectionService.getFieldMapping("x_axis");
+			var yAxis = $scope.attrY || connectionService.getFieldMapping("y_axis");
 			if (!yAxis) {
 				yAxis = COUNT_FIELD_NAME;
 			}
@@ -217,10 +215,10 @@ barchart.directive('stackedbarchart', ['ConnectionService', function(connectionS
 		var doDrawChart = function(data) {
 			charts.BarChart.destroy(el[0], '.barchart');
 
-			var xAxis = connectionService.getFieldMapping($scope.database, $scope.tableName, "x-axis");
-				xAxis = xAxis.mapping || $scope.attrX;
-			var yAxis = connectionService.getFieldMapping($scope.database, $scope.tableName, "y-axis")
-				yAxis = yAxis.mapping || $scope.attrY;
+			var xAxis = connectionService.getFieldMapping("x_axis");
+				xAxis = xAxis || $scope.attrX;
+			var yAxis = connectionService.getFieldMapping("y_axis");
+				yAxis = yAxis || $scope.attrY;
 			if (!yAxis) {
 				yAxis = COUNT_FIELD_NAME;
 			}

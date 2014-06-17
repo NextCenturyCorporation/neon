@@ -135,19 +135,21 @@ angular.module('queryResultsTableDirective', []).directive('queryResultsTable', 
                 $scope.tableName = message.table;
 
                 // if there is no active connection, try to make one.
-                connectionService.connectToDataset(message.datastore, message.hostname, message.database);
+                connectionService.connectToDataset(message.datastore, message.hostname, message.database, message.table);
 
                 // Pull data.
                 var connection = connectionService.getActiveConnection();
                 if (connection) {
-                    connection.getFieldNames($scope.tableName, function(results) {
-    				    $scope.$apply(function() {
-    				        populateFieldNames(results);
-    				        $scope.sortByField = connectionService.getFieldMapping($scope.database, $scope.tableName, "sort-by");
-    				        $scope.sortByField = $scope.sortByField.mapping || $scope.fields[0];
-                            updateRowsAndCount();
+                    connectionService.loadMetadata(function() {
+                        connection.getFieldNames($scope.tableName, function (results) {
+                            $scope.$apply(function () {
+                                populateFieldNames(results);
+                                $scope.sortByField = connectionService.getFieldMapping("sort_by");
+                                $scope.sortByField = $scope.sortByField || $scope.fields[0];
+                                updateRowsAndCount();
+                            });
                         });
-    				});
+                    });
                 }
             };
 

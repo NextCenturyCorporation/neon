@@ -119,12 +119,14 @@ angular.module('timelineSelectorDirective', []).directive('timelineSelector', ['
                     $scope.brush = [];
 
                     // if there is no active connection, try to make one.
-                    connectionService.connectToDataset(message.datastore, message.hostname, message.database);
+                    connectionService.connectToDataset(message.datastore, message.hostname, message.database, message.table);
 
                     // Pull data.
                     var connection = connectionService.getActiveConnection();
                     if (connection) {
-                        $scope.queryForChartData();
+                        connectionService.loadMetadata(function() {
+                            $scope.queryForChartData();
+                        });
                     }
                 };
 
@@ -133,8 +135,8 @@ angular.module('timelineSelectorDirective', []).directive('timelineSelector', ['
                  * @method queryForChartData
                  */
                 $scope.queryForChartData = function () {
-                    $scope.dateField = connectionService.getFieldMapping($scope.databaseName, $scope.tableName, "date");
-                    $scope.dateField = $scope.dateField.mapping || 'date';
+                    $scope.dateField = connectionService.getFieldMapping("date");
+                    $scope.dateField = $scope.dateField || 'date';
 
                     var yearGroupClause = new neon.query.GroupByFunctionClause(neon.query.YEAR, $scope.dateField, 'year');
                     var monthGroupClause = new neon.query.GroupByFunctionClause(neon.query.MONTH, $scope.dateField, 'month');

@@ -135,12 +135,14 @@ angular.module('circularHeatFormDirective', []).directive('circularHeatForm', ['
 				$scope.tableName = message.table;
 
 				// if there is no active connection, try to make one.
-				connectionService.connectToDataset(message.datastore, message.hostname, message.database);
+				connectionService.connectToDataset(message.datastore, message.hostname, message.database, message.table);
 
 				// Pull data.
 				var connection = connectionService.getActiveConnection();
 				if (connection) {
-					$scope.queryForChartData();
+                    connectionService.loadMetadata(function() {
+                        $scope.queryForChartData();
+                    });
 				}
 			};
 
@@ -152,8 +154,8 @@ angular.module('circularHeatFormDirective', []).directive('circularHeatForm', ['
 				// TODO: Decide how to pass in field mappings.  We can do this through a controller or the
 				// connection service or some mapping service.  Two example below, one commented out.
 				//var dateField = $scope.getDateField();
-				var dateField = connectionService.getFieldMapping($scope.databaseName, $scope.tableName, "date");
-				dateField = dateField.mapping || DEFAULT_DATE_FIELD;
+				var dateField = connectionService.getFieldMapping("date");
+				dateField = dateField || DEFAULT_DATE_FIELD;
 
 				if (!dateField) {
 					$scope.updateChartData({data: []});

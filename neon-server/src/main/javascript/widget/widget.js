@@ -148,7 +148,17 @@ neon.widget = (function() {
 		return neon.util.ajaxUtils.doGet(
 			neon.serviceUrl('widgetservice', 'widgetdataset/' + databaseName + '/' + tableName + '/' + widgetName),
 			{
-				success: successCallback
+				success: function(result) {
+                    // The result is an array in the format:
+                    // [{elementId: "name", value: "columnName"}, {elementId: "otherName", value: "column2"}]
+                    // Turn it into the more useful object:
+                    // {name: "columnName", otherName: "column2"}
+                    var mappings = {};
+                    for (var i = 0; i < result.length; ++i) {
+                        mappings[result[i].elementId] = result[i].value;
+                    }
+                    successCallback(mappings);
+                }
 			}
 		);
 	}

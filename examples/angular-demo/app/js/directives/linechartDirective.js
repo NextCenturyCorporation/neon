@@ -98,20 +98,20 @@ linechart.directive('linechart', ['ConnectionService', function(connectionServic
 			$scope.tableName = message.table;
 
 			// if there is no active connection, try to make one.
-			connectionService.connectToDataset(message.datastore, message.hostname, message.database);
+			connectionService.connectToDataset(message.datastore, message.hostname, message.database, message.table);
 
 			// Pull data.
 			var connection = connectionService.getActiveConnection();
 			if (connection) {
-				$scope.queryForData();
+                connectionService.loadMetadata(function() {
+                    $scope.queryForData();
+                });
 			}
 		};
 
 		var query = function(comparator, comparisionValue, callback) {
-			var xAxis = connectionService.getFieldMapping($scope.databaseName, $scope.tableName, "line-x-axis");
-				xAxis = xAxis.mapping;
-			var yAxis = connectionService.getFieldMapping($scope.databaseName, $scope.tableName, "y-axis")
-				yAxis = yAxis.mapping;
+			var xAxis = connectionService.getFieldMapping("line_x_axis");
+			var yAxis = connectionService.getFieldMapping("y_axis")
 
 			var query = new neon.query.Query()
 				.selectFrom($scope.databaseName, $scope.tableName)
@@ -132,10 +132,8 @@ linechart.directive('linechart', ['ConnectionService', function(connectionServic
 		};
 
 		$scope.queryForData = function() {
-			var xAxis = connectionService.getFieldMapping($scope.databaseName, $scope.tableName, "line-x-axis");
-				xAxis = xAxis.mapping;
-			var yAxis = connectionService.getFieldMapping($scope.databaseName, $scope.tableName, "y-axis")
-				yAxis = yAxis.mapping;
+			var xAxis = connectionService.getFieldMapping("line_x_axis");
+			var yAxis = connectionService.getFieldMapping("y_axis")
 
 			query('>', 0, function(posResults) {
 				//this prevents an error in older mongo caused when the xAxis value is invalid as it is not
@@ -226,10 +224,8 @@ linechart.directive('linechart', ['ConnectionService', function(connectionServic
 		}
 
 		var drawChart = function() {
-			var xAxis = connectionService.getFieldMapping($scope.databaseName, $scope.tableName, "line-x-axis");
-			xAxis = xAxis.mapping;
-			var yAxis = connectionService.getFieldMapping($scope.databaseName, $scope.tableName, "y-axis")
-			yAxis = yAxis.mapping;
+			var xAxis = connectionService.getFieldMapping("line_x_axis");
+			var yAxis = connectionService.getFieldMapping("y_axis")
 			if (!yAxis) {
 				yAxis = COUNT_FIELD_NAME;
 			}
