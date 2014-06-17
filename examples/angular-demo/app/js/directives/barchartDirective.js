@@ -84,10 +84,12 @@ barchart.directive('barchart', ['ConnectionService', '$timeout', function(connec
 		};
 
 		var onFiltersChanged = function(message) {
+			XDATA.activityLogger.logSystemActivity('BarChart - received neon filter changed event');
 			$scope.queryForData();
 		};
 
 		var onDatasetChanged = function(message) {
+			XDATA.activityLogger.logSystemActivity('BarChart - received neon dataset changed event');
             $scope.initializing = true;
 			$scope.databaseName = message.database;
 			$scope.tableName = message.table;
@@ -132,9 +134,12 @@ barchart.directive('barchart', ['ConnectionService', '$timeout', function(connec
 				query.aggregate(queryType, '*', COUNT_FIELD_NAME);
 			}
 
+			XDATA.activityLogger.logSystemActivity('BarChart - query for data');
 			connectionService.getActiveConnection().executeQuery(query, function(queryResults) {
 				$scope.$apply(function(){
+					XDATA.activityLogger.logSystemActivity('BarChart - received query data');
 					doDrawChart(queryResults);
+					XDATA.activityLogger.logSystemActivity('BarChart - rendered results');
 				});
 			});
 		};

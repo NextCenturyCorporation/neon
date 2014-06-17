@@ -39,9 +39,10 @@ fieldSelector.directive('fieldselector', ['ConnectionService', function(connecti
 			$scope.table = message.table;
 
 			connectionService.getActiveConnection().getFieldNames($scope.table, function(results) {
-
+				XDATA.activityLogger.logSystemActivity('FieldSelector - query for available fields');
 				$scope.$apply(function() {
 					$scope.fields = results;
+					XDATA.activityLogger.logSystemActivity('FieldSelector - received available fields');
 				});
 			});
 
@@ -50,9 +51,17 @@ fieldSelector.directive('fieldselector', ['ConnectionService', function(connecti
 			}
 		};
 
-		$scope.onSelectionChange = function() {
-
+		var onSelectionChange = function(newVal, oldVal) {
+			XDATA.activityLogger.logUserActivity('FieldSelector - user changed a field selection', 'select',
+                XDATA.activityLogger.WF_CREATE,
+                {
+                	"field": $scope.labelText,
+                    "to": newVal,
+                    "from": oldVal
+                });
 		};
+
+		$scope.$watch("targetVar", onSelectionChange);
 
 		// Wait for neon to be ready, the create our messenger and intialize the view and data.
 		neon.ready(function () {
