@@ -131,7 +131,9 @@ linechart.directive('linechart', ['ConnectionService', function(connectionServic
 				query.aggregate(queryType, '*', COUNT_FIELD_NAME);
 			}
 
-			connectionService.getActiveConnection().executeQuery(query, callback);
+			connectionService.getActiveConnection().executeQuery(query, callback, function() {
+				XDATA.activityLogger.logSystemActivity('LineChart - query failed');
+			});
 		};
 
 		$scope.queryForData = function() {
