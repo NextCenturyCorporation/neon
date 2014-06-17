@@ -40,6 +40,27 @@ metadata {
 				}
 			}
 		}
+        xdata {
+            logs {
+                angular_example {
+                    date {
+                        value = "timestamp"
+                    }
+                    line_x_axis {
+                        value = "timestamp"
+                    }
+                    bar_x_axis {
+                        value = "type"
+                    }
+                    y_axis {
+                        value = "_id"
+                    }
+                    sort_by {
+                        value = "timestamp"
+                    }
+                }
+            }
+        }
         test {
             earthquakes {
                 angular_example {
