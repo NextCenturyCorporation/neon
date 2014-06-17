@@ -71,10 +71,7 @@ describe('widgets', function () {
 
 
     it('gets widget dataset data', function () {
-        var expected =
-            [
-                {"elementId": "aSelector", "value": "someValue"}
-            ];
+        var expected = {"aSelector": "someValue"};
         var actual = executeAndWait(neon.widget.getWidgetDatasetMetadata, ['database1', 'table1', 'widget1']);
         runs(function () {
             expect(actual.get()).toEqual(expected);
@@ -84,7 +81,7 @@ describe('widgets', function () {
     it('gets empty widget dataset data if none exists', function () {
         var empty = executeAndWait(neon.widget.getWidgetDatasetMetadata, ['invalidDatabase', 'invalidWidget', 'invalidWidget']);
         runs(function () {
-            expect(empty.get().length).toEqual(0);
+            expect(empty.get()).toEqual({});
         });
     });
 
