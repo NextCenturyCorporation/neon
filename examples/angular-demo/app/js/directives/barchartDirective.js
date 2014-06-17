@@ -141,6 +141,8 @@ barchart.directive('barchart', ['ConnectionService', '$timeout', function(connec
 					doDrawChart(queryResults);
 					XDATA.activityLogger.logSystemActivity('BarChart - rendered results');
 				});
+			}, function() {
+				XDATA.activityLogger.logSystemActivity('BarChart - query failed');
 			});
 		};
 
