@@ -86,14 +86,17 @@ linechart.directive('linechart', ['ConnectionService', function(connectionServic
 		 * @private
 		 */
 		var onSelectionChanged = function(message) {
+			XDATA.activityLogger.logSystemActivity('LineChart - received neon selection changed event');
 			$scope.queryForData();
 		};
 
 		var onFiltersChanged = function(message) {
+			XDATA.activityLogger.logSystemActivity('LineChart - received neon filter changed event');
 			$scope.queryForData();
 		};
 
 		var onDatasetChanged = function(message) {
+			XDATA.activityLogger.logSystemActivity('LineChart - received neon dataset changed event');
 			$scope.databaseName = message.database;
 			$scope.tableName = message.table;
 
@@ -137,6 +140,7 @@ linechart.directive('linechart', ['ConnectionService', function(connectionServic
 			var yAxis = connectionService.getFieldMapping($scope.databaseName, $scope.tableName, "y-axis")
 				yAxis = yAxis.mapping;
 
+			XDATA.activityLogger.logSystemActivity('LineChart - query for data');
 			query('>', 0, function(posResults) {
 				//this prevents an error in older mongo caused when the xAxis value is invalid as it is not
 				//included as a key in the response
@@ -185,10 +189,11 @@ linechart.directive('linechart', ['ConnectionService', function(connectionServic
 						data: negResults,
 						classString: "negativeLine"
 					}];
-
+					XDATA.activityLogger.logSystemActivity('LineChart - query data received');
 					$scope.$apply(function(){
 						drawChart();
 						drawLine(data);
+						XDATA.activityLogger.logSystemActivity('LineChart - query data rendered');
 					});
 				});
 			});
