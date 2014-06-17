@@ -45,6 +45,7 @@ angular.module('filterBuilderDirective', []).directive('filterBuilder', ['Connec
 			 * @private
 			 */ 
 			var onConnectionChanged = function(message) {
+				XDATA.activityLogger.logSystemActivity('FilterBuilder - received neon connection changed event');
 				$scope.filterTable.clearFilterState();
 			};
 
@@ -57,6 +58,7 @@ angular.module('filterBuilderDirective', []).directive('filterBuilder', ['Connec
 			 * @private
 			 */ 
 			var onDatasetChanged = function(message) {
+				XDATA.activityLogger.logSystemActivity('FilterBuilder - received neon dataset changed event');
 				// Clear the filter table.
 				$scope.filterTable.clearFilterState();
 
@@ -70,10 +72,12 @@ angular.module('filterBuilderDirective', []).directive('filterBuilder', ['Connec
 				// Query for data only if we have an active connection.
 				var connection = connectionService.getActiveConnection();
 				if (connection) {
+					XDATA.activityLogger.logSystemActivity('FilterBuilder - query for available fields');
                 	connection.getFieldNames($scope.tableName, function(results) {
 					    $scope.$apply(function() {
 					        populateFieldNames(results);
 					        $scope.selectedField = results[0];
+					        XDATA.activityLogger.logSystemActivity('FilterBuilder - received available fields');
 					    });
 					});
                 }
