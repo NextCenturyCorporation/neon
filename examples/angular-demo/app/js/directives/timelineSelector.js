@@ -417,9 +417,9 @@ angular.module('timelineSelectorDirective', []).directive('timelineSelector', ['
                  * @method clearBrush
                  */
                 $scope.clearBrush = function () {
-                    XDATA.activityLogger.logUserActivity('Clear temporal filter', 'click',
+                    XDATA.activityLogger.logUserActivity('TimelineSelector - Clear temporal filter', 'click',
                         XDATA.activityLogger.WF_EXPLORE);
-                    XDATA.activityLogger.logSystemActivity('Removing Neon filter');
+                    XDATA.activityLogger.logSystemActivity('TimelineSelector - Removing Neon filter');
 
                     $scope.brush = [];
                     $scope.messenger.removeFilter($scope.filterKey);
@@ -428,7 +428,7 @@ angular.module('timelineSelectorDirective', []).directive('timelineSelector', ['
                 // Update the millis multipler when the granularity is changed.
                 $scope.$watch('granularity', function (newVal, oldVal) {
                     if (newVal && newVal !== oldVal) {
-                        XDATA.activityLogger.logUserActivity('Change timeline resolution', 'click',
+                        XDATA.activityLogger.logUserActivity('TimelineSelector - Change timeline resolution', 'click',
                             XDATA.activityLogger.WF_EXPLORE,
                             {
                                 "resolution": newVal
@@ -492,7 +492,7 @@ angular.module('timelineSelectorDirective', []).directive('timelineSelector', ['
                         var filterClause = neon.query.and.apply(this, clauses);
                         var filter = new neon.query.Filter().selectFrom($scope.databaseName, $scope.tableName).where(filterClause);
 
-                        XDATA.activityLogger.logSystemActivity('Create/Replace neon filter');
+                        XDATA.activityLogger.logSystemActivity('TimelineSelector - Create/Replace neon filter');
 
                         $scope.messenger.replaceFilter($scope.filterKey, filter, $scope.queryForChartData);
                     }
