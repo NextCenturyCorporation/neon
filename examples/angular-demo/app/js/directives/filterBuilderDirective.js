@@ -67,7 +67,7 @@ angular.module('filterBuilderDirective', []).directive('filterBuilder', ['Connec
 				$scope.tableName = message.table;
 
 				// if there is no active connection, try to make one.
-				connectionService.connectToDataset(message.datastore, message.hostname, message.database);
+				connectionService.connectToDataset(message.datastore, message.hostname, message.database, message.table);
 
 				// Query for data only if we have an active connection.
 				var connection = connectionService.getActiveConnection();
