@@ -35,7 +35,7 @@ linechart.directive('linechart', ['ConnectionService', function(connectionServic
 		el.addClass('linechartDirective');
 
 		var messenger = new neon.eventing.Messenger();
-		$scope.database = '';
+		$scope.databaseName = '';
 		$scope.tableName = '';
 		$scope.totalType = /*$scope.totalType ||*/ 'count';
 		$scope.fields = [];
@@ -86,32 +86,35 @@ linechart.directive('linechart', ['ConnectionService', function(connectionServic
 		 * @private
 		 */
 		var onSelectionChanged = function(message) {
+			XDATA.activityLogger.logSystemActivity('LineChart - received neon selection changed event');
 			$scope.queryForData();
 		};
 
 		var onFiltersChanged = function(message) {
+			XDATA.activityLogger.logSystemActivity('LineChart - received neon filter changed event');
 			$scope.queryForData();
 		};
 
 		var onDatasetChanged = function(message) {
+			XDATA.activityLogger.logSystemActivity('LineChart - received neon dataset changed event');
 			$scope.databaseName = message.database;
 			$scope.tableName = message.table;
 
 			// if there is no active connection, try to make one.
-			connectionService.connectToDataset(message.datastore, message.hostname, message.database);
+			connectionService.connectToDataset(message.datastore, message.hostname, message.database, message.table);
 
 			// Pull data.
 			var connection = connectionService.getActiveConnection();
 			if (connection) {
-				$scope.queryForData();
+                connectionService.loadMetadata(function() {
+                    $scope.queryForData();
+                });
 			}
 		};
 
 		var query = function(comparator, comparisionValue, callback) {
-			var xAxis = connectionService.getFieldMapping($scope.database, $scope.tableName, "line-x-axis");
-				xAxis = xAxis.mapping;
-			var yAxis = connectionService.getFieldMapping($scope.database, $scope.tableName, "y-axis")
-				yAxis = yAxis.mapping;
+			var xAxis = connectionService.getFieldMapping("line_x_axis");
+			var yAxis = connectionService.getFieldMapping("y_axis")
 
 			var query = new neon.query.Query()
 				.selectFrom($scope.databaseName, $scope.tableName)
@@ -128,15 +131,16 @@ linechart.directive('linechart', ['ConnectionService', function(connectionServic
 				query.aggregate(queryType, '*', COUNT_FIELD_NAME);
 			}
 
-			connectionService.getActiveConnection().executeQuery(query, callback);
+			connectionService.getActiveConnection().executeQuery(query, callback, function() {
+				XDATA.activityLogger.logSystemActivity('LineChart - query failed');
+			});
 		};
 
 		$scope.queryForData = function() {
-			var xAxis = connectionService.getFieldMapping($scope.database, $scope.tableName, "line-x-axis");
-				xAxis = xAxis.mapping;
-			var yAxis = connectionService.getFieldMapping($scope.database, $scope.tableName, "y-axis")
-				yAxis = yAxis.mapping;
+			var xAxis = connectionService.getFieldMapping("line_x_axis");
+			var yAxis = connectionService.getFieldMapping("y_axis")
 
+			XDATA.activityLogger.logSystemActivity('LineChart - query for data');
 			query('>', 0, function(posResults) {
 				//this prevents an error in older mongo caused when the xAxis value is invalid as it is not
 				//included as a key in the response
@@ -185,10 +189,11 @@ linechart.directive('linechart', ['ConnectionService', function(connectionServic
 						data: negResults,
 						classString: "negativeLine"
 					}];
-
+					XDATA.activityLogger.logSystemActivity('LineChart - query data received');
 					$scope.$apply(function(){
 						drawChart();
 						drawLine(data);
+						XDATA.activityLogger.logSystemActivity('LineChart - query data rendered');
 					});
 				});
 			});
@@ -226,10 +231,8 @@ linechart.directive('linechart', ['ConnectionService', function(connectionServic
 		}
 
 		var drawChart = function() {
-			var xAxis = connectionService.getFieldMapping($scope.database, $scope.tableName, "line-x-axis");
-			xAxis = xAxis.mapping;
-			var yAxis = connectionService.getFieldMapping($scope.database, $scope.tableName, "y-axis")
-			yAxis = yAxis.mapping;
+			var xAxis = connectionService.getFieldMapping("line_x_axis");
+			var yAxis = connectionService.getFieldMapping("y_axis")
 			if (!yAxis) {
 				yAxis = COUNT_FIELD_NAME;
 			}

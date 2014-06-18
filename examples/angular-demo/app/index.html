@@ -146,7 +146,11 @@
                             <!-- Sentiment chart -->
                             <div class="well">
                                 <div class="chart-options pull-right">
-                                    <a class="btn btn-lg text-muted collapsed" data-toggle="collapse" data-target="#chart-options" data-animation=false>
+                                    <a class="btn btn-lg text-muted collapsed draper" 
+                                        data-toggle="collapse" data-target="#chart-options" 
+                                        data-animation=false 
+                                        data-wf="4" 
+                                        data-description="Neon Demo - toggle chart Options">
                                       <span class="glyphicon glyphicon-cog"></span>
                                       <span class="caret"></span>
                                     </a>
@@ -161,10 +165,10 @@
                                                 </select>
                                             </div>
                                             <div class="form-group" ng-hide="chartType === 'line'">
-                                                <fieldselector target-var="xAxisField" label-text="'X axis:'" default-mapping="'bar-x-axis'"></fieldSelector>
+                                                <fieldselector target-var="xAxisField" label-text="'X axis:'" default-mapping="'bar_x_axis'"></fieldSelector>
                                             </div>
                                             <div class="form-group" ng-hide="chartType === 'line'">
-                                                <fieldselector target-var="yAxisField" label-text="'Y axis:'" default-mapping="'y-axis'"></fieldSelector>
+                                                <fieldselector target-var="yAxisField" label-text="'Y axis:'" default-mapping="'y_axis'"></fieldSelector>
                                             </div>
                                             <div class="form-group" ng-hide="chartType === 'line'">
                                                 <select ng-model="barType" class="form-control">
@@ -244,20 +248,22 @@
 
 		</div>
 
+		<!-- Including neon before angular here as neon has lodash and jquery wrapped into it.  If this is
+		     loaded first, angular should pick up the included jQuery. -->
+		<script src="/neon/js/neon.js"></script>
+		
+		<!-- Include the xdata logging package and our configuration thereof. -->
+		<script src="lib/draperlab/draper.activity_logger-2.0.js"></script>
+		<script src="js/xdata/xdataConfig.js"></script>
+
+		<script src="lib/jquery/jquery-1.11.0.min.js"></script>
 		<!-- In production use:
 		<script src="//ajax.googleapis.com/ajax/libs/angularjs/x.x.x/angular.min.js"></script>
 		-->
-
-		 <!-- Including neon before angular here as neon has lodash and jquery wrapped into it.  If this is
-			  loaded first, angular should pick up the included jQuery. -->
-		<script src="/neon/js/neon.js"></script>
-		
-
-		<script src="lib/jquery/jquery-1.11.0.min.js"></script>
 		<script src="lib/angular/angular.min.js"></script>
 
 		<!-- Include third party libs -->
-		<script src="lib/d3/d3.v3.min.js"></script>
+		<script src="lib/d3/d3.v3.min.js"></script>		
 
 		<script src="lib/openlayers/OpenLayers.js"></script>
 		<script src="lib/openlayers/heatmap/heatmap.js"></script>

@@ -36,6 +36,13 @@ angular.module('neonDemo.controllers', []).controller('neonDemoController', ['$s
          */
         $scope.toggleCreateFilters = function() {
             $scope.createFilters = !$scope.createFilters;
+            XDATA.activityLogger.logUserActivity('Neon Demo - Toggle custom filter display', 'click',
+                XDATA.activityLogger.WF_EXPLORE,
+                {
+                    from: !$scope.createFilters,
+                    to: $scope.createFilters
+                });
+
             if ($scope.createFilters && $scope.seeData) {
                 // using timeout here to execute a jquery event outside of apply().  This is necessary
                 // to avoid the event occuring within an apply() cycle and triggering another
@@ -56,6 +63,13 @@ angular.module('neonDemo.controllers', []).controller('neonDemoController', ['$s
          */
 		$scope.toggleSeeData = function() {
 			$scope.seeData = !$scope.seeData;
+            XDATA.activityLogger.logUserActivity('Neon Demo - Toggle data table display', 'click',
+                XDATA.activityLogger.WF_EXPLORE,
+                {
+                    from: !$scope.seeData,
+                    to: $scope.seeData
+                });
+
             if ($scope.createFilters && $scope.seeData) {
                 // using timeout here to execute a jquery event outside of apply().  This is necessary
                 // to avoid the event occuring within an apply() cycle and triggering another
@@ -72,6 +86,24 @@ angular.module('neonDemo.controllers', []).controller('neonDemoController', ['$s
         	return filterCountService.getCount();
         }, function(count) {
             $scope.filterCount = count;
+        });
+
+        $scope.$watch('chartType', function(newVal, oldVal) {
+            XDATA.activityLogger.logUserActivity('Neon Demo - Select chart type', 'select',
+                XDATA.activityLogger.WF_CREATE,
+                {
+                    from: oldVal,
+                    to: newVal
+                });
+        });
+
+        $scope.$watch('barType', function(newVal, oldVal) {
+            XDATA.activityLogger.logUserActivity('Neon Demo - Select aggregation type', 'select',
+                XDATA.activityLogger.WF_CREATE,
+                {
+                    from: oldVal,
+                    to: newVal
+                });
         });
 
 	}]);

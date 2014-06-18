@@ -15,24 +15,24 @@ databaseConfig.directive('databaseConfig', ['ConnectionService', function (conne
         $scope.activeServer = "Choose dataset";
         $scope.servers = [
             {
-                name: "Earthquake",
+                name: "Earthquakes",
                 datastoreSelect: "mongo",
                 hostnameInput: "localhost",
-                selectedDb: "mydb",
-                selectedTable: "sample"
+                selectedDb: "test",
+                selectedTable: "earthquakes"
             },
             {
                 name: "Twitter",
                 datastoreSelect: "mongo",
                 hostnameInput: "localhost",
-                selectedDb: "mydb",
+                selectedDb: "test",
                 selectedTable: "gbDate"
             },
             {
                 name: "Traffic",
                 datastoreSelect: "mongo",
                 hostnameInput: "localhost",
-                selectedDb: "mydb",
+                selectedDb: "test",
                 selectedTable: "most_active"
             }
         ];
@@ -44,6 +44,12 @@ databaseConfig.directive('databaseConfig', ['ConnectionService', function (conne
         }
 
         $scope.connectToDatastore = function () {
+            XDATA.activityLogger.logUserActivity('User selected new datastore',
+                'connect', XDATA.activityLogger.WF_GETDATA, {
+                    "datastore": $scope.datastoreSelect,
+                    "hostname": $scope.hostnameInput
+                });
+
             $scope.showDbTable = true;
 
             // Connect to the datastore.
@@ -71,6 +77,10 @@ databaseConfig.directive('databaseConfig', ['ConnectionService', function (conne
         };
 
         $scope.connectToPreset = function (server) {
+            XDATA.activityLogger.logUserActivity('User selected preset dataset',
+                'connect', XDATA.activityLogger.WF_GETDATA, {
+                    "preset": server.name
+                });
             // Change name of active connection.
             $scope.activeServer = server.name;
            
@@ -93,8 +103,11 @@ databaseConfig.directive('databaseConfig', ['ConnectionService', function (conne
         };
 
         $scope.selectDatabase = function () {
-            // $scope.connection.use($scope.selectedDb);
-            // $scope.connection.getTableNames(populateTableDropdown);
+            XDATA.activityLogger.logUserActivity('User selected new database',
+                'connect', XDATA.activityLogger.WF_GETDATA, {
+                    "database": $scope.selectedDb
+                });
+
             if ($scope.selectedDb) {
                 $scope.connection.use($scope.selectedDb);
                 $scope.connection.getTableNames(function(tables) {
@@ -106,6 +119,25 @@ databaseConfig.directive('databaseConfig', ['ConnectionService', function (conne
             else {
                 $scope.dbTables = [];
             }
+        };
+
+        $scope.selectTable = function () {
+            XDATA.activityLogger.logUserActivity('User selected new table',
+                'connect', XDATA.activityLogger.WF_GETDATA, {
+                    "table": $scope.selectedTable
+                });
+        };
+
+        $scope.selectTable = function () {
+            XDATA.activityLogger.logUserActivity('User selected new table',
+                'connect', XDATA.activityLogger.WF_GETDATA, {
+                    "table": $scope.selectedTable
+                });
+        };
+
+        $scope.openedCustom = function () {
+            XDATA.activityLogger.logUserActivity('User opened custom connection dialog',
+                'connect', XDATA.activityLogger.WF_GETDATA);
         };
 
         var populateTableDropdown = function (tables) {
@@ -122,6 +154,13 @@ databaseConfig.directive('databaseConfig', ['ConnectionService', function (conne
             // Set active connection to Custom and connect.
             $scope.activeServer = "Custom";
             $scope.connectToDatabase();
+            XDATA.activityLogger.logUserActivity('User requested new dataset',
+                'connect', XDATA.activityLogger.WF_GETDATA, {
+                    "datastore": $scope.datastoreSelect,
+                    "hostname": $scope.hostnameInput,
+                    "database": $scope.selectedDb,
+                    "table": $scope.selectedTable
+                });
         };
 
         $scope.broadcastActiveDataset = function () {
@@ -131,9 +170,11 @@ databaseConfig.directive('databaseConfig', ['ConnectionService', function (conne
                 "datastore": $scope.datastoreSelect,
                 "hostname": $scope.hostnameInput,
                 "database": $scope.selectedDb,
-                "table": $scope.selectedTable,
+                "table": $scope.selectedTable
             };
             $scope.messenger.publish(neon.eventing.channels.ACTIVE_DATASET_CHANGED, message);
+            XDATA.activityLogger.logSystemActivity('Publishing Neon Active Dataset Change message',
+                message);
         }
 
         // Wait for neon to be ready, the create our messenger and intialize the view and data.

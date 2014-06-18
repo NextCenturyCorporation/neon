@@ -151,6 +151,9 @@ jettyRun {
     }
 }
 
+[jettyRun, jettyStop]*.stopPort = 8081;
+[jettyRun, jettyStop]*.stopKey = 'neon-jetty';
+
 [jettyRun, jettyRunWar, transformTestWebService, acceptanceTestWar, concurrencyTestWar]*.with {
     /**
      * THIS IS A WORKAROUND FOR JETTY LOCKING STATIC HTML FILES ON WINDOWS

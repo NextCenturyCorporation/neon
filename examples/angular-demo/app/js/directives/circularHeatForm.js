@@ -116,6 +116,7 @@ angular.module('circularHeatFormDirective', []).directive('circularHeatForm', ['
 			 * @private
 			 */ 
 			var onFiltersChanged = function(message) {
+				XDATA.activityLogger.logSystemActivity('CircularHeatForm - received neon filter changed event');
 				$scope.queryForChartData();
 			};
 
@@ -128,16 +129,20 @@ angular.module('circularHeatFormDirective', []).directive('circularHeatForm', ['
 			 * @private
 			 */ 
 			var onDatasetChanged = function(message) {
+				XDATA.activityLogger.logSystemActivity('CircularHeatForm - received neon dataset changed event');
+
 				$scope.databaseName = message.database;
 				$scope.tableName = message.table;
 
 				// if there is no active connection, try to make one.
-				connectionService.connectToDataset(message.datastore, message.hostname, message.database);
+				connectionService.connectToDataset(message.datastore, message.hostname, message.database, message.table);
 
 				// Pull data.
 				var connection = connectionService.getActiveConnection();
 				if (connection) {
-					$scope.queryForChartData();
+                    connectionService.loadMetadata(function() {
+                        $scope.queryForChartData();
+                    });
 				}
 			};
 
@@ -149,8 +154,8 @@ angular.module('circularHeatFormDirective', []).directive('circularHeatForm', ['
 				// TODO: Decide how to pass in field mappings.  We can do this through a controller or the
 				// connection service or some mapping service.  Two example below, one commented out.
 				//var dateField = $scope.getDateField();
-				var dateField = connectionService.getFieldMapping($scope.databaseName, $scope.tableName, "date");
-				dateField = dateField.mapping || DEFAULT_DATE_FIELD;
+				var dateField = connectionService.getFieldMapping("date");
+				dateField = dateField || DEFAULT_DATE_FIELD;
 
 				if (!dateField) {
 					$scope.updateChartData({data: []});
@@ -174,9 +179,12 @@ angular.module('circularHeatFormDirective', []).directive('circularHeatForm', ['
 				// If updateChartData is called from within angular code or triggered by handler within angular,
 				// then the apply is handled by angular.  Forcing apply inside updateChartData instead is error prone as it
 				// may cause an apply within a digest cycle when triggered by an angular event.
+				XDATA.activityLogger.logSystemActivity('CircularHeatForm - query for data');
 				connectionService.getActiveConnection().executeQuery(query, function(queryResults) {
+					XDATA.activityLogger.logSystemActivity('CircularHeatForm - data received');
 					$scope.$apply(function(){
 						$scope.updateChartData(queryResults);
+						XDATA.activityLogger.logSystemActivity('CircularHeatForm - display updated');
 					});
 				});
 

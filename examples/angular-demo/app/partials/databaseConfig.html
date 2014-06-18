@@ -11,7 +11,7 @@
 
       <li class="divider"></li>
       <li ng-class="{true: 'active', false: ''}[activeServer == 'Custom' || !(servers.length > 0)]">
-        <a data-toggle="modal" href="#customConnectionModal" >Custom...</a>
+        <a data-toggle="modal" href="#customConnectionModal" ng-click="openedCustom()">Custom...</a>
       </li>
 
     </ul>
@@ -44,7 +44,7 @@
               <label for="datastore-select">Datastore Type</label>
               <select id="datastore-select" class="form-control" ng-model="datastoreSelect">
       					<option value="mongo">Mongo</option>
-      					<option value="hive">Hive</option>
+      					<option value="shark">Shark</option>
       				</select>
             </div>
 
@@ -83,7 +83,7 @@
 
             <div class="form-group">
               <label for="table-select">Table Name</label>
-              <select id="table-select" class="form-control" ng-model="selectedTable" ng-disabled="!(dbTables.length > 0)" ng-options="table for table in dbTables">
+              <select id="table-select" class="form-control" ng-change="selectTable()" ng-model="selectedTable" ng-disabled="!(dbTables.length > 0)" ng-options="table for table in dbTables">
                 <option value="">Select Table</option>
               </select>
             </div>

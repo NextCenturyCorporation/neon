@@ -84,33 +84,35 @@ barchart.directive('barchart', ['ConnectionService', '$timeout', function(connec
 		};
 
 		var onFiltersChanged = function(message) {
+			XDATA.activityLogger.logSystemActivity('BarChart - received neon filter changed event');
 			$scope.queryForData();
 		};
 
 		var onDatasetChanged = function(message) {
+			XDATA.activityLogger.logSystemActivity('BarChart - received neon dataset changed event');
             $scope.initializing = true;
 			$scope.databaseName = message.database;
 			$scope.tableName = message.table;
 
 			// if there is no active connection, try to make one.
-			connectionService.connectToDataset(message.datastore, message.hostname, message.database);
+			connectionService.connectToDataset(message.datastore, message.hostname, message.database, message.table);
 
 			// Pull data.
 			var connection = connectionService.getActiveConnection();
             $timeout(function() {
                 $scope.initializing = false;
                 if (connection) {
-                	$scope.queryForData();
+                    connectionService.loadMetadata(function() {
+                        $scope.queryForData();
+                    });
                 }
             });
 
 		};
 
 		$scope.queryForData = function() {
-			var xAxis = connectionService.getFieldMapping($scope.database, $scope.tableName, "bar-x-axis");
-			    xAxis = $scope.attrX || xAxis.mapping;
-			var yAxis = connectionService.getFieldMapping($scope.database, $scope.tableName, "y-axis")
-			    yAxis = $scope.attrY || yAxis.mapping;
+			var xAxis = $scope.attrX || connectionService.getFieldMapping("bar_x_axis");
+			var yAxis = $scope.attrY || connectionService.getFieldMapping("y_axis")
 
 			var query = new neon.query.Query()
 				.selectFrom($scope.databaseName, $scope.tableName)
@@ -132,10 +134,15 @@ barchart.directive('barchart', ['ConnectionService', '$timeout', function(connec
 				query.aggregate(queryType, '*', COUNT_FIELD_NAME);
 			}
 
+			XDATA.activityLogger.logSystemActivity('BarChart - query for data');
 			connectionService.getActiveConnection().executeQuery(query, function(queryResults) {
 				$scope.$apply(function(){
+					XDATA.activityLogger.logSystemActivity('BarChart - received query data');
 					doDrawChart(queryResults);
+					XDATA.activityLogger.logSystemActivity('BarChart - rendered results');
 				});
+			}, function() {
+				XDATA.activityLogger.logSystemActivity('BarChart - query failed');
 			});
 		};
 
@@ -149,10 +156,8 @@ barchart.directive('barchart', ['ConnectionService', '$timeout', function(connec
 				$scope.chart.destroy();	
 			}
 
-			var xAxis = connectionService.getFieldMapping($scope.database, $scope.tableName, "bar-x-axis");
-			    xAxis = $scope.attrX || xAxis.mapping;
-			var yAxis = connectionService.getFieldMapping($scope.database, $scope.tableName, "y-axis")
-			    yAxis = $scope.attrY || yAxis.mapping;
+			var xAxis = $scope.attrX || connectionService.getFieldMapping("bar_x_axis");
+			var yAxis = $scope.attrY || connectionService.getFieldMapping("y_axis");
 
 			if (!yAxis) {
 				yAxis = COUNT_FIELD_NAME;

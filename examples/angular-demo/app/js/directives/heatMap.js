@@ -221,26 +221,28 @@ angular.module('heatMapDirective', []).directive('heatMap', ['ConnectionService'
                     $scope.hideClearFilterButton();
 
                     // if there is no active connection, try to make one.
-                    connectionService.connectToDataset(message.datastore, message.hostname, message.database);
+                    connectionService.connectToDataset(message.datastore, message.hostname, message.database, message.table);
 
                     // Query for data only if we have an active connection.
                     var connection = connectionService.getActiveConnection();
                     if (connection) {
-                        // Repopulate the field selectors and get the default values.
-                        connection.getFieldNames($scope.tableName, function (results) {
-                            $scope.$apply(function () {
-                                populateFieldNames(results);
-                                $scope.latitudeField = connectionService.getFieldMapping($scope.database, $scope.tableName, "latitude");
-                                $scope.latitudeField = $scope.latitudeField.mapping || $scope.fields[0];
-                                $scope.longitudeField = connectionService.getFieldMapping($scope.database, $scope.tableName, "longitude");
-                                $scope.longitudeField = $scope.longitudeField.mapping || $scope.fields[0];
-                                $scope.colorByField = connectionService.getFieldMapping($scope.database, $scope.tableName, "color-by");
-                                $scope.colorByField = $scope.colorByField.mapping || $scope.fields[0];
-                                $scope.sizeByField = connectionService.getFieldMapping($scope.database, $scope.tableName, "size-by");
-                                $scope.sizeByField = $scope.sizeByField.mapping || $scope.fields[0];
-                                $timeout(function () {
-                                    $scope.initializing = false;
-                                    $scope.queryForMapData();
+                        connectionService.loadMetadata(function() {
+                            // Repopulate the field selectors and get the default values.
+                            connection.getFieldNames($scope.tableName, function (results) {
+                                $scope.$apply(function () {
+                                    populateFieldNames(results);
+                                    $scope.latitudeField = connectionService.getFieldMapping("latitude");
+                                    $scope.latitudeField = $scope.latitudeField || $scope.fields[0];
+                                    $scope.longitudeField = connectionService.getFieldMapping("longitude");
+                                    $scope.longitudeField = $scope.longitudeField || $scope.fields[0];
+                                    $scope.colorByField = connectionService.getFieldMapping("color_by");
+                                    $scope.colorByField = $scope.colorByField || $scope.fields[0];
+                                    $scope.sizeByField = connectionService.getFieldMapping("size_by");
+                                    $scope.sizeByField = $scope.sizeByField || $scope.fields[0];
+                                    $timeout(function () {
+                                        $scope.initializing = false;
+                                        $scope.queryForMapData();
+                                    });
                                 });
                             });
                         });
