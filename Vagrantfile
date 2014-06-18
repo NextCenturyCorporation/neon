@@ -1,7 +1,5 @@
-# -*- mode: ruby -*-
-# vi: set ft=ruby :
+require 'vagrant-openstack-plugin'
 
-# Vagrantfile API/syntax version. Don't touch unless you know what you're doing!
 VAGRANTFILE_API_VERSION = "2"
 
 $addMongoRepo = <<ADDMONGOREPO
@@ -17,6 +15,17 @@ $addTomcatRepo = <<ADDTOMCATREPO
 ADDTOMCATREPO
 
 Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
+	
+	config.vm.provider :openstack do |os|
+		#os.username     = "YOUR USERNAME"          # e.g. "#{ENV['OS_USERNAME']}"
+		#os.api_key      = "YOUR API KEY"           # e.g. "#{ENV['OS_PASSWORD']}"
+		#os.flavor       = /m1.tiny/                # Regex or String
+		#os.image        = /Ubuntu/                 # Regex or String
+		#os.endpoint     = "KEYSTONE AUTH URL"      # e.g. "#{ENV['OS_AUTH_URL']}/tokens"
+		#os.keypair_name = "YOUR KEYPAIR NAME"      # as stored in Nova
+		#os.ssh_username = "SSH USERNAME"           # login for the VM
+	end
+
 	config.vm.box = "puppetlabs/centos-6.5-64-puppet"
 
 	config.vm.provision "shell", inline: $addMongoRepo
