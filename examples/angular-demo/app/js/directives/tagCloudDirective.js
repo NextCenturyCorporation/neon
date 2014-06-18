@@ -42,6 +42,10 @@ angular.module('tagCloudDirective', []).directive('tagCloud', ['ConnectionServic
                     // data will be a list of tag name/counts in descending order
                     $scope.data = [];
 
+                    // optionsDisplayed is used merely to track the display of the options menu
+                    // for usability and workflow analysis.
+                    $scope.optionsDisplayed = false;
+
                     $scope.filterKey = neon.widget.getInstanceId("tagcloud");
                     $scope.filterTags = [];
                     $scope.showFilter = false;
@@ -72,6 +76,7 @@ angular.module('tagCloudDirective', []).directive('tagCloud', ['ConnectionServic
                  * @private
                  */
                 var onFiltersChanged = function (message) {
+                    XDATA.activityLogger.logSystemActivity('TagCloud - received neon filter changed event');
                     $scope.queryForTags();
                 };
 
@@ -84,6 +89,7 @@ angular.module('tagCloudDirective', []).directive('tagCloud', ['ConnectionServic
                  * @private
                  */
                 var onDatasetChanged = function (message) {
+                    XDATA.activityLogger.logSystemActivity('TagCloud - received neon dataset changed event');
                     $scope.databaseName = message.database;
                     $scope.tableName = message.table;
 
@@ -109,11 +115,18 @@ angular.module('tagCloudDirective', []).directive('tagCloud', ['ConnectionServic
                         if (connection) {
                             var host = connection.host_;
                             var url = neon.serviceUrl('mongotagcloud', 'tagcounts', 'host=' + host + "&db=" + $scope.databaseName + "&collection=" + $scope.tableName + "&arrayfield=" + $scope.tagField + "&limit=40");
+
+                            XDATA.activityLogger.logSystemActivity('TagCloud - query for tag data');
                             neon.util.ajaxUtils.doGet(url, {
                                 success: function (tagCounts) {
+                                    XDATA.activityLogger.logSystemActivity('TagCloud - received tag data');
                                     $scope.$apply(function () {
                                         $scope.updateTagData(tagCounts)
+                                        XDATA.activityLogger.logSystemActivity('TagCloud - rendered tag data');
                                     });
+                                },
+                                error: function() {
+                                    XDATA.activityLogger.logSystemActivity('TagCloud - failed to receive tag data');
                                 }
                             });
                         }
@@ -147,6 +160,11 @@ angular.module('tagCloudDirective', []).directive('tagCloud', ['ConnectionServic
                  * @method addTagFilter
                  */
                 $scope.addTagFilter = function(tagName) {
+                    XDATA.activityLogger.logUserActivity('TagCloud - user added a tag as a filter', 'click',
+                        XDATA.activityLogger.WF_EXPLORE,
+                        {
+                            tag: tagName
+                        });
                     if ($scope.filterTags.indexOf(tagName) === -1) {
                         $scope.filterTags.push(tagName);
                     }
@@ -192,14 +210,18 @@ angular.module('tagCloudDirective', []).directive('tagCloud', ['ConnectionServic
                  * @method applyFilter
                  */
                 $scope.applyFilter = function(filter) {
+                    XDATA.activityLogger.logSystemActivity('TagCloud - applying neon filter based on updated tag selections');
                     $scope.messenger.replaceFilter($scope.filterKey, filter, function () {
+                        XDATA.activityLogger.logSystemActivity('TagCloud - applied neon filter');
                         $scope.$apply(function () {
                             $scope.queryForTags();
                             // Show the Clear Filter button.
                             $scope.showFilter = true;
                             $scope.error = "";
+                            XDATA.activityLogger.logSystemActivity('TagCloud - rendered updated cloud');
                         });
                     }, function () {
+                        XDATA.activityLogger.logSystemActivity('TagCloud - failed to apply neon filter');
                         // Notify the user of the error.
                         $scope.error = "Error: Failed to apply the filter.";
                     });
@@ -229,14 +251,39 @@ angular.module('tagCloudDirective', []).directive('tagCloud', ['ConnectionServic
                  * @method removeFilter
                  */
                 $scope.removeFilter = function(tagName) {
+                    XDATA.activityLogger.logUserActivity('TagCloud - user removed a tag as a filter', 'click',
+                        XDATA.activityLogger.WF_EXPLORE,
+                        {
+                            tag: tagName
+                        });
                     $scope.filterTags = _.without($scope.filterTags, tagName)
+                };
+
+                $scope.toggleOptionsDisplay = function() {
+                    $scope.optionsDisplayed = !$scope.optionsDisplayed;
                 };
 
                 // Toggle the points and clusters view when the user toggles between them.
                 $scope.$watch('andTags', function (newVal, oldVal) {
+                    XDATA.activityLogger.logUserActivity('TagCloud - user toggled tag combination', 'click',
+                        XDATA.activityLogger.WF_EXPLORE,
+                        {
+                            and: newVal,
+                            or: !newVal
+                        });
                     if (newVal !== oldVal) {
                         $scope.setTagFilter($scope.filterTags);
                     }
+                });
+
+                // Log whenever the user toggles the options display.
+                $scope.$watch('optionsDisplayed', function(newVal, oldVal) {
+                    XDATA.activityLogger.logUserActivity('TagCloud - user toggled options display', 'click',
+                        XDATA.activityLogger.WF_EXPLORE,
+                        {
+                            from: oldVal,
+                            to: newVal
+                        });
                 });
 
                 // Wait for neon to be ready, the create our messenger and intialize the view and data.
