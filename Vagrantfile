@@ -1,5 +1,3 @@
-require 'vagrant-openstack-plugin'
-
 VAGRANTFILE_API_VERSION = "2"
 
 $addMongoRepo = <<ADDMONGOREPO
@@ -17,6 +15,8 @@ ADDTOMCATREPO
 Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
 	
 	config.vm.provider :openstack do |os|
+		require 'vagrant-openstack-plugin'
+		
 		#os.username     = "YOUR USERNAME"          # e.g. "#{ENV['OS_USERNAME']}"
 		#os.api_key      = "YOUR API KEY"           # e.g. "#{ENV['OS_PASSWORD']}"
 		#os.flavor       = /m1.tiny/                # Regex or String

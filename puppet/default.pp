@@ -4,9 +4,7 @@ class open8080 {
 	exec { "addRule":
 		command => "iptables -I INPUT 1 -p tcp --dport 8080 -j ACCEPT && \
 				service iptables save && \
-				iptables -L && \
-				service iptables restart && \
-				iptables -L",
+				service iptables restart"
 		path => ["/bin/", "/sbin/", "/usr/bin/", "/usr/sbin/"],
 	}
 }
