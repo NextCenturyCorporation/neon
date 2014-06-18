@@ -1,0 +1,12 @@
+# Be sure to enable the distro specific repository for your distro below:
+# - jpackage-fc for Fedora Core
+# - jpackage-rhel for Red Hat Enterprise Linux and derivatives
+
+[jpackage-generic]
+name=JPackage (free), generic
+mirrorlist=http://www.jpackage.org/mirrorlist.php?dist=generic&type=free&release=6.0
+failovermethod=priority
+gpgcheck=1
+gpgkey=http://www.jpackage.org/jpackage.asc
+enabled=1
+
