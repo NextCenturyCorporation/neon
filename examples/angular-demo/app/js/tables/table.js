@@ -123,6 +123,7 @@ tables.Table.appendGeneratedId_ = function (data) {
 tables.Table.prototype.createDataView_ = function (data) {
     var dataView = new Slick.Data.DataView();
     dataView.setItems(data, this.idField_);
+
     return dataView;
 };
 
@@ -190,6 +191,34 @@ tables.Table.prototype.draw = function () {
     this.table_ = new Slick.Grid(this.tableSelector_, this.dataView_, this.columns_, this.options_);
     this.addSortSupport_();
     this.table_.registerPlugin(new Slick.AutoTooltips({ enableForHeaderCells: true }));
+
+    // Setup some event loggers.
+    this.table_.onColumnsResized.subscribe(function(e,args){
+        XDATA.activityLogger.logUserActivity('Grid - user resized columns', 'resize',
+            XDATA.activityLogger.WF_EXPLORE);
+    });
+
+    // Setup some event loggers.
+    this.table_.onColumnsReordered.subscribe(function(e,args){
+        XDATA.activityLogger.logUserActivity('Grid - user reordered columns', 'reorder',
+            XDATA.activityLogger.WF_EXPLORE);
+    });
+
+    // Setup some event loggers.
+    this.table_.onScroll.subscribe(function(e,args){
+        XDATA.activityLogger.logUserActivity('Grid - user scrolled data view', 'scroll',
+            XDATA.activityLogger.WF_EXPLORE);
+    });
+
+    // Setup some event loggers.
+    this.table_.onSort.subscribe(function(e,args){
+        XDATA.activityLogger.logUserActivity('Grid - user sorted column', e.type,
+            XDATA.activityLogger.WF_EXPLORE, {
+                column: args.sortCol.field,
+                sortAsc: args.sortAsc,
+                multicolumnSort: args.multiColumnSort
+            });
+    });
 
     return this;
 };

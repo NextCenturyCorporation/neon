@@ -25,14 +25,14 @@ databaseConfig.directive('databaseConfig', ['ConnectionService', function (conne
                 name: "Twitter",
                 datastoreSelect: "mongo",
                 hostnameInput: "localhost",
-                selectedDb: "mydb",
+                selectedDb: "test",
                 selectedTable: "gbDate"
             },
             {
                 name: "Traffic",
                 datastoreSelect: "mongo",
                 hostnameInput: "localhost",
-                selectedDb: "mydb",
+                selectedDb: "test",
                 selectedTable: "most_active"
             }
         ];
