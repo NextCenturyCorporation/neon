@@ -2,7 +2,8 @@
     <h4 class="sr-only">Popular Hashtags</h4>
     <div class="filter-tags" ng-class="{true: '', false: 'hidden'}[showFilter]">
         <div class="chart-options pull-right">
-            <a class="btn btn-lg text-muted collapsed" data-toggle="collapse" data-target="#tag-options" data-animation=false>
+            <a class="btn btn-lg text-muted collapsed" data-toggle="collapse" data-target="#tag-options" data-animation=false
+              ng-click="toggleOptionsDisplay()">
               <span class="glyphicon glyphicon-cog"></span>
               <span class="caret"></span>
             </a>

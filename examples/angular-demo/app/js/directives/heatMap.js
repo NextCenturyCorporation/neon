@@ -63,6 +63,10 @@ angular.module('heatMapDirective', []).directive('heatMap', ['ConnectionService'
                     $scope.showFilter = false;
                     $scope.dataBounds = undefined;
 
+                    // optionsDisplayed is used merely to track the display of the options menu
+                    // for usability and workflow analysis.
+                    $scope.optionsDisplayed = false;
+
                     // Setup our map.
                     $scope.mapId = uuid();
                     element.append('<div id="' + $scope.mapId + '" class="map"></div>');
@@ -74,7 +78,10 @@ angular.module('heatMapDirective', []).directive('heatMap', ['ConnectionService'
                     });
 
                     $scope.draw();
-                    $scope.map.register("moveend", this, onMoved);
+                    $scope.map.register("moveend", this, onMapEvent);
+                    $scope.map.register("zoomend", this, onMapEvent);
+                    $scope.map.register("mouseover", this, onMapEvent);
+                    $scope.map.register("mouseout", this, onMapEvent);
 
                     // Setup our messenger.
                     $scope.messenger = new neon.eventing.Messenger();
@@ -90,6 +97,12 @@ angular.module('heatMapDirective', []).directive('heatMap', ['ConnectionService'
                     // Setup the control watches.
                     // Update the latitude field used by the map.
                     $scope.$watch('latitudeField', function (newVal, oldVal) {
+                        XDATA.activityLogger.logUserActivity('HeatMap - selected latitude field', 'select',
+                            XDATA.activityLogger.WF_CREATE,
+                            {
+                                from: oldVal,
+                                to: newVal
+                            });
                         if (newVal && newVal !== oldVal) {
                             $scope.map.latitudeMapping = newVal;
                             $scope.draw();
@@ -98,6 +111,12 @@ angular.module('heatMapDirective', []).directive('heatMap', ['ConnectionService'
 
                     // Update the longitude field used by the map.
                     $scope.$watch('longitudeField', function (newVal, oldVal) {
+                        XDATA.activityLogger.logUserActivity('HeatMap - selected longitude field', 'select',
+                            XDATA.activityLogger.WF_CREATE,
+                            {
+                                from: oldVal,
+                                to: newVal
+                            });
                         if (newVal && newVal !== oldVal) {
                             $scope.map.longitudeMapping = newVal;
                             $scope.draw();
@@ -106,6 +125,12 @@ angular.module('heatMapDirective', []).directive('heatMap', ['ConnectionService'
 
                     // Update the sizing field used by the map.
                     $scope.$watch('sizeByField', function (newVal, oldVal) {
+                        XDATA.activityLogger.logUserActivity('HeatMap - selected sizeBy field', 'select',
+                            XDATA.activityLogger.WF_CREATE,
+                            {
+                                from: oldVal,
+                                to: newVal
+                            });
                         if (newVal !== oldVal) {
                             if (newVal) {
                                 $scope.map.sizeMapping = newVal;
@@ -120,6 +145,12 @@ angular.module('heatMapDirective', []).directive('heatMap', ['ConnectionService'
 
                     // Update the coloring field used by the map.
                     $scope.$watch('colorByField', function (newVal, oldVal) {
+                        XDATA.activityLogger.logUserActivity('HeatMap - selected colorBy field', 'select',
+                            XDATA.activityLogger.WF_CREATE,
+                            {
+                                from: oldVal,
+                                to: newVal
+                            });
                         $scope.map.resetColorMappings();
                         if (newVal !== oldVal) {
                             if (newVal) {
@@ -134,6 +165,12 @@ angular.module('heatMapDirective', []).directive('heatMap', ['ConnectionService'
 
                     // Toggle the points and clusters view when the user toggles between them.
                     $scope.$watch('showPoints', function (newVal, oldVal) {
+                        XDATA.activityLogger.logUserActivity('HeatMap - user toggled visible map layer', 'toggle_layer',
+                            XDATA.activityLogger.WF_CREATE,
+                            {
+                                points: newVal,
+                                clusters: !newVal
+                            });
                         if (newVal !== oldVal) {
                             $scope.map.toggleLayers();
                         }
@@ -141,6 +178,12 @@ angular.module('heatMapDirective', []).directive('heatMap', ['ConnectionService'
 
                     // Handle toggling map caching.
                     $scope.$watch('cacheMap', function (newVal, oldVal) {
+                        XDATA.activityLogger.logUserActivity('HeatMap - user enabled/disabled map caching', 'click',
+                            XDATA.activityLogger.WF_CREATE,
+                            {
+                                pointsLayer: newVal,
+                                heatMapLayer: !newVal
+                            });
                         if (newVal !== oldVal) {
                             if (newVal) {
                                 $scope.map.clearCache();
@@ -152,12 +195,21 @@ angular.module('heatMapDirective', []).directive('heatMap', ['ConnectionService'
                         }
                     });
 
+                    // Log whenever the user toggles the options display.
+                    $scope.$watch('optionsDisplayed', function(newVal, oldVal) {
+                        XDATA.activityLogger.logUserActivity('HeatMap - user toggled options display', 'click',
+                            XDATA.activityLogger.WF_EXPLORE,
+                            {
+                                from: oldVal,
+                                to: newVal
+                            });
+                    });
+
                 };
 
-                var onMoved = function (message) {
-                    // Commenting out for now until we decide whether or not to filter data queries based on visible area.
-                    // May need to make this a user-toggleable capability.
-                    // $scope.queryForMapData();
+                var onMapEvent = function (message) {
+                    XDATA.activityLogger.logUserActivity('HeatMap - user interacted with map', message.type,
+                            XDATA.activityLogger.WF_EXPLORE);
                 };
 
                 /**
@@ -167,13 +219,19 @@ angular.module('heatMapDirective', []).directive('heatMap', ['ConnectionService'
                  * @private
                  */
                 var onFiltersChanged = function (message) {
+                    XDATA.activityLogger.logSystemActivity('HeatMap - received neon filter changed event');
                     $scope.queryForMapData();
                 };
 
                 var onZoomChanged = function (bounds) {
                     var extent = boundsToExtent(bounds);
                     var filter = $scope.createFilterFromExtent(extent);
+
+                    XDATA.activityLogger.logUserActivity('HeatMap - user defined geographic filter area', 'drag',
+                        XDATA.activityLogger.WF_EXPLORE, extent);
+                    XDATA.activityLogger.logSystemActivity('HeatMap - applying neon filter based on users geographic selection');
                     $scope.messenger.replaceFilter($scope.filterKey, filter, function () {
+                        XDATA.activityLogger.logSystemActivity('HeatMap - applied neon filter');
                         $scope.$apply(function () {
                             $scope.queryForMapData();
                             drawZoomRect({
@@ -186,8 +244,10 @@ angular.module('heatMapDirective', []).directive('heatMap', ['ConnectionService'
                             // Show the Clear Filter button.
                             $scope.showFilter = true;
                             $scope.error = "";
+                            XDATA.activityLogger.logSystemActivity('HeatMap - rendered filter graphic');
                         });
                     }, function () {
+                        XDATA.activityLogger.logSystemActivity('HeatMap - Failed to apply neon filter');
                         // Notify the user of the error.
                         $scope.error = "Error: Failed to create filter.";
                     });
@@ -202,6 +262,7 @@ angular.module('heatMapDirective', []).directive('heatMap', ['ConnectionService'
                  * @private
                  */
                 var onDatasetChanged = function (message) {
+                    XDATA.activityLogger.logSystemActivity('HeatMap - received neon dataset changed event');
                     $scope.initializing = true;
                     $scope.databaseName = message.database;
                     $scope.tableName = message.table;
@@ -228,8 +289,10 @@ angular.module('heatMapDirective', []).directive('heatMap', ['ConnectionService'
                     if (connection) {
                         connectionService.loadMetadata(function() {
                             // Repopulate the field selectors and get the default values.
+                            XDATA.activityLogger.logSystemActivity('HeatMap - query for data field names');
                             connection.getFieldNames($scope.tableName, function (results) {
                                 $scope.$apply(function () {
+                                    XDATA.activityLogger.logSystemActivity('HeatMap - data field names received');
                                     populateFieldNames(results);
                                     $scope.latitudeField = connectionService.getFieldMapping("latitude");
                                     $scope.latitudeField = $scope.latitudeField || $scope.fields[0];
@@ -239,6 +302,8 @@ angular.module('heatMapDirective', []).directive('heatMap', ['ConnectionService'
                                     $scope.colorByField = $scope.colorByField || $scope.fields[0];
                                     $scope.sizeByField = connectionService.getFieldMapping("size_by");
                                     $scope.sizeByField = $scope.sizeByField || $scope.fields[0];
+                                    XDATA.activityLogger.logSystemActivity('HeatMap - field selectors updated');
+
                                     $timeout(function () {
                                         $scope.initializing = false;
                                         $scope.queryForMapData();
@@ -302,9 +367,14 @@ angular.module('heatMapDirective', []).directive('heatMap', ['ConnectionService'
                 $scope.queryForMapData = function () {
                     if (!$scope.initializing && $scope.latitudeField !== "" && $scope.longitudeField !== "") {
                         var query = $scope.buildQuery();
+                        XDATA.activityLogger.logSystemActivity('HeatMap - query for map data');
                         connectionService.getActiveConnection().executeQuery(query, function (queryResults) {
                             $scope.$apply(function () {
+                                XDATA.activityLogger.logSystemActivity('HeatMap - map data received');
                                 $scope.updateMapData(queryResults);
+                                XDATA.activityLogger.logSystemActivity('HeatMap - rendered map data');
+                            }, function() {
+                                XDATA.activityLogger.logSystemActivity('HeatMap - Failed to receive map data');
                             });
                         });
                     }
@@ -447,17 +517,25 @@ angular.module('heatMapDirective', []).directive('heatMap', ['ConnectionService'
                  * @method clearFilter
                  */
                 $scope.clearFilter = function () {
+                    XDATA.activityLogger.logSystemActivity('HeatMap - removing neon filter based on users geographic selection');
                     $scope.messenger.removeFilter($scope.filterKey, function () {
                         $scope.$apply(function () {
+                            XDATA.activityLogger.logSystemActivity('HeatMap - geographic neon filter removed');
                             clearZoomRect();
                             $scope.queryForMapData();
                             $scope.hideClearFilterButton();
                             $scope.zoomToDataBounds();
+                            XDATA.activityLogger.logSystemActivity('HeatMap - removed filter graphics');
                         });
                     }, function () {
+                        XDATA.activityLogger.logSystemActivity('HeatMap - Failed to remove neon filter based on users geographic selection');
                         // Notify the user of the error.
                         $scope.error = "Error: Failed to clear filter.";
                     });
+                };
+
+                $scope.toggleOptionsDisplay = function() {
+                    $scope.optionsDisplayed = !$scope.optionsDisplayed;
                 };
 
                 // Wait for neon to be ready, the create our messenger and intialize the view and data.
