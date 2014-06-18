@@ -111,6 +111,7 @@ angular.module('queryResultsTableDirective', []).directive('queryResultsTable', 
              * @private
              */ 
             var onFiltersChanged = function(message) {
+                XDATA.activityLogger.logSystemActivity('DataView - received neon filter changed event');
                 updateRowsAndCount();
             };
 
@@ -131,6 +132,7 @@ angular.module('queryResultsTableDirective', []).directive('queryResultsTable', 
              * @private
              */ 
             var onDatasetChanged = function(message) {
+                XDATA.activityLogger.logSystemActivity('DataView - received neon dataset changed event');
                 $scope.databaseName = message.database;
                 $scope.tableName = message.table;
 
@@ -168,6 +170,8 @@ angular.module('queryResultsTableDirective', []).directive('queryResultsTable', 
              * @method refreshData
              */
             $scope.refreshData = function() {
+                XDATA.activityLogger.logUserActivity('DataView - user requested table refresh', 'click',
+                    XDATA.activityLogger.WF_EXPLORE);
                 $scope.queryForData();
             }
 
@@ -187,9 +191,12 @@ angular.module('queryResultsTableDirective', []).directive('queryResultsTable', 
                     if (connection) {
                         var query = $scope.buildQuery();
 
+                        XDATA.activityLogger.logSystemActivity('DataView - query for data');
                         connection.executeQuery(query, function(queryResults) {
+                            XDATA.activityLogger.logSystemActivity('DataView - received data');
                             $scope.$apply(function(){
                                 $scope.updateData(queryResults);
+                                XDATA.activityLogger.logSystemActivity('DataView - rendered data');
                             });
                         });
                     }
@@ -205,7 +212,7 @@ angular.module('queryResultsTableDirective', []).directive('queryResultsTable', 
                 var query = new neon.query.Query().selectFrom($scope.databaseName, $scope.tableName)
                     .aggregate(neon.query.COUNT, '*', 'count');
 
-
+                XDATA.activityLogger.logSystemActivity('DataView - query for total rows of data');
                 connectionService.getActiveConnection().executeQuery(query, function(queryResults) {
                     $scope.$apply(function(){
                         if (queryResults.data.length > 0) {
@@ -214,6 +221,7 @@ angular.module('queryResultsTableDirective', []).directive('queryResultsTable', 
                         else {
                             $scope.totalRows = 0;
                         }
+                        XDATA.activityLogger.logSystemActivity('DataView - received total; updating view');
                     });
                 });
             };
@@ -263,6 +271,33 @@ angular.module('queryResultsTableDirective', []).directive('queryResultsTable', 
                 if(newVal) {
                     $scope.queryForData();
                 }
+            });
+
+            $scope.$watch('sortByField', function(newVal, oldVal) {
+                XDATA.activityLogger.logUserActivity('DataView - user set database level sorting field', 'select',
+                    XDATA.activityLogger.WF_EXPLORE,
+                    {
+                        from: oldVal,
+                        to: newVal
+                    });
+            });
+
+            $scope.$watch('sortDirection', function(newVal, oldVal) {
+                XDATA.activityLogger.logUserActivity('DataView - user set database level sorting direction', 'select',
+                    XDATA.activityLogger.WF_EXPLORE,
+                    {
+                        from: oldVal,
+                        to: newVal
+                    });
+            });
+
+            $scope.$watch('limit', function(newVal, oldVal) {
+                XDATA.activityLogger.logUserActivity('DataView - user set max rows to pull from database', 'set',
+                    XDATA.activityLogger.WF_EXPLORE,
+                    {
+                        from: oldVal,
+                        to: newVal
+                    });
             });
 
             // Wait for neon to be ready, the create our messenger and intialize the view and data.
