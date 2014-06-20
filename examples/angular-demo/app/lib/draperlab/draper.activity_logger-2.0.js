@@ -54,6 +54,7 @@ function activityLogger() {
 				url: draperLog.url + '/register',
 				async: false,
 				dataType: 'json',
+                global:false,
 				success: function(a) {
 					if (logToConsole) {
 						console.log('DRAPER LOG: Session successfully registered', a);
@@ -159,6 +160,7 @@ function activityLogger() {
 				type: 'POST',
 				dataType: 'json',
 				data: msg,
+                global: false,
 				success: function(a) {
 					if (logToConsole) {
 						console.log('DRAPER LOG: message received!');
