@@ -19,40 +19,58 @@ $installPuppet = <<INSTALLPUPPET
 INSTALLPUPPET
 
 Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
-	
-	config.vm.box = "puppetlabs/centos-6.5-64-puppet"
-	
-	config.vm.provider "openstack" do |os|
-		require 'vagrant-openstack-plugin'
+	config.vm.define "virtualbox" do |vbox|
+		vbox.vm.box = "puppetlabs/centos-6.5-64-puppet"
 
-		config.ssh.private_key_path = "~/.ssh/neonxdatakeypair-vagrant.pem"
-	
-		config.vm.box = "dummy"
-	
-		os.username     = "#{ENV['OS_USERNAME']}"
-		os.api_key      = "#{ENV['OS_PASSWORD']}"
-		os.flavor       = /m1.small/                # Regex or String
-		os.image        = /xdata-centos-base/                 # Regex or String
-		os.endpoint     = "#{ENV['OS_AUTH_URL']}/tokens"
-		os.keypair_name = "KeyPairName"      # as stored in Nova
-		os.ssh_username = "cloud-user"           # login for the VM
-		os.networks = []
-		os.floating_ip = "auto"
-		config.ssh.pty = true
+		vbox.vm.provision "shell", inline: $installPuppet
 
-		config.vm.synced_folder ".", "/vagrant", disabled: true
+	    vbox.vm.synced_folder "./puppet/", "/puppet"
+
+	    vbox.vm.provision "shell", inline: $addMongoRepo
+
+	    vbox.vm.provision "shell", inline: $addTomcatRepo
+
+	    vbox.vm.provision "shell",
+    	    inline: "puppet apply /puppet/default.pp"
+
+	    vbox.vm.network "forwarded_port", host: 4567, guest: 8080
 	end
 
-	config.vm.provision "shell", inline: $installPuppet
-	
-	config.vm.synced_folder "./puppet/", "/puppet"
+	config.vm.define "openstack", autostart: false do |osConfig|
+		require 'vagrant-openstack-plugin'
 
-	config.vm.provision "shell", inline: $addMongoRepo
+		osConfig.ssh.private_key_path = "~/.ssh/neonxdatakeypair-vagrant.pem"
+		
+		osConfig.vm.box = "dummy"
+		osConfig.vm.box_url = "https://github.com/cloudbau/vagrant-openstack-plugin/raw/master/dummy.box"
 
-	config.vm.provision "shell", inline: $addTomcatRepo
+		osConfig.vm.provider :openstack do |os|
+			os.username     = "#{ENV['OS_USERNAME']}"
+    	    os.api_key      = "#{ENV['OS_PASSWORD']}"
+        	os.flavor       = /m1.small/                # Regex or String
+	        os.image        = /xdata-centos-base/                 # Regex or String
+    	    os.endpoint     = "#{ENV['OS_AUTH_URL']}/tokens"
+        	os.keypair_name = "NeonXDataKeyPair-vagrant"      # as stored in Nova
+	        os.ssh_username = "cloud-user"           # login for the VM
+        	os.floating_ip = "auto"
+        	os.networks = []
+		end
 
-	config.vm.provision "shell",
-		inline: "puppet apply /puppet/default.pp"	
+        osConfig.ssh.pty = true
 
-	config.vm.network "forwarded_port", host: 4567, guest: 8080
-end
+        osConfig.vm.synced_folder ".", "/vagrant", disabled: true
+
+		osConfig.vm.provision "shell", inline: $installPuppet
+
+	    osConfig.vm.synced_folder "./puppet/", "/puppet"
+
+	    osConfig.vm.provision "shell", inline: $addMongoRepo
+
+    	osConfig.vm.provision "shell", inline: $addTomcatRepo
+
+	    osConfig.vm.provision "shell",
+    	    inline: "puppet apply /puppet/default.pp"
+
+	    osConfig.vm.network "forwarded_port", host: 4567, guest: 8080
+	end
+end	
