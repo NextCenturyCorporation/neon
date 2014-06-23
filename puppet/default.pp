@@ -28,7 +28,8 @@ class mongodb {
 
 class tomcat7 {
 	package { "tomcat7.noarch":
-		ensure => "present"
+		ensure => "present",
+		require => Package["java-1.7.0-openjdk.x86_64"]
 	}
 
 	service { "tomcat7":
@@ -38,19 +39,29 @@ class tomcat7 {
 }
 
 class getNeon {
+	package { "wget":
+		ensure => "present"
+	}
+
 	exec { "wget http://neonframework.org/versions/latest/neon.war":
 		cwd => "/var/lib/tomcat7/webapps",
 		creates => "/var/lib/tomcat7/webapps/neon.war",
 		path => ["/bin/", "/sbin/", "/usr/bin/", "/usr/sbin/"],
-		require => Package["tomcat7.noarch"]
+		require => Package["wget", "tomcat7.noarch"]
 	}
 
 	exec { "wget http://neonframework.org/versions/latest/neon-examples.war":
 		cwd => "/var/lib/tomcat7/webapps",
 		creates => "/var/lib/tomcat7/webapps/neon-examples.war",
 		path => ["/bin/", "/sbin/", "/usr/bin/", "/usr/sbin/"],
-		require => Package["tomcat7.noarch"]
+		require => Package["wget", "tomcat7.noarch"]
 	}
 }
 
-include open8080, java7, mongodb, tomcat7, getNeon
+class restartTomcat {
+	exec { "service tomcat7 restart":
+		require => Class["tomcat7", "getNeon"]
+	}
+}
+
+include open8080, java7, mongodb, tomcat7, getNeon, restartTomcat

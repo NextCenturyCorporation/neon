@@ -2,59 +2,76 @@ VAGRANTFILE_API_VERSION = "2"
 
 $addMongoRepo = <<ADDMONGOREPO
 	echo "Setting up mongo repo"
-	cp /vagrant/puppet/yum/mongodb.repo /etc/yum.repos.d/mongodb.repo
+	cp /puppet/yum/mongodb.repo /etc/yum.repos.d/mongodb.repo
 	echo "Done adding mongo repo"
 ADDMONGOREPO
 
 $addTomcatRepo = <<ADDTOMCATREPO
 	echo "Setting up tomcat repo"
-	cp /vagrant/puppet/yum/jpackage.repo /etc/yum.repos.d/
+	cp /puppet/yum/jpackage.repo /etc/yum.repos.d/
 	echo "Done adding tomcat repo"
 ADDTOMCATREPO
 
+$installPuppet = <<INSTALLPUPPET
+	echo "Installing puppet"
+	yum -y install puppet	
+	echo "Done installing puppet"
+INSTALLPUPPET
+
 Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
-	
-	config.vm.provider :openstack do |os|
-		require 'vagrant-openstack-plugin'
-		
-		#os.username     = "YOUR USERNAME"          # e.g. "#{ENV['OS_USERNAME']}"
-		#os.api_key      = "YOUR API KEY"           # e.g. "#{ENV['OS_PASSWORD']}"
-		#os.flavor       = /m1.tiny/                # Regex or String
-		#os.image        = /Ubuntu/                 # Regex or String
-		#os.endpoint     = "KEYSTONE AUTH URL"      # e.g. "#{ENV['OS_AUTH_URL']}/tokens"
-		#os.keypair_name = "YOUR KEYPAIR NAME"      # as stored in Nova
-		#os.ssh_username = "SSH USERNAME"           # login for the VM
+	config.vm.define "virtualbox" do |vbox|
+		vbox.vm.box = "puppetlabs/centos-6.5-64-puppet"
+
+		vbox.vm.provision "shell", inline: $installPuppet
+
+	    vbox.vm.synced_folder "./puppet/", "/puppet"
+
+	    vbox.vm.provision "shell", inline: $addMongoRepo
+
+	    vbox.vm.provision "shell", inline: $addTomcatRepo
+
+	    vbox.vm.provision "shell",
+    	    inline: "puppet apply /puppet/default.pp"
+
+	    vbox.vm.network "forwarded_port", host: 4567, guest: 8080
 	end
 
-	config.vm.box = "puppetlabs/centos-6.5-64-puppet"
+	config.vm.define "openstack", autostart: false do |osConfig|
+		require 'vagrant-openstack-plugin'
 
-	config.vm.provision "shell", inline: $addMongoRepo
+		osConfig.ssh.private_key_path = "PathToPrivateKey.pem"
+		
+		osConfig.vm.box = "dummy"
+		osConfig.vm.box_url = "https://github.com/cloudbau/vagrant-openstack-plugin/raw/master/dummy.box"
 
-	config.vm.provision "shell", inline: $addTomcatRepo
+		osConfig.vm.provider :openstack do |os|
+			os.username     = "#{ENV['OS_USERNAME']}"
+    	    os.api_key      = "#{ENV['OS_PASSWORD']}"
+        	os.flavor       = /m1.small/                # Regex or String
+	        os.image        = /xdata-centos-base/                 # Regex or String
+    	    os.endpoint     = "#{ENV['OS_AUTH_URL']}/tokens"
+        	os.keypair_name = "KayPairName"      # as stored in Nova
+	        os.ssh_username = "cloud-user"           # login for the VM
+        	os.floating_ip = "auto"
+        	os.networks = []
+			#os.server_name = "A_name_for_the_ server"
+		end
 
-	config.vm.provision "shell",
-		inline: "puppet apply /vagrant/puppet/default.pp"	
+        osConfig.ssh.pty = true
 
-	config.vm.network "forwarded_port", host: 4567, guest: 8080
-  #config.vm.provision :puppet do |puppet|
-  #  puppet.options = ['--verbose']
-  #end
+        osConfig.vm.synced_folder ".", "/vagrant", disabled: true
 
-  # Create a forwarded port mapping which allows access to a specific port
-  # within the machine from a port on the host machine. In the example below,
-  # accessing "localhost:8080" will access port 80 on the guest machine.
-  # config.vm.network "forwarded_port", guest: 80, host: 8080
+		osConfig.vm.provision "shell", inline: $installPuppet
 
-  # Create a private network, which allows host-only access to the machine
-  # using a specific IP.
-  # config.vm.network "private_network", ip: "192.168.33.10"
+	    osConfig.vm.synced_folder "./puppet/", "/puppet"
 
-  # Create a public network, which generally matched to bridged network.
-  # Bridged networks make the machine appear as another physical device on
-  # your network.
-  # config.vm.network "public_network"
+	    osConfig.vm.provision "shell", inline: $addMongoRepo
 
-  # If true, then any SSH connections made will enable agent forwarding.
-  # Default value: false
-  # config.ssh.forward_agent = true
-end
+    	osConfig.vm.provision "shell", inline: $addTomcatRepo
+
+	    osConfig.vm.provision "shell",
+    	    inline: "puppet apply /puppet/default.pp"
+
+	    osConfig.vm.network "forwarded_port", host: 4567, guest: 8080
+	end
+end	
