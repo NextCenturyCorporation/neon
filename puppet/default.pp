@@ -53,4 +53,10 @@ class getNeon {
 	}
 }
 
-include open8080, java7, mongodb, tomcat7, getNeon
+class restartTomcat {
+	exec { "service tomcat7 restart":
+		require => Class["tomcat7", "getNeon"]
+	}
+}
+
+include open8080, java7, mongodb, tomcat7, getNeon, restartTomcat
