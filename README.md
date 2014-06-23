@@ -12,6 +12,8 @@ Neon is a software platform designed to help integrate your disparate visualizat
 **Deploying Neon** - Includes instructions for deploying the Neon application to a web server (e.g., Jetty and Tomcat).
 <br>[https://github.com/NextCenturyCorporation/neon/wiki/Deploying-Neon](https://github.com/NextCenturyCorporation/neon/wiki/Deploying-Neon)
 
+**Developer Quick Start Guide** - A quick tour of how to develop apps that use Neon.
+<br>[https://github.com/NextCenturyCorporation/neon/wiki/Developer-Quick-Start-Guide](https://github.com/NextCenturyCorporation/neon/wiki/Developer-Quick-Start-Guide)
 
 ## Additional Information
 
