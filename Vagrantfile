@@ -39,7 +39,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
 	config.vm.define "openstack", autostart: false do |osConfig|
 		require 'vagrant-openstack-plugin'
 
-		osConfig.ssh.private_key_path = "~/.ssh/neonxdatakeypair-vagrant.pem"
+		osConfig.ssh.private_key_path = "PathToPrivateKey.pem"
 		
 		osConfig.vm.box = "dummy"
 		osConfig.vm.box_url = "https://github.com/cloudbau/vagrant-openstack-plugin/raw/master/dummy.box"
@@ -50,10 +50,11 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
         	os.flavor       = /m1.small/                # Regex or String
 	        os.image        = /xdata-centos-base/                 # Regex or String
     	    os.endpoint     = "#{ENV['OS_AUTH_URL']}/tokens"
-        	os.keypair_name = "NeonXDataKeyPair-vagrant"      # as stored in Nova
+        	os.keypair_name = "KayPairName"      # as stored in Nova
 	        os.ssh_username = "cloud-user"           # login for the VM
         	os.floating_ip = "auto"
         	os.networks = []
+			#os.server_name = "A_name_for_the_ server"
 		end
 
         osConfig.ssh.pty = true
