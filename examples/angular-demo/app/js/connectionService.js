@@ -34,6 +34,7 @@ services.factory('ConnectionService', ['$filter',
 		 * @param {String} databaseType 
 		 * @param {String} host
 		 * @param {String} database
+         * @param {String} table
 		 */
 		service.connectToDataset = function(databaseType, host, database, table) {
 			if (!activeConnection) {
@@ -112,6 +113,23 @@ services.factory('ConnectionService', ['$filter',
 		service.getFieldMapping = function(field) {
             return connectionInformation.fields[field];
 		};
+
+        /**
+         * Overrides the meta-data for a particular field.
+         * @param {String} field
+         * @param {String} mapping
+         */
+        service.setFieldMapping = function(field, mapping) {
+            connectionInformation.fields[field] = mapping;
+        };
+
+        /**
+         * Returns an object where the keys are the fields and the values are the mappings for the current host.
+         * @returns {String}
+         */
+        service.getFieldMappings = function() {
+            return connectionInformation.fields;
+        };
 
 		return service;
 
