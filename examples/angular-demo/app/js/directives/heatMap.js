@@ -295,13 +295,9 @@ angular.module('heatMapDirective', []).directive('heatMap', ['ConnectionService'
                                     XDATA.activityLogger.logSystemActivity('HeatMap - data field names received');
                                     populateFieldNames(results);
                                     $scope.latitudeField = connectionService.getFieldMapping("latitude");
-                                    $scope.latitudeField = $scope.latitudeField || $scope.fields[0];
                                     $scope.longitudeField = connectionService.getFieldMapping("longitude");
-                                    $scope.longitudeField = $scope.longitudeField || $scope.fields[0];
                                     $scope.colorByField = connectionService.getFieldMapping("color_by");
-                                    $scope.colorByField = $scope.colorByField || $scope.fields[0];
                                     $scope.sizeByField = connectionService.getFieldMapping("size_by");
-                                    $scope.sizeByField = $scope.sizeByField || $scope.fields[0];
                                     XDATA.activityLogger.logSystemActivity('HeatMap - field selectors updated');
 
                                     $timeout(function () {

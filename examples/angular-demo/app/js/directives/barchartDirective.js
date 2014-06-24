@@ -114,6 +114,11 @@ barchart.directive('barchart', ['ConnectionService', '$timeout', function(connec
 			var xAxis = $scope.attrX || connectionService.getFieldMapping("bar_x_axis");
 			var yAxis = $scope.attrY || connectionService.getFieldMapping("y_axis")
 
+            if (xAxis === undefined || xAxis === "" || yAxis === undefined || yAxis ==="") {
+                drawBlankChart();
+                return;
+            }
+
 			var query = new neon.query.Query()
 				.selectFrom($scope.databaseName, $scope.tableName)
 				.where(xAxis,'!=', null)
@@ -143,6 +148,7 @@ barchart.directive('barchart', ['ConnectionService', '$timeout', function(connec
 				});
 			}, function() {
 				XDATA.activityLogger.logSystemActivity('BarChart - query failed');
+                drawBlankChart();
 			});
 		};
 
