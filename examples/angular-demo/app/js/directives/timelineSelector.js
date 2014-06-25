@@ -49,6 +49,9 @@ angular.module('timelineSelectorDirective', []).directive('timelineSelector', ['
                 var MILLIS_IN_DAY = MILLIS_IN_HOUR * 24;
                 var HOUR = "hour";
                 var DAY = "day";
+                // TODO - These need to be in a configuration file
+                var USE_OpenCPU = false;
+                var OpenCPU_URL = 'http://192.168.56.101/ocpu/library/stl2wrapper/R';
 
                 element.addClass('timeline-selector');
 
@@ -83,6 +86,10 @@ angular.module('timelineSelectorDirective', []).directive('timelineSelector', ['
                         activeDatasetChanged: onDatasetChanged,
                         filtersChanged: onFiltersChanged
                     });
+
+                    if (USE_OpenCPU) {
+                        ocpu.seturl(OpenCPU_URL);
+                    }
                 };
 
                 /**
@@ -264,8 +271,11 @@ angular.module('timelineSelectorDirective', []).directive('timelineSelector', ['
                             if ($scope.startDate === undefined || $scope.endDate === undefined) {
                                 $scope.updateDates();
                             }
-                            $scope.data = $scope.createTimelineData(queryResults);
-                            $scope.updateChartTimesAndTotal();
+                            var data = $scope.createTimelineData(queryResults);
+                            $scope.addTimeSeriesAnalysis(data[0].data, data, function() {
+                                $scope.data = data;
+                                $scope.updateChartTimesAndTotal();
+                            });
                         };
 
                         // on the initial query, setup the start/end bounds
@@ -418,9 +428,55 @@ angular.module('timelineSelectorDirective', []).directive('timelineSelector', ['
                         type: 'area',
                         color: '#39b54a',
                         data: queryData
-                    })
+                    });
 
                     return data;
+                };
+
+                /**
+                 * Adds the timeseries analysis to the data to be graphed.
+                 * @param timelineData an array of {date: Date(...), value: n} objects, one for each day
+                 * @param graphData the array of objects that will be graphed
+                 * @param callback the function to call after the timeseries analysis data has
+                 * been added to graphData, or if the analysis is not available this function will
+                 * be called immediately
+                 */
+                $scope.addTimeSeriesAnalysis = function(timelineData, graphData, callback) {
+                    // If OpenCPU isn't available, then just call the callback without doing anything.
+                    if (!USE_OpenCPU) {
+                        callback();
+                        return;
+                    }
+                    // The analysis code just wants an array of the counts
+                    var timelineVector = _.map(timelineData, function(it) {return it.value});
+
+                    var req = ocpu.rpc("stl2wrapper",{
+                        data : timelineVector
+//                        "n.p": 7, // specifies seasonal periodicity (day-of-week)
+//                        "t.degree": 2, "t.window": 41, // trend smoothing parameters
+//                        "s.window": 31, "s.degree": 2, // seasonal smoothing parameters
+//                        outer: 10 // number of robustness iterations
+                    }, function(output){
+                        // Square the trend data so that it is on the same scale as the counts
+                        var trend = _.map(timelineData, function(it, i) { return {date: it.date, value: (output[i].trend*output[i].trend)};});
+                        graphData.push({
+                            name: 'Trend',
+                            type: 'line',
+                            color: '#00FF00',
+                            data: trend
+                        });
+                        // Square the remainder data so that it is on the same scale as the counts
+                        var remainder = _.map(timelineData, function(it, i) { return {date: it.date, value: (output[i].remainder*output[i].remainder)};});
+                        graphData.push({
+                            name: 'Remainder',
+                            type: 'line',
+                            color: '#FF0000',
+                            data: remainder
+                        });
+                        $scope.$apply(function() {
+                            callback();
+                        });
+                    });
                 };
 
                 /**
