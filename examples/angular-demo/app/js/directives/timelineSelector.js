@@ -219,7 +219,7 @@ angular.module('timelineSelectorDirective', []).directive('timelineSelector', ['
                     // endIdx points to the start of the day/hour just after the buckets we want to count, so do not
                     // include the bucket at endIdx.
                     for (var i = startIdx; i < endIdx; i++) {
-                        total += $scope.data[i].value;
+                        total += $scope.data[0].data[i].value;
                     }
 
                     var displayStartDate = new Date(extentStartDate);
@@ -364,6 +364,7 @@ angular.module('timelineSelectorDirective', []).directive('timelineSelector', ['
                 $scope.createTimelineData = function (queryResults) {
                     var rawData = queryResults.data;
                     var data = [];
+                    var queryData = [];
                     var i = 0;
                     var rawLength = rawData.length;
 
@@ -399,7 +400,7 @@ angular.module('timelineSelectorDirective', []).directive('timelineSelector', ['
                         // For the 01:00 to 01:59 time bucket, we want to display the aggregate value at the
                         // perceived center of the bucket, 01:30, on the timeline graph.
                         var bucketGraphDate = new Date(startTime + ($scope.millisMultiplier * i) + ($scope.millisMultiplier / 2));
-                        data[i] = {
+                        queryData[i] = {
                             date: bucketGraphDate,
                             value: 0
                         }
@@ -409,8 +410,16 @@ angular.module('timelineSelectorDirective', []).directive('timelineSelector', ['
                     var resultDate;
                     for (i = 0; i < rawLength; i++) {
                         resultDate = new Date(rawData[i].date);
-                        data[Math.floor(Math.abs(resultDate - startDate) / $scope.millisMultiplier)].value = rawData[i].count;
+                        queryData[Math.floor(Math.abs(resultDate - startDate) / $scope.millisMultiplier)].value = rawData[i].count;
                     }
+
+                    data.push({
+                        name: 'Total',
+                        type: 'area',
+                        color: '#39b54a',
+                        data: queryData
+                    })
+
                     return data;
                 };
 

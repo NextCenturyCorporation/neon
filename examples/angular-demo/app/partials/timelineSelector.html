@@ -1,6 +1,16 @@
 <div class="well well-blank">
     <form>
-  	   <div class="btn-group pull-right">
+      
+      <div class="form-group pull-right">
+        <select class="form-control">
+          <option value="total">Total</option>
+          <option value="trend">Trend</option>
+          <option value="seasonality">Seasonality</option>
+          <option value="remainder">Deviation</option>
+        </select>
+      </div>
+
+  	  <div class="btn-group pull-right">
         <label class="btn btn-default active" ng-class="{true: 'active', false: ''}[granularity === 'day']">
           <input type="radio" style="display:none" ng-model="granularity" value="day"> Day
         </label>
@@ -14,6 +24,7 @@
           <span class="glyphicon glyphicon-remove"></span>
         </a>
       </div>
+
     </form>
     <h3><span class="count count-large text-primary" ng-bind="recordCount | number"></span> records 
     <span ng-bind="(startDateForDisplay) ? ' from ' : ''"></span>

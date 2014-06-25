@@ -31,7 +31,8 @@
 .timeline-selector-chart .area {
   fill: #39b54a;
   stroke: #39b54a;
-  stroke-width: 1px;
+  stroke-width: 0;
+  fill-opacity: 0.5;
   clip-path: url(#clip);
 }
 .timeline-selector-chart .axis path,

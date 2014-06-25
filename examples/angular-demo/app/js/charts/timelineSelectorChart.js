@@ -180,9 +180,14 @@ charts.TimelineSelectorChart = function (element, configuration) {
     this.render = function (values) {
         var width = this.determineWidth(this.d3element) - this.config.margin.left - this.config.margin.right;
         var height = this.determineHeight(this.d3element) - this.config.margin.top - this.config.margin.bottom;
+        var fullDataSet = [];
 
         if (values && values.length > 0) {
             this.data = values;
+            // Get list of all data to calculate min/max and domain
+            for(var i = 0; i < values.length; i++) {
+                fullDataSet = fullDataSet.concat(values[i].data);
+            }
         }
 
         // Date formatters used by the xAxis and summary header.
@@ -205,15 +210,6 @@ charts.TimelineSelectorChart = function (element, configuration) {
             this.brush.on("brushend", wrapBrushHandler(this.brush, this.brushHandler));
         }
 
-        var area = d3.svg.area()
-            .x(function (d) {
-                return x(d.date);
-            })
-            .y0(height)
-            .y1(function (d) {
-                return y(d.value);
-            });
-
         var heightRange = y.range()[0];
 
         function resizePath(d) {
@@ -231,20 +227,27 @@ charts.TimelineSelectorChart = function (element, configuration) {
                 + "V" + (2 * y - 8);
         }
 
-        var xMin = d3.min(this.data.map(function (d) {
+        var xMin = d3.min(fullDataSet.map(function (d) {
             return d.date;
         }));
-        var xMax = d3.max(this.data.map(function (d) {
+        var xMax = d3.max(fullDataSet.map(function (d) {
             return d.date;
         }));
-        var totalRecords = d3.sum(this.data.map(function (d) {
-            return d.value
-        }));
+        // var totalRecords = d3.sum(this.data[0].map(function (d) {
+        //     return d.value
+        // }));
 
-        x.domain(d3.extent(this.data.map(function (d) {
+        x.domain(d3.extent(fullDataSet.map(function (d) {
             return d.date;
         })));
-        y.domain([0, d3.max(this.data.map(function (d) {
+
+        // Use lowest value or 0 for Y-axis domain, whichever is less (e.g. if negative)
+        var minY = d3.min(fullDataSet.map(function (d) {
+            return d.value;
+        }));
+        minY = minY < 0 ? minY : 0;
+        
+        y.domain([minY, d3.max(fullDataSet.map(function (d) {
             return d.value;
         }))]);
 
@@ -266,10 +269,46 @@ charts.TimelineSelectorChart = function (element, configuration) {
             .attr("class", "context")
             .attr("transform", "translate(" + this.config.margin.left + "," + this.config.margin.top + ")");
 
-        context.append("path")
-            .datum(this.data)
-            .attr("class", "area")
-            .attr("d", area);
+        for(var i = 0; i < values.length; i++) {
+
+            var style = 'stroke:'+values[i].color+';'
+
+            // If type is area, render an area plot in addition to a line
+            if(values[i].type == 'area'){
+
+                style += 'stroke-width:1px;';
+
+                var area = d3.svg.area()
+                    .x(function (d) {
+                        return x(d.date);
+                    })
+                    .y0(height)
+                    .y1(function (d) {
+                        return y(d.value);
+                    });
+
+                context.append("path")
+                    .datum(values[i].data)
+                    .attr("class", "area")
+                    .attr("d", area)
+                    .attr("style", 'fill:'+values[i].color+';');
+            }
+
+            // Always render a line, even for area series
+            var line = d3.svg.line()
+                    .x(function (d) {
+                        return x(d.date);
+                    })
+                    .y(function (d) {
+                        return y(d.value);
+                    });
+
+            context.append("path")
+                .datum(values[i].data)
+                .attr("class", "line")
+                .attr("d", line)
+                .attr("style", style);
+        }
 
         context.append("g")
             .attr("class", "x axis")
