@@ -16,7 +16,6 @@
 
 package com.ncc.neon.services
 
-import java.net.UnknownHostException
 import javax.ws.rs.core.Response
 import javax.ws.rs.ext.ExceptionMapper
 import javax.ws.rs.ext.Provider

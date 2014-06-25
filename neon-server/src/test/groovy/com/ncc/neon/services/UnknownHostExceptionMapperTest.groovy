@@ -15,13 +15,10 @@
  */
 package com.ncc.neon.services
 
-import java.net.UnknownHostException
 import javax.ws.rs.core.Response
 
 import org.junit.Before
 import org.junit.Test
-
-import com.ncc.neon.services.UnknownHostExceptionMapper
 
 class UnknownHostExceptionMapperTest {
     private UnknownHostException testException
@@ -37,7 +34,7 @@ class UnknownHostExceptionMapperTest {
     void "map exception to response"() {
         Response response = mapper.toResponse(testException)
         assert response.getStatus() == 502
-        assert response.getEntity().toString() == "Requested host is unknown to the server. " + "sampleServer"
+        assert response.getEntity().toString() == "Requested host is unknown to the server. sampleServer"
     }
     
 }

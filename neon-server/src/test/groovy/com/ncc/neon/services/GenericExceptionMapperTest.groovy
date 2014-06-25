@@ -20,8 +20,6 @@ import javax.ws.rs.core.Response
 import org.junit.Before
 import org.junit.Test
 
-import com.ncc.neon.services.GenericExceptionMapper
-
 class GenericExceptionMapperTest {
     private Exception testException
     private GenericExceptionMapper mapper
