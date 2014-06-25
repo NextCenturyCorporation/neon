@@ -112,6 +112,7 @@ databaseConfig.directive('databaseConfig', ['ConnectionService', function (conne
 
             // Set table name and initiate connection.
             $scope.selectedTable = server.selectedTable;
+            $scope.selectTable();
             $scope.connectToDatabase();
         };
 
