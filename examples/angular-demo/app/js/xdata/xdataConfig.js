@@ -20,4 +20,9 @@
  XDATA.COMPONENT = "Neon Demo";
  XDATA.COMPONENT_VERSION = "0.8.0-SNAPSHOT";
 
- XDATA.activityLogger = new activityLogger().echo(true).testing(true);
+ XDATA.activityLogger = new activityLogger().echo(true).testing(false);
+
+// Register the xdata logger with a server.
+XDATA.activityLogger.registerActivityLogger(XDATA.ACTIVITY_LOGGER_URL, 
+	XDATA.COMPONENT,
+	XDATA.COMPONENT_VERSION);

@@ -20,12 +20,6 @@
 // neon.SERVER_URL = "http://localhost:8080/neon"
 neon.SERVER_URL = "/neon";
 
-// Register the xdata logger with a server.
-XDATA.activityLogger.registerActivityLogger("http://localhost:1337", 
-	XDATA.COMPONENT,
-	XDATA.COMPONENT_VERSION);
-XDATA.activityLogger.logSystemActivity("Angular Demo Application startup");
-
 var neonDemo = angular.module('neonDemo', [
 	'neonDemo.controllers',
 	'neonDemo.services',
