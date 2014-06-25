@@ -13,6 +13,10 @@ class java7 {
 	package { "java-1.7.0-openjdk.x86_64":
 		ensure  => present
 	}
+	
+	package { "java-1.7.0-openjdk-devel":
+		ensure => present
+	}
 }
 
 class mongodb {
@@ -64,4 +68,34 @@ class restartTomcat {
 	}
 }
 
-include open8080, java7, mongodb, tomcat7, getNeon, restartTomcat
+class getDemoData {
+	package { "git":
+		ensure => "present"
+	}
+
+	exec { "getData":
+		command => "git clone https://github.com/NextCenturyCorporation/neon.git",
+		creates => "/neon/",
+		cwd => "/",
+		require => Package["git"]
+	}
+}
+
+class unzipDemoData {
+	exec { "unzip":
+		command => "jar -xvf examples/angular-demo/data/earthquakes.zip",
+		cwd => "/neon",
+		require => Class["getDemoData","java7"]
+	}
+}
+
+class setupDemoData {
+	exec { "importData":
+		command => "mongoimport --db test --collection earthquakes --file earthquakes.csv --headerline --type csv && \
+			mongo test --eval \"db.earthquakes.find().forEach(function(doc){doc.time = new ISODate(doc.time);db.earthquakes.save(doc)});\"",
+		cwd => "/neon",
+		require => Class["unzipDemoData","mongodb"]
+	}
+}
+
+include open8080, java7, mongodb, tomcat7, getNeon, restartTomcat, getDemoData, unzipDemoData, setupDemoData

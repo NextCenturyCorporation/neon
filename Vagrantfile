@@ -36,10 +36,31 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
 	    vbox.vm.network "forwarded_port", host: 4567, guest: 8080
 	end
 
+	config.vm.define "aws", autostart: false do |aws|
+		require 'vagrant-aws'
+
+		aws.vm.box = "dummy"
+		aws.vm.box_url = "https://github.com/mitchellh/vagrant-aws/raw/master/dummy.box"
+
+		aws.ssh.username = ""
+		aws.ssh.private_key_path
+
+		aws.vm.provider :aws do |ec2, override|
+			ec2.access_key_id = "YOUR KEY"
+			ec2.secret_access_key = "YOUR SECRET KEY"
+			ec2.keypair_name = "KEYPAIR NAME"
+			ec2.instance_type = "m1.medium"
+			ec2.region = "us-east-1"
+			
+
+			ec2.ami = "ami-0d79c864" #the ami for the image to install
+		end
+	end
+
 	config.vm.define "openstack", autostart: false do |osConfig|
 		require 'vagrant-openstack-plugin'
 
-		osConfig.ssh.private_key_path = "PathToPrivateKey.pem"
+		osConfig.ssh.private_key_path = "/home/halfs13/.ssh/neonxdatakeypair-vagrant.pem"
 		
 		osConfig.vm.box = "dummy"
 		osConfig.vm.box_url = "https://github.com/cloudbau/vagrant-openstack-plugin/raw/master/dummy.box"
@@ -50,11 +71,11 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
         	os.flavor       = /m1.small/                # Regex or String
 	        os.image        = /xdata-centos-base/                 # Regex or String
     	    os.endpoint     = "#{ENV['OS_AUTH_URL']}/tokens"
-        	os.keypair_name = "KayPairName"      # as stored in Nova
+        	os.keypair_name = "NeonXdataKeyPair-vagrant"      # as stored in Nova
 	        os.ssh_username = "cloud-user"           # login for the VM
         	os.floating_ip = "auto"
         	os.networks = []
-			#os.server_name = "A_name_for_the_ server"
+			os.server_name = "testing_snapshot"
 		end
 
         osConfig.ssh.pty = true
