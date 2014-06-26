@@ -370,13 +370,17 @@ angular.module('timelineSelectorDirective', []).directive('timelineSelector', ['
                     // If we have no values, use our dates if they existed or now.
                     if (rawData.length === 0) {
                         rawData[0] = {
-                            date: new Date(),
+                            date: $scope.startDate || new Date(),
                             count: 0
                         }
+                        rawLength = 1;
                     }
                     // If we have only 1 value, create a range for it.
                     if (rawData.length === 1) {
-                        rawData[1] = rawData[0];
+                        rawData[1] = {
+                            date: $scope.endDate || rawData[0].date,
+                            count: 0
+                        }
                         rawLength = 2;
                     }
 
