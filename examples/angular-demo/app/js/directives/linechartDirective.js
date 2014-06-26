@@ -231,8 +231,9 @@ linechart.directive('linechart', ['ConnectionService', function(connectionServic
 		}
 
 		var drawChart = function() {
-			var xAxis = connectionService.getFieldMapping("line_x_axis");
-			var yAxis = connectionService.getFieldMapping("y_axis")
+			var xAxis = $scope.attrX || connectionService.getFieldMapping("line_x_axis");
+			var yAxis = $scope.attrY || connectionService.getFieldMapping("y_axis");
+
 			if (!yAxis) {
 				yAxis = COUNT_FIELD_NAME;
 			}
