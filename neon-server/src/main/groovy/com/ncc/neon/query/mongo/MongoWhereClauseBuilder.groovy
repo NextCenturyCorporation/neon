@@ -30,7 +30,8 @@ import com.ncc.neon.query.clauses.GeoIntersectionClause
 class MongoWhereClauseBuilder {
 
 	/** Maps an operator string to the mongo driver equivalent */
-	private static final OPERATOR_MAPPING = ['<': '$lt', '<=': '$lte', '>': '$gt', '>=': '$gte', '!=': '$ne', 'in': '$in', 'notin': '$nin']
+	private static final OPERATOR_MAPPING = ['<': '$lt', '<=': '$lte', '>': '$gt', '>=': '$gte', '!=': '$ne',
+            'in': '$in', 'notin': '$nin', 'contains': '$regex']
 
 	private MongoWhereClauseBuilder() {
 		// utility class, no public constructor needed
@@ -63,11 +64,11 @@ class MongoWhereClauseBuilder {
 		def near = new BasicDBObject('$near', nearDefinition)
 		return new BasicDBObject(clause.locationField, near)
 	}
-	
+
 	static def build(GeoIntersectionClause clause) {
 		def geoType = determineGeometryType(clause)
 		def geometryDefinition = new BasicDBObject("type", geoType)
-		
+
 		def coordinates
 		if(geoType == "Point") {
 			coordinates = clause.buildGeoJSONPoint(clause.points[0][0])
@@ -77,12 +78,12 @@ class MongoWhereClauseBuilder {
 			coordinates = clause.buildGeoJSONPointArray(clause.points)
 		}
 		geometryDefinition.put("coordinates", coordinates)
-		
+
 		def geometryBlock = new BasicDBObject('$geometry', geometryDefinition)
 		def intersection = new BasicDBObject('$geoIntersects', geometryBlock)
 		return new BasicDBObject(clause.locationField, intersection)
 	}
-	
+
 	static def determineGeometryType(clause) {
 		if(clause.geometryType == "Point") {
 			return "Point"
@@ -91,12 +92,12 @@ class MongoWhereClauseBuilder {
 		}
 		return "Polygon"
 	}
-	
+
 	static def build(GeoWithinClause clause) {
 		def geometryDefinition = new BasicDBObject("type", "Polygon")
-		
+
 		geometryDefinition.put("coordinates", clause.buildGeoJSONPointArray(clause.points))
-		
+
 		def geometryBlock = new BasicDBObject('$geometry', geometryDefinition)
 		def within = new BasicDBObject('$geoWithin', geometryBlock)
 		return new BasicDBObject(clause.locationField, within)
