@@ -50,7 +50,7 @@ angular.module('timelineSelectorDirective', []).directive('timelineSelector', ['
                 var HOUR = "hour";
                 var DAY = "day";
                 // TODO - These need to be in a configuration file
-                var USE_OpenCPU = false;
+                var USE_OpenCPU = true;
                 var OpenCPU_URL = 'http://neon-opencpu/ocpu/library/stl2wrapper/R';
 
                 element.addClass('timeline-selector');
@@ -74,7 +74,7 @@ angular.module('timelineSelectorDirective', []).directive('timelineSelector', ['
                     $scope.endDateForDisplay = undefined;
                     $scope.referenceStartDate = undefined;
                     $scope.referenceEndDate = undefined;
-                    $scope.primarySeries = 0;
+                    $scope.primarySeries = false;
 
                     $scope.granularity = DAY;
                     $scope.millisMultiplier = MILLIS_IN_DAY;
@@ -193,13 +193,25 @@ angular.module('timelineSelectorDirective', []).directive('timelineSelector', ['
                  * @method updateChartTimesAndTotal
                  */
                 $scope.updateChartTimesAndTotal = function () {
+                    // Try to find primary series in new data
+                    var primaryIndex = 0;
+                    if($scope.primarySeries){
+                        for (var i = 0; i < $scope.data.length; i++) {
+                            if($scope.primarySeries.name == $scope.data[i].name){
+                                 primaryIndex = i;
+                                 break;
+                            }
+                        }
+                    }
+                    $scope.primarySeries = $scope.data[primaryIndex];
+
                     // Handle bound conditions.
 
                     var extentStartDate;
                     var extentEndDate;
-                    if (this.brush.length == 2) {
-                        extentStartDate = this.brush[0];
-                        extentEndDate = this.brush[1];
+                    if ($scope.brush.length == 2) {
+                        extentStartDate = $scope.brush[0];
+                        extentEndDate = $scope.brush[1];
                     }
                     else {
                         extentStartDate = $scope.startDate;
@@ -461,19 +473,19 @@ angular.module('timelineSelectorDirective', []).directive('timelineSelector', ['
 //                        outer: 10 // number of robustness iterations
                     }, function(output){
                         // Square the trend data so that it is on the same scale as the counts
-                        var trend = _.map(timelineData, function(it, i) { return {date: it.date, value: (output[i].trend*output[i].trend)};});
+                        var trend = _.map(timelineData, function(it, i) { return {date: it.date, value: output[i].trend};});
                         graphData.push({
                             name: 'Trend',
                             type: 'line',
-                            color: '#00FF00',
+                            color: '#ff7f0e',
                             data: trend
                         });
                         // Square the remainder data so that it is on the same scale as the counts
-                        var remainder = _.map(timelineData, function(it, i) { return {date: it.date, value: (output[i].remainder*output[i].remainder)};});
+                        var remainder = _.map(timelineData, function(it, i) { return {date: it.date, value: output[i].remainder};});
                         graphData.push({
-                            name: 'Remainder',
+                            name: 'Deviation',
                             type: 'line',
-                            color: '#FF0000',
+                            color: '#C23333',
                             data: remainder
                         });
                         $scope.$apply(function() {

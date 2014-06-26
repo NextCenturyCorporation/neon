@@ -1,13 +1,10 @@
 <div class="well well-blank">
   <form>
     
-    <div class="form-group pull-right">
+    <div class="form-group pull-right" ng-hide="!(data.length > 1)">
       <div class="input-group timeseries-selector">
-        <select class="form-control" ng-model="primarySeries">
-          <option value="0">Total</option>
-          <option value="1">Trend</option>
-          <option value="2">Seasonality</option>
-          <option value="3">Deviation</option>
+        <select class="form-control" ng-model="primarySeries"
+          ng-options="series.name for series in data">
         </select>
         <span class="input-group-btn">
           <button class="btn" type="button" ng-class="{true: 'btn-primary', false: 'btn-danger'}[collapsed]" ng-click="collapsed = !collapsed">
@@ -43,7 +40,7 @@
   <span ng-bind="(startDateForDisplay) ? '(Z)' : ''"></span></h3>
 
   <div class="collapsed" ng-class="{true: 'collapsed', false: ''}[collapsed]">
-  	<div timeline-selector-chart timeline-data="data" timeline-brush='brush' collapsed='collapsed' extent-dirty='extentDirty' primarySeries='primarySeries'></div>
+  	<div timeline-selector-chart timeline-data="data" timeline-brush='brush' collapsed='collapsed' extent-dirty='extentDirty' primary-series='primarySeries'></div>
   </div>
 
 </div>

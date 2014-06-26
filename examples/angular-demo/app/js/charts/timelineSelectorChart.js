@@ -46,6 +46,7 @@ charts.TimelineSelectorChart = function (element, configuration) {
     this.d3element = d3.select(element);
     this.brushHandler = undefined;
     this.data = DEFAULT_DATA;
+    this.primarySeries = false;
 
     var self = this; // for internal d3 functions
 
@@ -65,7 +66,7 @@ charts.TimelineSelectorChart = function (element, configuration) {
      */
     this.configure = function (configuration) {
         this.config = configuration || {};
-        this.config.margin = this.config.margin || {top: 10, right: 15, bottom: 20, left: 15};
+        this.config.margin = this.config.margin || {top: 12, right: 15, bottom: 20, left: 15};
         this.redrawOnResize();
 
         return this;
@@ -177,17 +178,15 @@ charts.TimelineSelectorChart = function (element, configuration) {
      * @param {Number} values.value A number which will be plotted on the y-axis
      * @method render
      */
-    this.render = function (values, primary) {
-        var defaultHeight = 70;
-        $(this.d3element[0]).css("height", (defaultHeight * values.length) );
+    this.render = function (values) {
         var width = this.determineWidth(this.d3element) - this.config.margin.left - this.config.margin.right;
-        var height = this.determineHeight(this.d3element) - this.config.margin.top - this.config.margin.bottom;
-        var chartHeight = defaultHeight - this.config.margin.top - this.config.margin.bottom;
-        //var height = (70 * 4) - this.config.margin.top - this.config.margin.bottom;
+
+        var baseHeight = 70;
+        $(this.d3element[0]).css("height", (baseHeight * values.length) );
+        var height = (this.determineHeight(this.d3element) - (this.config.margin.top) - this.config.margin.bottom);
+        var chartHeight = baseHeight - this.config.margin.top - this.config.margin.bottom;
+
         var fullDataSet = [];
-
-        primary = primary || 0;
-
         if (values && values.length > 0) {
             this.data = values;
             // Get list of all data to calculate min/max and domain
@@ -314,7 +313,7 @@ charts.TimelineSelectorChart = function (element, configuration) {
 
             container.append("line")
                 .attr({
-                    "class":"series-axis",
+                    "class":"mini-axis",
                     "x1" : 0,
                     "x2" : width,
                     "y1" : y(0),
@@ -323,19 +322,22 @@ charts.TimelineSelectorChart = function (element, configuration) {
 
             charts.push({
                 name: series.name,
+                color: series.color,
                 yAxis: yAxis,
-                container: container
+                container: container,
+                index: seriesPos                
             });
 
             seriesPos++;
         }
-
-        // Render all series
+        
         var charts = [];
-        if(values.length > 0)
-            createSeries(values[primary]);
+        // If set, render primary series first
+        if(this.primarySeries)
+            createSeries(this.primarySeries);
+        // Render all series
         for(var i = 0; i < values.length; i++) {
-            if(i == primary) continue;
+            if(this.primarySeries && values[i].name == this.primarySeries.name) continue;
             createSeries(values[i]);
         }
 
@@ -409,19 +411,23 @@ charts.TimelineSelectorChart = function (element, configuration) {
             .attr("d", resizePath);
 
         for(var i = 0; i < charts.length; i++) {
-            context.append("text")
-              .attr("class","series-title")
-              .attr("fill", values[i].color)
-              .attr("transform", "translate(0," + ((chartHeight+this.config.margin.top+this.config.margin.bottom)*i) + ")")
-              .text(charts[i].name);
-
             context.append("g")
                 .attr("class", "y axis series-y")
-                .attr("transform", "translate(0," + ((chartHeight+this.config.margin.top+this.config.margin.bottom)*i) + ")")
+                .attr("transform", "translate(0," + ((chartHeight+this.config.margin.top+this.config.margin.bottom)*charts[i].index) + ")")
                 .call(charts[i].yAxis);
+
+            context.append("text")
+                .attr("class","series-title")
+                .attr("fill", charts[i].color)
+                .attr("transform", "translate(0," + (((chartHeight+this.config.margin.top+this.config.margin.bottom)*charts[i].index)-5) + ")")
+                .text(charts[i].name);
         }
 
     };
+
+    this.updatePrimarySeries = function(series) {
+        this.primarySeries = series;
+    }
 
     this.redrawOnResize = function () {
         var me = this;

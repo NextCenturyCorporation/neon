@@ -74,21 +74,22 @@ angular.module('timelineSelectorChartDirective', []).directive('timelineSelector
                     $scope.extentDirty = false;
                     $scope.chart.renderExtent($scope.timelineBrush);
                 }
-            })
+            });
 
             $scope.$watch('collapsed', function(newVal) {
                 if (typeof newVal !== "undefined") {
                     $scope.chart.render($scope.timelineData);
                     $scope.chart.renderExtent($scope.timelineBrush);
                 }
-            })
+            });
 
             $scope.$watch('primarySeries', function(newVal) {
-                if (newVal >= 0) {
-                    $scope.chart.render($scope.timelineData, newVal);
+                if (newVal) {
+                    $scope.chart.updatePrimarySeries(newVal);
+                    $scope.chart.render($scope.timelineData);
                     $scope.chart.renderExtent($scope.timelineBrush);
                 }
-            })
+            });
         }
     }
 });

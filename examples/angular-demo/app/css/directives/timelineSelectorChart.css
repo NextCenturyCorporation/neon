@@ -15,7 +15,7 @@
  */
 
 .timeline-selector-chart {
-	margin: 5px -15px 0;
+	margin: 0 -15px 0;
 	display:block;
   min-height: 40px;
 
@@ -24,7 +24,7 @@
 
 }
 .collapsed .timeline-selector-chart {
-  height: 70px !important;
+  height: 72px !important;
 }
 .timeline-selector-chart svg {
   font-size: 10px;
@@ -52,16 +52,23 @@
   stroke: #F1F1F1;
   stroke-width: 3px;
 }
-.timeline-selector-chart .series-axis{
+.timeline-selector-chart .mini-axis{
   fill: none;
   shape-rendering: crispEdges;
-  stroke: rgba(0,0,0,0.2);
+  stroke: rgba(0,0,0,0.1);
   stroke-width : 1px;
-  stroke-dasharray: 6px;
 }
 .timeline-selector-chart .y.axis text,
 .timeline-selector-chart .series-title{
-  text-shadow: 1px 1px 0 #f1f1f1;
+  text-shadow:
+    1px 1px 0 #f1f1f1,
+    1px 0px 0 #f1f1f1,
+    1px -1px 0 #f1f1f1,
+    -1px 1px 0 #f1f1f1,
+    -1px 0px 0 #f1f1f1,
+    -1px -1px 0 #f1f1f1,
+    0px 2px 0 #f1f1f1,
+    0px -2px 0 #f1f1f1;
   font-weight: bold;
 }
 .timeline-selector-chart .y.axis path,
