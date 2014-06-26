@@ -61,11 +61,6 @@ linechart.directive('linechart', ['ConnectionService', function(connectionServic
 					$scope.queryForData();
 				}
 			});
-			$scope.$watch('totalType', function(newValue, oldValue) {
-				if($scope.databaseName && $scope.tableName) {
-					$scope.queryForData();
-				}
-			});
 
 			// Detect if anything in the digest cycle altered our visibility and redraw our chart if necessary.
 			// Note, this supports the angular hide method and would need to be augmented to catch
@@ -113,8 +108,8 @@ linechart.directive('linechart', ['ConnectionService', function(connectionServic
 		};
 
 		var query = function(comparator, comparisionValue, callback) {
-			var xAxis = connectionService.getFieldMapping("line_x_axis");
-			var yAxis = connectionService.getFieldMapping("y_axis")
+			var xAxis = $scope.attrX || connectionService.getFieldMapping("line_x_axis");
+			var yAxis = $scope.attrY || connectionService.getFieldMapping("y_axis");
 
 			var query = new neon.query.Query()
 				.selectFrom($scope.databaseName, $scope.tableName)
@@ -137,8 +132,8 @@ linechart.directive('linechart', ['ConnectionService', function(connectionServic
 		};
 
 		$scope.queryForData = function() {
-			var xAxis = connectionService.getFieldMapping("line_x_axis");
-			var yAxis = connectionService.getFieldMapping("y_axis")
+			var xAxis = $scope.attrX || connectionService.getFieldMapping("line_x_axis");
+			var yAxis = $scope.attrY || connectionService.getFieldMapping("y_axis");
 
 			XDATA.activityLogger.logSystemActivity('LineChart - query for data');
 			query('>', 0, function(posResults) {
@@ -277,8 +272,7 @@ linechart.directive('linechart', ['ConnectionService', function(connectionServic
 		restrict: 'E',
 		scope: {
 			attrX: '=',
-			attrY: '=',
-			totalType: '='
+			attrY: '='
 		},
 		link: link
 	};
