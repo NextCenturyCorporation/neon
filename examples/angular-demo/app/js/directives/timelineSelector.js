@@ -51,7 +51,7 @@ angular.module('timelineSelectorDirective', []).directive('timelineSelector', ['
                 var DAY = "day";
                 // TODO - These need to be in a configuration file
                 var USE_OpenCPU = false;
-                var OpenCPU_URL = 'http://192.168.56.101/ocpu/library/stl2wrapper/R';
+                var OpenCPU_URL = 'http://neon-opencpu/ocpu/library/stl2wrapper/R';
 
                 element.addClass('timeline-selector');
 
