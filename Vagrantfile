@@ -36,7 +36,41 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
 	    vbox.vm.network "forwarded_port", host: 4567, guest: 8080
 	end
 
-	config.vm.define "aws", autostart: false do |aws|
+	config.vm.define "aws", autostart: false do |aws|   #install on ubuntu image
+		require 'vagrant-aws'
+
+		aws.vm.box = "dummy"
+		aws.vm.box_url = "https://github.com/mitchellh/vagrant-aws/raw/master/dummy.box"
+
+		aws.ssh.username = "ubuntu"
+		aws.ssh.private_key_path = "PATH_TO_YOUR_KEY_FILE.pem"
+
+		aws.vm.provider :aws do |ec2, override|
+			ec2.access_key_id = "YOUR_ACCESS_KEY"
+			ec2.secret_access_key = "YOUR_SECRET"
+			ec2.keypair_name = "KEYPAIR_NAME"
+			ec2.instance_type = "m1.medium"
+			ec2.region = "us-east-1"
+			ec2.security_groups = ["neon-vagrant"]
+			ec2.tags = {
+				'project' => 'neon'
+			}
+			ec2.block_device_mapping = [{ :DeviceName => "/dev/sda1", 'Ebs.VolumeSize' => 20, 'Ebs.DeleteOnTermination' => true }]
+			ec2.ami = "ami-d805f4b0" #"ami-018c9568" #the ami for the image to install
+			override.ssh.pty = true
+		end
+        
+		aws.vm.synced_folder ".", "/vagrant", disabled: true
+
+	    aws.vm.synced_folder "./puppet/", "/puppet"
+
+	    aws.vm.provision "shell",
+    	    inline: "echo \"Applying puppet\" &&  puppet apply /puppet/ubuntu.pp"
+
+	    aws.vm.network "forwarded_port", host: 4567, guest: 8080
+	end
+
+	config.vm.define "aws-centos", autostart: false do |aws|
 		require 'vagrant-aws'
 
 		aws.vm.box = "dummy"
