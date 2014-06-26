@@ -71,6 +71,7 @@ angular.module('timelineSelectorDirective', []).directive('timelineSelector', ['
                     $scope.endDateForDisplay = undefined;
                     $scope.referenceStartDate = undefined;
                     $scope.referenceEndDate = undefined;
+                    $scope.primarySeries = 0;
 
                     $scope.granularity = DAY;
                     $scope.millisMultiplier = MILLIS_IN_DAY;
@@ -78,6 +79,8 @@ angular.module('timelineSelectorDirective', []).directive('timelineSelector', ['
                     $scope.filterId = 'timelineFilter';
                     $scope.filterKey = neon.widget.getInstanceId($scope.filterId);
                     $scope.messenger = new neon.eventing.Messenger();
+
+                    $scope.collapsed = true;
 
                     $scope.messenger.events({
                         activeDatasetChanged: onDatasetChanged,

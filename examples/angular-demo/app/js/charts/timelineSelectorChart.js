@@ -177,10 +177,16 @@ charts.TimelineSelectorChart = function (element, configuration) {
      * @param {Number} values.value A number which will be plotted on the y-axis
      * @method render
      */
-    this.render = function (values) {
+    this.render = function (values, primary) {
+        var defaultHeight = 70;
+        $(this.d3element[0]).css("height", (defaultHeight * values.length) );
         var width = this.determineWidth(this.d3element) - this.config.margin.left - this.config.margin.right;
         var height = this.determineHeight(this.d3element) - this.config.margin.top - this.config.margin.bottom;
+        var chartHeight = defaultHeight - this.config.margin.top - this.config.margin.bottom;
+        //var height = (70 * 4) - this.config.margin.top - this.config.margin.bottom;
         var fullDataSet = [];
+
+        primary = primary || 0;
 
         if (values && values.length > 0) {
             this.data = values;
@@ -195,10 +201,7 @@ charts.TimelineSelectorChart = function (element, configuration) {
 
         // Setup the axes and their scales.
         var x = d3.time.scale.utc().range([0, width]),
-            y = d3.scale.linear().range([height, 0]);
-
-        var xAxis = d3.svg.axis().scale(x).orient("bottom").ticks(Math.round(width/100)),
-            yAxis = d3.svg.axis().scale(y).orient("left").ticks(1);
+            xAxis = d3.svg.axis().scale(x).orient("bottom").ticks(Math.round(width/100));
 
         // Save the brush as an instance variable to allow interaction on it by client code.
         this.brush = d3.svg.brush().x(x).on("brush", this.updateMask);
@@ -210,12 +213,11 @@ charts.TimelineSelectorChart = function (element, configuration) {
             this.brush.on("brushend", wrapBrushHandler(this.brush, this.brushHandler));
         }
 
-        var heightRange = y.range()[0];
-
+        //var heightRange = y.range()[0];
         function resizePath(d) {
             var e = +(d == "e"),
                 x = e ? 1 : -1,
-                y = heightRange / 3;
+                y = height / 3;
             return "M" + (.5 * x) + "," + y
                 + "A6,6 0 0 " + e + " " + (6.5 * x) + "," + (y + 6)
                 + "V" + (2 * y - 6)
@@ -241,16 +243,6 @@ charts.TimelineSelectorChart = function (element, configuration) {
             return d.date;
         })));
 
-        // Use lowest value or 0 for Y-axis domain, whichever is less (e.g. if negative)
-        var minY = d3.min(fullDataSet.map(function (d) {
-            return d.value;
-        }));
-        minY = minY < 0 ? minY : 0;
-        
-        y.domain([minY, d3.max(fullDataSet.map(function (d) {
-            return d.value;
-        }))]);
-
         // Clear the old contents by replacing innerhtml.
         d3.select(this.element).html('');
 
@@ -269,45 +261,82 @@ charts.TimelineSelectorChart = function (element, configuration) {
             .attr("class", "context")
             .attr("transform", "translate(" + this.config.margin.left + "," + this.config.margin.top + ")");
 
-        for(var i = 0; i < values.length; i++) {
+        // Render a series
+        var me = this;
+        var seriesPos = 0;
+        var createSeries = function(series){
+            var container = context.append("g")
+                .attr("class", series.name)
+                .attr("transform", "translate(0," + ((chartHeight+me.config.margin.top+me.config.margin.bottom)*seriesPos) + ")");
 
-            var style = 'stroke:'+values[i].color+';'
+            var y = d3.scale.linear().range([chartHeight, 0]),
+            yAxis = d3.svg.axis().scale(y).orient("right").ticks(2);
 
-            // If type is area, render an area plot in addition to a line
-            if(values[i].type == 'area'){
+            // Use lowest value or 0 for Y-axis domain, whichever is less (e.g. if negative)
+            var minY = d3.min(series.data.map(function (d) {
+                return d.value;
+            }));
+            minY = minY < 0 ? minY : 0;
+            
+            y.domain([minY, d3.max(series.data.map(function (d) {
+                return d.value;
+            }))]);
 
-                style += 'stroke-width:1px;';
-
-                var area = d3.svg.area()
-                    .x(function (d) {
-                        return x(d.date);
-                    })
-                    .y0(height)
-                    .y1(function (d) {
-                        return y(d.value);
-                    });
-
-                context.append("path")
-                    .datum(values[i].data)
-                    .attr("class", "area")
-                    .attr("d", area)
-                    .attr("style", 'fill:'+values[i].color+';');
-            }
-
-            // Always render a line, even for area series
-            var line = d3.svg.line()
+            var style = 'stroke:'+series.color+';'
+            var chartType = '';
+            // If type is line, render a line plot
+            if(series.type == 'line'){
+                chartType = d3.svg.line()
                     .x(function (d) {
                         return x(d.date);
                     })
                     .y(function (d) {
                         return y(d.value);
                     });
+            }else{
+                // Otherwise, default to area
+                style += 'fill:'+series.color+';';
+                chartType = d3.svg.area()
+                    .x(function (d) {
+                        return x(d.date);
+                    })
+                    .y0(chartHeight)
+                    .y1(function (d) {
+                        return y(d.value);
+                    });
+            }
 
-            context.append("path")
-                .datum(values[i].data)
-                .attr("class", "line")
-                .attr("d", line)
+            container.append("path")
+                .datum(series.data)
+                .attr("class", series.type)
+                .attr("d", chartType)
                 .attr("style", style);
+
+            container.append("line")
+                .attr({
+                    "class":"series-axis",
+                    "x1" : 0,
+                    "x2" : width,
+                    "y1" : y(0),
+                    "y2" : y(0)
+                });
+
+            charts.push({
+                name: series.name,
+                yAxis: yAxis,
+                container: container
+            });
+
+            seriesPos++;
+        }
+
+        // Render all series
+        var charts = [];
+        if(values.length > 0)
+            createSeries(values[primary]);
+        for(var i = 0; i < values.length; i++) {
+            if(i == primary) continue;
+            createSeries(values[i]);
         }
 
         context.append("g")
@@ -378,6 +407,19 @@ charts.TimelineSelectorChart = function (element, configuration) {
         gBrush.selectAll(".resize")
             .append("path")
             .attr("d", resizePath);
+
+        for(var i = 0; i < charts.length; i++) {
+            context.append("text")
+              .attr("class","series-title")
+              .attr("fill", values[i].color)
+              .attr("transform", "translate(0," + ((chartHeight+this.config.margin.top+this.config.margin.bottom)*i) + ")")
+              .text(charts[i].name);
+
+            context.append("g")
+                .attr("class", "y axis series-y")
+                .attr("transform", "translate(0," + ((chartHeight+this.config.margin.top+this.config.margin.bottom)*i) + ")")
+                .call(charts[i].yAxis);
+        }
 
     };
 

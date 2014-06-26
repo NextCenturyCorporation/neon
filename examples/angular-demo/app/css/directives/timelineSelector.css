@@ -47,3 +47,7 @@
 .timeline-selector .filter-reset .btn{
 	border-color: #cccccc;
 }
+
+.timeline-selector .timeseries-selector{
+	width: 180px;
+}
