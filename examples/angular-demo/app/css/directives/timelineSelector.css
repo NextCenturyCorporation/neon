@@ -49,5 +49,30 @@
 }
 
 .timeline-selector .timeseries-selector{
-	width: 160px;
+	width: 150px;
+}
+.timeline-selector .timeseries-selector .btn{
+	background-color: #dddddd;
+	border-color: #cccccc;
+	padding-left: 8px;
+	padding-right: 8px;
+}
+.timeline-selector .timeseries-selector .btn .glyphicon{
+	font-size: 12px;
+}
+.timeline-selector .timeseries-selector .btn-primary{
+	color: #39b54a;
+}
+.timeline-selector .timeseries-selector .btn-primary:hover{
+	color: #FFFFFF;
+	background-color: #39b54a;
+	border-color: #2F9F3E;
+}
+.timeline-selector .timeseries-selector .btn-danger{
+	color: #C2360D;
+}
+.timeline-selector .timeseries-selector .btn-danger:hover{
+	color: #FFFFFF;
+	background-color: #C2360D;
+	border-color: #AA1E13;
 }
