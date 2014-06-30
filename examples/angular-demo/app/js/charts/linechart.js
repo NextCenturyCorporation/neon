@@ -332,12 +332,12 @@ charts.LineChart.prototype.drawLine = function(opts) {
 		var mouse_y = d3.mouse(this)[1];
 		var graph_y = me.y.invert(mouse_y);
 		var graph_x = me.x.invert(mouse_x);
-		var format = d3.time.format('%e %B %Y');
+		var format = d3.time.format.utc('%e %B %Y');
 		var numFormat = d3.format("0,000.00");
 		//hoverDate.text(format(graph_x));
 
 		var bisect = d3.bisector(function(d) { return d[me.xAttribute]; }).right;
-		var dataIndex = bisect(opts[0].data, new Date(graph_x));
+		var dataIndex = bisect(opts[0].data, graph_x);
 		var dataDate = opts[0].data[dataIndex][me.xAttribute];
 		var closerDate = dataDate;
 		var closerIndex = dataIndex;
