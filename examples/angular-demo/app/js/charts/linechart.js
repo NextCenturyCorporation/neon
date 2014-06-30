@@ -23,6 +23,31 @@ charts.LineChart = function (rootElement, selector, opts) {
 	this.yAttribute = opts.y;
 	this.margin = $.extend({}, charts.LineChart.DEFAULT_MARGIN, opts.margin || {});
 
+	this.colors = [];
+	this.colorRange = [
+        '#39b54a',
+        '#C23333',
+        '#3662CC',
+        "#ff7f0e",
+        "#9467bd",
+        "#8c564b",
+        "#e377c2",
+        "#7f7f7f",
+        "#bcbd22",
+        "#17becf",
+        "#98df8a",
+        "#ff9896",
+        "#aec7e8",
+        "#ffbb78",
+        "#c5b0d5",
+        "#c49c94",
+        "#f7b6d2",
+        "#c7c7c7",
+        "#dbdb8d",
+        "#9edae5"
+    ];
+    this.colorScale = d3.scale.ordinal().range(this.colorRange);
+
 	this.categories = [];
 
 	if (opts.responsive) {
@@ -31,7 +56,7 @@ charts.LineChart = function (rootElement, selector, opts) {
 	return this;
 };
 
-charts.LineChart.DEFAULT_HEIGHT = 250;
+charts.LineChart.DEFAULT_HEIGHT = 300;
 charts.LineChart.DEFAULT_WIDTH = 600;
 charts.LineChart.DEFAULT_MARGIN = {top: 20, bottom: 20, left: 0, right: 0};
 charts.LineChart.DEFAULT_STYLE = {};
@@ -112,6 +137,32 @@ charts.LineChart.prototype.drawChart = function() {
 		.attr("transform", "translate(" + me.margin.left + "," + me.margin.top + ")");
 };
 
+charts.LineChart.prototype.calculateColor = function (series, total) {
+    var color = this.colorScale(series);
+
+    // store the color in the registry so we know the color/series mappings
+    for (var i = this.colors.length - 1; i > -1; i--) {
+    	if (this.colors[i].series === series)
+        	this.colors.splice(i, 1);
+	}
+	this.colors.push({color: color, series: series, total: total});
+
+    return color
+};
+
+charts.LineChart.prototype.getColorMappings = function () {
+    var me = this;
+
+    // convert to an array that is in alphabetical order for consistent iteration order
+    // var sortedColors = [];
+    // for (key in this.colors) {
+    //     var color = me.colors[key];
+    //     sortedColors.push({ 'color': color, 'series': key});
+    // }
+
+    return me.colors;
+};
+
 charts.LineChart.prototype.drawLine = function(opts) {
 	var me = this;
 
@@ -168,12 +219,35 @@ charts.LineChart.prototype.drawLine = function(opts) {
 	            "y2" : function(d){ return me.y(d);}
 	        });
 
+	// Hover line. 
+	var hoverLineGroup = me.svg.append("g")
+		.attr("class", "hover-line");
+	var hoverLine = hoverLineGroup
+		.append("line")
+			.attr("x1", 10).attr("x2", 10) 
+			.attr("y1", 0).attr("y2", me.height); 
+	var hoverDate = hoverLineGroup.append('text')
+	   .attr("class", "hover-text hover-date")
+	   .attr('y', me.height+20);
+
+	// Hide hover line by default.
+	hoverLineGroup.style("opacity", 1e-6);
+
 	var cls;
 	var data;
 	var line;
+	var hoverSeries = [];
 	for(var i = 0; i < opts.length; i++) {
-		cls = (opts[i].classString ? " " + opts[i].classString : "");
+		cls = (opts[i].series ? " " + opts[i].series : "");
 		data = opts[i].data;
+
+		hoverSeries.push(
+			hoverLineGroup.append('text')
+			   .attr("class", "hover-text")
+			   .attr('y', me.height+20)
+		);
+
+		var color = this.calculateColor(opts[i].series, opts[i].total);
 
 		me.x.ticks().map(function(bucket) {
 			return _.find(data, {date: bucket}) || {date: bucket, value: 0};
@@ -200,7 +274,8 @@ charts.LineChart.prototype.drawLine = function(opts) {
 		me.svg.append("path")
 		.datum(data)
 		.attr("class", "line" + cls)
-		.attr("d", line);
+		.attr("d", line)
+		.attr("stroke", color);
 
 		if(data.length < 40){
 
@@ -211,7 +286,8 @@ charts.LineChart.prototype.drawLine = function(opts) {
 			me.svg.selectAll("dot")
 	            .data(data)
 	          .enter().append("circle")
-	            .attr("class", "dot" + cls)
+	            .attr("class", "dot dot-empty")
+	            .attr("stroke", color)
 	            .attr("r", 4)
 	            .attr("cx", func)
 	            .attr("cy", function(d) { return me.y(d[me.yAttribute]); });
@@ -243,6 +319,73 @@ charts.LineChart.prototype.drawLine = function(opts) {
 	        tick.find('text').css('text-anchor', 'end');
 	    }
 	}
+
+	// Add mouseover events.
+	d3.select('.linechart').on("mouseover", function() { 
+		//console.log('mouseover')
+	}).on("mousemove", function(event) {
+		me.svg.selectAll("circle.dot-hover").remove();
+		var mouse_x = d3.mouse(this)[0];
+		var mouse_y = d3.mouse(this)[1];
+		var graph_y = me.y.invert(mouse_y);
+		var graph_x = me.x.invert(mouse_x);
+		var format = d3.time.format('%e %B %Y');
+		var numFormat = d3.format("0,000.00");
+		//hoverDate.text(format(graph_x));
+
+		var bisect = d3.bisector(function(d) { return d[me.xAttribute]; }).right;
+		var dataIndex = bisect(opts[0].data, new Date(graph_x));
+		var dataDate = opts[0].data[dataIndex][me.xAttribute];
+		var closerDate = dataDate;
+		var closerIndex = dataIndex;
+		var html = '';
+
+		if(dataIndex > 0){
+			var dataIndexLeft = (dataIndex-1);
+			var dataDateLeft = opts[0].data[dataIndexLeft][me.xAttribute];
+			var compare = ((me.x(dataDate) - me.x(dataDateLeft))/2)+me.x(dataDateLeft);
+			if(mouse_x < compare){
+				closerDate = dataDateLeft;
+				closerIndex = dataIndexLeft;
+			}
+		}
+
+		html = '<span class="tooltip-date">'+format(closerDate)+'</span>';
+
+		for(var i = 0; i < opts.length; i++) {
+
+			var color = me.calculateColor(opts[i].series, opts[i].total);
+			var xPos = me.x(closerDate);
+			if(opts[i].data.length == 1)
+				xPos = me.width/2;
+
+			me.svg.append("circle")
+	            .attr("class", "dot dot-hover")
+	            .attr("stroke", color)
+	            .attr("fill", color)
+	            .attr("r", 4)
+	            .attr("cx", xPos)
+	            .attr("cy", me.y(opts[i].data[closerIndex].value));
+
+			html += '<span style="color: '+color+'">'+opts[i].series+": "+numFormat(opts[i].data[closerIndex].value)+'</span>';
+		}
+
+		hoverLine.attr("x1", me.x(closerDate)).attr("x2", me.x(closerDate))
+		hoverLineGroup.style("opacity", 1);
+
+
+		$("#tooltip-container").html(html);
+	    $("#tooltip-container").show();
+	      
+	    d3.select("#tooltip-container")
+		    .style("top", (d3.event.pageY + 15)  + "px")
+		    .style("left", (d3.event.pageX + 15) + "px");
+
+	}).on("mouseout", function() {
+		hoverLineGroup.style("opacity", 1e-6);
+		me.svg.selectAll("circle.dot-hover").remove();
+		$("#tooltip-container").hide();
+	});
 };
 
 charts.LineChart.prototype.redraw = function() {
