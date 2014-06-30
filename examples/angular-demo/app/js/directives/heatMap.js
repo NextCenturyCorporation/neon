@@ -62,6 +62,7 @@ angular.module('heatMapDirective', []).directive('heatMap', ['ConnectionService'
                     $scope.filterKey = neon.widget.getInstanceId("map");
                     $scope.showFilter = false;
                     $scope.dataBounds = undefined;
+                    $scope.limit = 1000;  // Max points to pull into the map.
 
                     // optionsDisplayed is used merely to track the display of the options menu
                     // for usability and workflow analysis.
@@ -204,6 +205,16 @@ angular.module('heatMapDirective', []).directive('heatMap', ['ConnectionService'
                                 to: newVal
                             });
                     });
+
+                    $scope.$watch('limit', function(newVal, oldVal) {
+                        XDATA.activityLogger.logUserActivity('HeatMap - user change number of displayed points', 'select',
+                            XDATA.activityLogger.WF_EXPLORE,
+                            {
+                                from: oldVal,
+                                to: newVal
+                            });
+                        $scope.queryForMapData();
+                    })
 
                 };
 
@@ -451,7 +462,7 @@ angular.module('heatMapDirective', []).directive('heatMap', ['ConnectionService'
                 }
 
                 $scope.buildQuery = function () {
-                    var query = new neon.query.Query().selectFrom($scope.databaseName, $scope.tableName)
+                    var query = new neon.query.Query().selectFrom($scope.databaseName, $scope.tableName).limit($scope.limit)
                     var groupByFields = [$scope.latitudeField, $scope.longitudeField];
 
                     if ($scope.colorByField) {
