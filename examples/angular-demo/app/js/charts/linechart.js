@@ -367,7 +367,7 @@ charts.LineChart.prototype.drawLine = function(opts) {
 	            .attr("cx", xPos)
 	            .attr("cy", me.y(opts[i].data[closerIndex].value));
 
-			html += '<span style="color: '+color+'">'+opts[i].series+": "+numFormat(opts[i].data[closerIndex].value)+'</span>';
+			html += '<span style="color: '+color+'">'+opts[i].series+": "+numFormat(Math.round(opts[i].data[closerIndex].value * 100) / 100)+'</span>';
 		}
 
 		hoverLine.attr("x1", me.x(closerDate)).attr("x2", me.x(closerDate))

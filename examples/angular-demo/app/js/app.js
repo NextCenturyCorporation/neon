@@ -52,6 +52,8 @@ angular.module('numberShortModule', [])
 		        number = (number / Math.pow(10, 6)).toFixed(1)+"M";
 		      else if (abs < Math.pow(10, 6) && abs >= Math.pow(10, 3))
 		        number = (number / Math.pow(10, 3)).toFixed(1)+"K";
+		      else
+		      	number = Math.round(number * 100) / 100;
 		    }
 		    return number
 		};
