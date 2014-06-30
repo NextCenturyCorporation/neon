@@ -46,9 +46,6 @@ metadata {
                     date {
                         value = "timestamp"
                     }
-                    line_x_axis {
-                        value = "timestamp"
-                    }
                     bar_x_axis {
                         value = "type"
                     }
@@ -73,8 +70,8 @@ metadata {
                     longitude {
                         value = "longitude"
                     }
-                    line_x_axis {
-                        value = "time"
+                    line_category {
+                        value = "type"
                     }
                     bar_x_axis {
                         value = "net"
@@ -104,8 +101,8 @@ metadata {
                     longitude {
                         value = "longitude"
                     }
-                    line_x_axis {
-                        value = "yyyy-mm-dd"
+                    line_category {
+                        value = "sentimentType"
                     }
                     bar_x_axis {
                         value = "yyyy-mm"
@@ -135,8 +132,8 @@ metadata {
                     longitude {
                         value = "longitude"
                     }
-                    line_x_axis {
-                        value = "yyyy-mm-dd"
+                    line_category {
+                        value = "sentimentType"
                     }
                     bar_x_axis {
                         value = "yyyy-mm"

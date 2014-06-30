@@ -125,7 +125,7 @@ linechart.directive('linechart', ['ConnectionService', function(connectionServic
 					});
 					$scope.attrX = connectionService.getFieldMapping("date");
 					$scope.attrY = connectionService.getFieldMapping("y_axis");
-					$scope.categoryField = '';
+					$scope.categoryField = connectionService.getFieldMapping("line_category");
 					$scope.aggregation = 'count';
                     $scope.queryForData();
                 });
