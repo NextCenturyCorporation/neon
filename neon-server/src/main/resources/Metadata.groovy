@@ -101,9 +101,6 @@ metadata {
                     longitude {
                         value = "longitude"
                     }
-                    line_category {
-                        value = "sentimentType"
-                    }
                     bar_x_axis {
                         value = "yyyy-mm"
                     }

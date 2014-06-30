@@ -204,7 +204,10 @@ charts.LineChart.prototype.drawLine = function(opts) {
 		.orient("right")
 		.ticks(3);
 
-	me.y.domain([0, d3.max(fullDataSet, function(d) { return d[me.yAttribute]; })]);
+	// Use lowest value or 0 for Y-axis domain, whichever is less (e.g. if negative)
+	var minY = d3.min(fullDataSet, function(d) { return d[me.yAttribute]; });
+	minY = minY < 0 ? minY : 0;
+	me.y.domain([minY, d3.max(fullDataSet, function(d) { return d[me.yAttribute]; })]);
 
 	var gridLines = me.svg.append("g").attr("class", "gridLines");
 
