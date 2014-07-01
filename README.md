@@ -3,22 +3,24 @@ Neon is a software platform designed to help integrate your disparate visualizat
 
 ##Documentation
 
-**Neon Wiki** - Visit the Neon wiki for more information on what Neon can do for you.
-<br>[https://github.com/NextCenturyCorporation/neon/wiki](https://github.com/NextCenturyCorporation/neon/wiki)
+**[Neon Wiki][1]** - Visit the Neon wiki for more information on what Neon can do for you.
 
-**Build Instructions** - Includes instructions for building the Neon WAR file from source code and lists Neon's external dependencies.
-<br> [https://github.com/NextCenturyCorporation/neon/wiki/Build-Instructions](https://github.com/NextCenturyCorporation/neon/wiki/Build-Instructions)
+**[Build Instructions][2]** - Includes instructions for building the Neon WAR file from source code and lists Neon's external dependencies.
 
-**Deploying Neon** - Includes instructions for deploying the Neon application to a web server (e.g., Jetty and Tomcat).
-<br>[https://github.com/NextCenturyCorporation/neon/wiki/Deploying-Neon](https://github.com/NextCenturyCorporation/neon/wiki/Deploying-Neon)
+**[Deploying Neon][3]** - Includes instructions for deploying the Neon application to a web server (e.g., Jetty and Tomcat).
 
-**Developer Quick Start Guide** - A quick tour of how to develop apps that use Neon.
-<br>[https://github.com/NextCenturyCorporation/neon/wiki/Developer-Quick-Start-Guide](https://github.com/NextCenturyCorporation/neon/wiki/Developer-Quick-Start-Guide)
+**[Developer Quick Start Guide][4]** - A quick tour of how to develop apps that use Neon.
 
 ## Additional Information
 
 Email: neon-support@nextcentury.com
 
-Website: [http://neonframework.org](http://neonframework.org)
+Website: [http://neonframework.org][5]
 
 Copyright 2014 Next Century Corporation
+
+[1]: https://github.com/NextCenturyCorporation/neon/wiki
+[2]: https://github.com/NextCenturyCorporation/neon/wiki/Build-Instructions
+[3]: https://github.com/NextCenturyCorporation/neon/wiki/Deploying-Neon
+[4]: https://github.com/NextCenturyCorporation/neon/wiki/Developer-Quick-Start-Guide
+[5]: http://neonframework.org
