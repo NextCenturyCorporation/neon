@@ -144,6 +144,42 @@ coreMap.Map.BOX_OPACITY = 1;
 coreMap.Map.SOURCE_PROJECTION = new OpenLayers.Projection("EPSG:4326");
 coreMap.Map.DESTINATION_PROJECTION = new OpenLayers.Projection("EPSG:900913");
 
+
+var onPopupClose = function (evt) {
+    // 'this' is the popup.
+    this.map.selectControl.unselect(this.feature);
+}
+var onFeatureSelect = function(feature) {
+    //var feature = evt.feature;
+    var text = '<div><table>';
+    for (key in feature.attributes) {
+        text += '<tr><th>' + key + '</th><td>' + feature.attributes[key] + '</td>';
+    }
+    text += '</table></div>';
+    AutoSizeFramedCloudMaxSize = OpenLayers.Class(OpenLayers.Popup.FramedCloud, {
+            'displayClass': 'map-popup',
+            'contentDisplayClass': 'map-popup-contents'
+        });
+    var popup = new AutoSizeFramedCloudMaxSize("Data",
+                             feature.geometry.getBounds().getCenterLonLat(),
+                             null,
+                             text,
+                             null,  onPopupClose);
+
+    feature.popup = popup;
+    popup.feature = feature;
+    this.map.addPopup(popup);
+}
+var onFeatureUnselect = function(feature) {
+    //var feature = evt.feature;
+    if (feature.popup) {
+        //this.map.popup.feature = null;
+        this.map.removePopup(feature.popup);
+        feature.popup.destroy();
+        feature.popup = null;
+    }
+}
+
 /**
  * Draws the map data
  * @method draw
@@ -293,9 +329,11 @@ coreMap.Map.prototype.createHeatmapDataPoint = function (element, longitude, lat
 
 coreMap.Map.prototype.createPointsLayerDataPoint = function (element, longitude, latitude) {
     var point = new OpenLayers.Geometry.Point(longitude, latitude);
+    point.data = element;
     point.transform(coreMap.Map.SOURCE_PROJECTION, coreMap.Map.DESTINATION_PROJECTION);
     var feature = new OpenLayers.Feature.Vector(point);
     feature.style = this.stylePoint(element);
+    feature.attributes = element;
     return feature;
 };
 
@@ -585,6 +623,18 @@ coreMap.Map.prototype.setupLayers = function () {
     this.map.addLayer(this.heatmapLayer);
     this.map.addLayer(this.pointsLayer);
     this.map.addLayer(this.boxLayer);
+
+    // Add popup handlers to the points layer.
+    // this.pointsLayer.events.on({
+    //     'featureselected': onFeatureSelect,
+    //     'featureunselected': onFeatureUnselect
+    // });
+    this.map.selectControl = new OpenLayers.Control.SelectFeature(this.pointsLayer, {
+        'onSelect': onFeatureSelect,
+        'onUnselect': onFeatureUnselect
+    });
+    this.map.addControl(this.map.selectControl);
+    this.map.selectControl.activate();
 
     // Default the heatmap to be visible.
     this.heatmapLayer.toggle();
