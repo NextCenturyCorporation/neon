@@ -190,6 +190,7 @@ linechart.directive('linechart', ['ConnectionService', function(connectionServic
 				var data = [];
 				var series = []
 				var zeroedData = zeroPadData(results, minDate, maxDate);
+
 				// Convert results to array
 				for (series in zeroedData){
 					data.push(zeroedData[series]);
@@ -202,8 +203,34 @@ linechart.directive('linechart', ['ConnectionService', function(connectionServic
 					return 0;
 				});
 
+				// Calculate Other series
+				var otherTotal = 0;
+				var otherData = [];
+				if($scope.aggregation != 'avg'){
+					for(var i = $scope.seriesLimit; i < data.length; i++) {
+						otherTotal += data[i].total;
+						for(var d = 0; d < data[i].data.length; d++) {
+							if(otherData[d])
+								otherData[d].value += data[i].data[d].value;
+							else
+								otherData[d] = {
+									date: data[i].data[d].date,
+									value: data[i].data[d].value
+								};
+						}
+					}
+				}
+
 				// Trim data to only top results
 				data = data.splice(0, $scope.seriesLimit);
+
+				// Add Other series
+				if(otherTotal > 0)
+					data.push({
+						series: "Other",
+						total: otherTotal,
+						data: otherData
+					})
 
 				// Render chart and series lines
 				XDATA.activityLogger.logSystemActivity('LineChart - query data received');
@@ -213,6 +240,11 @@ linechart.directive('linechart', ['ConnectionService', function(connectionServic
 					XDATA.activityLogger.logSystemActivity('LineChart - query data rendered');
 				});
 			});
+		};
+
+		$scope.toggleSeries = function(series) {
+			XDATA.activityLogger.logSystemActivity('LineChart - toggle series');
+			$scope.chart.toggleSeries(series);
 		};
 
 		var zeroPadData = function(data, minDate, maxDate) {
@@ -237,7 +269,7 @@ linechart.directive('linechart', ['ConnectionService', function(connectionServic
 			// Scrape data for unique series
 			for(var i = 0; i < data.length; i++) {
 				if($scope.categoryField)
-					series = data[i][$scope.categoryField];
+					series = data[i][$scope.categoryField] != '' ? data[i][$scope.categoryField] : 'Unknown';
 
 				if(!resultData[series]){
 					resultData[series] = {
@@ -262,7 +294,7 @@ linechart.directive('linechart', ['ConnectionService', function(connectionServic
 				indexDate = new Date(data[i].date);
 
 				if($scope.categoryField)
-					series = data[i][$scope.categoryField];
+					series = data[i][$scope.categoryField] != '' ? data[i][$scope.categoryField] : 'Unknown';
 
 				resultData[series].data[Math.floor(Math.abs(indexDate - start) / dayMillis)].value = data[i].value;
 				resultData[series]['total'] += data[i].value;

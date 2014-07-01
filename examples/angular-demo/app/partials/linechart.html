@@ -39,10 +39,10 @@
 	<div class="legend legend-right">
 
 		<div class="legend-item" ng-class="{true: '', false: 'hidden'}[colorMappings.length >= seriesLimit]">
-        	<span class="legend-text text-muted">Top {{seriesLimit}}</span>
+        	<span class="legend-text text-muted"><strong>Top {{seriesLimit}}</strong></span>
         </div>
 
-		<div class="legend-item" ng-repeat="colorMapping in colorMappings|limitTo:seriesLimit">
+		<div class="legend-item legend-item-clickable" ng-repeat="colorMapping in colorMappings" ng-click="toggleSeries(colorMapping.series)" ng-class="{true: 'legend-hidden', false: ''}[colorMapping.hidden]">
 	    	<span class="legend-icon" style="background-color: {{colorMapping.color}}"></span>
 	    	<span class="legend-text">{{colorMapping.series}} <span class="text-muted">({{colorMapping.total | numberShort}})</span></span>
 	    </div>

@@ -23,6 +23,8 @@ charts.LineChart = function (rootElement, selector, opts) {
 	this.yAttribute = opts.y;
 	this.margin = $.extend({}, charts.LineChart.DEFAULT_MARGIN, opts.margin || {});
 
+	this.hiddenSeries = [];
+
 	this.colors = [];
 	this.colorRange = [
         '#39b54a',
@@ -138,14 +140,23 @@ charts.LineChart.prototype.drawChart = function() {
 };
 
 charts.LineChart.prototype.calculateColor = function (series, total) {
-    var color = this.colorScale(series);
 
-    // store the color in the registry so we know the color/series mappings
+    var color = this.colorScale(series);
+    var hidden = this.hiddenSeries.indexOf(series) >= 0 ? true : false;
+    var index = -1;
+
     for (var i = this.colors.length - 1; i > -1; i--) {
     	if (this.colors[i].series === series)
-        	this.colors.splice(i, 1);
+        	index = i;
 	}
-	this.colors.push({color: color, series: series, total: total});
+
+    // store the color in the registry so we know the color/series mappings
+    if(index >= 0){
+    	this.colors[index].color = color;
+    	this.colors[index].total = total;
+    	this.colors[index].hidden = hidden;
+    }else
+    	this.colors.push({color: color, series: series, total: total, hidden: hidden});
 
     return color
 };
@@ -175,7 +186,9 @@ charts.LineChart.prototype.drawLine = function(opts) {
 	var fullDataSet = [];
 	//get list of all data
 	for(var i = 0; i < opts.length; i++) {
-		fullDataSet = fullDataSet.concat(opts[i].data);
+		this.calculateColor(opts[i].series, opts[i].total);
+		if(this.hiddenSeries.indexOf(opts[i].series) == -1)
+			fullDataSet = fullDataSet.concat(opts[i].data);
 	}
 
 	me.x = d3.time.scale.utc()
@@ -241,6 +254,7 @@ charts.LineChart.prototype.drawLine = function(opts) {
 	var line;
 	var hoverSeries = [];
 	for(var i = 0; i < opts.length; i++) {
+		if(this.hiddenSeries.indexOf(opts[i].series) >= 0) continue;
 		cls = (opts[i].series ? " " + opts[i].series : "");
 		data = opts[i].data;
 
@@ -356,7 +370,7 @@ charts.LineChart.prototype.drawLine = function(opts) {
 		html = '<span class="tooltip-date">'+format(closerDate)+'</span>';
 
 		for(var i = 0; i < opts.length; i++) {
-
+			if(me.hiddenSeries.indexOf(opts[i].series) >= 0) continue;
 			var color = me.calculateColor(opts[i].series, opts[i].total);
 			var xPos = me.x(closerDate);
 			if(opts[i].data.length == 1)
@@ -389,6 +403,16 @@ charts.LineChart.prototype.drawLine = function(opts) {
 		me.svg.selectAll("circle.dot-hover").remove();
 		$("#tooltip-container").hide();
 	});
+};
+
+charts.LineChart.prototype.toggleSeries = function(series) {
+	var index = this.hiddenSeries.indexOf(series);
+	if(index >= 0)
+		this.hiddenSeries.splice(index, 1);
+	else
+		this.hiddenSeries.push(series);
+
+	this.redraw();
 };
 
 charts.LineChart.prototype.redraw = function() {
