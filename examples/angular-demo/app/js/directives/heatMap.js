@@ -83,8 +83,6 @@ angular.module('heatMapDirective', []).directive('heatMap', ['ConnectionService'
                     $scope.map.register("moveend", this, onMapEvent);
                     $scope.map.register("zoom", this, onMapEvent);
                     $scope.map.register("zoomend", this, onMapEvent);
-                    $scope.map.register("mouseover", this, onMapEvent);
-                    $scope.map.register("mouseout", this, onMapEvent);
 
                     // Setup our messenger.
                     $scope.messenger = new neon.eventing.Messenger();
@@ -222,7 +220,11 @@ angular.module('heatMapDirective', []).directive('heatMap', ['ConnectionService'
                 };
 
                 var onMapEvent = function (message) {
-                    XDATA.activityLogger.logUserActivity('HeatMap - user interacted with map', message.type,
+                    var type = message.type;
+                    type = type.replace("move", "pan");
+                    type = type.replace("start", "_start");
+                    type = type.replace("end", "_end");
+                    XDATA.activityLogger.logUserActivity('HeatMap - user interacted with map', type,
                             XDATA.activityLogger.WF_EXPLORE);
                 };
 
