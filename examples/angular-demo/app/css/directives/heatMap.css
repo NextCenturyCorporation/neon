@@ -57,3 +57,26 @@
 .heat-map .olControlZoom a:hover{
 	background-color: rgba(57, 181, 74, 1);
 }
+
+.map-popup{
+    padding: 12px 15px;
+    color: #555555;
+    font-size: 12px;
+    background-color: rgba(255,255,255,0.9);
+    border: 1px solid rgba(0, 0, 0, 0.15);
+    border-radius: 4px;
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.176);
+    pointer-events: none;
+    z-index: 10000;
+}
+.map-popup{
+	border: 0;
+}
+.map-popup #Data_GroupDiv,
+.map-popup-contents{
+	position: static !important;
+}
+.map-popup [id*='Data_FrameDecoration'],
+.map-popup #Data_close{
+	display: none;
+}
