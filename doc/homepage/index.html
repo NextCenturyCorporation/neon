@@ -42,18 +42,23 @@
 
         <div class="row">
           <div class="col-sm-10 col-sm-offset-1">
-            <p>Neon is an open-source framework used to develop custom data analysis applications.
-            It is designed to help integrate your visualizations with your data. The Neon framework
-            can incorporate a variety of data analysis and visualization widgets in a common webtop
-            environment to allow analysts to explore complex data sets.</p>
+            <p>Neon is an open-source framework used to develop custom data analysis applications. It is designed to help integrate your visualizations with your data. The Neon framework can incorporate a variety of data analysis and visualization widgets in a common webtop environment to allow analysts to explore complex data sets.</p>
 
             <a class="btn btn-primary btn-lg" href="https://github.com/nextcenturycorporation/neon">View on GitHub</a>
 
-            <a class="btn btn-primary btn-lg" href="https://github.com/nextcenturycorporation/neon/wiki">Read Documentation</a>
-
             <a class="btn btn-primary btn-lg" href="http://neonframework.org/versions">Download</a>
 
-            <a class="btn btn-primary btn-lg" href="http://neonframework.org/apidocs">View API Documentation</a>
+            <div class="btn-group">
+              <button type="button" class="btn btn-primary btn-lg dropdown-toggle" data-toggle="dropdown">
+                Documentation
+                <span class="caret"></span>
+              </button>
+              <ul class="dropdown-menu" role="menu">
+                <li><a href="https://github.com/nextcenturycorporation/neon/wiki">GitHub Wiki</a></li>
+                <li><a href="http://neonframework.org/apidocs">API Documentation</a></li>
+              </ul>
+            </div>
+
           </div>
         </div>
       </div>
@@ -70,10 +75,7 @@
               Data Access API
             </h2>
             <p>Allows users to send a query to No-SQL databases using a SQL-like
-            language. Neon does the heavy-lifting by converting the query to a format understood by
-            the target database. For developers using Neon, this removes the need to create
-            database-specific constructs. This API allows database queries to be specified through a
-            JavaScript library or a RESTful endpoint.</p>
+            language. Neon does the heavy-lifting by converting the query to a format understood by the target database. For developers using Neon, this removes the need to create database-specific constructs. This API allows database queries to be specified through a JavaScript library or a RESTful endpoint.</p>
           </div>
 
           <hr class="visible-xs">
@@ -83,10 +85,7 @@
               <span class="glyphicon glyphicon-link"></span>
               Interaction API
             </h2>
-            <p>Provides a method for inter-widget communication between disparate widgets. Using
-            this API, widgets can coordinate actions and visualizations based on user actions.
-            Developers can orchestrate complex, interactive visualizations using components that are
-            completely decoupled from each other.</p>
+            <p>Provides a method for inter-widget communication between disparate widgets. Using this API, widgets can coordinate actions and visualizations based on user actions. Developers can orchestrate complex, interactive visualizations using components that are completely decoupled from each other.</p>
           </div>
         </div>
 
