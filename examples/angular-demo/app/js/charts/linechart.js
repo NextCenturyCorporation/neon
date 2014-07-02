@@ -431,6 +431,9 @@ charts.LineChart.prototype.toggleSeries = function(series) {
 	else
 		this.hiddenSeries.push(series);
 
+	if(this.data && this.hiddenSeries.length >= this.data.length)
+		this.hiddenSeries.splice(0);
+
 	this.redraw();
 };
 
