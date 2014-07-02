@@ -101,6 +101,9 @@ metadata {
                     longitude {
                         value = "longitude"
                     }
+                    line_category {
+                        value = "user_screen_name"
+                    }
                     bar_x_axis {
                         value = "yyyy-mm"
                     }
@@ -108,10 +111,10 @@ metadata {
                         value = "sentiment"
                     }
                     color_by {
-                        value = "sentimentType"
+                        value = "lang_primary"
                     }
                     size_by {
-                        value = "sentiment"
+                        value = "foo"
                     }
                     sort_by {
                         value = "created_at"
@@ -129,14 +132,14 @@ metadata {
                     longitude {
                         value = "longitude"
                     }
-                    line_x_axis {
+                    line_category {
                         value = "country"
                     }
                     bar_x_axis {
-                        value = "_id"
+                        value = "country"
                     }
                     y_axis {
-                        value = "sentiment"
+                        value = "_id"
                     }
                     color_by {
                         value = "country"
@@ -164,7 +167,7 @@ metadata {
                         value = "sentimentType"
                     }
                     bar_x_axis {
-                        value = "yyyy-mm"
+                        value = "sentimentType"
                     }
                     y_axis {
                         value = "sentiment"
