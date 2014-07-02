@@ -369,22 +369,27 @@ charts.LineChart.prototype.drawLine = function(opts) {
 		var graph_x = me.x.invert(mouse_x);
 		var format = d3.time.format.utc('%e %B %Y');
 		var numFormat = d3.format("0,000.00");
-
-		var bisect = d3.bisector(function(d) { return d[me.xAttribute]; }).right;
-		var dataIndex = bisect(opts[0].data, graph_x);
-		var dataDate = opts[0].data[dataIndex][me.xAttribute];
-		var closerDate = dataDate;
-		var closerIndex = dataIndex;
 		var html = '';
 
-		if(dataIndex > 0){
-			var dataIndexLeft = (dataIndex-1);
-			var dataDateLeft = opts[0].data[dataIndexLeft][me.xAttribute];
-			var compare = ((me.x(dataDate) - me.x(dataDateLeft))/2)+me.x(dataDateLeft);
-			if(mouse_x < compare){
-				closerDate = dataDateLeft;
-				closerIndex = dataIndexLeft;
+		if(opts[0].data.length > 1){
+			var bisect = d3.bisector(function(d) { return d[me.xAttribute]; }).right;
+			var dataIndex = bisect(opts[0].data, graph_x);
+			var dataDate = opts[0].data[dataIndex][me.xAttribute];
+			var closerDate = dataDate;
+			var closerIndex = dataIndex;
+
+			if(dataIndex > 0){
+				var dataIndexLeft = (dataIndex-1);
+				var dataDateLeft = opts[0].data[dataIndexLeft][me.xAttribute];
+				var compare = ((me.x(dataDate) - me.x(dataDateLeft))/2)+me.x(dataDateLeft);
+				if(mouse_x < compare){
+					closerDate = dataDateLeft;
+					closerIndex = dataIndexLeft;
+				}
 			}
+		}else{
+			var closerIndex = 0;
+			var closerDate = opts[0].data[closerIndex][me.xAttribute];
 		}
 
 		html = '<span class="tooltip-date">'+format(closerDate)+'</span>';
@@ -405,7 +410,11 @@ charts.LineChart.prototype.drawLine = function(opts) {
 			html += '<span style="color: '+color+'">'+opts[i].series+": "+numFormat(Math.round(opts[i].data[closerIndex].value * 100) / 100)+'</span>';
 		}
 
-		hoverLine.attr("x1", me.x(closerDate)).attr("x2", me.x(closerDate))
+		if(opts[0].data.length == 1)
+			hoverLine.attr("x1", me.width/2).attr("x2", me.width/2);
+		else
+			hoverLine.attr("x1", me.x(closerDate)).attr("x2", me.x(closerDate));
+
 		hoverLineGroup.style("opacity", 1);
 
 		$("#tooltip-container").html(html);
