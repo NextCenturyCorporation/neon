@@ -254,7 +254,7 @@ charts.LineChart.prototype.drawLine = function(opts) {
 	var line;
 	var hoverSeries = [];
 	var hoverCircles = {};
-	for(var i = 0; i < opts.length; i++) {
+	for(var i = (opts.length-1); i > -1; i--) {
 		if(this.hiddenSeries.indexOf(opts[i].series) >= 0) continue;
 		cls = (opts[i].series ? " " + opts[i].series : "");
 		data = opts[i].data;
@@ -301,10 +301,20 @@ charts.LineChart.prototype.drawLine = function(opts) {
 			if(data.length == 1)
 				func = me.width/2;
 
+			// Hide circle if point is a 0
+			var isZero = function(d) {
+				if(d[me.yAttribute] == 0)
+					return 0;
+				else
+					return 1;
+			}
+			
 			me.svg.selectAll("dot")
 	            .data(data)
 	          .enter().append("circle")
 	            .attr("class", "dot dot-empty")
+	      		.attr("fill-opacity", isZero)
+	      		.attr("stroke-opacity", isZero)
 	            .attr("stroke", color)
 	            .attr("r", 4)
 	            .attr("cx", func)
@@ -353,14 +363,12 @@ charts.LineChart.prototype.drawLine = function(opts) {
 	d3.select('.linechart').on("mouseover", function() { 
 		//console.log('mouseover')
 	}).on("mousemove", function(event) {
-		// me.svg.selectAll("circle.dot-hover").remove();
 		var mouse_x = d3.mouse(this)[0];
 		var mouse_y = d3.mouse(this)[1];
 		var graph_y = me.y.invert(mouse_y);
 		var graph_x = me.x.invert(mouse_x);
 		var format = d3.time.format.utc('%e %B %Y');
 		var numFormat = d3.format("0,000.00");
-		//hoverDate.text(format(graph_x));
 
 		var bisect = d3.bisector(function(d) { return d[me.xAttribute]; }).right;
 		var dataIndex = bisect(opts[0].data, graph_x);
@@ -409,7 +417,6 @@ charts.LineChart.prototype.drawLine = function(opts) {
 
 	}).on("mouseout", function() {
 		hoverLineGroup.style("opacity", 1e-6);
-		//me.svg.selectAll("circle.dot-hover").remove();
 		me.svg.selectAll("circle.dot-hover")
 			.attr("stroke-opacity", 0)
 	        .attr("fill-opacity", 0);
