@@ -1,14 +1,14 @@
 
 /* Breadcrumbs styling */
 #breadcrumbs-two ul{
-  margin: 0;
-  padding: 0;
-  list-style: none;
 }
 
 #breadcrumbs-two{
   overflow: hidden;
   width: 100%;
+  margin: 0;
+  padding: 0;
+  list-style: none;
 }
 
 #breadcrumbs-two li{
@@ -18,7 +18,8 @@
 
 #breadcrumbs-two a{
   background: #ddd;
-  padding: .7em 1em;
+  font-size: 12px;
+  padding: .5em .2em .5em .7em;
   float: left;
   text-decoration: none;
   color: #444;

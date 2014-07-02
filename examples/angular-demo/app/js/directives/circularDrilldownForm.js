@@ -47,7 +47,7 @@ angular.module('circularDrilldownFormDirective', []).directive('circularDrilldow
 			 */
 			$scope.initialize = function() {
 				var dataInject = new HeatChartNeonData(connectionService);
-        		var heatChart = new HeatChartApp('year', new Date(2014, 0) ,dataInject);  
+        		var heatChart = new HeatChartApp('year', new Date(2014, 0) ,dataInject, element[0]);  
 			};
 
 

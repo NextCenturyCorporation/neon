@@ -8,29 +8,34 @@ var HeatChartApp = (function () {
 	 * refer to the name field of the objects in the _MODES list in heatChartTime.js.
 	 * @param {Date} date optional, where to point the chart at.  Default is current time.
 	 * @param {HeatChartData} dataInject optional object to retrieve data.  this allows for plugging in of different data sources.
+	 * @param {HTMLElement} domElement the DOM element that contains the chart
 	 * Default is to create a HeatChartData.
 	 */
-	var app = function(startingMode, date, dataInject) {
-		$('#nowButton').click(function() {
+	var app = function(startingMode, date, dataInject, domElement) {
+
+
+		var chartElement = $('#chart', domElement)[0];
+		var breadcrumbsElement = $('#breadcrumbs-two', domElement)[0];
+
+		$('#nowButton', breadcrumbsElement).click(function() {
 			updateNow();
 		});
-
-		$('#hourButton').click(function() {
+		$('#hourButton', breadcrumbsElement).click(function() {
 			execute("hour");
 		});
-		$('#dayButton').click(function() {
+		$('#dayButton', breadcrumbsElement).click(function() {
 			execute("day");
 		});
-		$('#weekButton').click(function() {
+		$('#weekButton', breadcrumbsElement).click(function() {
 			execute("week");
 		});
-		$('#monthButton').click(function() {
+		$('#monthButton', breadcrumbsElement).click(function() {
 			execute("month");
 		});
-		$('#yearButton').click(function() {
+		$('#yearButton', breadcrumbsElement).click(function() {
 			execute("year");
 		});
-		$('#year5Button').click(function() {
+		$('#year5Button', breadcrumbsElement).click(function() {
 			execute("year5");
 		});
 
@@ -80,7 +85,7 @@ var HeatChartApp = (function () {
 		}
 
 		function update(chunks) {
-			d3.select("#chart").selectAll("svg").data([]).exit().remove();
+			d3.select(chartElement).selectAll("svg").data([]).exit().remove();
 			createHeatChart(chunks);
 			if (typeof updateListener === 'function') {
 				updateListener(chunks);
@@ -109,12 +114,12 @@ var HeatChartApp = (function () {
 			var baseDayOfWeek = baseDate.getDay();
 			var baseHour = baseDate.getHours();
 
-			d3.select("#hourButton").text('Hour');
-			d3.select("#dayButton").text('Day');
-			d3.select("#weekButton").text('Week');
-			d3.select("#monthButton").text('Month');
-			d3.select("#yearButton").text('Year');
-			d3.select("#year5Button").text('5-Year');
+			d3.select(breadcrumbsElement).select("#hourButton").text('Hour');
+			d3.select(breadcrumbsElement).select("#dayButton").text('Day');
+			d3.select(breadcrumbsElement).select("#weekButton").text('Week');
+			d3.select(breadcrumbsElement).select("#monthButton").text('Month');
+			d3.select(breadcrumbsElement).select("#yearButton").text('Year');
+			d3.select(breadcrumbsElement).select("#year5Button").text('5-Year');
 
 			var monthLabel = chartTime.getMonthLabel(baseMonth);
 
@@ -135,42 +140,41 @@ var HeatChartApp = (function () {
 			switch (CHART_MODE.name) {
 
 				case "hour":
-					d3.select("#yearButton").text(baseYear);
-					d3.select("#monthButton").text(monthLabel);
-					d3.select("#weekButton").text(dayOfWeekLabel);
-					d3.select("#dayButton").text(dayLabel);
-					d3.select("#hourButton").text(hourLabel);
+					d3.select(breadcrumbsElement).select("#yearButton").text(baseYear);
+					d3.select(breadcrumbsElement).select("#monthButton").text(monthLabel);
+					d3.select(breadcrumbsElement).select("#weekButton").text(dayOfWeekLabel);
+					d3.select(breadcrumbsElement).select("#dayButton").text(dayLabel);
+					d3.select(breadcrumbsElement).select("#hourButton").text(hourLabel);
 					break;
 
 				case "day":
-					d3.select("#yearButton").text(baseYear);
-					d3.select("#monthButton").text(monthLabel);
-					d3.select("#weekButton").text(dayOfWeekLabel);
-					d3.select("#dayButton").text(dayLabel);
+					d3.select(breadcrumbsElement).select("#yearButton").text(baseYear);
+					d3.select(breadcrumbsElement).select("#monthButton").text(monthLabel);
+					d3.select(breadcrumbsElement).select("#weekButton").text(dayOfWeekLabel);
+					d3.select(breadcrumbsElement).select("#dayButton").text(dayLabel);
 					break;
 
 				case "week":
-					d3.select("#yearButton").text(baseYear);
-					d3.select("#monthButton").text(monthLabel);
-					d3.select("#weekButton").text(dayOfWeekLabel);
+					d3.select(breadcrumbsElement).select("#yearButton").text(baseYear);
+					d3.select(breadcrumbsElement).select("#monthButton").text(monthLabel);
+					d3.select(breadcrumbsElement).select("#weekButton").text(dayOfWeekLabel);
 					break;
 
 				case "month":
-					d3.select("#yearButton").text(baseYear);
-					d3.select("#monthButton").text(monthLabel);
+					d3.select(breadcrumbsElement).select("#yearButton").text(baseYear);
+					d3.select(breadcrumbsElement).select("#monthButton").text(monthLabel);
 					break;
 
 				case "year":
-					d3.select("#yearButton").text(baseYear);
+					d3.select(breadcrumbsElement).select("#yearButton").text(baseYear);
 					break;
 
 				case "year5":
-					d3.select("#yearButton").text(baseYear);
+					d3.select(breadcrumbsElement).select("#yearButton").text(baseYear);
 					break;
 
 			}
 
-			d3.select("#baseDate").text("Context Date: " + baseDate.toString());
 			//chartWidget.publishDateRange(CHART_MODE.name, baseDate);
 
 		}
@@ -180,7 +184,7 @@ var HeatChartApp = (function () {
 
 			var chartWidth = 150;
 			try {
-				var cw = d3.select("#chart").style('width');
+				var cw = d3.select(chartElement).style('width');
 				chartWidth = cw.split('px')[0];
 			} catch (err) {
 				console.error(err);
@@ -192,7 +196,7 @@ var HeatChartApp = (function () {
 
 			var innerRadius = segHeight < 10 ? 10 : segHeight;
 
-			chart = circularHeatChart()
+			chart = circularHeatChart(chartElement)
 				.range(["white", CHART_MODE.color])
 				.radialLabels(CHART_MODE.rowLabels)
 				.segmentLabels(CHART_MODE.columnLabels)
@@ -204,7 +208,7 @@ var HeatChartApp = (function () {
 				return d.value;
 			});
 
-			d3.select("#chart")
+			d3.select(chartElement)
 				.selectAll('svg')
 				.data([time_chunks])
 				.enter()
@@ -218,7 +222,7 @@ var HeatChartApp = (function () {
 				.style("visibility", "hidden")
 				.text("a simple tooltip");
 
-			d3.selectAll("#chart path")
+			d3.select(chartElement).selectAll("path")
 				.on('mouseover', function() {
 					var d = d3.select(this).data()[0];
 					if (0 !== d.value) {
@@ -232,12 +236,12 @@ var HeatChartApp = (function () {
 					return tooltip.style("visibility", "hidden");
 				});
 
-			d3.selectAll("#chart svg").on('mouseout', function() {
+			d3.select(chartElement).selectAll("svg").on('mouseout', function() {
 				//var d = d3.select(this).data()[0];
-				d3.select("#info").text('');
+				d3.select(chartElement).select("#info").text('');
 			});
 
-			d3.selectAll("#chart path").on('click', function() {
+			d3.select(chartElement).selectAll("path").on('click', function() {
 				tooltip.style("visibility", "hidden");
 				var d = d3.select(this).data()[0];
 				if (0 !== d.value) {
