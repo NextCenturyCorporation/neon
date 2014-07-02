@@ -22,6 +22,13 @@ databaseConfig.directive('databaseConfig', ['ConnectionService', function (conne
                 selectedTable: "earthquakes"
             },
             {
+                name: "South America Tweets",
+                datastoreSelect: "mongo",
+                hostnameInput: "localhost",
+                selectedDb: "test",
+                selectedTable: "alibaverstock130k"
+            },
+            {
                 name: "Twitter",
                 datastoreSelect: "mongo",
                 hostnameInput: "localhost",
