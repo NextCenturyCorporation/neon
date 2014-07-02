@@ -253,6 +253,7 @@ charts.LineChart.prototype.drawLine = function(opts) {
 	var data;
 	var line;
 	var hoverSeries = [];
+	var hoverCircles = {};
 	for(var i = 0; i < opts.length; i++) {
 		if(this.hiddenSeries.indexOf(opts[i].series) >= 0) continue;
 		cls = (opts[i].series ? " " + opts[i].series : "");
@@ -289,10 +290,10 @@ charts.LineChart.prototype.drawLine = function(opts) {
 		.y(function(d) { return me.y(d[me.yAttribute]); });
 
 		me.svg.append("path")
-		.datum(data)
-		.attr("class", "line" + cls)
-		.attr("d", line)
-		.attr("stroke", color);
+			.datum(data)
+			.attr("class", "line" + cls)
+			.attr("d", line)
+			.attr("stroke", color);
 
 		if(data.length < 40){
 
@@ -309,6 +310,17 @@ charts.LineChart.prototype.drawLine = function(opts) {
 	            .attr("cx", func)
 	            .attr("cy", function(d) { return me.y(d[me.yAttribute]); });
 	    }
+
+	    hoverCircles[opts[i].series] = 
+			me.svg.append("circle")
+	            .attr("class", "dot dot-hover")
+	            .attr("stroke", color)
+	            .attr("fill", color)
+	            .attr("stroke-opacity", 0)
+	            .attr("fill-opacity", 0)
+	            .attr("r", 4)
+	            .attr("cx", 0)
+	            .attr("cy", 0);
 	}
 
 	var yAxisElement = me.svg.append("g")
@@ -341,7 +353,7 @@ charts.LineChart.prototype.drawLine = function(opts) {
 	d3.select('.linechart').on("mouseover", function() { 
 		//console.log('mouseover')
 	}).on("mousemove", function(event) {
-		me.svg.selectAll("circle.dot-hover").remove();
+		// me.svg.selectAll("circle.dot-hover").remove();
 		var mouse_x = d3.mouse(this)[0];
 		var mouse_y = d3.mouse(this)[1];
 		var graph_y = me.y.invert(mouse_y);
@@ -376,11 +388,9 @@ charts.LineChart.prototype.drawLine = function(opts) {
 			if(opts[i].data.length == 1)
 				xPos = me.width/2;
 
-			me.svg.append("circle")
-	            .attr("class", "dot dot-hover")
-	            .attr("stroke", color)
-	            .attr("fill", color)
-	            .attr("r", 4)
+			hoverCircles[opts[i].series]
+	            .attr("stroke-opacity", 1)
+	            .attr("fill-opacity", 1)
 	            .attr("cx", xPos)
 	            .attr("cy", me.y(opts[i].data[closerIndex].value));
 
@@ -390,17 +400,19 @@ charts.LineChart.prototype.drawLine = function(opts) {
 		hoverLine.attr("x1", me.x(closerDate)).attr("x2", me.x(closerDate))
 		hoverLineGroup.style("opacity", 1);
 
-
 		$("#tooltip-container").html(html);
 	    $("#tooltip-container").show();
 	      
 	    d3.select("#tooltip-container")
-		    .style("top", (d3.event.pageY + 15)  + "px")
+		    .style("top", (d3.event.pageY)  + "px")
 		    .style("left", (d3.event.pageX + 15) + "px");
 
 	}).on("mouseout", function() {
 		hoverLineGroup.style("opacity", 1e-6);
-		me.svg.selectAll("circle.dot-hover").remove();
+		//me.svg.selectAll("circle.dot-hover").remove();
+		me.svg.selectAll("circle.dot-hover")
+			.attr("stroke-opacity", 0)
+	        .attr("fill-opacity", 0);
 		$("#tooltip-container").hide();
 	});
 };
