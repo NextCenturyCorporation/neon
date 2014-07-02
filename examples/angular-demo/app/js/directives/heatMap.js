@@ -79,7 +79,9 @@ angular.module('heatMapDirective', []).directive('heatMap', ['ConnectionService'
                     });
 
                     $scope.draw();
+                    $scope.map.register("movestart", this, onMapEvent);
                     $scope.map.register("moveend", this, onMapEvent);
+                    $scope.map.register("zoom", this, onMapEvent);
                     $scope.map.register("zoomend", this, onMapEvent);
                     $scope.map.register("mouseover", this, onMapEvent);
                     $scope.map.register("mouseout", this, onMapEvent);
@@ -98,7 +100,7 @@ angular.module('heatMapDirective', []).directive('heatMap', ['ConnectionService'
                     // Setup the control watches.
                     // Update the latitude field used by the map.
                     $scope.$watch('latitudeField', function (newVal, oldVal) {
-                        XDATA.activityLogger.logUserActivity('HeatMap - selected latitude field', 'select',
+                        XDATA.activityLogger.logUserActivity('HeatMap - selected latitude field', 'select_latitude_field',
                             XDATA.activityLogger.WF_CREATE,
                             {
                                 from: oldVal,
@@ -112,7 +114,7 @@ angular.module('heatMapDirective', []).directive('heatMap', ['ConnectionService'
 
                     // Update the longitude field used by the map.
                     $scope.$watch('longitudeField', function (newVal, oldVal) {
-                        XDATA.activityLogger.logUserActivity('HeatMap - selected longitude field', 'select',
+                        XDATA.activityLogger.logUserActivity('HeatMap - selected longitude field', 'select_longitude_field',
                             XDATA.activityLogger.WF_CREATE,
                             {
                                 from: oldVal,
@@ -126,7 +128,7 @@ angular.module('heatMapDirective', []).directive('heatMap', ['ConnectionService'
 
                     // Update the sizing field used by the map.
                     $scope.$watch('sizeByField', function (newVal, oldVal) {
-                        XDATA.activityLogger.logUserActivity('HeatMap - selected sizeBy field', 'select',
+                        XDATA.activityLogger.logUserActivity('HeatMap - selected sizeBy field', 'select_sizeby_field',
                             XDATA.activityLogger.WF_CREATE,
                             {
                                 from: oldVal,
@@ -146,7 +148,7 @@ angular.module('heatMapDirective', []).directive('heatMap', ['ConnectionService'
 
                     // Update the coloring field used by the map.
                     $scope.$watch('colorByField', function (newVal, oldVal) {
-                        XDATA.activityLogger.logUserActivity('HeatMap - selected colorBy field', 'select',
+                        XDATA.activityLogger.logUserActivity('HeatMap - selected colorBy field', 'select_colorby_field',
                             XDATA.activityLogger.WF_CREATE,
                             {
                                 from: oldVal,
@@ -166,7 +168,7 @@ angular.module('heatMapDirective', []).directive('heatMap', ['ConnectionService'
 
                     // Toggle the points and clusters view when the user toggles between them.
                     $scope.$watch('showPoints', function (newVal, oldVal) {
-                        XDATA.activityLogger.logUserActivity('HeatMap - user toggled visible map layer', 'toggle_layer',
+                        XDATA.activityLogger.logUserActivity('HeatMap - user toggled visible map layer', 'select_map_layer_type',
                             XDATA.activityLogger.WF_CREATE,
                             {
                                 points: newVal,
@@ -179,7 +181,7 @@ angular.module('heatMapDirective', []).directive('heatMap', ['ConnectionService'
 
                     // Handle toggling map caching.
                     $scope.$watch('cacheMap', function (newVal, oldVal) {
-                        XDATA.activityLogger.logUserActivity('HeatMap - user enabled/disabled map caching', 'click',
+                        XDATA.activityLogger.logUserActivity('HeatMap - user enabled/disabled map caching', 'toggle_map_caching',
                             XDATA.activityLogger.WF_CREATE,
                             {
                                 pointsLayer: newVal,
@@ -198,8 +200,9 @@ angular.module('heatMapDirective', []).directive('heatMap', ['ConnectionService'
 
                     // Log whenever the user toggles the options display.
                     $scope.$watch('optionsDisplayed', function(newVal, oldVal) {
-                        XDATA.activityLogger.logUserActivity('HeatMap - user toggled options display', 'click',
-                            XDATA.activityLogger.WF_EXPLORE,
+                        var action = (newVal === true) ? 'view_map_options' : 'hide_map_options';
+                        XDATA.activityLogger.logUserActivity('HeatMap - user toggled options display', action,
+                            XDATA.activityLogger.WF_CREATE,
                             {
                                 from: oldVal,
                                 to: newVal
@@ -207,8 +210,8 @@ angular.module('heatMapDirective', []).directive('heatMap', ['ConnectionService'
                     });
 
                     $scope.$watch('limit', function(newVal, oldVal) {
-                        XDATA.activityLogger.logUserActivity('HeatMap - user change number of displayed points', 'select',
-                            XDATA.activityLogger.WF_EXPLORE,
+                        XDATA.activityLogger.logUserActivity('HeatMap - user change number of displayed points', 'select_point_limit',
+                            XDATA.activityLogger.WF_GETDATA,
                             {
                                 from: oldVal,
                                 to: newVal
@@ -238,8 +241,8 @@ angular.module('heatMapDirective', []).directive('heatMap', ['ConnectionService'
                     var extent = boundsToExtent(bounds);
                     var filter = $scope.createFilterFromExtent(extent);
 
-                    XDATA.activityLogger.logUserActivity('HeatMap - user defined geographic filter area', 'drag',
-                        XDATA.activityLogger.WF_EXPLORE, extent);
+                    XDATA.activityLogger.logUserActivity('HeatMap - user defined geographic filter area', 'execute_geographic_filter',
+                        XDATA.activityLogger.WF_GETDATA, extent);
                     XDATA.activityLogger.logSystemActivity('HeatMap - applying neon filter based on users geographic selection');
                     $scope.messenger.replaceFilter($scope.filterKey, filter, function () {
                         XDATA.activityLogger.logSystemActivity('HeatMap - applied neon filter');
@@ -528,6 +531,8 @@ angular.module('heatMapDirective', []).directive('heatMap', ['ConnectionService'
                  * @method clearFilter
                  */
                 $scope.clearFilter = function () {
+                    XDATA.activityLogger.logUserActivity('HeatMap - user removed geographic filter area', 'remove_geographic_filter',
+                        XDATA.activityLogger.WF_GETDATA);
                     XDATA.activityLogger.logSystemActivity('HeatMap - removing neon filter based on users geographic selection');
                     $scope.messenger.removeFilter($scope.filterKey, function () {
                         $scope.$apply(function () {

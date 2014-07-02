@@ -170,8 +170,8 @@ angular.module('queryResultsTableDirective', []).directive('queryResultsTable', 
              * @method refreshData
              */
             $scope.refreshData = function() {
-                XDATA.activityLogger.logUserActivity('DataView - user requested table refresh', 'click',
-                    XDATA.activityLogger.WF_EXPLORE);
+                XDATA.activityLogger.logUserActivity('DataView - user requested table refresh', 'refresh_data_table',
+                    XDATA.activityLogger.WF_GETDATA);
                 $scope.queryForData();
             }
 
@@ -274,8 +274,8 @@ angular.module('queryResultsTableDirective', []).directive('queryResultsTable', 
             });
 
             $scope.$watch('sortByField', function(newVal, oldVal) {
-                XDATA.activityLogger.logUserActivity('DataView - user set database level sorting field', 'select',
-                    XDATA.activityLogger.WF_EXPLORE,
+                XDATA.activityLogger.logUserActivity('DataView - user set database level sorting field', 'select_sort_field',
+                    XDATA.activityLogger.WF_GETDATA,
                     {
                         from: oldVal,
                         to: newVal
@@ -283,8 +283,8 @@ angular.module('queryResultsTableDirective', []).directive('queryResultsTable', 
             });
 
             $scope.$watch('sortDirection', function(newVal, oldVal) {
-                XDATA.activityLogger.logUserActivity('DataView - user set database level sorting direction', 'select',
-                    XDATA.activityLogger.WF_EXPLORE,
+                XDATA.activityLogger.logUserActivity('DataView - user set database level sorting direction', 'select_sort_direction',
+                    XDATA.activityLogger.WF_GETDATA,
                     {
                         from: oldVal,
                         to: newVal
@@ -292,8 +292,8 @@ angular.module('queryResultsTableDirective', []).directive('queryResultsTable', 
             });
 
             $scope.$watch('limit', function(newVal, oldVal) {
-                XDATA.activityLogger.logUserActivity('DataView - user set max rows to pull from database', 'set',
-                    XDATA.activityLogger.WF_EXPLORE,
+                XDATA.activityLogger.logUserActivity('DataView - user set max rows to pull from database', 'set_data_table_limit',
+                    XDATA.activityLogger.WF_GETDATA,
                     {
                         from: oldVal,
                         to: newVal

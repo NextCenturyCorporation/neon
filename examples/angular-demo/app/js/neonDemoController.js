@@ -26,6 +26,7 @@ angular.module('neonDemo.controllers', []).controller('neonDemoController', ['$s
 
 		$scope.seeData = false;
         $scope.createFilters = false;
+        $scope.chartOptions = false;
         $scope.filterCount = 0;
 
         /**
@@ -36,8 +37,9 @@ angular.module('neonDemo.controllers', []).controller('neonDemoController', ['$s
          */
         $scope.toggleCreateFilters = function() {
             $scope.createFilters = !$scope.createFilters;
-            XDATA.activityLogger.logUserActivity('Neon Demo - Toggle custom filter display', 'click',
-                XDATA.activityLogger.WF_EXPLORE,
+            var action = ($scope.createFilters === true) ? 'show_custom_filters' : 'hide_custom_filters';
+            XDATA.activityLogger.logUserActivity('Neon Demo - Toggle custom filter display', action,
+                XDATA.activityLogger.WF_CREATE,
                 {
                     from: !$scope.createFilters,
                     to: $scope.createFilters
@@ -63,8 +65,9 @@ angular.module('neonDemo.controllers', []).controller('neonDemoController', ['$s
          */
 		$scope.toggleSeeData = function() {
 			$scope.seeData = !$scope.seeData;
-            XDATA.activityLogger.logUserActivity('Neon Demo - Toggle data table display', 'click',
-                XDATA.activityLogger.WF_EXPLORE,
+            var action = ($scope.seeData === true) ? 'show_data_table' : 'hide_data_table';
+            XDATA.activityLogger.logUserActivity('Neon Demo - Toggle data table display', action,
+                XDATA.activityLogger.WF_CREATE,
                 {
                     from: !$scope.seeData,
                     to: $scope.seeData
@@ -81,6 +84,21 @@ angular.module('neonDemo.controllers', []).controller('neonDemoController', ['$s
             }
 		};
 
+        /**
+         * Simple toggle method for tracking which chart is visible.
+         * @method toggleCreateFilters
+         */
+        $scope.toggleChartOptions = function() {
+            $scope.chartOptions = !$scope.chartOptions;
+            var action = ($scope.chartOptions === true) ? 'show_chart_options' : 'hide_chart_options';
+            XDATA.activityLogger.logUserActivity('Neon Demo - Toggle chart options display', action,
+                XDATA.activityLogger.WF_CREATE,
+                {
+                    from: !$scope.chartOptions,
+                    to: $scope.chartOptions
+                });
+        };
+
 		// Watch for changes in the filter counts and update the filter badge binding.
         $scope.$watch(function() {
         	return filterCountService.getCount();
@@ -89,21 +107,21 @@ angular.module('neonDemo.controllers', []).controller('neonDemoController', ['$s
         });
 
         $scope.$watch('chartType', function(newVal, oldVal) {
-            XDATA.activityLogger.logUserActivity('Neon Demo - Select chart type', 'select',
+            XDATA.activityLogger.logUserActivity('Neon Demo - Select chart type', 'select_plot_type',
                 XDATA.activityLogger.WF_CREATE,
                 {
                     from: oldVal,
                     to: newVal
                 });
-        });
+        }, true);
 
         $scope.$watch('barType', function(newVal, oldVal) {
-            XDATA.activityLogger.logUserActivity('Neon Demo - Select aggregation type', 'select',
+            XDATA.activityLogger.logUserActivity('Neon Demo - Select chart aggregation type', 'define_axes',
                 XDATA.activityLogger.WF_CREATE,
                 {
                     from: oldVal,
                     to: newVal
                 });
-        });
+        }, true);
 
 	}]);
