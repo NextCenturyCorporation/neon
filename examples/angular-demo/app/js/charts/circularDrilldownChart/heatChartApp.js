@@ -182,17 +182,10 @@ var HeatChartApp = (function () {
 		function createHeatChart(time_chunks) {
 			var me = this;
 
-			var chartWidth = 150;
-			try {
-				var cw = d3.select(chartElement).style('width');
-				chartWidth = cw.split('px')[0];
-			} catch (err) {
-				console.error(err);
-			}
+			var chartWidth = 160;
 
 			// CHART_MODE.rows + 1 due to the size of the innerRadius
 			var segHeight = chartWidth / (CHART_MODE.rows + 1);
-			segHeight = segHeight/3;  // TODO: Figure out why layout is off and get rid of this.
 
 			var innerRadius = segHeight < 10 ? 10 : segHeight;
 
