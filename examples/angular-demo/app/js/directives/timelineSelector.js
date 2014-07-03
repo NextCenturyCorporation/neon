@@ -52,6 +52,11 @@ angular.module('timelineSelectorDirective', []).directive('timelineSelector', ['
                 // TODO - These need to be in a configuration file
                 var USE_OpenCPU = true;
                 var OpenCPU_URL = 'http://neon-opencpu/ocpu/library/stl2wrapper/R';
+                var openCpuEnabled = false;
+                // opencpu logging is off to keep the logs clean, turn it on to debug opencpu problems
+                ocpu.enableLogging = false;
+                // By default, opencpu uses alerts when there are problems. We want to handle the errors gracefully instead
+                ocpu.useAlerts = false;
 
                 element.addClass('timeline-selector');
 
@@ -91,7 +96,11 @@ angular.module('timelineSelectorDirective', []).directive('timelineSelector', ['
                     });
 
                     if (USE_OpenCPU) {
-                        ocpu.seturl(OpenCPU_URL);
+                        ocpu.seturl(OpenCPU_URL).done(function() {
+                          openCpuEnabled = true;
+                        }).fail(function() {
+                          openCpuEnabled = false;
+                        });
                     }
                 };
 
@@ -458,7 +467,7 @@ angular.module('timelineSelectorDirective', []).directive('timelineSelector', ['
                  */
                 $scope.addTimeSeriesAnalysis = function(timelineData, graphData, callback) {
                     // If OpenCPU isn't available, then just call the callback without doing anything.
-                    if (!USE_OpenCPU) {
+                    if (!openCpuEnabled) {
                         callback();
                         return;
                     }
