@@ -409,7 +409,10 @@ angular.module('timelineSelectorDirective', []).directive('timelineSelector', ['
                     var resultDate;
                     for (i = 0; i < rawLength; i++) {
                         resultDate = new Date(rawData[i].date);
-                        data[Math.floor(Math.abs(resultDate - startDate) / $scope.millisMultiplier)].value = rawData[i].count;
+                        var bucket = Math.floor(Math.abs(resultDate - startDate) / $scope.millisMultiplier);
+                        if ((bucket >= 0) && (bucket < data.length)) {
+                            data[bucket].value = rawData[i].count;
+                        }
                     }
                     return data;
                 };
