@@ -38,6 +38,8 @@
 	background-color: #b5d0d0;
 	border: 1px solid #bbbbbb;
 	border-radius: 0 0 4px 4px;
+	width: auto !important;
+	margin: 0 -1px !important;
 	/*box-shadow: 0 1px 4px rgba(154, 154, 154, 0.3);*/
 }
 
