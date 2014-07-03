@@ -423,8 +423,8 @@ angular.module('timelineSelectorDirective', []).directive('timelineSelector', ['
                  * @method clearBrush
                  */
                 $scope.clearBrush = function () {
-                    XDATA.activityLogger.logUserActivity('TimelineSelector - Clear temporal filter', 'click',
-                        XDATA.activityLogger.WF_EXPLORE);
+                    XDATA.activityLogger.logUserActivity('TimelineSelector - Clear temporal filter', 'remove_temporal_filter',
+                        XDATA.activityLogger.WF_GETDATA);
                     XDATA.activityLogger.logSystemActivity('TimelineSelector - Removing Neon filter');
 
                     $scope.brush = [];
@@ -434,8 +434,8 @@ angular.module('timelineSelectorDirective', []).directive('timelineSelector', ['
                 // Update the millis multipler when the granularity is changed.
                 $scope.$watch('granularity', function (newVal, oldVal) {
                     if (newVal && newVal !== oldVal) {
-                        XDATA.activityLogger.logUserActivity('TimelineSelector - Change timeline resolution', 'click',
-                            XDATA.activityLogger.WF_EXPLORE,
+                        XDATA.activityLogger.logUserActivity('TimelineSelector - Change timeline resolution', 'define_temporal_resolution',
+                            XDATA.activityLogger.WF_CREATE,
                             {
                                 "resolution": newVal
                             });
