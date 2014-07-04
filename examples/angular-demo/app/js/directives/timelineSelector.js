@@ -50,7 +50,7 @@ angular.module('timelineSelectorDirective', []).directive('timelineSelector', ['
                 var HOUR = "hour";
                 var DAY = "day";
                 // TODO - These need to be in a configuration file
-                var USE_OpenCPU = true;
+                var USE_OpenCPU = false;
                 var OpenCPU_URL = 'http://neon-opencpu/ocpu/library/stl2wrapper/R';
                 var openCpuEnabled = false;
                 // opencpu logging is off to keep the logs clean, turn it on to debug opencpu problems
