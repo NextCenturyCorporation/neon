@@ -15,34 +15,68 @@
  */
 
 .timeline-selector-chart {
-	margin: 5px -15px 0;
+	margin: 0 -15px 0;
 	display:block;
   min-height: 40px;
-  height: 70px;
+
+ /* -webkit-transition: height 0.3s ease-out; 
+          transition: height 0.3s ease-out; */
+
+}
+.collapsed .timeline-selector-chart {
+  height: 72px !important;
 }
 .timeline-selector-chart svg {
-	font: 10px sans-serif;
-    width: 100%;
-    height: 100%;
-    display: block;
-    margin: auto;
+  font-size: 10px;
+  width: 100%;
+  height: 100%;
+  display: block;
+  margin: auto;
 }
 
 .timeline-selector-chart .area {
   fill: #39b54a;
   stroke: #39b54a;
   stroke-width: 1px;
+  /*fill-opacity: 0.5;*/
   clip-path: url(#clip);
 }
 .timeline-selector-chart .axis path,
 .timeline-selector-chart .axis line {
+  /*display: block;*/
   fill: none;
   stroke: #bbbbbb;
   shape-rendering: crispEdges;
 }
 .timeline-selector-chart .axis path {
-    stroke: #F1F1F1;
-    stroke-width: 3px;
+  stroke: #F1F1F1;
+  stroke-width: 3px;
+}
+.timeline-selector-chart .mini-axis{
+  fill: none;
+  shape-rendering: crispEdges;
+  stroke: rgba(0,0,0,0.1);
+  stroke-width : 1px;
+}
+.timeline-selector-chart .y.axis text,
+.timeline-selector-chart .series-title{
+  text-shadow:
+    1px 1px 0 #f1f1f1,
+    1px 0px 0 #f1f1f1,
+    1px -1px 0 #f1f1f1,
+    -1px 1px 0 #f1f1f1,
+    -1px 0px 0 #f1f1f1,
+    -1px -1px 0 #f1f1f1,
+    0px 2px 0 #f1f1f1,
+    0px -2px 0 #f1f1f1;
+  font-weight: bold;
+}
+.timeline-selector-chart .y.axis path,
+.timeline-selector-chart .y.axis .tick line{
+  display: none;
+}
+.collapsed .timeline-selector-chart [class*='series-']{
+  display: none;
 }
 /*.timeline-selector-chart .x.axis .tick:first-child text {
   text-anchor: start !important;
