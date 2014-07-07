@@ -212,7 +212,7 @@ tables.Table.prototype.draw = function () {
 
     // Setup some event loggers.
     this.table_.onSort.subscribe(function(e,args){
-        XDATA.activityLogger.logUserActivity('Grid - user sorted column', e.type,
+        XDATA.activityLogger.logUserActivity('Grid - user sorted column', 'sort',
             XDATA.activityLogger.WF_EXPLORE, {
                 column: args.sortCol.field,
                 sortAsc: args.sortAsc,
