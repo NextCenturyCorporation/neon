@@ -103,7 +103,7 @@ charts.TimelineSelectorChart = function (element, configuration) {
     var wrapBrushHandler = function (brush, handler) {
         return function () {
             if (brush) {
-                XDATA.activityLogger.logUserActivity('End temporal filter selection', 'end_temporal_selection',
+                XDATA.activityLogger.logUserActivity('End temporal filter selection', 'set_visual_filter_parameters',
                     XDATA.activityLogger.WF_GETDATA,
                     brush.extent());
 
@@ -199,7 +199,7 @@ charts.TimelineSelectorChart = function (element, configuration) {
         this.brush = d3.svg.brush().x(x).on("brush", this.updateMask);
         if (this.brushHandler) {
             this.brush.on("brushstart", function() {
-                XDATA.activityLogger.logUserActivity('Begin temporal filter selection', 'start_temporal_selection',
+                XDATA.activityLogger.logUserActivity('Begin temporal filter selection', 'set_visual_filter_parameters',
                     XDATA.activityLogger.WF_GETDATA);
             });
             this.brush.on("brushend", wrapBrushHandler(this.brush, this.brushHandler));

@@ -423,7 +423,7 @@ angular.module('timelineSelectorDirective', []).directive('timelineSelector', ['
                  * @method clearBrush
                  */
                 $scope.clearBrush = function () {
-                    XDATA.activityLogger.logUserActivity('TimelineSelector - Clear temporal filter', 'remove_temporal_filter',
+                    XDATA.activityLogger.logUserActivity('TimelineSelector - Clear temporal filter', 'remove_visual_filter',
                         XDATA.activityLogger.WF_GETDATA);
                     XDATA.activityLogger.logSystemActivity('TimelineSelector - Removing Neon filter');
 
@@ -434,7 +434,7 @@ angular.module('timelineSelectorDirective', []).directive('timelineSelector', ['
                 // Update the millis multipler when the granularity is changed.
                 $scope.$watch('granularity', function (newVal, oldVal) {
                     if (newVal && newVal !== oldVal) {
-                        XDATA.activityLogger.logUserActivity('TimelineSelector - Change timeline resolution', 'define_temporal_resolution',
+                        XDATA.activityLogger.logUserActivity('TimelineSelector - Change timeline resolution', 'define_axes',
                             XDATA.activityLogger.WF_CREATE,
                             {
                                 "resolution": newVal
@@ -474,6 +474,8 @@ angular.module('timelineSelectorDirective', []).directive('timelineSelector', ['
                     if (newVal && $scope.messenger && connectionService.getActiveConnection()) {
                         var startExtent;
                         var endExtent;
+                        XDATA.activityLogger.logUserActivity('TimelineSelector - Create/Replace temporal filter', 'execute_visual_filter',
+                        XDATA.activityLogger.WF_GETDATA);
                         // if a single spot was clicked, just reset the timeline - An alternative would be to expand to the minimum width
                         if (newVal === undefined || newVal.length < 2 || newVal[0].getTime() === newVal[1].getTime()) {
                             // may be undefined when a new dataset is being loaded

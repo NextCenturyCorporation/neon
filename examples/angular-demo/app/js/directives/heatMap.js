@@ -243,7 +243,7 @@ angular.module('heatMapDirective', []).directive('heatMap', ['ConnectionService'
                     var extent = boundsToExtent(bounds);
                     var filter = $scope.createFilterFromExtent(extent);
 
-                    XDATA.activityLogger.logUserActivity('HeatMap - user defined geographic filter area', 'execute_geographic_filter',
+                    XDATA.activityLogger.logUserActivity('HeatMap - user defined geographic filter area', 'execute_visual_filter',
                         XDATA.activityLogger.WF_GETDATA, extent);
                     XDATA.activityLogger.logSystemActivity('HeatMap - applying neon filter based on users geographic selection');
                     $scope.messenger.replaceFilter($scope.filterKey, filter, function () {
@@ -533,7 +533,7 @@ angular.module('heatMapDirective', []).directive('heatMap', ['ConnectionService'
                  * @method clearFilter
                  */
                 $scope.clearFilter = function () {
-                    XDATA.activityLogger.logUserActivity('HeatMap - user removed geographic filter area', 'remove_geographic_filter',
+                    XDATA.activityLogger.logUserActivity('HeatMap - user removed geographic filter area', 'remove_visual_filter',
                         XDATA.activityLogger.WF_GETDATA);
                     XDATA.activityLogger.logSystemActivity('HeatMap - removing neon filter based on users geographic selection');
                     $scope.messenger.removeFilter($scope.filterKey, function () {

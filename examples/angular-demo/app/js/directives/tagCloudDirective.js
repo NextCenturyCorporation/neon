@@ -160,7 +160,7 @@ angular.module('tagCloudDirective', []).directive('tagCloud', ['ConnectionServic
                  * @method addTagFilter
                  */
                 $scope.addTagFilter = function(tagName) {
-                    XDATA.activityLogger.logUserActivity('TagCloud - user added a tag as a filter', 'add_tag_filter',
+                    XDATA.activityLogger.logUserActivity('TagCloud - user added a tag as a filter', 'execute_visual_filter',
                         XDATA.activityLogger.WF_EXPLORE,
                         {
                             tag: tagName
@@ -251,7 +251,7 @@ angular.module('tagCloudDirective', []).directive('tagCloud', ['ConnectionServic
                  * @method removeFilter
                  */
                 $scope.removeFilter = function(tagName) {
-                    XDATA.activityLogger.logUserActivity('TagCloud - user removed a tag as a filter', 'remove_tag_filter',
+                    XDATA.activityLogger.logUserActivity('TagCloud - user removed a tag as a filter', 'remove_visual_filter',
                         XDATA.activityLogger.WF_EXPLORE,
                         {
                             tag: tagName
@@ -265,7 +265,7 @@ angular.module('tagCloudDirective', []).directive('tagCloud', ['ConnectionServic
 
                 // Toggle the points and clusters view when the user toggles between them.
                 $scope.$watch('andTags', function (newVal, oldVal) {
-                    XDATA.activityLogger.logUserActivity('TagCloud - user toggled tag combination', 'toggle_tag_filter_combination',
+                    XDATA.activityLogger.logUserActivity('TagCloud - user toggled tag combination', 'select_filter_menu_option',
                         XDATA.activityLogger.WF_EXPLORE,
                         {
                             and: newVal,
@@ -278,7 +278,7 @@ angular.module('tagCloudDirective', []).directive('tagCloud', ['ConnectionServic
 
                 // Log whenever the user toggles the options display.
                 $scope.$watch('optionsDisplayed', function(newVal, oldVal) {
-                    var action = (newVal === true) ? 'view_tag_options' : 'hide_tag_options';
+                    var action = (newVal === true) ? 'view_options' : 'hide_options';
                     XDATA.activityLogger.logUserActivity('TagCloud - user toggled options display', action,
                         XDATA.activityLogger.WF_EXPLORE);
                 });
