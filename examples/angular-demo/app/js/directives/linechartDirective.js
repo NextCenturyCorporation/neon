@@ -87,7 +87,7 @@ linechart.directive('linechart', ['ConnectionService', function(connectionServic
 		};
 
 		var onFieldChange = function(field, newVal, oldVal) {
-			XDATA.activityLogger.logUserActivity('LineChart - user changed a field selection', 'define_axes_field',
+			XDATA.activityLogger.logUserActivity('LineChart - user changed a field selection', 'define_axes',
                 XDATA.activityLogger.WF_CREATE,
                 {
                 	"field": field,
@@ -251,8 +251,12 @@ linechart.directive('linechart', ['ConnectionService', function(connectionServic
 		};
 
 		$scope.toggleSeries = function(series) {
-			XDATA.activityLogger.logUserActivity('LineChart - user toggled series', series);
-			$scope.chart.toggleSeries(series);
+			var activity = $scope.chart.toggleSeries(series);
+			XDATA.activityLogger.logUserActivity('LineChart - user toggled series', activity,
+                XDATA.activityLogger.WF_CREATE,
+                {
+                	"plot": series
+                });
 		};
 
 		var zeroPadData = function(data, minDate, maxDate) {

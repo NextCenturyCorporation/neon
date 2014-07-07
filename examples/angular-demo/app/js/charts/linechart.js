@@ -435,15 +435,22 @@ charts.LineChart.prototype.drawLine = function(opts) {
 
 charts.LineChart.prototype.toggleSeries = function(series) {
 	var index = this.hiddenSeries.indexOf(series);
-	if(index >= 0)
+	var activity = '';
+	if(index >= 0){
 		this.hiddenSeries.splice(index, 1);
-	else
+		activity = 'show_plot'
+	}else{
 		this.hiddenSeries.push(series);
+		activity = 'hide_plot';
+	}
 
-	if(this.data && this.hiddenSeries.length >= this.data.length)
+	if(this.data && this.hiddenSeries.length >= this.data.length){
 		this.hiddenSeries.splice(0);
+	}
 
 	this.redraw();
+
+	return activity;
 };
 
 charts.LineChart.prototype.redraw = function() {
