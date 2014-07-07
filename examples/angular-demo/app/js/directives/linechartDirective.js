@@ -55,22 +55,20 @@ linechart.directive('linechart', ['ConnectionService', function(connectionServic
 				filtersChanged: onFiltersChanged
 			});
 
-			$scope.$watch('attrX', function(newValue, oldValue) {
-				if($scope.databaseName && $scope.tableName) {
-					$scope.queryForData();
-				}
-			});
 			$scope.$watch('attrY', function(newValue, oldValue) {
+				onFieldChange('attrY', newValue, oldValue);
 				if($scope.databaseName && $scope.tableName) {
 					$scope.queryForData();
 				}
 			});
 			$scope.$watch('categoryField', function(newValue, oldValue) {
+				onFieldChange('categoryField', newValue, oldValue);
 				if($scope.databaseName && $scope.tableName) {
 					$scope.queryForData();
 				}
 			});
 			$scope.$watch('aggregation', function(newValue, oldValue) {
+				onFieldChange('aggregation', newValue, oldValue);
 				if($scope.databaseName && $scope.tableName) {
 					$scope.queryForData();
 				}
@@ -86,6 +84,16 @@ linechart.directive('linechart', ['ConnectionService', function(connectionServic
 					$scope.chart.redraw();
 				}
 			});
+		};
+
+		var onFieldChange = function(field, newVal, oldVal) {
+			XDATA.activityLogger.logUserActivity('LineChart - user changed a field selection', 'define_axes_field',
+                XDATA.activityLogger.WF_CREATE,
+                {
+                	"field": field,
+                    "to": newVal,
+                    "from": oldVal
+                });
 		};
 
 		/**
@@ -243,7 +251,7 @@ linechart.directive('linechart', ['ConnectionService', function(connectionServic
 		};
 
 		$scope.toggleSeries = function(series) {
-			XDATA.activityLogger.logSystemActivity('LineChart - toggle series');
+			XDATA.activityLogger.logUserActivity('LineChart - user toggled series', series);
 			$scope.chart.toggleSeries(series);
 		};
 
