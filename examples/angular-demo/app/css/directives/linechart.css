@@ -16,7 +16,15 @@
 }
 
 .linechart .y.axis text{
-  text-shadow: 0 2px 0 #FFFFFF;
+  text-shadow:
+    1px 1px 0 #FFFFFF,
+    1px 0px 0 #FFFFFF,
+    1px -1px 0 #FFFFFF,
+    -1px 1px 0 #FFFFFF,
+    -1px 0px 0 #FFFFFF,
+    -1px -1px 0 #FFFFFF,
+    0px 2px 0 #FFFFFF,
+    0px -2px 0 #FFFFFF;
   font-weight: bold;
   fill: #555555;
 }

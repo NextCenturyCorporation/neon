@@ -49,6 +49,14 @@ angular.module('timelineSelectorDirective', []).directive('timelineSelector', ['
                 var MILLIS_IN_DAY = MILLIS_IN_HOUR * 24;
                 var HOUR = "hour";
                 var DAY = "day";
+                // TODO - These need to be in a configuration file
+                var USE_OpenCPU = false;
+                var OpenCPU_URL = 'http://neon-opencpu/ocpu/library/stl2wrapper/R';
+                var openCpuEnabled = false;
+                // opencpu logging is off to keep the logs clean, turn it on to debug opencpu problems
+                ocpu.enableLogging = false;
+                // By default, opencpu uses alerts when there are problems. We want to handle the errors gracefully instead
+                ocpu.useAlerts = false;
 
                 element.addClass('timeline-selector');
 
@@ -71,6 +79,7 @@ angular.module('timelineSelectorDirective', []).directive('timelineSelector', ['
                     $scope.endDateForDisplay = undefined;
                     $scope.referenceStartDate = undefined;
                     $scope.referenceEndDate = undefined;
+                    $scope.primarySeries = false;
 
                     $scope.granularity = DAY;
                     $scope.millisMultiplier = MILLIS_IN_DAY;
@@ -79,10 +88,20 @@ angular.module('timelineSelectorDirective', []).directive('timelineSelector', ['
                     $scope.filterKey = neon.widget.getInstanceId($scope.filterId);
                     $scope.messenger = new neon.eventing.Messenger();
 
+                    $scope.collapsed = true;
+
                     $scope.messenger.events({
                         activeDatasetChanged: onDatasetChanged,
                         filtersChanged: onFiltersChanged
                     });
+
+                    if (USE_OpenCPU) {
+                        ocpu.seturl(OpenCPU_URL).done(function() {
+                          openCpuEnabled = true;
+                        }).fail(function() {
+                          openCpuEnabled = false;
+                        });
+                    }
                 };
 
                 /**
@@ -183,13 +202,25 @@ angular.module('timelineSelectorDirective', []).directive('timelineSelector', ['
                  * @method updateChartTimesAndTotal
                  */
                 $scope.updateChartTimesAndTotal = function () {
+                    // Try to find primary series in new data
+                    var primaryIndex = 0;
+                    if($scope.primarySeries){
+                        for (var i = 0; i < $scope.data.length; i++) {
+                            if($scope.primarySeries.name == $scope.data[i].name){
+                                 primaryIndex = i;
+                                 break;
+                            }
+                        }
+                    }
+                    $scope.primarySeries = $scope.data[primaryIndex];
+
                     // Handle bound conditions.
 
                     var extentStartDate;
                     var extentEndDate;
-                    if (this.brush.length == 2) {
-                        extentStartDate = this.brush[0];
-                        extentEndDate = this.brush[1];
+                    if ($scope.brush.length == 2) {
+                        extentStartDate = $scope.brush[0];
+                        extentEndDate = $scope.brush[1];
                     }
                     else {
                         extentStartDate = $scope.startDate;
@@ -219,7 +250,7 @@ angular.module('timelineSelectorDirective', []).directive('timelineSelector', ['
                     // endIdx points to the start of the day/hour just after the buckets we want to count, so do not
                     // include the bucket at endIdx.
                     for (var i = startIdx; i < endIdx; i++) {
-                        total += $scope.data[i].value;
+                        total += $scope.data[0].data[i].value;
                     }
 
                     var displayStartDate = new Date(extentStartDate);
@@ -264,8 +295,11 @@ angular.module('timelineSelectorDirective', []).directive('timelineSelector', ['
                             if ($scope.startDate === undefined || $scope.endDate === undefined) {
                                 $scope.updateDates();
                             }
-                            $scope.data = $scope.createTimelineData(queryResults);
-                            $scope.updateChartTimesAndTotal();
+                            var data = $scope.createTimelineData(queryResults);
+                            $scope.addTimeSeriesAnalysis(data[0].data, data, function() {
+                                $scope.data = data;
+                                $scope.updateChartTimesAndTotal();
+                            });
                         };
 
                         // on the initial query, setup the start/end bounds
@@ -364,6 +398,7 @@ angular.module('timelineSelectorDirective', []).directive('timelineSelector', ['
                 $scope.createTimelineData = function (queryResults) {
                     var rawData = queryResults.data;
                     var data = [];
+                    var queryData = [];
                     var i = 0;
                     var rawLength = rawData.length;
 
@@ -403,7 +438,7 @@ angular.module('timelineSelectorDirective', []).directive('timelineSelector', ['
                         // For the 01:00 to 01:59 time bucket, we want to display the aggregate value at the
                         // perceived center of the bucket, 01:30, on the timeline graph.
                         var bucketGraphDate = new Date(startTime + ($scope.millisMultiplier * i) + ($scope.millisMultiplier / 2));
-                        data[i] = {
+                        queryData[i] = {
                             date: bucketGraphDate,
                             value: 0
                         }
@@ -413,9 +448,63 @@ angular.module('timelineSelectorDirective', []).directive('timelineSelector', ['
                     var resultDate;
                     for (i = 0; i < rawLength; i++) {
                         resultDate = new Date(rawData[i].date);
-                        data[Math.floor(Math.abs(resultDate - startDate) / $scope.millisMultiplier)].value = rawData[i].count;
+                        queryData[Math.floor(Math.abs(resultDate - startDate) / $scope.millisMultiplier)].value = rawData[i].count;
                     }
+
+                    data.push({
+                        name: 'Total',
+                        type: 'area',
+                        color: '#39b54a',
+                        data: queryData
+                    });
+
                     return data;
+                };
+
+                /**
+                 * Adds the timeseries analysis to the data to be graphed.
+                 * @param timelineData an array of {date: Date(...), value: n} objects, one for each day
+                 * @param graphData the array of objects that will be graphed
+                 * @param callback the function to call after the timeseries analysis data has
+                 * been added to graphData, or if the analysis is not available this function will
+                 * be called immediately
+                 */
+                $scope.addTimeSeriesAnalysis = function(timelineData, graphData, callback) {
+                    // If OpenCPU isn't available, then just call the callback without doing anything.
+                    if (!openCpuEnabled) {
+                        callback();
+                        return;
+                    }
+                    // The analysis code just wants an array of the counts
+                    var timelineVector = _.map(timelineData, function(it) {return it.value});
+
+                    var req = ocpu.rpc("stl2wrapper",{
+                        data : timelineVector
+//                        "n.p": 7, // specifies seasonal periodicity (day-of-week)
+//                        "t.degree": 2, "t.window": 41, // trend smoothing parameters
+//                        "s.window": 31, "s.degree": 2, // seasonal smoothing parameters
+//                        outer: 10 // number of robustness iterations
+                    }, function(output){
+                        // Square the trend data so that it is on the same scale as the counts
+                        var trend = _.map(timelineData, function(it, i) { return {date: it.date, value: output[i].trend};});
+                        graphData.push({
+                            name: 'Trend',
+                            type: 'line',
+                            color: '#ff7f0e',
+                            data: trend
+                        });
+                        // Square the remainder data so that it is on the same scale as the counts
+                        var remainder = _.map(timelineData, function(it, i) { return {date: it.date, value: output[i].remainder};});
+                        graphData.push({
+                            name: 'Deviation',
+                            type: 'line',
+                            color: '#C23333',
+                            data: remainder
+                        });
+                        $scope.$apply(function() {
+                            callback();
+                        });
+                    });
                 };
 
                 /**

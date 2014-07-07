@@ -33,7 +33,9 @@ angular.module('timelineSelectorChartDirective', []).directive('timelineSelector
         scope: {
             timelineData: '=',
             timelineBrush: '=',
-            extentDirty: '='
+            extentDirty: '=',
+            collapsed: '=',
+            primarySeries: '='
         },
         link: function ($scope, element, attrs) {
 
@@ -72,7 +74,22 @@ angular.module('timelineSelectorChartDirective', []).directive('timelineSelector
                     $scope.extentDirty = false;
                     $scope.chart.renderExtent($scope.timelineBrush);
                 }
-            })
+            });
+
+            $scope.$watch('collapsed', function(newVal) {
+                if (typeof newVal !== "undefined") {
+                    $scope.chart.render($scope.timelineData);
+                    $scope.chart.renderExtent($scope.timelineBrush);
+                }
+            });
+
+            $scope.$watch('primarySeries', function(newVal) {
+                if (newVal) {
+                    $scope.chart.updatePrimarySeries(newVal);
+                    $scope.chart.render($scope.timelineData);
+                    $scope.chart.renderExtent($scope.timelineBrush);
+                }
+            });
         }
     }
 });
