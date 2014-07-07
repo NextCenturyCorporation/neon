@@ -86,6 +86,9 @@ p:last-child{
 .jumbotron .btn-lg{
 	margin: 10px 5px 0;
 }
+.jumbotron .btn-group{
+	margin-left: 5px;
+}
 
 /* Fixes for modal in header */
 .navbar-static-top{
