@@ -109,7 +109,7 @@ angular.module('filterBuilderDirective', []).directive('filterBuilder', ['Connec
 	            	if (newVal != oldVal) {
 	            		var filter = $scope.filterTable.buildFilterFromData($scope.databaseName, $scope.tableName, $scope.andClauses);
 
-	            		XDATA.activityLogger.logUserActivity('FilterBuilder - Toggle custom Neon filter set operator', 'select_filter_operator_option',
+	            		XDATA.activityLogger.logUserActivity('FilterBuilder - Toggle custom Neon filter set operator', 'select_filter_menu_option',
                             XDATA.activityLogger.WF_GETDATA,
                             {
                                 "operator": newVal
@@ -140,10 +140,17 @@ angular.module('filterBuilderDirective', []).directive('filterBuilder', ['Connec
 	            		if (oldVal && oldVal.filterState && oldVal.filterState.data[0]) {
 	            			logData.from = oldVal.filterState.data[0];
 	            		}
-	            		XDATA.activityLogger.logUserActivity('FilterBuilder - Modifying custom Neon filter data', 
-	            			'update_filter_definition',
-                            XDATA.activityLogger.WF_GETDATA,
-                            logData);
+
+	            		// Log filter modifications. Determine the activitiy to log for modifications to filters,
+	            		// menu selection or new filter text, 
+	            		// based upon whether the filter value changed or not.
+	            		if (logData.to && logData.from) {
+		            		var activity = (logData.to.value != logData.from.value) ? 'enter_filter_text' : 'select_filter_menu_option';
+		            		XDATA.activityLogger.logUserActivity('FilterBuilder - Modifying custom Neon filter data', 
+		            			activity,
+	                            XDATA.activityLogger.WF_GETDATA,
+	                            logData);
+		            	}
 	            		$(el).find('.tray-mirror.filter-tray .inner').height($('#filter-tray > .container').outerHeight(true));
 	            	}
 	            }, true);
@@ -163,7 +170,24 @@ angular.module('filterBuilderDirective', []).directive('filterBuilder', ['Connec
 	            			logData.from = oldVal;
 	            		}
 	            		XDATA.activityLogger.logUserActivity('FilterBuilder - Entering new custom Neon filter data', 
-	            			'define_filter_clause',
+	            			'select_filter_menu_option',
+                            XDATA.activityLogger.WF_GETDATA,
+                            logData);
+	            	}
+	            }, true);
+
+	            $scope.$watch('selectedValue', function (newVal, oldVal) {
+	            	if (newVal != oldVal) {
+	            		var logData = {};
+	            		if (newVal) {
+	            			logData.to = newVal;
+	            		}
+	            		if (oldVal) {
+	            			logData.from = oldVal;
+	            		}
+	            		
+	            		XDATA.activityLogger.logUserActivity('FilterBuilder - Entering new custom Neon filter data', 
+	            			'enter_filter_text',
                             XDATA.activityLogger.WF_GETDATA,
                             logData);
 	            	}

@@ -98,7 +98,7 @@ angular.module('heatMapDirective', []).directive('heatMap', ['ConnectionService'
                     // Setup the control watches.
                     // Update the latitude field used by the map.
                     $scope.$watch('latitudeField', function (newVal, oldVal) {
-                        XDATA.activityLogger.logUserActivity('HeatMap - selected latitude field', 'select_latitude_field',
+                        XDATA.activityLogger.logUserActivity('HeatMap - selected latitude field', 'set_map_layer_properties',
                             XDATA.activityLogger.WF_CREATE,
                             {
                                 from: oldVal,
@@ -112,7 +112,7 @@ angular.module('heatMapDirective', []).directive('heatMap', ['ConnectionService'
 
                     // Update the longitude field used by the map.
                     $scope.$watch('longitudeField', function (newVal, oldVal) {
-                        XDATA.activityLogger.logUserActivity('HeatMap - selected longitude field', 'select_longitude_field',
+                        XDATA.activityLogger.logUserActivity('HeatMap - selected longitude field', 'set_map_layer_properties',
                             XDATA.activityLogger.WF_CREATE,
                             {
                                 from: oldVal,
@@ -126,7 +126,7 @@ angular.module('heatMapDirective', []).directive('heatMap', ['ConnectionService'
 
                     // Update the sizing field used by the map.
                     $scope.$watch('sizeByField', function (newVal, oldVal) {
-                        XDATA.activityLogger.logUserActivity('HeatMap - selected sizeBy field', 'select_sizeby_field',
+                        XDATA.activityLogger.logUserActivity('HeatMap - selected sizeBy field', 'set_map_layer_properties',
                             XDATA.activityLogger.WF_CREATE,
                             {
                                 from: oldVal,
@@ -146,7 +146,7 @@ angular.module('heatMapDirective', []).directive('heatMap', ['ConnectionService'
 
                     // Update the coloring field used by the map.
                     $scope.$watch('colorByField', function (newVal, oldVal) {
-                        XDATA.activityLogger.logUserActivity('HeatMap - selected colorBy field', 'select_colorby_field',
+                        XDATA.activityLogger.logUserActivity('HeatMap - selected colorBy field', 'set_map_layer_properties',
                             XDATA.activityLogger.WF_CREATE,
                             {
                                 from: oldVal,
@@ -208,7 +208,7 @@ angular.module('heatMapDirective', []).directive('heatMap', ['ConnectionService'
                     });
 
                     $scope.$watch('limit', function(newVal, oldVal) {
-                        XDATA.activityLogger.logUserActivity('HeatMap - user change number of displayed points', 'select_point_limit',
+                        XDATA.activityLogger.logUserActivity('HeatMap - user change number of displayed points', 'set_map_layer_properties',
                             XDATA.activityLogger.WF_GETDATA,
                             {
                                 from: oldVal,
