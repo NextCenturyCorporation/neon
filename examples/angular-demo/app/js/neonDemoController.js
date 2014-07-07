@@ -90,7 +90,7 @@ angular.module('neonDemo.controllers', []).controller('neonDemoController', ['$s
          */
         $scope.toggleChartOptions = function() {
             $scope.chartOptions = !$scope.chartOptions;
-            var action = ($scope.chartOptions === true) ? 'show_chart_options' : 'hide_chart_options';
+            var action = ($scope.chartOptions === true) ? 'show_options' : 'hide_options';
             XDATA.activityLogger.logUserActivity('Neon Demo - Toggle chart options display', action,
                 XDATA.activityLogger.WF_CREATE,
                 {

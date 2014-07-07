@@ -198,7 +198,7 @@ angular.module('heatMapDirective', []).directive('heatMap', ['ConnectionService'
 
                     // Log whenever the user toggles the options display.
                     $scope.$watch('optionsDisplayed', function(newVal, oldVal) {
-                        var action = (newVal === true) ? 'view_map_options' : 'hide_map_options';
+                        var action = (newVal === true) ? 'show_options' : 'hide_options';
                         XDATA.activityLogger.logUserActivity('HeatMap - user toggled options display', action,
                             XDATA.activityLogger.WF_CREATE,
                             {

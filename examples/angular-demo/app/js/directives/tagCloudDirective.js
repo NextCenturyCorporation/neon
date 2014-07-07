@@ -278,7 +278,7 @@ angular.module('tagCloudDirective', []).directive('tagCloud', ['ConnectionServic
 
                 // Log whenever the user toggles the options display.
                 $scope.$watch('optionsDisplayed', function(newVal, oldVal) {
-                    var action = (newVal === true) ? 'view_options' : 'hide_options';
+                    var action = (newVal === true) ? 'show_options' : 'hide_options';
                     XDATA.activityLogger.logUserActivity('TagCloud - user toggled options display', action,
                         XDATA.activityLogger.WF_EXPLORE);
                 });
