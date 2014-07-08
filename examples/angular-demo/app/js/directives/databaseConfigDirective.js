@@ -9,7 +9,7 @@ databaseConfig.directive('databaseConfig', ['ConnectionService', function (conne
         $scope.selectedTable = null;
         $scope.databases = [];
         $scope.dbTables = [];
-        $scope.fields = [];
+        $scope.tableFields = [];
         $scope.isConnected = false;
         $scope.clearPopover = '';
         $scope.activeServer = "Choose dataset";
@@ -43,6 +43,23 @@ databaseConfig.directive('databaseConfig', ['ConnectionService', function (conne
                 selectedTable: "most_active"
             }
         ];
+        $scope.fields = [
+            {
+                label: "Latitude",
+                name: "latitude",
+                selected: ""
+            },
+            {
+                label: "Longitude",
+                name: "longitude",
+                selected: ""
+            },
+            {
+                label: "Date (and Time)",
+                name: "date",
+                selected: ""
+            }
+        ];
 
         $scope.initialize = function() {
             $scope.messenger = new neon.eventing.Messenger();
@@ -50,7 +67,7 @@ databaseConfig.directive('databaseConfig', ['ConnectionService', function (conne
             $scope.hostnameInput = $scope.hostName || 'localhost';
         }
 
-        $scope.connectToDatastore = function () {
+        $scope.connectToDataServer = function () {
             XDATA.activityLogger.logUserActivity('User selected new datastore',
                 'connect', XDATA.activityLogger.WF_GETDATA, {
                     "datastore": $scope.datastoreSelect,
@@ -94,7 +111,7 @@ databaseConfig.directive('databaseConfig', ['ConnectionService', function (conne
             // Set datastore connection details and connect to the datastore.
             $scope.datastoreSelect = server.datastoreSelect;
             $scope.hostnameInput = server.hostnameInput;
-            $scope.connectToDatastore();
+            $scope.connectToDataServer();
 
             // Set database name and get list of tables.
             $scope.selectedDb = server.selectedDb;
@@ -102,6 +119,7 @@ databaseConfig.directive('databaseConfig', ['ConnectionService', function (conne
 
             // Set table name and initiate connection.
             $scope.selectedTable = server.selectedTable;
+            $scope.selectTable();
             $scope.connectToDatabase();
         };
 
@@ -133,13 +151,30 @@ databaseConfig.directive('databaseConfig', ['ConnectionService', function (conne
                 'connect', XDATA.activityLogger.WF_GETDATA, {
                     "table": $scope.selectedTable
                 });
+            $scope.connection.getFieldNames($scope.selectedTable, function(result) {
+                $scope.$apply(function() {
+                    $scope.tableFields = result;
+                });
+                connectionService.connectToDataset($scope.datastoreSelect, $scope.hostnameInput, $scope.selectedDb, $scope.selectedTable);
+                $scope.applyDefaultFields();
+            });
         };
 
-        $scope.selectTable = function () {
-            XDATA.activityLogger.logUserActivity('User selected new table',
-                'connect', XDATA.activityLogger.WF_GETDATA, {
-                    "table": $scope.selectedTable
+        $scope.applyDefaultFields = function() {
+            connectionService.loadMetadata(function() {
+                $scope.$apply(function() {
+                    var mappings = connectionService.getFieldMappings();
+                    for (var i in $scope.fields) {
+                        var field = $scope.fields[i];
+                        field.selected = mappings.hasOwnProperty(field.name) ? mappings[field.name] : "";
+                    }
                 });
+            });
+        };
+
+        $scope.selectField = function() {
+            XDATA.activityLogger.logUserActivity('User mapped a field',
+                'connect', XDATA.activityLogger.WF_GETDATA);
         };
 
         $scope.openedCustom = function () {
@@ -157,9 +192,13 @@ databaseConfig.directive('databaseConfig', ['ConnectionService', function (conne
             });
         };
 
-        $scope.continueClick = function () {
+        $scope.connectClick = function () {
             // Set active connection to Custom and connect.
             $scope.activeServer = "Custom";
+            for (var i in $scope.fields) {
+                var field = $scope.fields[i];
+                connectionService.setFieldMapping(field.name, field.selected);
+            }
             $scope.connectToDatabase();
             XDATA.activityLogger.logUserActivity('User requested new dataset',
                 'connect', XDATA.activityLogger.WF_GETDATA, {

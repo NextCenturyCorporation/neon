@@ -170,6 +170,14 @@
                                                     <option value="line">Line</option>
                                                 </select>
                                             </div>
+
+                                            <div class="form-group" ng-hide="chartType === 'bar'">
+                                                <fieldselector target-var="lineXAxisField" label-text="'X axis:'" default-mapping="'line_x_axis'"></fieldSelector>
+                                            </div>
+                                            <div class="form-group" ng-hide="chartType === 'bar'">
+                                                <fieldselector target-var="lineYAxisField" label-text="'Y axis:'" default-mapping="'y_axis'"></fieldSelector>
+                                            </div>
+
                                             <div class="form-group" ng-hide="chartType === 'line'">
                                                 <fieldselector target-var="xAxisField" label-text="'X axis:'" default-mapping="'bar_x_axis'"></fieldSelector>
                                             </div>
@@ -211,7 +219,7 @@
 
                                 <!--stackedbarchart attr-x="xAxisField" attr-y="yAxisField" bar-type='barType'></stackedbarchart-->
                                 <barchart attr-x="xAxisField" attr-y="yAxisField" bar-type='barType' ng-hide="chartType === 'line'"></barchart>
-                                <linechart attr-x="xAxisField" attr-y="yAxisField" total-type='barType' ng-hide="chartType !== 'line'"></linechart>
+                                <linechart attr-x="lineXAxisField" attr-y="lineYAxisField" ng-hide="chartType !== 'line'"></linechart>
 
                             </div>
 
