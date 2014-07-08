@@ -156,7 +156,7 @@ charts.TimelineSelectorChart = function (element, configuration) {
     this.updateMask = function () {
         var brush = self.brush;
 
-        if(d3.event && d3.event.sourceEvent){
+        if(self.primarySeries.type == 'bar' && d3.event && d3.event.sourceEvent){
             var timeFunction = d3.time[self.granularity].utc;
 
             var extent0 = brush.extent(),
