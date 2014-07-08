@@ -99,6 +99,17 @@
   margin-top: 0px;
 }
 
+.timeline-selector-chart .dot{
+    stroke: #f1f1f1;
+    stroke-width: 2px;
+    fill: #39b54a;
+}
+.timeline-selector-chart .bar {
+  fill: #39b54a;
+  stroke: #39b54a;
+  stroke-width: 1px;
+}
+
 .timeline-selector-chart .tick text{
   fill: #777777;
 }
