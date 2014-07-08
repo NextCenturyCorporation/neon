@@ -18,11 +18,11 @@ var neon = neon || {};
 neon.query = neon.query || {};
 
 /**
- * This Angular JS directive adds a circular heat map to the DOM and drives the visualization data from
- * whatever database and table are currently selected in Neon.  This directive pulls the current
- * Neon connection from a connection service and listens for
- * neon system events (e.g., data tables changed) to determine when to update its visualization
- * by issuing a Neon query for aggregated time data.
+ * FilterTable manages a set of filter clauses to be used with Neon queries
+ * where each row in the table represents a separate filter clause.  A single row
+ * represents a field-operator-value combo.  For example, "total < 10".  This class
+ * provides convenience functions for adding/removing rows or building a filter
+ * table from more primitive data arrays.
  * 
  * @example
  *    var filterRow = new FilterRow("total", "<", 10);<br>
