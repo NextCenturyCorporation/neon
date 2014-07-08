@@ -308,7 +308,7 @@ angular.module('filterBuilderDirective', []).directive('filterBuilder', ['Connec
 			 * @private
 			 */
 			var populateFieldNames = function(fields) {
-				$scope.fields = fields;
+				$scope.fields = _.without(fields, "_id");
 			};
 
 			// Wait for neon to be ready, the create our messenger and intialize the view and data.
