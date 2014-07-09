@@ -161,6 +161,8 @@ charts.TimelineSelectorChart = function (element, configuration) {
 
             var extent0 = brush.extent(),
                 extent1;
+
+            if(typeof extent0[0] === 'undefined' || typeof extent0[1] === 'undefined') return;
              
             // if dragging, preserve the width of the extent
             if (d3.event.mode === "move") {
@@ -182,7 +184,8 @@ charts.TimelineSelectorChart = function (element, configuration) {
                 }
             }
 
-            d3.select(this).call(brush.extent(extent1));
+            if (extent1[0] < extent1[1])
+                d3.select(this).call(brush.extent(extent1));
         }
  
         var brushElement = $(this);
