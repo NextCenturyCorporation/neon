@@ -497,7 +497,7 @@ angular.module('timelineSelectorDirective', []).directive('timelineSelector', ['
                         var remainder = _.map(timelineData, function(it, i) { return {date: it.date, value: output[i].remainder};});
                         graphData.push({
                             name: 'Deviation',
-                            type: 'line',
+                            type: 'bar',
                             color: '#C23333',
                             data: remainder
                         });

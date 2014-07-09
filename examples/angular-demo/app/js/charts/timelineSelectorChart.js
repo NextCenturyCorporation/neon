@@ -156,7 +156,7 @@ charts.TimelineSelectorChart = function (element, configuration) {
     this.updateMask = function () {
         var brush = self.brush;
 
-        if(self.primarySeries.type == 'bar' && d3.event){
+        if(d3.event){
             var timeFunction = d3.time[self.granularity].utc;
 
             var extent0 = brush.extent(),
@@ -169,7 +169,6 @@ charts.TimelineSelectorChart = function (element, configuration) {
                 var d0 = timeFunction.round(extent0[0]),
                     range = timeFunction.range(extent0[0], extent0[1]),
                     d1 = timeFunction.offset(d0, range.length);
-                    //d1 = timeFunction.offset(d0, Math.round((extent0[1] - extent0[0]) / 864e5));
                 extent1 = [d0, d1];
             }
 
@@ -219,6 +218,7 @@ charts.TimelineSelectorChart = function (element, configuration) {
         var me = this;
 
         var width = this.determineWidth(this.d3element) - this.config.margin.left - this.config.margin.right;
+        var barWidth = 0;
 
         var baseHeight = 70;
         $(this.d3element[0]).css("height", (baseHeight * values.length) );
@@ -227,6 +227,7 @@ charts.TimelineSelectorChart = function (element, configuration) {
 
         var fullDataSet = [];
         if (values && values.length > 0) {
+            barWidth = (width/values[0].data.length);
             this.data = values;
             // Get list of all data to calculate min/max and domain
             for(var i = 0; i < values.length; i++) {
@@ -272,13 +273,8 @@ charts.TimelineSelectorChart = function (element, configuration) {
             return d.date;
         }));
         var xMax = d3.max(fullDataSet.map(function (d) {
-            return d.date;
+            return d3.time[me.granularity].utc.offset(d.date, 1);
         }));
-
-        if(this.primarySeries.type == 'bar')
-            xMax = d3.max(fullDataSet.map(function (d) {
-                return d3.time[me.granularity].utc.offset(d.date, 1);
-            }));
 
         x.domain([xMin, xMax]);
 
@@ -305,12 +301,22 @@ charts.TimelineSelectorChart = function (element, configuration) {
             .attr("transform", "translate(0," + (height + 2) + ")")
             .call(xAxis);
 
+        context.selectAll('.major text')
+            .attr('transform', 'translate('+(barWidth/2)+',0)'); 
+
+        context.selectAll('.major line')
+            .attr('transform', 'translate('+(barWidth/2)+',0)');
+
         // Render a series
         var seriesPos = 0;
         var createSeries = function(series){
+            var xOffset = barWidth/2;
+            if(series.type == 'bar')
+                xOffset = 0;
+
             var container = context.append("g")
                 .attr("class", series.name)
-                .attr("transform", "translate(0," + ((chartHeight+me.config.margin.top+me.config.margin.bottom)*seriesPos) + ")");
+                .attr("transform", "translate("+xOffset+"," + ((chartHeight+me.config.margin.top+me.config.margin.bottom)*seriesPos) + ")");
 
             var y = d3.scale.linear().range([chartHeight, 0]),
             yAxis = d3.svg.axis().scale(y).orient("right").ticks(2);
@@ -331,7 +337,6 @@ charts.TimelineSelectorChart = function (element, configuration) {
             // If type is bar, render a bar plot
             if(series.type == 'bar'){
 
-                var barWidth = (width/series.data.length);
                 var barheight = chartHeight;
                 
                 if(series.data.length < 60){
@@ -348,14 +353,13 @@ charts.TimelineSelectorChart = function (element, configuration) {
                   .attr("style", style)
                   .attr("x", function(d) { return x(d.date); })
                   .attr("width", barWidth)
-                  .attr("y", function(d) { return y(d.value); })
-                  .attr("height", function(d) { return (barheight) - y(d.value); });
+                  .attr("y", function(d) { return y(Math.max(0, d.value)); })
+                  //.attr("height", function(d) { return (barheight) - y(d.value); });
+                  .attr("height", function(d) { 
+                    var height = y(d.value) - y(0);
+                    return Math.abs(height)+(height/height);
+                  });
 
-                context.selectAll('.major text')
-                    .attr('transform', 'translate('+(barWidth/2)+',0)'); 
-
-                context.selectAll('.major line')
-                    .attr('transform', 'translate('+(barWidth/2)+',0)'); 
             }else{
                 // If type is line, render a line plot
                 if(series.type == 'line'){
@@ -395,6 +399,7 @@ charts.TimelineSelectorChart = function (element, configuration) {
                         .data(series.data)
                       .enter().append("circle")
                         .attr("class", "dot")
+                        .attr("style", 'fill:'+series.color+';')
                         .attr("r", 3)
                         .attr("cx", func)
                         .attr("cy", function(d) { return y(d.value); });
@@ -405,7 +410,7 @@ charts.TimelineSelectorChart = function (element, configuration) {
                 .attr({
                     "class":"mini-axis",
                     "x1" : 0,
-                    "x2" : width,
+                    "x2" : width-(xOffset*2),
                     "y1" : y(0),
                     "y2" : y(0)
                 });
@@ -430,28 +435,6 @@ charts.TimelineSelectorChart = function (element, configuration) {
             if(this.primarySeries && values[i].name == this.primarySeries.name) continue;
             createSeries(values[i]);
         }
-
-        // var tick = $('.timeline-selector-chart').find('.x.axis').find('.tick.major').first();
-        // if(tick.length != 0){
-        //     var transform = tick.attr('transform');
-        //     var parts  = /translate\(\s*([^\s,)]+)[ ,]([^\s,)]+)/.exec(transform);
-        //     var firstX = parseInt(parts[1]);
-        //     var threshold = (tick[0].getBBox().width/2);
-
-        //     if(firstX < threshold){
-        //         tick.find('text').css('text-anchor', 'start');
-        //     }
-
-        //     tick = $('.timeline-selector-chart').find('.x.axis').find('.tick.major').last();
-        //     transform = tick.attr('transform');
-        //     parts  = /translate\(\s*([^\s,)]+)[ ,]([^\s,)]+)/.exec(transform);
-        //     firstX = parseInt(parts[1]);
-        //     threshold = width - (tick[0].getBBox().width/2);
-
-        //     if(firstX > threshold){
-        //         tick.find('text').css('text-anchor', 'end');
-        //     }
-        // }
 
         var gBrush = context.append("g")
             .attr("class", "brush");
