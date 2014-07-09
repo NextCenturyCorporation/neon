@@ -156,20 +156,33 @@ charts.TimelineSelectorChart = function (element, configuration) {
     this.updateMask = function () {
         var brush = self.brush;
 
-        if(self.primarySeries.type == 'bar' && d3.event && d3.event.sourceEvent){
+        if(self.primarySeries.type == 'bar' && d3.event){
             var timeFunction = d3.time[self.granularity].utc;
 
             var extent0 = brush.extent(),
-                extent1 = extent0.map(timeFunction.round);
-
-            // if empty when rounded, use floor & ceil instead
-            if (extent1[0] >= extent1[1]) {
-                extent1[0] = timeFunction.floor(extent0[0]);
-                extent1[1] = timeFunction.ceil(extent0[1]);
+                extent1;
+             
+            // if dragging, preserve the width of the extent
+            if (d3.event.mode === "move") {
+                var d0 = timeFunction.round(extent0[0]),
+                    range = timeFunction.range(extent0[0], extent0[1]),
+                    d1 = timeFunction.offset(d0, range.length);
+                    //d1 = timeFunction.offset(d0, Math.round((extent0[1] - extent0[0]) / 864e5));
+                extent1 = [d0, d1];
             }
 
-            d3.select(this)
-                .call(brush.extent(extent1));
+            // otherwise, if resizing, round both dates
+            else {
+                extent1 = extent0.map(timeFunction.round);
+
+                // if empty when rounded, use floor & ceil instead
+                if (extent1[0] >= extent1[1]) {
+                    extent1[0] = timeFunction.floor(extent0[0]);
+                    extent1[1] = timeFunction.ceil(extent0[1]);
+                }
+            }
+
+            d3.select(this).call(brush.extent(extent1));
         }
  
         var brushElement = $(this);
