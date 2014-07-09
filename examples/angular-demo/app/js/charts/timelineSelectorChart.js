@@ -337,7 +337,7 @@ charts.TimelineSelectorChart = function (element, configuration) {
             // If type is bar, render a bar plot
             if(series.type == 'bar'){
 
-                var barheight = chartHeight;
+                var barheight = 0;
                 
                 if(series.data.length < 60){
                     style = 'stroke:#f1f1f1;'
@@ -357,7 +357,9 @@ charts.TimelineSelectorChart = function (element, configuration) {
                   //.attr("height", function(d) { return (barheight) - y(d.value); });
                   .attr("height", function(d) { 
                     var height = y(d.value) - y(0);
-                    return Math.abs(height)+(height/height);
+                    var offset = height/height || 0;
+                    var calculatedHeight = Math.abs(height)+(offset*barheight);
+                    return calculatedHeight;
                   });
 
             }else{
@@ -377,9 +379,11 @@ charts.TimelineSelectorChart = function (element, configuration) {
                         .x(function (d) {
                             return x(d.date);
                         })
-                        .y0(chartHeight)
+                        .y0(function (d) {
+                            return y(Math.min(0, d.value));
+                        })
                         .y1(function (d) {
-                            return y(d.value);
+                            return y(Math.max(0, d.value));
                         });
                 }
 
