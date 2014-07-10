@@ -385,7 +385,24 @@ angular.module('timelineSelectorDirective', []).directive('timelineSelector', ['
                  * @returns {Date}
                  */
                 $scope.roundUpBucket = function (date) {
-                    return $scope.zeroOutDate(new Date(date.getTime() - 1 + $scope.millisMultiplier));
+                    var roundedDate = $scope.zeroOutDate(new Date(date.getTime() - 1 + $scope.millisMultiplier));
+                    if(roundedDate > $scope.endDate)
+                        return $scope.endDate;
+                    else
+                        return roundedDate
+                };
+
+                /**
+                 * Rounds the date down to the beginning of the current bucket
+                 * @param date
+                 * @returns {Date}
+                 */
+                $scope.roundDownBucket = function (date) {
+                    var roundedDate = $scope.zeroOutDate(new Date(date.getTime() + 1));
+                    if(roundedDate < $scope.startDate)
+                        return $scope.startDate;
+                    else
+                        return roundedDate
                 };
 
                 /**
@@ -539,7 +556,7 @@ angular.module('timelineSelectorDirective', []).directive('timelineSelector', ['
                         $scope.updateDates();
 
                         if ($scope.brush.length > 0) {
-                            var newBrushStart = $scope.brush[0];
+                            var newBrushStart = $scope.roundDownBucket($scope.brush[0]);
                             // Set the brush to one millisecond back when changing resolutions back to what we had.
                             // Otherwise, our brush will drift forward in time on consecutive granularity changes due to the 
                             // nature of having to zero out the value and calculating the start point of the next day/hour.

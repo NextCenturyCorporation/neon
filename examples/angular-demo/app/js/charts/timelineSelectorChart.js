@@ -156,6 +156,7 @@ charts.TimelineSelectorChart = function (element, configuration) {
     this.updateMask = function () {
         var brush = self.brush;
 
+        // Snap brush
         if(d3.event){
             var timeFunction = d3.time[self.granularity].utc;
 
@@ -187,6 +188,7 @@ charts.TimelineSelectorChart = function (element, configuration) {
                 d3.select(this).call(brush.extent(extent1));
         }
  
+        // Update mask
         var brushElement = $(this);
         var xPos = brushElement.find('.extent').attr('x');
 
@@ -227,11 +229,11 @@ charts.TimelineSelectorChart = function (element, configuration) {
 
         var fullDataSet = [];
         if (values && values.length > 0) {
-            barWidth = (width/values[0].data.length);
             this.data = values;
             // Get list of all data to calculate min/max and domain
             for(var i = 0; i < values.length; i++) {
                 fullDataSet = fullDataSet.concat(values[i].data);
+                if(values[i].data && !barWidth) barWidth = (width/values[i].data.length);
             }
         }
 
@@ -334,8 +336,8 @@ charts.TimelineSelectorChart = function (element, configuration) {
             var style = 'stroke:'+series.color+';'
             var chartType = '';
             
-            // If type is bar, render a bar plot
-            if(series.type == 'bar'){
+            // If type is bar AND the data isn't too long, render a bar plot
+            if(series.type == 'bar' && series.data.length < width){
 
                 var barheight = 0;
                 
@@ -373,7 +375,7 @@ charts.TimelineSelectorChart = function (element, configuration) {
                             return y(d.value);
                         });
                 }else{
-                    // Otherwise, default to area
+                    // Otherwise, default to area, e.g. for bars whose data is too long
                     style += 'fill:'+series.color+';';
                     chartType = d3.svg.area()
                         .x(function (d) {
