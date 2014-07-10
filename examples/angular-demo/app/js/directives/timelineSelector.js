@@ -51,7 +51,7 @@ angular.module('timelineSelectorDirective', []).directive('timelineSelector', ['
                 var DAY = "day";
                 // TODO - These need to be in a configuration file
                 var USE_OpenCPU = false;
-                var OpenCPU_URL = 'http://neon-opencpu/ocpu/library/stl2wrapper/R';
+                var OpenCPU_URL = 'http://neon-opencpu/ocpu/library/NeonAngularDemo/R';
                 var openCpuEnabled = false;
                 // opencpu logging is off to keep the logs clean, turn it on to debug opencpu problems
                 ocpu.enableLogging = false;
@@ -478,12 +478,20 @@ angular.module('timelineSelectorDirective', []).directive('timelineSelector', ['
                     // The analysis code just wants an array of the counts
                     var timelineVector = _.map(timelineData, function(it) {return it.value});
 
-                    var req = ocpu.rpc("stl2wrapper",{
-                        data : timelineVector
-//                        "n.p": 7, // specifies seasonal periodicity (day-of-week)
-//                        "t.degree": 2, "t.window": 41, // trend smoothing parameters
-//                        "s.window": 31, "s.degree": 2, // seasonal smoothing parameters
-//                        outer: 10 // number of robustness iterations
+                    var periodLength = 1;
+                    if ($scope.granularity === DAY) {
+                        // At the day granularity, look for weekly patterns
+                        periodLength = 7;
+                    } else if ($scope.granularity === HOUR) {
+                        // At the hourly granularity, look for daily patterns
+                        periodLength = 24;
+                    }
+                    var req = ocpu.rpc("nstl2",{
+                        x : timelineVector,
+                        "n.p": periodLength, // specifies seasonal periodicity
+                        "t.degree": 2, "t.window": 41, // trend smoothing parameters
+                        "s.window": 31, "s.degree": 2, // seasonal smoothing parameters
+                        outer: 10 // number of robustness iterations
                     }, function(output){
                         // Square the trend data so that it is on the same scale as the counts
                         var trend = _.map(timelineData, function(it, i) { return {date: it.date, value: output[i].trend};});
@@ -501,6 +509,11 @@ angular.module('timelineSelectorDirective', []).directive('timelineSelector', ['
                             color: '#C23333',
                             data: remainder
                         });
+                        $scope.$apply(function() {
+                            callback();
+                        });
+                    }).fail(function() {
+                        // If the request fails, then just do the callback.
                         $scope.$apply(function() {
                             callback();
                         });
