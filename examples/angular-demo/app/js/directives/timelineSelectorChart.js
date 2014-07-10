@@ -35,7 +35,8 @@ angular.module('timelineSelectorChartDirective', []).directive('timelineSelector
             timelineBrush: '=',
             extentDirty: '=',
             collapsed: '=',
-            primarySeries: '='
+            primarySeries: '=',
+            granularity: '='
         },
         link: function ($scope, element, attrs) {
 
@@ -58,6 +59,7 @@ angular.module('timelineSelectorChartDirective', []).directive('timelineSelector
             // and clear the brush.
             $scope.$watch('timelineData', function (newVal) {
                 if (newVal && (newVal.length > 0)) {
+                    $scope.chart.updateGranularity($scope.granularity);
                     $scope.chart.render(newVal);
                     $scope.chart.renderExtent($scope.timelineBrush);
                 }

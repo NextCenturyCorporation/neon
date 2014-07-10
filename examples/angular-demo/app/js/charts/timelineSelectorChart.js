@@ -47,6 +47,7 @@ charts.TimelineSelectorChart = function (element, configuration) {
     this.brushHandler = undefined;
     this.data = DEFAULT_DATA;
     this.primarySeries = false;
+    this.granularity = 'day';
 
     var self = this; // for internal d3 functions
 
@@ -67,6 +68,7 @@ charts.TimelineSelectorChart = function (element, configuration) {
     this.configure = function (configuration) {
         this.config = configuration || {};
         this.config.margin = this.config.margin || {top: 12, right: 15, bottom: 20, left: 15};
+        this.granularity = this.config.granularity || this.granularity;
         this.redrawOnResize();
 
         return this;
@@ -152,19 +154,55 @@ charts.TimelineSelectorChart = function (element, configuration) {
      * @method updateMask
      */
     this.updateMask = function () {
-        var brush = $(this);
-        var xPos = brush.find('.extent').attr('x');
-        var extentWidth = brush.find('.extent').attr('width');
-        var width = parseInt(brush.find('.mask-west').attr('width'));
+        var brush = self.brush;
+
+        // Snap brush
+        if(d3.event){
+            var timeFunction = d3.time[self.granularity].utc;
+
+            var extent0 = brush.extent(),
+                extent1;
+
+            if(typeof extent0[0] === 'undefined' || typeof extent0[1] === 'undefined') return;
+             
+            // if dragging, preserve the width of the extent
+            if (d3.event.mode === "move") {
+                var d0 = timeFunction.round(extent0[0]),
+                    range = timeFunction.range(extent0[0], extent0[1]),
+                    d1 = timeFunction.offset(d0, range.length);
+                extent1 = [d0, d1];
+            }
+
+            // otherwise, if resizing, round both dates
+            else {
+                extent1 = extent0.map(timeFunction.round);
+
+                // if empty when rounded, use floor & ceil instead
+                if (extent1[0] >= extent1[1]) {
+                    extent1[0] = timeFunction.floor(extent0[0]);
+                    extent1[1] = timeFunction.ceil(extent0[1]);
+                }
+            }
+
+            if (extent1[0] < extent1[1])
+                d3.select(this).call(brush.extent(extent1));
+        }
+ 
+        // Update mask
+        var brushElement = $(this);
+        var xPos = brushElement.find('.extent').attr('x');
+
+        var extentWidth = brushElement.find('.extent').attr('width');
+        var width = parseInt(brushElement.find('.mask-west').attr('width'));
 
         // If brush extent has been cleared, reset mask positions
         if (extentWidth == "0" || extentWidth === undefined) {
-            brush.find('.mask-west').attr('x', (0 - (width + 50)));
-            brush.find('.mask-east').attr('x', width + 50);
+            brushElement.find('.mask-west').attr('x', (0 - (width + 50)));
+            brushElement.find('.mask-east').attr('x', width + 50);
         } else {
             // Otherwise, update mask positions to new extent location
-            brush.find('.mask-west').attr('x', parseFloat(xPos) - width);
-            brush.find('.mask-east').attr('x', parseFloat(xPos) + parseFloat(extentWidth));
+            brushElement.find('.mask-west').attr('x', parseFloat(xPos) - width);
+            brushElement.find('.mask-east').attr('x', parseFloat(xPos) + parseFloat(extentWidth));
         }
     }
 
@@ -179,7 +217,10 @@ charts.TimelineSelectorChart = function (element, configuration) {
      * @method render
      */
     this.render = function (values) {
+        var me = this;
+
         var width = this.determineWidth(this.d3element) - this.config.margin.left - this.config.margin.right;
+        var barWidth = 0;
 
         var baseHeight = 70;
         $(this.d3element[0]).css("height", (baseHeight * values.length) );
@@ -192,6 +233,7 @@ charts.TimelineSelectorChart = function (element, configuration) {
             // Get list of all data to calculate min/max and domain
             for(var i = 0; i < values.length; i++) {
                 fullDataSet = fullDataSet.concat(values[i].data);
+                if(values[i].data && !barWidth) barWidth = (width/values[i].data.length);
             }
         }
 
@@ -204,6 +246,7 @@ charts.TimelineSelectorChart = function (element, configuration) {
 
         // Save the brush as an instance variable to allow interaction on it by client code.
         this.brush = d3.svg.brush().x(x).on("brush", this.updateMask);
+
         if (this.brushHandler) {
             this.brush.on("brushstart", function() {
                 XDATA.activityLogger.logUserActivity('Begin temporal filter selection', 'set_visual_filter_parameters',
@@ -232,15 +275,10 @@ charts.TimelineSelectorChart = function (element, configuration) {
             return d.date;
         }));
         var xMax = d3.max(fullDataSet.map(function (d) {
-            return d.date;
+            return d3.time[me.granularity].utc.offset(d.date, 1);
         }));
-        // var totalRecords = d3.sum(this.data[0].map(function (d) {
-        //     return d.value
-        // }));
 
-        x.domain(d3.extent(fullDataSet.map(function (d) {
-            return d.date;
-        })));
+        x.domain([xMin, xMax]);
 
         // Clear the old contents by replacing innerhtml.
         d3.select(this.element).html('');
@@ -260,13 +298,27 @@ charts.TimelineSelectorChart = function (element, configuration) {
             .attr("class", "context")
             .attr("transform", "translate(" + this.config.margin.left + "," + this.config.margin.top + ")");
 
+        context.append("g")
+            .attr("class", "x axis")
+            .attr("transform", "translate(0," + (height + 2) + ")")
+            .call(xAxis);
+
+        context.selectAll('.major text')
+            .attr('transform', 'translate('+(barWidth/2)+',0)'); 
+
+        context.selectAll('.major line')
+            .attr('transform', 'translate('+(barWidth/2)+',0)');
+
         // Render a series
-        var me = this;
         var seriesPos = 0;
         var createSeries = function(series){
+            var xOffset = barWidth/2;
+            if(series.type == 'bar')
+                xOffset = 0;
+
             var container = context.append("g")
                 .attr("class", series.name)
-                .attr("transform", "translate(0," + ((chartHeight+me.config.margin.top+me.config.margin.bottom)*seriesPos) + ")");
+                .attr("transform", "translate("+xOffset+"," + ((chartHeight+me.config.margin.top+me.config.margin.bottom)*seriesPos) + ")");
 
             var y = d3.scale.linear().range([chartHeight, 0]),
             yAxis = d3.svg.axis().scale(y).orient("right").ticks(2);
@@ -283,39 +335,88 @@ charts.TimelineSelectorChart = function (element, configuration) {
 
             var style = 'stroke:'+series.color+';'
             var chartType = '';
-            // If type is line, render a line plot
-            if(series.type == 'line'){
-                chartType = d3.svg.line()
-                    .x(function (d) {
-                        return x(d.date);
-                    })
-                    .y(function (d) {
-                        return y(d.value);
-                    });
-            }else{
-                // Otherwise, default to area
-                style += 'fill:'+series.color+';';
-                chartType = d3.svg.area()
-                    .x(function (d) {
-                        return x(d.date);
-                    })
-                    .y0(chartHeight)
-                    .y1(function (d) {
-                        return y(d.value);
-                    });
-            }
+            
+            // If type is bar AND the data isn't too long, render a bar plot
+            if(series.type == 'bar' && series.data.length < width){
 
-            container.append("path")
-                .datum(series.data)
-                .attr("class", series.type)
-                .attr("d", chartType)
-                .attr("style", style);
+                var barheight = 0;
+                
+                if(series.data.length < 60){
+                    style = 'stroke:#f1f1f1;'
+                    barheight++;
+                }
+
+                style += 'fill:'+series.color+';';
+
+                container.selectAll(".bar")
+                  .data(series.data)
+                .enter().append("rect")
+                  .attr("class", "bar")
+                  .attr("style", style)
+                  .attr("x", function(d) { return x(d.date); })
+                  .attr("width", barWidth)
+                  .attr("y", function(d) { return y(Math.max(0, d.value)); })
+                  //.attr("height", function(d) { return (barheight) - y(d.value); });
+                  .attr("height", function(d) { 
+                    var height = y(d.value) - y(0);
+                    var offset = height/height || 0;
+                    var calculatedHeight = Math.abs(height)+(offset*barheight);
+                    return calculatedHeight;
+                  });
+
+            }else{
+                // If type is line, render a line plot
+                if(series.type == 'line'){
+                    chartType = d3.svg.line()
+                        .x(function (d) {
+                            return x(d.date);
+                        })
+                        .y(function (d) {
+                            return y(d.value);
+                        });
+                }else{
+                    // Otherwise, default to area, e.g. for bars whose data is too long
+                    style += 'fill:'+series.color+';';
+                    chartType = d3.svg.area()
+                        .x(function (d) {
+                            return x(d.date);
+                        })
+                        .y0(function (d) {
+                            return y(Math.min(0, d.value));
+                        })
+                        .y1(function (d) {
+                            return y(Math.max(0, d.value));
+                        });
+                }
+
+                container.append("path")
+                    .datum(series.data)
+                    .attr("class", series.type)
+                    .attr("d", chartType)
+                    .attr("style", style);
+
+                if(series.data.length < 80){
+
+                    var func = function(d) { return x(d.date); };
+                    if(series.data.length == 1)
+                        func = width/2;
+
+                    container.selectAll("dot")
+                        .data(series.data)
+                      .enter().append("circle")
+                        .attr("class", "dot")
+                        .attr("style", 'fill:'+series.color+';')
+                        .attr("r", 3)
+                        .attr("cx", func)
+                        .attr("cy", function(d) { return y(d.value); });
+                }
+            }
 
             container.append("line")
                 .attr({
                     "class":"mini-axis",
                     "x1" : 0,
-                    "x2" : width,
+                    "x2" : width-(xOffset*2),
                     "y1" : y(0),
                     "y2" : y(0)
                 });
@@ -339,33 +440,6 @@ charts.TimelineSelectorChart = function (element, configuration) {
         for(var i = 0; i < values.length; i++) {
             if(this.primarySeries && values[i].name == this.primarySeries.name) continue;
             createSeries(values[i]);
-        }
-
-        context.append("g")
-            .attr("class", "x axis")
-            .attr("transform", "translate(0," + (height + 2) + ")")
-            .call(xAxis);
-
-        var tick = $('.timeline-selector-chart').find('.x.axis').find('.tick.major').first();
-        if(tick.length != 0){
-            var transform = tick.attr('transform');
-            var parts  = /translate\(\s*([^\s,)]+)[ ,]([^\s,)]+)/.exec(transform);
-            var firstX = parseInt(parts[1]);
-            var threshold = (tick[0].getBBox().width/2);
-
-            if(firstX < threshold){
-                tick.find('text').css('text-anchor', 'start');
-            }
-
-            tick = $('.timeline-selector-chart').find('.x.axis').find('.tick.major').last();
-            transform = tick.attr('transform');
-            parts  = /translate\(\s*([^\s,)]+)[ ,]([^\s,)]+)/.exec(transform);
-            firstX = parseInt(parts[1]);
-            threshold = width - (tick[0].getBBox().width/2);
-
-            if(firstX > threshold){
-                tick.find('text').css('text-anchor', 'end');
-            }
         }
 
         var gBrush = context.append("g")
@@ -427,6 +501,10 @@ charts.TimelineSelectorChart = function (element, configuration) {
 
     this.updatePrimarySeries = function(series) {
         this.primarySeries = series;
+    }
+
+    this.updateGranularity = function(granularity) {
+        this.granularity = granularity;
     }
 
     this.redrawOnResize = function () {

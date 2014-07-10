@@ -385,7 +385,24 @@ angular.module('timelineSelectorDirective', []).directive('timelineSelector', ['
                  * @returns {Date}
                  */
                 $scope.roundUpBucket = function (date) {
-                    return $scope.zeroOutDate(new Date(date.getTime() - 1 + $scope.millisMultiplier));
+                    var roundedDate = $scope.zeroOutDate(new Date(date.getTime() - 1 + $scope.millisMultiplier));
+                    if(roundedDate > $scope.endDate)
+                        return $scope.endDate;
+                    else
+                        return roundedDate
+                };
+
+                /**
+                 * Rounds the date down to the beginning of the current bucket
+                 * @param date
+                 * @returns {Date}
+                 */
+                $scope.roundDownBucket = function (date) {
+                    var roundedDate = $scope.zeroOutDate(new Date(date.getTime() + 1));
+                    if(roundedDate < $scope.startDate)
+                        return $scope.startDate;
+                    else
+                        return roundedDate
                 };
 
                 /**
@@ -427,7 +444,7 @@ angular.module('timelineSelectorDirective', []).directive('timelineSelector', ['
                     var startDate = $scope.zeroOutDate($scope.startDate || rawData[0].date);
                     var endDate = $scope.zeroOutDate($scope.endDate  || rawData[rawData.length - 1].date);
 
-                    var numBuckets = Math.ceil(Math.abs(endDate - startDate) / $scope.millisMultiplier) + 1;
+                    var numBuckets = Math.ceil(Math.abs(endDate - startDate) / $scope.millisMultiplier);
                     var startTime = startDate.getTime();
 
                     // Initialize our time buckets.
@@ -437,7 +454,7 @@ angular.module('timelineSelectorDirective', []).directive('timelineSelector', ['
                         // point on the timeline at which we want to display the count for that time bucket.
                         // For the 01:00 to 01:59 time bucket, we want to display the aggregate value at the
                         // perceived center of the bucket, 01:30, on the timeline graph.
-                        var bucketGraphDate = new Date(startTime + ($scope.millisMultiplier * i) + ($scope.millisMultiplier / 2));
+                        var bucketGraphDate = new Date(startTime + ($scope.millisMultiplier * i));
                         queryData[i] = {
                             date: bucketGraphDate,
                             value: 0
@@ -453,7 +470,7 @@ angular.module('timelineSelectorDirective', []).directive('timelineSelector', ['
 
                     data.push({
                         name: 'Total',
-                        type: 'area',
+                        type: 'bar',
                         color: '#39b54a',
                         data: queryData
                     });
@@ -505,7 +522,7 @@ angular.module('timelineSelectorDirective', []).directive('timelineSelector', ['
                         var remainder = _.map(timelineData, function(it, i) { return {date: it.date, value: output[i].remainder};});
                         graphData.push({
                             name: 'Deviation',
-                            type: 'line',
+                            type: 'bar',
                             color: '#C23333',
                             data: remainder
                         });
@@ -552,7 +569,7 @@ angular.module('timelineSelectorDirective', []).directive('timelineSelector', ['
                         $scope.updateDates();
 
                         if ($scope.brush.length > 0) {
-                            var newBrushStart = $scope.brush[0];
+                            var newBrushStart = $scope.roundDownBucket($scope.brush[0]);
                             // Set the brush to one millisecond back when changing resolutions back to what we had.
                             // Otherwise, our brush will drift forward in time on consecutive granularity changes due to the 
                             // nature of having to zero out the value and calculating the start point of the next day/hour.
