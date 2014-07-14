@@ -384,6 +384,14 @@ fieldset[disabled] .btn-primary.active {
     margin-top: 5px;
     font-size: 12px;
 }
+.legend .legend-item .legend-text {
+    display: inline-block;
+    max-width: 120px;
+    overflow: hidden;
+	white-space: nowrap;
+    text-overflow: ellipsis;
+	vertical-align: middle;
+}
 .legend .legend-item-clickable{
 	cursor: pointer;
 	-webkit-touch-callout: none;
