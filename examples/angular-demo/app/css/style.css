@@ -380,8 +380,18 @@ fieldset[disabled] .btn-primary.active {
 .legend .legend-item {
     color: #555555;
     display: inline-block;
-    margin-right: 15px;
+    margin-right: 10px;
     margin-top: 5px;
+    font-size: 12px;
+}
+.legend .legend-item-clickable{
+	cursor: pointer;
+	-webkit-touch-callout: none;
+	-webkit-user-select: none;
+	-khtml-user-select: none;
+	-moz-user-select: none;
+	-ms-user-select: none;
+	user-select: none;
 }
 .legend .legend-icon {
     border-radius: 2px;
@@ -389,6 +399,12 @@ fieldset[disabled] .btn-primary.active {
     height: 1em;
     vertical-align: middle;
     width: 1em;
+}
+.legend .legend-item.legend-hidden{
+	color: #999999
+}
+.legend .legend-item.legend-hidden .legend-icon{
+	background: #e1e1e1 !important;
 }
 .legend-scale .legend-item {
     color: #777777;
@@ -398,6 +414,35 @@ fieldset[disabled] .btn-primary.active {
 }
 .legend-scale .legend-item .legend-text:first-child {
     margin-left: 0;
+}
+
+/* Tooltip container */
+
+#tooltip-container {
+	display: none;
+	position: absolute;
+	padding: 12px 15px;
+	color: #555555;
+	font-size: 12px;
+	background-color: rgba(255,255,255,0.9);
+	border: 1px solid rgba(0, 0, 0, 0.15);
+	border-radius: 4px;
+	box-shadow: 0 6px 12px rgba(0, 0, 0, 0.176);
+	pointer-events: none;
+	z-index: 10000;
+}
+#tooltip-container span{
+	font-weight: bold;
+	color: #39b54a;
+	display: block;
+	text-shadow: 0 2px 0 #FFFFFF;
+}
+#tooltip-container .tooltip-date {
+	font-weight: bold;
+	text-transform: uppercase;
+	margin-bottom: 5px;
+	font-size: 12px;
+	color: #555555;
 }
 
 

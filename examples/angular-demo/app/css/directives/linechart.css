@@ -1,6 +1,18 @@
 .linechart{
   margin: 0 -30px 0;
 }
+.linechart .hover-line line { 
+  stroke: #e1e1e1;  
+  fill: none;
+  stroke-width: 1px;
+}
+.linechart .hover-line text {
+  font-weight: bold;
+  text-shadow: 0 2px 0 #FFFFFF;
+}
+.linechart .hover-line .hover-date {
+  fill: #555555;
+}
 .linechart svg{
 	font-size: 10px;
 }
@@ -48,27 +60,12 @@
 
 .line {
   fill: none;
-  stroke: steelblue;
   stroke-width: 2px;
 }
 
-.line.positiveLine {
-  stroke: #39b54a;
-}
-
-.line.negativeLine {
-  stroke: #C2360D;
-}
-
 .linechart .dot{
-    stroke: #39b54a;
-    stroke-width: 2px;
-    fill: #FFFFFF;
+  stroke-width: 2px;
 }
-.dot.positiveLine {
-  stroke: #39b54a;
-}
-
-.dot.negativeLine {
-  stroke: #C2360D;
+.linechart .dot-empty{
+  fill: #FFFFFF;
 }
