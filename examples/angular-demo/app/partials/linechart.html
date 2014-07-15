@@ -45,7 +45,7 @@
 		<div class="legend-item legend-item-clickable" title="{{colorMapping.series}}" ng-repeat="colorMapping in colorMappings" ng-click="toggleSeries(colorMapping.series)" ng-class="{true: 'legend-hidden', false: ''}[colorMapping.hidden]">
 	    	<span class="legend-icon" style="background-color: {{colorMapping.color}}"></span>
 	    	<span class="legend-text">{{colorMapping.series}}</span> 
-	    	<span class="legend-count text-muted">({{colorMapping.total | numberShort}})</span>
+	    	<span ng-show="aggregation != 'avg'" class="legend-count text-muted">({{colorMapping.total | numberShort}})</span>
 	    </div>
 
 	</div>
