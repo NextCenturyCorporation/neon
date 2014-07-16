@@ -99,7 +99,7 @@
     </div>
 
 	<div class="legend" ng-class="{true: '', false: 'hidden'}[showPoints]">
-        <div class="legend-item" ng-repeat="colorMapping in colorMappings|limitTo:20">
+        <div class="legend-item" title="{{colorMapping.category}}" ng-repeat="colorMapping in colorMappings|limitTo:20">
         	<span class="legend-icon" style="background-color: {{colorMapping.color}}"></span>
         	<span class="legend-text">{{colorMapping.category}}</span>
         </div>

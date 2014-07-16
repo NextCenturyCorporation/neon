@@ -29,7 +29,7 @@
 var linechart = angular.module('linechartDirective', []);
 
 linechart.directive('linechart', ['ConnectionService', function(connectionService) {
-	var COUNT_FIELD_NAME = 'Count';
+	var COUNT_FIELD_NAME = 'value';
 
 	var link = function($scope, el, attr) {
 		el.addClass('linechartDirective');
@@ -37,12 +37,16 @@ linechart.directive('linechart', ['ConnectionService', function(connectionServic
 		var messenger = new neon.eventing.Messenger();
 		$scope.databaseName = '';
 		$scope.tableName = '';
-		$scope.totalType = /*$scope.totalType ||*/ 'count';
+		$scope.totalType = 'count';
 		$scope.fields = [];
-		$scope.xAxisSelect = $scope.fields[0] ? $scope.fields[0] : '';
 		$scope.chart = undefined;
+		$scope.attrX = '';
+		$scope.attrY = '';
+		$scope.categoryField = '';
+		$scope.aggregation = 'count';
+		$scope.seriesLimit = 10;
 
-		var COUNT_FIELD_NAME = 'Count';
+		var COUNT_FIELD_NAME = 'value';
 
 		var initialize = function() {
 
@@ -51,12 +55,20 @@ linechart.directive('linechart', ['ConnectionService', function(connectionServic
 				filtersChanged: onFiltersChanged
 			});
 
-			$scope.$watch('attrX', function(newValue, oldValue) {
+			$scope.$watch('attrY', function(newValue, oldValue) {
+				onFieldChange('attrY', newValue, oldValue);
 				if($scope.databaseName && $scope.tableName) {
 					$scope.queryForData();
 				}
 			});
-			$scope.$watch('attrY', function(newValue, oldValue) {
+			$scope.$watch('categoryField', function(newValue, oldValue) {
+				onFieldChange('categoryField', newValue, oldValue);
+				if($scope.databaseName && $scope.tableName) {
+					$scope.queryForData();
+				}
+			});
+			$scope.$watch('aggregation', function(newValue, oldValue) {
+				onFieldChange('aggregation', newValue, oldValue);
 				if($scope.databaseName && $scope.tableName) {
 					$scope.queryForData();
 				}
@@ -72,6 +84,16 @@ linechart.directive('linechart', ['ConnectionService', function(connectionServic
 					$scope.chart.redraw();
 				}
 			});
+		};
+
+		var onFieldChange = function(field, newVal, oldVal) {
+			XDATA.activityLogger.logUserActivity('LineChart - user changed a field selection', 'define_axes',
+                XDATA.activityLogger.WF_CREATE,
+                {
+                	"field": field,
+                    "to": newVal,
+                    "from": oldVal
+                });
 		};
 
 		/**
@@ -102,29 +124,48 @@ linechart.directive('linechart', ['ConnectionService', function(connectionServic
 			var connection = connectionService.getActiveConnection();
 			if (connection) {
                 connectionService.loadMetadata(function() {
+                	connection.getFieldNames($scope.tableName, function(results) {
+	                	XDATA.activityLogger.logSystemActivity('LineChart - query for available fields');
+						$scope.$apply(function() {
+							$scope.fields = results;
+							XDATA.activityLogger.logSystemActivity('LineChart - received available fields');
+						});
+					});
+					$scope.attrX = connectionService.getFieldMapping("date");
+					$scope.attrY = connectionService.getFieldMapping("y_axis");
+					$scope.categoryField = connectionService.getFieldMapping("line_category");
+					$scope.aggregation = 'count';
                     $scope.queryForData();
                 });
 			}
 		};
 
-		var query = function(comparator, comparisionValue, callback) {
-			var xAxis = $scope.attrX || connectionService.getFieldMapping("line_x_axis");
-			var yAxis = $scope.attrY || connectionService.getFieldMapping("y_axis");
+		var query = function(callback) {
 
-			var query = new neon.query.Query()
+			var yearGroupClause = new neon.query.GroupByFunctionClause(neon.query.YEAR, $scope.attrX, 'year');
+            var monthGroupClause = new neon.query.GroupByFunctionClause(neon.query.MONTH, $scope.attrX, 'month');
+            var dayGroupClause = new neon.query.GroupByFunctionClause(neon.query.DAY, $scope.attrX, 'day');
+
+            var groupByClause = [yearGroupClause, monthGroupClause, dayGroupClause];
+            if($scope.categoryField)
+            	groupByClause.push($scope.categoryField);
+
+            var query = new neon.query.Query()
 				.selectFrom($scope.databaseName, $scope.tableName)
-				.where(xAxis,'!=', null)
-				.where(yAxis, comparator, comparisionValue)
-				//.selectionOnly()
-				.groupBy(xAxis);
+				.where($scope.attrX,'!=', null);
 
-			var queryType = neon.query.COUNT;
+            query.groupBy.apply(query, groupByClause);
 
-			if(yAxis) {
-				query.aggregate(queryType, yAxis, yAxis);
+			if($scope.aggregation === 'sum') {
+				query.aggregate(neon.query.SUM, $scope.attrY, COUNT_FIELD_NAME);
+			} else if($scope.aggregation === 'avg') {
+				query.aggregate(neon.query.AVG, $scope.attrY, COUNT_FIELD_NAME);
 			} else {
-				query.aggregate(queryType, '*', COUNT_FIELD_NAME);
+				query.aggregate(neon.query.COUNT, '*', COUNT_FIELD_NAME);
 			}
+
+			query.aggregate(neon.query.MIN, $scope.attrX, 'date')
+				.sortBy('date', neon.query.ASCENDING);
 
 			connectionService.getActiveConnection().executeQuery(query, callback, function() {
 				XDATA.activityLogger.logSystemActivity('LineChart - query failed');
@@ -132,69 +173,93 @@ linechart.directive('linechart', ['ConnectionService', function(connectionServic
 		};
 
 		$scope.queryForData = function() {
-			var xAxis = $scope.attrX || connectionService.getFieldMapping("line_x_axis");
-			var yAxis = $scope.attrY || connectionService.getFieldMapping("y_axis");
-
 			XDATA.activityLogger.logSystemActivity('LineChart - query for data');
-			query('>', 0, function(posResults) {
+			query(function(results) {
 				//this prevents an error in older mongo caused when the xAxis value is invalid as it is not
 				//included as a key in the response
-				for(var i = 0; i < posResults.data.length; i++) {
-					if(typeof(posResults.data[i][xAxis]) === 'undefined') {
-						posResults.data[i][xAxis] = null;
+				for(var i = 0; i < results.data.length; i++) {
+					if(typeof(results.data[i][$scope.attrX]) === 'undefined') {
+						results.data[i][$scope.attrX] = null;
 					}
 				};
 
-				query('<', 0, function(negResults) {
-					for(var i = 0; i < negResults.data.length; i++) {
-						if(typeof(negResults.data[i][xAxis]) === 'undefined') {
-							negResults.data[i][xAxis] = null;
+				var minDate, maxDate;
+				var range;
+
+				if(results.data.length > 0) {
+					range = d3.extent(results.data, function(d) { return new Date(d.date)});
+					minDate = range[0];
+					maxDate = range[1];
+				} else {
+					minDate = new Date();
+					maxDate = new Date();
+				}
+
+				var data = [];
+				var series = []
+				var zeroedData = zeroPadData(results, minDate, maxDate);
+
+				// Convert results to array
+				for (series in zeroedData){
+					data.push(zeroedData[series]);
+				}
+
+				// Sort by series total
+				data.sort(function(a, b){
+					if(a.total < b.total) return 1;
+					if(a.total > b.total) return -1;
+					return 0;
+				});
+
+				// Calculate Other series
+				var otherTotal = 0;
+				var otherData = [];
+				if($scope.aggregation != 'avg'){
+					for(var i = $scope.seriesLimit; i < data.length; i++) {
+						otherTotal += data[i].total;
+						for(var d = 0; d < data[i].data.length; d++) {
+							if(otherData[d])
+								otherData[d].value += data[i].data[d].value;
+							else
+								otherData[d] = {
+									date: data[i].data[d].date,
+									value: data[i].data[d].value
+								};
 						}
-					};
-
-					var minDate, maxDate;
-					var posRange, negRange;
-
-					if(posResults.data.length > 0 && negResults.data.length > 0) {
-						posRange = d3.extent(posResults.data, function(d) { return new Date(d[xAxis])});
-						negRange = d3.extent(negResults.data, function(d) { return new Date(d[xAxis])});
-
-						minDate = new Date(Math.min(posRange[0], negRange[0]));
-						maxDate = new Date(Math.max(posRange[1], negRange[1]));
-					} else if(posResults.data.length > 0) {
-						posRange = d3.extent(posResults.data, function(d) { return new Date(d[xAxis])});
-						minDate = posRange[0];
-						maxDate = posRange[1];
-					} else if(negResults.data.length > 0) {
-						negRange = d3.extent(negResults.data, function(d) { return new Date(d[xAxis])});
-						minDate = negRange[0];
-						maxDate = negRange[1];
-					} else {
-						minDate = new Date();//new Date().getTime() - (1000 * 60 * 60 * 24));
-						maxDate = new Date();
 					}
+				}
 
-					posResults = zeroPadData(posResults, xAxis, yAxis, minDate, maxDate);
-					negResults = zeroPadData(negResults, xAxis, yAxis, minDate, maxDate);
+				// Trim data to only top results
+				data = data.splice(0, $scope.seriesLimit);
 
-					var data = [{
-						data: posResults,
-						classString: "positiveLine"
-					},{
-						data: negResults,
-						classString: "negativeLine"
-					}];
-					XDATA.activityLogger.logSystemActivity('LineChart - query data received');
-					$scope.$apply(function(){
-						drawChart();
-						drawLine(data);
-						XDATA.activityLogger.logSystemActivity('LineChart - query data rendered');
-					});
+				// Add Other series
+				if(otherTotal > 0)
+					data.push({
+						series: "Other",
+						total: otherTotal,
+						data: otherData
+					})
+
+				// Render chart and series lines
+				XDATA.activityLogger.logSystemActivity('LineChart - query data received');
+				$scope.$apply(function(){
+					drawChart();
+					drawLine(data);
+					XDATA.activityLogger.logSystemActivity('LineChart - query data rendered');
 				});
 			});
 		};
 
-		var zeroPadData = function(data, xField, yField, minDate, maxDate) {
+		$scope.toggleSeries = function(series) {
+			var activity = $scope.chart.toggleSeries(series);
+			XDATA.activityLogger.logUserActivity('LineChart - user toggled series', activity,
+                XDATA.activityLogger.WF_CREATE,
+                {
+                	"plot": series
+                });
+		};
+
+		var zeroPadData = function(data, minDate, maxDate) {
 			data = data.data;
 
 			var start = zeroOutDate(minDate);
@@ -205,35 +270,53 @@ linechart.directive('linechart', ['ConnectionService', function(connectionServic
 
 			var startTime = start.getTime();
 
-			// Initialize our time buckets.
-			var resultData = [];
-			for(var i = 0; i < numBuckets; i++) {
-				var bucketGraphDate = new Date(startTime + (dayMillis * i));
-				resultData[i] = {};
-				resultData[i][xField] = bucketGraphDate;
-				resultData[i][yField] = 0;
+			var resultData = {};
+
+			var series = 'Total';
+			if($scope.aggregation == 'avg')
+				series = 'Average '+$scope.attrY;
+			else if($scope.aggregation == 'sum')
+				series = $scope.attrY;
+
+			// Scrape data for unique series
+			for(var i = 0; i < data.length; i++) {
+				if($scope.categoryField)
+					series = data[i][$scope.categoryField] != '' ? data[i][$scope.categoryField] : 'Unknown';
+
+				if(!resultData[series]){
+					resultData[series] = {
+						series: series,
+						total: 0,
+						data: []
+					};
+				}
 			}
 
+			// Initialize our time buckets.
+			for(var i = 0; i < numBuckets; i++) {
+				var bucketGraphDate = new Date(startTime + (dayMillis * i));
+				for (series in resultData){
+					resultData[series].data.push({date: bucketGraphDate, value: 0});
+				}
+			}
+
+			// Populate series with data
 			var indexDate;
-
 			for (i = 0; i < data.length; i++) {
-				indexDate = new Date(data[i][xField]);
+				indexDate = new Date(data[i].date);
 
-				resultData[Math.floor(Math.abs(indexDate - start) / dayMillis)][yField] = data[i][yField];
+				if($scope.categoryField)
+					series = data[i][$scope.categoryField] != '' ? data[i][$scope.categoryField] : 'Unknown';
+
+				resultData[series].data[Math.floor(Math.abs(indexDate - start) / dayMillis)].value = data[i].value;
+				resultData[series]['total'] += data[i].value;
 			}
 
 			return resultData;
 		}
 
 		var drawChart = function() {
-			var xAxis = $scope.attrX || connectionService.getFieldMapping("line_x_axis");
-			var yAxis = $scope.attrY || connectionService.getFieldMapping("y_axis");
-
-			if (!yAxis) {
-				yAxis = COUNT_FIELD_NAME;
-			}
-
-			var opts = {"x": xAxis, "y": yAxis, responsive: true};
+			var opts = {"x": "date", "y": "value", responsive: true};
 
 			// Destroy the old chart and rebuild it.
 			if ($scope.chart) {
@@ -245,6 +328,7 @@ linechart.directive('linechart', ['ConnectionService', function(connectionServic
 
 		var drawLine = function(data) {
 			$scope.chart.drawLine(data);
+			$scope.colorMappings = $scope.chart.getColorMappings();
 		};
 
 		/**
@@ -271,8 +355,8 @@ linechart.directive('linechart', ['ConnectionService', function(connectionServic
 		templateUrl: 'partials/linechart.html',
 		restrict: 'E',
 		scope: {
-			attrX: '=',
-			attrY: '='
+			colorMappings: '&',
+			chartType: '='
 		},
 		link: link
 	};
