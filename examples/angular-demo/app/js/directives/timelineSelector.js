@@ -518,10 +518,17 @@ angular.module('timelineSelectorDirective', []).directive('timelineSelector', ['
                             color: '#ff7f0e',
                             data: trend
                         });
+                        var seasonal = _.map(timelineData, function(it, i) { return {date: it.date, value: output[i].seasonal};});
+                        graphData.push({
+                            name: 'Seasonal',
+                            type: 'line',
+                            color: '#3333C2',
+                            data: seasonal
+                        });
                         // Square the remainder data so that it is on the same scale as the counts
                         var remainder = _.map(timelineData, function(it, i) { return {date: it.date, value: output[i].remainder};});
                         graphData.push({
-                            name: 'Deviation',
+                            name: 'Remainder',
                             type: 'bar',
                             color: '#C23333',
                             data: remainder
