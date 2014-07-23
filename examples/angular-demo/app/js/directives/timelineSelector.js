@@ -313,7 +313,7 @@ angular.module('timelineSelectorDirective', []).directive('timelineSelector', ['
                     }
                     else {
                         $scope.data = $scope.createTimelineData(queryResults);
-                        $scope.recordCount = 0;
+                        $scope.updateChartTimesAndTotal();
                     }
                 };
 
@@ -430,7 +430,8 @@ angular.module('timelineSelectorDirective', []).directive('timelineSelector', ['
                     // If we have only 1 value, create a range for it.
                     if (rawData.length === 1) {
                         rawData[1] = {
-                            date: $scope.endDate || rawData[0].date,
+                            // Use a time just within our end date, if available, so it fits in a bucket.
+                            date: new Date($scope.endDate.getTime() - 1) || rawData[0].date,
                             count: 0
                         }
                         rawLength = 2;
