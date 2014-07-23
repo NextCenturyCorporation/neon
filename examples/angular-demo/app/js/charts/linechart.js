@@ -363,67 +363,68 @@ charts.LineChart.prototype.drawLine = function(opts) {
 	d3.select('.linechart').on("mouseover", function() { 
 		//console.log('mouseover')
 	}).on("mousemove", function(event) {
-		var mouse_x = d3.mouse(this)[0];
-		var mouse_y = d3.mouse(this)[1];
-		var graph_y = me.y.invert(mouse_y);
-		var graph_x = me.x.invert(mouse_x);
-		var format = d3.time.format.utc('%e %B %Y');
-		var numFormat = d3.format("0,000.00");
-		var html = '';
+		if (opts && opts.length > 0) {
+			var mouse_x = d3.mouse(this)[0];
+			var mouse_y = d3.mouse(this)[1];
+			var graph_y = me.y.invert(mouse_y);
+			var graph_x = me.x.invert(mouse_x);
+			var format = d3.time.format.utc('%e %B %Y');
+			var numFormat = d3.format("0,000.00");
+			var html = '';
 
-		if(opts[0].data.length > 1){
-			var bisect = d3.bisector(function(d) { return d[me.xAttribute]; }).right;
-			var dataIndex = bisect(opts[0].data, graph_x);
-			var dataDate = opts[0].data[dataIndex][me.xAttribute];
-			var closerDate = dataDate;
-			var closerIndex = dataIndex;
+			if(opts[0].data.length > 1){
+				var bisect = d3.bisector(function(d) { return d[me.xAttribute]; }).right;
+				var dataIndex = bisect(opts[0].data, graph_x);
+				var dataDate = opts[0].data[dataIndex][me.xAttribute];
+				var closerDate = dataDate;
+				var closerIndex = dataIndex;
 
-			if(dataIndex > 0){
-				var dataIndexLeft = (dataIndex-1);
-				var dataDateLeft = opts[0].data[dataIndexLeft][me.xAttribute];
-				var compare = ((me.x(dataDate) - me.x(dataDateLeft))/2)+me.x(dataDateLeft);
-				if(mouse_x < compare){
-					closerDate = dataDateLeft;
-					closerIndex = dataIndexLeft;
+				if(dataIndex > 0){
+					var dataIndexLeft = (dataIndex-1);
+					var dataDateLeft = opts[0].data[dataIndexLeft][me.xAttribute];
+					var compare = ((me.x(dataDate) - me.x(dataDateLeft))/2)+me.x(dataDateLeft);
+					if(mouse_x < compare){
+						closerDate = dataDateLeft;
+						closerIndex = dataIndexLeft;
+					}
 				}
+			}else{
+				var closerIndex = 0;
+				var closerDate = opts[0].data[closerIndex][me.xAttribute];
 			}
-		}else{
-			var closerIndex = 0;
-			var closerDate = opts[0].data[closerIndex][me.xAttribute];
+
+			html = '<span class="tooltip-date">'+format(closerDate)+'</span>';
+
+			for(var i = 0; i < opts.length; i++) {
+				if(me.hiddenSeries.indexOf(opts[i].series) >= 0) continue;
+				var color = me.calculateColor(opts[i].series, opts[i].total);
+				var xPos = me.x(closerDate);
+				if(opts[i].data.length == 1)
+					xPos = me.width/2;
+
+				hoverCircles[opts[i].series]
+		            .attr("stroke-opacity", 1)
+		            .attr("fill-opacity", 1)
+		            .attr("cx", xPos)
+		            .attr("cy", me.y(opts[i].data[closerIndex].value));
+
+				html += '<span style="color: '+color+'">'+opts[i].series+": "+numFormat(Math.round(opts[i].data[closerIndex].value * 100) / 100)+'</span>';
+			}
+
+			if(opts[0].data.length == 1)
+				hoverLine.attr("x1", me.width/2).attr("x2", me.width/2);
+			else
+				hoverLine.attr("x1", me.x(closerDate)).attr("x2", me.x(closerDate));
+
+			hoverLineGroup.style("opacity", 1);
+
+			$("#tooltip-container").html(html);
+		    $("#tooltip-container").show();
+		      
+		    d3.select("#tooltip-container")
+			    .style("top", (d3.event.pageY)  + "px")
+			    .style("left", (d3.event.pageX + 15) + "px");
 		}
-
-		html = '<span class="tooltip-date">'+format(closerDate)+'</span>';
-
-		for(var i = 0; i < opts.length; i++) {
-			if(me.hiddenSeries.indexOf(opts[i].series) >= 0) continue;
-			var color = me.calculateColor(opts[i].series, opts[i].total);
-			var xPos = me.x(closerDate);
-			if(opts[i].data.length == 1)
-				xPos = me.width/2;
-
-			hoverCircles[opts[i].series]
-	            .attr("stroke-opacity", 1)
-	            .attr("fill-opacity", 1)
-	            .attr("cx", xPos)
-	            .attr("cy", me.y(opts[i].data[closerIndex].value));
-
-			html += '<span style="color: '+color+'">'+opts[i].series+": "+numFormat(Math.round(opts[i].data[closerIndex].value * 100) / 100)+'</span>';
-		}
-
-		if(opts[0].data.length == 1)
-			hoverLine.attr("x1", me.width/2).attr("x2", me.width/2);
-		else
-			hoverLine.attr("x1", me.x(closerDate)).attr("x2", me.x(closerDate));
-
-		hoverLineGroup.style("opacity", 1);
-
-		$("#tooltip-container").html(html);
-	    $("#tooltip-container").show();
-	      
-	    d3.select("#tooltip-container")
-		    .style("top", (d3.event.pageY)  + "px")
-		    .style("left", (d3.event.pageX + 15) + "px");
-
 	}).on("mouseout", function() {
 		hoverLineGroup.style("opacity", 1e-6);
 		me.svg.selectAll("circle.dot-hover")
