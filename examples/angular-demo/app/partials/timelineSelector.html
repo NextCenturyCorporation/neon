@@ -1,6 +1,11 @@
 <div class="well well-blank">
   <form>
-    
+      <div class="pull-right" ng-class="{true: '', false: 'hidden'}[granularity === 'hour']">
+          <a class="btn" ng-click="runMMPP()">
+              <span class="glyphicon glyphicon-remove"></span>
+          </a>
+      </div>
+
     <div class="form-group pull-right" ng-hide="!(data.length > 1)">
       <div class="input-group timeseries-selector">
         <select class="form-control" ng-model="primarySeries"

@@ -252,7 +252,7 @@ angular.module('timelineSelectorDirective', []).directive('timelineSelector', ['
                     // endIdx points to the start of the day/hour just after the buckets we want to count, so do not
                     // include the bucket at endIdx.
                     for (var i = startIdx; i < endIdx; i++) {
-                        total += $scope.data[0].data[i].value;
+                        total += $scope.primarySeries.data[i].value;
                     }
 
                     var displayStartDate = new Date(extentStartDate);
@@ -298,10 +298,9 @@ angular.module('timelineSelectorDirective', []).directive('timelineSelector', ['
                                 $scope.updateDates();
                             }
                             var data = $scope.createTimelineData(queryResults);
-                            $scope.addTimeSeriesAnalysis(data[0].data, data, function() {
-                                $scope.data = data;
-                                $scope.updateChartTimesAndTotal();
-                            });
+                            $scope.data = data;
+                            $scope.updateChartTimesAndTotal();
+                            $scope.addTimeSeriesAnalysis(data[0].data, data);
                         };
 
                         // on the initial query, setup the start/end bounds
@@ -484,26 +483,26 @@ angular.module('timelineSelectorDirective', []).directive('timelineSelector', ['
                  * Adds the timeseries analysis to the data to be graphed.
                  * @param timelineData an array of {date: Date(...), value: n} objects, one for each day
                  * @param graphData the array of objects that will be graphed
-                 * @param callback the function to call after the timeseries analysis data has
-                 * been added to graphData, or if the analysis is not available this function will
-                 * be called immediately
                  */
-                $scope.addTimeSeriesAnalysis = function(timelineData, graphData, callback) {
-                    // If OpenCPU isn't available, then just call the callback without doing anything.
+                $scope.addTimeSeriesAnalysis = function(timelineData, graphData) {
+                    // If OpenCPU isn't available, then just return without doing anything.
                     if (!openCpuEnabled) {
-                        callback();
                         return;
                     }
 
-                    $scope.addStl2TimeSeriesAnalysis(timelineData, graphData, function() {
-                        $scope.addMmppTimeSeriesAnalysis(timelineData, graphData, callback);
-                    });
+                    $scope.addStl2TimeSeriesAnalysis(timelineData, graphData);
                 };
 
-                $scope.addMmppTimeSeriesAnalysis = function(timelineData, graphData, callback) {
+                $scope.runMMPP = function() {
+                    if (!openCpuEnabled) {
+                        return;
+                    }
+                    $scope.addMmppTimeSeriesAnalysis($scope.primarySeries.data, $scope.data);
+                };
+
+                $scope.addMmppTimeSeriesAnalysis = function(timelineData, graphData) {
                     // The MMPP analysis needs hourly data
                     if ($scope.granularity !== HOUR) {
-                        callback();
                         return;
                     }
                     // The MMPP code wants a matrix of the counts, with each row being an hour of
@@ -536,15 +535,15 @@ angular.module('timelineSelectorDirective', []).directive('timelineSelector', ['
                             color: '#000000',
                             data: probability
                         });
-                        $scope.$apply(function() { callback(); });
+                        $scope.$apply();
                     }).fail(function (output) {
-                        // If the request fails, then just do the callback.
-                        $scope.$apply(function() { callback(); });
+                        // If the request fails, then just update.
+                        $scope.$apply();
                     });
 
                 };
 
-                $scope.addStl2TimeSeriesAnalysis = function(timelineData, graphData, callback) {
+                $scope.addStl2TimeSeriesAnalysis = function(timelineData, graphData) {
                     // The analysis code just wants an array of the counts
                     var timelineVector = _.map(timelineData, function(it) {return it.value});
 
@@ -592,14 +591,10 @@ angular.module('timelineSelectorDirective', []).directive('timelineSelector', ['
                             color: '#C23333',
                             data: remainder
                         });
-                        $scope.$apply(function() {
-                            callback();
-                        });
+                        $scope.$apply();
                     }).fail(function() {
-                        // If the request fails, then just do the callback.
-                        $scope.$apply(function() {
-                            callback();
-                        });
+                        // If the request fails, then just update.
+                        $scope.$apply();
                     });
                 };
 
