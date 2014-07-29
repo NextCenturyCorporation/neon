@@ -91,6 +91,7 @@ angular.module('timelineSelectorDirective', []).directive('timelineSelector', ['
                     $scope.messenger = new neon.eventing.Messenger();
 
                     $scope.collapsed = true;
+                    $scope.eventProbabilitiesDisplayed = false;
 
                     $scope.messenger.events({
                         activeDatasetChanged: onDatasetChanged,
@@ -291,6 +292,9 @@ angular.module('timelineSelectorDirective', []).directive('timelineSelector', ['
                  * @method updateChartData
                  */
                 $scope.updateChartData = function (queryResults) {
+
+                    // Any time new data is fetched, the old MMPP analysis is invalidated.
+                    $scope.eventProbabilitiesDisplayed = false;
 
                     if (queryResults.data.length > 0) {
                         var updateDatesCallback = function () {
@@ -535,7 +539,9 @@ angular.module('timelineSelectorDirective', []).directive('timelineSelector', ['
                             color: '#000000',
                             data: probability
                         });
-                        $scope.$apply();
+                        $scope.$apply(function() {
+                            $scope.eventProbabilitiesDisplayed = true;
+                        });
                     }).fail(function (output) {
                         // If the request fails, then just update.
                         $scope.$apply();
