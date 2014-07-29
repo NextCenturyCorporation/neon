@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="en" ng-app="neonDemo">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+            <meta name="viewport" content="width=device-width, initial-scale=1">
+        <title>ATAK Demo Widget</title>
+
+        <link rel="stylesheet" type="text/css" href="css/bootstrap/bootstrap.min.css">
+        <link rel="stylesheet" type="text/css" href="css/atakDemo.css">
+
+    </head>
+    <body>
+        <div class="col-md-4 text-center">
+            <button type="button" class="btn btn-primary" id="atak-button">
+              Update ATAK Layer
+            </button>
+        </div>
+
+        <!-- Including neon before angular here as neon has lodash and jquery wrapped into it.  If this is
+              loaded first, angular should pick up the included jQuery. -->
+        <script src="lib/owf/owf-widget-debug.js"></script>
+        <script type="text/javascript">
+            OWF.relayFile = 'js/eventing/rpc_relay.uncompressed.html';
+        </script>
+        <script src="/neon/js/neon.js"></script>
+        <script src="lib/bootstrap/bootstrap.min.js"></script>
+        <script src="js/atakDemo.js"></script>
+
+    </body>
+</html>
