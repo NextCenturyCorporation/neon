@@ -682,7 +682,9 @@ angular.module('timelineSelectorDirective', []).directive('timelineSelector', ['
 
                         XDATA.activityLogger.logSystemActivity('TimelineSelector - Create/Replace neon filter');
 
-                        $scope.messenger.replaceFilter($scope.filterKey, filter, $scope.queryForChartData);
+                        // Because the timeline ignores its own filter, we just need to update the
+                        // chart times and total when this filter is applied
+                        $scope.messenger.replaceFilter($scope.filterKey, filter, $scope.updateChartTimesAndTotal());
                     }
                 }, true);
 
