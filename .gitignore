@@ -3,6 +3,8 @@ neon-server/src/test-data/mongo-json/
 neon-server/src/test-data/shark-json/
 neon-server/src/test-data/shark-csv/
 package.json
+examples/angular-demo/app/R/NeonAngularDemo.Rcheck
+examples/angular-demo/app/R/NeonAngularDemo_*.tar.gz
 
 # grunt files
 node_modules
@@ -36,5 +38,6 @@ metadata/bin
 neon-server/bin
 
 *.*~
+*.swp
 *.log
 *.hprof
