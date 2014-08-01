@@ -49,9 +49,11 @@ angular.module('timelineSelectorDirective', []).directive('timelineSelector', ['
                 var MILLIS_IN_DAY = MILLIS_IN_HOUR * 24;
                 var HOUR = "hour";
                 var DAY = "day";
-                // TODO - These need to be in a configuration file
+                // TODO - These two variables need to be in a configuration file
                 var USE_OpenCPU = false;
                 var OpenCPU_URL = 'http://neon-opencpu/ocpu/library/NeonAngularDemo/R';
+                // Any code that wants to contact OpenCPU should use this variable. It will be set to true
+                // if and only if USE_OpenCPU is true AND the initial connection to the OpenCPU server succeeds.
                 var openCpuEnabled = false;
                 // opencpu logging is off to keep the logs clean, turn it on to debug opencpu problems
                 ocpu.enableLogging = false;
@@ -89,6 +91,7 @@ angular.module('timelineSelectorDirective', []).directive('timelineSelector', ['
                     $scope.messenger = new neon.eventing.Messenger();
 
                     $scope.collapsed = true;
+                    $scope.eventProbabilitiesDisplayed = false;
 
                     $scope.messenger.events({
                         activeDatasetChanged: onDatasetChanged,
@@ -250,7 +253,7 @@ angular.module('timelineSelectorDirective', []).directive('timelineSelector', ['
                     // endIdx points to the start of the day/hour just after the buckets we want to count, so do not
                     // include the bucket at endIdx.
                     for (var i = startIdx; i < endIdx; i++) {
-                        total += $scope.data[0].data[i].value;
+                        total += $scope.primarySeries.data[i].value;
                     }
 
                     var displayStartDate = new Date(extentStartDate);
@@ -290,16 +293,18 @@ angular.module('timelineSelectorDirective', []).directive('timelineSelector', ['
                  */
                 $scope.updateChartData = function (queryResults) {
 
+                    // Any time new data is fetched, the old MMPP analysis is invalidated.
+                    $scope.eventProbabilitiesDisplayed = false;
+
                     if (queryResults.data.length > 0) {
                         var updateDatesCallback = function () {
                             if ($scope.startDate === undefined || $scope.endDate === undefined) {
                                 $scope.updateDates();
                             }
                             var data = $scope.createTimelineData(queryResults);
-                            $scope.addTimeSeriesAnalysis(data[0].data, data, function() {
-                                $scope.data = data;
-                                $scope.updateChartTimesAndTotal();
-                            });
+                            $scope.data = data;
+                            $scope.updateChartTimesAndTotal();
+                            $scope.addTimeSeriesAnalysis(data[0].data, data);
                         };
 
                         // on the initial query, setup the start/end bounds
@@ -483,32 +488,91 @@ angular.module('timelineSelectorDirective', []).directive('timelineSelector', ['
                  * Adds the timeseries analysis to the data to be graphed.
                  * @param timelineData an array of {date: Date(...), value: n} objects, one for each day
                  * @param graphData the array of objects that will be graphed
-                 * @param callback the function to call after the timeseries analysis data has
-                 * been added to graphData, or if the analysis is not available this function will
-                 * be called immediately
                  */
-                $scope.addTimeSeriesAnalysis = function(timelineData, graphData, callback) {
-                    // If OpenCPU isn't available, then just call the callback without doing anything.
+                $scope.addTimeSeriesAnalysis = function(timelineData, graphData) {
+                    // If OpenCPU isn't available, then just return without doing anything.
                     if (!openCpuEnabled) {
-                        callback();
                         return;
                     }
+
+                    $scope.addStl2TimeSeriesAnalysis(timelineData, graphData);
+                };
+
+                $scope.runMMPP = function() {
+                    if (!openCpuEnabled) {
+                        return;
+                    }
+                    $scope.addMmppTimeSeriesAnalysis($scope.primarySeries.data, $scope.data);
+                };
+
+                $scope.addMmppTimeSeriesAnalysis = function(timelineData, graphData) {
+                    // The MMPP analysis needs hourly data
+                    if ($scope.granularity !== HOUR) {
+                        return;
+                    }
+                    // The MMPP code wants a matrix of the counts, with each row being an hour of
+                    // the day and each column being a day. Depending on the dataset, the results from the
+                    // dataset may start in the middle of the first day. Missing data should be encoded as -1
+
+                    var timelineMatrix = [];
+                    for (var i = 0; i < 24; ++i) {
+                        timelineMatrix[i] = [];
+                    }
+                    var day = 0; var hour = 0;
+                    for (day = 0; day * 24 < timelineData.length; ++day) {
+                        for (hour = 0; hour < 24; ++hour) {
+                            var index = day * 24 + hour;
+                            if (index < timelineData.length) {
+                                timelineMatrix[hour][day] = timelineData[day*24 + hour].value;
+                            } else {
+                                timelineMatrix[hour][day] = -1;
+                            }
+                        }
+                    }
+                    var req = ocpu.rpc("nsensorMMPP", {
+                        N: timelineMatrix,
+                        ITER: [50, 10]
+                    }, function(output) {
+                        var probability = _.map(timelineData, function(it, i) { return {date: it.date, value: (output.Z[i]*100)};});
+                        graphData.push({
+                            name: 'Event Probability',
+                            type: 'bar',
+                            color: '#000000',
+                            data: probability
+                        });
+                        $scope.$apply(function() {
+                            $scope.eventProbabilitiesDisplayed = true;
+                        });
+                    }).fail(function (output) {
+                        // If the request fails, then just update.
+                        $scope.$apply();
+                    });
+
+                };
+
+                $scope.addStl2TimeSeriesAnalysis = function(timelineData, graphData) {
                     // The analysis code just wants an array of the counts
                     var timelineVector = _.map(timelineData, function(it) {return it.value});
 
                     var periodLength = 1;
+                    var seasonWindow = 1;
+                    var trendWindow = 1;
                     if ($scope.granularity === DAY) {
                         // At the day granularity, look for weekly patterns
                         periodLength = 7;
+                        seasonWindow = 31;
+                        trendWindow = 41;
                     } else if ($scope.granularity === HOUR) {
                         // At the hourly granularity, look for daily patterns
                         periodLength = 24;
+                        seasonWindow = 24*7*2;
+                        trendWindow = 24*30;
                     }
                     var req = ocpu.rpc("nstl2",{
                         x : timelineVector,
                         "n.p": periodLength, // specifies seasonal periodicity
                         "t.degree": 2, "t.window": 41, // trend smoothing parameters
-                        "s.window": 31, "s.degree": 2, // seasonal smoothing parameters
+                        "s.window": seasonWindow, "s.degree": 2, // seasonal smoothing parameters
                         outer: 10 // number of robustness iterations
                     }, function(output){
                         // Square the trend data so that it is on the same scale as the counts
@@ -534,14 +598,10 @@ angular.module('timelineSelectorDirective', []).directive('timelineSelector', ['
                             color: '#C23333',
                             data: remainder
                         });
-                        $scope.$apply(function() {
-                            callback();
-                        });
+                        $scope.$apply();
                     }).fail(function() {
-                        // If the request fails, then just do the callback.
-                        $scope.$apply(function() {
-                            callback();
-                        });
+                        // If the request fails, then just update.
+                        $scope.$apply();
                     });
                 };
 
@@ -629,7 +689,9 @@ angular.module('timelineSelectorDirective', []).directive('timelineSelector', ['
 
                         XDATA.activityLogger.logSystemActivity('TimelineSelector - Create/Replace neon filter');
 
-                        $scope.messenger.replaceFilter($scope.filterKey, filter, $scope.queryForChartData);
+                        // Because the timeline ignores its own filter, we just need to update the
+                        // chart times and total when this filter is applied
+                        $scope.messenger.replaceFilter($scope.filterKey, filter, $scope.updateChartTimesAndTotal());
                     }
                 }, true);
 
