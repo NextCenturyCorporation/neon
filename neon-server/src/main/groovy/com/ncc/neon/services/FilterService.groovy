@@ -41,6 +41,21 @@ class FilterService {
     FilterState filterState
 
     /**
+     * Get information about the filters
+     * @param dataSet The DataSet to get the filters of
+     * @return information about the current filters
+     */
+    @POST
+    @Path("getfilters")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    HashMap getFilters(DataSet dataSet) {
+        List<Filter> filters = filterState.getFiltersForDataset(dataSet)
+        return [count: filters.size()]
+
+    }
+
+    /**
      * Add a filter
      * @param filterKey The filter to add
      * @return an ADD filter event

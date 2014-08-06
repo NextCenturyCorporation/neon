@@ -145,6 +145,18 @@ neon.eventing.Messenger.prototype.addFilter = function (id, filter, successCallb
 	);
 };
 
+neon.eventing.Messenger.prototype.getFilters = function(databaseName, tableName, successCallback, errorCallback) {
+    var dataSet = {databaseName: databaseName, tableName: tableName};
+    return neon.util.ajaxUtils.doPostJSON(
+        dataSet,
+        neon.serviceUrl('filterservice', 'getfilters'),
+        {
+            success: successCallback,
+            error: errorCallback
+        }
+    );
+};
+
 /**
  * Removes a previously added filter. This will fire a filter changed event to notify other widgets that the filters
  * have changed.
