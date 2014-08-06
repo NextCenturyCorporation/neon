@@ -144,7 +144,7 @@ neon.ready(function () {
      */
     var createFilterFromEntities = function(entities, databaseName, tableName) {
         var filterClauses = entities.map(function(entityName) {
-            return neon.query.where(USER_FIELD, "=", entityName);
+            return neon.query.where(USER_FIELD, "=", entityName.trim());
         });
         var filterClause = filterClauses.length > 1 ? neon.query.or.apply(neon.query, filterClauses) : filterClauses[0];
         return new neon.query.Filter().selectFrom(databaseName, tableName).where(filterClause);
@@ -178,7 +178,6 @@ neon.ready(function () {
      */
     var onCommunitySelection = function(sender, msg, channel) {
         var senderObj = JSON.parse(sender);  // Convert the sender string to a JSON object
-        //var msgObj = JSON.parse(msg); // Convert the data payload to a JSON object
         var msgObj = (typeof msg === "string") ? JSON.parse(sender) : msg;
         msgObj = msgObj.user;
 
@@ -220,6 +219,8 @@ neon.ready(function () {
     // Listen for entity selections from Tangelo Mentions app.
     OWF.Eventing.subscribe("tangelo.map.entity.selection", onCommunitySelection);
 
+    // Listen for an entity being manually entered in the Tangelo Geoplot
+    OWF.Eventing.subscribe("geomap.entity.entered", onEntitySelection);
     // Listen for an entity selection from the Tangelo GeoPlot.
     OWF.Eventing.subscribe("entity.selection", onEntitySelection);
 
