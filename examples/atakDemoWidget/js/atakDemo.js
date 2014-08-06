@@ -215,7 +215,7 @@ neon.ready(function () {
     });
 
     // Listen for new bounds from map widgets.
-    OWF.Eventing.subscribe("map.view.center.bounds", onBoundsMessage);
+    OWF.Eventing.subscribe("geomap.center.view.bounds", onBoundsMessage);
 
     // Listen for entity selections from Tangelo Mentions app.
     OWF.Eventing.subscribe("tangelo.map.entity.selection", onCommunitySelection);
