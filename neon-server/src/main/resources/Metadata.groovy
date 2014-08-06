@@ -152,6 +152,37 @@ metadata {
                     }
                 }
             }
+            south_america_tweets {
+                angular_example {
+                    date {
+                        value = "created_at"
+                    }
+                    latitude {
+                        value = "latitude"
+                    }
+                    longitude {
+                        value = "longitude"
+                    }
+                    line_category {
+                        value = "country"
+                    }
+                    bar_x_axis {
+                        value = "country"
+                    }
+                    y_axis {
+                        value = "_id"
+                    }
+                    color_by {
+                        value = "country"
+                    }
+                    size_by {
+                        value = "foo"
+                    }
+                    sort_by {
+                        value = "created_at"
+                    }
+                }
+            }
             gbDate {
                 angular_example {
                     date {

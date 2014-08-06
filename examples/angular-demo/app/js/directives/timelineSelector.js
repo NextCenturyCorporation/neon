@@ -128,14 +128,7 @@ angular.module('timelineSelectorDirective', []).directive('timelineSelector', ['
 
                     $scope.databaseName = message.database;
                     $scope.tableName = message.table;
-                    $scope.startDate = undefined;
-                    $scope.startDateForDisplay = undefined;
-                    $scope.endDate = undefined;
-                    $scope.endDateForDisplay = undefined;
-                    $scope.referenceStartDate = undefined;
-                    $scope.referenceEndDate = undefined;
-                    $scope.data = [];
-                    $scope.brush = [];
+                    $scope.clearTimeline();
 
                     // if there is no active connection, try to make one.
                     connectionService.connectToDataset(message.datastore, message.hostname, message.database, message.table);
@@ -149,6 +142,26 @@ angular.module('timelineSelectorDirective', []).directive('timelineSelector', ['
                     }
                 };
 
+                $scope.clearTimeline = function() {
+                    $scope.startDate = undefined;
+                    $scope.startDateForDisplay = undefined;
+                    $scope.endDate = undefined;
+                    $scope.endDateForDisplay = undefined;
+                    $scope.referenceStartDate = undefined;
+                    $scope.referenceEndDate = undefined;
+                    $scope.data = [
+                    {
+                        name: 'Total',
+                        type: 'bar',
+                        color: '#39b54a',
+                        data: []
+                    }];
+
+                    $scope.primarySeries = false;
+                    $scope.recordCount = 0;
+                    $scope.brush = [];
+                };
+
                 /**
                  * Triggers a Neon query that will aggregate the time data for the currently selected dataset.
                  * @method queryForChartData
@@ -157,6 +170,30 @@ angular.module('timelineSelectorDirective', []).directive('timelineSelector', ['
                     $scope.dateField = connectionService.getFieldMapping("date");
                     $scope.dateField = $scope.dateField || 'date';
 
+
+                    // Do a quick check to make sure that there isn't too much data for Mongo to process
+                    XDATA.activityLogger.logSystemActivity('TimelineSelector - pre-query for active filters');
+                    $scope.messenger.getFilters($scope.databaseName, $scope.tableName, function(result) {
+                        $scope.$apply(function () {
+                            XDATA.activityLogger.logSystemActivity('TimelineSelector - filters received');
+                            $scope.queryForActualChartData(result);
+                        });
+                    }, function (error) {
+                        $scope.$apply(function () {
+                            XDATA.activityLogger.logSystemActivity('TimelineSelector - filter request failed');
+                            $scope.clearTimeline();
+                        })
+                    });
+                };
+
+                $scope.queryForActualChartData = function(filterInfo) {
+                    if (!(filterInfo.count > 0)) {
+                        $scope.clearTimeline();
+//                        $scope.recordCount = filterInfo.data[0].count;
+                        return;
+                    }
+
+
                     var yearGroupClause = new neon.query.GroupByFunctionClause(neon.query.YEAR, $scope.dateField, 'year');
                     var monthGroupClause = new neon.query.GroupByFunctionClause(neon.query.MONTH, $scope.dateField, 'month');
                     var dayGroupClause = new neon.query.GroupByFunctionClause(neon.query.DAY, $scope.dateField, 'day');
@@ -164,7 +201,8 @@ angular.module('timelineSelectorDirective', []).directive('timelineSelector', ['
 
                     var query = new neon.query.Query()
                         .selectFrom($scope.databaseName, $scope.tableName)
-                        .where($scope.dateField, '!=', null)
+                    // Checking for null fields is insanely slow, and if every record in the dataset has a date field, then it's a giant waste
+//                        .where($scope.dateField, '!=', null)
 
                     // Group by the appropriate granularity.
                     if ($scope.granularity === DAY) {
@@ -431,7 +469,7 @@ angular.module('timelineSelectorDirective', []).directive('timelineSelector', ['
                     if (rawData.length === 1) {
                         rawData[1] = {
                             // Use a time just within our end date, if available, so it fits in a bucket.
-                            date: new Date($scope.endDate.getTime() - 1) || rawData[0].date,
+                            date: ($scope.endDate ? new Date($scope.endDate.getTime() - 1) : rawData[0].date),
                             count: 0
                         }
                         rawLength = 2;
