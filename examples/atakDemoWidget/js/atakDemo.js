@@ -161,6 +161,12 @@ neon.ready(function () {
         //var msgObj = JSON.parse(msg); // Convert the data payload to a JSON object
         var msgObj = (typeof msg === "string") ? [msg] : msg;
 
+        // An empty entity means don't filter on entity
+        if (msgObj === [""]) {
+            messenger.removeFilter(ENTITY_FILTER_KEY);
+            return;
+        }
+
         var filter = createFilterFromEntities(msgObj, DB, TABLE);
         messenger.replaceFilter(ENTITY_FILTER_KEY, filter, function () {
             console.log("Added an entity filter.");
