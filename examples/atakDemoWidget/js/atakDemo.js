@@ -12,6 +12,10 @@ var LONGITUDE_FIELD = "longitude";
 var LATITUDE_FIELD = "latitude";
 var USER_FIELD = "user_name";
 
+// TODO:  Make configurable
+var ATAK_REST_SERVICE_URL = "http://10.1.93.167:8080/AtakRestService/pointsofinterest/post"
+var MAX_NUMBER_ELEMENTS_TO_ATAK = 300
+
 // Set the neon server URL.
 neon.SERVER_URL = "/neon";
 
@@ -24,7 +28,7 @@ neon.SERVER_URL = "/neon";
 
 // Wait for owf and neon to be ready, then attach our data handlers.
 neon.ready(function () {
-    var connection = new neon.query.Connection(); 
+    var connection = new neon.query.Connection();
     // Create a messenger for Neon communication.
     var messenger = new neon.eventing.Messenger();
 
@@ -34,16 +38,16 @@ neon.ready(function () {
      * @method onFiltersChanged
      * @private
      */
-     var onFiltersChanged = function(message) {
+    var onFiltersChanged = function (message) {
         console.log("received filter change from timeline " + message);
-     };
+    };
 
     /**
      * Event handler for the Send button to push data from Neon to an outside server.
      * @method onAtakButton
      * @private
      */
-    var onAtakButton = function() {
+    var onAtakButton = function () {
         console.log('Pushed the atak button');
         // Issues a neon data query and push the data to the atak server.
         var query = new neon.query.Query().selectFrom(TABLE);
@@ -53,7 +57,17 @@ neon.ready(function () {
             console.log("Num Results: " + result.data.length);
             console.log("First results: " + JSON.stringify(result.data[0]));
 
-            // TODO: Push the data to the test server.
+            // Limit to the first 200
+            if (result.data.length > MAX_NUMBER_ELEMENTS_TO_ATAK)
+            {
+                result.data = result.data.slice(0,MAX_NUMBER_ELEMENTS_TO_ATAK)
+                console.log("Num Results after slicing: " + result.data.length);
+            }
+
+            $.post(ATAK_REST_SERVICE_URL, result)
+                .done(function (data) {
+                    alert("Data Loaded: " + data);
+                });
         });
     };
 
@@ -74,7 +88,7 @@ neon.ready(function () {
         messenger.publish(neon.eventing.channels.ACTIVE_DATASET_CHANGED, message);
     };
 
-    var createFilterFromPoints = function(sw, ne, databaseName, tableName) {
+    var createFilterFromPoints = function (sw, ne, databaseName, tableName) {
         if (sw && ne && databaseName && tableName) {
             var leftClause = neon.query.where(LONGITUDE_FIELD, ">=", sw.longitude);
             var rightClause = neon.query.where(LONGITUDE_FIELD, "<=", ne.longitude);
@@ -112,7 +126,7 @@ neon.ready(function () {
      * @method onBoundsMessage
      * @private
      */
-    var onBoundsMessage = function(sender, msg, channel) {
+    var onBoundsMessage = function (sender, msg, channel) {
 
         var senderObj = JSON.parse(sender);  // Convert the sender string to a JSON object
         var msgObj = (typeof msg === "string") ? JSON.parse(msg) : msg; // Convert the data payload to a JSON object
@@ -142,8 +156,8 @@ neon.ready(function () {
      * @returns {Object} a neon select statement
      * @method createFilterFromEntities
      */
-    var createFilterFromEntities = function(entities, databaseName, tableName) {
-        var filterClauses = entities.map(function(entityName) {
+    var createFilterFromEntities = function (entities, databaseName, tableName) {
+        var filterClauses = entities.map(function (entityName) {
             return neon.query.where(USER_FIELD, "=", entityName.trim());
         });
         var filterClause = filterClauses.length > 1 ? neon.query.or.apply(neon.query, filterClauses) : filterClauses[0];
@@ -156,7 +170,7 @@ neon.ready(function () {
      * @method onEntitySelection
      * @private
      */
-    var onEntitySelection = function(sender, msg, channel) {
+    var onEntitySelection = function (sender, msg, channel) {
         var senderObj = JSON.parse(sender);  // Convert the sender string to a JSON object
         //var msgObj = JSON.parse(msg); // Convert the data payload to a JSON object
         var msgObj = (typeof msg === "string") ? [msg] : msg;
@@ -182,7 +196,7 @@ neon.ready(function () {
      * @method onCommunitySelection
      * @private
      */
-    var onCommunitySelection = function(sender, msg, channel) {
+    var onCommunitySelection = function (sender, msg, channel) {
         var senderObj = JSON.parse(sender);  // Convert the sender string to a JSON object
         var msgObj = (typeof msg === "string") ? JSON.parse(sender) : msg;
         msgObj = msgObj.user;
@@ -207,15 +221,15 @@ neon.ready(function () {
     broadcastActiveDataset();
 
     // Clean up any old GEO or Name filters.
-    messenger.removeFilter(GEO_FILTER_KEY, function() {
+    messenger.removeFilter(GEO_FILTER_KEY, function () {
         console.log("ATAK Demo Widget: removed Neon geo filter");
-    }, function() {
+    }, function () {
         console.log("ATAK Demo Widget: failed to remove Neon geo filter");
     });
 
-    messenger.removeFilter(ENTITY_FILTER_KEY, function() {
+    messenger.removeFilter(ENTITY_FILTER_KEY, function () {
         console.log("ATAK Demo Widget: removed Neon entity filter");
-    }, function() {
+    }, function () {
         console.log("ATAK Demo Widget: failed to remove Neon entity filter");
     });
 
@@ -232,5 +246,5 @@ neon.ready(function () {
 
     // Add the click handler.
     $('#atak-button').click(onAtakButton);
-    
+
 });
