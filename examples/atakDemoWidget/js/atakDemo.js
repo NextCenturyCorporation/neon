@@ -14,7 +14,8 @@ var USER_FIELD = "user_name";
 
 // TODO:  Make configurable
 var ATAK_REST_SERVICE_URL = "http://10.1.93.167:8080/AtakRestService/pointsofinterest/post"
-var MAX_NUMBER_ELEMENTS_TO_ATAK = 300
+// var ATAK_REST_SERVICE_URL = "http://localhost:9090/AtakRestService/pointsofinterest/post"
+var MAX_NUMBER_ELEMENTS_TO_ATAK = 200
 
 // Set the neon server URL.
 neon.SERVER_URL = "/neon";
@@ -31,6 +32,7 @@ neon.ready(function () {
     var connection = new neon.query.Connection();
     // Create a messenger for Neon communication.
     var messenger = new neon.eventing.Messenger();
+
 
     /**
      * Event handler for filter changed events issued over Neon's messaging channels.
@@ -55,19 +57,24 @@ neon.ready(function () {
         //Execute the query and display the results.
         connection.executeQuery(query, function (result) {
             console.log("Num Results: " + result.data.length);
+            if (!result || result.data < 1) {
+                console.log("No results from query.  Returning");
+                return;
+            }
             console.log("First results: " + JSON.stringify(result.data[0]));
 
-            // Limit to the first 200
-            if (result.data.length > MAX_NUMBER_ELEMENTS_TO_ATAK)
-            {
-                result.data = result.data.slice(0,MAX_NUMBER_ELEMENTS_TO_ATAK)
+            // Limit to a small number of results
+            if (result.data.length > MAX_NUMBER_ELEMENTS_TO_ATAK) {
+                result.data = result.data.slice(0, MAX_NUMBER_ELEMENTS_TO_ATAK)
                 console.log("Num Results after slicing: " + result.data.length);
             }
 
-            $.post(ATAK_REST_SERVICE_URL, result)
-                .done(function (data) {
-                    alert("Data Loaded: " + data);
-                });
+            $.ajax({
+                type: "POST",
+                url: ATAK_REST_SERVICE_URL,
+                data: JSON.stringify(result),
+                contentType: 'application/json'
+            });
         });
     };
 
