@@ -39,6 +39,7 @@ war {
     from("${rootDir}/examples") {
         include('*.html')
         include('angular-demo/app/**')
+        include('atakDemoWidget/**')
     }
 }
 
