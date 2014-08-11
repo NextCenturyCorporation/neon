@@ -102,6 +102,8 @@ angular.module('timelineSelectorDirective', []).directive('timelineSelector', ['
                           openCpuEnabled = false;
                         });
                     }
+
+                    $scope.connect("mongo", "localhost", "test", "south_america_tweets");
                 };
 
                 /**
@@ -126,12 +128,16 @@ angular.module('timelineSelectorDirective', []).directive('timelineSelector', ['
                 var onDatasetChanged = function (message) {
                     XDATA.activityLogger.logSystemActivity('TimelineSelector - received neon dataset changed event');
 
-                    $scope.databaseName = message.database;
-                    $scope.tableName = message.table;
+                    $scope.connect(message.datastore, message.hostname, message.database, message.table);
+                };
+
+                $scope.connect = function(datastore, hostname, database, table) {
+                    $scope.databaseName = database;
+                    $scope.tableName = table;
                     $scope.clearTimeline();
 
                     // if there is no active connection, try to make one.
-                    connectionService.connectToDataset(message.datastore, message.hostname, message.database, message.table);
+                    connectionService.connectToDataset(datastore, hostname, database, table);
 
                     // Pull data.
                     var connection = connectionService.getActiveConnection();
