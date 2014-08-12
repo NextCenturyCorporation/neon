@@ -173,6 +173,27 @@ angular.module('circularHeatFormDirective', []).directive('circularHeatForm', ['
 			 * @method queryForChartData
 			 */
 			$scope.queryForChartData = function() {
+                // Do a quick check to make sure that there isn't too much data for Mongo to process
+                XDATA.activityLogger.logSystemActivity('CircularHeatForm - pre-query for active filters');
+                $scope.messenger.getFilters($scope.databaseName, $scope.tableName, function(result) {
+                    $scope.$apply(function () {
+                        XDATA.activityLogger.logSystemActivity('CircularHeatForm - filters received');
+                        $scope.queryForActualChartData(result);
+                    });
+                }, function (error) {
+                    $scope.$apply(function () {
+                        XDATA.activityLogger.logSystemActivity('CircularHeatForm - filter request failed');
+                        $scope.clearTimeline();
+                    })
+                });
+            };
+
+            $scope.queryForActualChartData = function(filterInfo) {
+                if (!(filterInfo.count > 0)) {
+                    $scope.updateChartData({data: []});
+                    return;
+                }
+
 				// TODO: Decide how to pass in field mappings.  We can do this through a controller or the
 				// connection service or some mapping service.  Two example below, one commented out.
 				//var dateField = $scope.getDateField();
