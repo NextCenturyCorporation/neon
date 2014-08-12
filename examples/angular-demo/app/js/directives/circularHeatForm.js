@@ -82,6 +82,8 @@ angular.module('circularHeatFormDirective', []).directive('circularHeatForm', ['
 					activeDatasetChanged: onDatasetChanged,
 					filtersChanged: onFiltersChanged
 				});
+
+                $scope.connect("mongo", "localhost", "test", "south_america_tweets");
 			};
 
 			/**
@@ -131,22 +133,28 @@ angular.module('circularHeatFormDirective', []).directive('circularHeatForm', ['
 			var onDatasetChanged = function(message) {
 				XDATA.activityLogger.logSystemActivity('CircularHeatForm - received neon dataset changed event');
 
-				$scope.databaseName = message.database;
-				$scope.tableName = message.table;
-
 				// if there is no active connection, try to make one.
-				connectionService.connectToDataset(message.datastore, message.hostname, message.database, message.table);
+				$scope.connect(message.datastore, message.hostname, message.database, message.table);
 
-				// Pull data.
-				var connection = connectionService.getActiveConnection();
-				if (connection) {
+			};
+
+            $scope.connect = function(datastore, hostname, database, table) {
+                $scope.databaseName = database;
+                $scope.tableName = table;
+
+                // if there is no active connection, try to make one.
+                connectionService.connectToDataset(datastore, hostname, database, table);
+
+                // Pull data.
+                var connection = connectionService.getActiveConnection();
+                if (connection) {
                     connectionService.loadMetadata(function() {
                         $scope.queryForChartData();
                     });
-				}
-			};
+                }
+            };
 
-			/**
+            /**
 			 * Triggers a Neon query that will aggregate the time data for the currently selected dataset.
 			 * @method queryForChartData
 			 */
@@ -171,7 +179,8 @@ angular.module('circularHeatFormDirective', []).directive('circularHeatForm', ['
 				var query = new neon.query.Query()
 					.selectFrom($scope.databaseName, $scope.tableName)
 					.groupBy(groupByDayClause, groupByHourClause)
-					.where($scope.dateField, '!=', null)
+                    // Checking for null fields is insanely slow, and if every record in the dataset has a date field, then it's a giant waste
+//					.where($scope.dateField, '!=', null)
 					.aggregate(neon.query.COUNT, '*', 'count');
 
 				// Issue the query and provide a success handler that will forcefully apply an update to the chart.
