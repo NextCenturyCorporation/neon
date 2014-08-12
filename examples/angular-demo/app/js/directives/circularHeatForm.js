@@ -83,10 +83,24 @@ angular.module('circularHeatFormDirective', []).directive('circularHeatForm', ['
 					filtersChanged: onFiltersChanged
 				});
 
-                $scope.connect("mongo", "localhost", "test", "south_america_tweets");
+                if (OWF) {
+                    OWF.Preferences.getUserPreference({
+                        namespace: 'neon.atakDemo.databaseInfo',
+                        name: 'connectionInfo',
+                        onSuccess: $scope.connectFromPreference
+                    });
+                }
 			};
 
-			/**
+            $scope.connectFromPreference = function(pref) {
+                console.log("connectFromPreference: " + JSON.stringify(pref));
+                if (pref !== undefined && pref !== null && pref.value !== undefined && pref.value !== null) {
+                    var val = JSON.parse(pref.value);
+                    $scope.connect(val.type, val.host, val.database, val.table);
+                }
+            };
+
+            /**
 			 * Initializes the arrays and variables used to track the most active day of the week and time of day.
 			 * @method initDayTimeArrays
 			 */

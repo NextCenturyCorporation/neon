@@ -251,6 +251,12 @@ neon.ready(function () {
     // Listen for an entity selection from the Tangelo GeoPlot.
     OWF.Eventing.subscribe("entity.selection", onEntitySelection);
 
+    OWF.Preferences.setUserPreference({
+        namespace: 'neon.atakDemo.databaseInfo',
+        name: 'connectionInfo',
+        value: JSON.stringify({type: HOST_TYPE, host: HOST, database: DB, table: TABLE})
+    });
+
     // Add the click handler.
     $('#atak-button').click(onAtakButton);
 
