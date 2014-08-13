@@ -15,7 +15,7 @@ var USER_FIELD = "user_name";
 // TODO:  Make configurable
 var ATAK_REST_SERVICE_URL = "http://10.1.93.167:8080/AtakRestService/pointsofinterest/post"
 // var ATAK_REST_SERVICE_URL = "http://localhost:9090/AtakRestService/pointsofinterest/post"
-var MAX_NUMBER_ELEMENTS_TO_ATAK = 200
+var MAX_NUMBER_ELEMENTS_TO_ATAK = 1000
 
 // Set the neon server URL.
 neon.SERVER_URL = "/neon";
