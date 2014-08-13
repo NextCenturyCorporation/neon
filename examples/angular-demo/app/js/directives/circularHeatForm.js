@@ -93,7 +93,6 @@ angular.module('circularHeatFormDirective', []).directive('circularHeatForm', ['
 			};
 
             $scope.connectFromPreference = function(pref) {
-                console.log("connectFromPreference: " + JSON.stringify(pref));
                 if (pref !== undefined && pref !== null && pref.value !== undefined && pref.value !== null) {
                     var val = JSON.parse(pref.value);
                     $scope.connect(val.type, val.host, val.database, val.table);
