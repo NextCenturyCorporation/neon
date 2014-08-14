@@ -110,6 +110,11 @@
   stroke-width: 1px;
 }
 
+.timeline-selector-chart .line {
+    fill: none;
+    stroke-width: 2px;
+}
+
 .timeline-selector-chart .tick text{
   fill: #777777;
 }
