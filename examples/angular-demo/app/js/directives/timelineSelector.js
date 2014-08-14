@@ -50,8 +50,8 @@ angular.module('timelineSelectorDirective', []).directive('timelineSelector', ['
                 var HOUR = "hour";
                 var DAY = "day";
                 // TODO - These need to be in a configuration file
-                var USE_OpenCPU = false;
-                var OpenCPU_URL = 'http://neon-opencpu/ocpu/library/NeonAngularDemo/R';
+                var USE_OpenCPU = true;
+                var OpenCPU_URL = 'http://10.1.93.174/ocpu/library/NeonAngularDemo/R';
                 var openCpuEnabled = false;
                 // opencpu logging is off to keep the logs clean, turn it on to debug opencpu problems
                 ocpu.enableLogging = false;
@@ -565,7 +565,7 @@ angular.module('timelineSelectorDirective', []).directive('timelineSelector', ['
                         x : timelineVector,
                         "n.p": periodLength, // specifies seasonal periodicity
                         "t.degree": 2, "t.window": 41, // trend smoothing parameters
-                        "s.window": 31, "s.degree": 2, // seasonal smoothing parameters
+                        "s.window": 31, "s.degree": 0, // seasonal smoothing parameters
                         outer: 10 // number of robustness iterations
                     }, function(output){
                         // Square the trend data so that it is on the same scale as the counts
