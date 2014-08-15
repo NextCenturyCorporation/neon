@@ -62,7 +62,7 @@ class SharkQueryExecutor extends AbstractQueryExecutor {
         LOGGER.debug("Executing SHOW DATABASES")
         return runAndRelease { client ->
             client.executeQuery("SHOW DATABASES").collect { Map<String, String> map ->
-                map.get("database_name")
+                map.get("result")
             }
         }
     }
@@ -72,7 +72,7 @@ class SharkQueryExecutor extends AbstractQueryExecutor {
         LOGGER.debug("Executing SHOW TABLES IN {}", dbName)
         return runAndRelease { client ->
             client.executeQuery("SHOW TABLES IN " + dbName).collect { Map<String, String> map ->
-                map.get("tab_name")
+                map.get("result")
             }
         }
     }

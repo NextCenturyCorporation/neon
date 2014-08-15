@@ -40,7 +40,7 @@ class JdbcClientPool implements ConnectionClient {
     }
 
     JdbcClient getJdbcClient() {
-        return new JdbcClient(connectionPool.getConnection("",""))
+        return new JdbcClient(connectionPool.getConnection("root",""))
     }
 
     @Override
