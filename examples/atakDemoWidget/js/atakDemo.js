@@ -180,7 +180,9 @@ neon.ready(function () {
     var onEntitySelection = function (sender, msg, channel) {
         var senderObj = JSON.parse(sender);  // Convert the sender string to a JSON object
         //var msgObj = JSON.parse(msg); // Convert the data payload to a JSON object
-        var msgObj = (typeof msg === "string") ? [msg] : msg;
+        msg = (typeof msg === "string") ? [msg] : msg;
+        var msgObj = msg.map(function(it) { return it.split(/\s+/); });
+        msgObj = _.flatten(msgObj);
 
         // An empty entity means don't filter on entity
         if (msgObj.length === 0 || (msgObj.length === 1 && msgObj[0] === "")) {
