@@ -183,7 +183,7 @@ neon.ready(function () {
         var msgObj = (typeof msg === "string") ? [msg] : msg;
 
         // An empty entity means don't filter on entity
-        if (msgObj === [""]) {
+        if (msgObj.length === 0 || (msgObj.length === 1 && msgObj[0] === "")) {
             messenger.removeFilter(ENTITY_FILTER_KEY);
             return;
         }
