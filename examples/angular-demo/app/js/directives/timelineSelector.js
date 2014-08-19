@@ -191,11 +191,15 @@ angular.module('timelineSelectorDirective', []).directive('timelineSelector', ['
 
 
                     // Do a quick check to make sure that there isn't too much data for Mongo to process
-                    XDATA.activityLogger.logSystemActivity('TimelineSelector - pre-query for active filters');
-                    $scope.messenger.getFilters($scope.databaseName, $scope.tableName, function(result) {
+                    XDATA.activityLogger.logSystemActivity('TimelineSelector - pre-query for number of matching records');
+                    var query = new neon.query.Query()
+                        .selectFrom($scope.databaseName, $scope.tableName)
+                        .aggregate(neon.query.COUNT, '*', 'count')
+                        .ignoreFilters([$scope.filterKey]);
+                    connectionService.getActiveConnection().executeQuery(query, function (queryResults) {
                         $scope.$apply(function () {
                             XDATA.activityLogger.logSystemActivity('TimelineSelector - filters received');
-                            $scope.queryForActualChartData(result);
+                            $scope.queryForActualChartData(queryResults);
                         });
                     }, function (error) {
                         $scope.$apply(function () {
@@ -205,10 +209,9 @@ angular.module('timelineSelectorDirective', []).directive('timelineSelector', ['
                     });
                 };
 
-                $scope.queryForActualChartData = function(filterInfo) {
-                    if (!(filterInfo.count > 0)) {
+                $scope.queryForActualChartData = function(countResults) {
+                    if (countResults.data[0].counter > 500000) {
                         $scope.clearTimeline();
-//                        $scope.recordCount = filterInfo.data[0].count;
                         return;
                     }
 
