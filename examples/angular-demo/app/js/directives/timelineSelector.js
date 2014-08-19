@@ -211,7 +211,9 @@ angular.module('timelineSelectorDirective', []).directive('timelineSelector', ['
 
                 $scope.queryForActualChartData = function(countResults) {
                     if (countResults.data[0].counter > 500000) {
+                        // If there are too many records, don't do the histogram and just show the record count
                         $scope.clearTimeline();
+                        $scope.recordCount = countResults.data[0].counter;
                         return;
                     }
 
