@@ -173,22 +173,25 @@ angular.module('circularHeatFormDirective', []).directive('circularHeatForm', ['
 			 */
 			$scope.queryForChartData = function() {
                 // Do a quick check to make sure that there isn't too much data for Mongo to process
-                XDATA.activityLogger.logSystemActivity('CircularHeatForm - pre-query for active filters');
-                $scope.messenger.getFilters($scope.databaseName, $scope.tableName, function(result) {
+                XDATA.activityLogger.logSystemActivity('CircularHeatForm - pre-query for number of matching records');
+                var query = new neon.query.Query()
+                    .selectFrom($scope.databaseName, $scope.tableName)
+                    .aggregate(neon.query.COUNT, '*', 'count');
+                connectionService.getActiveConnection().executeQuery(query, function (result) {
                     $scope.$apply(function () {
-                        XDATA.activityLogger.logSystemActivity('CircularHeatForm - filters received');
+                        XDATA.activityLogger.logSystemActivity('CircularHeatForm - count received');
                         $scope.queryForActualChartData(result);
                     });
                 }, function (error) {
                     $scope.$apply(function () {
-                        XDATA.activityLogger.logSystemActivity('CircularHeatForm - filter request failed');
+                        XDATA.activityLogger.logSystemActivity('CircularHeatForm - count request failed');
                         $scope.clearTimeline();
                     })
                 });
             };
 
-            $scope.queryForActualChartData = function(filterInfo) {
-                if (!(filterInfo.count > 0)) {
+            $scope.queryForActualChartData = function(countResults) {
+                if (countResults.data[0].counter > 500000) {
                     $scope.updateChartData({data: []});
                     return;
                 }
