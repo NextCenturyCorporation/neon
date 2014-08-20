@@ -30,16 +30,37 @@ dependencies {
     compile 'commons-daemon:commons-daemon:1.0.5'
     compile 'joda-time:joda-time:2.1'
     compile 'com.mchange:c3p0:0.9.5-pre8'
+    compile "org.codehaus.jackson:jackson-core-asl:1.9.2"
 
-    // these libraries are needed for the patched version of hive/spark-sql that we use
-    compile 'org.apache.hive:hive-cli:0.12.0'
-    compile 'org.apache.hive:hive-common:0.12.0'
-    compile 'org.apache.hive:hive-contrib:0.12.0'
-    compile 'org.apache.hive:hive-exec:0.12.0'
-    compile 'org.apache.hive:hive-jdbc:0.12.0'
-    compile 'org.apache.hive:hive-metastore:0.12.0'
-    compile 'org.apache.hive:hive-serde:0.12.0'
-    compile 'org.apache.hive:hive-service:0.12.0'
-    compile 'org.apache.hive:hive-shims:0.12.0'
+    // These libraries are needed for the patched version of hive/spark-sql that we use
+    // Hive 0.12.0 libraries are needed to talk with Spark 1.1
+    compile ('org.apache.hive:hive-service:0.12.0') {
+        exclude module: 'hive-exec'
+    }
+    compile ('org.apache.hive:hive-shims:0.12.0') {
+        exclude group: 'com.google.guava'
+    }
+    compile ('org.apache.hive:hive-cli:0.12.0') {
+        exclude module: 'hive-exec'
+        exclude module: 'hive-shims'
+        exclude group: 'com.google.guava'
+    }
+    compile ('org.apache.hive:hive-jdbc:0.12.0') {
+        exclude module: 'hive-exec'
+    }
+    compile ('org.apache.hive:hive-common:0.12.0') {
+        exclude module: 'hive-exec'
+        exclude module: 'hive-shims'
+        exclude group: 'com.google.guava'
+    }
+    compile ('org.apache.hive:hive-metastore:0.12.0') {
+        exclude module: 'hive-exec'
+    }
+    compile ('org.apache.hive:hive-contrib:0.12.0') {
+        exclude module: 'hive-exec'
+    }
+    compile ('org.apache.hive:hive-serde:0.12.0') {
+        exclude module: 'hive-exec'
+    }
 
 }

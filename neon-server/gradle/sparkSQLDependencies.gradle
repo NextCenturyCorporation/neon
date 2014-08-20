@@ -1,7 +1,8 @@
 // dependencies required for the shark libraries included in lib
 dependencies {
 
-    compile('org.apache.hadoop:hadoop-common:2.4.0') {
+    compile('org.apache.hadoop:hadoop-common:2.0.0-cdh4.3.0') {
+        exclude group: 'com.google.guava'
         exclude group: 'org.mortbay.jetty'
         exclude group: 'javax.servlet'
         exclude group: 'javax.servlet.jsp'
@@ -12,6 +13,7 @@ dependencies {
         exclude module: 'slf4j-log4j12'
     }
 
+    compile 'com.google.protobuf:protobuf-java:2.4.1'
     compile 'jline:jline:0.9.94'
 
     // See https://code.google.com/p/javaewah/  Variant of Java BitSet class.

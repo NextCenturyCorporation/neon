@@ -32,7 +32,9 @@ configurations {
 }
 
 dependencies {
+
     integrationTestCompile('org.apache.hadoop:hadoop-hdfs:2.0.0-cdh4.3.0') {
+        exclude group: 'com.google.guava'
         exclude group: 'javax.servlet'
         exclude group: 'javax.servlet.jsp'
         exclude module: 'jasper-runtime'
