@@ -62,6 +62,7 @@ charts.TimelineSelectorChart = function (element, configuration) {
      * @param {Number} configuration.margin.right
      * @param {Number} configuration.margin.top
      * @param {Number} configuration.width
+     * @param {Boolean} configuration.brushEnabled
      * @return charts.TimelineSelectorChart
      * @method configure
      */
@@ -69,6 +70,10 @@ charts.TimelineSelectorChart = function (element, configuration) {
         this.config = configuration || {};
         this.config.margin = this.config.margin || {top: 12, right: 15, bottom: 20, left: 15};
         this.granularity = this.config.granularity || this.granularity;
+        // Default to brush enabled, unless it was explicitly set to false
+        if (this.config.brushEnabled !== false) {
+            this.config.brushEnabled = true;
+        }
         this.redrawOnResize();
 
         return this;
@@ -123,7 +128,7 @@ charts.TimelineSelectorChart = function (element, configuration) {
      * @method addBrushHandler
      */
     this.addBrushHandler = function (handler) {
-        if (typeof(handler) === 'function') {
+        if (this.config.brushEnabled && typeof(handler) === 'function') {
             this.brushHandler = handler;
             if (this.brush) {
                 this.brush.on("brushend", wrapBrushHandler(this.brush, handler));
@@ -136,8 +141,10 @@ charts.TimelineSelectorChart = function (element, configuration) {
      * @method removeBrushHandler
      */
     this.removeBrushHandler = function () {
-        this.brushHandler = undefined;
-        this.brush.on("brushend");
+        if (this.config.brushEnabled) {
+            this.brushHandler = undefined;
+            this.brush.on("brushend");
+        }
     }
 
     /**
@@ -145,8 +152,10 @@ charts.TimelineSelectorChart = function (element, configuration) {
      * @method clearBrush
      */
     this.clearBrush = function () {
-        this.brush.clear();
-        d3.select(this.element).select('.brush').call(this.brush);
+        if (this.config.brushEnabled) {
+            this.brush.clear();
+            d3.select(this.element).select('.brush').call(this.brush);
+        }
     }
 
     /**
@@ -247,12 +256,14 @@ charts.TimelineSelectorChart = function (element, configuration) {
         // Save the brush as an instance variable to allow interaction on it by client code.
         this.brush = d3.svg.brush().x(x).on("brush", this.updateMask);
 
-        if (this.brushHandler) {
-            this.brush.on("brushstart", function() {
-                XDATA.activityLogger.logUserActivity('Begin temporal filter selection', 'set_visual_filter_parameters',
-                    XDATA.activityLogger.WF_GETDATA);
-            });
-            this.brush.on("brushend", wrapBrushHandler(this.brush, this.brushHandler));
+        if (this.config.brushEnabled) {
+            if (this.brushHandler) {
+                this.brush.on("brushstart", function () {
+                    XDATA.activityLogger.logUserActivity('Begin temporal filter selection', 'set_visual_filter_parameters',
+                        XDATA.activityLogger.WF_GETDATA);
+                });
+                this.brush.on("brushend", wrapBrushHandler(this.brush, this.brushHandler));
+            }
         }
 
         //var heightRange = y.range()[0];
@@ -445,44 +456,46 @@ charts.TimelineSelectorChart = function (element, configuration) {
         var gBrush = context.append("g")
             .attr("class", "brush");
 
-        gBrush.append("rect")
-            .attr("x", width + this.config.margin.right)
-            .attr("y", -6)
-            .attr("width", width)
-            .attr("height", height + 7)
-            .attr("class", "mask mask-east");
+        if (this.config.brushEnabled) {
+            gBrush.append("rect")
+                .attr("x", width + this.config.margin.right)
+                .attr("y", -6)
+                .attr("width", width)
+                .attr("height", height + 7)
+                .attr("class", "mask mask-east");
 
-        gBrush.append("rect")
-            .attr("x", (0 - (width + this.config.margin.left)))
-            .attr("y", -6)
-            .attr("width", width)
-            .attr("height", height + 7)
-            .attr("class", "mask mask-west");
+            gBrush.append("rect")
+                .attr("x", (0 - (width + this.config.margin.left)))
+                .attr("y", -6)
+                .attr("width", width)
+                .attr("height", height + 7)
+                .attr("class", "mask mask-west");
 
-        gBrush.call(this.brush);
+            gBrush.call(this.brush);
 
-        gBrush.selectAll("rect")
-            .attr("y", -6)
-            .attr("height", height + 7);
+            gBrush.selectAll("rect")
+                .attr("y", -6)
+                .attr("height", height + 7);
 
-        gBrush.selectAll(".e")
-            .append("rect")
-            .attr("y", -6)
-            .attr("width", 1)
-            .attr("height", height + 6)
-            .attr("class", "resize-divider");
+            gBrush.selectAll(".e")
+                .append("rect")
+                .attr("y", -6)
+                .attr("width", 1)
+                .attr("height", height + 6)
+                .attr("class", "resize-divider");
 
-        gBrush.selectAll(".w")
-            .append("rect")
-            .attr("x", -1)
-            .attr("y", -6)
-            .attr("width", 1)
-            .attr("height", height + 6)
-            .attr("class", "resize-divider");
+            gBrush.selectAll(".w")
+                .append("rect")
+                .attr("x", -1)
+                .attr("y", -6)
+                .attr("width", 1)
+                .attr("height", height + 6)
+                .attr("class", "resize-divider");
 
-        gBrush.selectAll(".resize")
-            .append("path")
-            .attr("d", resizePath);
+            gBrush.selectAll(".resize")
+                .append("path")
+                .attr("d", resizePath);
+        }
 
         for(var i = 0; i < charts.length; i++) {
             context.append("g")
@@ -511,9 +524,11 @@ charts.TimelineSelectorChart = function (element, configuration) {
         var me = this;
 
         function drawChart() {
-            var extent = me.brush.extent();
             me.render(me.data);
-            me.renderExtent(extent);
+            if (me.config.brushEnabled) {
+                var extent = me.brush.extent();
+                me.renderExtent(extent);
+            }
         }
 
         // Debounce is needed because browser resizes fire this resize even multiple times.

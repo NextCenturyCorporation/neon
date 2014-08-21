@@ -41,7 +41,7 @@ angular.module('timelineSelectorChartDirective', []).directive('timelineSelector
         link: function ($scope, element, attrs) {
 
             // Initialize the chart.
-            $scope.chart = new charts.TimelineSelectorChart(element[0]);
+            $scope.chart = new charts.TimelineSelectorChart(element[0], {brushEnabled: false});
 
             // Add a brush handler.
             $scope.chart.addBrushHandler(function (data) {
