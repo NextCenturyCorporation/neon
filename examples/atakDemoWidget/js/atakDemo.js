@@ -6,6 +6,7 @@ var DB = "test";
 //var TABLE = "alibaverstock130k";
 var TABLE = "south_america_tweets";
 var GEO_FILTER_KEY = "atakDemoGeoFilter";
+var TIME_FILTER_KEY = "atakDemoTimeFilter";
 var ENTITY_FILTER_KEY = "atakDemoEntityFilter";
 var TIME_FIELD = "created_at";
 var LONGITUDE_FIELD = "longitude";
@@ -157,6 +158,31 @@ neon.ready(function () {
         });
     };
 
+    var createFilterFromTimes = function(minTime, maxTime, databaseName, tableName) {
+        var minClause = neon.query.where(TIME_FIELD, ">=", minTime);
+        var maxClause = neon.query.where(TIME_FIELD, "<=", maxTime);
+        var filterClause = neon.query.and(minClause, maxClause);
+        return new neon.query.Filter().selectFrom(databaseName, tableName).where(filterClause);
+    }
+
+    var onTimeMessage = function(sender, msg, channel) {
+        var senderObj = JSON.parse(sender);  // Convert the sender string to a JSON object
+        var msgObj = (typeof msg === "string") ? JSON.parse(msg) : msg; // Convert the data payload to a JSON object
+
+        console.log("atak demo widget creating a time filter");
+
+        var minTime = new Date(msgObj.time.min);
+        var maxTime = new Date(msgObj.time.max);
+
+        var filter = createFilterFromTimes(minTime, maxTime, DB, TABLE);
+
+        messenger.replaceFilter(TIME_FILTER_KEY, filter, function () {
+            console.log("Added a time filter.");
+        }, function () {
+            console.log("Error: Failed to create filter.");
+        });
+    }
+
     /**
      * Creates a filter select object that has a where clause that "or"s all of the entities together
      * @param entities {Array} an array of entity/user strings that records must have to pass the filter
@@ -244,6 +270,9 @@ neon.ready(function () {
 
     // Listen for new bounds from map widgets.
     OWF.Eventing.subscribe("geomap.center.view.bounds", onBoundsMessage);
+
+    // Listen for new time message from map widget
+    OWF.Eventing.subscribe("geomap.time.bounds", onTimeMessage);
 
     // Listen for entity selections from Tangelo Mentions app.
     OWF.Eventing.subscribe("tangelo.map.entity.selection", onCommunitySelection);
