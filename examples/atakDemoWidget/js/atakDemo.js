@@ -13,9 +13,8 @@ var LATITUDE_FIELD = "latitude";
 var USER_FIELD = "user_name";
 
 // TODO:  Make configurable
-var ATAK_REST_SERVICE_URL = "http://10.1.93.167:8080/AtakRestService/pointsofinterest/post"
+var ATAK_REST_SERVICE_URL = "http://10.1.93.167:8080/AtakRestService/pointsofinterest/post";
 // var ATAK_REST_SERVICE_URL = "http://localhost:9090/AtakRestService/pointsofinterest/post"
-var MAX_NUMBER_ELEMENTS_TO_ATAK = 1000
 
 // Set the neon server URL.
 neon.SERVER_URL = "/neon";
@@ -50,7 +49,15 @@ neon.ready(function () {
      * @private
      */
     var onAtakButton = function () {
-        console.log('Pushed the atak button');
+
+        console.log("on atak button called ")          ;
+        var maxNumPoints = parseInt( $('#atakPointLimit').val() );
+        if (!maxNumPoints || maxNumPoints > 999999)
+        {
+            maxNumPoints = 1000;
+        }
+        console.log("max num points: " + maxNumPoints);
+
         // Issues a neon data query and push the data to the atak server.
         var query = new neon.query.Query().selectFrom(TABLE);
 
@@ -61,11 +68,11 @@ neon.ready(function () {
                 console.log("No results from query.  Returning");
                 return;
             }
-            console.log("First results: " + JSON.stringify(result.data[0]));
+            console.log("First result: " + JSON.stringify(result.data[0]));
 
             // Limit to a small number of results
-            if (result.data.length > MAX_NUMBER_ELEMENTS_TO_ATAK) {
-                result.data = result.data.slice(0, MAX_NUMBER_ELEMENTS_TO_ATAK)
+            if (result.data.length > maxNumPoints) {
+                result.data = result.data.slice(0, maxNumPoints);
                 console.log("Num Results after slicing: " + result.data.length);
             }
 
@@ -196,7 +203,7 @@ neon.ready(function () {
         }, function () {
             console.log("Error: Failed to create filter.");
         });
-    }
+    };
 
     /**
      * Event handler for receiving bounds via the entity.selection channel from Tangelo Mentions.
@@ -216,7 +223,7 @@ neon.ready(function () {
         }, function () {
             console.log("Error: Failed to create filter.");
         });
-    }
+    };
 
     // register for Neon events.
     messenger.events({
