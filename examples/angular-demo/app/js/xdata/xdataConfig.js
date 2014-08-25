@@ -14,13 +14,13 @@
  * limitations under the License.
  *
  */
- var XDATA = {};
+var XDATA = {};
 
- XDATA.ACTIVITY_LOGGER_URL = "http://xd-draper.xdata.data-tactics-corp.com:1337";
- XDATA.COMPONENT = "Neon Demo";
- XDATA.COMPONENT_VERSION = "0.8.0-SNAPSHOT";
+XDATA.ACTIVITY_LOGGER_URL = "http://xd-draper.xdata.data-tactics-corp.com:1337";
+XDATA.COMPONENT = "Neon Demo";
+XDATA.COMPONENT_VERSION = "0.8.0-SNAPSHOT";
 
- XDATA.activityLogger = new activityLogger('lib/draperlab/draper.activity_worker-2.1.1.js').echo(true).testing(false);
+XDATA.activityLogger = new activityLogger('lib/draperlab/draper.activity_worker-2.1.1.js').echo(false).testing(true);
 
 // Register the xdata logger with a server.
 XDATA.activityLogger.registerActivityLogger(XDATA.ACTIVITY_LOGGER_URL, 
