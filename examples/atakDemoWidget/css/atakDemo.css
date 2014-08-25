@@ -1,0 +1,11 @@
+
+.row {
+    padding: 4px;
+}
+
+input {
+    font-size: 12px;
+    font-family: Arial;
+    white-space: pre;
+    width: 90px;
+}
