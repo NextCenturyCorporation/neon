@@ -15,14 +15,13 @@
  */
 
 
-
 /**
  * Utility methods for working with ajax calls
  * @class neon.util.ajaxUtils
  * @static
  */
 
-neon.util.ajaxUtils = (function(){
+neon.util.ajaxUtils = (function () {
     var overlayId = 'neon-overlay';
     var logger = neon.util.loggerUtils.getGlobalLogger();
     var errorLogger = neon.util.loggerUtils.getLogger('neon.util.ajaxUtils.error');
@@ -86,7 +85,7 @@ neon.util.ajaxUtils = (function(){
      * @param {Object} opts See {{#crossLink "neon.util.ajaxUtils/doAjaxRequest"}}{{/crossLink}}
      * @return {neon.util.AjaxRequest} The xhr request object
      */
-    function doPost(url, opts){
+    function doPost(url, opts) {
         return doAjaxRequest('POST', url, opts);
     }
 
@@ -141,8 +140,7 @@ neon.util.ajaxUtils = (function(){
 
     function showDefaultSpinner() {
         $('body').append($('<div>').attr('id', overlayId).addClass('overlay-container'));
-        $('#' + overlayId).append($('<div>').addClass('overlay'));
-        $('#' + overlayId).append($('<div>').addClass('spinner'));
+        $('#' + overlayId).append($('<div>').addClass('loader'));
     }
 
     function hideDefaultSpinner() {
