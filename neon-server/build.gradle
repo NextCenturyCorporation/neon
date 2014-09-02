@@ -62,7 +62,6 @@ project.ext {
 apply plugin: 'jetty'
 apply plugin: 'war'
 
-
 // these files need to be applied in order since there are dependencies between them
 apply from: "${rootDir}/gradle/sharedDependencies.gradle"
 apply from: "gradle/sharkDependencies.gradle"
@@ -115,6 +114,7 @@ dependencies {
 }
 
 war {
+    dependsOn 'setVersion'
     description = 'Creates a war file for the project'
     from(jsOutputFile) {
         into 'js'
@@ -128,7 +128,7 @@ task watch(type: com.ncc.common.GruntTask) {
 }
 
 jettyRun {
-    dependsOn concatjs, watch
+    dependsOn concatjs, watch, 'setVersion'
     reload = 'automatic'
     scanIntervalSeconds = 10
     httpPort = 8080
@@ -157,12 +157,12 @@ jettyRun {
 [jettyRun, jettyRunWar, transformTestWebService, acceptanceTestWar, concurrencyTestWar]*.with {
     /**
      * THIS IS A WORKAROUND FOR JETTY LOCKING STATIC HTML FILES ON WINDOWS
-     * 
+     *
      * When developing on Windows Jetty locks any static HTML files and resources, preventing on-the-fly
      * editing for quick development turn-around.  The work around for this is to override the 
      * default setting for useFileMappedBuffer in jetty's webdefault.xml file.  Here we've extracted
      * the Jetty 6.1.25 webdefault.xml and simply set useFileMappedBuffer to false.
-     * 
+     *
      * References: 
      * http://issues.gradle.org/browse/GRADLE-727
      * http://stackoverflow.com/questions/11032342/gradle-jetty-plugin-locking-files
@@ -254,4 +254,22 @@ def getSharkHost() {
 
 def getHdfsUrl() {
     return project.hasProperty("hdfs.url") ? getProperty("hdfs.url") : "hdfs://localhost:8020"
+}
+
+/* Get the version information, save it to resources file */
+task setVersion {
+    def versionString = getVersionName()
+
+    println "Version number: |$versionString|"
+    def versionfile = new File("${projectDir}/src/main/resources/version.properties")
+    versionfile.text = 'build.version=' + versionString
+}
+
+def getVersionName() {
+    def stdout = new ByteArrayOutputStream()
+    exec {
+        commandLine 'git', 'describe', '--tags', '--long'
+        standardOutput = stdout
+    }
+    return stdout.toString().trim()
 }
