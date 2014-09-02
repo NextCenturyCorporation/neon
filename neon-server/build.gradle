@@ -14,12 +14,17 @@
  *
  */
 
+
+
+
 import org.json.JSONArray
 import com.ncc.neon.SharkJSONGenerator
 import com.ncc.neon.MongoJSONGenerator
 import com.ncc.neon.JSONToCSVConverter
 import org.gradle.api.plugins.jetty.internal.Monitor
 import org.gradle.api.plugins.jetty.internal.JettyPluginWebAppContext
+
+import java.text.SimpleDateFormat
 
 buildscript {
     repositories {
@@ -256,20 +261,37 @@ def getHdfsUrl() {
     return project.hasProperty("hdfs.url") ? getProperty("hdfs.url") : "hdfs://localhost:8020"
 }
 
-/* Get the version information, save it to resources file */
+/* Get the version information, save it to resources directory
+ *
+ * Format:  0.7.5-32-g42770e9-2014.09.02
+ *            ^    ^    ^        ^
+ *            |    |    |        +  Date of build
+ *            |    |    + shorted hash of git
+ *            |    + Number of commits since last tag
+ *            + Last tag
+ */
 task setVersion {
-    def versionString = getVersionName()
-
-    println "Version number: |$versionString|"
-    def versionfile = new File("${projectDir}/src/main/resources/version.properties")
-    versionfile.text = 'build.version=' + versionString
+    def tagString = getTagName()
+    def dateString = getDateString()
+    writeVersionStringToPropertiesFile(tagString + "-" + dateString)
 }
 
-def getVersionName() {
+def getDateString() {
+    SimpleDateFormat sdf = new SimpleDateFormat("yyyy.MM.dd")
+    def dateString = new Date()
+    return sdf.format(dateString)
+}
+
+def getTagName() {
     def stdout = new ByteArrayOutputStream()
     exec {
         commandLine 'git', 'describe', '--tags', '--long'
         standardOutput = stdout
     }
     return stdout.toString().trim()
+}
+
+def writeVersionStringToPropertiesFile(versionString) {
+    def versionfile = new File("${projectDir}/src/main/resources/version.properties")
+    versionfile.text = 'build.version=' + versionString
 }
