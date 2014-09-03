@@ -16,6 +16,8 @@
 
 package com.ncc.neon.services
 
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
 
 import javax.annotation.PostConstruct
@@ -29,8 +31,9 @@ import javax.ws.rs.core.MediaType
  */
 
 @Component
-@Path("/versionservice")
-class VersionService {
+@Path("/infoservice")
+class InfoService {
+    private static final Logger LOGGER = LoggerFactory.getLogger(InfoService)
 
     private static final VERSION_FILE_NAME = System.getProperty("version.file", "version.properties")
 
@@ -43,24 +46,24 @@ class VersionService {
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     @Path("version")
-    String getNeonVersion() {
+    String showNeonVersion() {
         return versionString
     }
 
-    @SuppressWarnings("JavaIoPackageAccess") // metadata is loaded from a file on the classpath
+    // @SuppressWarnings("JavaIoPackageAccess") // version info is loaded from a file on the classpath
     @PostConstruct
     void loadVersion() {
         URL url = getClass().getResource("/${VERSION_FILE_NAME}")
         if (url) {
             File file = new File(url.toURI())
-            println ("Loading version information from ${file}")
+            LOGGER.debug("Loading version information from ${file}")
             FileInputStream fis=  new FileInputStream(file)
             Properties p = new Properties()
             p.load(fis)
             versionString = p.getProperty("build.version")
-            println ("Version string ${versionString}")
+            LOGGER.debug("Version string ${versionString}")
         } else {
-            println ("No ${VERSION_FILE_NAME} file found on classpath")
+            LOGGER.debug("No ${VERSION_FILE_NAME} file found on classpath")
         }
     }
 
