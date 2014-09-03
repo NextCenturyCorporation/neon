@@ -30,10 +30,12 @@ angular.module('neonDemo.controllers', []).controller('neonDemoController', ['$s
         $scope.filterCount = 0;
 	    $scope.versionString = 'test value';
 
-            neon.util.infoUtils.getNeonVersion( function(result) {
-		$scope.$apply(function() { 
-		    $scope.versionString = result
-		});
+        neon.util.infoUtils.getNeonVersion( function(result) {
+            // Wrap this is timeout to push this update to the next $apply pass, since this runs while
+            // other modules may be loading.
+            $timeout(function() {
+                $scope.versionString = result;
+            })
 	    });
 
         /**
