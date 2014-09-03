@@ -28,15 +28,6 @@ angular.module('neonDemo.controllers', []).controller('neonDemoController', ['$s
         $scope.createFilters = false;
         $scope.chartOptions = false;
         $scope.filterCount = 0;
-	    $scope.versionString = 'test value';
-
-        neon.util.infoUtils.getNeonVersion( function(result) {
-            // Wrap this is timeout to push this update to the next $apply pass, since this runs while
-            // other modules may be loading.
-            $timeout(function() {
-                $scope.versionString = result;
-            })
-	    });
 
         /**
          * Simple toggle method for tracking whether or not the create filters tray should be visible.
