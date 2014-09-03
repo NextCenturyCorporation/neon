@@ -18,7 +18,7 @@
 
 /**
  * Provides utility methods for working with a log4javascript logger
- * @class neon.util,loggerUtils
+ * @class neon.util.loggerUtils
  * @static
  */
 
