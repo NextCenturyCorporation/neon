@@ -50,16 +50,13 @@ class InfoService {
         return versionString
     }
 
-    // @SuppressWarnings("JavaIoPackageAccess") // version info is loaded from a file on the classpath
     @PostConstruct
     void loadVersion() {
         URL url = getClass().getResource("/${VERSION_FILE_NAME}")
         if (url) {
-            File file = new File(url.toURI())
-            LOGGER.debug("Loading version information from ${file}")
-            FileInputStream fis=  new FileInputStream(file)
+            InputStream is = url.openStream()
             Properties p = new Properties()
-            p.load(fis)
+            p.load(is)
             versionString = p.getProperty("build.version")
             LOGGER.debug("Version string ${versionString}")
         } else {
