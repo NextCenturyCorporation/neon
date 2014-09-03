@@ -42,14 +42,10 @@
 			<div class="navbar-default navbar-static-top affix">
 				<div class="container">
 
-					<a target="_blank" href="http://neonframework.org/" class="navbar-text pull-right">
-						Powered by <img class="brand-image" src="img/Neon_60x34.png"></img>
-					</a>
-
-                    <span ng-bind="versionString"></span>
+					<div powered-by-neon class="pull-right"></div>
 
 					<div class="clearfix visible-xs"></div>
-
+					
 					<!-- Database Config -->
 					<database-config></database-config>
 
@@ -293,6 +289,7 @@
 		<script src="js/neonDemoController.js"></script>
 
 		<script src="js/directives/databaseConfigDirective.js"></script>
+		<script src="js/directives/poweredByNeon.js"></script>
 		<script src="js/directives/filterBuilderDirective.js"></script>
 		<script src="js/charts/circularHeatChart.js"></script>
 		<script src="js/directives/circularHeatChart.js"></script>
