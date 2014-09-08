@@ -1,0 +1,41 @@
+<div class="well" ng-show="filterTags.length > 0 || data.length > 0">
+    <h4 class="sr-only">Popular Hashtags</h4>
+    <div class="filter-tags" ng-class="{true: '', false: 'hidden'}[showFilter]">
+        <div class="chart-options pull-right">
+            <a class="btn btn-lg text-muted collapsed" data-toggle="collapse" data-target="#tag-options" data-animation=false
+              ng-click="toggleOptionsDisplay()">
+              <span class="glyphicon glyphicon-cog"></span>
+              <span class="caret"></span>
+            </a>
+            <div id="tag-options" class="popover bottom">
+                <div class="arrow"></div>
+                <div class="popover-content">
+                    <div class="form-group">
+                        <label>Show records with</label>
+                        <div class="btn-group">
+                            <label class="btn btn-default" ng-class="{true: 'active', false: ''}[andTags]">
+                                <input type="radio" ng-model="andTags" style="display:none" ng-value="true">
+                                All of these
+                            </label>
+                            <label class="btn btn-default" ng-class="{true: '', false: 'active'}[andTags]">
+                                <input type="radio" ng-model="andTags" style="display:none" ng-value="false"> 
+                                Any of these
+                            </label>
+                        </div>
+                        <div class="clearfix"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    	<div class="filter-reset" ng-repeat="tagName in filterTags">
+			{{tagName}}
+            <a class="btn" ng-click="removeFilter(tagName)">
+			 <span class="glyphicon glyphicon-remove"></span>
+			</a>
+		</div>
+    </div>
+    <div class="tagcloud">
+        <a ng-click="addTagFilter(tagCount.tag)" class="tag" ng-repeat="tagCount in data" rel="{{tagCount.count}}">{{tagCount.tag}}</a>
+    </div>
+</div>

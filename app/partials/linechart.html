@@ -1,0 +1,56 @@
+<div class="well">
+	 <div class="chart-options pull-right">
+	    <a class="btn btn-lg text-muted collapsed" data-toggle="collapse" data-target="#line-chart-options" data-animation=false>
+	      <span class="glyphicon glyphicon-cog"></span>
+	      <span class="caret"></span>
+	    </a>
+	    <div id="line-chart-options" class="popover bottom">
+	        <div class="arrow"></div>
+	        <div class="popover-content">
+	        	<div class="form-group">
+                    <label>Chart Type</label>
+                    <select ng-model="chartType" class="form-control">
+                        <option value="bar">Bar</option>
+                        <option value="line">Line</option>
+                    </select>
+                </div>
+	            <div class="form-group">
+	            	<label>Y-axis</label>
+		    		<select class="form-control" ng-model="attrY" ng-options="field for field in fields" ng-required="true" ng-disabled="!(fields.length > 0)">
+		    		</select>
+		    	</div>
+		    	<div class="form-group">
+		    		<select class="form-control" ng-model="aggregation" ng-disabled="!(fields.length > 0)">
+		    			<option value="count">Count</option>
+		    			<option value="sum">Sum</option>
+		    			<option value="avg">Average</option>
+		    		</select>
+		    	</div>
+		    	<div class="form-group">
+	            	<label>Categorize by</label>
+		    		<select class="form-control" ng-model="categoryField" ng-options="field for field in fields" ng-required="true" ng-disabled="!(fields.length > 0)">
+		    			<option value="">None</option>
+		    		</select>
+		    	</div>
+	        </div>
+	    </div>
+	</div>
+
+	<div class="legend legend-right">
+
+		<div class="legend-item" ng-class="{true: '', false: 'hidden'}[colorMappings.length >= seriesLimit]">
+        	<span class="legend-text text-muted"><strong>Top {{seriesLimit}}</strong></span>
+        </div>
+
+		<div class="legend-item legend-item-clickable" title="{{colorMapping.series}}" ng-repeat="colorMapping in colorMappings" ng-click="toggleSeries(colorMapping.series)" ng-class="{true: 'legend-hidden', false: ''}[colorMapping.hidden]">
+	    	<span class="legend-icon" style="background-color: {{colorMapping.color}}"></span>
+	    	<span class="legend-text">{{colorMapping.series}}</span> 
+	    	<span ng-show="aggregation != 'avg'" class="legend-count text-muted">({{colorMapping.total | numberShort}})</span>
+	    </div>
+
+	</div>
+
+	<div class="clearfix"></div> 
+
+	<div class="linechart chart-div"></div>
+</div>

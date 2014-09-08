@@ -1,0 +1,74 @@
+<div class="tray-mirror filter-tray collapse">
+  <div class="inner" style="height: 134px"></div>
+</div>
+<div id="filter-tray" class="tray filter-tray panel panel-default collapse">
+
+  <div class="container panel-body">
+
+    <h4 class="pull-left">Create Filters</h4>
+
+    <div class="pull-right">
+      <div class="btn-group" >
+        <label class="btn btn-default active" ng-class="{true: 'active', false: ''}[andClauses]">
+          <input type="radio" ng-model="andClauses" style="display:none" ng-value="true"> AND
+        </label>
+        <label class="btn btn-default" ng-class="{true: '', false: 'active'}[andClauses]">
+          <input type="radio" ng-model="andClauses" style="display:none" ng-value="false"> OR
+        </label>
+      </div>
+
+      <button type="button" class="btn btn-danger" ng-click="resetFilters()">
+          Reset
+      </button>
+    </div>
+
+    <div class="clearfix"></div>
+
+    <div class="filter form-inline clearfix" ng-repeat="filterRow in filterTable.filterState.data">
+      <div class="form-group">
+        <select class="form-control" ng-model="filterRow.columnValue" ng-disabled="!(fields.length > 0)" ng-options="field for field in fields">
+        </select>
+      </div>
+      <div class="form-group">
+        <select class="form-control"  ng-model="filterRow.operatorValue" ng-disabled="!(fields.length > 0)"
+          ng-options="operator for operator in filterTable.operatorOptions">
+        </select>
+      </div>
+      <div class="form-group">
+        <input type="text" class="form-control" size="42" placeholder="Value" ng-model="filterRow.value">
+      </div>
+      <div class="form-group">
+        <button type="button" class="btn btn-default refresh" ng-click="updateFilterRow($index)">
+          <span class="glyphicon glyphicon-refresh"></span>
+        </button>
+      </div>
+      <div class="form-group pull-right">
+        <button type="button" class="btn delete" ng-click="removeFilterRow($index)">
+          <span class="glyphicon glyphicon-remove"></span>
+        </button>
+      </div>
+    </div>
+
+    <div class="filter filter-new form-inline">
+      <div class="form-group">
+        <select id="filter-field-selection" class="form-control" ng-model="selectedField" ng-disabled="!(fields.length > 0)" ng-options="field for field in fields">
+        </select>
+      </div>
+      <div class="form-group">
+        <select id="filter-operator-selection" class="form-control"  ng-model="selectedOperator" ng-disabled="!(fields.length > 0)"
+          ng-options="operator for operator in filterTable.operatorOptions">
+        </select>
+      </div>
+      <div class="form-group">
+        <input type="text" class="form-control" id="filter-value" size="42" placeholder="Value"  ng-model="selectedValue" 
+          ng-disabled="!(fields.length > 0)" ng-required="true">
+      </div>
+      <div class="form-group">
+        <button type="button" class="btn btn-primary" ng-click="addFilterRow()">
+          Add Filter
+        </button>
+      </div>
+    </div>
+
+  </div>
+</div>

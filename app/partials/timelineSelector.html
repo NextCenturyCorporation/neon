@@ -1,0 +1,52 @@
+<div class="well well-blank">
+  <form>
+
+    <div class="form-group pull-right" ng-hide="!(data.length > 1)">
+      <div class="input-group timeseries-selector">
+        <select class="form-control" ng-model="primarySeries"
+          ng-options="series.name for series in data">
+        </select>
+        <span class="input-group-btn">
+          <button class="btn" type="button" ng-class="{true: 'btn-primary', false: 'btn-danger'}[collapsed]" ng-click="collapsed = !collapsed">
+            <span class="glyphicon" ng-class="{true: 'glyphicon-plus', false: 'glyphicon-minus'}[collapsed]"></span>
+          </button>
+        </span>
+      </div>
+    </div>
+
+	  <div class="btn-group pull-right">
+      <label class="btn btn-default active" ng-class="{true: 'active', false: ''}[granularity === 'day']">
+        <input type="radio" style="display:none" ng-model="granularity" value="day"> Day
+      </label>
+      <label class="btn btn-default" ng-class="{true: 'active', false: ''}[granularity === 'hour']">
+        <input type="radio" style="display:none" ng-model="granularity" value="hour"> Hour
+      </label>
+    </div>
+    <div class="filter-reset pull-right" ng-class="{true: '', false: 'hidden'}[brush.length > 0]">
+      Filter
+      <a class="btn" ng-click="clearBrush()">
+        <span class="glyphicon glyphicon-remove"></span>
+      </a>
+    </div>
+
+  </form>
+  <h3><span class="count count-large text-primary" ng-bind="recordCount | number"></span> records 
+  <span ng-bind="(startDateForDisplay) ? ' from ' : ''"></span>
+  <span ng-bind="(startDateForDisplay && granularity === 'hour') ? (startDateForDisplay.toISOString() | date: 'MMM d, yyyy HH:mm') : ''"></span>
+  <span ng-bind="(startDateForDisplay && granularity === 'day') ? (startDateForDisplay.toISOString() | date: 'MMMM d, yyyy') : ''"></span>
+  <span ng-bind="(endDateForDisplay) ? ' to ' : ''"></span>
+  <span ng-bind="(endDateForDisplay && granularity === 'hour') ? (endDateForDisplay.toISOString() | date:'MMM d, yyyy HH:mm') : ''"></span>
+  <span ng-bind="(endDateForDisplay && granularity === 'day') ? (endDateForDisplay.toISOString() | date:'MMMM d, yyyy') : ''"></span>
+  <span ng-bind="(startDateForDisplay) ? '(Z)' : ''"></span></h3>
+
+  <div class="collapsed" ng-class="{true: 'collapsed', false: ''}[collapsed]">
+  	<div timeline-selector-chart timeline-data='data' timeline-brush='brush' collapsed='collapsed' extent-dirty='extentDirty' primary-series='primarySeries' granularity='granularity'></div>
+  </div>
+
+  <div class="text-center" ng-class="{true: '', false: 'hidden'}[granularity === 'hour' && !eventProbabilitiesDisplayed &&!collapsed]">
+    <a class="btn" ng-click="runMMPP()">
+      Click to run event probability analysis (this may take a few minutes) <span class="glyphicon glyphicon-transfer"></span>
+    </a>
+  </div>
+
+</div>

@@ -1,0 +1,24 @@
+html {
+	height: 100%;
+}
+
+body {
+	height: 100%;
+}
+
+.container, .container-fluid {
+	height: 100%;
+}
+
+.toggles-div {
+	padding-top: 15px;
+	padding-bottom: 15px;
+}
+
+.filter-toggle {
+	padding-right: 10px;
+}
+
+.query-results-grid {
+	height:150px;
+}

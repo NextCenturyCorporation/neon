@@ -1,0 +1,24 @@
+<a  data-toggle="modal" data-target="#aboutNeonModal" class="navbar-text pull-right" 
+  ng-click="loadNeonInfo()">
+  Powered by <img class="brand-image" src="img/Neon_60x34.png"></img>
+</a>
+
+<div class="modal fade" id="aboutNeonModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+        <h4 class="modal-title" id="aboutNeonModalLabel">About Neon</h4>
+      </div>
+      <div class="modal-body">
+        <p>Neon is an open-source framework used to develop custom data analysis applications. It is designed to help integrate your visualizations with your data. The Neon framework can incorporate a variety of data analysis and visualization widgets in a common webtop environment to allow analysts to explore complex data sets.</p>
+        <p>For more information about Neon, please visit the <a href="http://www.neonframework.org" target="_blank">Neon Framework Page</a> or view the <a href="https://github.com/nextcenturycorporation/neon" target="_blank">Github Project</a>.</p>
+        <p><strong>Server Version:&nbsp;</strong>Neon&nbsp;<span ng-bind="versionString"></span></p>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+      </div>
+    </div>
+  </div>
+</div>
+
