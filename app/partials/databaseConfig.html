@@ -35,7 +35,7 @@
         <h4 class="modal-title" id="customConnectionModalLabel">Custom Connection</h4>
       </div>
       <div class="modal-body">
-        
+
         <div class="row">
 
           <div class="col-md-6">
@@ -99,9 +99,10 @@
           <div class="col-md-6" ng-repeat="field in fields">
             <div class="form-group">
               <label for="{{field.name}}-mapping">{{field.label}}</label>
-                <select id="{{field.name}}-mapping" class="form-control" ng-change="selectField()" ng-model="field.selected" ng-disabled="!(tableFields.length > 0)" ng-options="field for field in tableFields">
+                <!--select id="{{field.name}}-mapping" class="form-control" ng-change="selectField()" ng-model="field.selected" ng-disabled="!(tableFields.length > 0)" ng-options="field for field in tableFields">
                   <option value="">Select Field</option>
-                </select>
+                </select!-->
+                <input type="text" id="{{field.name}}-mapping" ng-model="field.selected" ng-disabled="!(tableFields.length > 0)">
             </div>
           </div>
 
@@ -111,7 +112,7 @@
       <div class="modal-footer">
         <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
         <button type="button" class="btn btn-primary" data-dismiss="modal" id="database-table-button"
-            ng-disabled="selectedTable === null || selectedDb === null" 
+            ng-disabled="selectedTable === null || selectedDb === null"
             ng-click="connectClick()">Connect</button>
       </div>
     </div>

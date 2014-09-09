@@ -65,8 +65,6 @@ angular.module('neon.controllers', []).controller('neonController', ['$scope', '
 		 * @method toggleSeeData
 		 */
 		$scope.toggleSeeData = function() {
-			console.log("Got a click");
-
 			$scope.seeData = !$scope.seeData;
 			var action = ($scope.seeData === true) ? 'show_data_table' : 'hide_data_table';
 			XDATA.activityLogger.logUserActivity('Neon Demo - Toggle data table display', action,

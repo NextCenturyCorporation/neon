@@ -1,0 +1,71 @@
+.linechart{
+  margin: 0 -30px 0;
+}
+.linechart .hover-line line { 
+  stroke: #e1e1e1;  
+  fill: none;
+  stroke-width: 1px;
+}
+.linechart .hover-line text {
+  font-weight: bold;
+  text-shadow: 0 2px 0 #FFFFFF;
+}
+.linechart .hover-line .hover-date {
+  fill: #555555;
+}
+.linechart svg{
+	font-size: 10px;
+}
+.axis path,
+.axis line {
+  fill: none;
+  stroke: #cccccc;
+  shape-rendering: crispEdges;
+}
+
+.x.axis path {
+  display: none;
+}
+
+.linechart .y.axis text{
+  text-shadow:
+    1px 1px 0 #FFFFFF,
+    1px 0px 0 #FFFFFF,
+    1px -1px 0 #FFFFFF,
+    -1px 1px 0 #FFFFFF,
+    -1px 0px 0 #FFFFFF,
+    -1px -1px 0 #FFFFFF,
+    0px 2px 0 #FFFFFF,
+    0px -2px 0 #FFFFFF;
+  font-weight: bold;
+  fill: #555555;
+}
+.linechart .y.axis .tick:first-child,
+.linechart .y.axis path,
+.linechart .y.axis .tick line{
+  display: none;
+}
+
+.linechart .horizontalGrid{
+  fill: none;
+  shape-rendering: crispEdges;
+  stroke: #eeeeee;
+  stroke-width : 1px;
+  stroke-dasharray: 6px;
+}
+.linechart .gridLines .horizontalGrid:first-child{
+  stroke-dasharray: 0;
+}
+
+
+.line {
+  fill: none;
+  stroke-width: 2px;
+}
+
+.linechart .dot{
+  stroke-width: 2px;
+}
+.linechart .dot-empty{
+  fill: #FFFFFF;
+}

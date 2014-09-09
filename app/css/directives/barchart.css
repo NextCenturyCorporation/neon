@@ -1,0 +1,85 @@
+/*
+ * Copyright 2013 Next Century Corporation
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ */
+
+.barchartDirective {
+    margin: auto;
+    display: block;
+}
+
+#plot {
+    font-size: 10px;
+    text-align: right;
+    display: block;
+    margin: auto;
+    width: 100%;
+    height: 100%;
+}
+
+#chart {
+    background-color: #FFFFFF;
+}
+
+svg .tick {
+    fill: #444444;
+}
+
+.bar {
+    /** provides a slight separation for adjacent bars. the barchart javascript sets the color based on the svg color */
+    fill: #39b54a;
+    stroke-width: 6;
+    stroke-opacity: 1;
+}
+
+.axis {
+    shape-rendering: crispEdges;
+}
+
+.axis line, .axis path {
+    stroke: #cccccc;
+    stroke-width: 1px;
+    fill: none;
+}
+
+/* do not use .tooltip to avoid conflict with bootstrap */
+.charttooltip {
+    /* just use a big number to ensure the tooltip is on top */
+    z-index: 10000;
+    position: absolute;
+    padding: 15px;
+    background-color: rgba(255,255,255,0.9);
+    border: 1px solid rgba(0, 0, 0, 0.15);
+    border-radius: 4px;
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.176);
+    pointer-events: none;
+    color: #555555;
+}
+
+.timeline-div {
+    width: 100%;
+    height: 100%;
+}
+
+.chart-div {
+    margin: auto;
+    display: block;
+    min-height: 250px;
+}
+
+.error-text {
+    color: red;
+    margin-top: 170px;
+    margin-left: 20px;
+}

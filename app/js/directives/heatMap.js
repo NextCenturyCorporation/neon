@@ -30,7 +30,7 @@ angular.module('heatMapDirective', []).directive('heatMap', ['ConnectionService'
     function (connectionService, $timeout) {
 
         return {
-            templateUrl: 'partials/heatMap.html',
+            templateUrl: 'app/partials/heatMap.html',
             restrict: 'EA',
             scope: {
                 // map of categories to colors used for the legend
@@ -251,9 +251,9 @@ angular.module('heatMapDirective', []).directive('heatMap', ['ConnectionService'
                         $scope.$apply(function () {
                             $scope.queryForMapData();
                             drawZoomRect({
-                                left: extent.minimumLongitude, 
-                                bottom:extent.minimumLatitude, 
-                                right: extent.maximumLongitude, 
+                                left: extent.minimumLongitude,
+                                bottom:extent.minimumLatitude,
+                                right: extent.maximumLongitude,
                                 top: extent.maximumLatitude
                             });
 

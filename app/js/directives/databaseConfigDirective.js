@@ -19,7 +19,7 @@ databaseConfig.directive('databaseConfig', ['ConnectionService', function (conne
                 datastoreSelect: "mongo",
                 hostnameInput: "memex",
                 selectedDb: "memex",
-                selectedTable: "2.5k-basic"
+                selectedTable: "modifiedBasic2500"
             }
         ];
         $scope.fields = [

@@ -3,6 +3,12 @@ angular.module("memex", [
 	'neon.services',
 
 
+	'circularHeatChartDirective',
+	'circularHeatFormDirective',
 	'configurationDirective',
-	'queryResultsTableDirective'
+	'filterBuilderDirective',
+	'heatMapDirective',
+	'queryResultsTableDirective',
+	'timelineSelectorDirective',
+	'timelineSelectorChartDirective'
 ]);

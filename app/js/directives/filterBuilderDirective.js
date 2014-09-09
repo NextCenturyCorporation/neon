@@ -17,13 +17,13 @@
 
 /**
  * This Angular JS directive adds a basic Neon filter builder pane to a page.  The pane allows as user
- * to associate basic operators (e.g., >, <, =) and comparison values with table fields on any 
+ * to associate basic operators (e.g., >, <, =) and comparison values with table fields on any
  * open database connection.
- * 
+ *
  * @example
  *    &lt;filter-builder&gt;&lt;/filter-builder&gt;<br>
  *    &lt;div filter-builder&gt;&lt;/div&gt;
- * 
+ *
  * @class neonDemo.directives.filterBuilder
  * @constructor
  */
@@ -31,9 +31,9 @@ angular.module('filterBuilderDirective', []).directive('filterBuilder', ['Connec
 	function(connectionService, filterCountService) {
 
 	return {
-		templateUrl: 'partials/filterBuilder.html',
+		templateUrl: 'app/partials/filterBuilder.html',
 		restrict: 'EA',
-        controller: 'neonDemoController',
+        controller: 'neonController',
 		scope: {
 		},
 		link: function($scope, el, attr) {
@@ -43,7 +43,7 @@ angular.module('filterBuilderDirective', []).directive('filterBuilder', ['Connec
 			 * @param {Object} message A Neon filter changed message.
 			 * @method onConnectionChanged
 			 * @private
-			 */ 
+			 */
 			var onConnectionChanged = function(message) {
 				XDATA.activityLogger.logSystemActivity('FilterBuilder - received neon connection changed event');
 				$scope.filterTable.clearFilterState();
@@ -56,7 +56,7 @@ angular.module('filterBuilderDirective', []).directive('filterBuilder', ['Connec
 			 * @param {String} message.table The table within the database that was selected.
 			 * @method onDatasetChanged
 			 * @private
-			 */ 
+			 */
 			var onDatasetChanged = function(message) {
 				XDATA.activityLogger.logSystemActivity('FilterBuilder - received neon dataset changed event');
 				// Clear the filter table.
@@ -83,7 +83,7 @@ angular.module('filterBuilderDirective', []).directive('filterBuilder', ['Connec
                 }
 			};
 
-			/** 
+			/**
 			 * Initializes the name of the date field used to query the current dataset
 			 * and the Neon Messenger used to monitor data change events.
 			 * @method initialize
@@ -142,11 +142,11 @@ angular.module('filterBuilderDirective', []).directive('filterBuilder', ['Connec
 	            		}
 
 	            		// Log filter modifications. Determine the activitiy to log for modifications to filters,
-	            		// menu selection or new filter text, 
+	            		// menu selection or new filter text,
 	            		// based upon whether the filter value changed or not.
 	            		if (logData.to && logData.from) {
 		            		var activity = (logData.to.value != logData.from.value) ? 'enter_filter_text' : 'select_filter_menu_option';
-		            		XDATA.activityLogger.logUserActivity('FilterBuilder - Modifying custom Neon filter data', 
+		            		XDATA.activityLogger.logUserActivity('FilterBuilder - Modifying custom Neon filter data',
 		            			activity,
 	                            XDATA.activityLogger.WF_GETDATA,
 	                            logData);
@@ -169,7 +169,7 @@ angular.module('filterBuilderDirective', []).directive('filterBuilder', ['Connec
 	            		if (oldVal) {
 	            			logData.from = oldVal;
 	            		}
-	            		XDATA.activityLogger.logUserActivity('FilterBuilder - Entering new custom Neon filter data', 
+	            		XDATA.activityLogger.logUserActivity('FilterBuilder - Entering new custom Neon filter data',
 	            			'select_filter_menu_option',
                             XDATA.activityLogger.WF_GETDATA,
                             logData);
@@ -185,8 +185,8 @@ angular.module('filterBuilderDirective', []).directive('filterBuilder', ['Connec
 	            		if (oldVal) {
 	            			logData.from = oldVal;
 	            		}
-	            		
-	            		XDATA.activityLogger.logUserActivity('FilterBuilder - Entering new custom Neon filter data', 
+
+	            		XDATA.activityLogger.logUserActivity('FilterBuilder - Entering new custom Neon filter data',
 	            			'enter_filter_text',
                             XDATA.activityLogger.WF_GETDATA,
                             logData);
@@ -282,7 +282,7 @@ angular.module('filterBuilderDirective', []).directive('filterBuilder', ['Connec
 			}
 
 			/**
-			 * Resets the current filter. 
+			 * Resets the current filter.
 			 * @method resetFilters
 			 */
 			$scope.resetFilters = function() {

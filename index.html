@@ -11,7 +11,13 @@
 		<link rel="stylesheet" type="text/css" href="app/lib/slickgrid/css/slick.grid.css">
 
 		<!--neon-->
-		<!--link rel="stylesheet" type="text/css" href="app/css/neon.css" /-->
+		<link rel="stylesheet" type="text/css" href="app/css/directives/circularHeatChart.css">
+		<link rel="stylesheet" type="text/css" href="app/css/directives/heatMap.css">
+		<link rel="stylesheet" type="text/css" href="app/css/directives/timelineSelector.css" />
+		<link rel="stylesheet" type="text/css" href="app/css/directives/timelineSelectorChart.css" />
+		<link rel="stylesheet" type="text/css" href="app/css/directives/queryResultsTable.css">
+
+		<link rel="stylesheet" type="text/css" href="app/css/neon.css" />
 		<link rel="stylesheet" type="text/css" href="app/css/app.css" />
 
 		<script src="/neon/js/neon.js"></script>
@@ -19,7 +25,12 @@
 		<script src="app/lib/jquery/jquery-1.11.0.min.js"></script>
 	</head>
 	<body ng-app="memex" ng-controller="neonController">
-		<div class="container-fluid">
+		<div class="container">
+
+			<!-- Timeline -->
+			<div timeline-selector></div>
+		</div>
+		<div class="container">
 			<div class="row">
 				<div class="col-xs-4">
 					<database-config></database-config>
@@ -43,6 +54,25 @@
 					<query-results-table show-data="seeData"></query-results-table>
 				</div>
 			</div>
+			<div class="row">
+				<timeline-selector></timeline-selector>
+			</div>
+			<div class="row">
+				<div class="col-xs-6">
+					<heat-map></heat-map>
+				</div>
+				<div class="col-xs-6">
+					<p>graph</p>
+				</div>
+			</div>
+			<div class="row">
+				<div class="col-xs-6">
+					<circular-heat-form></circular-heat-form>
+				</div>
+				<div class="col-xs-6">
+				</div>
+			</div>
+
 		</div>
 
 
@@ -68,10 +98,22 @@
 		<script src="app/lib/slickgrid/plugins/slick.autotooltips.js"></script>
 		<script src="app/lib/slickgrid/plugins/slick.rowselectionmodel.js"></script>
 
+		<script src="app/lib/opencpu/opencpu-0.4.js"></script>
+
+		<script src="app/lib/openlayers/OpenLayers.js"></script>
+		<script src="app/lib/openlayers/heatmap/heatmap.js"></script>
+		<script src="app/lib/openlayers/heatmap/heatmap-openlayers.js"></script>
+
 		<!-- neon utils -->
+		<script src="app/js/namespaces.js"></script>
+		<script src="app/lib/neon/charts/circularHeatChart.js"></script>
+		<script src="app/lib/neon/charts/timelineSelectorChart.js"></script>
+
 		<script src="app/lib/draperLab/draper.activity_logger-2.1.1.js"></script>
 		<script src="app/js/xdata/xdataConfig.js"></script>
 		<script src="app/lib/neon/tables/table.js"></script>
+		<script src="app/lib/neon/neon-extensions/filtertable.js"></script>
+		<script src="app/lib/neon/coremap/coremap.js"></script>
 
 
 		<!-- neon angular -->
@@ -80,8 +122,14 @@
 		<script src="app/js/services/connectionService.js"></script>
 		<script src="app/js/services/filterCountService.js"></script>
 
+		<script src="app/js/directives/circularHeatChart.js"></script>
+		<script src="app/js/directives/circularHeatForm.js"></script>
 		<script src="app/js/directives/databaseConfigDirective.js"></script>
+		<script src="app/js/directives/filterBuilderDirective.js"></script>
+		<script src="app/js/directives/heatMap.js"></script>
 		<script src="app/js/directives/queryResultsTable.js"></script>
+		<script src="app/js/directives/timelineSelector.js"></script>
+		<script src="app/js/directives/timelineSelectorChart.js"></script>
 
 		<script src="app/js/app.js"></script>
 	</body>

@@ -21,11 +21,11 @@
  * Neon connection from a connection service and listens for
  * neon system events (e.g., data tables changed) to determine when to update its visualization
  * by issuing a Neon query for aggregated time data.
- * 
+ *
  * @example
  *    &lt;circular-heat-form&gt;&lt;/circular-heat-form&gt;<br>
  *    &lt;div circular-heat-form&gt;&lt;/div&gt;
- * 
+ *
  * @class neonDemo.directives.circularHeatForm
  * @constructor
  */
@@ -33,14 +33,14 @@ angular.module('circularHeatFormDirective', []).directive('circularHeatForm', ['
 	function(connectionService) {
 
 	return {
-		templateUrl: 'partials/circularHeatForm.html',
+		templateUrl: 'app/partials/circularHeatForm.html',
 		restrict: 'EA',
 		scope: {
 			filterKey: '='
 		},
 		controller: function($scope) {
 
-			/** 
+			/**
 			 * Sets the name of the date field to pull from the current dataset.
 			 * @method setDateField
 			 */
@@ -48,7 +48,7 @@ angular.module('circularHeatFormDirective', []).directive('circularHeatForm', ['
 				$scope.dateField = field;
 			};
 
-			/** 
+			/**
 			 * Returns the name of the date field used to pull from time data from the current dataset.
 			 * @method getDateField
 			 */
@@ -70,7 +70,7 @@ angular.module('circularHeatFormDirective', []).directive('circularHeatForm', ['
 			// Defaulting the expected date field to 'created_at' as that works best with our twitter datasets.
 			var DEFAULT_DATE_FIELD = 'created_at';
 
-			/** 
+			/**
 			 * Initializes the name of the date field used to query the current dataset
 			 * and the Neon Messenger used to monitor data change events.
 			 * @method initialize
@@ -114,7 +114,7 @@ angular.module('circularHeatFormDirective', []).directive('circularHeatForm', ['
 			 * @param {Object} message A Neon filter changed message.
 			 * @method onFiltersChanged
 			 * @private
-			 */ 
+			 */
 			var onFiltersChanged = function(message) {
 				XDATA.activityLogger.logSystemActivity('CircularHeatForm - received neon filter changed event');
 				$scope.queryForChartData();
@@ -127,7 +127,7 @@ angular.module('circularHeatFormDirective', []).directive('circularHeatForm', ['
 			 * @param {String} message.table The table within the database that was selected.
 			 * @method onDatasetChanged
 			 * @private
-			 */ 
+			 */
 			var onDatasetChanged = function(message) {
 				XDATA.activityLogger.logSystemActivity('CircularHeatForm - received neon dataset changed event');
 
@@ -191,7 +191,7 @@ angular.module('circularHeatFormDirective', []).directive('circularHeatForm', ['
 			};
 
 			/**
-			 * Updates the data bound to the heat chart managed by this directive.  This will trigger a change in 
+			 * Updates the data bound to the heat chart managed by this directive.  This will trigger a change in
 			 * the chart's visualization.
 			 * @param {Object} queryResults Results returned from a Neon query.
 			 * @param {Array} queryResults.data The aggregate numbers for the heat chart cells.
