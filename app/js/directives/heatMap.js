@@ -481,7 +481,11 @@ angular.module('heatMapDirective', []).directive('heatMap', ['ConnectionService'
                         query.aggregate(neon.query.COUNT, '*', coreMap.Map.DEFAULT_SIZE_MAPPING);
                     }
 
-                    return query;
+                    var latNotNullClause = neon.query.where($scope.latitudeField, "!=", null);
+                    var lonNotNullClause = neon.query.where($scope.longitudeField, "!=", null);
+                    var notNullClause = neon.query.and(latNotNullClause, lonNotNullClause);
+
+                    return query.where(notNullClause);
                 }
 
                 $scope.hideClearFilterButton = function () {

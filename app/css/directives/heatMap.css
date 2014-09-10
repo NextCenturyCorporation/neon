@@ -13,6 +13,60 @@
  * limitations under the License.
  *
  */
+/* Chart legend */
+
+.legend{
+    margin-bottom: 10px;
+    min-height: 25px;
+}
+.legend .legend-item {
+    color: #555555;
+    display: inline-block;
+    margin-right: 10px;
+    margin-top: 5px;
+    font-size: 12px;
+}
+.legend .legend-item .legend-text {
+    display: inline-block;
+    max-width: 120px;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    vertical-align: middle;
+}
+.legend .legend-item-clickable{
+    cursor: pointer;
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    -khtml-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+}
+.legend .legend-icon {
+    border-radius: 2px;
+    display: inline-block;
+    height: 1em;
+    vertical-align: middle;
+    width: 1em;
+}
+.legend .legend-item.legend-hidden{
+    color: #999999
+}
+.legend .legend-item.legend-hidden .legend-icon{
+    background: #e1e1e1 !important;
+}
+.legend-scale .legend-item {
+    color: #777777;
+}
+.legend-scale .legend-text {
+    margin: 0 5px;
+}
+.legend-scale .legend-item .legend-text:first-child {
+    margin-left: 0;
+}
+
+
 
 .well-map{
 	padding: 0;
