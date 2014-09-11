@@ -62,7 +62,7 @@ angular.module('heatMapDirective', []).directive('heatMap', ['ConnectionService'
                     $scope.filterKey = neon.widget.getInstanceId("map");
                     $scope.showFilter = false;
                     $scope.dataBounds = undefined;
-                    $scope.limit = 1000;  // Max points to pull into the map.
+                    $scope.limit = 3000;  // Max points to pull into the map.
 
                     // optionsDisplayed is used merely to track the display of the options menu
                     // for usability and workflow analysis.
