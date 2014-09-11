@@ -80,3 +80,19 @@ div.filter.row {
 .map-field-form .chart-options #map-options .arrow{
 	left:inherit;
 	right: 56px;
+}
+
+linechart .linechart {
+	margin: 0 0 0 0;
+}
+
+.chart-options #line-chart-options {
+	left:inherit;
+	right: 17px;
+	top: 48px;
+}
+
+.chart-options #line-chart-options .arrow {
+	left:inherit;
+	right: 27px;
+}
