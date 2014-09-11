@@ -22,3 +22,51 @@ body {
 .query-results-grid {
 	height:150px;
 }
+
+div.no-top-padding {
+	padding-top: 0px;
+}
+
+.olControlAttribution {
+	display: none !important;
+}
+
+.heat-map div.map-field-form {
+	padding: 0px 30px 0px;
+}
+
+.legend .legend-item {
+	margin-top: 8px;
+}
+
+.chart-options .btn {
+	padding-top: 8px;
+	padding-bottom: 2px;
+}
+
+h3.table-label {
+	margin-top: 5px;
+	margin-bottom: 5px;
+}
+
+div.table-configs-row, div.filters-config-row {
+	margin-top: 10px;
+}
+
+.query-results-table div.table-label-div {
+	padding-left: 30px;
+	padding-right: 0px;
+	text-align: right;
+}
+
+.query-results-table .button-div {
+	padding-left: 0px;
+	padding-right: 30px;
+}
+.query-results-table .data-tray .refresh {
+	margin-left: 0px;
+}
+
+div.filter.row {
+	margin-bottom: 10px;
+}
