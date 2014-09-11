@@ -26,9 +26,8 @@
  * @class neonDemo.directives.linechart
  * @constructor
  */
-var linechart = angular.module('linechartDirective', []);
-
-linechart.directive('linechart', ['ConnectionService', function(connectionService) {
+angular.module('neon.directives', [])
+.directive('linechart', ['ConnectionService', function(connectionService) {
 	var COUNT_FIELD_NAME = 'value';
 
 	var link = function($scope, el, attr) {
@@ -352,7 +351,7 @@ linechart.directive('linechart', ['ConnectionService', function(connectionServic
 	};
 
 	return {
-		templateUrl: 'partials/linechart.html',
+		templateUrl: 'app/partials/linechart.html',
 		restrict: 'E',
 		scope: {
 			colorMappings: '&',

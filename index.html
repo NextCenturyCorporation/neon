@@ -16,6 +16,7 @@
 		<link rel="stylesheet" type="text/css" href="app/css/directives/timelineSelector.css" />
 		<link rel="stylesheet" type="text/css" href="app/css/directives/timelineSelectorChart.css" />
 		<link rel="stylesheet" type="text/css" href="app/css/directives/queryResultsTable.css">
+		<link rel="stylesheet" type="text/css" href="app/css/directives/linechart.css">
 
 		<!--link rel="stylesheet" type="text/css" href="app/css/neon.css" /-->
 		<link rel="stylesheet" type="text/css" href="app/css/app.css" />
@@ -69,7 +70,10 @@
 				</div>
 			</div>
 			<div class="row">
-				<div class="col-xs-12">
+				<div class="col-xs-6">
+					<linechart chart-type="'line'"></linechart>
+				</div>
+				<div class="col-xs-6">
 					<p>graph</p>
 				</div>
 			</div>
@@ -110,6 +114,7 @@
 		<script src="app/js/namespaces.js"></script>
 		<script src="app/lib/neon/charts/circularHeatChart.js"></script>
 		<script src="app/lib/neon/charts/timelineSelectorChart.js"></script>
+		<script src="app/lib/neon/charts/linechart.js"></script>
 
 		<script src="app/lib/draperLab/draper.activity_logger-2.1.1.js"></script>
 		<script src="app/js/xdata/xdataConfig.js"></script>
@@ -131,6 +136,7 @@
 		<script src="app/js/directives/directedGraphDirective.js"></script>
 		<script src="app/js/directives/filterBuilderDirective.js"></script>
 		<script src="app/js/directives/heatMap.js"></script>
+		<script src="app/js/directives/lineChartDirective.js"></script>
 		<script src="app/js/directives/queryResultsTable.js"></script>
 		<script src="app/js/directives/timelineSelector.js"></script>
 		<script src="app/js/directives/timelineSelectorChart.js"></script>

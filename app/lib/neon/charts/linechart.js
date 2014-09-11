@@ -27,6 +27,7 @@ charts.LineChart = function (rootElement, selector, opts) {
 
 	this.colors = [];
 	this.colorRange = [
+		'#428bca',
         '#39b54a',
         '#C23333',
         '#3662CC',
@@ -235,13 +236,13 @@ charts.LineChart.prototype.drawLine = function(opts) {
 	            "y2" : function(d){ return me.y(d);}
 	        });
 
-	// Hover line. 
+	// Hover line.
 	var hoverLineGroup = me.svg.append("g")
 		.attr("class", "hover-line");
 	var hoverLine = hoverLineGroup
 		.append("line")
-			.attr("x1", 10).attr("x2", 10) 
-			.attr("y1", 0).attr("y2", me.height); 
+			.attr("x1", 10).attr("x2", 10)
+			.attr("y1", 0).attr("y2", me.height);
 	var hoverDate = hoverLineGroup.append('text')
 	   .attr("class", "hover-text hover-date")
 	   .attr('y', me.height+20);
@@ -308,7 +309,7 @@ charts.LineChart.prototype.drawLine = function(opts) {
 				else
 					return 1;
 			}
-			
+
 			me.svg.selectAll("dot")
 	            .data(data)
 	          .enter().append("circle")
@@ -321,7 +322,7 @@ charts.LineChart.prototype.drawLine = function(opts) {
 	            .attr("cy", function(d) { return me.y(d[me.yAttribute]); });
 	    }
 
-	    hoverCircles[opts[i].series] = 
+	    hoverCircles[opts[i].series] =
 			me.svg.append("circle")
 	            .attr("class", "dot dot-hover")
 	            .attr("stroke", color)
@@ -360,7 +361,7 @@ charts.LineChart.prototype.drawLine = function(opts) {
 	}
 
 	// Add mouseover events.
-	d3.select('.linechart').on("mouseover", function() { 
+	d3.select('.linechart').on("mouseover", function() {
 		//console.log('mouseover')
 	}).on("mousemove", function(event) {
 		if (opts && opts.length > 0) {
@@ -420,7 +421,7 @@ charts.LineChart.prototype.drawLine = function(opts) {
 
 			$("#tooltip-container").html(html);
 		    $("#tooltip-container").show();
-		      
+
 		    d3.select("#tooltip-container")
 			    .style("top", (d3.event.pageY)  + "px")
 			    .style("left", (d3.event.pageX + 15) + "px");
