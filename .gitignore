@@ -42,3 +42,4 @@ neon-server/bin
 *.swp
 *.log
 *.hprof
+*.*#
