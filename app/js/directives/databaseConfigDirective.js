@@ -15,12 +15,19 @@ databaseConfig.directive('databaseConfig', ['ConnectionService', function (conne
         $scope.activeServer = "Choose dataset";
         $scope.servers = [
             {
-                name: "Memex",
+                name: "Memex Primary",
                 datastoreSelect: "mongo",
                 hostnameInput: "memex",
                 selectedDb: "memex",
-                selectedTable: "modifiedBasic2500"
+                selectedTable: "mergedFixed"
+            },{
+                name: "Memex Phones",
+                datastoreSelect: "mongo",
+                hostnameInput: "memex",
+                selectedDb: "memex",
+                selectedTable: "mergedFixedPhones"
             }
+
         ];
         $scope.fields = [
             {

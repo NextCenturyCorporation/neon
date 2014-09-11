@@ -27,44 +27,50 @@
 	<body ng-app="memex" ng-controller="neonController">
 		<div class="container-fluid">
 			<div class="row">
-				<div class="col-xs-4">
-					<database-config></database-config>
-				</div>
-				<div class="col-xs-2 col-xs-offset-6 toggles-div">
-					<a data-toggle="collapse" data-parent="#trays" href=".filter-tray" class="collapsed filter-toggle"
-						ng-click="toggleCreateFilters()">
-						<span class="glyphicon glyphicon-filter"></span>
-						Create Filters
-						<span class="label label-primary" ng-bind="filterCount" ng-class="{true: '', false: 'hidden'}[filterCount > 0]"></span>
-					</a>
-					<a data-toggle="collapse" data-parent="#trays" href=".data-tray" class="collapsed table-toggle"
-					   ng-click="toggleSeeData()">
-						<span class="glyphicon glyphicon-list"></span> View Data
-					</a>
+				<div class="col-xs-12">
+					<div class="pull-left">
+						<database-config></database-config>
+					</div>
+					<div class="pull-right toggles-div">
+						<a data-toggle="collapse" data-parent="#trays" href=".filter-tray" class="collapsed filter-toggle"
+							ng-click="toggleCreateFilters()">
+							<span class="glyphicon glyphicon-filter"></span>
+							Create Filters
+							<span class="label label-primary" ng-bind="filterCount" ng-class="{true: '', false: 'hidden'}[filterCount > 0]"></span>
+						</a>
+						<a data-toggle="collapse" data-parent="#trays" href=".data-tray" class="collapsed table-toggle"
+						   ng-click="toggleSeeData()">
+							<span class="glyphicon glyphicon-list"></span> View Data
+						</a>
+					</div>
 				</div>
 			</div>
 			<div class="row">
 				<div class="panel-group" id="trays">
-					<div filter-builder></div>
+					<filter-builder></filter-builder>
 					<query-results-table show-data="seeData"></query-results-table>
 				</div>
 			</div>
 			<div class="row">
-				<timeline-selector></timeline-selector>
-			</div>
-			<div class="row">
-				<div class="col-xs-6">
-					<heat-map></heat-map>
-				</div>
-				<div class="col-xs-6">
-					<p>graph</p>
+				<div class="col-xs-12">
+					<div class="well">
+						<timeline-selector></timeline-selector>
+					</div>
 				</div>
 			</div>
 			<div class="row">
+				<div class="col-xs-6">
+					<div class="well no-top-padding">
+						<heat-map></heat-map>
+					</div>
+				</div>
 				<div class="col-xs-6">
 					<circular-heat-form></circular-heat-form>
 				</div>
-				<div class="col-xs-6">
+			</div>
+			<div class="row">
+				<div class="col-xs-12">
+					<p>graph</p>
 				</div>
 			</div>
 
@@ -118,9 +124,11 @@
 		<script src="app/js/services/connectionService.js"></script>
 		<script src="app/js/services/filterCountService.js"></script>
 
+		<script src="app/js/directives/arrayTextFormDirective.js"></script>
 		<script src="app/js/directives/circularHeatChart.js"></script>
 		<script src="app/js/directives/circularHeatForm.js"></script>
 		<script src="app/js/directives/databaseConfigDirective.js"></script>
+		<script src="app/js/directives/directedGraphDirective.js"></script>
 		<script src="app/js/directives/filterBuilderDirective.js"></script>
 		<script src="app/js/directives/heatMap.js"></script>
 		<script src="app/js/directives/queryResultsTable.js"></script>

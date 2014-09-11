@@ -500,7 +500,7 @@ angular.module('timelineSelectorDirective', []).directive('timelineSelector', ['
 					data.push({
 						name: 'Total',
 						type: 'bar',
-						color: '#39b54a',
+						color: '#428bca',
 						data: queryData
 					});
 

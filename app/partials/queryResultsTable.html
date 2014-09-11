@@ -1,16 +1,20 @@
 <div id="data-tray" class="tray data-tray panel panel-default collapse">
 	<div class="container-fluid">
-		<div class="row">
-			<div class="col-xs-2">
-				Showing {{tableOptions.data.length}} of {{totalRows}}
+		<div class="row table-configs-row">
+			<div class="col-xs-3">
+				<h3 class="table-label">
+					Showing {{tableOptions.data.length}} of {{totalRows}}
+				</h3>
 			</div>
-			<div class="col-xs-1 col-xs-offset-2">
-				Sort By
+			<div class="col-xs-1 col-xs-offset-1 table-label-div">
+				<h3 class="table-label">
+					Sort By
+				</h3>
 			</div>
 			<div class="col-xs-1">
 				<select class="form-control" ng-model="sortByField" ng-disabled="!(fields.length > 0)" ng-options="field for field in fields"></select>
 			</div>
-			<div class="col-xs-2">
+			<div class="col-xs-2 button-div">
 				<label class="btn btn-default active" ng-class="{true: 'active', false: ''}[sortDirection === ASCENDING]">
 					<input type="radio" ng-model="sortDirection" style="display:none" ng-value="ASCENDING"> ASC
 				</label>
@@ -19,14 +23,16 @@
 				</label>
 			</div>
 
-			<div class="col-xs-1 col-xs-offset-1">
-				Limit
+			<div class="col-xs-1 col-xs-offset-1 table-label-div">
+				<h3 class="table-label">
+					Limit
+				</h3>
 			</div>
 			<div class="col-xs-1">
 				<input type="number" min="1" name="limitInput" class="form-control" ng-model="limit"
 					ng-class="{true: '', false: 'has-error'}[dataTableForm.limitInput.$error.number]">
 			</div>
-			<div class="col-xs-1">
+			<div class="col-xs-1 button-div">
 				<button type="button" class="btn btn-default refresh" ng-click="refreshData()">
 					<span class="glyphicon glyphicon-refresh"></span>
 				</button>

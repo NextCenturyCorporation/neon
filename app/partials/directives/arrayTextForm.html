@@ -1,0 +1,6 @@
+<div ng-if="fields">
+	<textarea ng-repeat="field in fields" ng-blur="blur( $event, $index )">
+		{{strings[$index]}}
+	</textarea>
+	<button ng-click="addField()">+</button>
+</div>
