@@ -4,7 +4,7 @@ function circularHeatChart(element, configuration) {
     numSegments = 24,
     segmentHeight = 20,
     domain = null,
-    range = ["#ffffff", "#39b54a"],
+    range = ["#ffffff", "#428bca"],
     accessor = function(d) {return d;},
     radialLabels = segmentLabels = [];
 
@@ -56,7 +56,7 @@ function circularHeatChart(element, configuration) {
                 .attr("id", function(d, i) {return "radial-label-path-"+id+"-"+i;})
                 .attr("d", function(d, i) {
                     var r = innerRadius + ((i + 0.2) * segmentHeight);
-                    return "m" + r * Math.sin(lsa) + " -" + r * Math.cos(lsa) + 
+                    return "m" + r * Math.sin(lsa) + " -" + r * Math.cos(lsa) +
                             " a" + r + " " + r + " 0 1 1 -1 0";
                 });
 
