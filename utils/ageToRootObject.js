@@ -13,11 +13,11 @@ MongoClient.connect("mongodb://" + host +":" + port + "/"+ db , function(err, db
 	if(!err) {
 		log.info("We are connected");
 		var collection = db.collection("mergedFixed");
-		textToNumber(collection);
+		doAction(collection);
 	}
 });
 
-var textToNumber = function(collection) {
+var doAction = function(collection) {
 	log.info("Fetching rows");
 	collection.find().toArray(function(err, items) {
 		log.info(items.length);
@@ -26,12 +26,9 @@ var textToNumber = function(collection) {
 			if(doc["dig|snapshot"]["dig|mentionsPersonAge"]) {
 				log.info("Record:")
 				log.info(doc["dig|snapshot"]["dig|mentionsPersonAge"]);
-
-
-				doc["dig|snapshot"]["dig|mentionsPersonAge"] = parseInt(doc["dig|snapshot"]["dig|mentionsPersonAge"]);
-
-				log.info(doc["dig|snapshot"]["dig|mentionsPersonAge"]);
 				log.info("")
+
+				doc["age"] = parseFloat(doc["dig|snapshot"]["dig|mentionsPersonAge"]);
 
 				collection.save(doc, {w:1}, function(err, savedDoc) {
 					if(err) {

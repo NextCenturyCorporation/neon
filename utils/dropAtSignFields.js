@@ -1,7 +1,7 @@
 var host = "memex";
 var port = 27017;
 var db = "memex";
-var collection = "mergedFixedPhones";
+var collection = "mergedFixed";
 
 var async = require('async');
 var MongoClient = require('mongodb').MongoClient;
@@ -13,25 +13,23 @@ MongoClient.connect("mongodb://" + host +":" + port + "/"+ db , function(err, db
 	if(!err) {
 		log.info("We are connected");
 		var collection = db.collection("mergedFixed");
-		textToNumber(collection);
+		doAction(collection);
 	}
 });
 
-var textToNumber = function(collection) {
+var doAction = function(collection) {
 	log.info("Fetching rows");
 	collection.find().toArray(function(err, items) {
 		log.info(items.length);
 
 		async.each(items, function(doc, docCallback) {
-			if(doc["dig|snapshot"]["dig|mentionsPersonAge"]) {
-				log.info("Record:")
-				log.info(doc["dig|snapshot"]["dig|mentionsPersonAge"]);
-
-
-				doc["dig|snapshot"]["dig|mentionsPersonAge"] = parseInt(doc["dig|snapshot"]["dig|mentionsPersonAge"]);
-
-				log.info(doc["dig|snapshot"]["dig|mentionsPersonAge"]);
-				log.info("")
+			if(doc["@type"] || doc["@id"]) {
+				if(doc["@type"]) {
+					delete doc["@type"];
+				}
+				if(doc["@id"]) {
+					delete doc["@id"];
+				}
 
 				collection.save(doc, {w:1}, function(err, savedDoc) {
 					if(err) {
