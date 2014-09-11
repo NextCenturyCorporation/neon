@@ -70,3 +70,13 @@ div.table-configs-row, div.filters-config-row {
 div.filter.row {
 	margin-bottom: 10px;
 }
+
+.map-field-form .chart-options #map-options {
+	left:inherit;
+	right: 18px;
+	top: 30px;
+}
+
+.map-field-form .chart-options #map-options .arrow{
+	left:inherit;
+	right: 56px;
