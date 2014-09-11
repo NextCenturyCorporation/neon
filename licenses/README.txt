@@ -3,7 +3,7 @@ below. Copies of these licenses are included in this folder.
 
 Last update:  2014-09-10 by Clark 
 
-Apache v2.0, apache-2.0.txt
+Apache v2.0 (apache-2.0.txt)
 - Gradle (see http://www.gradle.org/license)
 - Groovy
   -- org.codehaus.groovy:groovy-all:2.1.6
@@ -81,14 +81,17 @@ Eclipse Public License (EPL v1.0, epl-1.0.txt)
 BSD (bsd.txt)
 - javolution (used by Hive/Shark)
   -- javolution:javolution:5.5.1
-- jline (used by Hive/Shark)
-  -- jline:jline:0.9.94
 - antlr
   -- org.antlr:ST4:4.0.7
   -- org.antlr:antlr-runtime:3.5
   -- org.antlr:antlr4-runtime:4.0
   -- org.antlr:antlr4:4.0
   -- org.antlr:antlr4:4.0
+
+JLine (jline.txt)
+- jline (used by Hive/Shark)
+  -- jline:jline:0.9.94
+
 
 CDDL v1.1 (cddl-1.1.txt)
 - Jersey
