@@ -1,7 +1,7 @@
 var host = "memex";
 var port = 27017;
 var db = "memex";
-var collection = "mergedFixedPhones";
+var collectionName = "mergedFixedPhones";
 
 var async = require('async');
 var MongoClient = require('mongodb').MongoClient;
@@ -12,7 +12,7 @@ var log = new (winston.Logger)({ transports : [new (winston.transports.Console)(
 MongoClient.connect("mongodb://" + host +":" + port + "/"+ db , function(err, db) {
 	if(!err) {
 		log.info("We are connected");
-		var collection = db.collection("mergedFixed");
+		var collection = db.collection(collectionName);
 		textToNumber(collection);
 	}
 });

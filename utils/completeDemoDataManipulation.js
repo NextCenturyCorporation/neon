@@ -8,7 +8,7 @@
 var host = "memex";
 var port = 27017;
 var db = "memex";
-var collection = "testNewScript";
+var collectionName = "testNewScript";
 
 var stringDefault = "";
 var numberDefault = "";
@@ -24,7 +24,7 @@ var log = new (winston.Logger)({ transports : [new (winston.transports.Console)(
 MongoClient.connect("mongodb://" + host +":" + port + "/"+ db , function(err, db) {
 	if(!err) {
 		log.info("We are connected");
-		var coll = db.collection(collection);
+		var coll = db.collection(collectionName);
 		unwind(coll);
 	}
 });
