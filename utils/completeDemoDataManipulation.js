@@ -1,3 +1,10 @@
+/*  To Run:
+
+	npm install async mongodb winston
+	node completeDemoDateManipulation.js
+*/
+
+
 var host = "memex";
 var port = 27017;
 var db = "memex";
