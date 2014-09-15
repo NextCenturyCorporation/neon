@@ -41,7 +41,7 @@ angular.module('directedGraphDirective', [])
 			};
 
 			var onFiltersChanged = function (message) {
-				$scope.queryForChartData();
+				$scope.render();
 			};
 
 			var onDatasetChanged = function (message) {
@@ -60,6 +60,9 @@ angular.module('directedGraphDirective', [])
 
 			$scope.render = function() {
 				if($scope.groupFields.length > 1 || $scope.groupFields[0] !== "") {
+					if($scope.groupFields[$scope.groupFields.length - 1] === "") {
+						$scope.groupFields.splice($scope.groupFields.length - 1, 1);
+					}
 					$scope.queryForData();
 				}
 			};
