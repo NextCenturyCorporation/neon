@@ -1,4 +1,5 @@
 <div ng-if="fields">
+	<span class="field-label">Fields:</span>
 	<input type="text" ng-repeat="field in fields" ng-blur="blur( $event, $index )" value="{{field}}" class="form-control field-input" />
 	<button ng-click="addField()" class="btn btn-default">+</button>
 </div>

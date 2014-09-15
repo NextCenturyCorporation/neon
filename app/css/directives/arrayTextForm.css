@@ -1,6 +1,13 @@
 input.field-input {
 	width: 125px;
 	display: inline-block;
-	padding-bottom: 5px;
+	margin-bottom: 3px;
 	margin-right:2px;
+}
+
+span.field-label {
+	width: 123px;
+	display: inline-block;
+	margin-bottom: 3px;
+	margin-right:0px;
 }

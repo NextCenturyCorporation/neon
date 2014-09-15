@@ -21,9 +21,15 @@ angular.module('directedGraphDirective', [])
 	return {
 		templateUrl: 'app/partials/directives/directedGraph.html',
 		restrict: 'EA',
-		scope: {},
+		scope: {
+			startingFields: '='
+		},
 		link: function ($scope, element, attr) {
-			$scope.groupFields = [""];
+			if($scope.startingFields) {
+				$scope.groupFields = $scope.startingFields;
+			} else {
+				$scope.groupFields = [""];
+			}
 
 			$scope.initialize = function () {
 				$scope.messenger = new neon.eventing.Messenger();
@@ -46,7 +52,6 @@ angular.module('directedGraphDirective', [])
 				// if there is no active connection, try to make one.
 				connectionService.connectToDataset(message.datastore, message.hostname, message.database, message.table);
 
-				// Pull data.
 				var connection = connectionService.getActiveConnection();
 				if (connection) {
 					connectionService.loadMetadata($scope.render);
@@ -54,55 +59,28 @@ angular.module('directedGraphDirective', [])
 			};
 
 			$scope.render = function() {
-				console.log("rendering logic");
-				console.log($scope.groupFields);
-
 				if($scope.groupFields.length > 1 || $scope.groupFields[0] !== "") {
-					console.log("need to actually render");
 					$scope.queryForData();
-				} else {
-					console.log("skipping rendering because no fields defined");
 				}
 			};
 
 			$scope.queryForData = function () {
-				/*var query = new neon.query.Query()
-					.selectFrom($scope.databaseName, $scope.tableName)
-					.where($scope.dateField, '!=', null)*/
 				var query = new neon.query.Query()
 					.selectFrom($scope.databaseName, $scope.tableName);
-
-				console.log($scope.groupFields);
 
 				query = query.groupBy.apply(query, $scope.groupFields);
 
 				var connection = connectionService.getActiveConnection();
 
 				if(connection) {
-					console.log("Execute!");
 					connection.executeQuery(query, $scope.calculateGraphData);
-				} else {
-					console.log('no connection');
 				}
-				/*
-				connectionService.getActiveConnection().executeQuery(query, function (queryResults) {
-					$scope.$apply(function () {
-						//$scope.updateChartData(queryResults);
-					});
-				}, function(error) {
-					$scope.$apply(function () {
-						$scope.updateGraph({nodes:[], links: []});
-					})
-				});*/
 
 			};
 
 			$scope.calculateGraphData = function(response) {
 				var data = response.data;
 				//var data = [{name: "foo"},{name: "bar"},{name: "foo"}];
-
-				console.log("Need to process data for graph");
-				console.log(data);
 
 				//build nodes array
 				var nodesIndexes = {};
@@ -136,25 +114,19 @@ angular.module('directedGraphDirective', [])
 							}
 							linksIndexes[node1][node2] = links.length;
 
-
-							console.log("Linking " + data[i][$scope.groupFields[field]] + " : " + node1 +
-								" and " + data[i][$scope.groupFields[field+1]] + " : " + node2);
 							links.push({source: node1, target: node2, value: 1});
 						}
 					}
 				}
 
-				console.dir(nodesIndexes);
-				console.log(nodes.length);
-				console.log(nodes);
-				console.log(links.length);
-				console.log(links);
-
 				$scope.updateGraph({nodes: nodes, links: links});
 			}
 
+			$scope.uniqueId = (Math.floor(Math.random()*10000));
+			$scope.svgId = "directed-svg-" + $scope.uniqueId;
+
 			$scope.updateGraph = function(data) {
-				var svg = d3.select("#directed-graph-svg")
+				var svg = d3.select("#" + $scope.svgId)
 				if(svg) {
 					svg.remove();
 				}
@@ -162,16 +134,16 @@ angular.module('directedGraphDirective', [])
 				var width = 600,
 				    height = 300;
 
-				var color = d3.scale.category20();
+				var color = d3.scale.category10();
 
 				var force = d3.layout.force()
 				    .charge(-10)
 				    .linkDistance(30)
 				    .size([width, height]);
 
-				var svg = d3.select("#directed-graph-div")
+				var svg = d3.select("#directed-graph-div-"+$scope.uniqueId)
 				    .append("svg")
-						.attr("id", "directed-graph-svg")
+						.attr("id", $scope.svgId)
 				      .attr({
 				        "width": "100%",
 				        "height": "100%"
