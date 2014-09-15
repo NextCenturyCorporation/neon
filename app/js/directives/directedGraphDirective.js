@@ -76,7 +76,10 @@ angular.module('directedGraphDirective', [])
 				var connection = connectionService.getActiveConnection();
 
 				if(connection) {
+					d3.select("#node-click-name").text("");
 					connection.executeQuery(query, $scope.calculateGraphData);
+				} else {
+					d3.select("#node-click-name").text("No database connection.");
 				}
 
 			};
