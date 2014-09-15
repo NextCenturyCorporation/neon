@@ -16,17 +16,18 @@
  */
 
 
-angular.module('neon.directives', [])
+angular.module('directedGraphDirective', [])
 .directive('directedGraph', ['ConnectionService', function (connectionService) {
 	return {
 		templateUrl: 'app/partials/directives/directedGraph.html',
 		restrict: 'EA',
-		scope: {
-
-		},
+		scope: {},
 		link: function ($scope, element, attr) {
+			$scope.groupFields = [""];
 
 			$scope.initialize = function () {
+				$scope.messenger = new neon.eventing.Messenger();
+
 				$scope.messenger.events({
 					activeDatasetChanged: onDatasetChanged,
 					filtersChanged: onFiltersChanged
@@ -48,28 +49,185 @@ angular.module('neon.directives', [])
 				// Pull data.
 				var connection = connectionService.getActiveConnection();
 				if (connection) {
-					connectionService.loadMetadata(function() {
-						$scope.queryForData();
-					});
+					connectionService.loadMetadata($scope.render);
+				}
+			};
+
+			$scope.render = function() {
+				console.log("rendering logic");
+				console.log($scope.groupFields);
+
+				if($scope.groupFields.length > 1 || $scope.groupFields[0] !== "") {
+					console.log("need to actually render");
+					$scope.queryForData();
+				} else {
+					console.log("skipping rendering because no fields defined");
 				}
 			};
 
 			$scope.queryForData = function () {
 				/*var query = new neon.query.Query()
 					.selectFrom($scope.databaseName, $scope.tableName)
-					.where($scope.dateField, '!=', null)
-*/
+					.where($scope.dateField, '!=', null)*/
+				var query = new neon.query.Query()
+					.selectFrom($scope.databaseName, $scope.tableName);
+
+				console.log($scope.groupFields);
+
+				query = query.groupBy.apply(query, $scope.groupFields);
+
+				var connection = connectionService.getActiveConnection();
+
+				if(connection) {
+					console.log("Execute!");
+					connection.executeQuery(query, $scope.calculateGraphData);
+				} else {
+					console.log('no connection');
+				}
+				/*
 				connectionService.getActiveConnection().executeQuery(query, function (queryResults) {
 					$scope.$apply(function () {
 						//$scope.updateChartData(queryResults);
 					});
 				}, function(error) {
 					$scope.$apply(function () {
-						//$scope.updateChartData([]);
+						$scope.updateGraph({nodes:[], links: []});
 					})
-				});
+				});*/
 
 			};
+
+			$scope.calculateGraphData = function(response) {
+				var data = response.data;
+				//var data = [{name: "foo"},{name: "bar"},{name: "foo"}];
+
+				console.log("Need to process data for graph");
+				console.log(data);
+
+				//build nodes array
+				var nodesIndexes = {};
+				var nodes = [];
+				var linksIndexes = {};
+				var links = [];
+				var node1;
+				var node2;
+				for(var i = 0; i < data.length; i++) {
+					for(var field = 0; field < $scope.groupFields.length; field++) {
+						if(!nodesIndexes[data[i][$scope.groupFields[field]]] ||
+							!nodesIndexes[data[i][$scope.groupFields[field]]][$scope.groupFields[field]]) {
+
+							if(!nodesIndexes[data[i][$scope.groupFields[field]]]) {
+								nodesIndexes[data[i][$scope.groupFields[field]]] = {};
+							}
+
+
+							nodesIndexes[data[i][$scope.groupFields[field]]][$scope.groupFields[field]] = nodes.length;
+							nodes.push({name: data[i][$scope.groupFields[field]], group:field});
+						}
+					}
+
+					for(var field = 0; field < $scope.groupFields.length -1; field++) {
+						node1 = nodesIndexes[data[i][$scope.groupFields[field]]][$scope.groupFields[field]];
+						node2 = nodesIndexes[data[i][$scope.groupFields[field + 1]]][$scope.groupFields[field + 1]];
+
+						if(!linksIndexes[node1] || !linksIndexes[node1][node2]) {
+							if(!linksIndexes[node1]) {
+								linksIndexes[node1] = {};
+							}
+							linksIndexes[node1][node2] = links.length;
+
+
+							console.log("Linking " + data[i][$scope.groupFields[field]] + " : " + node1 +
+								" and " + data[i][$scope.groupFields[field+1]] + " : " + node2);
+							links.push({source: node1, target: node2, value: 1});
+						}
+					}
+				}
+
+				console.dir(nodesIndexes);
+				console.log(nodes.length);
+				console.log(nodes);
+				console.log(links.length);
+				console.log(links);
+
+				$scope.updateGraph({nodes: nodes, links: links});
+			}
+
+			$scope.updateGraph = function(data) {
+				var svg = d3.select("#directed-graph-svg")
+				if(svg) {
+					svg.remove();
+				}
+
+				var width = 600,
+				    height = 300;
+
+				var color = d3.scale.category20();
+
+				var force = d3.layout.force()
+				    .charge(-10)
+				    .linkDistance(30)
+				    .size([width, height]);
+
+				var svg = d3.select("#directed-graph-div")
+				    .append("svg")
+						.attr("id", "directed-graph-svg")
+				      .attr({
+				        "width": "100%",
+				        "height": "100%"
+				      })
+				      .attr("viewBox", "0 0 " + width + " " + height )
+				      .attr("preserveAspectRatio", "xMidYMid meet")
+				      .attr("pointer-events", "all")
+				    .call(d3.behavior.zoom().on("zoom", redraw));
+
+				var vis = svg
+				    .append('svg:g');
+
+				function redraw() {
+				  vis.attr("transform",
+				      "translate(" + d3.event.translate + ")"
+				      + " scale(" + d3.event.scale + ")");
+				}
+
+				  force
+				      .nodes(data.nodes)
+				      .links(data.links)
+				      .start();
+
+				  var link = vis.selectAll(".link")
+				      .data(data.links)
+				    .enter().append("line")
+				      .attr("class", "link")
+				      .style("stroke-width", function(d) { return Math.sqrt(d.value); });
+
+				  var node = vis.selectAll(".node")
+				      .data(data.nodes)
+				    .enter().append("circle")
+				      .attr("class", "node")
+				      .attr("r", 5)
+				      .style("fill", function(d) { return color(d.group); })
+				      .call(force.drag);
+
+					node.on("click", function(d, i) {
+						d3.select("#node-click-name").text(d.name);
+					});
+
+				  node.append("title")
+				      .text(function(d) { return d.name; });
+
+				  force.on("tick", function() {
+				    link.attr("x1", function(d) { return d.source.x; })
+				        .attr("y1", function(d) { return d.source.y; })
+				        .attr("x2", function(d) { return d.target.x; })
+				        .attr("y2", function(d) { return d.target.y; });
+
+				    node.attr("cx", function(d) { return d.x; })
+				        .attr("cy", function(d) { return d.y; });
+				  });
+			};
+
+
 
 			// Wait for neon to be ready, the create our messenger and intialize the view and data.
 			neon.ready(function () {

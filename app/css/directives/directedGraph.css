@@ -1,0 +1,17 @@
+.node {
+  stroke: #fff;
+  stroke-width: 1.5px;
+}
+
+.link {
+  stroke: #999;
+  stroke-opacity: .6;
+}
+
+div.draw-button-div {
+	padding-left: 0px;
+}
+
+div.config-row-div {
+	padding-bottom: 5px;
+}

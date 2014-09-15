@@ -1,2 +1,17 @@
-<div class="directed-graph">
+<div class="directed-graph well">
+	<div class="row config-row-div">
+		<div class="col-xs-8">
+			<array-text-form fields="groupFields"></array-text-form>
+		</div>
+		<div id="node-click-name" class="col-xs-2">
+		</div>
+		<div class="col-xs-2">
+			<button ng-click="render()" class="btn btn-default draw-button pull-right">Draw</button>
+		</div>
+	</div>
+	<div class="row">
+		<div class="col-xs-12">
+			<div id="directed-graph-div"></div>
+		</div>
+	</div>
 </div>

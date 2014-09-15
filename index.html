@@ -11,7 +11,9 @@
 		<link rel="stylesheet" type="text/css" href="app/lib/slickgrid/css/slick.grid.css">
 
 		<!--neon-->
+		<link rel="stylesheet" type="text/css" href="app/css/directives/arrayTextForm.css">
 		<link rel="stylesheet" type="text/css" href="app/css/directives/circularHeatChart.css">
+		<link rel="stylesheet" type="text/css" href="app/css/directives/directedGraph.css">
 		<link rel="stylesheet" type="text/css" href="app/css/directives/heatMap.css">
 		<link rel="stylesheet" type="text/css" href="app/css/directives/timelineSelector.css" />
 		<link rel="stylesheet" type="text/css" href="app/css/directives/timelineSelectorChart.css" />
@@ -74,7 +76,7 @@
 					<linechart chart-type="'line'"></linechart>
 				</div>
 				<div class="col-xs-6">
-					<p>graph</p>
+					<directed-graph></directed-graph>
 				</div>
 			</div>
 
@@ -124,6 +126,8 @@
 
 
 		<!-- neon angular -->
+		<script src="app/js/app.js"></script>
+
 		<script src="app/js/controllers/neonController.js"></script>
 
 		<script src="app/js/services/connectionService.js"></script>
@@ -141,6 +145,6 @@
 		<script src="app/js/directives/timelineSelector.js"></script>
 		<script src="app/js/directives/timelineSelectorChart.js"></script>
 
-		<script src="app/js/app.js"></script>
+
 	</body>
 </html>

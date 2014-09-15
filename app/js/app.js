@@ -7,6 +7,8 @@ angular.module("memex", [
 	'neon.services',
 	'neon.directives',
 
+	'directedGraphDirective',
+	'arrayTextFormDirective',
 	'circularHeatChartDirective',
 	'circularHeatFormDirective',
 	'configurationDirective',

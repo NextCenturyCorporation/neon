@@ -1,21 +1,21 @@
-angular.module('neon.directives', [])
+angular.module('arrayTextFormDirective', [])
 .directive('arrayTextForm', function() {
 	return {
 		restrict: "E",
-		scope: {},
+		scope: {
+			fields: '='
+		},
 		templateUrl: "app/partials/directives/arrayTextForm.html",
 		link: function( $scope ){
-			$scope.fields = [""];
-
 			$scope.addField = function() {
-				$scope.strings.push("");
+				$scope.fields.push("");
 			};
 
 			$scope.blur = function( $event, $index ){
 				if($event.currentTarget.value === "" && $scope.fields.length > 1) {
-					$scope.strings.splice($index, 1);
+					$scope.fields.splice($index, 1);
 				} else {
-					$scope.strings[ $index ] = $event.currentTarget.value;
+					$scope.fields[ $index ] = $event.currentTarget.value;
 				}
 			};
 		}
