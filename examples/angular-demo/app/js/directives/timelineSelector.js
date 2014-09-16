@@ -49,12 +49,9 @@ angular.module('timelineSelectorDirective', []).directive('timelineSelector', ['
                 var MILLIS_IN_DAY = MILLIS_IN_HOUR * 24;
                 var HOUR = "hour";
                 var DAY = "day";
-                // TODO - These two variables need to be in a configuration file
-                var USE_OpenCPU = false;
-                var OpenCPU_URL = 'http://neon-opencpu/ocpu/library/NeonAngularDemo/R';
                 // Any code that wants to contact OpenCPU should use this variable. It will be set to true
-                // if and only if USE_OpenCPU is true AND the initial connection to the OpenCPU server succeeds.
-                var openCpuEnabled = false;
+                // if and only if DEMO_CONFIG.opencpu.enableOpenCpu is true AND the initial connection to the OpenCPU server succeeds.
+                var connectedToOpenCpu = false;
                 // opencpu logging is off to keep the logs clean, turn it on to debug opencpu problems
                 ocpu.enableLogging = false;
                 // By default, opencpu uses alerts when there are problems. We want to handle the errors gracefully instead
@@ -98,11 +95,11 @@ angular.module('timelineSelectorDirective', []).directive('timelineSelector', ['
                         filtersChanged: onFiltersChanged
                     });
 
-                    if (USE_OpenCPU) {
-                        ocpu.seturl(OpenCPU_URL).done(function() {
-                          openCpuEnabled = true;
+                    if (DEMO_CONFIG.opencpu.enableOpenCpu) {
+                        ocpu.seturl(DEMO_CONFIG.opencpu.url).done(function() {
+                          connectedToOpenCpu = true;
                         }).fail(function() {
-                          openCpuEnabled = false;
+                          connectedToOpenCpu = false;
                         });
                     }
                 };
@@ -491,7 +488,7 @@ angular.module('timelineSelectorDirective', []).directive('timelineSelector', ['
                  */
                 $scope.addTimeSeriesAnalysis = function(timelineData, graphData) {
                     // If OpenCPU isn't available, then just return without doing anything.
-                    if (!openCpuEnabled) {
+                    if (!connectedToOpenCpu) {
                         return;
                     }
 
@@ -499,7 +496,7 @@ angular.module('timelineSelectorDirective', []).directive('timelineSelector', ['
                 };
 
                 $scope.runMMPP = function() {
-                    if (!openCpuEnabled) {
+                    if (!connectedToOpenCpu) {
                         return;
                     }
                     $scope.addMmppTimeSeriesAnalysis($scope.primarySeries.data, $scope.data);
