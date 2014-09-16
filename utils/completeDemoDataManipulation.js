@@ -8,10 +8,10 @@
 var host = "memex";
 var port = 27017;
 var db = "memex";
-var collectionName = "testNewScript";
+var collectionName = "mergedFixed";
 
 var stringDefault = "";
-var numberDefault = "";
+var numberDefault = 0;
 var dateDefault = null;
 
 
