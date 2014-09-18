@@ -20,8 +20,8 @@ import groovy.io.FileType
 apply plugin: 'antlr4'
 
 dependencies {
-    antlr4 'org.antlr:antlr4:4.0'
-    antlr4 'org.antlr:antlr4-runtime:4.0'
+    antlr4 'org.antlr:antlr4:4.2'
+    antlr4 'org.antlr:antlr4-runtime:4.2'
     antlr4 'org.antlr:antlr-runtime:3.5'
     antlr4 'org.antlr:ST4:4.0.7'
 }

@@ -1,74 +1,299 @@
-// Generated from Neon.g4 by ANTLR 4.0
+// Generated from Neon.g4 by ANTLR 4.2
 package com.ncc.neon.language;
 
 import org.antlr.v4.runtime.ParserRuleContext;
-import org.antlr.v4.runtime.Token;
-import org.antlr.v4.runtime.tree.TerminalNode;
+import org.antlr.v4.runtime.misc.NotNull;
 import org.antlr.v4.runtime.tree.ErrorNode;
+import org.antlr.v4.runtime.tree.TerminalNode;
 
+/**
+ * This class provides an empty implementation of {@link NeonListener},
+ * which can be extended to create a listener which only needs to handle a subset
+ * of the available methods.
+ */
 public class NeonBaseListener implements NeonListener {
-	@Override public void enterLimit(NeonParser.LimitContext ctx) { }
-	@Override public void exitLimit(NeonParser.LimitContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterSelectFields(@NotNull NeonParser.SelectFieldsContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitSelectFields(@NotNull NeonParser.SelectFieldsContext ctx) { }
 
-	@Override public void enterWhereClause(NeonParser.WhereClauseContext ctx) { }
-	@Override public void exitWhereClause(NeonParser.WhereClauseContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterWhereClause(@NotNull NeonParser.WhereClauseContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitWhereClause(@NotNull NeonParser.WhereClauseContext ctx) { }
 
-	@Override public void enterSort(NeonParser.SortContext ctx) { }
-	@Override public void exitSort(NeonParser.SortContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterSelect(@NotNull NeonParser.SelectContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitSelect(@NotNull NeonParser.SelectContext ctx) { }
 
-	@Override public void enterCount(NeonParser.CountContext ctx) { }
-	@Override public void exitCount(NeonParser.CountContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterOffset(@NotNull NeonParser.OffsetContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitOffset(@NotNull NeonParser.OffsetContext ctx) { }
 
-	@Override public void enterFieldList(NeonParser.FieldListContext ctx) { }
-	@Override public void exitFieldList(NeonParser.FieldListContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterFunctionName(@NotNull NeonParser.FunctionNameContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitFunctionName(@NotNull NeonParser.FunctionNameContext ctx) { }
 
-	@Override public void enterSortClause(NeonParser.SortClauseContext ctx) { }
-	@Override public void exitSortClause(NeonParser.SortClauseContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterQuery(@NotNull NeonParser.QueryContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitQuery(@NotNull NeonParser.QueryContext ctx) { }
 
-	@Override public void enterQuery(NeonParser.QueryContext ctx) { }
-	@Override public void exitQuery(NeonParser.QueryContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterCount(@NotNull NeonParser.CountContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitCount(@NotNull NeonParser.CountContext ctx) { }
 
-	@Override public void enterSelect(NeonParser.SelectContext ctx) { }
-	@Override public void exitSelect(NeonParser.SelectContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterSort(@NotNull NeonParser.SortContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitSort(@NotNull NeonParser.SortContext ctx) { }
 
-	@Override public void enterWhere(NeonParser.WhereContext ctx) { }
-	@Override public void exitWhere(NeonParser.WhereContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterOperator(@NotNull NeonParser.OperatorContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitOperator(@NotNull NeonParser.OperatorContext ctx) { }
 
-	@Override public void enterDatabase(NeonParser.DatabaseContext ctx) { }
-	@Override public void exitDatabase(NeonParser.DatabaseContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterDatabase(@NotNull NeonParser.DatabaseContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitDatabase(@NotNull NeonParser.DatabaseContext ctx) { }
 
-	@Override public void enterAdditionalClauses(NeonParser.AdditionalClausesContext ctx) { }
-	@Override public void exitAdditionalClauses(NeonParser.AdditionalClausesContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterGroupClause(@NotNull NeonParser.GroupClauseContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitGroupClause(@NotNull NeonParser.GroupClauseContext ctx) { }
 
-	@Override public void enterOperator(NeonParser.OperatorContext ctx) { }
-	@Override public void exitOperator(NeonParser.OperatorContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterSimpleWhereClause(@NotNull NeonParser.SimpleWhereClauseContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitSimpleWhereClause(@NotNull NeonParser.SimpleWhereClauseContext ctx) { }
 
-	@Override public void enterFunction(NeonParser.FunctionContext ctx) { }
-	@Override public void exitFunction(NeonParser.FunctionContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterFunction(@NotNull NeonParser.FunctionContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitFunction(@NotNull NeonParser.FunctionContext ctx) { }
 
-	@Override public void enterSimpleWhereClause(NeonParser.SimpleWhereClauseContext ctx) { }
-	@Override public void exitSimpleWhereClause(NeonParser.SimpleWhereClauseContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterStatement(@NotNull NeonParser.StatementContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitStatement(@NotNull NeonParser.StatementContext ctx) { }
 
-	@Override public void enterStatement(NeonParser.StatementContext ctx) { }
-	@Override public void exitStatement(NeonParser.StatementContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterLimit(@NotNull NeonParser.LimitContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitLimit(@NotNull NeonParser.LimitContext ctx) { }
 
-	@Override public void enterGroupClause(NeonParser.GroupClauseContext ctx) { }
-	@Override public void exitGroupClause(NeonParser.GroupClauseContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterWhere(@NotNull NeonParser.WhereContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitWhere(@NotNull NeonParser.WhereContext ctx) { }
 
-	@Override public void enterOffset(NeonParser.OffsetContext ctx) { }
-	@Override public void exitOffset(NeonParser.OffsetContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterSortClause(@NotNull NeonParser.SortClauseContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitSortClause(@NotNull NeonParser.SortClauseContext ctx) { }
 
-	@Override public void enterFunctionName(NeonParser.FunctionNameContext ctx) { }
-	@Override public void exitFunctionName(NeonParser.FunctionNameContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterFieldList(@NotNull NeonParser.FieldListContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitFieldList(@NotNull NeonParser.FieldListContext ctx) { }
 
-	@Override public void enterGroup(NeonParser.GroupContext ctx) { }
-	@Override public void exitGroup(NeonParser.GroupContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterAdditionalClauses(@NotNull NeonParser.AdditionalClausesContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitAdditionalClauses(@NotNull NeonParser.AdditionalClausesContext ctx) { }
 
-	@Override public void enterSelectFields(NeonParser.SelectFieldsContext ctx) { }
-	@Override public void exitSelectFields(NeonParser.SelectFieldsContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterGroup(@NotNull NeonParser.GroupContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitGroup(@NotNull NeonParser.GroupContext ctx) { }
 
-	@Override public void enterEveryRule(ParserRuleContext ctx) { }
-	@Override public void exitEveryRule(ParserRuleContext ctx) { }
-	@Override public void visitTerminal(TerminalNode node) { }
-	@Override public void visitErrorNode(ErrorNode node) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterEveryRule(@NotNull ParserRuleContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitEveryRule(@NotNull ParserRuleContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void visitTerminal(@NotNull TerminalNode node) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void visitErrorNode(@NotNull ErrorNode node) { }
 }

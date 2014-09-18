@@ -39,17 +39,17 @@ class NeonParsingErrorListener implements ANTLRErrorListener {
     }
 
     @Override
-    void reportAmbiguity(@NotNull Parser recognizer, DFA dfa, int startIndex, int stopIndex, @NotNull BitSet ambigAlts, @NotNull ATNConfigSet configs) {
+    void reportAmbiguity(@NotNull Parser recognizer, DFA dfa, int startIndex, int stopIndex, boolean exact, @NotNull BitSet ambigAlts, @NotNull ATNConfigSet configs) {
         throw new NeonParsingException("Ambiguity error.")
     }
 
     @Override
-    void reportAttemptingFullContext(@NotNull Parser recognizer, @NotNull DFA dfa, int startIndex, int stopIndex, @NotNull ATNConfigSet configs) {
+    void reportAttemptingFullContext(@NotNull Parser recognizer, @NotNull DFA dfa, int startIndex, int stopIndex, @NotNull BitSet ambigAlts, @NotNull ATNConfigSet configs) {
         throw new NeonParsingException("Full context error.")
     }
 
     @Override
-    void reportContextSensitivity(@NotNull Parser recognizer, @NotNull DFA dfa, int startIndex, int stopIndex, @NotNull ATNConfigSet configs) {
+    void reportContextSensitivity(@NotNull Parser recognizer, @NotNull DFA dfa, int startIndex, int stopIndex, int prediction, @NotNull ATNConfigSet configs) {
         throw new NeonParsingException("Context sensitivity error.")
     }
 }

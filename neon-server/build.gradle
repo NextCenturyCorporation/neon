@@ -100,7 +100,7 @@ dependencies {
     compile "ch.qos.logback:logback-core:$logbackVersion"
     compile "ch.qos.logback:logback-classic:$logbackVersion"
     compile "com.google.guava:guava:14.0.1"
-    compile 'org.antlr:antlr4:4.0'
+    compile 'org.antlr:antlr4:4.2'
     compile('org.codehaus.groovy.modules.http-builder:http-builder:0.6') {
         // we already include groovy-all
         exclude module: 'groovy'
