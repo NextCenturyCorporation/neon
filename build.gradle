@@ -18,7 +18,7 @@ defaultTasks 'clean', 'build'
 
 project.ext {
     logbackVersion = "1.0.13"
-    springVersion = "3.2.1.RELEASE"
+    springVersion = "3.2.11.RELEASE"
 }
 
 allprojects {
