@@ -20,15 +20,21 @@
 // neon.SERVER_URL = "http://localhost:8080/neon"
 neon.SERVER_URL = "/neon";
 
+// Configure xdata logger
 var XDATA = {};
-
 XDATA.activityLogger = new activityLogger('lib/draperlab/draper.activity_worker-2.1.1.js');
 XDATA.activityLogger.echo(DEMO_CONFIG.xdata.echoToConsole).testing(!DEMO_CONFIG.xdata.enableLogging);
-
 // Register the xdata logger with a server.
 XDATA.activityLogger.registerActivityLogger(DEMO_CONFIG.xdata.ACTIVITY_LOGGER_URL,
     DEMO_CONFIG.xdata.COMPONENT,
     DEMO_CONFIG.xdata.COMPONENT_VERSION);
+
+// Configure opencpu connection
+if (DEMO_CONFIG.opencpu.enableOpenCpu) {
+    ocpu.enableLogging = DEMO_CONFIG.opencpu.enableLogging;
+    ocpu.useAlerts = DEMO_CONFIG.opencpu.useAlerts;
+    ocpu.seturl(DEMO_CONFIG.opencpu.url);
+}
 
 
 

@@ -30,6 +30,7 @@ if(!window.jQuery) {
   var ocpu = window.ocpu;
   ocpu.useAlerts = true;
   ocpu.enableLogging = true;
+  ocpu.connected = false;
 
   function log(msg) {
     if (ocpu.enableLogging && typeof console != "undefined") {
@@ -412,10 +413,12 @@ if(!window.jQuery) {
       //we use trycatch because javascript will throw an error in case CORS is refused.
       $.get(r_path.href).done(function (resdata) {
         log("Path updated. Available objects/functions:\n" + resdata);
+        ocpu.connected = true;
         deferredResult.resolve();
       }).fail(function (xhr, textStatus, errorThrown) {
         message = "Connection to OpenCPU failed:\n" + textStatus + "\n" + xhr.responseText + "\n" + errorThrown;
         alert(message);
+        ocpu.connected = false;
         deferredResult.reject({name: "OpenCPU connection failed", message: message});
       });
     }

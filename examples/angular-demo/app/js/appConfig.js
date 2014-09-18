@@ -36,3 +36,7 @@ DEMO_CONFIG.opencpu.enableOpenCpu = false;
 // If enableOpenCpu is true, this must be the URL of an open cpu server that has the
 // NeonAngularDemo R package installed (see the app/R/NeonAngularDemo directory)
 DEMO_CONFIG.opencpu.url = 'http://neon-opencpu/ocpu/library/NeonAngularDemo/R';
+// opencpu logging is off to keep the logs clean, turn it on to debug opencpu problems
+DEMO_CONFIG.opencpu.enableLogging = false;
+// By default, opencpu uses alerts when there are problems. We want to handle the errors gracefully instead
+DEMO_CONFIG.opencpu.useAlerts = false;

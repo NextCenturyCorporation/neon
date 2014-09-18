@@ -49,13 +49,6 @@ angular.module('timelineSelectorDirective', []).directive('timelineSelector', ['
                 var MILLIS_IN_DAY = MILLIS_IN_HOUR * 24;
                 var HOUR = "hour";
                 var DAY = "day";
-                // Any code that wants to contact OpenCPU should use this variable. It will be set to true
-                // if and only if DEMO_CONFIG.opencpu.enableOpenCpu is true AND the initial connection to the OpenCPU server succeeds.
-                var connectedToOpenCpu = false;
-                // opencpu logging is off to keep the logs clean, turn it on to debug opencpu problems
-                ocpu.enableLogging = false;
-                // By default, opencpu uses alerts when there are problems. We want to handle the errors gracefully instead
-                ocpu.useAlerts = false;
 
                 element.addClass('timeline-selector');
 
@@ -95,13 +88,6 @@ angular.module('timelineSelectorDirective', []).directive('timelineSelector', ['
                         filtersChanged: onFiltersChanged
                     });
 
-                    if (DEMO_CONFIG.opencpu.enableOpenCpu) {
-                        ocpu.seturl(DEMO_CONFIG.opencpu.url).done(function() {
-                          connectedToOpenCpu = true;
-                        }).fail(function() {
-                          connectedToOpenCpu = false;
-                        });
-                    }
                 };
 
                 /**
@@ -488,7 +474,7 @@ angular.module('timelineSelectorDirective', []).directive('timelineSelector', ['
                  */
                 $scope.addTimeSeriesAnalysis = function(timelineData, graphData) {
                     // If OpenCPU isn't available, then just return without doing anything.
-                    if (!connectedToOpenCpu) {
+                    if (!ocpu.connected) {
                         return;
                     }
 
@@ -496,7 +482,7 @@ angular.module('timelineSelectorDirective', []).directive('timelineSelector', ['
                 };
 
                 $scope.runMMPP = function() {
-                    if (!connectedToOpenCpu) {
+                    if (!ocpu.connected) {
                         return;
                     }
                     $scope.addMmppTimeSeriesAnalysis($scope.primarySeries.data, $scope.data);
