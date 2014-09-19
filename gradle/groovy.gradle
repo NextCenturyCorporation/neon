@@ -36,6 +36,10 @@ groovydoc {
     windowTitle = javadocTitle
 }
 
+jacoco {
+    toolVersion = "0.7.0.201403182114"
+}
+
 task copyJavadocs(type: org.gradle.api.tasks.Copy) {
     description = 'Copies the javadocs to a directory to be zipped'
     dependsOn 'groovydoc'
