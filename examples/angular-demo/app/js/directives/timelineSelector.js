@@ -309,7 +309,7 @@ angular.module('timelineSelectorDirective', []).directive('timelineSelector', ['
                     // TODO: neon doesn't yet support a more efficient way to just get the min/max fields without aggregating
                     // TODO: This could be done better with a promise framework - just did this in a pinch for a demo
                     var minDateQuery = new neon.query.Query()
-                        .selectFrom($scope.databaseName, $scope.tableName)
+                        .selectFrom($scope.databaseName, $scope.tableName).ignoreFilters()
                         .where($scope.dateField, '!=', null).sortBy($scope.dateField, neon.query.ASCENDING).limit(1);
 
                     XDATA.activityLogger.logSystemActivity('TimelineSelector - query for minimum date');
@@ -324,7 +324,7 @@ angular.module('timelineSelectorDirective', []).directive('timelineSelector', ['
                     });
 
                     var maxDateQuery = new neon.query.Query()
-                        .selectFrom($scope.databaseName, $scope.tableName)
+                        .selectFrom($scope.databaseName, $scope.tableName).ignoreFilters()
                         .where($scope.dateField, '!=', null).sortBy($scope.dateField, neon.query.DESCENDING).limit(1);
 
                     XDATA.activityLogger.logSystemActivity('TimelineSelector - query for maximum date');
