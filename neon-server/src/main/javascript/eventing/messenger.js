@@ -74,7 +74,7 @@ neon.eventing.Messenger.prototype.subscribe = function (channel, callback) {
 	var me = this;
 	neon.eventing.eventBus_.subscribe(channel, function (message) {
 		if (message.sender !== me.id_) {
-			callback(message.payload);
+			callback(message, message.payload);
 		}
 	});
 };
