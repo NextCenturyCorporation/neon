@@ -67,7 +67,7 @@ neon.eventing.Messenger.prototype.publish = function (channel, message) {
  * own messages even if they are subscribed to that channel.
  * @param {String} channel The channel to subscribe to
  * @param {Function} callback The callback to invoke when a message is received on the channel. The function takes
- * 1 parameter: the message that was published.
+ * 2 parameters: the full data object that was published, and the message that was published as the nested 'payload' object.
  * @method subscribe
  */
 neon.eventing.Messenger.prototype.subscribe = function (channel, callback) {
