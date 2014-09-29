@@ -103,9 +103,9 @@ neon.eventing.Messenger.prototype.events = function (callbacks) {
 	var me = this;
 	var globalChannelConfigs = this.createGlobalChannelSubscriptions_(callbacks);
 	_.each(globalChannelConfigs, function (channelConfig) {
-		me.subscribe(channelConfig.channel, function (message) {
+		me.subscribe(channelConfig.channel, function (message, payload) {
 				if (channelConfig.callback && typeof channelConfig.callback === 'function') {
-					channelConfig.callback(message);
+					channelConfig.callback(message, payload);
 				}
 			}
 		);

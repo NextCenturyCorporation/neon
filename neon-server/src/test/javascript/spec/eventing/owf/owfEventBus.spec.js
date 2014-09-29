@@ -16,36 +16,39 @@
 
 describe('messaging using the OWF event bus', function () {
 
-    afterEach(function () {
-        neon.mock.owf.clearChannels();
-    });
+	afterEach(function () {
+		neon.mock.owf.clearChannels();
+	});
 
-    it('publish/subscribe OWF messages', function () {
-        neon.eventing.eventBusTestUtils.testPublishSubscribe(new neon.eventing.owf.OWFEventBus());
-    });
+	it('publish/subscribe OWF messages', function () {
+		neon.eventing.eventBusTestUtils.testPublishSubscribe(new neon.eventing.owf.OWFEventBus());
+	});
 
-    it('supports only a single subscriber', function() {
-        // as mentioned in the owfEventBus publish/subscribe docs, OWF only supports a single
-        // subscriber per channel
-        // https://groups.google.com/forum/#!searchin/ozone-developers/eventing/ozone-developers/MbQXWy8vXiA/Q3GwJuW3grQJ
+	it('supports multiple subscribers', function() {
+		//Previously:
+		// as mentioned in the owfEventBus publish/subscribe docs, OWF only supports a single
+		// subscriber per channel
+		// https://groups.google.com/forum/#!searchin/ozone-developers/eventing/ozone-developers/MbQXWy8vXiA/Q3GwJuW3grQJ
 
-        var eventBus = new neon.eventing.owf.OWFEventBus();
-        var channel = 'aChannel';
-        var callback1 = jasmine.createSpy();
-        var callback2 = jasmine.createSpy();
+		//The OWF channel subscribe has been wrapped to allow for multiple handlers
 
-        eventBus.subscribe(channel, callback1);
-        eventBus.publish(channel, 'aMessage');
+		var eventBus = new neon.eventing.owf.OWFEventBus();
+		var channel = 'aChannel';
+		var callback1 = jasmine.createSpy();
+		var callback2 = jasmine.createSpy();
 
-        // this replaces the old subscriber
-        var subscriber = eventBus.subscribe(channel, callback2);
-        eventBus.publish(channel, 'bMessage');
+		eventBus.subscribe(channel, callback1);
+		eventBus.publish(channel, 'aMessage');
 
-        eventBus.unsubscribe(subscriber);
-        eventBus.publish(channel, 'cMessage');
+		//this is added as a second subscription handler
+		var subscriber = eventBus.subscribe(channel, callback2);
+		eventBus.publish(channel, 'bMessage');
 
-        expect(callback1.callCount).toEqual(1);
-        expect(callback2.callCount).toEqual(1);
+		//verify that unsubsribe removes all handlers
+		eventBus.unsubscribe(subscriber);
+		eventBus.publish(channel, 'cMessage');
 
-    });
+		expect(callback1.callCount).toEqual(2);
+		expect(callback2.callCount).toEqual(1);
+	});
 });
