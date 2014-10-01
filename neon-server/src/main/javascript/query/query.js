@@ -178,7 +178,11 @@ neon.query.Query.prototype.selectFrom = function (args) {
  *     new neon.query.Query(...).withFields("field1","field2");
  */
 neon.query.Query.prototype.withFields = function (fields) {
-	this.fields = neon.util.arrayUtils.argumentsToArray(arguments);
+	if(arguments.length === 1 && $.isArray(fields)) {
+		this.fields = fields;
+	} else {
+		this.fields = neon.util.arrayUtils.argumentsToArray(arguments);
+	}
 	return this;
 };
 
@@ -224,11 +228,17 @@ neon.query.Query.prototype.groupBy = function (fields) {
 	this.groupByClauses.length = 0;
 	var me = this;
 
-	var list = neon.util.arrayUtils.argumentsToArray(arguments);
+	var list;
+	if(arguments.length === 1 && $.isArray(fields)) {
+		list = fields;
+	} else {
+		list = neon.util.arrayUtils.argumentsToArray(arguments);
+	}
+
 	list.forEach(function (field) {
 		// if the user provided a string, convert that to the groupBy representation of a single field, otherwise,
 		// they provided a groupBy function so just use that
-		var clause = typeof field === 'string' ? new neon.query.GroupBySingleFieldClause(field) : field;
+		var clause = ((typeof field === 'string') ? new neon.query.GroupBySingleFieldClause(field) : field);
 		me.groupByClauses.push(clause);
 	});
 	return this;
@@ -294,12 +304,19 @@ neon.query.Query.prototype.offset = function (offset) {
  * @example
  *     new neon.query.Query(...).sortBy('field1',neon.query.ASC,'field2',neon.query.DESC);
  */
-neon.query.Query.prototype.sortBy = function (fieldName, sortOrder) {
+neon.query.Query.prototype.sortBy = function (fields) {
 	// even though internally each sortBy clause is a separate object, the user will think about a single sortBy
 	// operation which may include multiple fields, so this method does not append to the existing
 	// sortBy fields, but replaces them
 	this.sortClauses.length = 0;
-	var list = neon.util.arrayUtils.argumentsToArray(arguments);
+
+	var list;
+	if(arguments.length === 1 && $.isArray(fields)) {
+		list = fields;
+	} else {
+		list = neon.util.arrayUtils.argumentsToArray(arguments);
+	}
+
 	for (var i = 0; i < list.length; i += 2) {
 		var field = list[i];
 		var order = list[i + 1];
@@ -385,7 +402,11 @@ neon.query.where = function (fieldName, op, value) {
  * @return {Object}
  */
 neon.query.and = function (clauses) {
-	return new neon.query.BooleanClause('and', neon.util.arrayUtils.argumentsToArray(arguments));
+	if(arguments.length === 1 && $.isArray(clauses)) {
+		return new neon.query.BooleanClause('and', clauses);
+	} else {
+		return new neon.query.BooleanClause('and', neon.util.arrayUtils.argumentsToArray(arguments));
+	}
 };
 
 /**
@@ -397,7 +418,11 @@ neon.query.and = function (clauses) {
  * @return {Object}
  */
 neon.query.or = function (clauses) {
-	return new neon.query.BooleanClause('or', neon.util.arrayUtils.argumentsToArray(arguments));
+	if(arguments.length === 1 && $.isArray(clauses)) {
+		return new neon.query.BooleanClause('or', clauses);
+	} else {
+		return new neon.query.BooleanClause('or', neon.util.arrayUtils.argumentsToArray(arguments));
+	}
 };
 
 /**
