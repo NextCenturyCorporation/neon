@@ -72,14 +72,9 @@ describe('messenger', function () {
 
 		messenger1.publish(channel, message);
 
-		var payloadObject = {
-			payload: message,
-			sender: messenger1.id_
-		};
-
 		expect(callback1).not.toHaveBeenCalled();
-		expect(callback2).toHaveBeenCalledWith(payloadObject, message);
-		expect(callback3).toHaveBeenCalledWith(payloadObject, message);
+		expect(callback2).toHaveBeenCalledWith(message);
+		expect(callback3).toHaveBeenCalledWith(message);
 	});
 
 	it('should be notified when a message is published to the selection changed channel', function () {
@@ -104,12 +99,7 @@ describe('messenger', function () {
 		var newMessenger = new neon.eventing.Messenger()
 		newMessenger.publish(channelName, message);
 
-
-		var payloadObject = {
-			payload: message,
-			sender: newMessenger.id_
-		};
-		expect(callback).toHaveBeenCalledWith(payloadObject, message);
+		expect(callback).toHaveBeenCalledWith(message);
 	}
 
 	it('should publish add filter results', function () {
@@ -199,12 +189,7 @@ describe('messenger', function () {
 		var publisher = new neon.eventing.Messenger();
 		neon.eventing.Messenger.prototype[methodName].apply(publisher, args);
 
-		var payloadObject = {
-			payload: mockResults,
-			sender: publisher.id_
-		};
-
-		expect(callback).toHaveBeenCalledWith(payloadObject, mockResults);
+		expect(callback).toHaveBeenCalledWith(mockResults);
 	}
 
 });

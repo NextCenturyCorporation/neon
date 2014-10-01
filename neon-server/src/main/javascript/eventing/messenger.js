@@ -74,7 +74,7 @@ neon.eventing.Messenger.prototype.subscribe = function (channel, callback) {
 	var me = this;
 	neon.eventing.eventBus_.subscribe(channel, function (message) {
 		if (message.sender !== me.id_) {
-			callback(message, message.payload);
+			callback(message.payload);
 		}
 	});
 };
@@ -103,9 +103,9 @@ neon.eventing.Messenger.prototype.events = function (callbacks) {
 	var me = this;
 	var globalChannelConfigs = this.createGlobalChannelSubscriptions_(callbacks);
 	_.each(globalChannelConfigs, function (channelConfig) {
-		me.subscribe(channelConfig.channel, function (message, payload) {
+		me.subscribe(channelConfig.channel, function (payload) {
 				if (channelConfig.callback && typeof channelConfig.callback === 'function') {
-					channelConfig.callback(message, payload);
+					channelConfig.callback(payload);
 				}
 			}
 		);
