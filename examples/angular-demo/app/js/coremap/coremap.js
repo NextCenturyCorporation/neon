@@ -150,30 +150,26 @@ var onPopupClose = function (evt) {
     this.map.selectControl.unselect(this.feature);
 }
 var onFeatureSelect = function(feature) {
-    //var feature = evt.feature;
     var text = '<div><table>';
     for (key in feature.attributes) {
         text += '<tr><th>' + key + '</th><td>' + feature.attributes[key] + '</td>';
     }
     text += '</table></div>';
-    AutoSizeFramedCloudMaxSize = OpenLayers.Class(OpenLayers.Popup.FramedCloud, {
-            'displayClass': 'map-popup',
-            'contentDisplayClass': 'map-popup-contents'
-        });
-    var popup = new AutoSizeFramedCloudMaxSize("Data",
-                             feature.geometry.getBounds().getCenterLonLat(),
-                             null,
-                             text,
-                             null,  onPopupClose);
+
+    var popup = new OpenLayers.Popup.FramedCloud("Data",
+        feature.geometry.getBounds().getCenterLonLat(),
+        null,
+        text,
+        null,
+        false,
+        onPopupClose);
 
     feature.popup = popup;
     popup.feature = feature;
     this.map.addPopup(popup);
 }
 var onFeatureUnselect = function(feature) {
-    //var feature = evt.feature;
     if (feature.popup) {
-        //this.map.popup.feature = null;
         this.map.removePopup(feature.popup);
         feature.popup.destroy();
         feature.popup = null;
@@ -200,7 +196,7 @@ coreMap.Map.prototype.draw = function () {
             mapData.push(me.createPointsLayerDataPoint(element, longitude, latitude));
         }
     });
-
+    me.map.selectControl.unselectAll();
     me.heatmapLayer.setDataSet({ max: 1, data: heatmapData});
     me.pointsLayer.removeAllFeatures();
     me.pointsLayer.addFeatures(mapData);
@@ -212,6 +208,7 @@ coreMap.Map.prototype.draw = function () {
  */
 
 coreMap.Map.prototype.reset = function () {
+    this.map.selectControl.unSelectAll();
     this.setData([]);
     this.draw();
     this.resetZoom();
