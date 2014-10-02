@@ -61,7 +61,9 @@ neon.eventing.owf.OWFEventBus.prototype.subscribe = function (channel, callback)
 	this.subscriptions[channel] = subscriptionHandler;
 
 	OWF.Eventing.subscribe(channel, function (sender, message) {
-		subscriptionHandler(message);
+		if(sender !== OWF.getInstanceId()) {
+			subscriptionHandler(message);
+		}
 	});
 	return channel;
 };

@@ -57,13 +57,13 @@ describe('messenger', function () {
 		var message = 'message';
 
 		var messenger1 = new neon.eventing.Messenger();
-		var callback1 = jasmine.createSpy();
+		var callback1 = jasmine.createSpy('callback1');
 
 		var messenger2 = new neon.eventing.Messenger();
-		var callback2 = jasmine.createSpy();
+		var callback2 = jasmine.createSpy('callback2');
 
 		var messenger3 = new neon.eventing.Messenger();
-		var callback3 = jasmine.createSpy();
+		var callback3 = jasmine.createSpy('callback3');
 
 
 		messenger1.subscribe(channel, callback1);

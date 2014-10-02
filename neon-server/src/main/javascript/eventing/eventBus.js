@@ -22,9 +22,9 @@
  * @constructor
  */
 neon.eventing.EventBus = function () {
-    // postal.js has channels and topics. channels provide ways to group multiple topics. neon only
-    // uses one postal channel, and each neon channel will correspond to a postal topic
-    this.channel_ = postal.channel();
+	// postal.js has channels and topics. channels provide ways to group multiple topics. neon only
+	// uses one postal channel, and each neon channel will correspond to a postal topic
+	this.channel_ = postal.channel();
 };
 
 /**
@@ -32,27 +32,32 @@ neon.eventing.EventBus = function () {
  * the channel will be notified of the message.
  * @param {String} channel The name of the channel to publish the message to
  * @param {Object} message The message
+ * @param {String} messengerId The id of the owning neon messenger
  * @method publish
  *
  */
-neon.eventing.EventBus.prototype.publish = function (channel, message) {
-    this.channel_.publish(channel, message);
+neon.eventing.EventBus.prototype.publish = function (channel, message, messengerId) {
+	var data = { payload: message, sender: messengerId};
+	this.channel_.publish(channel, data);
 };
 
 /**
  * Subscribes to messages on the channel. The callback will be invoked synchronously
  * when a message is received on the channel.
  * @param {String} channel The name of the channel to subscribe to
- * @param {Function} callback The callback to invoke when a message is published to the channel. It takes
- * one parameter, the callback.
+ * @param {Function} callback The callback to invoke when a message is published to the channel.
+ * @param {String|Object} The message published to the given channel
+ * @param {String} messengerId The id of the owning neon messenger
  * @method subscribe
  * @return {Object} The subscription to the channel. Pass this to unsubscribe to stop receiving
  * messages for this subscription.
  */
-neon.eventing.EventBus.prototype.subscribe = function (channel, callback) {
-    return this.channel_.subscribe(channel, function (data) {
-        callback(data);
-    });
+neon.eventing.EventBus.prototype.subscribe = function (channel, callback, messengerId) {
+	return this.channel_.subscribe(channel, function (data) {
+		if(data.sender !== messengerId) {
+			callback(data.payload);
+		}
+	});
 };
 
 /**
@@ -61,5 +66,5 @@ neon.eventing.EventBus.prototype.subscribe = function (channel, callback) {
  * @method unsubscribe
  */
 neon.eventing.EventBus.prototype.unsubscribe = function(subscription) {
-    subscription.unsubscribe();
+	subscription.unsubscribe();
 };
