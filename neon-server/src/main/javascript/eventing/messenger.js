@@ -28,7 +28,7 @@ neon.eventing.createEventBus_ = function () {
 	if (neon.util.owfUtils.isRunningInOWF()) {
 		return new neon.eventing.owf.OWFEventBus();
 	}
-	return new neon.eventing.EventBus();
+	return new neon.eventing.EventBus(this.id_);
 };
 
 /**
@@ -58,8 +58,8 @@ neon.eventing.Messenger = function () {
  * @method publish
  */
 neon.eventing.Messenger.prototype.publish = function (channel, message) {
-	var data = { payload: message, sender: this.id_ };
-	neon.eventing.eventBus_.publish(channel, data);
+	//var data = { payload: message, sender: this.id_ };
+	neon.eventing.eventBus_.publish(channel, message, this.id_);
 };
 
 /**
@@ -67,16 +67,12 @@ neon.eventing.Messenger.prototype.publish = function (channel, message) {
  * own messages even if they are subscribed to that channel.
  * @param {String} channel The channel to subscribe to
  * @param {Function} callback The callback to invoke when a message is received on the channel. The function takes
- * 1 parameter: the message that was published.
+ * @param {Object|String} callback.message the message that was published
  * @method subscribe
  */
 neon.eventing.Messenger.prototype.subscribe = function (channel, callback) {
 	var me = this;
-	neon.eventing.eventBus_.subscribe(channel, function (message) {
-		if (message.sender !== me.id_) {
-			callback(message.payload);
-		}
-	});
+	neon.eventing.eventBus_.subscribe(channel, callback, this.id_);
 };
 
 /**
