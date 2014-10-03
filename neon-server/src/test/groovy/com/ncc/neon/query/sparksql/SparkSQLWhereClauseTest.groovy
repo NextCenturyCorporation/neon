@@ -54,7 +54,7 @@ class SparkSQLWhereClauseTest {
         assertSameClause(expected, new SparkSQLWhereClause(whereClause: whereClause))
     }
 
-    // "not in" is tested separately because shark handles it specially
+    // "not in" is tested separately because spark sql handles it specially
     @Test
     void "where not in collection"() {
         def lhs = "afield"
