@@ -62,6 +62,9 @@
 	font-size: 12px;
 }
 
+.olPopup table {
+	margin: 2px;
+}
 .olPopup td, .olPopup th {
 	padding: 2px;
 }

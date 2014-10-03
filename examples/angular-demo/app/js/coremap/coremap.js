@@ -144,13 +144,26 @@ coreMap.Map.BOX_OPACITY = 1;
 coreMap.Map.SOURCE_PROJECTION = new OpenLayers.Projection("EPSG:4326");
 coreMap.Map.DESTINATION_PROJECTION = new OpenLayers.Projection("EPSG:900913");
 
+/**
+ * Simple close handler to be called if a popup is closed.
+ * @param Object evet A close event.
+ * @private
+ * @method onPopupClose
+ */
 
 var onPopupClose = function (evt) {
-    // 'this' is the popup.
     this.map.selectControl.unselect(this.feature);
 }
+
+/**
+ * Feature select handler used to display popups on point layers.
+ * @param Object feature An Open Layers feature object.  Should be an object with geometry.
+ * @private
+ * @method onFeatureSelect
+ */
+
 var onFeatureSelect = function(feature) {
-    var text = '<div><table>';
+    var text = '<div><table class="table table-striped">';
     for (key in feature.attributes) {
         text += '<tr><th>' + key + '</th><td>' + feature.attributes[key] + '</td>';
     }
@@ -165,9 +178,16 @@ var onFeatureSelect = function(feature) {
         onPopupClose);
 
     feature.popup = popup;
-    popup.feature = feature;
     this.map.addPopup(popup);
 }
+
+/**
+ * Feature unselect handler used to remove popups from point layers.
+ * @param Object feature An Open Layers feature object.  Should be an object with geometry.
+ * @private
+ * @method onFeatureUnelect
+ */
+
 var onFeatureUnselect = function(feature) {
     if (feature.popup) {
         this.map.removePopup(feature.popup);
@@ -196,6 +216,8 @@ coreMap.Map.prototype.draw = function () {
             mapData.push(me.createPointsLayerDataPoint(element, longitude, latitude));
         }
     });
+
+    // Remove any popups before resetting data so they do not become orphaned.
     me.map.selectControl.unselectAll();
     me.heatmapLayer.setDataSet({ max: 1, data: heatmapData});
     me.pointsLayer.removeAllFeatures();
@@ -214,6 +236,10 @@ coreMap.Map.prototype.reset = function () {
     this.resetZoom();
 };
 
+/**
+ * Resets the map to zoom level 1 centered on latitude/longitude 0.0/0.0.
+ * @method resetZoom
+ */
 
 coreMap.Map.prototype.resetZoom = function () {
     this.map.zoomToMaxExtent();
@@ -237,6 +263,7 @@ coreMap.Map.prototype.setData = function (mapData) {
  * Updates the min/max radii values for the point layer
  * @method updateRadii
  */
+
 coreMap.Map.prototype.updateRadii = function () {
     this.minRadius = this.calculateMinRadius();
     this.maxRadius = this.calculateMaxRadius();
@@ -260,6 +287,7 @@ coreMap.Map.prototype.getColorMappings = function () {
  * Resets all assigned color mappings.
  * @method resetColorMappings
  */
+
 coreMap.Map.prototype.resetColorMappings = function () {
     this.colorScale = d3.scale.ordinal().range(this.colorRange);
 };
