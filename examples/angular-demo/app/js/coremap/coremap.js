@@ -145,6 +145,58 @@ coreMap.Map.SOURCE_PROJECTION = new OpenLayers.Projection("EPSG:4326");
 coreMap.Map.DESTINATION_PROJECTION = new OpenLayers.Projection("EPSG:900913");
 
 /**
+ * Simple close handler to be called if a popup is closed.
+ * @param Object evet A close event.
+ * @private
+ * @method onPopupClose
+ */
+
+var onPopupClose = function (evt) {
+    this.map.selectControl.unselect(this.feature);
+}
+
+/**
+ * Feature select handler used to display popups on point layers.
+ * @param Object feature An Open Layers feature object.  Should be an object with geometry.
+ * @private
+ * @method onFeatureSelect
+ */
+
+var onFeatureSelect = function(feature) {
+    var text = '<div><table class="table table-striped">';
+    for (key in feature.attributes) {
+        text += '<tr><th>' + key + '</th><td>' + feature.attributes[key] + '</td>';
+    }
+    text += '</table></div>';
+
+    var popup = new OpenLayers.Popup.FramedCloud("Data",
+        feature.geometry.getBounds().getCenterLonLat(),
+        null,
+        text,
+        null,
+        false,
+        onPopupClose);
+
+    feature.popup = popup;
+    this.map.addPopup(popup);
+}
+
+/**
+ * Feature unselect handler used to remove popups from point layers.
+ * @param Object feature An Open Layers feature object.  Should be an object with geometry.
+ * @private
+ * @method onFeatureUnelect
+ */
+
+var onFeatureUnselect = function(feature) {
+    if (feature.popup) {
+        this.map.removePopup(feature.popup);
+        feature.popup.destroy();
+        feature.popup = null;
+    }
+}
+
+/**
  * Draws the map data
  * @method draw
  */
@@ -165,6 +217,8 @@ coreMap.Map.prototype.draw = function () {
         }
     });
 
+    // Remove any popups before resetting data so they do not become orphaned.
+    me.map.selectControl.unselectAll();
     me.heatmapLayer.setDataSet({ max: 1, data: heatmapData});
     me.pointsLayer.removeAllFeatures();
     me.pointsLayer.addFeatures(mapData);
@@ -176,11 +230,16 @@ coreMap.Map.prototype.draw = function () {
  */
 
 coreMap.Map.prototype.reset = function () {
+    this.map.selectControl.unSelectAll();
     this.setData([]);
     this.draw();
     this.resetZoom();
 };
 
+/**
+ * Resets the map to zoom level 1 centered on latitude/longitude 0.0/0.0.
+ * @method resetZoom
+ */
 
 coreMap.Map.prototype.resetZoom = function () {
     this.map.zoomToMaxExtent();
@@ -204,6 +263,7 @@ coreMap.Map.prototype.setData = function (mapData) {
  * Updates the min/max radii values for the point layer
  * @method updateRadii
  */
+
 coreMap.Map.prototype.updateRadii = function () {
     this.minRadius = this.calculateMinRadius();
     this.maxRadius = this.calculateMaxRadius();
@@ -227,6 +287,7 @@ coreMap.Map.prototype.getColorMappings = function () {
  * Resets all assigned color mappings.
  * @method resetColorMappings
  */
+
 coreMap.Map.prototype.resetColorMappings = function () {
     this.colorScale = d3.scale.ordinal().range(this.colorRange);
 };
@@ -293,9 +354,11 @@ coreMap.Map.prototype.createHeatmapDataPoint = function (element, longitude, lat
 
 coreMap.Map.prototype.createPointsLayerDataPoint = function (element, longitude, latitude) {
     var point = new OpenLayers.Geometry.Point(longitude, latitude);
+    point.data = element;
     point.transform(coreMap.Map.SOURCE_PROJECTION, coreMap.Map.DESTINATION_PROJECTION);
     var feature = new OpenLayers.Feature.Vector(point);
     feature.style = this.stylePoint(element);
+    feature.attributes = element;
     return feature;
 };
 
@@ -585,6 +648,18 @@ coreMap.Map.prototype.setupLayers = function () {
     this.map.addLayer(this.heatmapLayer);
     this.map.addLayer(this.pointsLayer);
     this.map.addLayer(this.boxLayer);
+
+    // Add popup handlers to the points layer.
+    // this.pointsLayer.events.on({
+    //     'featureselected': onFeatureSelect,
+    //     'featureunselected': onFeatureUnselect
+    // });
+    this.map.selectControl = new OpenLayers.Control.SelectFeature(this.pointsLayer, {
+        'onSelect': onFeatureSelect,
+        'onUnselect': onFeatureUnselect
+    });
+    this.map.addControl(this.map.selectControl);
+    this.map.selectControl.activate();
 
     // Default the heatmap to be visible.
     this.heatmapLayer.toggle();
