@@ -41,14 +41,11 @@ neon.query.Filter.prototype.selectFrom = function (args) {
 		var table = parts[0].split(".");
 		if (table.length === 1) {
 			this.tableName = table[0];
-		}
-		else {
+		} else {
 			this.databaseName = table[0];
 			this.tableName = table[1];
 		}
-	}
-	// database and table passed in separately
-	else {
+	} else { // database and table passed in separately
 		this.databaseName = parts[0];
 		this.tableName = parts[1];
 	}
@@ -65,8 +62,7 @@ neon.query.Filter.prototype.selectFrom = function (args) {
 neon.query.Filter.prototype.where = function () {
 	if (arguments.length === 3) {
 		this.whereClause = neon.query.where(arguments[0], arguments[1], arguments[2]);
-	}
-	else {
+	} else {
 		// must be a boolean/geospatial clause
 		this.whereClause = arguments[0];
 	}

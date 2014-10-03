@@ -317,9 +317,9 @@ neon.query.Query.prototype.sortBy = function (fields) {
 		list = neon.util.arrayUtils.argumentsToArray(arguments);
 	}
 
-	for (var i = 0; i < list.length; i += 2) {
-		var field = list[i];
-		var order = list[i + 1];
+	for (var i = 1; i < list.length; i += 2) {
+		var field = list[i - 1];
+		var order = list[i];
 		this.sortClauses.push(new neon.query.SortClause(field, order));
 	}
 	return this;
@@ -344,10 +344,16 @@ neon.query.Query.prototype.transform = function (transformObj) {
  * @return {neon.query.Query} This query object
  */
 neon.query.Query.prototype.ignoreFilters = function (filterIds) {
-	if ( filterIds ) {
-		this.ignoredFilterIds_= filterIds;
+	var filters;
+	if(arguments.length === 1 && $.isArray(filterIds)) {
+		filters = filterIds;
+	} else {
+		filters = neon.util.arrayUtils.argumentsToArray(arguments);
 	}
-	else {
+
+	if(filters.length > 0) {
+		this.ignoredFilterIds_= filters;
+	} else {
 		this.ignoreFilters_ = true;
 	}
 	return this;
