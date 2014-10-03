@@ -17,7 +17,7 @@
 package com.ncc.neon
 
 import com.ncc.neon.connect.ConnectionManager
-import com.ncc.neon.query.shark.SharkQueryExecutor
+import com.ncc.neon.query.shark.SparkSQLQueryExecutor
 import com.ncc.neon.query.mongo.MongoQueryExecutor
 import com.ncc.neon.query.transform.SalaryTransformer
 import com.ncc.neon.query.result.Transformer
@@ -61,8 +61,8 @@ class IntegrationTestContext {
     }
 
     @Bean
-    SharkQueryExecutor hiveQueryExecutor() {
-        SharkQueryExecutor executor = new SharkQueryExecutor()
+    SparkSQLQueryExecutor sparkSQLQueryExecutor() {
+        SparkSQLQueryExecutor executor = new SparkSQLQueryExecutor()
         executor.connectionManager = new ConnectionManager()
         return executor
     }

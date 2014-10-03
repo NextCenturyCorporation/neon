@@ -31,9 +31,9 @@ import org.springframework.stereotype.Component
 import java.sql.SQLException
 
 @Component
-class SharkQueryExecutor extends AbstractQueryExecutor {
+class SparkSQLQueryExecutor extends AbstractQueryExecutor {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(SharkQueryExecutor)
+    private static final Logger LOGGER = LoggerFactory.getLogger(SparkSQLQueryExecutor)
 
     @Autowired
     private FilterState filterState

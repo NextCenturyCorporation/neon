@@ -20,7 +20,7 @@ import com.ncc.neon.AbstractQueryExecutorIntegrationTest
 import com.ncc.neon.IntegrationTestContext
 import com.ncc.neon.connect.ConnectionInfo
 import com.ncc.neon.connect.DataSources
-import com.ncc.neon.query.shark.SharkQueryExecutor
+import com.ncc.neon.query.shark.SparkSQLQueryExecutor
 import com.ncc.neon.util.DateUtils
 import org.json.JSONArray
 import org.json.JSONObject
@@ -34,27 +34,27 @@ import java.sql.Timestamp
 
 @RunWith(SpringJUnit4ClassRunner)
 @ContextConfiguration(classes = IntegrationTestContext)
-class SharkQueryExecutorIntegrationTest extends AbstractQueryExecutorIntegrationTest {
+class SparkSQLQueryExecutorIntegrationTest extends AbstractQueryExecutorIntegrationTest {
 
     // TODO: NEON-565 another duplication of shark.host in here
     private static final String HOST_STRING = System.getProperty("shark.host", "localhost:10000")
 
-    SharkQueryExecutor sharkQueryExecutor
+    SparkSQLQueryExecutor sparkSQLQueryExecutor
 
     @SuppressWarnings("JUnitPublicNonTestMethod")
     @Autowired
-    void setSharkQueryExecutor(SharkQueryExecutor sharkQueryExecutor) {
-        this.sharkQueryExecutor = sharkQueryExecutor
+    void setSparkSQLQueryExecutor(SparkSQLQueryExecutor sparkSQLQueryExecutor) {
+        this.sparkSQLQueryExecutor = sparkSQLQueryExecutor
     }
 
     @Before
     void before() {
-        this.sharkQueryExecutor.connectionManager.currentRequest = new ConnectionInfo(host: HOST_STRING, dataSource: DataSources.shark)
+        this.sparkSQLQueryExecutor.connectionManager.currentRequest = new ConnectionInfo(host: HOST_STRING, dataSource: DataSources.shark)
     }
 
     @Override
-    protected SharkQueryExecutor getQueryExecutor() {
-        sharkQueryExecutor
+    protected SparkSQLQueryExecutor getQueryExecutor() {
+        sparkSQLQueryExecutor
     }
 
     protected String getResultsJsonFolder() {
