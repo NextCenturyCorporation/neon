@@ -48,11 +48,11 @@ class SparkSQLQueryExecutor extends AbstractQueryExecutor {
     @Override
     QueryResult doExecute(Query query, QueryOptions options) {
         return runAndRelease { client ->
-            SharkConversionStrategy conversionStrategy = new SharkConversionStrategy(filterState: filterState, selectionState: selectionState)
-            String sharkQuery = conversionStrategy.convertQuery(query, options)
-            LOGGER.debug("Query: {}", sharkQuery)
+            SparkSQLConversionStrategy conversionStrategy = new SparkSQLConversionStrategy(filterState: filterState, selectionState: selectionState)
+            String sparkSQLQuery = conversionStrategy.convertQuery(query, options)
+            LOGGER.debug("Query: {}", sparkSQLQuery)
             int offset = query.offsetClause ? query.offsetClause.offset : 0
-            List<Map> resultList = client.executeQuery(sharkQuery, offset)
+            List<Map> resultList = client.executeQuery(sparkSQLQuery, offset)
             return  new TabularQueryResult(resultList)
         }
     }

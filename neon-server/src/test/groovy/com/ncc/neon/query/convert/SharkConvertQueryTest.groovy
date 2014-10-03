@@ -16,9 +16,10 @@
 
 package com.ncc.neon.query.convert
 
-import com.ncc.neon.query.shark.SharkConversionStrategy
+import com.ncc.neon.query.shark.SparkSQLConversionStrategy
+
 /*
- Tests the SharkConversionStrategy.convertQuery()
+ Tests the SparkSQLConversionStrategy.convertQuery()
  correctly converts Query objects into shark queries
 */
 
@@ -26,13 +27,13 @@ class SharkConvertQueryTest extends AbstractConversionTest {
 
     @Override
     protected def doConvertQuery(query, queryOptions) {
-        SharkConversionStrategy conversionStrategy = new SharkConversionStrategy(filterState: filterState, selectionState: selectionState)
+        SparkSQLConversionStrategy conversionStrategy = new SparkSQLConversionStrategy(filterState: filterState, selectionState: selectionState)
         conversionStrategy.convertQuery(query, queryOptions)
     }
 
     @Override
     void assertSimplestConvertQuery(query) {
-        assertStandardSharkQLStatement(query)
+        assertStandardSparkSQLStatement(query)
     }
 
     @Override
@@ -55,7 +56,7 @@ class SharkConvertQueryTest extends AbstractConversionTest {
         // OFFSET is not actually implemented in Shark, so it is not included in the query. Neon will adjust the
         // query to include enough results to get the offset and then manually advance the cursor to the correct
         // position.
-        assertStandardSharkQLStatement(query)
+        assertStandardSparkSQLStatement(query)
     }
 
 
@@ -91,7 +92,7 @@ class SharkConvertQueryTest extends AbstractConversionTest {
 
     @Override
     protected void assertQueryWithEmptyFilter(query) {
-        assertStandardSharkQLStatement(query)
+        assertStandardSparkSQLStatement(query)
     }
 
     @Override
@@ -99,7 +100,7 @@ class SharkConvertQueryTest extends AbstractConversionTest {
         assert query.toLowerCase() == "select $FIELD_NAME, $FIELD_NAME_2 from ${DATABASE_NAME}.${TABLE_NAME}".toLowerCase()
     }
 
-    private void assertStandardSharkQLStatement(query){
+    private void assertStandardSparkSQLStatement(query){
         assert query.toLowerCase() == "select * from ${DATABASE_NAME}.${TABLE_NAME}".toLowerCase()
     }
 

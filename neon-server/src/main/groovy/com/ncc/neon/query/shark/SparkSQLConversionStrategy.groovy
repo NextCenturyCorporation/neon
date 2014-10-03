@@ -31,7 +31,7 @@ import groovy.transform.Immutable
  */
 
 @Immutable
-class SharkConversionStrategy {
+class SparkSQLConversionStrategy {
 
     private final FilterState filterState
     private final SelectionState selectionState
