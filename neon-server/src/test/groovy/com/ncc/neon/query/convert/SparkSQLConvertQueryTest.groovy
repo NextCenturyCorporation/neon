@@ -16,7 +16,7 @@
 
 package com.ncc.neon.query.convert
 
-import com.ncc.neon.query.shark.SparkSQLConversionStrategy
+import com.ncc.neon.query.sparksql.SparkSQLConversionStrategy
 
 /*
  Tests the SparkSQLConversionStrategy.convertQuery()

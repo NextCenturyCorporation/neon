@@ -17,7 +17,7 @@
 package com.ncc.neon
 
 import com.ncc.neon.connect.ConnectionManager
-import com.ncc.neon.query.shark.SparkSQLQueryExecutor
+import com.ncc.neon.query.sparksql.SparkSQLQueryExecutor
 import com.ncc.neon.query.mongo.MongoQueryExecutor
 import com.ncc.neon.query.transform.SalaryTransformer
 import com.ncc.neon.query.result.Transformer

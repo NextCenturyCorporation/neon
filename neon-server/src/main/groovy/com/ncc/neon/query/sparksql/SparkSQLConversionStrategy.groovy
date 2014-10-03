@@ -14,7 +14,7 @@
  *
  */
 
-package com.ncc.neon.query.shark
+package com.ncc.neon.query.sparksql
 import com.ncc.neon.query.Query
 import com.ncc.neon.query.QueryOptions
 import com.ncc.neon.query.clauses.*

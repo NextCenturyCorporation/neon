@@ -14,13 +14,13 @@
  *
  */
 
-package com.ncc.neon.shark
+package com.ncc.neon.sparksql
 
 import com.ncc.neon.AbstractQueryExecutorIntegrationTest
 import com.ncc.neon.IntegrationTestContext
 import com.ncc.neon.connect.ConnectionInfo
 import com.ncc.neon.connect.DataSources
-import com.ncc.neon.query.shark.SparkSQLQueryExecutor
+import com.ncc.neon.query.sparksql.SparkSQLQueryExecutor
 import com.ncc.neon.util.DateUtils
 import org.json.JSONArray
 import org.json.JSONObject

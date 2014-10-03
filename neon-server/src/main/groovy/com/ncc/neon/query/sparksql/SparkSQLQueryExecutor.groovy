@@ -14,7 +14,7 @@
  *
  */
 
-package com.ncc.neon.query.shark
+package com.ncc.neon.query.sparksql
 import com.ncc.neon.connect.ConnectionManager
 import com.ncc.neon.connect.JdbcClient
 import com.ncc.neon.query.*

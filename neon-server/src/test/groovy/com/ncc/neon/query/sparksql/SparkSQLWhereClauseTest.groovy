@@ -14,7 +14,7 @@
  *
  */
 
-package com.ncc.neon.query.shark
+package com.ncc.neon.query.sparksql
 import com.ncc.neon.query.clauses.AndWhereClause
 import com.ncc.neon.query.clauses.OrWhereClause
 import com.ncc.neon.query.clauses.SingularWhereClause
