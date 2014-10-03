@@ -20,10 +20,10 @@ import com.ncc.neon.query.shark.SparkSQLConversionStrategy
 
 /*
  Tests the SparkSQLConversionStrategy.convertQuery()
- correctly converts Query objects into shark queries
+ correctly converts Query objects into Spark SQL queries
 */
 
-class SharkConvertQueryTest extends AbstractConversionTest {
+class SparkSQLConvertQueryTest extends AbstractConversionTest {
 
     @Override
     protected def doConvertQuery(query, queryOptions) {
@@ -53,7 +53,7 @@ class SharkConvertQueryTest extends AbstractConversionTest {
 
     @Override
     protected void assertQueryWithOffsetClause(query) {
-        // OFFSET is not actually implemented in Shark, so it is not included in the query. Neon will adjust the
+        // OFFSET is not actually implemented in Spark SQL, so it is not included in the query. Neon will adjust the
         // query to include enough results to get the offset and then manually advance the cursor to the correct
         // position.
         assertStandardSparkSQLStatement(query)
