@@ -106,8 +106,8 @@ class SparkSQLWhereClauseTest {
         return new SingularWhereClause(lhs: lhs, operator: operator, rhs: rhs)
     }
 
-    private static assertSameClause(expected, sharkWhereClause) {
-        assert expected.equalsIgnoreCase(sharkWhereClause.toString())
+    private static assertSameClause(expected, sparkSQLWhereClause) {
+        assert expected.equalsIgnoreCase(sparkSQLWhereClause.toString())
     }
 
 }

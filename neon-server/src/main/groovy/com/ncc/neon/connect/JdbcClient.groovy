@@ -42,7 +42,7 @@ class JdbcClient implements Closeable {
     /**
      * Executes the specified query
      * @param offset An optional number of rows to skip in the result set. This is provided as a parameter to
-     * execute query since not all JDBC drivers (namely shark) support doing this as part of the query
+     * execute query since not all JDBC drivers (namely Spark SQL) support doing this as part of the query
      */
     List executeQuery(String query, int offset = 0) {
         Statement statement
@@ -117,7 +117,7 @@ class JdbcClient implements Closeable {
                 // if it does not succeed, it means we went past the end of the result set (or before the beginning
                 // which wouldn't make sense in this case). When this happens, there are no more results to iterate
                 // over, but rather than actually iterating through the result set return false indicating that so
-                // the result set is ignored (and "last" is not supported all jdbc drivers, shark for example)
+                // the result set is ignored (and "last" is not supported all jdbc drivers, Spark SQL for example)
                 return resultSet.absolute(offset)
             }
             // happens if this is not supported, but implementations may throw different types of exceptions so
@@ -146,7 +146,7 @@ class JdbcClient implements Closeable {
         def val = resultSet.getObject(index)
         // timestamps are time-zone less, but we assume UTC
         if (val && metadata.getColumnType(index) == Types.TIMESTAMP) {
-            // use joda time because not all jdbc drivers (e.g. shark) support timezones - they return in local time
+            // use joda time because not all jdbc drivers (e.g. Spark SQL) support timezones - they return in local time
             val = new DateTime(val.time).withZoneRetainFields(DateTimeZone.UTC).toDate()
         }
         return val
