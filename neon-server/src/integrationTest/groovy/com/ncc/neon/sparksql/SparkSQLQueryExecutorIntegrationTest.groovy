@@ -49,7 +49,7 @@ class SparkSQLQueryExecutorIntegrationTest extends AbstractQueryExecutorIntegrat
 
     @Before
     void before() {
-        this.sparkSQLQueryExecutor.connectionManager.currentRequest = new ConnectionInfo(host: HOST_STRING, dataSource: DataSources.shark)
+        this.sparkSQLQueryExecutor.connectionManager.currentRequest = new ConnectionInfo(host: HOST_STRING, dataSource: DataSources.sparksql)
     }
 
     @Override

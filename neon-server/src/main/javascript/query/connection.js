@@ -47,7 +47,7 @@ neon.query.Connection.MONGO = 'mongo';
  * @property SHARK
  * @type {String}
  */
-neon.query.Connection.SHARK = 'shark';
+neon.query.Connection.SHARK = 'sparksql';
 
 
 /**

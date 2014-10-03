@@ -23,7 +23,7 @@ class ConnectionManagerTest {
 
     private ConnectionManager connectionManager
     private final def mockMongoConnectionClient = { "mongo" } as ConnectionClient
-    private final def mockSharkConnectionClient = { "shark" } as ConnectionClient
+    private final def mockSharkConnectionClient = { "sparksql" } as ConnectionClient
 
 
     @Before
@@ -31,7 +31,7 @@ class ConnectionManagerTest {
         connectionManager = new ConnectionManager()
         connectionManager.currentRequestConnection = new CurrentRequestConnection()
         connectionManager.mongoConnectionFactory = { mockMongoConnectionClient } as ConnectionClientFactory
-        connectionManager.sharkConnectionFactory = { mockSharkConnectionClient } as ConnectionClientFactory
+        connectionManager.sparkSQLConnectionFactory = { mockSharkConnectionClient } as ConnectionClientFactory
     }
 
     @Test(expected = NeonConnectionException)
@@ -45,7 +45,7 @@ class ConnectionManagerTest {
         connectionManager.currentRequest = new ConnectionInfo(host: "aHost", dataSource: DataSources.mongo)
         assert connectionManager.connection == mockMongoConnectionClient
 
-        connectionManager.currentRequest = new ConnectionInfo(host: "aHost", dataSource: DataSources.shark)
+        connectionManager.currentRequest = new ConnectionInfo(host: "aHost", dataSource: DataSources.sparksql)
         assert connectionManager.connection == mockSharkConnectionClient
     }
 
