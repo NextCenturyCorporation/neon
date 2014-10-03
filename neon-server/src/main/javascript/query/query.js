@@ -172,7 +172,7 @@ neon.query.Query.prototype.selectFrom = function (args) {
  * Sets the fields that should be included in the result. If not specified,
  * all fields will be included (equivalent to SELECT *).
  * @method withFields
- * @param {...String} fields A variable number of strings indicating which fields should be included
+ * @param {...String | Array} fields A variable number of strings or single Array of Strings indicating which fields should be included
  * @return {neon.query.Query} This query object
  * @example
  *     new neon.query.Query(...).withFields("field1","field2");
@@ -214,8 +214,9 @@ neon.query.Query.prototype.where = function () {
 /**
  * Groups the results by the specified field(s)
  * @method groupBy
- * @param {...String|...neon.query.GroupByFunctionClause} fields One or more fields to group the results by.
- * Each parameter can be a single field name or a {{#crossLink "neon.query.GroupByFunctionClause"}}{{/crossLink}}
+ * @param {...String|...neon.query.GroupByFunctionClause|Array} fields One or more fields to group the results by.
+ * Each parameter can be a single field name, a {{#crossLink "neon.query.GroupByFunctionClause"}}{{/crossLink}}. Alternatively a
+ * single array containing field names and/or GroupByFunctionClause objects.
  * @return {neon.query.Query} This query object
  * @example
  *    var averageAmount = new neon.query.GroupByFunctionClause(neon.query.AVG, 'amount', 'avg_amount');
@@ -298,7 +299,8 @@ neon.query.Query.prototype.offset = function (offset) {
  * Configures the query results to be sorted by the specified field(s). To sort by multiple fields, repeat the
  * 2 parameters multiple times
  * @method sortBy
- * @param {String} fieldName The name of the field to sort on
+ * @param {String | Array} fieldName The name of the field to sort on OR single array in the form
+ * of ['field1', neon.query.ASC, ... , 'fieldN', neon.query.DESC]
  * @param {int} sortOrder The sort order (see the constants in this class)
  * @return {neon.query.Query} This query object
  * @example
@@ -339,8 +341,8 @@ neon.query.Query.prototype.transform = function (transformObj) {
 /**
  * Sets the query to ignore any filters that are currently applied
  * @method ignoreFilters
- * @param {Array} [filterIds] An optional list of specific filter ids to ignore. If specified, only these filters will
- * be ignored. Otherwise, all will be ignored.
+ * @param {...String | Array} [filterIds] An optional, variable number of filter ids to ignore OR ab array of
+ * filter ids to ignore. If specified, only these filters will be ignored. Otherwise, all will be ignored.
  * @return {neon.query.Query} This query object
  */
 neon.query.Query.prototype.ignoreFilters = function (filterIds) {
@@ -402,7 +404,7 @@ neon.query.where = function (fieldName, op, value) {
 /**
  * Creates an *and* boolean clause for the query
  * @method and
- * @param  {Object} clauses A variable number of *where* clauses to apply
+ * @param  {Object | Array} clauses A variable number of *where* clauses to apply OR an single array of *where* clauses
  * @example
  *     and(where('x','=',10),where('y','=',1))
  * @return {Object}
@@ -418,7 +420,7 @@ neon.query.and = function (clauses) {
 /**
  * Creates an *or* boolean clause for the query
  * @method or
- * @param {Object} clauses A variable number of *where* clauses to apply
+ * @param {Object} clauses A variable number of *where* clauses to apply OR a single array of *where* clauses
  * @example
  *     or(where('x','=',10),where('y','=',1))
  * @return {Object}
