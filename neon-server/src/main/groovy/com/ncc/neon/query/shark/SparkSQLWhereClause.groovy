@@ -28,18 +28,18 @@ import org.joda.time.format.DateTimeFormatter
 import org.joda.time.format.DateTimeFormatterBuilder
 
 /**
- * Utility class for creating Shark WHERE clauses
+ * Utility class for creating Spark SQL WHERE clauses
  */
-class SharkWhereClause {
+class SparkSQLWhereClause {
 
     private WhereClause whereClause
 
     // used to build up the text of the where clause when toString is called
     private final StringBuilder stringBuilder = new StringBuilder()
 
-    private static final DateTimeFormatter SHARK_DATETIME_FORMATTER = createSharkDateTimeFormat()
+    private static final DateTimeFormatter SPARK_SQL_DATETIME_FORMATTER = createSparkSQLDateTimeFormat()
 
-    private static DateTimeFormatter createSharkDateTimeFormat() {
+    private static DateTimeFormatter createSparkSQLDateTimeFormat() {
         new DateTimeFormatterBuilder()
                 .appendYear(4, 4).appendLiteral('-')
                 .appendMonthOfYear(2).appendLiteral('-')
@@ -120,7 +120,7 @@ class SharkWhereClause {
         }
 
         if (val instanceof Date) {
-            return "unix_timestamp('${return SHARK_DATETIME_FORMATTER.print(new DateTime(val).withZone(DateTimeZone.UTC))}')"
+            return "unix_timestamp('${return SPARK_SQL_DATETIME_FORMATTER.print(new DateTime(val).withZone(DateTimeZone.UTC))}')"
         }
 
         return val

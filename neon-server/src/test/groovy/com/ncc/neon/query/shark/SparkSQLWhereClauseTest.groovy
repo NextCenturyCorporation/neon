@@ -21,7 +21,7 @@ import com.ncc.neon.query.clauses.SingularWhereClause
 import com.ncc.neon.util.DateUtils
 import org.junit.Test
 
-class SharkWhereClauseTest {
+class SparkSQLWhereClauseTest {
 
 
     @Test
@@ -31,7 +31,7 @@ class SharkWhereClauseTest {
         def rhs = "aStringValue"
         def whereClause = createSimpleWhereClause(lhs, operator, rhs)
         def expected = "${lhs} ${operator} '${rhs}'"
-        assertSameClause(expected, new SharkWhereClause(whereClause: whereClause))
+        assertSameClause(expected, new SparkSQLWhereClause(whereClause: whereClause))
     }
 
     @Test
@@ -41,7 +41,7 @@ class SharkWhereClauseTest {
         def rhs = 10
         def whereClause = createSimpleWhereClause(lhs, operator, rhs)
         def expected = "${lhs} ${operator} ${rhs}"
-        assertSameClause(expected, new SharkWhereClause(whereClause: whereClause))
+        assertSameClause(expected, new SparkSQLWhereClause(whereClause: whereClause))
     }
 
     @Test
@@ -51,7 +51,7 @@ class SharkWhereClauseTest {
         def rhs = ["a", "b", "c"]
         def whereClause = createSimpleWhereClause(lhs, operator, rhs)
         def expected = "${lhs} ${operator} ('a','b','c')"
-        assertSameClause(expected, new SharkWhereClause(whereClause: whereClause))
+        assertSameClause(expected, new SparkSQLWhereClause(whereClause: whereClause))
     }
 
     // "not in" is tested separately because shark handles it specially
@@ -62,7 +62,7 @@ class SharkWhereClauseTest {
         def rhs = ["a", "b", "c"]
         def whereClause = createSimpleWhereClause(lhs, operator, rhs)
         def expected = "${lhs} not in ('a','b','c')"
-        assertSameClause(expected, new SharkWhereClause(whereClause: whereClause))
+        assertSameClause(expected, new SparkSQLWhereClause(whereClause: whereClause))
     }
 
     @Test
@@ -72,7 +72,7 @@ class SharkWhereClauseTest {
         def rhs = DateUtils.tryToParseDate('2013-09-15')
         def whereClause = createSimpleWhereClause(lhs, operator, rhs)
         def expected = "unix_timestamp(${lhs}) ${operator} unix_timestamp('2013-09-15 00:00:00')"
-        assertSameClause(expected, new SharkWhereClause(whereClause: whereClause))
+        assertSameClause(expected, new SparkSQLWhereClause(whereClause: whereClause))
     }
 
     @Test
@@ -97,7 +97,7 @@ class SharkWhereClauseTest {
         def andClause = new AndWhereClause(whereClauses: [orClause, whereClause3])
 
         def expected = "((${lhs1} ${operator1} ${rhs1} OR ${lhs2} ${operator2} '${rhs2}') AND ${lhs3} ${operator3} '${rhs3}')"
-        assertSameClause(expected, new SharkWhereClause(whereClause: andClause))
+        assertSameClause(expected, new SparkSQLWhereClause(whereClause: andClause))
 
 
     }

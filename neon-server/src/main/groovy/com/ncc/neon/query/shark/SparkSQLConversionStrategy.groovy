@@ -27,7 +27,7 @@ import groovy.transform.Immutable
 
 
 /**
- * Converts a Query object into a shark based query.
+ * Converts a Query object into a spark SQL based query.
  */
 
 @Immutable
@@ -86,7 +86,7 @@ class SparkSQLConversionStrategy {
     private void applyWhereStatement(StringBuilder builder, Query query, QueryOptions queryOptions) {
         List whereClauses = collectWhereClauses(query, queryOptions)
 
-        SharkWhereClause clause = createWhereClauseParams(whereClauses)
+        SparkSQLWhereClause clause = createWhereClauseParams(whereClauses)
         if (clause) {
             builder << " where " << clause.toString()
         }
@@ -130,7 +130,7 @@ class SparkSQLConversionStrategy {
         groupByClauses.addAll(query.groupByClauses)
 
         if (groupByClauses) {
-            // shark doesn't support grouping by the field alias so we actually need to provide the field function again
+            // spark sql doesn't support grouping by the field alias so we actually need to provide the field function again
             builder << " group by " << groupByClauses.collect { groupByClauseToString(it).split(" ")[0] }.join(", ")
         }
 
@@ -149,14 +149,14 @@ class SparkSQLConversionStrategy {
         }
     }
 
-    private static SharkWhereClause createWhereClauseParams(List whereClauses) {
+    private static SparkSQLWhereClause createWhereClauseParams(List whereClauses) {
         if (!whereClauses) {
             return null
         }
         if (whereClauses.size() == 1) {
-            return new SharkWhereClause(whereClause: whereClauses[0])
+            return new SparkSQLWhereClause(whereClause: whereClauses[0])
         }
-        return new SharkWhereClause(whereClause: new AndWhereClause(whereClauses: whereClauses))
+        return new SparkSQLWhereClause(whereClause: new AndWhereClause(whereClauses: whereClauses))
     }
 
 }
