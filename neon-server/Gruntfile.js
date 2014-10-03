@@ -90,7 +90,6 @@ module.exports = function (grunt) {
 				src: outputFile,
 				options: createTestOptions('src/acceptanceTest/javascript/spec/**/*.spec.js')
 			}
-
 		}
 	});
 
