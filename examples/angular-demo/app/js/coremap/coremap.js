@@ -163,9 +163,9 @@ var onPopupClose = function (evt) {
  */
 
 var onFeatureSelect = function(feature) {
-    var text = '<div><table class="table table-striped">';
+    var text = '<div><table class="table table-striped table-condensed">';
     for (key in feature.attributes) {
-        text += '<tr><th>' + key + '</th><td>' + feature.attributes[key] + '</td>';
+        text += '<tr><th>' + _.escape(key) + '</th><td>' + _.escape(feature.attributes[key]) + '</td>';
     }
     text += '</table></div>';
 
