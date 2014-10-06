@@ -563,7 +563,7 @@ angular.module('heatMapDirective', []).directive('heatMap', ['ConnectionService'
                         $scope.map.sizeMapping = mapping;
                     }
                     else {
-                        $scope.map.sizeMapping = coreMap.Map.DEFAULT_SIZE_MAPPING;
+                        $scope.map.sizeMapping = "";
                     }
                     $scope.map.updateRadii();
                 }
