@@ -172,13 +172,17 @@ neon.query.Query.prototype.selectFrom = function (args) {
  * Sets the fields that should be included in the result. If not specified,
  * all fields will be included (equivalent to SELECT *).
  * @method withFields
- * @param {...String} fields A variable number of strings indicating which fields should be included
+ * @param {...String | Array} fields A variable number of strings or single Array of Strings indicating which fields should be included
  * @return {neon.query.Query} This query object
  * @example
  *     new neon.query.Query(...).withFields("field1","field2");
  */
 neon.query.Query.prototype.withFields = function (fields) {
-	this.fields = neon.util.arrayUtils.argumentsToArray(arguments);
+	if(arguments.length === 1 && $.isArray(fields)) {
+		this.fields = fields;
+	} else {
+		this.fields = neon.util.arrayUtils.argumentsToArray(arguments);
+	}
 	return this;
 };
 
@@ -210,8 +214,9 @@ neon.query.Query.prototype.where = function () {
 /**
  * Groups the results by the specified field(s)
  * @method groupBy
- * @param {...String|...neon.query.GroupByFunctionClause} fields One or more fields to group the results by.
- * Each parameter can be a single field name or a {{#crossLink "neon.query.GroupByFunctionClause"}}{{/crossLink}}
+ * @param {...String|...neon.query.GroupByFunctionClause|Array} fields One or more fields to group the results by.
+ * Each parameter can be a single field name, a {{#crossLink "neon.query.GroupByFunctionClause"}}{{/crossLink}}. Alternatively a
+ * single array containing field names and/or GroupByFunctionClause objects.
  * @return {neon.query.Query} This query object
  * @example
  *    var averageAmount = new neon.query.GroupByFunctionClause(neon.query.AVG, 'amount', 'avg_amount');
@@ -224,11 +229,17 @@ neon.query.Query.prototype.groupBy = function (fields) {
 	this.groupByClauses.length = 0;
 	var me = this;
 
-	var list = neon.util.arrayUtils.argumentsToArray(arguments);
+	var list;
+	if(arguments.length === 1 && $.isArray(fields)) {
+		list = fields;
+	} else {
+		list = neon.util.arrayUtils.argumentsToArray(arguments);
+	}
+
 	list.forEach(function (field) {
 		// if the user provided a string, convert that to the groupBy representation of a single field, otherwise,
 		// they provided a groupBy function so just use that
-		var clause = typeof field === 'string' ? new neon.query.GroupBySingleFieldClause(field) : field;
+		var clause = ((typeof field === 'string') ? new neon.query.GroupBySingleFieldClause(field) : field);
 		me.groupByClauses.push(clause);
 	});
 	return this;
@@ -288,21 +299,29 @@ neon.query.Query.prototype.offset = function (offset) {
  * Configures the query results to be sorted by the specified field(s). To sort by multiple fields, repeat the
  * 2 parameters multiple times
  * @method sortBy
- * @param {String} fieldName The name of the field to sort on
+ * @param {String | Array} fieldName The name of the field to sort on OR single array in the form
+ * of ['field1', neon.query.ASC, ... , 'fieldN', neon.query.DESC]
  * @param {int} sortOrder The sort order (see the constants in this class)
  * @return {neon.query.Query} This query object
  * @example
  *     new neon.query.Query(...).sortBy('field1',neon.query.ASC,'field2',neon.query.DESC);
  */
-neon.query.Query.prototype.sortBy = function (fieldName, sortOrder) {
+neon.query.Query.prototype.sortBy = function (fields) {
 	// even though internally each sortBy clause is a separate object, the user will think about a single sortBy
 	// operation which may include multiple fields, so this method does not append to the existing
 	// sortBy fields, but replaces them
 	this.sortClauses.length = 0;
-	var list = neon.util.arrayUtils.argumentsToArray(arguments);
-	for (var i = 0; i < list.length; i += 2) {
-		var field = list[i];
-		var order = list[i + 1];
+
+	var list;
+	if(arguments.length === 1 && $.isArray(fields)) {
+		list = fields;
+	} else {
+		list = neon.util.arrayUtils.argumentsToArray(arguments);
+	}
+
+	for (var i = 1; i < list.length; i += 2) {
+		var field = list[i - 1];
+		var order = list[i];
 		this.sortClauses.push(new neon.query.SortClause(field, order));
 	}
 	return this;
@@ -322,15 +341,21 @@ neon.query.Query.prototype.transform = function (transformObj) {
 /**
  * Sets the query to ignore any filters that are currently applied
  * @method ignoreFilters
- * @param {Array} [filterIds] An optional list of specific filter ids to ignore. If specified, only these filters will
- * be ignored. Otherwise, all will be ignored.
+ * @param {...String | Array} [filterIds] An optional, variable number of filter ids to ignore OR ab array of
+ * filter ids to ignore. If specified, only these filters will be ignored. Otherwise, all will be ignored.
  * @return {neon.query.Query} This query object
  */
 neon.query.Query.prototype.ignoreFilters = function (filterIds) {
-	if ( filterIds ) {
-		this.ignoredFilterIds_= filterIds;
+	var filters;
+	if(arguments.length === 1 && $.isArray(filterIds)) {
+		filters = filterIds;
+	} else {
+		filters = neon.util.arrayUtils.argumentsToArray(arguments);
 	}
-	else {
+
+	if(filters.length > 0) {
+		this.ignoredFilterIds_= filters;
+	} else {
 		this.ignoreFilters_ = true;
 	}
 	return this;
@@ -379,25 +404,33 @@ neon.query.where = function (fieldName, op, value) {
 /**
  * Creates an *and* boolean clause for the query
  * @method and
- * @param  {Object} clauses A variable number of *where* clauses to apply
+ * @param  {Object | Array} clauses A variable number of *where* clauses to apply OR an single array of *where* clauses
  * @example
  *     and(where('x','=',10),where('y','=',1))
  * @return {Object}
  */
 neon.query.and = function (clauses) {
-	return new neon.query.BooleanClause('and', neon.util.arrayUtils.argumentsToArray(arguments));
+	if(arguments.length === 1 && $.isArray(clauses)) {
+		return new neon.query.BooleanClause('and', clauses);
+	} else {
+		return new neon.query.BooleanClause('and', neon.util.arrayUtils.argumentsToArray(arguments));
+	}
 };
 
 /**
  * Creates an *or* boolean clause for the query
  * @method or
- * @param {Object} clauses A variable number of *where* clauses to apply
+ * @param {Object} clauses A variable number of *where* clauses to apply OR a single array of *where* clauses
  * @example
  *     or(where('x','=',10),where('y','=',1))
  * @return {Object}
  */
 neon.query.or = function (clauses) {
-	return new neon.query.BooleanClause('or', neon.util.arrayUtils.argumentsToArray(arguments));
+	if(arguments.length === 1 && $.isArray(clauses)) {
+		return new neon.query.BooleanClause('or', clauses);
+	} else {
+		return new neon.query.BooleanClause('or', neon.util.arrayUtils.argumentsToArray(arguments));
+	}
 };
 
 /**
