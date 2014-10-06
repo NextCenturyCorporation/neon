@@ -260,13 +260,19 @@ coreMap.Map.prototype.setData = function (mapData) {
 };
 
 /**
- * Updates the min/max radii values for the point layer
+ * Updates the internal min/max radii values for the point layer.  These values are simply
+ * the minimum and maximum values of the sizeMapping in the current data set.  They will be
+ * mapped linearly to the range of allowed sizes between coreMap.Map.MIN_RADIUS and
+ * coreMap.Map.MAX_RADIUS.  This function should be called after new data is set to ensure
+ * correct display.
  * @method updateRadii
  */
 
 coreMap.Map.prototype.updateRadii = function () {
     this.minRadius = this.calculateMinRadius();
     this.maxRadius = this.calculateMaxRadius();
+    this._baseRadiusDiff = coreMap.Map.MAX_RADIUS - coreMap.Map.MIN_RADIUS;
+    this._dataRadiusDiff = this.maxRadius - this.minRadius;
 };
 
 
@@ -399,28 +405,16 @@ coreMap.Map.prototype.createPointStyleObject = function (color, radius) {
 };
 
 /**
- * Calculate the desired radius of a point.
+ * Calculate the desired radius of a point.  This will be a proporation of the
+ * allowed coreMap.Map.MIN_RADIUS and coreMap.Map.MAX_RADIUS values.
  * @param {Object} element One data element of the map's data array.
  * @return {number} The radius
  * @method calculateRadius
  */
-
 coreMap.Map.prototype.calculateRadius = function (element) {
-    // TODO: Review this function and make sure radius is being properly calculated and document what it is doing
-    if (this.minRadius === this.maxRadius) {
-        return coreMap.Map.MIN_RADIUS;
-    }
-
-    var size = this.getValueFromDataElement(this.sizeMapping, element);
-    var radius = coreMap.Map.MIN_RADIUS;
-    if (size >= 1) {
-        var slope = 10 / (this.maxRadius - this.minRadius);
-        var computedRadius = Math.round(slope * size + 5);
-        if (computedRadius > radius) {
-            radius = computedRadius;
-        }
-    }
-    return radius;
+    var dataVal = this.getValueFromDataElement(this.sizeMapping, element);
+    var percentOfDataRange = (dataVal - this.minRadius) / this._dataRadiusDiff;
+    return coreMap.Map.MIN_RADIUS + (percentOfDataRange * this._baseRadiusDiff);
 };
 
 /**
