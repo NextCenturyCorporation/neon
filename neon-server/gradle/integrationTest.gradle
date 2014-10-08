@@ -159,9 +159,9 @@ task deleteSharkDataIntegrationTest(type: com.ncc.neon.data.SharkDataDeleter) {
 def isMongoOnly() {
     // all other non-shark tests require mongo
     def integrationTestSingle = System.getProperty("integrationTest.single")
-    return integrationTestSingle && !integrationTestSingle.toLowerCase().contains("shark")
+    return integrationTestSingle && !integrationTestSingle.toLowerCase().contains("spark")
 }
 
 def isSharkOnly() {
-    return System.getProperty("integrationTest.single")?.toLowerCase()?.contains("shark")
+    return System.getProperty("integrationTest.single")?.toLowerCase()?.contains("spark")
 }

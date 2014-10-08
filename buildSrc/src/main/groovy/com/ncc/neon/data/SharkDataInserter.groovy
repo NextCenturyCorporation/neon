@@ -30,8 +30,8 @@ class SharkDataInserter extends DefaultTask{
     private static final def FIELD_TYPES = [_id: "string", firstname: "string", lastname: "string", city: "string", state: "string", salary: "int", hiredate: "timestamp"]
 
     // default values. build will override these
-    String host = "shark:10000"
-    String hdfsUrl = "hdfs://shark:8020"
+    String host = "spark:10000"
+    String hdfsUrl = "hdfs://spark:8020"
 
     String databaseName = "concurrencytest"
     String tableName = "records"
@@ -40,7 +40,7 @@ class SharkDataInserter extends DefaultTask{
     void run(){
         Configuration conf = new Configuration()
         conf.set("fs.defaultFS", hdfsUrl)
-        FileSystem fileSystem = FileSystem.get(conf)
+        FileSystem fileSystem = FileSystem.get(new URI(hdfsUrl), conf, "root")
 
         File testDataFile = getFile("/shark-csv/data.csv")
         File fieldsFile = getFile("/shark-csv/fields.csv")

@@ -1,7 +1,7 @@
 // dependencies required for the shark libraries included in lib
 dependencies {
 
-    compile('org.apache.hadoop:hadoop-common:2.0.0-cdh4.3.0') {
+    compile('org.apache.hadoop:hadoop-common:2.3.0') {
         exclude group: 'com.google.guava'
         exclude group: 'org.mortbay.jetty'
         exclude group: 'javax.servlet'
