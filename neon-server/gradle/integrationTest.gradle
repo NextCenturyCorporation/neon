@@ -115,7 +115,7 @@ task insertSharkDataIntegrationTest(type: com.ncc.neon.data.SharkDataInserter) {
     description = "Inserts test data used for shark integration tests"
     dependsOn 'deleteSharkDataIntegrationTestBeforeInsert', 'generateSharkCSV', 'generateSharkJson'
     host = getSharkHost()
-    hdfsUrl = getHdfsUrl()
+    hdfsUrl = project.getHdfsUrl()
     databaseName = 'neonintegrationtest'
 }
 
