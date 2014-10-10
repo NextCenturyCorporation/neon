@@ -26,7 +26,7 @@ import com.mchange.v2.c3p0.ComboPooledDataSource
 import java.sql.Connection
 import java.sql.Statement
 
-class SharkDataInserter extends DefaultTask{
+class SparkSQLDataInserter extends DefaultTask{
     private static final def FIELD_TYPES = [_id: "string", firstname: "string", lastname: "string", city: "string", state: "string", salary: "int", hiredate: "timestamp"]
 
     // default values. build will override these
@@ -42,8 +42,8 @@ class SharkDataInserter extends DefaultTask{
         conf.set("fs.defaultFS", hdfsUrl)
         FileSystem fileSystem = FileSystem.get(new URI(hdfsUrl), conf, "root")
 
-        File testDataFile = getFile("/shark-csv/data.csv")
-        File fieldsFile = getFile("/shark-csv/fields.csv")
+        File testDataFile = getFile("/spark-csv/data.csv")
+        File fieldsFile = getFile("/spark-csv/fields.csv")
         def destFolder = "${hdfsUrl}/tmp/neonconcurrencytest-${new Random().nextInt(Integer.MAX_VALUE)}/"
         def destFolderPath = new Path(destFolder)
         fileSystem.mkdirs(destFolderPath)

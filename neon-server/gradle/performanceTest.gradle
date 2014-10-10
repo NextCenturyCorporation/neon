@@ -49,7 +49,7 @@ dependencies {
 }
 
 task gatling {
-    dependsOn 'concurrencyTestWar', 'insertDataIntoMongo', 'insertDataIntoShark'
+    dependsOn 'concurrencyTestWar', 'insertDataIntoMongo', 'insertDataIntoSparkSQL'
     group = TEST_GROUP
 
     doLast {
@@ -92,7 +92,7 @@ def getFullyQualifiedClassName(File file){
 def createSystemProperties(){
     return [
         "mongo.host" : getMongoHost(),
-        "shark.host" : getSharkHost()
+        "sparksql.host" : getSparkSQLHost()
     ]
 }
 
@@ -124,15 +124,15 @@ task deleteDataFromMongoBeforeInsert(type: com.ncc.neon.data.MongoDataDeleter) {
     host = getMongoHost()
 }
 
-task insertDataIntoShark(type: com.ncc.neon.data.SharkDataInserter) {
-    description = "Inserts data into shark used by concurrency tests"
-    dependsOn 'deleteDataFromSharkBeforeInsert', 'generateSharkCSV', 'generateSharkJson'
-    host = getSharkHost()
+task insertDataIntoSparkSQL(type: com.ncc.neon.data.SparkSQLDataInserter) {
+    description = "Inserts data into spark sql used by concurrency tests"
+    dependsOn 'deleteDataFromSparkSQLBeforeInsert', 'generateSparkSQLCSV', 'generateSparkSQLJson'
+    host = getSparkSQLHost()
     hdfsUrl = getHdfsUrl()
 }
-task deleteDataFromSharkBeforeInsert(type: com.ncc.neon.data.SharkDataDeleter) {
-    description = "Deletes any old concurrent tests data from shark that may have been left around by previous tests"
-    host = getSharkHost()
+task deleteDataFromSparkSQLBeforeInsert(type: com.ncc.neon.data.SparkSQLDataDeleter) {
+    description = "Deletes any old concurrent tests data from spark sql that may have been left around by previous tests"
+    host = getSparkSQLHost()
 }
 
 task deleteDataFromMongo(type: com.ncc.neon.data.MongoDataDeleter) {
@@ -140,15 +140,15 @@ task deleteDataFromMongo(type: com.ncc.neon.data.MongoDataDeleter) {
     host = getMongoHost()
 }
 
-task deleteDataFromShark(type: com.ncc.neon.data.SharkDataDeleter) {
-    description = "Deletes any concurrency test data from shark"
-    host = getSharkHost()
+task deleteDataFromSparkSQL(type: com.ncc.neon.data.SparkSQLDataDeleter) {
+    description = "Deletes any concurrency test data from spark sql"
+    host = getSparkSQLHost()
 }
 
 task afterGatlingTest{
     description = "Cleans up any concurrency test data"
     group = TEST_GROUP
-    dependsOn 'stopGatlingJetty', 'deleteDataFromMongo', 'deleteDataFromShark'
+    dependsOn 'stopGatlingJetty', 'deleteDataFromMongo', 'deleteDataFromSparkSQL'
 }
 
 gatling.finalizedBy afterGatlingTest

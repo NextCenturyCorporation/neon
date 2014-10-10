@@ -36,8 +36,8 @@ import java.sql.Timestamp
 @ContextConfiguration(classes = IntegrationTestContext)
 class SparkSQLQueryExecutorIntegrationTest extends AbstractQueryExecutorIntegrationTest {
 
-    // TODO: NEON-565 another duplication of shark.host in here
-    private static final String HOST_STRING = System.getProperty("shark.host", "localhost:10000")
+    // TODO: NEON-565 another duplication of sparksql.host in here
+    private static final String HOST_STRING = System.getProperty("sparksql.host", "localhost:10000")
 
     SparkSQLQueryExecutor sparkSQLQueryExecutor
 
@@ -58,7 +58,7 @@ class SparkSQLQueryExecutorIntegrationTest extends AbstractQueryExecutorIntegrat
     }
 
     protected String getResultsJsonFolder() {
-        return "shark-json/"
+        return "spark-json/"
     }
 
     protected def jsonObjectToMap(jsonObject) {

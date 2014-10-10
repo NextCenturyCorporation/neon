@@ -20,9 +20,9 @@ import org.json.JSONArray
 import org.json.JSONObject
 
 /**
- * Generates json that can be used for shark database tests, specifically removing nested data
+ * Generates json that can be used for Spark SQL database tests, specifically removing nested data
  */
-class SharkJSONGenerator extends AbstractJSONGenerator {
+class SparkSQLJSONGenerator extends AbstractJSONGenerator {
 
 
     @Override

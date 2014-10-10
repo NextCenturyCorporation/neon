@@ -23,10 +23,10 @@ import java.sql.DriverManager
 import java.sql.Statement
 import com.mchange.v2.c3p0.ComboPooledDataSource
 
-class SharkDataDeleter extends DefaultTask {
+class SparkSQLDataDeleter extends DefaultTask {
 
     // default value. build will override this
-    String host = "shark:10000"
+    String host = "spark:10000"
     String databaseName = "concurrencytest"
     String tableName = "records"
 

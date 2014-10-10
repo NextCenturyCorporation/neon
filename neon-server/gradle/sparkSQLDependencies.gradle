@@ -1,4 +1,4 @@
-// dependencies required for the shark libraries included in lib
+// dependencies required for the spark sql libraries
 dependencies {
 
     compile('org.apache.hadoop:hadoop-common:2.3.0') {
