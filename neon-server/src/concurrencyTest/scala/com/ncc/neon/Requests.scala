@@ -12,7 +12,7 @@ object Requests {
 
   val mongoHost = System.getProperty("mongo.host")
 
-  val sharkHost = System.getProperty("shark.host")
+  val sparkSQLHost = System.getProperty("sparksql.host")
 
 
 }

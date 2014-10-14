@@ -44,8 +44,8 @@ configurations {
 
 dependencies {
     compile 'org.scala-lang:scala-library:2.10.3'
-    concurrencyTestCompile("com.excilys.ebi.gatling.highcharts:gatling-charts-highcharts:1.5.3")
-    concurrencyTestRuntime "com.excilys.ebi.gatling:gatling-app:1.5.3"
+    concurrencyTestCompile("com.excilys.ebi.gatling.highcharts:gatling-charts-highcharts:1.5.6")
+    concurrencyTestRuntime "com.excilys.ebi.gatling:gatling-app:1.5.6"
 }
 
 task gatling {
@@ -128,7 +128,7 @@ task insertDataIntoSparkSQL(type: com.ncc.neon.data.SparkSQLDataInserter) {
     description = "Inserts data into spark sql used by concurrency tests"
     dependsOn 'deleteDataFromSparkSQLBeforeInsert', 'generateSparkSQLCSV', 'generateSparkSQLJson'
     host = getSparkSQLHost()
-    hdfsUrl = getHdfsUrl()
+    hdfsUrl = project.getHdfsUrl()
 }
 task deleteDataFromSparkSQLBeforeInsert(type: com.ncc.neon.data.SparkSQLDataDeleter) {
     description = "Deletes any old concurrent tests data from spark sql that may have been left around by previous tests"

@@ -11,7 +11,7 @@ import Headers._
 import Responses._
 import Requests._
 
-class SharkScenario extends Simulation {
+class SparkSQLScenario extends Simulation {
 
   val httpConf = httpConfig
     .baseURL("http://localhost:11402")
@@ -23,15 +23,15 @@ class SharkScenario extends Simulation {
 
   val serviceRoot = "/neon/services/"
   val userCount = 10
-  val queryServicePath = sharkHost + "/shark"
+  val queryServicePath = sparkSQLHost + "/sparksql"
 
 
-  val scn = scenario("Shark under "+ userCount +" concurrent users")
+  val scn = scenario("Spark SQL under "+ userCount +" concurrent users")
     .exec(http("Query all data")
     .post(serviceRoot + "queryservice/query/" + queryServicePath)
     .headers(json_header)
     .body(query)
-    .check(bodyString.is(shark_all_data))
+    .check(bodyString.is(spark_sql_all_data))
   )
     .pause(2)
     .exec(http("Add a filter")
@@ -51,7 +51,7 @@ class SharkScenario extends Simulation {
     .queryParam("selectionOnly","true")
     .headers(json_header)
     .body(query)
-    .check(bodyString.is(shark_selection_data))
+    .check(bodyString.is(spark_sql_selection_data))
   )
     .pause(2)
     .exec(http("Remove the filter")
@@ -64,7 +64,7 @@ class SharkScenario extends Simulation {
     .post(serviceRoot + "queryservice/query/" + queryServicePath)
     .headers(json_header)
     .body(query)
-    .check(bodyString.is(shark_all_data))
+    .check(bodyString.is(spark_sql_all_data))
   )
     .pause(2)
     .exec(http("Remove the selection")

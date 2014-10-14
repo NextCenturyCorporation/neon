@@ -12,7 +12,7 @@ import Responses._
 import Requests._
 
 
-class MongoAndSharkMix extends Simulation {
+class MongoAndSparkSQLMix extends Simulation {
 
   val httpConf = httpConfig
     .baseURL("http://localhost:11402")
@@ -24,9 +24,9 @@ class MongoAndSharkMix extends Simulation {
 
   val serviceRoot = "/neon/services/"
   val mongoQueryServicePath = mongoHost + "/mongo"
-  val sharkQueryServicePath = sharkHost + "/shark"
+  val sparkSQLQueryServicePath = sparkSQLHost + "/sparksql"
 
-  val scn = scenario("Query both mongo and shark")
+  val scn = scenario("Query both mongo and spark sql")
     .exec(http("Query ignore filters")
     .post(serviceRoot + "queryservice/query/" + mongoQueryServicePath)
     .queryParam("ignoreFilters","true")
@@ -47,19 +47,19 @@ class MongoAndSharkMix extends Simulation {
     .body(add_selection)
   )
     .pause(3)
-    .exec(http("Query filtered data from shark")
-    .post(serviceRoot + "queryservice/query/" + sharkQueryServicePath)
+    .exec(http("Query filtered data from spark sql")
+    .post(serviceRoot + "queryservice/query/" + sparkSQLQueryServicePath)
     .headers(json_header)
     .body(query)
-    .check(bodyString.is(shark_filtered_data))
+    .check(bodyString.is(spark_sql_filtered_data))
   )
     .pause(5)
-    .exec(http("Query selection from shark")
-    .post(serviceRoot + "queryservice/query/" + sharkQueryServicePath)
+    .exec(http("Query selection from spark sql")
+    .post(serviceRoot + "queryservice/query/" + sparkSQLQueryServicePath)
     .queryParam("selectionOnly","true")
     .headers(json_header)
     .body(query)
-    .check(bodyString.is(shark_selection_data))
+    .check(bodyString.is(spark_sql_selection_data))
   )
     .pause(5)
     .exec(http("Query mongo")
