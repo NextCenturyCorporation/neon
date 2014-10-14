@@ -38,7 +38,7 @@ neon.query.Query = function () {
 	this.aggregates = [];
 	this.sortClauses = [];
 	this.limitClause = undefined;
-	this.transform = undefined;
+	this.transforms = undefined;
 };
 
 /**
@@ -334,7 +334,14 @@ neon.query.Query.prototype.sortBy = function (fields) {
  * @return {neon.query.Query} This query object
  */
 neon.query.Query.prototype.transform = function (transformObj) {
-	this.transform = transformObj;
+	var transforms;
+	if(arguments.length === 1 && $.isArray(transformObj)) {
+		transforms = transformObj;
+	} else {
+		transforms = neon.util.arrayUtils.argumentsToArray(arguments);
+	}
+
+	this.transforms = transforms;
 	return this;
 };
 

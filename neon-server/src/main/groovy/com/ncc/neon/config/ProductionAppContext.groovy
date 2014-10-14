@@ -20,6 +20,11 @@ import com.ncc.neon.query.result.TransformerRegistry
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.context.annotation.Profile
+
+import groovy.lang.GroovyClassLoader
+
+import groovy.io.FileType
+
 /**
  * Spring bean configuration to use in production
  */
@@ -27,15 +32,27 @@ import org.springframework.context.annotation.Profile
 @Profile("production")
 class ProductionAppContext {
 
-    @Bean
-    TransformerRegistry transformerRegistry() {
-        TransformerRegistry registry = new TransformerRegistry()
-        List<Transformer> registeredTransformers = []
-        registeredTransformers.each { Transformer transformer ->
-            registry.register(transformer)
-        }
-        return registry
-    }
+	@Bean
+	TransformerRegistry transformerRegistry() {
+		TransformerRegistry registry = new TransformerRegistry()
 
+		List<Transformer> registeredTransformers = []
 
+		//alternatively read the specified folder and add the items found.
+		def path = this.getClass().getResource("../../../../transforms/");
+
+		def dir = new File(path.getPath());
+
+		GroovyClassLoader loader = new GroovyClassLoader();
+		dir.eachFileMatch (FileType.FILES, ~/.*\.groovy/) { file ->
+			println(file);
+			registeredTransformers << loader.parseClass(file).newInstance();
+		}
+
+		registeredTransformers.each { Transformer transformer ->
+			registry.register(transformer)
+		}
+
+		return registry
+	}
 }
