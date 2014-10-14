@@ -1,57 +1,6 @@
 // dependencies required for the spark sql libraries
 dependencies {
 
-    compile('org.apache.hadoop:hadoop-common:2.3.0') {
-        exclude group: 'com.google.guava'
-        exclude group: 'org.mortbay.jetty'
-        exclude group: 'javax.servlet'
-        exclude group: 'javax.servlet.jsp'
-        exclude module: 'jasper-compiler'
-        exclude module: 'jasper-runtime'
-        // using log4j-over-slf4j
-        exclude module: 'log4j'
-        exclude module: 'slf4j-log4j12'
-    }
+    compile 'org.apache.hadoop:hadoop-common:2.3.0'
 
-    compile 'com.google.protobuf:protobuf-java:2.4.1'
-    compile 'jline:jline:0.9.94'
-
-    // See https://code.google.com/p/javaewah/  Variant of Java BitSet class.
-    compile 'com.googlecode.javaewah:JavaEWAH:0.3.2'
-
-    // Optimized versions of various java classes like string builders.
-    compile 'javolution:javolution:5.5.1'
-
-    // High scale replacement for java.util collections.
-    compile 'com.github.stephenc.high-scale-lib:high-scale-lib:1.1.1'
-    compile 'com.yammer.metrics:metrics-core:2.1.2'
-
-    compile 'commons-cli:commons-cli:1.2'
-    compile 'commons-dbcp:commons-dbcp:1.4'
-    compile 'commons-lang:commons-lang:2.4'
-    compile ('commons-logging:commons-logging:1.1.3') { // using log4j-over-slf4j
-        exclude module: 'log4j'
-        exclude module: 'slf4j-log4j12'
-    }
-
-    compile 'commons-io:commons-io:2.4'
-
-    compile 'org.datanucleus:datanucleus-api-jdo:3.2.6'
-    compile 'org.datanucleus:datanucleus-core:3.2.10'
-    compile 'org.datanucleus:datanucleus-rdbms:3.2.9'
-    compile 'javax.jdo:jdo2-api:2.3-ec'
-
-    compile 'org.apache.derby:derby:10.4.2.0'
-    compile('org.apache.thrift:libfb303:0.9.0') {
-        exclude group: 'javax.servlet'
-    }
-    compile 'org.apache.thrift:libthrift:0.9.0'
-    compile('org.apache.zookeeper:zookeeper:3.4.3') {
-        exclude group: 'javax.servlet'
-        // using log4j-over-slf4j
-        exclude module: 'log4j'
-        exclude module: 'slf4j-log4j12'
-
-    }
-    compile 'com.google.code.tempus-fugit:tempus-fugit:1.1'
 }
