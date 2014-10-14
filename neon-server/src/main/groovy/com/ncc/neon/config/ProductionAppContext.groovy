@@ -38,14 +38,11 @@ class ProductionAppContext {
 
 		List<Transformer> registeredTransformers = []
 
-		//alternatively read the specified folder and add the items found.
-		def path = this.getClass().getResource("../../../../transforms/");
-
+		def path = this.getClass().getResource("/transforms/");
+		@SuppressWarnings('JavaIoPackageAccess')
 		def dir = new File(path.getPath());
-
 		GroovyClassLoader loader = new GroovyClassLoader();
 		dir.eachFileMatch (FileType.FILES, ~/.*\.groovy/) { file ->
-			println(file);
 			registeredTransformers << loader.parseClass(file).newInstance();
 		}
 
