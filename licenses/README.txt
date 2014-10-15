@@ -18,38 +18,22 @@ Apache v2.0 (apache-2.0.txt)
   -- org.codenarc:CodeNarc:0.19
 - cglib
   -- cglib:cglib:2.2.2
-- Hive/Shark
-  -- hive-cli:0.11.0-shark-SNAPSHOT
-  -- hive-common:0.11.0-shark-SNAPSHOT
-  -- hive-contrib:0.11.0-shark-SNAPSHOT
-  -- hive-exec:0.11.0-shark-SNAPSHOT
-  -- hive-jdbc:0.11.0-shark-SNAPSHOT
-  -- hive-metastore:0.11.0-shark-SNAPSHOT
-  -- hive-serde:0.11.0-shark-SNAPSHOT
-  -- hive-service:0.11.0-shark-SNAPSHOT
-  -- hive-shims:0.11.0-shark-SNAPSHOT
-- Hadoop (used by Hive/Shark)
-  -- org.apache.hadoop:hadoop-common:2.0.0-cdh4.3.0
-  -- org.apache.hadoop:hadoop-hdfs:2.0.0-cdh4.3.0
-- Thrift (used by Hive/Shark)
+- Hive
+  -- hive-cli:0.12.0
+  -- hive-common:0.12.0
+  -- hive-contrib:0.12.0
+  -- hive-exec:0.12.0
+  -- hive-jdbc:0.12.0
+  -- hive-metastore:0.12.0
+  -- hive-serde:0.12.0
+  -- hive-service:0.12.0
+  -- hive-shims:0.12.0
+- Hadoop (used by Hive)
+  -- org.apache.hadoop:hadoop-common:2.3.0
+  -- org.apache.hadoop:hadoop-hdfs:2.3.0
+- Thrift (used by Hive)
   -- org.apache.thrift:libfb303:0.9.0
   -- org.apache.thrift:libthrift:0.9.0
-- Zookeeper (used by Hive/Shark)
-  -- org.apache.zookeeper:zookeeper:3.4.3
-- Yammer metrics (used by Hive/Shark)
-  -- com.yammer.metrics:metrics-core:2.1.2
-- tempus-fugit (used by Hive/Shark)
-  -- com.google.code.tempus-fugit:tempus-fugit:1.1
-- Java Data Objects (used by Hive/Shark)
-  -- javax.jdo:jdo2-api:2.3-ec
-- javaewah (used by Hive/Shark)
-  -- com.googlecode.javaewah:JavaEWAH:0.3.2
-- Derby (used by Hive/Shark)
-  -- org.apache.derby:derby:10.4.2.0
-- Datanucleus (used by Hive/Shark)
-  -- org.datanucleus:datanucleus-api-jdo:3.2.1
-  -- org.datanucleus:datanucleus-core:3.2.1
-  -- org.datanucleus:datanucleus-rdbms:3.2.1
 - Mongo Java driver
   -- org.mongodb:mongo-java-driver:2.11.3
 - Joda Time
@@ -79,8 +63,6 @@ Eclipse Public License (EPL v1.0, epl-1.0.txt)
   -- org.scala-lang:scala-library:2.10.3
 
 BSD (bsd.txt)
-- javolution (used by Hive/Shark)
-  -- javolution:javolution:5.5.1
 - antlr
   -- org.antlr:ST4:4.0.7
   -- org.antlr:antlr-runtime:3.5

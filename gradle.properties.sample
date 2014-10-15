@@ -9,10 +9,10 @@ org.gradle.daemon=true
 # Path to a tomcat or other application server.
 NEON_SERVER=/my/tomcat/path/apache-tomcat-7.0.39
 
-# Configuration for the instances of mongo/shark used for testing
+# Configuration for the instances of mongo/spark-sql used for testing
 mongo.host=localhost
 hdfs.url=hdfs://localhost:8020
-shark.host=localhost:10000
+sparksql.host=localhost:10000
 
 # Change the port for acceptance tests
 acceptanceTest.port=10102
