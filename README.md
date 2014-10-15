@@ -36,7 +36,7 @@ On Fedora 20, run
     [Demo App QuickStart Guide][demo-guide].
     
 [demo]: http://localhost:8080/neon/examples/angular-demo/app/
-[demo-guide]: https://github.com/NextCenturyCorporation/neon/wiki/Demo-App-QuickStart-Guide#initial-screen
+[demo-guide]: https://github.com/NextCenturyCorporation/neon/wiki/Demo-App-User-Guide
 
 ##Documentation
 
