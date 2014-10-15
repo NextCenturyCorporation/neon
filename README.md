@@ -33,7 +33,7 @@ On Fedora 20, run
         ./gradlew jettyRun
     Point your web browser at [http://localhost:8080/neon/examples/angular-demo/app/][demo]
     and click *Choose dataset* then *Earthquakes*. You can read more about using the demo at the
-    [Demo App QuickStart Guide][demo-guide].
+    [Demo App Users Guide][demo-guide].
     
 [demo]: http://localhost:8080/neon/examples/angular-demo/app/
 [demo-guide]: https://github.com/NextCenturyCorporation/neon/wiki/Demo-App-User-Guide
