@@ -21,6 +21,8 @@ import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.context.annotation.Profile
 
+import java.nio.file.FileSystems
+
 import groovy.lang.GroovyClassLoader
 
 import groovy.io.FileType
@@ -38,13 +40,11 @@ class ProductionAppContext {
 
 		List<Transformer> registeredTransformers = []
 
-		def path = this.getClass().getResource("/transforms/");
-		@SuppressWarnings('JavaIoPackageAccess')
-		def dir = new File(path.getPath());
-		GroovyClassLoader loader = new GroovyClassLoader();
-		dir.eachFileMatch (FileType.FILES, ~/.*\.groovy/) { file ->
-			registeredTransformers << loader.parseClass(file).newInstance();
-		}
+		def path = FileSystems.getDefault().getPath(this.getClass().getResource("/transforms/").getPath());
+
+		TransformLoader loader = new TransformLoader(path, registry);
+		Thread th = new Thread(loader, "TransformLoader");
+		th.start();
 
 		registeredTransformers.each { Transformer transformer ->
 			registry.register(transformer)
