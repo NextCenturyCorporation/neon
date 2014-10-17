@@ -23,10 +23,6 @@ import org.springframework.context.annotation.Profile
 
 import java.nio.file.FileSystems
 
-import groovy.lang.GroovyClassLoader
-
-import groovy.io.FileType
-
 /**
  * Spring bean configuration to use in production
  */
@@ -40,11 +36,11 @@ class ProductionAppContext {
 
 		List<Transformer> registeredTransformers = []
 
-		def path = FileSystems.getDefault().getPath(this.getClass().getResource("/transforms/").getPath());
+		def path = FileSystems.getDefault().getPath(this.getClass().getResource("/transforms/").getPath())
 
-		TransformLoader loader = new TransformLoader(path, registry);
-		Thread th = new Thread(loader, "TransformLoader");
-		th.start();
+		TransformLoader loader = new TransformLoader(path, registry)
+		Thread th = new Thread(loader, "TransformLoader")
+		th.start()
 
 		registeredTransformers.each { Transformer transformer ->
 			registry.register(transformer)

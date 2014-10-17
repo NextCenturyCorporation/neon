@@ -11,59 +11,66 @@ import java.nio.file.FileSystems
 import java.nio.file.StandardWatchEventKinds
 
 class TransformLoader implements Runnable {
-	WatchService watchService = FileSystems.getDefault().newWatchService();
-	private TransformerRegistry registry;
-	private Path path;
+	WatchService watchService = FileSystems.getDefault().newWatchService()
+	private final TransformerRegistry registry
+	private final Path path
+	private final Map<String, String> loadedTransforms = [:]
 
 	public TransformLoader(Path watchPath, TransformerRegistry transformRegistry) {
-		registry = transformRegistry;
-		path = watchPath;
-		path.register(watchService, StandardWatchEventKinds.ENTRY_MODIFY, StandardWatchEventKinds.ENTRY_DELETE, StandardWatchEventKinds.ENTRY_CREATE);
+		registry = transformRegistry
+		path = watchPath
+		path.register(watchService, StandardWatchEventKinds.ENTRY_MODIFY, StandardWatchEventKinds.ENTRY_DELETE)
 	}
 
 	public void run() {
 		for ( ; ; ) {
 			WatchKey key = watchService.take()
-
-			//Poll all the events queued for the key
 			for ( WatchEvent<?> event: key.pollEvents()){
-				WatchEvent.Kind kind = event.kind()
-				switch (kind.name()){
-					case "ENTRY_CREATE":
-						//IF groovy file
-						System.out.println("Created: " + event.context());
-					case "ENTRY_MODIFY":
-						System.out.println("Modified: "+event.context());
-						break
-					case "ENTRY_DELETE":
-						System.out.println("Delete: "+event.context());
-						break
-				}
+				handleEvent(event)
 			}
-
-			//reset is invoked to put the key back to ready state
 			boolean valid = key.reset()
-			//If the key is invalid, just exit.
-
 			if ( !valid ) {
 				break
 			}
 		}
 	}
 
-	private void loadTransform(Path path) {
-		@SuppressWarnings('JavaIoPackageAccess')
-		def dir = new File(path.getPath())
+	private void handleEvent(WatchEvent<?> event) {
+		WatchEvent.Kind kind = event.kind()
+		switch (kind.name()){
+			case "ENTRY_MODIFY":
+				if(event.context().toString().contains(".groovy")) {
+					replaceTransform(event.context().toString())
+				}
+				break
+			case "ENTRY_DELETE":
+				if(event.context().toString().contains(".groovy")) {
+					removeTransform(event.context().toString())
+				}
+				break
+		}
+	}
+
+	@SuppressWarnings("JavaIoPackageAccess")
+	private void loadTransform(String relativePath) {
+		def file = new File(path.toString(), relativePath)
+
 		GroovyClassLoader loader = new GroovyClassLoader()
-		Transformer transform = loader.parseClass(file).newInstance();
+		Transformer transform = loader.parseClass(file).newInstance()
+		loadedTransforms.put(relativePath, transform.getName())
 		registry.register(transform)
 	}
 
-	private void replaceTransform(Path path) {
-
+	private void replaceTransform(String relativePath) {
+		removeTransform(relativePath)
+		loadTransform(relativePath)
 	}
 
-	private void removeTransform(Path path) {
-
+	private void removeTransform(String relativePath) {
+		String name = loadedTransforms.get(relativePath)
+		if(name) {
+			Transformer transform = registry.removeTransformer(name)
+			GroovySystem.getMetaClassRegistry().removeMetaClass(transform.getClass())
+		}
 	}
 }
