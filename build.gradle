@@ -24,3 +24,8 @@ project.ext {
 allprojects {
     version = "0.8.0-SNAPSHOT"
 }
+
+
+task wrapper(type: Wrapper) {
+    gradleVersion = '2.0'
+}
