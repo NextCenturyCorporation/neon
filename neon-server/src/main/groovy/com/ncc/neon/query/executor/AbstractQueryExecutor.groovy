@@ -89,14 +89,14 @@ abstract class AbstractQueryExecutor implements QueryExecutor {
 	 * @return
 	 */
 	private QueryResult transform(Transform[] transforms, QueryResult queryResult) {
-		if(transforms.length == 0){
+		if(!transforms || transforms.length == 0){
 			return queryResult
 		}
 
 		QueryResult returnResult = queryResult
 		transforms.each { transform ->
 			String transformName = transform.transformName
-			Transform transformer = transformRegistry.getTransformer(transformName)
+			Transformer transformer = transformRegistry.getTransformer(transformName)
 
 			if(!transformer){
 				throw new TransformerNotFoundException("Transform ${transformName} does not exist.")
