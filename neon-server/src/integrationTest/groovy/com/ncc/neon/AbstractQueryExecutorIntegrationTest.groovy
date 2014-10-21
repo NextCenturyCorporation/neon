@@ -60,7 +60,7 @@ abstract class AbstractQueryExecutorIntegrationTest {
 
     /**
      * Gets the folder that the input json files are stored in. By defalut, the test-data
-     * directory is used, but some databases (e.g. shark) will transform the data (such as by
+     * directory is used, but some databases (e.g. spark) will transform the data (such as by
      * removing nested fields) and put it i na folder it can use
      * @return
      */

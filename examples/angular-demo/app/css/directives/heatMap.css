@@ -59,3 +59,15 @@
 .heat-map .olControlZoom a:hover{
 	background-color: rgba(57, 181, 74, 1);
 }
+
+.olPopup {
+	font-size: 12px;
+}
+
+.olPopup table {
+	margin: 2px;
+}
+.olPopup td, .olPopup th {
+	padding: 2px;
+}
+

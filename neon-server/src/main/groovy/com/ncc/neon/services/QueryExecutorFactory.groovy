@@ -36,7 +36,7 @@ class QueryExecutorFactory {
     private QueryExecutor mongoQueryExecutor
 
     @Resource
-    private QueryExecutor sharkQueryExecutor
+    private QueryExecutor sparkSQLQueryExecutor
 
     @Autowired
     private ConnectionManager connectionManager
@@ -53,8 +53,8 @@ class QueryExecutorFactory {
         switch (databaseType) {
             case DataSources.mongo:
                 return mongoQueryExecutor
-            case DataSources.shark:
-                return sharkQueryExecutor
+            case DataSources.sparksql:
+                return sparkSQLQueryExecutor
             default:
                 throw new NeonConnectionException("Unsupported database type ${databaseType}")
         }

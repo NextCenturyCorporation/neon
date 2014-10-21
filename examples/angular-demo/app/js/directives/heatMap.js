@@ -43,26 +43,28 @@ angular.module('heatMapDirective', []).directive('heatMap', ['ConnectionService'
 
                 element.addClass('heat-map');
 
+                // Setup scope variables.
+                $scope.databaseName = '';
+                $scope.tableName = '';
+                $scope.fields = [];
+                $scope.latitudeField = '';
+                $scope.longitudeField = '';
+                $scope.sizeByField = '';
+                $scope.colorByField = '';
+                $scope.showPoints = false;  // Default to the heatmap view.
+                $scope.cacheMap = false;
+                $scope.initializing = true;
+                $scope.filterKey = neon.widget.getInstanceId("map");
+                $scope.showFilter = false;
+                $scope.dataBounds = undefined;
+                $scope.limit = 1000;  // Max points to pull into the map.
+
                 /**
                  * Initializes the name of the directive's scope variables
                  * and the Neon Messenger used to monitor data change events.
                  * @method initialize
                  */
                 $scope.initialize = function () {
-                    $scope.databaseName = '';
-                    $scope.tableName = '';
-                    $scope.fields = [];
-                    $scope.latitudeField = '';
-                    $scope.longitudeField = '';
-                    $scope.sizeByField = '';
-                    $scope.colorByField = '';
-                    $scope.showPoints = false;
-                    $scope.cacheMap = false;
-                    $scope.initializing = true;
-                    $scope.filterKey = neon.widget.getInstanceId("map");
-                    $scope.showFilter = false;
-                    $scope.dataBounds = undefined;
-                    $scope.limit = 1000;  // Max points to pull into the map.
 
                     // optionsDisplayed is used merely to track the display of the options menu
                     // for usability and workflow analysis.
@@ -133,14 +135,12 @@ angular.module('heatMapDirective', []).directive('heatMap', ['ConnectionService'
                                 to: newVal
                             });
                         if (newVal !== oldVal) {
-                            if (newVal) {
-                                $scope.map.sizeMapping = newVal;
+                            // Set the size by field if we are on a point layer.
+                            if ($scope.showPoints) {
+                                $scope.setMapSizeMapping(newVal);
+                                $scope.draw();
                             }
-                            else {
-                                $scope.map.sizeMapping = coreMap.Map.DEFAULT_SIZE_MAPPING;
-                            }
-
-                            $scope.queryForMapData();
+                            //$scope.queryForMapData();
                         }
                     });
 
@@ -154,13 +154,9 @@ angular.module('heatMapDirective', []).directive('heatMap', ['ConnectionService'
                             });
                         $scope.map.resetColorMappings();
                         if (newVal !== oldVal) {
-                            if (newVal) {
-                                $scope.map.categoryMapping = newVal;
-                            }
-                            else {
-                                $scope.map.categoryMapping = undefined;
-                            }
-                            $scope.queryForMapData();
+                            $scope.setMapCategoryMapping(newVal);
+                            $scope.draw();
+                            //$scope.queryForMapData();
                         }
                     });
 
@@ -173,6 +169,13 @@ angular.module('heatMapDirective', []).directive('heatMap', ['ConnectionService'
                                 clusters: !newVal
                             });
                         if (newVal !== oldVal) {
+                            if ($scope.showPoints) {
+                                $scope.setMapSizeMapping($scope.sizeByField);
+                            }
+                            else {
+                                $scope.setMapSizeMapping('');
+                            }
+                            $scope.map.draw();
                             $scope.map.toggleLayers();
                         }
                     });
@@ -283,12 +286,8 @@ angular.module('heatMapDirective', []).directive('heatMap', ['ConnectionService'
                     $scope.databaseName = message.database;
                     $scope.tableName = message.table;
                     $scope.latitudeField = "";
-                    $scope.latitudeField = "";
-                    $scope.longitudeField = "";
                     $scope.longitudeField = "";
                     $scope.colorByField = "";
-                    $scope.colorByField = "";
-                    $scope.sizeByField = "";
                     $scope.sizeByField = "";
 
                     // Clear the zoom Rect from the map before reinitializing it.
@@ -378,7 +377,7 @@ angular.module('heatMapDirective', []).directive('heatMap', ['ConnectionService'
                  */
                 $scope.queryForMapData = function () {
                     if (!$scope.initializing && $scope.latitudeField !== "" && $scope.longitudeField !== "") {
-                        var query = $scope.buildQuery();
+                        var query = $scope.buildPointQuery();
                         XDATA.activityLogger.logSystemActivity('HeatMap - query for map data');
                         connectionService.getActiveConnection().executeQuery(query, function (queryResults) {
                             $scope.$apply(function () {
@@ -399,6 +398,9 @@ angular.module('heatMapDirective', []).directive('heatMap', ['ConnectionService'
                     if (!$scope.initializing) {
                         $scope.map.draw();
                     }
+
+                    // color mappings need to be updated after drawing since they are set during drawing
+                    $scope.colorMappings = $scope.map.getColorMappings();
                 };
 
                 /**
@@ -415,10 +417,7 @@ angular.module('heatMapDirective', []).directive('heatMap', ['ConnectionService'
                     if ($scope.dataBounds === undefined) {
                         $scope.dataBounds = $scope.computeDataBounds(data);
                         $scope.zoomToDataBounds();
-                    }
-
-                    // color mappings need to be updated after drawing since they are set during drawing
-                    $scope.colorMappings = $scope.map.getColorMappings();
+                    } 
                 };
 
                 /**
@@ -481,6 +480,11 @@ angular.module('heatMapDirective', []).directive('heatMap', ['ConnectionService'
                         query.aggregate(neon.query.COUNT, '*', coreMap.Map.DEFAULT_SIZE_MAPPING);
                     }
 
+                    return query;
+                }
+
+                $scope.buildPointQuery = function() {
+                    var query = new neon.query.Query().selectFrom($scope.databaseName, $scope.tableName).limit($scope.limit)
                     return query;
                 }
 
@@ -548,6 +552,41 @@ angular.module('heatMapDirective', []).directive('heatMap', ['ConnectionService'
                     });
                 };
 
+                /**
+                 * Sets the size mapping field used by the map for its layers.  This should be a top level
+                 * field in the data objects passed to the map.
+                 * @param String mapping
+                 * @method setMapSizeMapping
+                 */
+                $scope.setMapSizeMapping = function(mapping) {
+                    if (mapping) {
+                        $scope.map.sizeMapping = mapping;
+                    }
+                    else {
+                        $scope.map.sizeMapping = "";
+                    }
+                    $scope.map.updateRadii();
+                }
+
+                /**
+                 * Sets the category mapping field used by the map for its layers.  This should be a top level
+                 * field in the data objects passed to the map.  If a non-truthy mapping is provided, the
+                 * @param String mapping
+                 * @method setMapCategoryMapping
+                 */
+                $scope.setMapCategoryMapping = function(mapping) {
+                    if (mapping) {
+                        $scope.map.categoryMapping = mapping;
+                    }
+                    else {
+                        $scope.map.categoryMapping = undefined;
+                    }
+                }
+
+                /**
+                 * Toggles whether or not the options menu should be displayed.
+                 * @method toggleOptionsDisplay
+                 */
                 $scope.toggleOptionsDisplay = function() {
                     $scope.optionsDisplayed = !$scope.optionsDisplayed;
                 };

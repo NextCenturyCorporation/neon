@@ -27,7 +27,7 @@ import org.junit.Before
 import org.junit.Test
 
 /**
- * Sets up unit tests to be run against both shark and mongo conversion strategies
+ * Sets up unit tests to be run against both spark SQL and mongo conversion strategies
  */
 abstract class AbstractConversionTest {
 

@@ -18,7 +18,7 @@
 
 
 import org.json.JSONArray
-import com.ncc.neon.SharkJSONGenerator
+import com.ncc.neon.SparkSQLJSONGenerator
 import com.ncc.neon.MongoJSONGenerator
 import com.ncc.neon.JSONToCSVConverter
 import org.gradle.api.plugins.jetty.internal.Monitor
@@ -69,7 +69,7 @@ apply plugin: 'war'
 
 // these files need to be applied in order since there are dependencies between them
 apply from: "${rootDir}/gradle/sharedDependencies.gradle"
-apply from: "gradle/sharkDependencies.gradle"
+apply from: "gradle/sparkSQLDependencies.gradle"
 apply from: "${rootDir}/gradle/js.gradle"
 apply from: "gradle/integrationTest.gradle"
 apply from: "gradle/acceptanceTest.gradle"
@@ -96,7 +96,9 @@ dependencies {
     compile "org.springframework:spring-web:$springVersion"
     compile 'org.slf4j:slf4j-api:1.7.2'
     compile 'org.slf4j:jcl-over-slf4j:1.7.2'
-    compile 'org.slf4j:log4j-over-slf4j:1.7.2'
+    // TODO: Revisit this dependency.  In the migration from shark to spark-sql, one of the newer
+    // library dependencies for spark-sql seems to cause a slf4j/log4j circular referencing issue.
+    //compile 'org.slf4j:log4j-over-slf4j:1.7.2'
     compile "ch.qos.logback:logback-core:$logbackVersion"
     compile "ch.qos.logback:logback-classic:$logbackVersion"
     compile "com.google.guava:guava:14.0.1"
@@ -222,19 +224,19 @@ task generateMongoJson {
     }
 }
 
-task generateSharkJson {
-    description = "Generates json files with shark specific constructs that are used for validating shark test results"
-    def outputDir = "${testDataDir}/shark-json"
+task generateSparkSQLJson {
+    description = "Generates json files with spark sql specific constructs that are used for validating spark sql test results"
+    def outputDir = "${testDataDir}/spark-json"
     inputs.files { testDataInputFileTree }
     outputs.dir { outputDir }
     doLast {
-        new SharkJSONGenerator().generateJson(testDataDir, outputDir)
+        new SparkSQLJSONGenerator().generateJson(testDataDir, outputDir)
     }
 }
 
-task generateSharkCSV {
-    description = "Generates csv files for inserting test data into shark"
-    def outputDir = "${testDataDir}/shark-csv"
+task generateSparkSQLCSV {
+    description = "Generates csv files for inserting test data into spark sql"
+    def outputDir = "${testDataDir}/spark-csv"
     def inputFile = new File(testDataDir, 'data.json')
     inputs.file { inputFile }
     outputs.dir { outputDir }
@@ -253,8 +255,8 @@ def getMongoHost() {
     return project.hasProperty("mongo.host") ? getProperty("mongo.host") : "localhost"
 }
 
-def getSharkHost() {
-    return project.hasProperty("shark.host") ? getProperty("shark.host") : "localhost:10000"
+def getSparkSQLHost() {
+    return project.hasProperty("sparksql.host") ? getProperty("sparksql.host") : "localhost:10000"
 }
 
 def getHdfsUrl() {

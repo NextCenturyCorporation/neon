@@ -32,7 +32,9 @@ configurations {
 }
 
 dependencies {
+
     integrationTestCompile('org.apache.hadoop:hadoop-hdfs:2.0.0-cdh4.3.0') {
+        exclude group: 'com.google.guava'
         exclude group: 'javax.servlet'
         exclude group: 'javax.servlet.jsp'
         exclude module: 'jasper-runtime'
@@ -54,10 +56,10 @@ task integrationTest(type: Test) {
     // TODO: NEON-960 workaround
     if (isMongoOnly()) {
         dependsOn 'insertMongoDataIntegrationTest','insertMongoDataTagCloudTest'
-    } else if (isSharkOnly()) {
-        dependsOn 'insertSharkDataIntegrationTest'
+    } else if (isSparkSQLOnly()) {
+        dependsOn 'insertSparkSQLDataIntegrationTest'
     } else {
-        dependsOn 'insertMongoDataIntegrationTest', 'insertMongoDataTagCloudTest', 'insertSharkDataIntegrationTest'
+        dependsOn 'insertMongoDataIntegrationTest', 'insertMongoDataTagCloudTest', 'insertSparkSQLDataIntegrationTest'
     }
 
     testClassesDir = sourceSets.integrationTest.output.classesDir
@@ -66,7 +68,7 @@ task integrationTest(type: Test) {
     // allow project properties and just pass them through to the system properties
     def props = [:]
     props["mongo.host"] = getMongoHost()
-    props["shark.host"] = getSharkHost()
+    props["sparksql.host"] = getSparkSQLHost()
     props["hdfs.url"] = getHdfsUrl()
 
     props['integration.test'] = true
@@ -108,19 +110,19 @@ task deleteMongoDataTagCloudTest(type: com.ncc.neon.data.MongoDataDeleter) {
     databaseName = 'neonmongotagcloud'
 }
 
-task insertSharkDataIntegrationTest(type: com.ncc.neon.data.SharkDataInserter) {
+task insertSparkSQLDataIntegrationTest(type: com.ncc.neon.data.SparkSQLDataInserter) {
     group = TEST_GROUP
-    description = "Inserts test data used for shark integration tests"
-    dependsOn 'deleteSharkDataIntegrationTestBeforeInsert', 'generateSharkCSV', 'generateSharkJson'
-    host = getSharkHost()
-    hdfsUrl = getHdfsUrl()
+    description = "Inserts test data used for spark sql integration tests"
+    dependsOn 'deleteSparkSQLDataIntegrationTestBeforeInsert', 'generateSparkSQLCSV', 'generateSparkSQLJson'
+    host = getSparkSQLHost()
+    hdfsUrl = project.getHdfsUrl()
     databaseName = 'neonintegrationtest'
 }
 
-task deleteSharkDataIntegrationTestBeforeInsert(type: com.ncc.neon.data.SharkDataDeleter) {
+task deleteSparkSQLDataIntegrationTestBeforeInsert(type: com.ncc.neon.data.SparkSQLDataDeleter) {
     group = TEST_GROUP
-    description = "Deletes any old integration test data from shark that may have been left around by previous tests"
-    host = getSharkHost()
+    description = "Deletes any old integration test data from spark sql that may have been left around by previous tests"
+    host = getSparkSQLHost()
     databaseName = 'neonintegrationtest'
 }
 
@@ -130,10 +132,10 @@ task afterIntegrationTest {
     // TODO: NEON-960 workaround
     if (isMongoOnly()) {
         dependsOn 'deleteMongoDataIntegrationTest', 'deleteMongoDataTagCloudTest'
-    } else if (isSharkOnly()) {
-        dependsOn 'deleteSharkDataIntegrationTest'
+    } else if (isSparkSQLOnly()) {
+        dependsOn 'deleteSparkSQLDataIntegrationTest'
     } else {
-        dependsOn 'deleteMongoDataIntegrationTest', 'deleteMongoDataTagCloudTest', 'deleteSharkDataIntegrationTest'
+        dependsOn 'deleteMongoDataIntegrationTest', 'deleteMongoDataTagCloudTest', 'deleteSparkSQLDataIntegrationTest'
     }
 }
 
@@ -146,20 +148,20 @@ task deleteMongoDataIntegrationTest(type: com.ncc.neon.data.MongoDataDeleter) {
     databaseName = 'neonintegrationtest'
 }
 
-task deleteSharkDataIntegrationTest(type: com.ncc.neon.data.SharkDataDeleter) {
+task deleteSparkSQLDataIntegrationTest(type: com.ncc.neon.data.SparkSQLDataDeleter) {
     group = TEST_GROUP
-    description = "Deletes any integration test data from shark"
-    host = getSharkHost()
+    description = "Deletes any integration test data from spark sql"
+    host = getSparkSQLHost()
     databaseName = 'neonintegrationtest'
 }
 
 // TODO: NEON-960 The isXXXOnly are workarounds for NEON-960
 def isMongoOnly() {
-    // all other non-shark tests require mongo
+    // all other non-spark sql tests require mongo
     def integrationTestSingle = System.getProperty("integrationTest.single")
-    return integrationTestSingle && !integrationTestSingle.toLowerCase().contains("shark")
+    return integrationTestSingle && !integrationTestSingle.toLowerCase().contains("spark")
 }
 
-def isSharkOnly() {
-    return System.getProperty("integrationTest.single")?.toLowerCase()?.contains("shark")
+def isSparkSQLOnly() {
+    return System.getProperty("integrationTest.single")?.toLowerCase()?.contains("spark")
 }

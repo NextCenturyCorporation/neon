@@ -19,7 +19,7 @@ apply from: '../gradle/sharedDependencies.gradle'
 
 dependencies {
     compile localGroovy()
-    compile 'org.apache.hadoop:hadoop-common:2.0.0-cdh4.3.0'
-    compile 'org.apache.hadoop:hadoop-hdfs:2.0.0-cdh4.3.0'
+    compile 'org.apache.hadoop:hadoop-common:2.3.0'
+    compile 'org.apache.hadoop:hadoop-hdfs:2.3.0'
 }
 
