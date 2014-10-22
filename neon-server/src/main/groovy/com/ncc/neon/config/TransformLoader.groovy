@@ -10,6 +10,8 @@ import java.nio.file.WatchService
 import java.nio.file.FileSystems
 import java.nio.file.StandardWatchEventKinds
 
+ import groovy.io.FileType
+
 class TransformLoader implements Runnable {
 	WatchService watchService = FileSystems.getDefault().newWatchService()
 	private final TransformerRegistry registry
@@ -22,7 +24,13 @@ class TransformLoader implements Runnable {
 		path.register(watchService, StandardWatchEventKinds.ENTRY_MODIFY, StandardWatchEventKinds.ENTRY_DELETE)
 	}
 
+	@SuppressWarnings("JavaIoPackageAccess")
 	public void run() {
+		def dir = new File(path.toString())
+		dir.eachFileMatch(FileType.FILES, ~/.*\.groovy/) { file ->
+			loadTransform(file.name)
+		}
+
 		for ( ; ; ) {
 			WatchKey key = watchService.take()
 			for ( WatchEvent<?> event: key.pollEvents()){

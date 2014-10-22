@@ -25,6 +25,7 @@ class SampleTransformer implements Transformer{
 
 	@Override
 	QueryResult convert(QueryResult queryResult, params) {
+		def data = queryResult.getData();
 		data.each { rows ->
 			rows['foo'] = "bar"
 		}

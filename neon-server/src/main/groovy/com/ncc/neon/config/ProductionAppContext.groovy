@@ -38,13 +38,13 @@ class ProductionAppContext {
 
 		def path = FileSystems.getDefault().getPath(this.getClass().getResource("/transforms/").getPath())
 
-		TransformLoader loader = new TransformLoader(path, registry)
-		Thread th = new Thread(loader, "TransformLoader")
-		th.start()
-
 		registeredTransformers.each { Transformer transformer ->
 			registry.register(transformer)
 		}
+
+		TransformLoader loader = new TransformLoader(path, registry)
+		Thread th = new Thread(loader, "TransformLoader")
+		th.start()
 
 		return registry
 	}
