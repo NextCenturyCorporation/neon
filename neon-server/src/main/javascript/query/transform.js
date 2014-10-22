@@ -21,8 +21,7 @@
  * @constructor
  */
 neon.query.Transform = function (name) {
-    this.transformName = name;
-    this.params = undefined;
+	this.transformName = name;
 };
 
 /**
@@ -32,6 +31,6 @@ neon.query.Transform = function (name) {
  * @method params
  */
 neon.query.Transform.prototype.params = function(params){
-    this.params = params;
-    return this;
+	this.params = params;
+	return this;
  };
