@@ -51,7 +51,7 @@ class TransformIntegrationTest {
     static final Transform BAD_TRANSFORM = new Transform(transformName: "blah")
 
     /** a simple query that returns all of the data */
-    static final Query TRANSFORM_ALL_DATA_QUERY = new Query(filter: ALL_DATA_FILTER, transform: TRANSFORM)
+    static final Query TRANSFORM_ALL_DATA_QUERY = new Query(filter: ALL_DATA_FILTER, transforms: [TRANSFORM])
 
     @Before
     void before() {
@@ -67,7 +67,7 @@ class TransformIntegrationTest {
 
     @Test(expected = TransformerNotFoundException)
     void "bad transform throws exception"(){
-        Query query = new Query(filter: ALL_DATA_FILTER, transform: BAD_TRANSFORM)
+        Query query = new Query(filter: ALL_DATA_FILTER, transforms: [BAD_TRANSFORM])
         mongoQueryExecutor.execute(query, QueryOptions.DEFAULT_OPTIONS)
     }
 

@@ -14,26 +14,21 @@
  *
  */
 
-package com.ncc.neon.query.result
+package com.ncc.neon.query.transform
+import com.ncc.neon.query.result.QueryResult
+import com.ncc.neon.query.result.TabularQueryResult
+import com.ncc.neon.query.result.Transformer
 
 
-/**
- * Holds all the transformer implementations. A transformer must be registered
- * so that it can be looked up by QueryExecutors.
- */
+class SampleTransformer implements Transformer{
+	String name = "Sample"
 
-class TransformerRegistry {
-	private final Map<String, Transformer> registry = [:]
-
-	void register(Transformer transformer){
-		registry.put(transformer.name, transformer)
-	}
-
-	Transformer getTransformer(String transformName){
-		return registry.get(transformName)
-	}
-
-	Transformer removeTransformer(String transformName) {
-		return registry.remove(transformName)
+	@Override
+	QueryResult convert(QueryResult queryResult, params) {
+		def data = queryResult.getData();
+		data.each { rows ->
+			rows['foo'] = "bar"
+		}
+		return new TabularQueryResult(data)
 	}
 }
