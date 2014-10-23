@@ -31,12 +31,12 @@ On Fedora 20, run
 3. Finally, build and run the Neon server. This will launch a test web server on port 8080:
 
         ./gradlew jettyRun
-    Point your web browser at [http://localhost:8080/neon/examples/angular-demo/app/][demo]
-    and click *Choose dataset* then *Earthquakes*. You can read more about using the demo at the
-    [Demo App Users Guide][demo-guide].
+    Point your web browser at [http://localhost:8080/neon/examples][demo] and select one of the single page example files to view a simple query, filter, or database listing.  If they display the earthquake data listed above, you have successfully configured your development environment.
     
-[demo]: http://localhost:8080/neon/examples/angular-demo/app/
-[demo-guide]: https://github.com/NextCenturyCorporation/neon/wiki/Demo-App-User-Guide
+    To see a more substantial Neon demonstration, check out the [Neon Geo Temporal Dashboard][neon-gtd].  Originally part of this project, it has been spun off to a sister project and is meant to be deployed as a separate web application alongside core Neon.
+    
+[demo]: http://localhost:8080/neon/examples
+[neon-gtd]: https://github.com/NextCenturyCorporation/neon-gtd
 
 ##Documentation
 
