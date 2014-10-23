@@ -127,7 +127,7 @@ class QueryService {
             @PathParam("databaseName") String databaseName,
             @PathParam("tableName") String tableName
     ) {
-        return metadataResolver.retrieve(databaseName, tableName)
+        return metadataResolver.retrieve(databaseName, tableName, [] as Set)
     }
 
     /**
