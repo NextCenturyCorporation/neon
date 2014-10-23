@@ -1,31 +1,30 @@
 <html>
-<head>
-    <script src="http://localhost:8080/neon/js/neon.js"></script>
+    <head>
+        <script src="http://localhost:8080/neon/js/neon.js"></script>
 
-    <script>
-        // Defaulting the Neon SERVER_URL to be under the neon context on the same host machine.
-        // If the neon application is loaded elsewhere, this can be changed as in the following example:
-        // neon.SERVER_URL = "http://localhost:8080/neon"
-        neon.SERVER_URL = "/neon";
-        
-        var connection = new neon.query.Connection();
-        connection.connect(neon.query.Connection.MONGO,"localhost");
+        <script>
+            // Defaulting the Neon SERVER_URL to be under the neon context on the same host machine.
+            // If the neon application is loaded elsewhere, this can be changed as in the following example:
+            // neon.SERVER_URL = "http://localhost:8080/neon"
+            neon.SERVER_URL = "/neon";
+            
+            var connection = new neon.query.Connection();
+            connection.connect(neon.query.Connection.MONGO,"localhost");
 
-        //A text based query. This query gets 5 rows of data from the given database and table.
-        var textQuery = "use mydb; select * from sample limit 5";
+            //A text based query. This query gets 5 rows of data from the given database and table.
+            var textQuery = "use test; select * from earthquakes limit 5";
 
-        //Execute the query and display the results.
-        connection.executeTextQuery(textQuery, function (result) {
-            $("#result").html(JSON.stringify(result.data));
-        });
+            //Execute the query and display the results.
+            connection.executeTextQuery(textQuery, function (result) {
+                $("#result").html(JSON.stringify(result.data));
+            });
+        </script>
+    </head>
 
-
-    </script>
-</head>
-
-<body>
-    <p>Query Results:</p>
-    <p id="result"></p>
-</body>
-
+    <body>
+        <h3>Query String:</h3>
+        <p>use test; select * from earthquakes limit 5</p>
+        <h3>Query Results:</h3>
+        <p id="result"></p>
+    </body>
 </html>

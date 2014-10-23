@@ -10,10 +10,10 @@
         var connection = new neon.query.Connection();
         connection.connect(neon.query.Connection.MONGO,"localhost");
 
-        var databaseName = "mydb";
+        var databaseName = "test";
         connection.use(databaseName);
 
-        var tableName = "sample";
+        var tableName = "earthquakes";
 
         // sends and receive messages about what elements are selected
         var messenger = new neon.eventing.Messenger();
@@ -22,12 +22,12 @@
         var selectionKey = "exampleKey";
 
         //Create a selection
-        var whereClause = neon.query.where("magnitude", ">=", 2.5);
-        var filter = new neon.query.Filter().selectFrom(databaseName,tableName).where(whereClause);
+        var whereClause = neon.query.where("mag", ">", 6);
+        var filter = new neon.query.Filter().selectFrom(databaseName, tableName).where(whereClause);
 
         messenger.addSelection(selectionKey, filter, function () {
             //Query in selection mode.
-            var query = new neon.query.Query().selectFrom(tableName).selectionOnly();
+            var query = new neon.query.Query().selectFrom(databaseName, tableName).withFields('mag','place').selectionOnly();
             //Execute the query and display the results.
             connection.executeQuery(query, function (result) {
                 $("#result").html(JSON.stringify(result.data));
@@ -40,7 +40,7 @@
 
 
 <body>
-<p>Selection Query Results:</p>
+<p>Selection Query Results (mag > 6):</p>
 <p id="result"></p>
 
 </body>

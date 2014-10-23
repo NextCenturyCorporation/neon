@@ -15,7 +15,7 @@
             $("#databases").html(JSON.stringify(databases));
         });
 
-        connection.use("mydb");
+        connection.use("test");
 
         //Table names.
         connection.getTableNames(function (tables) {
@@ -23,7 +23,7 @@
         });
 
         //Field names.
-        connection.getFieldNames("sample", function (fields) {
+        connection.getFieldNames("earthquakes", function (fields) {
             $("#fields").html(JSON.stringify(fields));
         });
 
@@ -35,10 +35,10 @@
     <p>Available Databases:</p>
     <p id="databases"></p>
 
-    <p>Available Tables in Database <b>mydb</b>:</p>
+    <p>Available Tables in Database <b>test</b>:</p>
     <p id="tables"></p>
 
-    <p>Available Fields in Database <b>mydb</b> and Table <b>sample</b>:</p>
+    <p>Available Fields in Database <b>test</b> and Table <b>earthquakes</b>:</p>
     <p id="fields"></p>
 
 </body>
