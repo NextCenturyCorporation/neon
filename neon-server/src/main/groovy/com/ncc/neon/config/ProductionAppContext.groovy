@@ -20,6 +20,9 @@ import com.ncc.neon.query.result.TransformerRegistry
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.context.annotation.Profile
+
+import java.nio.file.FileSystems
+
 /**
  * Spring bean configuration to use in production
  */
@@ -27,15 +30,22 @@ import org.springframework.context.annotation.Profile
 @Profile("production")
 class ProductionAppContext {
 
-    @Bean
-    TransformerRegistry transformerRegistry() {
-        TransformerRegistry registry = new TransformerRegistry()
-        List<Transformer> registeredTransformers = []
-        registeredTransformers.each { Transformer transformer ->
-            registry.register(transformer)
-        }
-        return registry
-    }
+	@Bean
+	TransformerRegistry transformerRegistry() {
+		TransformerRegistry registry = new TransformerRegistry()
 
+		List<Transformer> registeredTransformers = []
 
+		def path = FileSystems.getDefault().getPath(this.getClass().getResource("/transforms/").getPath())
+
+		registeredTransformers.each { Transformer transformer ->
+			registry.register(transformer)
+		}
+
+		TransformLoader loader = new TransformLoader(path, registry)
+		Thread th = new Thread(loader, "TransformLoader")
+		th.start()
+
+		return registry
+	}
 }

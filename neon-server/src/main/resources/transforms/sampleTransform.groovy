@@ -14,23 +14,21 @@
  *
  */
 
-/**
- * Creates a transform that can be applied to a query.
- * @param name The fully qualified name of the transform to be used.
- * @class neon.query.Transform
- * @constructor
- */
-neon.query.Transform = function (name) {
-	this.transformName = name;
-};
+package com.ncc.neon.query.transform
+import com.ncc.neon.query.result.QueryResult
+import com.ncc.neon.query.result.TabularQueryResult
+import com.ncc.neon.query.result.Transformer
 
-/**
- * Adds parameters to the transform
- * @param {Object} params Parameters to set on the transform.
- * @return {neon.query.Transform} This transform object
- * @method params
- */
-neon.query.Transform.prototype.params = function(params){
-	this.params = params;
-	return this;
- };
+
+class SampleTransformer implements Transformer{
+	String name = "Sample"
+
+	@Override
+	QueryResult convert(QueryResult queryResult, params) {
+		def data = queryResult.getData();
+		data.each { rows ->
+			rows['foo'] = "bar"
+		}
+		return new TabularQueryResult(data)
+	}
+}
