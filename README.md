@@ -2,7 +2,7 @@
 Neon is a software platform designed to help you, as a developer, to integrate your disparate visualization widgets with your data stores. The **Data Access API** makes it easy for widgets to query NoSQL databases directly from JavaScript or RESTful endpoints, while still letting the server do the heavy lifting. The **Interaction API** provides capabilities for inter-widget communication, which easily links your widgets together. Neon does not provide any user interface components. Instead, Neon shines under-the-hood by removing the pressure from developers to figure out *how* to make different components work together and allowing them to focus more on the fun stuff, like creating valuable data exploration applications and workflows.
 
 ## View an example application
-To see an example of what's possible with Neon, check out our demo server running an [example application](http://54.88.152.130:8080/neon-examples/angular-demo/app/) built with Neon. Read more about how to use it and how it interacts with Neon [here][demo-guide].
+To see an example of what's possible with Neon, check out our demo server running an [example application](http://54.88.152.130:8080/neon-examples/angular-demo/app/) built with Neon. Read more about how to use it and how it interacts with Neon [here][neon-gtd-guide].
 
 ## Build and run the example
 Building the example application requires Java JDK 1.7 or 1.8, node.js, and MongoDB. To install everything you need on Ubuntu 14.04, run
@@ -31,12 +31,13 @@ On Fedora 20, run
 3. Finally, build and run the Neon server. This will launch a test web server on port 8080:
 
         ./gradlew jettyRun
-    Point your web browser at [http://localhost:8080/neon/examples/angular-demo/app/][demo]
-    and click *Choose dataset* then *Earthquakes*. You can read more about using the demo at the
-    [Demo App Users Guide][demo-guide].
+    Point your web browser at [http://localhost:8080/neon/examples][demo] and select one of the single page example files to view a simple query, filter, or database listing.  If they display the earthquake data listed above, you have successfully configured your development environment.
     
-[demo]: http://localhost:8080/neon/examples/angular-demo/app/
-[demo-guide]: https://github.com/NextCenturyCorporation/neon/wiki/Demo-App-User-Guide
+    To see a more substantial Neon demonstration, check out the [Neon Geo Temporal Dashboard][neon-gtd].  Originally part of this project, it has been spun off to a sister project and is meant to be deployed as a separate web application alongside core Neon.
+    
+[demo]: http://localhost:8080/neon/examples
+[neon-gtd]: https://github.com/NextCenturyCorporation/neon-gtd
+[neon-gtd-guide]: https://github.com/NextCenturyCorporation/neon-gtd/wiki/Neon-GTD-User-Guide
 
 ##Documentation
 
