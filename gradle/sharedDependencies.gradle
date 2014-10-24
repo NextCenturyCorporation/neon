@@ -32,34 +32,4 @@ dependencies {
     compile 'com.mchange:c3p0:0.9.5-pre8'
     compile "org.codehaus.jackson:jackson-core-asl:1.9.2"
 
-    // Hive 0.12.0 libraries are needed to talk with Spark 1.1
-    compile ("org.apache.hive:hive-service:$hiveVersion") {
-        exclude module: 'hive-exec'
-    }
-    compile ("org.apache.hive:hive-shims:$hiveVersion") {
-        exclude group: 'com.google.guava'
-    }
-    compile ("org.apache.hive:hive-cli:$hiveVersion") {
-        exclude module: 'hive-exec'
-        exclude module: 'hive-shims'
-        exclude group: 'com.google.guava'
-    }
-    compile ("org.apache.hive:hive-jdbc:$hiveVersion") {
-        exclude module: 'hive-exec'
-    }
-    compile ("org.apache.hive:hive-common:$hiveVersion") {
-        exclude module: 'hive-exec'
-        exclude module: 'hive-shims'
-        exclude group: 'com.google.guava'
-    }
-    compile ("org.apache.hive:hive-metastore:$hiveVersion") {
-        exclude module: 'hive-exec'
-    }
-    compile ("org.apache.hive:hive-contrib:$hiveVersion") {
-        exclude module: 'hive-exec'
-    }
-    compile ("org.apache.hive:hive-serde:$hiveVersion") {
-        exclude module: 'hive-exec'
-    }
-
 }

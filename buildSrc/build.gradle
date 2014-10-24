@@ -17,6 +17,7 @@
 apply plugin: 'groovy'
 apply from: '../gradle/versions.gradle'
 apply from: '../gradle/sharedDependencies.gradle'
+apply from: '../neon-server/gradle/sparkSQLDependencies.gradle'
 
 dependencies {
     compile localGroovy()
