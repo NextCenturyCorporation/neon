@@ -17,6 +17,7 @@
 // configures a basic project with groovy support and common plugins used by a groovy project
 apply plugin: 'groovy'
 apply plugin: 'jacoco'
+apply from: "${rootDir}/gradle/versions.gradle"
 apply from: "${rootDir}/gradle/codenarc.gradle"
 apply from: "${rootDir}/gradle/jdepend.gradle"
 apply from: "${rootDir}/gradle/docs.gradle"
@@ -27,7 +28,7 @@ repositories{
 
 dependencies {
     compile 'org.codehaus.groovy:groovy-all:2.3.3'
-    testCompile 'junit:junit:4.11'
+    testCompile "junit:junit:$junitVersion"
 }
 
 groovydoc {

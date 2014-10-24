@@ -1,5 +1,5 @@
 /*
- * Copyright 2013 Next Century Corporation
+ * Copyright 2014 Next Century Corporation
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -11,16 +11,18 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
 
-apply plugin: 'groovy'
-apply from: '../gradle/versions.gradle'
-apply from: '../gradle/sharedDependencies.gradle'
-
-dependencies {
-    compile localGroovy()
-    compile "org.apache.hadoop:hadoop-common:$hadoopVersion"
-    compile "org.apache.hadoop:hadoop-hdfs:$hadoopVersion"
+// This file is just a place to set track the version numbers of dependencies. It should
+// not define any tasks because it is included in different subprojects.
+project.ext {
+    logbackVersion = "1.0.13"
+    springVersion = "3.2.11.RELEASE"
+    hadoopVersion = "2.3.0"
+    hiveVersion = "0.12.0"
+    jerseyVersion = "1.15"
+    slf4jVersion = "1.7.2"
+    antlrVersion = "4.2"
+    junitVersion = "4.11"
 }
 

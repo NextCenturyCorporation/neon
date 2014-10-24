@@ -1,6 +1,6 @@
 // dependencies required for the spark sql libraries
 dependencies {
 
-    compile 'org.apache.hadoop:hadoop-common:2.3.0'
+    compile "org.apache.hadoop:hadoop-common:$hadoopVersion"
 
 }

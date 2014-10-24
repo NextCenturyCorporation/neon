@@ -15,6 +15,7 @@
  */
 
 apply from: "${rootDir}/gradle/groovy.gradle"
+apply from: "${rootDir}/gradle/versions.gradle"
 apply from: "${rootDir}/gradle/sharedDependencies.gradle"
 
 repositories {

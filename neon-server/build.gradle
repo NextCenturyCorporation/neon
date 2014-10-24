@@ -68,6 +68,7 @@ apply plugin: 'jetty'
 apply plugin: 'war'
 
 // these files need to be applied in order since there are dependencies between them
+apply from: "${rootDir}/gradle/versions.gradle"
 apply from: "${rootDir}/gradle/sharedDependencies.gradle"
 apply from: "gradle/sparkSQLDependencies.gradle"
 apply from: "${rootDir}/gradle/js.gradle"
@@ -87,22 +88,22 @@ configurations {
 }
 
 dependencies {
-    compile 'com.sun.jersey:jersey-servlet:1.15'
-    compile 'com.sun.jersey:jersey-core:1.15'
-    compile 'com.sun.jersey:jersey-client:1.15'
-    compile 'com.sun.jersey:jersey-server:1.15'
-    compile 'com.sun.jersey:jersey-json:1.15'
-    compile 'com.sun.jersey.contribs:jersey-spring:1.15'
+    compile "com.sun.jersey:jersey-servlet:$jerseyVersion"
+    compile "com.sun.jersey:jersey-core:$jerseyVersion"
+    compile "com.sun.jersey:jersey-client:$jerseyVersion"
+    compile "com.sun.jersey:jersey-server:$jerseyVersion"
+    compile "com.sun.jersey:jersey-json:$jerseyVersion"
+    compile "com.sun.jersey.contribs:jersey-spring:$jerseyVersion"
     compile "org.springframework:spring-web:$springVersion"
-    compile 'org.slf4j:slf4j-api:1.7.2'
-    compile 'org.slf4j:jcl-over-slf4j:1.7.2'
+    compile "org.slf4j:slf4j-api:$slf4jVersion"
+    compile "org.slf4j:jcl-over-slf4j:$slf4jVersion"
     // TODO: Revisit this dependency.  In the migration from shark to spark-sql, one of the newer
     // library dependencies for spark-sql seems to cause a slf4j/log4j circular referencing issue.
     //compile 'org.slf4j:log4j-over-slf4j:1.7.2'
     compile "ch.qos.logback:logback-core:$logbackVersion"
     compile "ch.qos.logback:logback-classic:$logbackVersion"
     compile "com.google.guava:guava:14.0.1"
-    compile 'org.antlr:antlr4:4.2'
+    compile "org.antlr:antlr4:$antlrVersion"
     compile('org.codehaus.groovy.modules.http-builder:http-builder:0.6') {
         // we already include groovy-all
         exclude module: 'groovy'
@@ -114,7 +115,7 @@ dependencies {
 
     runtime 'cglib:cglib:2.2.2'
 
-    testCompile 'junit:junit:4.11'
+    testCompile "junit:junit:$junitVersion"
     testCompile 'commons-collections:commons-collections:3.2.1'
     testCompile 'commons-io:commons-io:2.4'
     testCompile "org.springframework:spring-test:$springVersion"
