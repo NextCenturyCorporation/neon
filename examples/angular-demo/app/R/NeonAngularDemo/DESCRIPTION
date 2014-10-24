@@ -1,9 +1,0 @@
-Package: NeonAngularDemo
-Type: Package
-Title: All functions needed by the Neon Angular demo
-Version: 1.1
-Date: 2014-06-26
-Author: Next Century Corporation
-Maintainer: Who to complain to <yourfault@somewhere.net>
-Description: OpenCPU works best when scripts are wrapped in functions, and those functions are all in the same package.
-License: Apache License, Version 2.0
