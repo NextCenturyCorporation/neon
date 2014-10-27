@@ -45,7 +45,7 @@
 					<div powered-by-neon class="pull-right"></div>
 
 					<div class="clearfix visible-xs"></div>
-					
+
 					<!-- Database Config -->
 					<database-config></database-config>
 
@@ -145,8 +145,8 @@
                             <!-- Bar chart -->
                             <div class="well" ng-init="chartType = 'line'" ng-hide="chartType != 'bar'">
                                 <div class="chart-options pull-right">
-                                    <a class="btn btn-lg text-muted collapsed" 
-                                        data-toggle="collapse" data-target="#chart-options" 
+                                    <a class="btn btn-lg text-muted collapsed"
+                                        data-toggle="collapse" data-target="#chart-options"
                                         data-animation=false
                                         ng-click="toggleChartOptions()">
                                       <span class="glyphicon glyphicon-cog"></span>
@@ -204,7 +204,7 @@
 
                             <!-- Map -->
                             <div heat-map class="well well-map"></div>
-                            
+
                         </div>
 
                     </div>
@@ -239,13 +239,14 @@
 
 		</div>
 
+		<!-- Include the xdata logging package. -->
+		<script src="lib/draperlab/draper.activity_logger-2.1.1.js"></script>
+
 		<!-- Including neon before angular here as neon has lodash and jquery wrapped into it.  If this is
 		     loaded first, angular should pick up the included jQuery. -->
 		<script src="/neon/js/neon.js"></script>
         <script src="js/appConfig.js"></script>
 
-		<!-- Include the xdata logging package. -->
-		<script src="lib/draperlab/draper.activity_logger-2.1.1.js"></script>
 
 		<script src="lib/jquery/jquery-1.11.0.min.js"></script>
 		<!-- In production use:
@@ -254,7 +255,7 @@
 		<script src="lib/angular/angular.min.js"></script>
 
 		<!-- Include third party libs -->
-		<script src="lib/d3/d3.v3.min.js"></script>		
+		<script src="lib/d3/d3.v3.min.js"></script>
 
 		<script src="lib/openlayers/OpenLayers.js"></script>
 		<script src="lib/openlayers/heatmap/heatmap.js"></script>

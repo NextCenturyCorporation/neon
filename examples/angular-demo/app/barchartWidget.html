@@ -75,14 +75,14 @@
 		<script src="//ajax.googleapis.com/ajax/libs/angularjs/x.x.x/angular.min.js"></script>
 		-->
 
+		<!-- Include the xdata logging package. -->
+		<script src="lib/draperlab/draper.activity_logger-2.1.1.js"></script>
+
 		 <!-- Including neon before angular here as neon has lodash and jquery wrapped into it.  If this is
 			  loaded first, angular should pick up the included jQuery. -->
         <script src="lib/owf/owf-widget-debug.js"></script>
 		<script src="/neon/js/neon.js"></script>
         <script src="js/appConfig.js"></script>
-
-		<!-- Include the xdata logging package. -->
-		<script src="lib/draperlab/draper.activity_logger-2.1.1.js"></script>
 
 		<script src="lib/jquery/jquery-1.11.0.min.js"></script>
 		<script src="lib/angular/angular.min.js"></script>
@@ -98,10 +98,10 @@
 		<!-- Setup our widget's OWF handlers and trigger the angular code -->
 		<script type="text/javascript">
 			// -----------------------------------
-			// Initialize the close handlers. 
+			// Initialize the close handlers.
 			// -----------------------------------
 
-			OWF.ready(function () {	
+			OWF.ready(function () {
 
 				// -----------------------------------
 			    // Hide the body when the widget is not visible.
@@ -128,7 +128,7 @@
 			    widgetState.addStateEventListeners({
 			        events: ['activate', 'hide', 'show']
 			    });
-			    
+
 			    OWF.notifyWidgetReady();
 			});
 
@@ -136,7 +136,7 @@
 	        // If the neon application is loaded elsewhere, this can be changed as in the following example:
 	        // neon.SERVER_URL = "http://localhost:8080/neon"
 	        neon.SERVER_URL = "/neon";
-	        
+
 			var neonDemo = angular.module('neonDemo', [
 				'neonDemo.controllers',
 				'neonDemo.services',
