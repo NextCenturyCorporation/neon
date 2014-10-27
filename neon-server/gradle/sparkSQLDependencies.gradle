@@ -11,7 +11,7 @@ configurations {
 // dependencies required for the spark sql libraries
 dependencies {
 
-    compile "org.apache.hadoop:hadoop-common:$hadoopVersion"
+    runtime "org.apache.hadoop:hadoop-common:$hadoopVersion"
     // Hive 0.12.0 libraries are needed to talk with Spark 1.1
     runtime "org.apache.hive:hive-jdbc:$hiveVersion"
     runtime "org.apache.hive:hive-common:$hiveVersion"

@@ -33,15 +33,8 @@ configurations {
 
 dependencies {
 
-    integrationTestCompile("org.apache.hadoop:hadoop-hdfs:$hadoopVersion") {
-        exclude group: 'com.google.guava'
-        exclude group: 'javax.servlet'
-        exclude group: 'javax.servlet.jsp'
-        exclude module: 'jasper-runtime'
-        // using log4j-over-slf4j
-        exclude module: 'log4j'
-        exclude module: 'slf4j-log4j12'
-    }
+    // Needed to put the test file on HDFS so that it can be turned into a Spark SQL table
+    integrationTestCompile "org.apache.hadoop:hadoop-hdfs:$hadoopVersion"
 
     integrationTestCompile sourceSets.main.output
     integrationTestCompile sourceSets.test.output
