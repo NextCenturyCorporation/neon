@@ -43,14 +43,7 @@ buildscript {
 }
 
 repositories {
-    maven {
-        url 'https://repository.cloudera.com/artifactory/public'
-        mavenCentral()
-    }
-
-    flatDir {
-        dirs '../lib'
-    }
+    mavenCentral()
 }
 
 project.ext {
