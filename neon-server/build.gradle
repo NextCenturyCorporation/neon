@@ -29,9 +29,6 @@ import java.text.SimpleDateFormat
 buildscript {
     repositories {
         mavenCentral()
-        maven {
-            url 'http://repository.codehaus.org/'
-        }
         flatDir {
             dirs 'gradle/plugins'
         }
