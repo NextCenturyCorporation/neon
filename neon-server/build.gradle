@@ -58,7 +58,6 @@ apply plugin: 'jetty'
 apply plugin: 'war'
 
 // these files need to be applied in order since there are dependencies between them
-apply from: "${rootDir}/gradle/versions.gradle"
 apply from: "${rootDir}/gradle/sharedDependencies.gradle"
 apply from: "gradle/sparkSQLDependencies.gradle"
 apply from: "${rootDir}/gradle/js.gradle"

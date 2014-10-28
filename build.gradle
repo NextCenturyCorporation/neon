@@ -20,6 +20,8 @@ allprojects {
     version = "0.8.0-SNAPSHOT"
 }
 
+// Versions are shared across all builds
+apply from: 'gradle/versions.gradle'
 
 task wrapper(type: Wrapper) {
     gradleVersion = '2.1'
