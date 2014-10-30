@@ -43,9 +43,9 @@ configurations {
 }
 
 dependencies {
-    compile 'org.scala-lang:scala-library:2.10.3'
-    concurrencyTestCompile("com.excilys.ebi.gatling.highcharts:gatling-charts-highcharts:1.5.6")
-    concurrencyTestRuntime "com.excilys.ebi.gatling:gatling-app:1.5.6"
+    compile "org.scala-lang:scala-library:$scalaLibraryVersion"
+    concurrencyTestCompile "com.excilys.ebi.gatling.highcharts:gatling-charts-highcharts:$gatlingVersion"
+    concurrencyTestRuntime "com.excilys.ebi.gatling:gatling-app:$gatlingVersion"
 }
 
 task gatling {
