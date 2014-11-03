@@ -48,6 +48,7 @@ dependencies {
     concurrencyTestRuntime "com.excilys.ebi.gatling:gatling-app:$gatlingVersion"
 }
 
+// This is the standard way to run gatling from gradle, see https://github.com/vincentkok/gradle-gatling
 task gatling {
     dependsOn 'concurrencyTestWar', 'insertDataIntoMongo', 'insertDataIntoSparkSQL'
     group = TEST_GROUP
@@ -104,14 +105,6 @@ task concurrencyTestWar(type: org.gradle.api.plugins.jetty.JettyRunWar) {
     httpPort = concurrencyTestPort
     stopPort = httpPort + 2
     stopKey = 'stop'
-}
-
-processConcurrencyTestResources {
-    from(sourceSets.concurrencyTest.resources.srcDirs) {
-        filter(ReplaceTokens, tokens: [
-                "mongo.host": getMongoHost()
-        ])
-    }
 }
 
 task insertDataIntoMongo(type: com.ncc.neon.data.MongoDataInserter) {
