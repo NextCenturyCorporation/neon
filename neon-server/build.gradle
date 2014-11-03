@@ -118,12 +118,6 @@ war {
     }
 }
 
-task watch(type: com.ncc.common.GruntTask) {
-    description = "Wrapper around grunt's watch task to rebuild javascript files if any change"
-    background = true
-    gruntArgs "watch", "--outfile=${jsOutputFile}"
-}
-
 jettyRun {
     dependsOn concatjs, watch, 'setVersion'
     reload = 'automatic'
