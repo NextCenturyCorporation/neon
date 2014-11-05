@@ -17,7 +17,9 @@
 /*global module:false*/
 module.exports = function (grunt) {
 
-	var outputFile = grunt.option('outfile') || 'build/<%= pkg.name %>.js';
+	var outputFile = grunt.option('outfile') + 'js' || 'build/<%= pkg.name %>.js';
+	var nodepOutputFile = grunt.option('outfile') + '-nodeps.js' || 'build/<%= pkg.name %>-nodeps.js';
+
 
 	function src(file) {
 		return 'src/main/javascript/' + file;
@@ -63,7 +65,7 @@ module.exports = function (grunt) {
 				src: [].concat([src('license-header.txt'), src('intro.js'), src('util/loggerUtils.js'), src('util/owfUtils.js'), src('eventing/owf/owfEventBus.js')]).concat(grunt.file.expand(src('**/*.js'), concatExcludes.map(function (file) {
 					return '!' + src(file);
 				}))),
-				dest: 'build/<%= pkg.name %>-nodeps.js'
+				dest: nodepOutputFile
 			},
 			dist: {
 				src: [lib('lodash'), lib('uuid'), lib('postal'), lib('jquery'), lib('log4javascript'), 'build/dependencies/**/*.js', '<%= concat.nodeps.dest %>'],
