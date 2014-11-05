@@ -22,8 +22,9 @@ apply plugin: 'antlr4'
 dependencies {
     antlr4 "org.antlr:antlr4:$antlrVersion"
     antlr4 "org.antlr:antlr4-runtime:$antlrVersion"
-    antlr4 "org.antlr:antlr-runtime:$antlr3Version"
     antlr4 "org.antlr:ST4:$antlrST4Version"
+    // Antlr 3 runtime is needed to generate antlr 4 expressions
+    antlr4 "org.antlr:antlr-runtime:$antlr3Version"
 }
 
 project.ext {
