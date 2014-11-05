@@ -19,7 +19,7 @@ apply plugin: 'groovy'
 apply plugin: 'jacoco'
 apply from: "${rootDir}/gradle/codenarc.gradle"
 apply from: "${rootDir}/gradle/jdepend.gradle"
-apply from: "${rootDir}/gradle/docs.gradle"
+apply from: "${rootDir}/gradle/docsUtils.gradle"
 
 repositories{
     mavenCentral()

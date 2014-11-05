@@ -18,7 +18,7 @@ import org.apache.tools.ant.filters.ReplaceTokens
 import org.apache.tools.ant.taskdefs.condition.Os
 import com.ncc.common.GruntTask
 
-apply from: "${rootDir}/gradle/docs.gradle"
+apply from: "${rootDir}/gradle/docsUtils.gradle"
 
 project.ext {
     jsDocDir = "${project.docsDir}/jsdocs"
