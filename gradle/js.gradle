@@ -70,15 +70,6 @@ task watch(type: com.ncc.common.GruntTask) {
     }
 }
 
-
-task installGruntDeps(type: Exec) {
-    description  'Installs javascript dependencies using npm'
-    dependsOn 'createPackageJson'
-    inputs.file "${projectDir}/package.json"
-    outputs.dir "${projectDir}/node_modules"
-    commandLine npmExecutable, "install"
-}
-
 task createPackageJson(type: Copy) {
     description = 'Creates a package.json file used by npm from a template that is shared by all projects'
     inputs.file "${rootDir}/package.json.template"
@@ -92,6 +83,14 @@ task createPackageJson(type: Copy) {
             "version": project.version
     ])
 }
+
+task installGruntDeps(type: Exec) {
+    description  'Installs javascript dependencies using npm'
+    inputs.file createPackageJson.outputs.files
+    outputs.dir "${projectDir}/node_modules"
+    commandLine npmExecutable, "install"
+}
+
 
 task jsDocs {
     description = 'Creates the javascript API documentation.'
