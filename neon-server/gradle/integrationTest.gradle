@@ -70,7 +70,6 @@ task integrationTest(type: Test) {
 
 
 task insertMongoDataIntegrationTest(type: com.ncc.neon.data.MongoDataInserter) {
-    group = TEST_GROUP
     description = "Inserts test data used for mongo integration tests"
     dependsOn 'deleteMongoDataIntegrationTestBeforeInsert', 'generateMongoJson'
     host = getMongoHost()
@@ -78,7 +77,6 @@ task insertMongoDataIntegrationTest(type: com.ncc.neon.data.MongoDataInserter) {
 }
 
 task deleteMongoDataIntegrationTestBeforeInsert(type: com.ncc.neon.data.MongoDataDeleter) {
-    group = TEST_GROUP
     description = "Deletes any old integration test data from mongo that may have been left around by previous tests"
     host = getMongoHost()
     databaseName = 'neonintegrationtest'
@@ -104,7 +102,6 @@ task deleteMongoDataTagCloudTest(type: com.ncc.neon.data.MongoDataDeleter) {
 }
 
 task insertSparkSQLDataIntegrationTest(type: com.ncc.neon.data.SparkSQLDataInserter) {
-    group = TEST_GROUP
     description = "Inserts test data used for spark sql integration tests"
     dependsOn 'deleteSparkSQLDataIntegrationTestBeforeInsert', 'generateSparkSQLCSV', 'generateSparkSQLJson'
     host = getSparkSQLHost()
@@ -113,13 +110,13 @@ task insertSparkSQLDataIntegrationTest(type: com.ncc.neon.data.SparkSQLDataInser
 }
 
 task deleteSparkSQLDataIntegrationTestBeforeInsert(type: com.ncc.neon.data.SparkSQLDataDeleter) {
-    group = TEST_GROUP
     description = "Deletes any old integration test data from spark sql that may have been left around by previous tests"
     host = getSparkSQLHost()
     databaseName = 'neonintegrationtest'
 }
 
 task afterIntegrationTest {
+    // Tasks that are used for "finalizedBy" are still shown in './gradlew tasks' (GRADLE-2949), so put it in the correct group
     group = TEST_GROUP
     description = "Cleans up test data after the integration tests"
     // TODO: NEON-960 workaround
@@ -135,14 +132,12 @@ task afterIntegrationTest {
 integrationTest.finalizedBy afterIntegrationTest
 
 task deleteMongoDataIntegrationTest(type: com.ncc.neon.data.MongoDataDeleter) {
-    group = TEST_GROUP
     description = "Deletes any integration test data from mongo"
     host = getMongoHost()
     databaseName = 'neonintegrationtest'
 }
 
 task deleteSparkSQLDataIntegrationTest(type: com.ncc.neon.data.SparkSQLDataDeleter) {
-    group = TEST_GROUP
     description = "Deletes any integration test data from spark sql"
     host = getSparkSQLHost()
     databaseName = 'neonintegrationtest'

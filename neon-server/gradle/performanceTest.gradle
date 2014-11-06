@@ -100,7 +100,6 @@ def createSystemProperties(){
 task concurrencyTestWar(type: org.gradle.api.plugins.jetty.JettyRunWar) {
     description = "Launches an instance of neon used for concurrency tests"
     dependsOn 'concurrencyTestClasses'
-    group = TEST_GROUP
     daemon = true
     httpPort = concurrencyTestPort
     stopPort = httpPort + 2
@@ -140,6 +139,7 @@ task deleteDataFromSparkSQL(type: com.ncc.neon.data.SparkSQLDataDeleter) {
 
 task afterGatlingTest{
     description = "Cleans up any concurrency test data"
+    // Tasks that are used for "finalizedBy" are still shown in './gradlew tasks' (GRADLE-2949), so put it in the correct group
     group = TEST_GROUP
     dependsOn 'stopGatlingJetty', 'deleteDataFromMongo', 'deleteDataFromSparkSQL'
 }
@@ -148,7 +148,6 @@ gatling.finalizedBy afterGatlingTest
 
 task stopGatlingJetty(type: org.gradle.api.plugins.jetty.JettyStop) {
     description = "Stops the instance of neon used for concurrency testing"
-    group = TEST_GROUP
     stopKey = 'stop'
     stopPort = concurrencyTestPort + 2
 }

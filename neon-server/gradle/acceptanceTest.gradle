@@ -32,7 +32,6 @@ configurations {
 }
 
 task transformTestWebService(type: org.gradle.api.plugins.jetty.JettyRun) {
-    group = TEST_GROUP
     description = "Launches a web service that performs a transform on data used for testing the transform functionality"
     dependsOn 'acceptanceTestClasses', 'generateAcceptanceTestHelpers'
     daemon = true
@@ -44,7 +43,6 @@ task transformTestWebService(type: org.gradle.api.plugins.jetty.JettyRun) {
 }
 
 task acceptanceTestWar(type: org.gradle.api.plugins.jetty.JettyRunWar) {
-    group = TEST_GROUP
     description = "Launches an instance of neon that acceptance tests are run against"
     dependsOn 'acceptanceTestClasses', 'generateAcceptanceTestHelpers'
     daemon = true
@@ -57,7 +55,6 @@ task acceptanceTestWar(type: org.gradle.api.plugins.jetty.JettyRunWar) {
 }
 
 task generateAcceptanceTestHelpers {
-    group = TEST_GROUP
     description = "Generates a helper file that used for acceptance tests that contain common javascript values that can be used by the specs"
     // since the properties may change in the build file, always regenerate this file
     outputs.upToDateWhen { false }
@@ -86,41 +83,37 @@ def getAcceptanceTestServicePort() {
 }
 
 task stopAcceptanceTestWar(type: org.gradle.api.plugins.jetty.JettyStop) {
-    group = TEST_GROUP
     description = "Stops the instance of neon which acceptance tests are run against"
     stopPort = getAcceptanceTestPort() + 2
     stopKey = 'stop'
 }
 
 task stopTransformJetty(type: org.gradle.api.plugins.jetty.JettyStop) {
-    group = TEST_GROUP
     description = "Stops the web service used for testing the transform service"
     stopPort = getAcceptanceTestServicePort() + 2
     stopKey = 'stop'
 }
 
 task insertMongoDataAcceptanceTest(type: com.ncc.neon.data.MongoDataInserter) {
-    group = TEST_GROUP
     description = "Inserts acceptance test data into mongo"
     dependsOn 'deleteMongoDataAcceptanceTestBeforeInsert', 'generateMongoJson'
     host = getMongoHost()
     databaseName = 'acceptanceTest'
 }
 task deleteMongoDataAcceptanceTestBeforeInsert(type: com.ncc.neon.data.MongoDataDeleter) {
-    group = TEST_GROUP
     description = "Deletes any old acceptance tests data in mongo that might have been left around by previous tests"
     host = getMongoHost()
     databaseName = 'acceptanceTest'
 }
 
 task deleteMongoDataAcceptanceTest(type: com.ncc.neon.data.MongoDataDeleter) {
-    group = TEST_GROUP
     description = "Deletes the acceptance test data from mongo"
     host = getMongoHost()
     databaseName = 'acceptanceTest'
 }
 
 task afterAcceptanceTest {
+    // Tasks that are used for "finalizedBy" are still shown in './gradlew tasks' (GRADLE-2949), so put it in the correct group
     group = TEST_GROUP
     description = "Cleans up after the acceptance test"
     dependsOn 'stopAcceptanceTestWar', 'stopTransformJetty', 'deleteMongoDataAcceptanceTest'
