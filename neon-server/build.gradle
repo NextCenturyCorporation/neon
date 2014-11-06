@@ -236,7 +236,7 @@ task generateSparkSQLCSV {
 
 // if the host is not specified just use an empty string and neon will choose defaults
 def getMongoHost() {
-    return project.hasProperty("mongo.host") ? getProperty("mongo.host") : "localhost"
+    return project.hasProperty("mongo.host") ? getProperty("mongo.host") : null
 }
 
 def getSparkSQLHost() {

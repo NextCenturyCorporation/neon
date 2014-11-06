@@ -46,14 +46,11 @@ task integrationTest(type: Test) {
     group = TEST_GROUP
     dependsOn 'integrationTestClasses'
 
-    // TODO: NEON-960 workaround
-    if (isMongoOnly()) {
+    if (isMongoEnabled()) {
         dependsOn 'insertMongoDataIntegrationTest','insertMongoDataTagCloudTest'
-    } else {
-        dependsOn 'insertMongoDataIntegrationTest', 'insertMongoDataTagCloudTest'
-        if (isSparkSQLEnabled()) {
-            dependsOn 'insertSparkSQLDataIntegrationTest'
-        }
+    }
+    if (isSparkSQLEnabled()) {
+        dependsOn 'insertSparkSQLDataIntegrationTest'
     }
 
     testClassesDir = sourceSets.integrationTest.output.classesDir
@@ -120,14 +117,11 @@ task afterIntegrationTest {
     // Tasks that are used for "finalizedBy" are still shown in './gradlew tasks' (GRADLE-2949), so put it in the correct group
     group = TEST_GROUP
     description = "Cleans up test data after the integration tests"
-    // TODO: NEON-960 workaround
-    if (isMongoOnly()) {
+    if (isMongoEnabled()) {
         dependsOn 'deleteMongoDataIntegrationTest', 'deleteMongoDataTagCloudTest'
-    } else {
-        dependsOn 'deleteMongoDataIntegrationTest', 'deleteMongoDataTagCloudTest'
-        if (isSparkSQLEnabled()) {
-            dependsOn 'deleteSparkSQLDataIntegrationTest'
-        }
+    }
+    if (isSparkSQLEnabled()) {
+        dependsOn 'deleteSparkSQLDataIntegrationTest'
     }
 }
 
@@ -145,11 +139,8 @@ task deleteSparkSQLDataIntegrationTest(type: com.ncc.neon.data.SparkSQLDataDelet
     databaseName = 'neonintegrationtest'
 }
 
-// TODO: NEON-960 The isXXXOnly are workarounds for NEON-960
-def isMongoOnly() {
-    // all other non-spark sql tests require mongo
-    def integrationTestSingle = System.getProperty("integrationTest.single")
-    return integrationTestSingle && !integrationTestSingle.toLowerCase().contains("spark")
+def isMongoEnabled() {
+    return (getMongoHost() != null && getMongoHost() != "")
 }
 
 def isSparkSQLEnabled() {

@@ -24,6 +24,7 @@ import com.ncc.neon.query.result.Transform
 import com.ncc.neon.query.result.TransformerNotFoundException
 import com.ncc.neon.query.filter.Filter
 import com.ncc.neon.query.mongo.MongoQueryExecutor
+import org.junit.Assume
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -36,7 +37,7 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner
 class TransformIntegrationTest {
 
     // TODO: NEON-565 another duplication of mongo.host in here
-    private static final String HOST_STRING = System.getProperty("mongo.host", "localhost")
+    private static final String HOST_STRING = System.getProperty("mongo.host")
 
     private MongoQueryExecutor mongoQueryExecutor
 
@@ -55,6 +56,8 @@ class TransformIntegrationTest {
 
     @Before
     void before() {
+        // Establish the connection, or skip the tests if no host was specified
+        Assume.assumeTrue(HOST_STRING != null && HOST_STRING != "")
         this.mongoQueryExecutor.connectionManager.currentRequest = new ConnectionInfo(host: HOST_STRING, dataSource: DataSources.mongo)
     }
 
