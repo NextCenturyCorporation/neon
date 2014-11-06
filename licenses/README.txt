@@ -106,13 +106,13 @@ Additional Dependencies included in the neon.js Javascript library
 
 Apache v2.0 (apache-2.0.txt)
 - log4javascript
-  -- log4javascript.js v1.4.6
+  -- log4javascript.js 1.4.6
 
 MIT/X11 (mit.txt)
 - jQuery
-  -- jquery-1.8.3.min.js v1.8.3
+  -- jquery-1.8.3.min.js 1.8.3
 - Lo-Dash
-  -- lodash.min.js v1.3.1
+  -- lodash.min.js 1.3.1
 - node-uuid
   -- uuid.js v1.2
 - Postal.js
