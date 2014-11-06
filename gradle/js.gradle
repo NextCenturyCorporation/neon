@@ -24,8 +24,9 @@ project.ext {
     jsDocDir = "${project.docsDir}/jsdocs"
     jsSrcDir = 'src/main/javascript'
     jsLibDir = 'src/main/js-lib'
-    combinedJsFileName = "${project.name}.js"
-    jsOutputFile = "${buildDir}/js/${combinedJsFileName}"
+    combinedJsFileName = "${project.name}"
+    jsOutputFolder = "${buildDir}/js"
+    jsOutputFile = "${jsOutputFolder}/${combinedJsFileName}"
 
     // where javascript/css dependencies from other projects are copied
     dependenciesDir = "${buildDir}/dependencies"
