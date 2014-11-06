@@ -49,10 +49,11 @@ task integrationTest(type: Test) {
     // TODO: NEON-960 workaround
     if (isMongoOnly()) {
         dependsOn 'insertMongoDataIntegrationTest','insertMongoDataTagCloudTest'
-    } else if (isSparkSQLOnly()) {
-        dependsOn 'insertSparkSQLDataIntegrationTest'
     } else {
-        dependsOn 'insertMongoDataIntegrationTest', 'insertMongoDataTagCloudTest', 'insertSparkSQLDataIntegrationTest'
+        dependsOn 'insertMongoDataIntegrationTest', 'insertMongoDataTagCloudTest'
+        if (isSparkSQLEnabled()) {
+            dependsOn 'insertSparkSQLDataIntegrationTest'
+        }
     }
 
     testClassesDir = sourceSets.integrationTest.output.classesDir
@@ -122,10 +123,11 @@ task afterIntegrationTest {
     // TODO: NEON-960 workaround
     if (isMongoOnly()) {
         dependsOn 'deleteMongoDataIntegrationTest', 'deleteMongoDataTagCloudTest'
-    } else if (isSparkSQLOnly()) {
-        dependsOn 'deleteSparkSQLDataIntegrationTest'
     } else {
-        dependsOn 'deleteMongoDataIntegrationTest', 'deleteMongoDataTagCloudTest', 'deleteSparkSQLDataIntegrationTest'
+        dependsOn 'deleteMongoDataIntegrationTest', 'deleteMongoDataTagCloudTest'
+        if (isSparkSQLEnabled()) {
+            dependsOn 'deleteSparkSQLDataIntegrationTest'
+        }
     }
 }
 
@@ -150,6 +152,6 @@ def isMongoOnly() {
     return integrationTestSingle && !integrationTestSingle.toLowerCase().contains("spark")
 }
 
-def isSparkSQLOnly() {
-    return System.getProperty("integrationTest.single")?.toLowerCase()?.contains("spark")
+def isSparkSQLEnabled() {
+    return (getSparkSQLHost() != null && getSparkSQLHost() != "")
 }

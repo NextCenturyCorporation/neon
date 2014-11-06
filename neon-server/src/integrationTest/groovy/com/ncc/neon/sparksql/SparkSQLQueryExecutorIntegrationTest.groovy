@@ -25,6 +25,7 @@ import com.ncc.neon.util.DateUtils
 import org.json.JSONArray
 import org.json.JSONObject
 import org.junit.Before
+import org.junit.Assume
 import org.junit.runner.RunWith
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.test.context.ContextConfiguration
@@ -36,8 +37,7 @@ import java.sql.Timestamp
 @ContextConfiguration(classes = IntegrationTestContext)
 class SparkSQLQueryExecutorIntegrationTest extends AbstractQueryExecutorIntegrationTest {
 
-    // TODO: NEON-565 another duplication of sparksql.host in here
-    private static final String HOST_STRING = System.getProperty("sparksql.host", "localhost:10000")
+    private static final String HOST_STRING = System.getProperty("sparksql.host")
 
     SparkSQLQueryExecutor sparkSQLQueryExecutor
 
@@ -49,6 +49,8 @@ class SparkSQLQueryExecutorIntegrationTest extends AbstractQueryExecutorIntegrat
 
     @Before
     void before() {
+        // Establish the connection, or skip the tests if no host was specified
+        Assume.assumeTrue(HOST_STRING != null && HOST_STRING != "")
         this.sparkSQLQueryExecutor.connectionManager.currentRequest = new ConnectionInfo(host: HOST_STRING, dataSource: DataSources.sparksql)
     }
 

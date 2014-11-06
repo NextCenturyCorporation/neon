@@ -240,7 +240,7 @@ def getMongoHost() {
 }
 
 def getSparkSQLHost() {
-    return project.hasProperty("sparksql.host") ? getProperty("sparksql.host") : "localhost:10000"
+    return project.hasProperty("sparksql.host") ? getProperty("sparksql.host") : null
 }
 
 def getHdfsUrl() {
