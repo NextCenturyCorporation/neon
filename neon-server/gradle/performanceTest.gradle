@@ -50,7 +50,7 @@ dependencies {
 
 // This is the standard way to run gatling from gradle, see https://github.com/vincentkok/gradle-gatling
 task gatling {
-    dependsOn 'concurrencyTestWar', 'insertDataIntoMongo', 'insertDataIntoSparkSQL'
+    dependsOn 'checkDbProperties', 'concurrencyTestWar', 'insertDataIntoMongo', 'insertDataIntoSparkSQL'
     group = TEST_GROUP
 
     doLast {
@@ -95,6 +95,18 @@ def createSystemProperties(){
         "mongo.host" : getMongoHost(),
         "sparksql.host" : getSparkSQLHost()
     ]
+}
+
+task checkDbProperties << {
+    if (!project.ext.has('mongo.host')) {
+        throw new InvalidUserDataException("The 'mongo.host' property must be specified for gatling builds")
+    }
+    if (!project.ext.has('hdfs.url')) {
+        throw new InvalidUserDataException("The 'hdfs.url' property must be specified for gatling builds")
+    }
+    if (!project.ext.has('sparksql.host')) {
+        throw new InvalidUserDataException("The 'sparksql.host' property must be specified for gatling builds")
+    }
 }
 
 task concurrencyTestWar(type: org.gradle.api.plugins.jetty.JettyRunWar) {
