@@ -15,11 +15,15 @@
  */
 
 apply plugin: 'groovy'
+// The buildSrc is a separate build, so it doesn't get properties from the root build.gradle,
+// so pull the versions in here.
+apply from: '../gradle/versions.gradle'
 apply from: '../gradle/sharedDependencies.gradle'
+apply from: '../neon-server/gradle/sparkSQLDependencies.gradle'
 
 dependencies {
     compile localGroovy()
-    compile 'org.apache.hadoop:hadoop-common:2.3.0'
-    compile 'org.apache.hadoop:hadoop-hdfs:2.3.0'
+    compile "org.apache.hadoop:hadoop-common:$hadoopVersion"
+    compile "org.apache.hadoop:hadoop-hdfs:$hadoopVersion"
 }
 

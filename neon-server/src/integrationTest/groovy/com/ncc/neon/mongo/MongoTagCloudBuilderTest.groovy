@@ -23,6 +23,7 @@ import com.ncc.neon.query.filter.SelectionState
 import com.ncc.neon.services.demo.MongoNeonHelper
 import com.ncc.neon.services.demo.MongoTagCloudBuilder
 import org.junit.AfterClass
+import org.junit.Assume
 import org.junit.Before
 import org.junit.BeforeClass
 import org.junit.Test
@@ -39,17 +40,24 @@ class MongoTagCloudBuilderTest {
 
     @BeforeClass
     static void beforeClass() {
-        // TODO: This is duplicated from the build
-        db = new MongoClient(System.getProperty("mongo.host")).getDB("neonmongotagcloud")
+        String host = System.getProperty("mongo.host")
+        // Assume can't be used in beforeClass, so only set up the database if there is a host,
+        // and then the before() method will skip if it needs to
+        if (host != null && host != "") {
+            db = new MongoClient(host).getDB("neonmongotagcloud")
+        }
     }
 
     @AfterClass
     static void afterClass() {
-        db.mongo.close()
+        if (db != null) {
+            db.mongo.close()
+        }
     }
 
     @Before
     void before() {
+        Assume.assumeTrue(db != null)
         tagBuilder = new MongoTagCloudBuilder()
         MongoNeonHelper neonHelper = new MongoNeonHelper()
         neonHelper.filterState = new FilterState()

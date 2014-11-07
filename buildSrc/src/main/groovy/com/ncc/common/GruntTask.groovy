@@ -31,11 +31,6 @@ class GruntTask extends Exec {
 
     boolean background = false
 
-    static {
-        PARENT_EXEC_METHOD = Exec.getDeclaredMethod("exec", null)
-        PARENT_EXEC_METHOD.accessible = true
-    }
-
     GruntTask() {
         executable = GRUNT_EXECUTABLE
     }
@@ -46,7 +41,7 @@ class GruntTask extends Exec {
 
     // this is a groovy hack that lets us override exec, but it will let us run the task in the background
     void exec() {
-        def runnable = [run: { PARENT_EXEC_METHOD.invoke(this) }] as Runnable
+        def runnable = {super.exec()} as Runnable
         if (background) {
             Thread t = new Thread(runnable)
             t.daemon = true

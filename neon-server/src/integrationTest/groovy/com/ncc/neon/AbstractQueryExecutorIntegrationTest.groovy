@@ -754,11 +754,11 @@ abstract class AbstractQueryExecutorIntegrationTest {
         }
     }
 
-    private static void compareRowOrdered(expectedRow, actualRow, message) {
+    protected static void compareRowOrdered(expectedRow, actualRow, message) {
         assert expectedRow == actualRow: message
     }
 
-    private static void compareRowUnordered(expectedRows, actualRow, message) {
+    protected static void compareRowUnordered(expectedRows, actualRow, message) {
         def match = false
         expectedRows.each { expectedRow ->
             if (!match && expectedRow == actualRow) {

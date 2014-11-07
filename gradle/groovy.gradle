@@ -19,15 +19,15 @@ apply plugin: 'groovy'
 apply plugin: 'jacoco'
 apply from: "${rootDir}/gradle/codenarc.gradle"
 apply from: "${rootDir}/gradle/jdepend.gradle"
-apply from: "${rootDir}/gradle/docs.gradle"
+apply from: "${rootDir}/gradle/docsUtils.gradle"
 
 repositories{
     mavenCentral()
 }
 
 dependencies {
-    compile 'org.codehaus.groovy:groovy-all:2.1.6'
-    testCompile 'junit:junit:4.11'
+    compile "org.codehaus.groovy:groovy-all:$groovyVersion"
+    testCompile "junit:junit:$junitVersion"
 }
 
 groovydoc {
@@ -39,6 +39,8 @@ groovydoc {
 jacoco {
     toolVersion = "0.7.0.201403182114"
 }
+
+jacocoTestReport.group = JavaBasePlugin.VERIFICATION_GROUP
 
 task copyJavadocs(type: org.gradle.api.tasks.Copy) {
     description = 'Copies the javadocs to a directory to be zipped'

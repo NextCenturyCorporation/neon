@@ -14,7 +14,7 @@
  *
  */
 
-// used by other gradle files that generate documentation
+// Defines utility methods used by other gradle files that generate documentation
 
 project.ext {
     libraryName = "${project.name}-${project.version}"
