@@ -145,7 +145,7 @@ jettyRun {
 [jettyRun, jettyStop]*.stopPort = 8081;
 [jettyRun, jettyStop]*.stopKey = 'neon-jetty';
 
-[jettyRun, jettyRunWar, transformTestWebService, acceptanceTestWar, concurrencyTestWar]*.with {
+[jettyRun, jettyRunWar, transformTestWebService, acceptanceTestWar, performanceTestWar]*.with {
     /**
      * THIS IS A WORKAROUND FOR JETTY LOCKING STATIC HTML FILES ON WINDOWS
      *
@@ -161,7 +161,7 @@ jettyRun {
     webDefaultXml = file("${projectDir}/webdefault.xml")
 }
 
-[jettyRun, jettyRunWar, transformTestWebService, acceptanceTestWar, concurrencyTestWar]*.doLast {
+[jettyRun, jettyRunWar, transformTestWebService, acceptanceTestWar, performanceTestWar]*.doLast {
     /**
      * THIS IS A WORKAROUND! THE CURRENT VERSION OF THIS TASK DOESN'T START A WATCHER IN DAEMON MODE
      *
