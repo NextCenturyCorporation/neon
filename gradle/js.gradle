@@ -18,7 +18,7 @@ import org.apache.tools.ant.filters.ReplaceTokens
 import org.apache.tools.ant.taskdefs.condition.Os
 import com.ncc.common.GruntTask
 
-apply from: "${rootDir}/gradle/docs.gradle"
+apply from: "${rootDir}/gradle/docsUtils.gradle"
 
 project.ext {
     jsDocDir = "${project.docsDir}/jsdocs"
@@ -55,6 +55,12 @@ task concatjs(type: GruntTask) {
 
 }
 
+task watch(type: com.ncc.common.GruntTask) {
+    description = "Wrapper around grunt's watch task to rebuild javascript files if any change"
+    background = true
+    gruntArgs "watch", "--outfile=${jsOutputFile}"
+}
+
 // ensure that javascript tasks are properly configured to run when
 // they actually change. note: we don't just attach to all GruntTask types because the acceptance test is a
 // bit different and it's not just dependent on javascript changes
@@ -63,15 +69,6 @@ task concatjs(type: GruntTask) {
         task.inputs.files { jsFiles }
         task.outputs.file { jsOutputFile }
     }
-}
-
-
-task installGruntDeps(type: Exec) {
-    description  'Installs javascript dependencies using npm'
-    dependsOn 'createPackageJson'
-    inputs.file "${projectDir}/package.json"
-    outputs.dir "${projectDir}/node_modules"
-    commandLine npmExecutable, "install"
 }
 
 task createPackageJson(type: Copy) {
@@ -87,6 +84,14 @@ task createPackageJson(type: Copy) {
             "version": project.version
     ])
 }
+
+task installGruntDeps(type: Exec) {
+    description  'Installs javascript dependencies using npm'
+    inputs.file createPackageJson.outputs.files
+    outputs.dir "${projectDir}/node_modules"
+    commandLine npmExecutable, "install"
+}
+
 
 task jsDocs {
     description = 'Creates the javascript API documentation.'

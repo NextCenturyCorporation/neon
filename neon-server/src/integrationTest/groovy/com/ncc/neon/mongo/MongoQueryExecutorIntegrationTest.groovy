@@ -35,6 +35,7 @@ import com.ncc.neon.util.LatLon
 import org.bson.types.ObjectId
 import org.json.JSONArray
 import org.json.JSONObject
+import org.junit.Assume
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -50,8 +51,7 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner
 @ContextConfiguration(classes = IntegrationTestContext)
 class MongoQueryExecutorIntegrationTest extends AbstractQueryExecutorIntegrationTest {
 
-	// TODO: NEON-565 another duplication of mongo.host in here
-	private static final String HOST_STRING = System.getProperty("mongo.host", "localhost")
+	private static final String HOST_STRING = System.getProperty("mongo.host")
 
 	private MongoQueryExecutor mongoQueryExecutor
 
@@ -63,6 +63,8 @@ class MongoQueryExecutorIntegrationTest extends AbstractQueryExecutorIntegration
 
 	@Before
 	void before() {
+        // Establish the connection, or skip the tests if no host was specified
+        Assume.assumeTrue(HOST_STRING != null && HOST_STRING != "")
 		this.mongoQueryExecutor.connectionManager.currentRequest = new ConnectionInfo(host: HOST_STRING, dataSource: DataSources.mongo)
 	}
 

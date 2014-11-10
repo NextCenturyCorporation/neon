@@ -29,28 +29,18 @@ import java.text.SimpleDateFormat
 buildscript {
     repositories {
         mavenCentral()
-        maven {
-            url 'http://repository.codehaus.org/'
-        }
         flatDir {
             dirs 'gradle/plugins'
         }
     }
     dependencies {
-        classpath ':antlr4-plugin:0.1.1'
-        classpath 'org.hidetake:gradle-ssh-plugin:0.2.0'
+        classpath ":antlr4-plugin:$antlrPluginVersion"
+        classpath "org.hidetake:gradle-ssh-plugin:$sshPluginVersion"
     }
 }
 
 repositories {
-    maven {
-        url 'https://repository.cloudera.com/artifactory/public'
-        mavenCentral()
-    }
-
-    flatDir {
-        dirs '../lib'
-    }
+    mavenCentral()
 }
 
 project.ext {
@@ -87,36 +77,36 @@ configurations {
 }
 
 dependencies {
-    compile 'com.sun.jersey:jersey-servlet:1.15'
-    compile 'com.sun.jersey:jersey-core:1.15'
-    compile 'com.sun.jersey:jersey-client:1.15'
-    compile 'com.sun.jersey:jersey-server:1.15'
-    compile 'com.sun.jersey:jersey-json:1.15'
-    compile 'com.sun.jersey.contribs:jersey-spring:1.15'
+    compile "com.sun.jersey:jersey-servlet:$jerseyVersion"
+    compile "com.sun.jersey:jersey-core:$jerseyVersion"
+    compile "com.sun.jersey:jersey-client:$jerseyVersion"
+    compile "com.sun.jersey:jersey-server:$jerseyVersion"
+    compile "com.sun.jersey:jersey-json:$jerseyVersion"
+    compile "com.sun.jersey.contribs:jersey-spring:$jerseyVersion"
     compile "org.springframework:spring-web:$springVersion"
-    compile 'org.slf4j:slf4j-api:1.7.2'
-    compile 'org.slf4j:jcl-over-slf4j:1.7.2'
+    compile "org.slf4j:slf4j-api:$slf4jVersion"
+    compile "org.slf4j:jcl-over-slf4j:$slf4jVersion"
     // TODO: Revisit this dependency.  In the migration from shark to spark-sql, one of the newer
     // library dependencies for spark-sql seems to cause a slf4j/log4j circular referencing issue.
     //compile 'org.slf4j:log4j-over-slf4j:1.7.2'
     compile "ch.qos.logback:logback-core:$logbackVersion"
     compile "ch.qos.logback:logback-classic:$logbackVersion"
-    compile "com.google.guava:guava:14.0.1"
-    compile 'org.antlr:antlr4:4.2'
-    compile('org.codehaus.groovy.modules.http-builder:http-builder:0.6') {
+    compile "com.google.guava:guava:$guavaVersion"
+    compile "org.antlr:antlr4:$antlrVersion"
+    compile("org.codehaus.groovy.modules.http-builder:http-builder:$httpBuilderVersion") {
         // we already include groovy-all
         exclude module: 'groovy'
     }
-    compile 'commons-lang:commons-lang:2.6'
+    compile "commons-lang:commons-lang:$commonsLangVersion"
     compile project(":metadata")
 
-    providedCompile 'javax.servlet:javax.servlet-api:3.0.1'
+    providedCompile "javax.servlet:javax.servlet-api:$javaxServletVersion"
 
-    runtime 'cglib:cglib:2.2.2'
+    runtime "cglib:cglib:$cglibVersion"
 
-    testCompile 'junit:junit:4.11'
-    testCompile 'commons-collections:commons-collections:3.2.1'
-    testCompile 'commons-io:commons-io:2.4'
+    testCompile "junit:junit:$junitVersion"
+    testCompile "commons-collections:commons-collections:$commonsCollectionsVersion"
+    testCompile "commons-io:commons-io:$commonsIoVersion"
     testCompile "org.springframework:spring-test:$springVersion"
 }
 
@@ -126,12 +116,6 @@ war {
     from(jsOutputFolder) {
         into 'js'
     }
-}
-
-task watch(type: com.ncc.common.GruntTask) {
-    description = "Wrapper around grunt's watch task to rebuild javascript files if any change"
-    background = true
-    gruntArgs "watch", "--outfile=${jsOutputFile}"
 }
 
 jettyRun {
@@ -161,7 +145,7 @@ jettyRun {
 [jettyRun, jettyStop]*.stopPort = 8081;
 [jettyRun, jettyStop]*.stopKey = 'neon-jetty';
 
-[jettyRun, jettyRunWar, transformTestWebService, acceptanceTestWar, concurrencyTestWar]*.with {
+[jettyRun, jettyRunWar, transformTestWebService, acceptanceTestWar, performanceTestWar]*.with {
     /**
      * THIS IS A WORKAROUND FOR JETTY LOCKING STATIC HTML FILES ON WINDOWS
      *
@@ -177,7 +161,7 @@ jettyRun {
     webDefaultXml = file("${projectDir}/webdefault.xml")
 }
 
-[jettyRun, jettyRunWar, transformTestWebService, acceptanceTestWar, concurrencyTestWar]*.doLast {
+[jettyRun, jettyRunWar, transformTestWebService, acceptanceTestWar, performanceTestWar]*.doLast {
     /**
      * THIS IS A WORKAROUND! THE CURRENT VERSION OF THIS TASK DOESN'T START A WATCHER IN DAEMON MODE
      *
@@ -252,11 +236,11 @@ task generateSparkSQLCSV {
 
 // if the host is not specified just use an empty string and neon will choose defaults
 def getMongoHost() {
-    return project.hasProperty("mongo.host") ? getProperty("mongo.host") : "localhost"
+    return project.hasProperty("mongo.host") ? getProperty("mongo.host") : null
 }
 
 def getSparkSQLHost() {
-    return project.hasProperty("sparksql.host") ? getProperty("sparksql.host") : "localhost:10000"
+    return project.hasProperty("sparksql.host") ? getProperty("sparksql.host") : null
 }
 
 def getHdfsUrl() {

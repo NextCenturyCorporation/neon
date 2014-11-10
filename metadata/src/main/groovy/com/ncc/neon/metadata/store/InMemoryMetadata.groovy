@@ -64,7 +64,7 @@ class InMemoryMetadata implements Metadata {
     }
 
     @Override
-    List<ColumnMetadata> retrieve(String databaseName, String tableName, Set<String> columnNames = [] as Set) {
+    List<ColumnMetadata> retrieve(String databaseName, String tableName, Set<String> columnNames) {
 
         List<ColumnMetadata> metadata = columnMetadata[databaseName][tableName].values() as List
 

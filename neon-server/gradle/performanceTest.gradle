@@ -20,15 +20,15 @@ import org.gradle.api.plugins.jetty.internal.Monitor
 apply plugin: 'scala'
 apply plugin: 'jetty'
 
-def concurrencyTestSourceDir = 'src/concurrencyTest/scala'
-def concurrencyTestPort = 11402
+def performanceTestSourceDir = 'src/performanceTest/scala'
+def performanceTestPort = 11402
 def TEST_GROUP = JavaBasePlugin.VERIFICATION_GROUP
 
 sourceSets {
-    concurrencyTest {
-        scala.srcDir file(concurrencyTestSourceDir)
-        compileClasspath = configurations.concurrencyTestCompile
-        runtimeClasspath = output + compileClasspath + configurations.concurrencyTestRuntime
+    performanceTest {
+        scala.srcDir file(performanceTestSourceDir)
+        compileClasspath = configurations.performanceTestCompile
+        runtimeClasspath = output + compileClasspath + configurations.performanceTestRuntime
     }
 }
 
@@ -38,22 +38,23 @@ repositories {
 }
 
 configurations {
-    concurrencyTestCompile
-    concurrencyTestRuntime { extendsFrom concurrencyTestCompile }
+    performanceTestCompile
+    performanceTestRuntime { extendsFrom performanceTestCompile }
 }
 
 dependencies {
-    compile 'org.scala-lang:scala-library:2.10.3'
-    concurrencyTestCompile("com.excilys.ebi.gatling.highcharts:gatling-charts-highcharts:1.5.6")
-    concurrencyTestRuntime "com.excilys.ebi.gatling:gatling-app:1.5.6"
+    compile "org.scala-lang:scala-library:$scalaLibraryVersion"
+    performanceTestCompile "com.excilys.ebi.gatling.highcharts:gatling-charts-highcharts:$gatlingVersion"
+    performanceTestRuntime "com.excilys.ebi.gatling:gatling-app:$gatlingVersion"
 }
 
-task gatling {
-    dependsOn 'concurrencyTestWar', 'insertDataIntoMongo', 'insertDataIntoSparkSQL'
+// This is the standard way to run gatling from gradle, see https://github.com/vincentkok/gradle-gatling
+task performanceTest {
+    dependsOn 'checkDbProperties', 'performanceTestWar', 'insertDataIntoMongo', 'insertDataIntoSparkSQL'
     group = TEST_GROUP
 
     doLast {
-        sourceSets.concurrencyTest.output.classesDir.eachFileRecurse { file ->
+        sourceSets.performanceTest.output.classesDir.eachFileRecurse { file ->
             if(!file.isFile() || containsExcludedNames(file)){
                 return
             }
@@ -61,10 +62,10 @@ task gatling {
 
             javaexec {
                 main = 'com.excilys.ebi.gatling.app.Gatling'
-                classpath = sourceSets.concurrencyTest.output + sourceSets.concurrencyTest.runtimeClasspath
+                classpath = sourceSets.performanceTest.output + sourceSets.performanceTest.runtimeClasspath
                 systemProperties = createSystemProperties()
                 args '-sbf',
-                        sourceSets.concurrencyTest.output.classesDir,
+                        sourceSets.performanceTest.output.classesDir,
                         '-s',
                         gatlingScenarioClass,
                         '-rf',
@@ -86,7 +87,7 @@ def containsExcludedNames(File file){
 }
 
 def getFullyQualifiedClassName(File file){
-    (file.getPath() - (sourceSets.concurrencyTest.output.classesDir.getPath() + File.separator) - '.class').replace(File.separator, '.')
+    (file.getPath() - (sourceSets.performanceTest.output.classesDir.getPath() + File.separator) - '.class').replace(File.separator, '.')
 }
 
 def createSystemProperties(){
@@ -96,66 +97,69 @@ def createSystemProperties(){
     ]
 }
 
-task concurrencyTestWar(type: org.gradle.api.plugins.jetty.JettyRunWar) {
-    description = "Launches an instance of neon used for concurrency tests"
-    dependsOn 'concurrencyTestClasses'
-    group = TEST_GROUP
+task checkDbProperties << {
+    if (!project.ext.has('mongo.host')) {
+        throw new InvalidUserDataException("The 'mongo.host' property must be specified for performanceTest builds")
+    }
+    if (!project.ext.has('hdfs.url')) {
+        throw new InvalidUserDataException("The 'hdfs.url' property must be specified for performanceTest builds")
+    }
+    if (!project.ext.has('sparksql.host')) {
+        throw new InvalidUserDataException("The 'sparksql.host' property must be specified for performanceTest builds")
+    }
+}
+
+task performanceTestWar(type: org.gradle.api.plugins.jetty.JettyRunWar) {
+    description = "Launches an instance of neon used for performance tests"
+    dependsOn 'performanceTestClasses'
     daemon = true
-    httpPort = concurrencyTestPort
+    httpPort = performanceTestPort
     stopPort = httpPort + 2
     stopKey = 'stop'
 }
 
-processConcurrencyTestResources {
-    from(sourceSets.concurrencyTest.resources.srcDirs) {
-        filter(ReplaceTokens, tokens: [
-                "mongo.host": getMongoHost()
-        ])
-    }
-}
-
 task insertDataIntoMongo(type: com.ncc.neon.data.MongoDataInserter) {
-    description = "Inserts data into mongo used by concurrency tests"
+    description = "Inserts data into mongo used by performance tests"
     dependsOn 'deleteDataFromMongoBeforeInsert', 'generateMongoJson'
     host = getMongoHost()
 }
 task deleteDataFromMongoBeforeInsert(type: com.ncc.neon.data.MongoDataDeleter) {
-    description = "Deletes any old concurrency test data from mongo that may have been left around by previous tests"
+    description = "Deletes any old performance test data from mongo that may have been left around by previous tests"
     host = getMongoHost()
 }
 
 task insertDataIntoSparkSQL(type: com.ncc.neon.data.SparkSQLDataInserter) {
-    description = "Inserts data into spark sql used by concurrency tests"
+    description = "Inserts data into spark sql used by performance tests"
     dependsOn 'deleteDataFromSparkSQLBeforeInsert', 'generateSparkSQLCSV', 'generateSparkSQLJson'
     host = getSparkSQLHost()
     hdfsUrl = project.getHdfsUrl()
 }
 task deleteDataFromSparkSQLBeforeInsert(type: com.ncc.neon.data.SparkSQLDataDeleter) {
-    description = "Deletes any old concurrent tests data from spark sql that may have been left around by previous tests"
+    description = "Deletes any old performance tests data from spark sql that may have been left around by previous tests"
     host = getSparkSQLHost()
 }
 
 task deleteDataFromMongo(type: com.ncc.neon.data.MongoDataDeleter) {
-    description = "Deletes any concurrency test data from mongo"
+    description = "Deletes any performance test data from mongo"
     host = getMongoHost()
 }
 
 task deleteDataFromSparkSQL(type: com.ncc.neon.data.SparkSQLDataDeleter) {
-    description = "Deletes any concurrency test data from spark sql"
+    description = "Deletes any performance test data from spark sql"
     host = getSparkSQLHost()
 }
 
-task afterGatlingTest{
-    description = "Cleans up any concurrency test data"
+task afterPerformanceTest{
+    description = "Cleans up any performance test data"
+    // Tasks that are used for "finalizedBy" are still shown in './gradlew tasks' (GRADLE-2949), so put it in the correct group
     group = TEST_GROUP
     dependsOn 'stopGatlingJetty', 'deleteDataFromMongo', 'deleteDataFromSparkSQL'
 }
 
-gatling.finalizedBy afterGatlingTest
+performanceTest.finalizedBy afterPerformanceTest
 
 task stopGatlingJetty(type: org.gradle.api.plugins.jetty.JettyStop) {
-    description = "Stops the instance of neon used for concurrency testing"
-    group = TEST_GROUP
+    description = "Stops the instance of neon used for performance testing"
     stopKey = 'stop'
-    stopPort = concurrencyTestPort + 2
+    stopPort = performanceTestPort + 2
 }

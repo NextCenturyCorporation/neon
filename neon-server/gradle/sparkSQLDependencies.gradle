@@ -1,6 +1,18 @@
+configurations {
+    // The 'hive-exec' jar *includes* (not depends on, but actually includes) a host
+    // of common libraries that conflict with versions in Neon.
+    // See http://mvnrepository.com/artifact/org.apache.hive/hive-exec/0.12.0 to see
+    // the list of packages that are in it, and see Hive's tracker for further discussion:
+    // https://issues.apache.org/jira/browse/HIVE-3017
+    // https://issues.apache.org/jira/browse/HIVE-2424
+    compile.exclude module: 'hive-exec'
+}
+
 // dependencies required for the spark sql libraries
 dependencies {
 
-    compile 'org.apache.hadoop:hadoop-common:2.3.0'
-
+    runtime "org.apache.hadoop:hadoop-common:$hadoopVersion"
+    // Hive 0.12.0 libraries are needed to talk with Spark 1.1
+    runtime "org.apache.hive:hive-jdbc:$hiveVersion"
+    runtime "org.apache.hive:hive-common:$hiveVersion"
 }
