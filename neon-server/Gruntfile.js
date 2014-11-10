@@ -17,7 +17,7 @@
 /*global module:false*/
 module.exports = function (grunt) {
 
-	var outputFile = grunt.option('outfile') + 'js' || 'build/<%= pkg.name %>.js';
+	var outputFile = grunt.option('outfile') + '.js' || 'build/<%= pkg.name %>.js';
 	var nodepOutputFile = grunt.option('outfile') + '-nodeps.js' || 'build/<%= pkg.name %>-nodeps.js';
 
 
