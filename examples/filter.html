@@ -33,6 +33,7 @@
 
             //Add a click handler to the query button
             $("#query-button").click(function () {
+                $("#result").html('Starting query...');
                 var query = new neon.query.Query().selectFrom(tableName).withFields('mag');
                 //Execute the query and display the results.
                 connection.executeQuery(query, function (result) {
@@ -52,6 +53,7 @@
             //Add a click handler to the filter button
             $("#remove-button").click(function () {
                 messenger.removeFilter(filterKey);
+                $('#message').html('No filter');
             });
         });
     </script>
@@ -60,16 +62,22 @@
 
 
 <body>
+
+Click 'Execute Query' to query for all the earthquakes.  Click 'Add
+Filter' to add a filter to Neon to only return earthquakes with
+magnitude above 5, and click 'Execute Query' again.  Click 'Remove
+Filter' to remove the filter and then click 'Execute Query' again.
+
 <p>
     <button id="query-button">Execute Query</button>
     <button id="add-button">Add Filter: (mag > 5)</button>
     <button id="remove-button">Remove Filter</button>
 </p>
-<p>Message:</p>
+<h2>Message:</h2>
 
-<p id="message"></p>
+<p id="message">Initial, no filter</p>
 
-<p>Query Results:</p>
+<h2>Query Results:</h2>
 
 <p id="result"></p>
 
