@@ -22,16 +22,17 @@ On Fedora 20, run
 
 2. Then import the example data into a MongoDB collection:
 
-        cd examples/angular-demo/data/
+        cd examples
         unzip earthquakes.zip
         mongoimport --db test --collection earthquakes --type csv --headerline --stopOnError --file earthquakes.csv
         mongo test --eval "db.earthquakes.find().forEach(function(doc){doc.time = new ISODate(doc.time);db.earthquakes.save(doc)});"
-        cd ../../..
+        cd ..
 
 3. Finally, build and run the Neon server. This will launch a test web server on port 8080:
 
         ./gradlew jettyRun
-    Point your web browser at [http://localhost:8080/neon/examples][demo] and select one of the single page example files to view a simple query, filter, or database listing.  If they display the earthquake data listed above, you have successfully configured your development environment.
+
+Point your web browser at [http://localhost:8080/neon/examples][demo] and select one of the single page example files to view a simple query, filter, or database listing.  If they display the earthquake data listed above, you have successfully configured your development environment.
     
     To see a more substantial Neon demonstration, check out the [Neon Geo Temporal Dashboard][neon-gtd].  Originally part of this project, it has been spun off to a sister project and is meant to be deployed as a separate web application alongside core Neon.
     
