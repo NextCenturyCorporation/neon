@@ -79,6 +79,13 @@ class MongoQueryExecutor extends AbstractQueryExecutor {
             LOGGER.trace("Using distinct mongo query worker")
             return new DistinctMongoQueryWorker(mongo)
         } else if (query.aggregates || query.groupByClauses) {
+            if (query.groupByClauses.size() == 0 && query.aggregates.size() == 1) {
+                def aggregate = query.aggregates[0]
+                if (aggregate.operation == 'count' && aggregate.field == '*') {
+                    LOGGER.trace("Using simple count query worker")
+                    return new SimpleMongoCountWorker(mongo)
+                }
+            }
             LOGGER.trace("Using aggregate mongo query worker")
             return new AggregateMongoQueryWorker(mongo)
         }
