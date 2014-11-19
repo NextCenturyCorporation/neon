@@ -7,11 +7,11 @@ org.gradle.jvmargs=-Xmx1024m -XX:MaxPermSize=256m
 org.gradle.daemon=true
 
 # Path to a tomcat or other application server.
-NEON_SERVER=/my/tomcat/path/apache-tomcat-7.0.39
+neonServer=/my/tomcat/path/apache-tomcat-7.0.39
 
 # Configuration for the instances of mongo/spark-sql used for testing
 # Mongo host configuration. Uncomment the following and specify the mongo host to enable MongoDB tests
-mongo.host=localhost
+#mongo.host=localhost
 # Spark SQL configuration. Uncomment the following and specify the appropriate hosts to enable Spark SQL tests
 #hdfs.url=hdfs://localhost:8020
 #sparksql.host=localhost:10000
