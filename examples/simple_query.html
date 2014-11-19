@@ -1,5 +1,6 @@
 <html>
     <head>
+        <meta charset="UTF-8"> 
         <script src="http://localhost:8080/neon/js/neon.js"></script>
 
         <script>
@@ -11,7 +12,6 @@
             connection.connect(neon.query.Connection.MONGO,"localhost");
             connection.use("test");
 
-            //var countMagType = new neon.query.GroupByFunctionClause();
             var query = new neon.query.Query().selectFrom("earthquakes").groupBy("magType").aggregate(neon.query.COUNT, "mag", "count");
 
             //Execute the query and display the results.
