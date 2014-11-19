@@ -21,7 +21,7 @@ def DEPLOY_GROUP = 'deploy'
 
 project.ext {
     // neon server to deploy to. may be remote or local, depending on the remote configuration
-    neonServer = project.hasProperty('NEON_SERVER') ? project.getProperty('NEON_SERVER') : System.env.NEON_SERVER
+    neonServer = project.hasProperty('neonServer') ? project.getProperty('neonServer') : System.env.NEON_SERVER
     neonServerWebapps = neonServer + '/webapps'
 
     // these are set to empty string, not null, when not provided. otherwise the ssh task will choke
@@ -83,6 +83,6 @@ task 'remoteTomcatDeploy'(type: SshTask) {
 
 private def validateNeonServer() {
     if (!neonServer) {
-        throw new GradleException("Must specify the neon server to deploy to using -PNEON_SERVER=<neon-server> or using a NEON_SERVER environment variable")
+        throw new GradleException("Must specify the neon server to deploy to using -PneonServer=<neon-server> or using a NEON_SERVER environment variable")
     }
 }
