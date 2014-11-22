@@ -33,7 +33,10 @@ class mongodb {
 class tomcat7 {
 	package { "tomcat7.noarch":
 		ensure => "present",
-		require => Package["java-1.7.0-openjdk.x86_64"]
+		require => Package["java-1.7.0-openjdk.x86_64"],
+        # This is needed because some of the tomcat packages are not signed,
+        # as documented here: http://blog.gmane.org/gmane.linux.jpackage.general
+        install_options => ['--nogpgcheck']
 	}
 
 	service { "tomcat7":
@@ -47,16 +50,16 @@ class getNeon {
 		ensure => "present"
 	}
 
-	exec { "wget http://neonframework.org/versions/latest/neon.war":
+	exec { "wget http://neonframework.org/neon/versions/latest/neon.war":
 		cwd => "/var/lib/tomcat7/webapps",
 		creates => "/var/lib/tomcat7/webapps/neon.war",
 		path => ["/bin/", "/sbin/", "/usr/bin/", "/usr/sbin/"],
 		require => Package["wget", "tomcat7.noarch"]
 	}
 
-	exec { "wget http://neonframework.org/versions/latest/neon-examples.war":
+	exec { "wget http://neonframework.org/neon-gtd/versions/latest/neon-gtd.war":
 		cwd => "/var/lib/tomcat7/webapps",
-		creates => "/var/lib/tomcat7/webapps/neon-examples.war",
+		creates => "/var/lib/tomcat7/webapps/neon-gtd.war",
 		path => ["/bin/", "/sbin/", "/usr/bin/", "/usr/sbin/"],
 		require => Package["wget", "tomcat7.noarch"]
 	}
@@ -83,7 +86,7 @@ class getDemoData {
 
 class unzipDemoData {
 	exec { "unzip":
-		command => "jar -xvf examples/angular-demo/data/earthquakes.zip",
+		command => "jar -xvf examples/earthquakes.zip",
 		cwd => "/neon",
 		require => Class["getDemoData","java7"]
 	}
