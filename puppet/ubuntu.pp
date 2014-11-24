@@ -53,14 +53,14 @@ class getNeon {
 		require => Class["update"]
 	}
 
-	exec { "wget http://neonframework.org/versions/latest/neon.war":
+	exec { "wget http://neonframework.org/neon/versions/latest/neon.war":
 		cwd => "/var/lib/tomcat7/webapps",
 		creates => "/var/lib/tomcat7/webapps/neon.war",
 		path => ["/bin/", "/sbin/", "/usr/bin/", "/usr/sbin/"],
 		require => Package["wget", "tomcat7"]
 	}
 
-	exec { "wget http://neonframework.org/versions/latest/neon-examples.war":
+	exec { "wget http://neonframework.org/neon-gtd/versions/latest/neon-examples.war":
 		cwd => "/var/lib/tomcat7/webapps",
 		creates => "/var/lib/tomcat7/webapps/neon-examples.war",
 		path => ["/bin/", "/sbin/", "/usr/bin/", "/usr/sbin/"],
@@ -90,7 +90,7 @@ class getDemoData {
 
 class unzipDemoData {
 	exec { "unzip":
-		command => "jar -xvf examples/angular-demo/data/earthquakes.zip",
+		command => "jar -xvf examples/earthquakes.zip",
 		cwd => "/neon",
 		require => Class["getDemoData","java7"]
 	}
