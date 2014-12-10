@@ -22,6 +22,7 @@ import org.springframework.context.annotation.Configuration
 import org.springframework.context.annotation.Profile
 
 import java.nio.file.FileSystems
+import java.nio.file.Path
 
 /**
  * Spring bean configuration to use in production
@@ -30,22 +31,36 @@ import java.nio.file.FileSystems
 @Profile("production")
 class ProductionAppContext {
 
-	@Bean
-	TransformerRegistry transformerRegistry() {
-		TransformerRegistry registry = new TransformerRegistry()
+    /**
+     * Uses this Class to get a resource folder from the classpath and return a Path to 
+     * that folder.
+     * @return A Path object representing the transforms folder found on the classpath.
+     */
+    private Path getTransformsPath() {
+        def pathString = this.getClass().getResource("/transforms").getPath()
 
-		List<Transformer> registeredTransformers = []
+        // Clean any leading slashes on windows paths with drive letters.
+        if (System.getProperty("os.name").contains("indow")) {
+            pathString = pathString.replaceFirst("/(\\w+):", "\$1:")
+        }
 
-		def path = FileSystems.getDefault().getPath(this.getClass().getResource("/transforms/").getPath())
+        return FileSystems.getDefault().getPath(pathString)
+    }
 
-		registeredTransformers.each { Transformer transformer ->
-			registry.register(transformer)
-		}
+    @Bean 
+    TransformerRegistry transformerRegistry() {
+        TransformerRegistry registry = new TransformerRegistry()
+        List<Transformer> registeredTransformers = []
 
-		TransformLoader loader = new TransformLoader(path, registry)
-		Thread th = new Thread(loader, "TransformLoader")
-		th.start()
+        def path = getTransformsPath()
+        registeredTransformers.each { Transformer transformer ->
+            registry.register(transformer)
+        }
 
-		return registry
-	}
+        TransformLoader loader = new TransformLoader(path, registry)
+        Thread th = new Thread(loader, "TransformLoader")
+        th.start()
+        return registry
+    }
+
 }
