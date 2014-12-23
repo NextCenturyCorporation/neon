@@ -267,7 +267,7 @@ neon.eventing.Messenger.prototype.removeSelection = function (id, successCallbac
  * @param {neon.query.Filter} filter The filter that defines the new selection
  * @param {Function} successCallback The callback to invoke when the selection is replaced
  * @param {Function} errorCallback The callback to invoke if an error occurs.
- * @method replaceFilter
+ * @method replaceSelection
  */
 
 neon.eventing.Messenger.prototype.replaceSelection = function (id, filter, successCallback, errorCallback) {

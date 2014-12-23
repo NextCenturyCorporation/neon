@@ -43,3 +43,6 @@ neon-server/bin
 *.log
 *.hprof
 *.*#
+
+#gtd symlink
+examples/neon-gtd
