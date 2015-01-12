@@ -22,14 +22,17 @@
         // this can be any value. each key can contain 1 or more selections
         var selectionKey = "exampleKey";
 
-        //Create a selection
+        // Create a filter
         var whereClause = neon.query.where("mag", ">", 6);
         var filter = new neon.query.Filter().selectFrom(databaseName, tableName).where(whereClause);
 
+	// Create a selection, using the above filter to limit the results
         messenger.addSelection(selectionKey, filter, function () {
-            //Query in selection mode.
+
+            // Query in selection mode.
             var query = new neon.query.Query().selectFrom(databaseName, tableName).withFields('mag','place').selectionOnly();
-            //Execute the query and display the results.
+
+            // Execute the query and display the results.
             connection.executeQuery(query, function (result) {
                 $("#result").html(JSON.stringify(result.data));
             });
