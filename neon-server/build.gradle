@@ -271,7 +271,11 @@ def getDateString() {
 def getTagName() {
     def stdout = new ByteArrayOutputStream()
     exec {
+        // If Neon dir does not have .git/, or built on a system without git, this will fail. 
+	// This will continue anyway.
+        ignoreExitValue = true
         commandLine 'git', 'describe', '--tags', '--long'
+	// standardOutput is the default for output of a command line call; built into exec
         standardOutput = stdout
     }
     return stdout.toString().trim()
