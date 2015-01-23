@@ -58,6 +58,58 @@ metadata {
                 }
             }
         }
+        memex {
+            papers {
+                angular_example {
+                    date {
+                        value = "date"
+                    }
+                    line_category {
+                        value = "type"
+                    }
+                    bar_x_axis {
+                        value = "year"
+                    }
+                    y_axis {
+                        value = "_index"
+                    }
+                    color_by {
+                        value = "magType"
+                    }
+                    size_by {
+                        value = "mag"
+                    }
+                    sort_by {
+                        value = "time"
+                    }
+                }
+            }
+            janes {
+                angular_example {
+                    date {
+                        value = "date"
+                    }
+                    line_category {
+                        value = "type"
+                    }
+                    bar_x_axis {
+                        value = "Year"
+                    }
+                    y_axis {
+                        value = "Value"
+                    }
+                    color_by {
+                        value = "magType"
+                    }
+                    size_by {
+                        value = "mag"
+                    }
+                    sort_by {
+                        value = "time"
+                    }
+                }
+            }
+        }
         test {
             earthquakes {
                 angular_example {
