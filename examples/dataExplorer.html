@@ -9,7 +9,7 @@
     <link rel="stylesheet" type="text/css" href="lib/dataExplorer.css"/>
     <link rel="stylesheet" type="text/css" href="lib/jquery.jsonview.css"/>
 
-    <script>
+    <script type="text/javascript">
         var _databaseType = neon.query.Connection.MONGO;
         var _url = "localhost";
         var _databaseName = "test";
@@ -55,10 +55,12 @@
         var queryData = function (event) {
             _tableName = event.target.value;
             var query = new neon.query.Query().selectFrom(_databaseName, _tableName).limit(_limit);
+            $("#queryString").html("Query Result for database: '" + _databaseName + "',  table: '" + _tableName + "'");
+            // $("#queryString").val("" + );
             _connection.executeQuery(query, function (result) {
                 $("#formattedJson").JSONView(result.data);
             });
-        }
+        };
 
         $(document).ready(function () {
             neon.SERVER_URL = "/neon";
@@ -76,8 +78,8 @@
 <div id="header">Simple Data Explorer Page using Neon</div>
 <div id="container">
     <div id="center" class="column">
-        <h3>Query Results:</h3>
 
+        <p  id='queryString'>Query Result</p>
         <p id="formattedJson"></p>
     </div>
     <div id="left" class="column">
