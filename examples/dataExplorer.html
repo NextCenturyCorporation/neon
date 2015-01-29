@@ -1,0 +1,58 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+        <script src="http://localhost:8080/neon/js/neon.js"></script>
+
+        <script>
+            neon.SERVER_URL = "/neon";
+            var connection = new neon.query.Connection();
+            connection.connect(neon.query.Connection.MONGO,"localhost");
+
+            var setDatabase = function() {
+               connection.use("test");
+            }
+
+            // Initialize with the databases
+            connection.getDatabaseNames(function (databases) {
+                $("#databases").empty();
+                var numDatabases = databases.length;
+                for (var ii=0; ii<numDatabases; ii++) {
+                    var buttonString = '<input type="button" value="' + databases[ii] + '" />)';
+                    var newButton = $(buttonString).click( setDatabase() );
+                    $("#databases").append(newButton);
+                }
+            });
+
+            var query = new neon.query.Query().selectFrom("earthquakes").aggregate("avg", "depth");
+
+            //Execute the query and display the results.
+            connection.executeQuery(query, function (result) {
+            $("#result").html(JSON.stringify(result.data));
+            });
+
+        </script>
+
+        <title>Simple Data Explorer</title>
+
+        <link rel="stylesheet" type="text/css" href="dataExplorer.css" />
+    </head>
+
+    <body>
+        <div id="header">Simple Data Explorer Page using Neon</div>
+        <div id="container">
+            <div id="center" class="column">
+                <h1>This is the main content.</h1>
+                <p>Query Results:</p>
+                <p id="result"></p>
+            </div>
+            <div id="left" class="column">
+                <h2>Databases</h2>
+                <p id="databases"></p>
+            </div>
+        </div>
+        <div id="footer">Copyright 2014. Next Century Corporation</div>
+    </body>
+</html>
