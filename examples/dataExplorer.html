@@ -7,12 +7,30 @@
         <script src="http://localhost:8080/neon/js/neon.js"></script>
 
         <script>
+
+            var databaseName = "test";
+            var tableName = "earthquakes";
+
             neon.SERVER_URL = "/neon";
             var connection = new neon.query.Connection();
             connection.connect(neon.query.Connection.MONGO,"localhost");
 
-            var setDatabase = function() {
-               connection.use("test");
+            var setDatabase = function(event) {
+            databaseName = event.target.value;
+            connection.use(databaseName);
+            updateTables();
+            };
+
+            var queryData = function(event) {
+            tableName = event.target.value;
+
+            // Query in selection mode.
+            var query = new neon.query.Query().selectFrom(databaseName, tableName).limit(1);
+
+            // Execute the query and display the results.
+            connection.executeQuery(query, function (result) {
+                $("#result").html(JSON.stringify(result.data));
+            });
             }
 
             // Initialize with the databases
@@ -21,17 +39,31 @@
                 var numDatabases = databases.length;
                 for (var ii=0; ii<numDatabases; ii++) {
                     var buttonString = '<input type="button" value="' + databases[ii] + '" />)';
-                    var newButton = $(buttonString).click( setDatabase() );
+                    var newButton = $(buttonString).click(function(event) { setDatabase(event); });
                     $("#databases").append(newButton);
                 }
-            });
+           });
+
+           var updateTables = function() { 
+               connection.getTableNames(function (tables) {
+                   $("#tables").empty();
+                   var numTables = tables.length;
+                   for (var ii=0; ii<numTables; ii++) {
+                       var buttonString = '<input type="button" value="' + tables[ii] + '" />)';
+                       var newButton = $(buttonString).click(function(event) { queryData(event); });
+                       $("#tables").append(newButton);
+                   }
+               });
+            };
+
+            
 
             var query = new neon.query.Query().selectFrom("earthquakes").aggregate("avg", "depth");
-
             //Execute the query and display the results.
             connection.executeQuery(query, function (result) {
             $("#result").html(JSON.stringify(result.data));
             });
+
 
         </script>
 
@@ -51,6 +83,8 @@
             <div id="left" class="column">
                 <h2>Databases</h2>
                 <p id="databases"></p>
+                <h2>Tables</h2>
+                <p id="tables"></p>
             </div>
         </div>
         <div id="footer">Copyright 2014. Next Century Corporation</div>
