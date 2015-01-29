@@ -4,53 +4,42 @@
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
 
-    <script src="http://localhost:8080/neon/js/neon.js"></script>
-    <script src="lib/jquery.jsonview.js"></script>
+    <script src="http://localhost:8080/neon/js/neon.js" type="text/javascript"></script>
+    <script src="lib/jquery.jsonview.js" type="text/javascript"></script>
     <link rel="stylesheet" type="text/css" href="lib/dataExplorer.css"/>
     <link rel="stylesheet" type="text/css" href="lib/jquery.jsonview.css"/>
 
     <script>
-        var databaseName = "test";
-        var tableName = "earthquakes";
+        var _databaseType = neon.query.Connection.MONGO;
+        var _url = "localhost";
+        var _databaseName = "test";
+        var _tableName = "earthquakes";
+        var _limit = 1;
+        var _connection = new neon.query.Connection();
 
-        neon.SERVER_URL = "/neon";
-        var connection = new neon.query.Connection();
-        connection.connect(neon.query.Connection.MONGO, "localhost");
+        // Initialize with the databases
+        var updateDatabases = function () {
+            _connection.getDatabaseNames(function (databases) {
+                $("#databases").empty();
+                var numDatabases = databases.length;
+                for (var ii = 0; ii < numDatabases; ii++) {
+                    var buttonString = '<input type="button" value="' + databases[ii] + '" />)';
+                    var newButton = $(buttonString).click(function (event) {
+                        setDatabase(event);
+                    });
+                    $("#databases").append(newButton);
+                }
+            });
+        };
 
         var setDatabase = function (event) {
-            databaseName = event.target.value;
-            connection.use(databaseName);
+            _databaseName = event.target.value;
+            _connection.use(_databaseName);
             updateTables();
         };
 
-        var queryData = function (event) {
-            tableName = event.target.value;
-
-            // Query in selection mode.
-            var query = new neon.query.Query().selectFrom(databaseName, tableName).limit(1);
-
-            // Execute the query and display the results.
-            connection.executeQuery(query, function (result) {
-                $("#formattedJson").JSONView(result.data);
-                // $("#result").html(JSON.stringify(result.data));
-            });
-        }
-
-        // Initialize with the databases
-        connection.getDatabaseNames(function (databases) {
-            $("#databases").empty();
-            var numDatabases = databases.length;
-            for (var ii = 0; ii < numDatabases; ii++) {
-                var buttonString = '<input type="button" value="' + databases[ii] + '" />)';
-                var newButton = $(buttonString).click(function (event) {
-                    setDatabase(event);
-                });
-                $("#databases").append(newButton);
-            }
-        });
-
         var updateTables = function () {
-            connection.getTableNames(function (tables) {
+            _connection.getTableNames(function (tables) {
                 $("#tables").empty();
                 var numTables = tables.length;
                 for (var ii = 0; ii < numTables; ii++) {
@@ -62,6 +51,21 @@
                 }
             });
         };
+
+        var queryData = function (event) {
+            _tableName = event.target.value;
+            var query = new neon.query.Query().selectFrom(_databaseName, _tableName).limit(_limit);
+            _connection.executeQuery(query, function (result) {
+                $("#formattedJson").JSONView(result.data);
+            });
+        }
+
+        $(document).ready(function () {
+            neon.SERVER_URL = "/neon";
+            _connection.connect(_databaseType, _url);
+            updateDatabases();
+        });
+
 
     </script>
     <title>Simple Data Explorer</title>
