@@ -6,7 +6,8 @@ body {
 
 #container {
     padding-left: 200px;      /* LC fullwidth */
-    padding-right: 190px;     /* RC fullwidth + CC padding */
+    padding-right: 50px;     /* RC fullwidth + CC padding */
+    /* padding-right: 190px;  */   /* RC fullwidth + CC padding */
 }
 
 #container .column {
