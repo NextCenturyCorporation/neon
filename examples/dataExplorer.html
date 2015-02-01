@@ -14,58 +14,92 @@
         var _url = "localhost";
         var _databaseName = "test";
         var _tableName = "earthquakes";
-        var _limit = 1;
+        var _limit = 3;
+        var _offset = 0;
         var _connection = new neon.query.Connection();
 
         // Initialize with the databases
         var updateDatabases = function () {
+            _offset = 0;
             _connection.getDatabaseNames(function (databases) {
                 $("#databases").empty();
                 var numDatabases = databases.length;
                 for (var ii = 0; ii < numDatabases; ii++) {
                     var buttonString = '<input type="button" value="' + databases[ii] + '" />)';
                     var newButton = $(buttonString).click(function (event) {
-                        setDatabase(event);
+                        setDatabaseName(event);
                     });
                     $("#databases").append(newButton);
                 }
             });
         };
 
-        var setDatabase = function (event) {
+        var setDatabaseName = function (event) {
             _databaseName = event.target.value;
-            _connection.use(_databaseName);
             updateTables();
         };
 
         var updateTables = function () {
+            _connection.use(_databaseName);
             _connection.getTableNames(function (tables) {
                 $("#tables").empty();
                 var numTables = tables.length;
                 for (var ii = 0; ii < numTables; ii++) {
                     var buttonString = '<input type="button" value="' + tables[ii] + '" />)';
                     var newButton = $(buttonString).click(function (event) {
-                        queryData(event);
+                        setTableName(event);
                     });
                     $("#tables").append(newButton);
                 }
             });
+            _offset = 0;
         };
 
-        var queryData = function (event) {
+        var setTableName = function (event) {
             _tableName = event.target.value;
-            var query = new neon.query.Query().selectFrom(_databaseName, _tableName).limit(_limit);
-            $("#queryString").html("Query Result for database: '" + _databaseName + "',  table: '" + _tableName + "'");
-            // $("#queryString").val("" + );
+            _offset = 0;
+            queryExistingSettings();
+        }
+
+        var queryExistingSettings = function () {
+            var query = new neon.query.Query().selectFrom(_databaseName, _tableName).limit(_limit).offset(_offset);
+            $("#queryString").html("Query Result for database: '" + _databaseName + "',  table: '" + _tableName + "'" +
+                    " Results " + (_offset + 1) + " to " + (_offset + _limit));
             _connection.executeQuery(query, function (result) {
                 $("#formattedJson").JSONView(result.data);
+            });
+        };
+
+
+        var setHandlers = function () {
+            $("#updateLimit").click(function () {
+                _limit = parseInt($("#numLimit").val());
+                if (isNaN(_limit)) {
+                    _limit = 1;
+                }
+                queryExistingSettings();
+            });
+            $("#next").click(function () {
+                _offset = _offset + _limit;
+                queryExistingSettings();
+            });
+            $("#prev").click(function () {
+                _offset = _offset - _limit;
+                if (_offset < 0) {
+                    _offset = 0;
+                }
+                queryExistingSettings();
             });
         };
 
         $(document).ready(function () {
             neon.SERVER_URL = "/neon";
             _connection.connect(_databaseType, _url);
+
+            setHandlers();
             updateDatabases();
+            updateTables();
+            queryExistingSettings();
         });
 
 
@@ -79,10 +113,12 @@
 <div id="container">
     <div id="center" class="column">
 
-        <p  id='queryString'>Query Result</p>
+        <p id='queryString'>Query Result</p>
+
         <p id="formattedJson"></p>
     </div>
     <div id="left" class="column">
+
         <h2>Databases</h2>
 
         <p id="databases"></p>
@@ -90,6 +126,13 @@
         <h2>Tables</h2>
 
         <p id="tables"></p>
+
+        <p></p>NumItems: <input type="text" value="3" id="numLimit" size="5" maxlength="4">
+        <button id="updateLimit">Update</button>
+        </p>
+
+        <button id="prev">Prev</button>
+        <button id="next">Next</button>
     </div>
 </div>
 <div id="footer">Copyright 2014. Next Century Corporation</div>
