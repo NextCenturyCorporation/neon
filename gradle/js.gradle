@@ -26,7 +26,6 @@ project.ext {
     jsLibDir = 'src/main/js-lib'
     jsOutputFolder = "${buildDir}/js"
     jsOutputFileBase = "${jsOutputFolder}/${project.name}"
-    jsOutputFile = "${jsOutputFileBase}.js"
     combinedJsFileName = "${jsOutputFileBase}.js"
     combinedNoDepsJsFileName = "${jsOutputFileBase}-nodeps.js"
 

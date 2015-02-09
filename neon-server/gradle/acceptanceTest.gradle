@@ -124,7 +124,7 @@ task acceptanceTest(type: GruntTask) {
     description = "Runs the neon acceptance test"
     dependsOn 'assemble', 'acceptanceTestWar', 'insertMongoDataAcceptanceTest', 'transformTestWebService'
     group = TEST_GROUP
-    gruntArgs "jasmine:acceptance", "--outfile=${jsOutputFile}"
+    gruntArgs "jasmine:acceptance", "--outfile=${jsOutputFileBase}"
 }
 
 acceptanceTest.finalizedBy afterAcceptanceTest
