@@ -108,6 +108,18 @@ neon.eventing.Messenger.prototype.events = function (callbacks) {
 	});
 };
 
+/**
+ * Unsubscribe from all events:  selection changes, filters changes, active dataset changed.
+ * @method removeEvents
+ */
+neon.eventing.Messenger.prototype.removeEvents = function () {
+	var me = this;
+	var globalChannelConfigs = this.createGlobalChannelSubscriptions_({});
+	_.each(globalChannelConfigs, function (channelConfig) {
+		me.unsubscribe(channelConfig.channel);
+	});
+};
+
 neon.eventing.Messenger.prototype.createGlobalChannelSubscriptions_ = function (neonCallbacks) {
 	// some of the callbacks may be null/undefined, which is ok since they will be ignored
 	return [

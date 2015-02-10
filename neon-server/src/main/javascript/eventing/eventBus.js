@@ -25,6 +25,7 @@ neon.eventing.EventBus = function () {
 	// postal.js has channels and topics. channels provide ways to group multiple topics. neon only
 	// uses one postal channel, and each neon channel will correspond to a postal topic
 	this.channel_ = postal.channel();
+	this.subscriptions_ = {};
 };
 
 /**
@@ -53,18 +54,34 @@ neon.eventing.EventBus.prototype.publish = function (channel, message, messenger
  * messages for this subscription.
  */
 neon.eventing.EventBus.prototype.subscribe = function (channel, callback, messengerId) {
-	return this.channel_.subscribe(channel, function (data) {
+	var subscription = this.channel_.subscribe(channel, function (data) {
 		if(data.sender !== messengerId) {
 			callback(data.payload);
 		}
 	});
+
+	if (this.subscriptions_[channel]) {
+		this.subscriptions_[channel].push(subscription);
+	} else {
+		(this.subscriptions_[channel] = [subscription]);
+	}
+	return subscription;
 };
 
 /**
  * Unsubscribes the subscription created from the subscribe method.
- * @param {Object} subscription The subscription to remove from the bus
+ * @param {String|Object} subscription The channel or individual subscription to remove from the bus
  * @method unsubscribe
  */
 neon.eventing.EventBus.prototype.unsubscribe = function(subscription) {
-	subscription.unsubscribe();
+	// If given a channel name string, unsubscribe all subscriptions on that channel.  Otherwise, unsubscribe just that subscription.
+	if (typeof(subscription) === "string" && this.subscriptions_[subscription]) {
+		var length = this.subscriptions_[subscription].length;
+		for (var i = 0; i < length; i++) {
+			this.subscriptions_[subscription][i].unsubscribe();
+		}
+		delete this.subscriptions_[subscription];
+	} else if (typeof(subscription) === "object" && subscription !== null) {
+		subscription.unsubscribe();
+	}
 };
