@@ -24,16 +24,24 @@ import org.slf4j.LoggerFactory
 
 class SimpleMongoCountWorker extends AbstractMongoQueryWorker {
     private static final Logger LOGGER = LoggerFactory.getLogger(SimpleMongoCountWorker)
+
     SimpleMongoCountWorker(MongoClient mongo) {
         super(mongo)
     }
 
     @Override
     QueryResult executeQuery(MongoQuery mongoQuery) {
+        def aggregation = mongoQuery.query.aggregates[0]
+        String fieldName = aggregation.name ?: 'counter'
+
         LOGGER.debug("Executing count: {}", mongoQuery)
         long count = queryDB(mongoQuery)
 
-        return new TabularQueryResult([[_id: [:], counter: count]])
+        Map resultMap = [_id: [:]]
+        resultMap[fieldName] = count
+        List result = [resultMap]
+
+        return new TabularQueryResult(result)
     }
 
     private long queryDB(MongoQuery query) {
