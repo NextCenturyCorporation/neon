@@ -59,6 +59,8 @@ neon.eventing.EventBus.prototype.subscribe = function (channel, callback, messen
 			callback(data.payload);
 		}
 	});
+	// Save the messenger ID to allow unsubscribing by id.
+	subscription.messengerId = messengerId;
 
 	if (this.subscriptions_[channel]) {
 		this.subscriptions_[channel].push(subscription);
@@ -73,14 +75,16 @@ neon.eventing.EventBus.prototype.subscribe = function (channel, callback, messen
  * @param {String|Object} subscription The channel or individual subscription to remove from the bus
  * @method unsubscribe
  */
-neon.eventing.EventBus.prototype.unsubscribe = function(subscription) {
+neon.eventing.EventBus.prototype.unsubscribe = function(subscription, messengerId) {
 	// If given a channel name string, unsubscribe all subscriptions on that channel.  Otherwise, unsubscribe just that subscription.
 	if (typeof(subscription) === "string" && this.subscriptions_[subscription]) {
 		var length = this.subscriptions_[subscription].length;
 		for (var i = 0; i < length; i++) {
-			this.subscriptions_[subscription][i].unsubscribe();
+			if (this.subscriptions_[subscription][i].messengerId === messengerId) {
+				this.subscriptions_[subscription][i].unsubscribe();
+			}
 		}
-		delete this.subscriptions_[subscription];
+		//delete this.subscriptions_[subscription];
 	} else if (typeof(subscription) === "object" && subscription !== null) {
 		subscription.unsubscribe();
 	}

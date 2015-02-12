@@ -81,7 +81,7 @@ neon.eventing.Messenger.prototype.subscribe = function (channel, callback) {
  * @method unsubscribe
  */
 neon.eventing.Messenger.prototype.unsubscribe = function (channel) {
-	neon.eventing.eventBus_.unsubscribe(channel);
+	neon.eventing.eventBus_.unsubscribe(channel, this.id_);
 };
 
 /**
