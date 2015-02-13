@@ -65,7 +65,7 @@ neon.eventing.EventBus.prototype.subscribe = function (channel, callback, messen
 	if (this.subscriptions_[channel]) {
 		this.subscriptions_[channel].push(subscription);
 	} else {
-		(this.subscriptions_[channel] = [subscription]);
+		this.subscriptions_[channel] = [subscription];
 	}
 	return subscription;
 };
