@@ -84,26 +84,28 @@ describe('messenger', function () {
 
 		var messenger1 = new neon.eventing.Messenger();
 		var messenger2 = new neon.eventing.Messenger();
+		var messenger3 = new neon.eventing.Messenger();
+
 		var callback1 = jasmine.createSpy('callback1');
 		var callback2 = jasmine.createSpy('callback2');
 		var callback3 = jasmine.createSpy('callback3');
 
 		messenger1.subscribe(channel, callback1);
 		messenger1.subscribe(channel, callback2);
-		messenger1.subscribe(channel, callback3);
+		messenger2.subscribe(channel, callback3);
 
-		messenger2.publish(channel, message1);
+		messenger3.publish(channel, message1);
 
 		expect(callback1).toHaveBeenCalledWith(message1);
 		expect(callback2).toHaveBeenCalledWith(message1);
 		expect(callback3).toHaveBeenCalledWith(message1);
-		messenger1.unsubscribe(channel);
 
-		messenger2.publish(channel, message2);
+		messenger1.unsubscribe(channel);
+		messenger3.publish(channel, message2);
 
 		expect(callback1).not.toHaveBeenCalledWith(message2);
 		expect(callback2).not.toHaveBeenCalledWith(message2);
-		expect(callback3).not.toHaveBeenCalledWith(message2);
+		expect(callback3).toHaveBeenCalledWith(message2);
 	});
 
 	it('subscribes to each Neon event type on events()', function () {

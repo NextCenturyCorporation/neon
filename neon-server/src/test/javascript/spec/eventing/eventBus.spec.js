@@ -60,7 +60,7 @@ describe('messaging using the standard neon event bus', function () {
         var subscriber2 = eventBus.subscribe(channel, callback2, 'messengerId1');
 
         eventBus.publish(channel, 'aMessage', 'messengerId2');
-        eventBus.unsubscribe('aChannel', 'messengerId1');
+        eventBus.unsubscribe(channel, 'messengerId1');
         eventBus.publish(channel, 'bMessage', 'messengerId2');
         eventBus.publish(channel, 'cMessage', 'messengerId2');
 

@@ -32,7 +32,7 @@ neon.eventing.EventBus = function () {
  * Publishes a message to the channel. The message can be any type of object. Those subscribed to
  * the channel will be notified of the message.
  * @param {String} channel The name of the channel to publish the message to
- * @param {Object} message The message
+ * @param {String|Object} The message published to the given channel
  * @param {String} messengerId The id of the owning neon messenger
  * @method publish
  *
@@ -47,7 +47,6 @@ neon.eventing.EventBus.prototype.publish = function (channel, message, messenger
  * when a message is received on the channel.
  * @param {String} channel The name of the channel to subscribe to
  * @param {Function} callback The callback to invoke when a message is published to the channel.
- * @param {String|Object} The message published to the given channel
  * @param {String} messengerId The id of the owning neon messenger
  * @method subscribe
  * @return {Object} The subscription to the channel. Pass this to unsubscribe to stop receiving
@@ -73,6 +72,7 @@ neon.eventing.EventBus.prototype.subscribe = function (channel, callback, messen
 /**
  * Unsubscribes the subscription created from the subscribe method.
  * @param {String|Object} subscription The channel or individual subscription to remove from the bus
+ * @param {String} messengerId The id of the owning neon messenger
  * @method unsubscribe
  */
 neon.eventing.EventBus.prototype.unsubscribe = function(subscription, messengerId) {
@@ -81,10 +81,13 @@ neon.eventing.EventBus.prototype.unsubscribe = function(subscription, messengerI
 		var length = this.subscriptions_[subscription].length;
 		for (var i = 0; i < length; i++) {
 			if (this.subscriptions_[subscription][i].messengerId === messengerId) {
-				this.subscriptions_[subscription][i].unsubscribe();
+				// Remove the item from our array, unsubscribe and adjust our array counters.
+				var removedItem = this.subscriptions_[subscription].splice(i, 1);
+				removedItem[0].unsubscribe();
+				length--;
+				i--;
 			}
 		}
-		//delete this.subscriptions_[subscription];
 	} else if (typeof(subscription) === "object" && subscription !== null) {
 		subscription.unsubscribe();
 	}
