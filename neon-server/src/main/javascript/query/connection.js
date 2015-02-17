@@ -28,8 +28,7 @@
  *     connection.executeQuery(query2, callback);
  * @constructor
  */
-neon.query.Connection = function () {
-
+neon.query.Connection = function() {
     this.host_ = undefined;
     this.databaseType_ = undefined;
     this.database_ = undefined;
@@ -49,7 +48,6 @@ neon.query.Connection.MONGO = 'mongo';
  */
 neon.query.Connection.SPARK = 'sparksql';
 
-
 /**
  * Specifies what database type and host the queries will be executed against.
  * @method connect
@@ -57,7 +55,7 @@ neon.query.Connection.SPARK = 'sparksql';
  * valid database types.
  * @param {String} host The host the database is running on
  */
-neon.query.Connection.prototype.connect = function (databaseType, host) {
+neon.query.Connection.prototype.connect = function(databaseType, host) {
     this.host_ = host;
     this.databaseType_ = databaseType;
 };
@@ -67,7 +65,7 @@ neon.query.Connection.prototype.connect = function (databaseType, host) {
  * @param {String} database The name of the database to use for queries
  * @method use
  */
-neon.query.Connection.prototype.use = function (database) {
+neon.query.Connection.prototype.use = function(database) {
     this.database_ = database;
 };
 
@@ -80,7 +78,7 @@ neon.query.Connection.prototype.use = function (database) {
  * @param {Function} [errorCallback] The optional callback when an error occurs. This is a 3 parameter function that contains the xhr, a short error status and the full error message.
  * @return {neon.util.AjaxRequest} The xhr request object
  */
-neon.query.Connection.prototype.executeQuery = function (query, successCallback, errorCallback) {
+neon.query.Connection.prototype.executeQuery = function(query, successCallback, errorCallback) {
     this.populateQueryDatabaseField_(query);
     return this.executeQueryService_(query, successCallback, errorCallback, 'query');
 };
@@ -95,10 +93,12 @@ neon.query.Connection.prototype.executeQuery = function (query, successCallback,
  * contains the xhr, a short error status and the full error message.
  * @return {neon.util.AjaxRequest} The xhr request object
  */
-neon.query.Connection.prototype.executeTextQuery = function (queryText, successCallback, errorCallback) {
+neon.query.Connection.prototype.executeTextQuery = function(queryText, successCallback, errorCallback) {
     return neon.util.ajaxUtils.doPost(
         neon.serviceUrl('languageservice', 'query/' + this.host_ + '/' + this.databaseType_), {
-            data: { text: queryText },
+            data: {
+                text: queryText
+            },
             contentType: 'application/x-www-form-urlencoded; charset=UTF-8',
             responseType: 'json',
             success: successCallback,
@@ -107,7 +107,6 @@ neon.query.Connection.prototype.executeTextQuery = function (queryText, successC
     );
 };
 
-
 /**
  * Gets the metadata for each of the columns in the table
  * @method getColumnMetadata
@@ -115,7 +114,7 @@ neon.query.Connection.prototype.executeTextQuery = function (queryText, successC
  * @param {Function} successCallback
  * @return {neon.util.AjaxRequest}
  */
-neon.query.Connection.prototype.getColumnMetadata = function (tableName, successCallback) {
+neon.query.Connection.prototype.getColumnMetadata = function(tableName, successCallback) {
     return neon.util.ajaxUtils.doGet(
         neon.serviceUrl('queryservice', 'columnmetadata/' + this.database_ + '/' + tableName), {
             success: successCallback,
@@ -124,8 +123,8 @@ neon.query.Connection.prototype.getColumnMetadata = function (tableName, success
     );
 };
 
-neon.query.Connection.prototype.populateQueryDatabaseField_ = function (query) {
-    if (!query.filter.databaseName) {
+neon.query.Connection.prototype.populateQueryDatabaseField_ = function(query) {
+    if(!query.filter.databaseName) {
         query.filter.databaseName = this.database_;
     }
 };
@@ -140,31 +139,30 @@ neon.query.Connection.prototype.populateQueryDatabaseField_ = function (query) {
  * @param {Function} [errorCallback] The optional callback when an error occurs. This is a 3 parameter function that contains the xhr, a short error status and the full error message.
  * @return {neon.util.AjaxRequest} The xhr request object
  */
-neon.query.Connection.prototype.executeQueryGroup = function (queryGroup, successCallback, errorCallback) {
+neon.query.Connection.prototype.executeQueryGroup = function(queryGroup, successCallback, errorCallback) {
     this.populateQueryGroupDatabaseField_(queryGroup);
     return this.executeQueryService_(queryGroup, successCallback, errorCallback, 'querygroup');
 };
 
-neon.query.Connection.prototype.populateQueryGroupDatabaseField_ = function (queryGroup) {
+neon.query.Connection.prototype.populateQueryGroupDatabaseField_ = function(queryGroup) {
     var me = this;
-    _.each(queryGroup.queries, function (query) {
+    _.each(queryGroup.queries, function(query) {
         me.populateQueryDatabaseField_(query);
     });
 };
 
-neon.query.Connection.prototype.executeQueryService_ = function (query, successCallback, errorCallback, serviceName) {
+neon.query.Connection.prototype.executeQueryService_ = function(query, successCallback, errorCallback, serviceName) {
     var opts = [];
-    if (query.ignoreFilters_) {
+    if(query.ignoreFilters_) {
         opts.push("ignoreFilters=true");
-    }
-    else if ( query.ignoredFilterIds_ ) {
+    } else if(query.ignoredFilterIds_) {
         var filterIds = [];
         query.ignoredFilterIds_.forEach(function(id) {
             filterIds.push("ignoredFilterIds=" + id);
         });
         opts.push(filterIds.join("&"));
     }
-    if (query.selectionOnly_) {
+    if(query.selectionOnly_) {
         opts.push("selectionOnly=true");
     }
 
@@ -178,7 +176,6 @@ neon.query.Connection.prototype.executeQueryService_ = function (query, successC
     );
 };
 
-
 /**
  * Gets a list of database names
  * @method getDatabaseNames
@@ -186,7 +183,7 @@ neon.query.Connection.prototype.executeQueryService_ = function (query, successC
  * @return {neon.util.AjaxRequest} The xhr request object
  */
 
-neon.query.Connection.prototype.getDatabaseNames = function (successCallback) {
+neon.query.Connection.prototype.getDatabaseNames = function(successCallback) {
     return neon.util.ajaxUtils.doGet(
         neon.serviceUrl('queryservice', 'databasenames/' + this.host_ + '/' + this.databaseType_), {
             success: successCallback,
@@ -202,7 +199,7 @@ neon.query.Connection.prototype.getDatabaseNames = function (successCallback) {
  * @return {neon.util.AjaxRequest} The xhr request object
  */
 
-neon.query.Connection.prototype.getTableNames = function (successCallback) {
+neon.query.Connection.prototype.getTableNames = function(successCallback) {
     return neon.util.ajaxUtils.doGet(
         neon.serviceUrl('queryservice', 'tablenames/' + this.host_ + '/' + this.databaseType_ + '/' + this.database_), {
             success: successCallback,
@@ -220,7 +217,7 @@ neon.query.Connection.prototype.getTableNames = function (successCallback) {
  * function that contains the xhr, a short error status and the full error message.
  * @return {neon.util.AjaxRequest} The xhr request object
  */
-neon.query.Connection.prototype.getFieldNames = function (tableName, successCallback, errorCallback) {
+neon.query.Connection.prototype.getFieldNames = function(tableName, successCallback, errorCallback) {
     return neon.util.ajaxUtils.doGet(
         neon.serviceUrl('queryservice', 'fields/' + this.host_ + '/' + this.databaseType_ + '/' + this.database_ + '/' + tableName), {
             success: successCallback,

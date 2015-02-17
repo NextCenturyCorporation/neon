@@ -14,7 +14,6 @@
  *
  */
 
-
 /**
  * Utility methods for working with arrays
  * @class neon.util.arrayUtils

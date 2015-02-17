@@ -15,11 +15,9 @@
  */
 
 /*global module:false*/
-module.exports = function (grunt) {
-
+module.exports = function(grunt) {
     var outputFile = grunt.option('outfile-base') + '.js' || 'build/<%= pkg.name %>.js';
     var nodepOutputFile = grunt.option('outfile-base') + '-nodeps.js' || 'build/<%= pkg.name %>-nodeps.js';
-
 
     function src(file) {
         return 'src/main/javascript/' + file;
@@ -50,7 +48,6 @@ module.exports = function (grunt) {
     // order dependent files, so exclude them from the concatenation. they will be included in the correct order
     var concatExcludes = ['intro.js', 'util/loggerUtils.js', 'util/owfUtils.js', 'eventing/owf/owfEventBus.js'];
 
-
     grunt.initConfig({
         // Metadata.
         pkg: grunt.file.readJSON('package.json'),
@@ -62,7 +59,7 @@ module.exports = function (grunt) {
                     banner: '<%= banner %>',
                     stripBanners: true
                 },
-                src: [].concat([src('license-header.txt'), src('intro.js'), src('util/loggerUtils.js'), src('util/owfUtils.js'), src('eventing/owf/owfEventBus.js')]).concat(grunt.file.expand(src('**/*.js'), concatExcludes.map(function (file) {
+                src: [].concat([src('license-header.txt'), src('intro.js'), src('util/loggerUtils.js'), src('util/owfUtils.js'), src('eventing/owf/owfEventBus.js')]).concat(grunt.file.expand(src('**/*.js'), concatExcludes.map(function(file) {
                     return '!' + src(file);
                 }))),
                 dest: nodepOutputFile
@@ -78,7 +75,7 @@ module.exports = function (grunt) {
         },
         jshint: {
             options: {
-                'jshintrc': '../.jshintrc'
+                jshintrc: '../.jshintrc'
             },
             // check both the preconcat and concatenated files
             files: [].concat('<%= concat.nodeps.src %>').concat(['<%= concat.nodeps.dest %>'])
@@ -92,6 +89,17 @@ module.exports = function (grunt) {
                 src: outputFile,
                 options: createTestOptions('src/acceptanceTest/javascript/spec/**/*.spec.js')
             }
+        },
+        jscs: {
+            options: {
+                config: ".jscsrc",
+                force: true,
+                reporterOutput: 'reports/jscs.xml',
+                reporter: 'checkstyle'
+            },
+            files: {
+                src: ['Gruntfile.js', 'src/main/javascript/**/*.js']
+            }
         }
     });
 
@@ -99,8 +107,8 @@ module.exports = function (grunt) {
     grunt.loadNpmTasks('grunt-contrib-jshint');
     grunt.loadNpmTasks('grunt-contrib-jasmine');
     grunt.loadNpmTasks('grunt-contrib-watch');
+    grunt.loadNpmTasks('grunt-jscs');
 
     // hint after concatenation since the concatenated version is also hinted
-    grunt.registerTask('default', ['concat', 'jshint', 'jasmine:unit']);
-
+    grunt.registerTask('default', ['concat', 'jscs', 'jshint', 'jasmine:unit']);
 };

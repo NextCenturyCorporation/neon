@@ -14,14 +14,12 @@
  *
  */
 
-
 /**
  * Utility methods for working with widgets
  * @class neon.widget
  * @static
  */
 neon.widget = (function() {
-
     /**
      * Save the current state of a widget.
      * @method saveState
@@ -53,15 +51,15 @@ neon.widget = (function() {
     function getSavedState(id, successCallback) {
         return neon.util.ajaxUtils.doGet(
             neon.serviceUrl('widgetservice', 'restorestate/' + id), {
-                success: function (data) {
-                    if (!data) {
+                success: function(data) {
+                    if(!data) {
                         return;
                     }
-                    if (successCallback && typeof successCallback === 'function') {
+                    if(successCallback && typeof successCallback === 'function') {
                         successCallback(data);
                     }
                 },
-                error: function () {
+                error: function() {
                     //Do nothing, the state does not exist.
                 },
                 responseType: 'json'
@@ -86,7 +84,7 @@ neon.widget = (function() {
             neon.serviceUrl('widgetservice', 'instanceid', buildInstanceIdQueryString(qualifier)), {
                 // callers expect the id to return synchronously so set async to false
                 async: false,
-                success: function (id) {
+                success: function(id) {
                     instanceId = id;
                 }
             }
@@ -105,16 +103,15 @@ neon.widget = (function() {
         var fullQualifier = qualifier || '';
         // when running in OWF, it is possible to have the same widget running multiple times so append
         // the owf widget instanceid to the qualifier
-        if (neon.util.owfUtils.isRunningInOWF()) {
+        if(neon.util.owfUtils.isRunningInOWF()) {
             fullQualifier += OWF.getInstanceId();
         }
         return fullQualifier;
     }
 
-
     function buildInstanceIdQueryString(qualifier) {
         var queryString = '';
-        if (qualifier) {
+        if(qualifier) {
             queryString = 'qualifier=' + buildQualifierString(qualifier);
         }
         return queryString;
@@ -154,7 +151,7 @@ neon.widget = (function() {
                     // Turn it into the more useful object:
                     // {name: "columnName", otherName: "column2"}
                     var mappings = {};
-                    for (var i = 0; i < result.length; ++i) {
+                    for(var i = 0; i < result.length; ++i) {
                         mappings[result[i].elementId] = result[i].value;
                     }
                     successCallback(mappings);
@@ -168,6 +165,6 @@ neon.widget = (function() {
         getSavedState: getSavedState,
         getInstanceId: getInstanceId,
         getWidgetInitializationData: getWidgetInitializationData,
-        getWidgetDatasetMetadata: getWidgetDatasetMetadata,
+        getWidgetDatasetMetadata: getWidgetDatasetMetadata
     };
 })();

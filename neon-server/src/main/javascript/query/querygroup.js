@@ -20,7 +20,7 @@
  * @constructor
  * @class neon.query.QueryGroup
  */
-neon.query.QueryGroup = function () {
+neon.query.QueryGroup = function() {
     this.queries = [];
     this.ignoreFilters_ = false;
     this.selectionOnly_ = false;
@@ -32,7 +32,7 @@ neon.query.QueryGroup = function () {
  * @param {neon.query.Query} query The query to execute as part of the query group
  * @return {neon.query.QueryGroup} This object
  */
-neon.query.QueryGroup.prototype.addQuery = function (query) {
+neon.query.QueryGroup.prototype.addQuery = function(query) {
     this.queries.push(query);
     return this;
 };
@@ -42,7 +42,7 @@ neon.query.QueryGroup.prototype.addQuery = function (query) {
  * @method ignoreFilters
  * @return {neon.query.QueryGroup} This query group object
  */
-neon.query.QueryGroup.prototype.ignoreFilters = function () {
+neon.query.QueryGroup.prototype.ignoreFilters = function() {
     this.ignoreFilters_ = true;
     return this;
 };
@@ -52,7 +52,7 @@ neon.query.QueryGroup.prototype.ignoreFilters = function () {
  * @method selectionOnly
  * @return {neon.query.QueryGroup} This query group object
  */
-neon.query.QueryGroup.prototype.selectionOnly = function () {
+neon.query.QueryGroup.prototype.selectionOnly = function() {
     this.selectionOnly_ = true;
     return this;
 };

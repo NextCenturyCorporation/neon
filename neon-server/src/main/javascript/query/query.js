@@ -24,7 +24,7 @@
  * @class neon.query.Query
  * @constructor
  */
-neon.query.Query = function () {
+neon.query.Query = function() {
     this.filter = new neon.query.Filter();
     this.fields = ['*'];
     this.ignoreFilters_ = false;
@@ -76,7 +76,6 @@ neon.query.MIN = 'min';
  */
 neon.query.AVG = 'avg';
 
-
 /**
  * The sort parameter for clauses to sort ascending
  * @property ASCENDING
@@ -90,7 +89,6 @@ neon.query.ASCENDING = 1;
  * @type {int}
  */
 neon.query.DESCENDING = -1;
-
 
 /**
  * The function name to get the month part of a date field
@@ -134,7 +132,6 @@ neon.query.MINUTE = 'minute';
  */
 neon.query.SECOND = 'second';
 
-
 /**
  * The distance unit for geospatial queries in meters
  * @property METER
@@ -163,7 +160,7 @@ neon.query.MILE = 'mile';
  * {{#crossLink "neon.query.Filter/selectFrom"}}{{/crossLink}}
  * @return {neon.query.Query} This query object
  */
-neon.query.Query.prototype.selectFrom = function (args) {
+neon.query.Query.prototype.selectFrom = function(args) {
     this.filter.selectFrom.apply(this.filter, arguments);
     return this;
 };
@@ -177,7 +174,7 @@ neon.query.Query.prototype.selectFrom = function (args) {
  * @example
  *     new neon.query.Query(...).withFields("field1","field2");
  */
-neon.query.Query.prototype.withFields = function (fields) {
+neon.query.Query.prototype.withFields = function(fields) {
     if(arguments.length === 1 && $.isArray(fields)) {
         this.fields = fields;
     } else {
@@ -206,7 +203,7 @@ neon.query.Query.prototype.withFields = function (fields) {
  *     where(neon.Query.and(where('someProperty','=',5), where('someOtherProperty','<',10)))
  * @return {neon.query.Query} This query object
  */
-neon.query.Query.prototype.where = function () {
+neon.query.Query.prototype.where = function() {
     this.filter.where.apply(this.filter, arguments);
     return this;
 };
@@ -222,7 +219,7 @@ neon.query.Query.prototype.where = function () {
  *    var averageAmount = new neon.query.GroupByFunctionClause(neon.query.AVG, 'amount', 'avg_amount');
  *    new neon.query.Query(...).groupBy('field1',averageAmount);
  */
-neon.query.Query.prototype.groupBy = function (fields) {
+neon.query.Query.prototype.groupBy = function(fields) {
     // even though internally each groupBy clause is a separate object (since single field and functions
     // are processed differently), the user will think about a single groupBy operation which may include
     // multiple fields, so this method does not append to the existing groupBy fields, but replaces them
@@ -236,7 +233,7 @@ neon.query.Query.prototype.groupBy = function (fields) {
         list = neon.util.arrayUtils.argumentsToArray(arguments);
     }
 
-    list.forEach(function (field) {
+    list.forEach(function(field) {
         // if the user provided a string, convert that to the groupBy representation of a single field, otherwise,
         // they provided a groupBy function so just use that
         var clause = ((typeof field === 'string') ? new neon.query.GroupBySingleFieldClause(field) : field);
@@ -256,7 +253,7 @@ neon.query.Query.prototype.groupBy = function (fields) {
  * @method aggregate
  * @return {neon.query.Query} This query object
  */
-neon.query.Query.prototype.aggregate = function (aggregationOperation, aggregationField, name) {
+neon.query.Query.prototype.aggregate = function(aggregationOperation, aggregationField, name) {
     var newFieldName = name != null ? name : (aggregationOperation + '(' + aggregationField + ')');
     this.aggregates.push(new neon.query.FieldFunction(aggregationOperation, aggregationField, newFieldName));
     return this;
@@ -267,7 +264,7 @@ neon.query.Query.prototype.aggregate = function (aggregationOperation, aggregati
  * @method distinct
  * @return {neon.query.Query} This query object
  */
-neon.query.Query.prototype.distinct = function () {
+neon.query.Query.prototype.distinct = function() {
     this.isDistinct = true;
     return this;
 };
@@ -278,7 +275,7 @@ neon.query.Query.prototype.distinct = function () {
  * @param {int} limit The maximum number of results to return from the query
  * @return {neon.query.Query} This query object
  */
-neon.query.Query.prototype.limit = function (limit) {
+neon.query.Query.prototype.limit = function(limit) {
     this.limitClause = new neon.query.LimitClause(limit);
     return this;
 };
@@ -289,7 +286,7 @@ neon.query.Query.prototype.limit = function (limit) {
  * @param {int} offset The number of rows to skip in the results
  * @return {neon.query.Query} This query object
  */
-neon.query.Query.prototype.offset = function (offset) {
+neon.query.Query.prototype.offset = function(offset) {
     this.offsetClause = new neon.query.OffsetClause(offset);
     return this;
 };
@@ -306,7 +303,7 @@ neon.query.Query.prototype.offset = function (offset) {
  * @example
  *     new neon.query.Query(...).sortBy('field1',neon.query.ASC,'field2',neon.query.DESC);
  */
-neon.query.Query.prototype.sortBy = function (fields) {
+neon.query.Query.prototype.sortBy = function(fields) {
     // even though internally each sortBy clause is a separate object, the user will think about a single sortBy
     // operation which may include multiple fields, so this method does not append to the existing
     // sortBy fields, but replaces them
@@ -319,7 +316,7 @@ neon.query.Query.prototype.sortBy = function (fields) {
         list = neon.util.arrayUtils.argumentsToArray(arguments);
     }
 
-    for (var i = 1; i < list.length; i += 2) {
+    for(var i = 1; i < list.length; i += 2) {
         var field = list[i - 1];
         var order = list[i];
         this.sortClauses.push(new neon.query.SortClause(field, order));
@@ -333,7 +330,7 @@ neon.query.Query.prototype.sortBy = function (fields) {
  * @param {neon.query.Transform} transformObj a transform to be applied to the data
  * @return {neon.query.Query} This query object
  */
-neon.query.Query.prototype.transform = function (transformObj) {
+neon.query.Query.prototype.transform = function(transformObj) {
     var transforms;
     if(arguments.length === 1 && $.isArray(transformObj)) {
         transforms = transformObj;
@@ -352,7 +349,7 @@ neon.query.Query.prototype.transform = function (transformObj) {
  * filter ids to ignore. If specified, only these filters will be ignored. Otherwise, all will be ignored.
  * @return {neon.query.Query} This query object
  */
-neon.query.Query.prototype.ignoreFilters = function (filterIds) {
+neon.query.Query.prototype.ignoreFilters = function(filterIds) {
     var filters;
     if(arguments.length === 1 && $.isArray(filterIds)) {
         filters = filterIds;
@@ -361,7 +358,7 @@ neon.query.Query.prototype.ignoreFilters = function (filterIds) {
     }
 
     if(filters.length > 0) {
-        this.ignoredFilterIds_= filters;
+        this.ignoredFilterIds_ = filters;
     } else {
         this.ignoreFilters_ = true;
     }
@@ -373,7 +370,7 @@ neon.query.Query.prototype.ignoreFilters = function (filterIds) {
  * @method selectionOnly
  * @return {neon.query.Query} This query object
  */
-neon.query.Query.prototype.selectionOnly = function () {
+neon.query.Query.prototype.selectionOnly = function() {
     this.selectionOnly_ = true;
     return this;
 };
@@ -389,7 +386,7 @@ neon.query.Query.prototype.selectionOnly = function () {
  * @param {String} distanceUnit The unit of measure for the distance. See the constants in this class.
  * @return {neon.query.Query} This query object
  */
-neon.query.Query.prototype.withinDistance = function (locationField, center, distance, distanceUnit) {
+neon.query.Query.prototype.withinDistance = function(locationField, center, distance, distanceUnit) {
     this.filter.withinDistance(locationField, center, distance, distanceUnit);
     return this;
 };
@@ -404,7 +401,7 @@ neon.query.Query.prototype.withinDistance = function (locationField, center, dis
  *     where('x','=',10)
  * @return {Object}
  */
-neon.query.where = function (fieldName, op, value) {
+neon.query.where = function(fieldName, op, value) {
     return new neon.query.WhereClause(fieldName, op, value);
 };
 
@@ -416,7 +413,7 @@ neon.query.where = function (fieldName, op, value) {
  *     and(where('x','=',10),where('y','=',1))
  * @return {Object}
  */
-neon.query.and = function (clauses) {
+neon.query.and = function(clauses) {
     if(arguments.length === 1 && $.isArray(clauses)) {
         return new neon.query.BooleanClause('and', clauses);
     } else {
@@ -432,7 +429,7 @@ neon.query.and = function (clauses) {
  *     or(where('x','=',10),where('y','=',1))
  * @return {Object}
  */
-neon.query.or = function (clauses) {
+neon.query.or = function(clauses) {
     if(arguments.length === 1 && $.isArray(clauses)) {
         return new neon.query.BooleanClause('or', clauses);
     } else {
@@ -450,16 +447,16 @@ neon.query.or = function (clauses) {
  * @param {String} distanceUnit The unit of measure for the distance. See the constants in this class.
  * @return {neon.query.WithinDistanceClause}
  */
-neon.query.withinDistance = function (locationField, center, distance, distanceUnit) {
+neon.query.withinDistance = function(locationField, center, distance, distanceUnit) {
     return new neon.query.WithinDistanceClause(locationField, center, distance, distanceUnit);
 };
 
-neon.query.Query.prototype.geoIntersection = function (locationField, points, geometryType) {
+neon.query.Query.prototype.geoIntersection = function(locationField, points, geometryType) {
     this.filter.geoIntersection(locationField, points, geometryType);
     return this;
 };
 
-neon.query.Query.prototype.geoWithin = function (locationField, points) {
+neon.query.Query.prototype.geoWithin = function(locationField, points) {
     this.filter.geoWithin(locationField, points);
     return this;
 };
@@ -475,7 +472,7 @@ neon.query.Query.prototype.geoWithin = function (locationField, points) {
  * @constructor
  * @private
  */
-neon.query.FieldFunction = function (operation, field, name) {
+neon.query.FieldFunction = function(operation, field, name) {
     this.operation = operation;
     this.field = field;
     this.name = name;
@@ -490,48 +487,45 @@ neon.query.FieldFunction = function (operation, field, name) {
  * @class neon.query.GroupByFunctionClause
  * @constructor
  */
-neon.query.GroupByFunctionClause = function (operation, field, name) {
+neon.query.GroupByFunctionClause = function(operation, field, name) {
     this.type = 'function';
     neon.query.FieldFunction.call(this, operation, field, name);
 };
 // TODO: NEON-73 (Javascript inheritance library)
 neon.query.GroupByFunctionClause.prototype = new neon.query.FieldFunction();
 
-
 // These are not meant to be instantiated directly but rather by helper methods
-neon.query.GroupBySingleFieldClause = function (field) {
+neon.query.GroupBySingleFieldClause = function(field) {
     this.type = 'single';
     this.field = field;
 };
 
-neon.query.BooleanClause = function (type, whereClauses) {
+neon.query.BooleanClause = function(type, whereClauses) {
     this.type = type;
     this.whereClauses = whereClauses;
 };
 
-neon.query.WhereClause = function (lhs, operator, rhs) {
+neon.query.WhereClause = function(lhs, operator, rhs) {
     this.type = 'where';
     this.lhs = lhs;
     this.operator = operator;
     this.rhs = rhs;
-
 };
 
-neon.query.SortClause = function (fieldName, sortOrder) {
+neon.query.SortClause = function(fieldName, sortOrder) {
     this.fieldName = fieldName;
     this.sortOrder = sortOrder;
 };
 
-neon.query.LimitClause = function (limit) {
+neon.query.LimitClause = function(limit) {
     this.limit = limit;
 };
 
-neon.query.OffsetClause = function (offset) {
+neon.query.OffsetClause = function(offset) {
     this.offset = offset;
 };
 
-
-neon.query.WithinDistanceClause = function (locationField, center, distance, distanceUnit) {
+neon.query.WithinDistanceClause = function(locationField, center, distance, distanceUnit) {
     this.type = 'withinDistance';
     this.locationField = locationField;
     this.center = center;

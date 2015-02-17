@@ -19,21 +19,17 @@
  * @class neon.util.owfUtils
  * @static
  */
-neon.util.owfUtils = (function () {
-
-
+neon.util.owfUtils = (function() {
     /**
      * Indicates if neon is running within an OWF environment
      * @return {boolean} true if running in OWF, false if not
      * @method isRunningInOWF
      */
     function isRunningInOWF() {
-        return typeof (OWF) !== "undefined" && OWF.Util.isRunningInOWF();
+        return typeof(OWF) !== "undefined" && OWF.Util.isRunningInOWF();
     }
 
     return {
         isRunningInOWF: isRunningInOWF
     };
-
-
 })();

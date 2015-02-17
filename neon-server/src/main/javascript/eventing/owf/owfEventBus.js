@@ -19,7 +19,7 @@
  * @class neon.eventing.owf.OWFEventBus
  * @constructor
  */
-neon.eventing.owf.OWFEventBus = function () {
+neon.eventing.owf.OWFEventBus = function() {
     this.subscriptions = {};
 };
 
@@ -33,7 +33,7 @@ neon.eventing.owf.OWFEventBus = function () {
  * @param {Object} message The message to publish to the channel
  * @method publish
  */
-neon.eventing.owf.OWFEventBus.prototype.publish = function (channel, message) {
+neon.eventing.owf.OWFEventBus.prototype.publish = function(channel, message) {
     OWF.Eventing.publish(channel, message);
 };
 
@@ -46,7 +46,7 @@ neon.eventing.owf.OWFEventBus.prototype.publish = function (channel, message) {
  * @method subscribe
  * @return {Object} The subscription to the channel. Pass this to the unsubscribe method to remove this
  */
-neon.eventing.owf.OWFEventBus.prototype.subscribe = function (channel, callback) {
+neon.eventing.owf.OWFEventBus.prototype.subscribe = function(channel, callback) {
     var subscriptionHandler;
 
     if(this.subscriptions[channel]) {
@@ -60,7 +60,7 @@ neon.eventing.owf.OWFEventBus.prototype.subscribe = function (channel, callback)
     }
     this.subscriptions[channel] = subscriptionHandler;
 
-    OWF.Eventing.subscribe(channel, function (sender, message) {
+    OWF.Eventing.subscribe(channel, function(sender, message) {
         if(sender !== OWF.getInstanceId()) {
             subscriptionHandler(message);
         }
@@ -68,14 +68,13 @@ neon.eventing.owf.OWFEventBus.prototype.subscribe = function (channel, callback)
     return channel;
 };
 
-
 /**
  * Unsubscribes from the specified channel.
  * Note OWF cannot remove a single channel subscription, so this will unsubscribe from all channels.
  * @param {Object} subscription The subscription to remove.
  * @method unsubscribe
  */
-neon.eventing.owf.OWFEventBus.prototype.unsubscribe = function (channel) {
+neon.eventing.owf.OWFEventBus.prototype.unsubscribe = function(channel) {
     delete this.subscriptions[channel];
     OWF.Eventing.unsubscribe(channel);
 };

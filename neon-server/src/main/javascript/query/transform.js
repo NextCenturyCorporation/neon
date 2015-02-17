@@ -20,7 +20,7 @@
  * @class neon.query.Transform
  * @constructor
  */
-neon.query.Transform = function (name) {
+neon.query.Transform = function(name) {
     this.transformName = name;
 };
 
@@ -30,7 +30,7 @@ neon.query.Transform = function (name) {
  * @return {neon.query.Transform} This transform object
  * @method params
  */
-neon.query.Transform.prototype.params = function(params){
+neon.query.Transform.prototype.params = function(params) {
     this.params = params;
     return this;
- };
+};
