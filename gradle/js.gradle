@@ -24,9 +24,10 @@ project.ext {
     jsDocDir = "${project.docsDir}/jsdocs"
     jsSrcDir = 'src/main/javascript'
     jsLibDir = 'src/main/js-lib'
-    combinedJsFileName = "${project.name}"
     jsOutputFolder = "${buildDir}/js"
-    jsOutputFile = "${jsOutputFolder}/${combinedJsFileName}"
+    jsOutputFileBase = "${jsOutputFolder}/${project.name}"
+    combinedJsFileName = "${jsOutputFileBase}.js"
+    combinedNoDepsJsFileName = "${jsOutputFileBase}-nodeps.js"
 
     // where javascript/css dependencies from other projects are copied
     dependenciesDir = "${buildDir}/dependencies"
@@ -46,19 +47,19 @@ project.ext {
 
 task gruntjs(type: GruntTask) {
     description = 'the default grunt task in Gruntfile.js'
-    gruntArgs "--outfile=${jsOutputFile}"
+    gruntArgs "--outfile-base=${jsOutputFileBase}"
 }
 
 task concatjs(type: GruntTask) {
     description = 'runs the grunt javascript concatenation task'
-    gruntArgs "concat", "--outfile=${jsOutputFile}"
+    gruntArgs "concat", "--outfile-base=${jsOutputFileBase}"
 
 }
 
 task watch(type: com.ncc.common.GruntTask) {
     description = "Wrapper around grunt's watch task to rebuild javascript files if any change"
     background = true
-    gruntArgs "watch", "--outfile=${jsOutputFile}"
+    gruntArgs "watch", "--outfile-base=${jsOutputFileBase}"
 }
 
 // ensure that javascript tasks are properly configured to run when
@@ -67,7 +68,10 @@ task watch(type: com.ncc.common.GruntTask) {
 ['concatjs', 'gruntjs'].each { name ->
     project.getTasksByName(name, false).each { task ->
         task.inputs.files { jsFiles }
-        task.outputs.file { jsOutputFile }
+        task.outputs.files { 
+            file(combinedJsFileName)
+            file(combinedNoDepsJsFileName) 
+        }
     }
 }
 

@@ -81,7 +81,7 @@ neon.eventing.Messenger.prototype.subscribe = function (channel, callback) {
  * @method unsubscribe
  */
 neon.eventing.Messenger.prototype.unsubscribe = function (channel) {
-    neon.eventing.eventBus_.unsubscribe(channel);
+    neon.eventing.eventBus_.unsubscribe(channel, this.id_);
 };
 
 /**
@@ -105,6 +105,18 @@ neon.eventing.Messenger.prototype.events = function (callbacks) {
                 }
             }
         );
+    });
+};
+
+/**
+ * Unsubscribe from all events:  selection changes, filters changes, active dataset changed.
+ * @method removeEvents
+ */
+neon.eventing.Messenger.prototype.removeEvents = function () {
+    var me = this;
+    var globalChannelConfigs = this.createGlobalChannelSubscriptions_({});
+    _.each(globalChannelConfigs, function (channelConfig) {
+        me.unsubscribe(channelConfig.channel);
     });
 };
 

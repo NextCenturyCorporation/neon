@@ -77,6 +77,87 @@ describe('messenger', function () {
         expect(callback3).toHaveBeenCalledWith(message);
     });
 
+    it('unsubscribes messages from a channel using neon event bus', function () {
+        var channel = 'aChannel';
+        var message1 = 'message1';
+        var message2 = 'message2';
+
+        var messenger1 = new neon.eventing.Messenger();
+        var messenger2 = new neon.eventing.Messenger();
+        var messenger3 = new neon.eventing.Messenger();
+
+        var callback1 = jasmine.createSpy('callback1');
+        var callback2 = jasmine.createSpy('callback2');
+        var callback3 = jasmine.createSpy('callback3');
+
+        messenger1.subscribe(channel, callback1);
+        messenger1.subscribe(channel, callback2);
+        messenger2.subscribe(channel, callback3);
+
+        messenger3.publish(channel, message1);
+
+        expect(callback1).toHaveBeenCalledWith(message1);
+        expect(callback2).toHaveBeenCalledWith(message1);
+        expect(callback3).toHaveBeenCalledWith(message1);
+
+        messenger1.unsubscribe(channel);
+        messenger3.publish(channel, message2);
+
+        expect(callback1).not.toHaveBeenCalledWith(message2);
+        expect(callback2).not.toHaveBeenCalledWith(message2);
+        expect(callback3).toHaveBeenCalledWith(message2);
+    });
+
+    it('subscribes to each Neon event type on events()', function () {
+        var channel = 'aChannel';
+        var message = 'message';
+
+        var messenger1 = new neon.eventing.Messenger();
+        var messenger2 = new neon.eventing.Messenger();
+        var callback1 = jasmine.createSpy('callback1');
+        var callback2 = jasmine.createSpy('callback2');
+        var callback3 = jasmine.createSpy('callback3');
+
+        messenger1.events({
+            "activeDatasetChanged": callback1,
+            "filtersChanged": callback2,
+            "selectionChanged": callback3
+        });
+        messenger2.publish(neon.eventing.channels.ACTIVE_DATASET_CHANGED, {id: "activeDatasetChanged"});
+        messenger2.publish(neon.eventing.channels.FILTERS_CHANGED, {id: "filtersChanged"});
+        messenger2.publish(neon.eventing.channels.SELECTION_CHANGED, {id: "selectionChanged"});
+
+        expect(callback1.callCount).toEqual(1);
+        expect(callback2.callCount).toEqual(1);
+        expect(callback3.callCount).toEqual(1);
+    });
+
+    it('unsubscribes from all Neon event type on removeEvents()', function () {
+        var channel = 'aChannel';
+        var message = 'message';
+
+        var messenger1 = new neon.eventing.Messenger();
+        var messenger2 = new neon.eventing.Messenger();
+        var callback1 = jasmine.createSpy('callback1');
+        var callback2 = jasmine.createSpy('callback2');
+        var callback3 = jasmine.createSpy('callback3');
+
+        messenger1.events({
+            "activeDatasetChanged": callback1,
+            "filtersChanged": callback2,
+            "selectionChanged": callback3
+        });
+        messenger1.removeEvents();
+
+        messenger2.publish(neon.eventing.channels.ACTIVE_DATASET_CHANGED, {id: "activeDatasetChanged"});
+        messenger2.publish(neon.eventing.channels.FILTERS_CHANGED, {id: "filtersChanged"});
+        messenger2.publish(neon.eventing.channels.SELECTION_CHANGED, {id: "selectionChanged"});
+
+        expect(callback1.callCount).toEqual(0);
+        expect(callback2.callCount).toEqual(0);
+        expect(callback3.callCount).toEqual(0);
+    });
+
     it('should be notified when a message is published to the selection changed channel', function () {
         testGlobalNeonEventReceived(neon.eventing.channels.SELECTION_CHANGED, 'selectionChanged', {id: "selectionChanged"});
     });
