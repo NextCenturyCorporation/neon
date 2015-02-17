@@ -110,6 +110,39 @@ metadata {
                 }
             }
         }
+        qcr {
+            twitter36 {
+                angular_example {
+                    date {
+                        value = "created_at"
+                    }
+                    latitude {
+                        value = "latitude"
+                    }
+                    longitude {
+                        value = "longitude"
+                    }
+                    line_category {
+                        value = "lang"
+                    }
+                    bar_x_axis {
+                        value = "lang"
+                    }
+                    y_axis {
+                        value = "_id"
+                    }
+                    color_by {
+                        value = "lang"
+                    }
+                    size_by {
+                        value = "lang"
+                    }
+                    sort_by {
+                        value = "created_at"
+                    }
+                }
+            }
+        }
         test {
             earthquakes {
                 angular_example {
