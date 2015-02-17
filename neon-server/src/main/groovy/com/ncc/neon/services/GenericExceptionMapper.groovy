@@ -29,7 +29,7 @@ class GenericExceptionMapper implements ExceptionMapper<Exception> {
      
     @Override
     public Response toResponse(Exception exception) {
-    	// Log any unhandled server exceptions and return an internal server error for them.
+        // Log any unhandled server exceptions and return an internal server error for them.
         LOGGER.error(exception.getMessage(), exception)
         return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(exception.getMessage()).type("text/plain").build()
     }

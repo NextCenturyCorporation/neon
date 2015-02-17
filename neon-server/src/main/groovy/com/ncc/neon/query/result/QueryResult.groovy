@@ -21,5 +21,5 @@ package com.ncc.neon.query.result
  * The result of executing a query
  */
 public interface QueryResult {
-	def getData()
+    def getData()
 }

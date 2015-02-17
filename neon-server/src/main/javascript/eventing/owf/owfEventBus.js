@@ -20,7 +20,7 @@
  * @constructor
  */
 neon.eventing.owf.OWFEventBus = function () {
-	this.subscriptions = {};
+    this.subscriptions = {};
 };
 
 // The OWF publish/subscribe methods are "static", but we still encapsulate them in an instance
@@ -34,7 +34,7 @@ neon.eventing.owf.OWFEventBus = function () {
  * @method publish
  */
 neon.eventing.owf.OWFEventBus.prototype.publish = function (channel, message) {
-	OWF.Eventing.publish(channel, message);
+    OWF.Eventing.publish(channel, message);
 };
 
 /**
@@ -47,25 +47,25 @@ neon.eventing.owf.OWFEventBus.prototype.publish = function (channel, message) {
  * @return {Object} The subscription to the channel. Pass this to the unsubscribe method to remove this
  */
 neon.eventing.owf.OWFEventBus.prototype.subscribe = function (channel, callback) {
-	var subscriptionHandler;
+    var subscriptionHandler;
 
-	if(this.subscriptions[channel]) {
-		var existing = this.subscriptions[channel];
-		subscriptionHandler = function(message) {
-			existing(message);
-			callback(message);
-		};
-	} else {
-		subscriptionHandler = callback;
-	}
-	this.subscriptions[channel] = subscriptionHandler;
+    if(this.subscriptions[channel]) {
+        var existing = this.subscriptions[channel];
+        subscriptionHandler = function(message) {
+            existing(message);
+            callback(message);
+        };
+    } else {
+        subscriptionHandler = callback;
+    }
+    this.subscriptions[channel] = subscriptionHandler;
 
-	OWF.Eventing.subscribe(channel, function (sender, message) {
-		if(sender !== OWF.getInstanceId()) {
-			subscriptionHandler(message);
-		}
-	});
-	return channel;
+    OWF.Eventing.subscribe(channel, function (sender, message) {
+        if(sender !== OWF.getInstanceId()) {
+            subscriptionHandler(message);
+        }
+    });
+    return channel;
 };
 
 
@@ -76,6 +76,6 @@ neon.eventing.owf.OWFEventBus.prototype.subscribe = function (channel, callback)
  * @method unsubscribe
  */
 neon.eventing.owf.OWFEventBus.prototype.unsubscribe = function (channel) {
-	delete this.subscriptions[channel];
-	OWF.Eventing.unsubscribe(channel);
+    delete this.subscriptions[channel];
+    OWF.Eventing.unsubscribe(channel);
 };
