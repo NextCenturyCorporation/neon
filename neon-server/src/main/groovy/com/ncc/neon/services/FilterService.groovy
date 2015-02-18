@@ -21,8 +21,10 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
 
 import javax.ws.rs.Consumes
+import javax.ws.rs.GET
 import javax.ws.rs.POST
 import javax.ws.rs.Path
+import javax.ws.rs.PathParam
 import javax.ws.rs.Produces
 import javax.ws.rs.core.MediaType
 
@@ -96,5 +98,32 @@ class FilterService {
         filterState.clearAllFilters()
         // use an empty dataset since the clear can span multiple datasets
         return new FilterEvent(type: "CLEAR", dataSet: EMPTY_DATASET)
+    }
+
+    /**
+     * Get all filters for a given table.
+     * @param tableName
+     * @return
+     */
+    @GET
+    @Path("filters/{databaseName}/{tableName}")
+    @Produces(MediaType.APPLICATION_JSON)
+    List getFilters(@PathParam("databaseName") String databaseName, @PathParam("tableName") String tableName) {
+        if(databaseName == "*" && tableName == "*") {
+            //return all filters
+            def filters = filterState.getAllFilters()
+            println(filters)
+            return filters
+        } else if(databaseName == "*") {
+            //return the filters for */table
+        } else if(tableName == "*") {
+            //return the filters for db/*
+        } else {
+            //return the filters for db/table
+            DataSet dataset = new DataSet(databaseName: databaseName, tableName: tableName)
+            def filters = filterState.getFiltersForDataset(dataset)
+            println(filters)
+            return filters
+        }
     }
 }

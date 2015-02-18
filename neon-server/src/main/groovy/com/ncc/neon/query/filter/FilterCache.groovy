@@ -95,4 +95,15 @@ class FilterCache implements Serializable {
         }
     }
 
+    List<Filter> getAllFilters() {
+        return cache.findResults {k, v ->
+            return v.filter
+        }
+    }
+
+    List<FilterKey> getAllFilterKeys() {
+        return cache.findResults {k, v ->
+            return v
+        }
+    }
 }
