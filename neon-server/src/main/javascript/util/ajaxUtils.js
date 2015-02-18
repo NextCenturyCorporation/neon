@@ -14,20 +14,19 @@
  *
  */
 
-
 /**
  * Utility methods for working with ajax calls
  * @class neon.util.ajaxUtils
  * @static
  */
 
-neon.util.ajaxUtils = (function () {
+neon.util.ajaxUtils = (function() {
     var overlayId = 'neon-overlay';
     var logger = neon.util.loggerUtils.getGlobalLogger();
     var errorLogger = neon.util.loggerUtils.getLogger('neon.util.ajaxUtils.error');
 
     neon.util.loggerUtils.useBrowserConsoleAppender(errorLogger);
-    $(function () {
+    $(function() {
         //document ready is used here so that this call is not overwritten by other jquery includes
         useDefaultStartStopCallbacks();
     });
@@ -64,8 +63,8 @@ neon.util.ajaxUtils = (function () {
         params.global = opts.global;
         params.async = opts.async;
         // set a default error behavior is none is specified
-        if (!params.error) {
-            params.error = function (xhr, status, error) {
+        if(!params.error) {
+            params.error = function(xhr, status, error) {
                 errorLogger.error('Error accessing ' + url, status, error);
             };
         }
@@ -100,7 +99,11 @@ neon.util.ajaxUtils = (function () {
      */
     function doPostJSON(object, url, opts) {
         var data = JSON.stringify(object);
-        var fullOpts = _.extend({}, opts, {data: data, contentType: 'application/json', responseType: 'json'});
+        var fullOpts = _.extend({}, opts, {
+            data: data,
+            contentType: 'application/json',
+            responseType: 'json'
+        });
         return doPost(url, fullOpts);
     }
 
@@ -164,7 +167,6 @@ neon.util.ajaxUtils = (function () {
         setStartStopCallbacks: setStartStopCallbacks,
         useDefaultStartStopCallbacks: useDefaultStartStopCallbacks
     };
-
 })();
 
 /**
@@ -173,8 +175,7 @@ neon.util.ajaxUtils = (function () {
  * @param {Object} xhr The jquery xhr being wrapped
  * @constructor
  */
-neon.util.AjaxRequest = function (xhr) {
-
+neon.util.AjaxRequest = function(xhr) {
     // this really just wraps a jquery xhr
     this.xhr = xhr;
 };
@@ -183,6 +184,6 @@ neon.util.AjaxRequest = function (xhr) {
  * Cancels the request if it is in progress
  * @method cancel
  */
-neon.util.AjaxRequest.prototype.cancel = function () {
+neon.util.AjaxRequest.prototype.cancel = function() {
     this.xhr.abort();
 };

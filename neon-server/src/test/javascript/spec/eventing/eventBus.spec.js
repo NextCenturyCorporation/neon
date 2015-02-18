@@ -41,12 +41,30 @@ describe('messaging using the standard neon event bus', function () {
         var subscriber2 = eventBus.subscribe(channel, callback2, 'messengerId1');
 
         eventBus.publish(channel, 'aMessage', 'messengerId2');
-        eventBus.unsubscribe(subscriber2);
+        eventBus.unsubscribe(subscriber2, 'messengerId1');
         eventBus.publish(channel, 'bMessage', 'messengerId2');
-        eventBus.unsubscribe(subscriber1);
+        eventBus.unsubscribe(subscriber1, 'messengerId1');
         eventBus.publish(channel, 'cMessage', 'messengerId2');
 
         expect(callback1.callCount).toEqual(2);
+        expect(callback2.callCount).toEqual(1);
+    });
+
+    it('can unsubscribe all individual subscribers from a channel', function() {
+        var eventBus = new neon.eventing.EventBus();
+        var channel = 'aChannel';
+        var callback1 = jasmine.createSpy();
+        var callback2 = jasmine.createSpy();
+
+        var subscriber1 = eventBus.subscribe(channel, callback1, 'messengerId1');
+        var subscriber2 = eventBus.subscribe(channel, callback2, 'messengerId1');
+
+        eventBus.publish(channel, 'aMessage', 'messengerId2');
+        eventBus.unsubscribe(channel, 'messengerId1');
+        eventBus.publish(channel, 'bMessage', 'messengerId2');
+        eventBus.publish(channel, 'cMessage', 'messengerId2');
+
+        expect(callback1.callCount).toEqual(1);
         expect(callback2.callCount).toEqual(1);
     });
 

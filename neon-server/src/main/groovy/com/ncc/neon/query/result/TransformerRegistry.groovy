@@ -23,17 +23,17 @@ package com.ncc.neon.query.result
  */
 
 class TransformerRegistry {
-	private final Map<String, Transformer> registry = [:]
+    private final Map<String, Transformer> registry = [:]
 
-	void register(Transformer transformer){
-		registry.put(transformer.name, transformer)
-	}
+    void register(Transformer transformer){
+        registry.put(transformer.name, transformer)
+    }
 
-	Transformer getTransformer(String transformName){
-		return registry.get(transformName)
-	}
+    Transformer getTransformer(String transformName){
+        return registry.get(transformName)
+    }
 
-	Transformer removeTransformer(String transformName) {
-		return registry.remove(transformName)
-	}
+    Transformer removeTransformer(String transformName) {
+        return registry.remove(transformName)
+    }
 }

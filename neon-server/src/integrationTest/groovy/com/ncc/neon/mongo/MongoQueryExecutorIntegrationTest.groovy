@@ -51,164 +51,164 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner
 @ContextConfiguration(classes = IntegrationTestContext)
 class MongoQueryExecutorIntegrationTest extends AbstractQueryExecutorIntegrationTest {
 
-	private static final String HOST_STRING = System.getProperty("mongo.host")
+    private static final String HOST_STRING = System.getProperty("mongo.host")
 
-	private MongoQueryExecutor mongoQueryExecutor
+    private MongoQueryExecutor mongoQueryExecutor
 
-	@SuppressWarnings('JUnitPublicNonTestMethod')
-	@Autowired
-	public void setMongoQueryExecutor(MongoQueryExecutor mongoQueryExectuor) {
-		this.mongoQueryExecutor = mongoQueryExectuor
-	}
+    @SuppressWarnings('JUnitPublicNonTestMethod')
+    @Autowired
+    public void setMongoQueryExecutor(MongoQueryExecutor mongoQueryExectuor) {
+        this.mongoQueryExecutor = mongoQueryExectuor
+    }
 
-	@Before
-	void before() {
+    @Before
+    void before() {
         // Establish the connection, or skip the tests if no host was specified
         Assume.assumeTrue(HOST_STRING != null && HOST_STRING != "")
-		this.mongoQueryExecutor.connectionManager.currentRequest = new ConnectionInfo(host: HOST_STRING, dataSource: DataSources.mongo)
-	}
+        this.mongoQueryExecutor.connectionManager.currentRequest = new ConnectionInfo(host: HOST_STRING, dataSource: DataSources.mongo)
+    }
 
 
-	@Override
-	protected MongoQueryExecutor getQueryExecutor(){
-		mongoQueryExecutor
-	}
+    @Override
+    protected MongoQueryExecutor getQueryExecutor(){
+        mongoQueryExecutor
+    }
 
-	@Override
-	protected def convertRowValueToBasicJavaType(def val) {
-		if (val instanceof ObjectId) {
-			return val.toString()
-		}
-		return super.convertRowValueToBasicJavaType(val)
-	}
+    @Override
+    protected def convertRowValueToBasicJavaType(def val) {
+        if (val instanceof ObjectId) {
+            return val.toString()
+        }
+        return super.convertRowValueToBasicJavaType(val)
+    }
 
-	@Override
-	protected def jsonObjectToMap(jsonObject) {
-		def map = [:]
-		jsonObject.keys().each { key ->
-			def value = jsonObject.get(key)
-			if (key =~ AbstractQueryExecutorIntegrationTest.DATE_FIELD_REGEX) {
-				map[key] = DateUtils.parseDate(value)
-			} else if (value instanceof JSONArray) {
-				map[key] = jsonArrayToList(value)
-			} else if (value instanceof JSONObject) {
-				map[key] = jsonObjectToMap(value)
-			} else if (value instanceof String && ObjectId.isValid(value)){
-				map[key] = new ObjectId(value)
-			} else {
-				map[key] = value
-			}
-		}
-		return map
-	}
+    @Override
+    protected def jsonObjectToMap(jsonObject) {
+        def map = [:]
+        jsonObject.keys().each { key ->
+            def value = jsonObject.get(key)
+            if (key =~ AbstractQueryExecutorIntegrationTest.DATE_FIELD_REGEX) {
+                map[key] = DateUtils.parseDate(value)
+            } else if (value instanceof JSONArray) {
+                map[key] = jsonArrayToList(value)
+            } else if (value instanceof JSONObject) {
+                map[key] = jsonObjectToMap(value)
+            } else if (value instanceof String && ObjectId.isValid(value)){
+                map[key] = new ObjectId(value)
+            } else {
+                map[key] = value
+            }
+        }
+        return map
+    }
 
-	@Test
-	void "query near location"() {
-		def withinDistance = new WithinDistanceClause(
-			locationField: "location",
-			center: new LatLon(latDegrees: 11.95d, lonDegrees: 19.5d),
-			distance: 35d,
-			distanceUnit: DistanceUnit.MILE
-		)
-		def expected = rows(2, 0)
-		def query = new Query(filter: new Filter(databaseName: DATABASE_NAME, tableName: TABLE_NAME, whereClause: withinDistance))
-		def result = queryExecutor.execute(query, QueryOptions.DEFAULT_OPTIONS)
-		assertOrderedQueryResult(expected, result)
-	}
+    @Test
+    void "query near location"() {
+        def withinDistance = new WithinDistanceClause(
+            locationField: "location",
+            center: new LatLon(latDegrees: 11.95d, lonDegrees: 19.5d),
+            distance: 35d,
+            distanceUnit: DistanceUnit.MILE
+        )
+        def expected = rows(2, 0)
+        def query = new Query(filter: new Filter(databaseName: DATABASE_NAME, tableName: TABLE_NAME, whereClause: withinDistance))
+        def result = queryExecutor.execute(query, QueryOptions.DEFAULT_OPTIONS)
+        assertOrderedQueryResult(expected, result)
+    }
 
-	@Test
-	void "query near location and filter on attributes"() {
-		def withinDistance = new WithinDistanceClause(
-			locationField: "location",
-			center: new LatLon(latDegrees: 11.95d, lonDegrees: 19.5d),
-			distance: 35d,
-			distanceUnit: DistanceUnit.MILE
-		)
-		def expected = rows(2)
-		def dcStateClause = new SingularWhereClause(lhs: 'state', operator: '=', rhs: 'DC')
-		def whereClause = new AndWhereClause(whereClauses: [withinDistance, dcStateClause])
-		def query = new Query(filter: new Filter(databaseName: DATABASE_NAME, tableName: TABLE_NAME, whereClause: whereClause))
+    @Test
+    void "query near location and filter on attributes"() {
+        def withinDistance = new WithinDistanceClause(
+            locationField: "location",
+            center: new LatLon(latDegrees: 11.95d, lonDegrees: 19.5d),
+            distance: 35d,
+            distanceUnit: DistanceUnit.MILE
+        )
+        def expected = rows(2)
+        def dcStateClause = new SingularWhereClause(lhs: 'state', operator: '=', rhs: 'DC')
+        def whereClause = new AndWhereClause(whereClauses: [withinDistance, dcStateClause])
+        def query = new Query(filter: new Filter(databaseName: DATABASE_NAME, tableName: TABLE_NAME, whereClause: whereClause))
 
-		def result = queryExecutor.execute(query, QueryOptions.DEFAULT_OPTIONS)
-		assertOrderedQueryResult(expected, result)
-	}
+        def result = queryExecutor.execute(query, QueryOptions.DEFAULT_OPTIONS)
+        assertOrderedQueryResult(expected, result)
+    }
 
-	@Test
-	void "query intersection point"() {
-		def latLonArray = new LatLon[1][1]
-		latLonArray[0][0] = new LatLon(latDegrees: 11.92d, lonDegrees: 19.55d)
-		def intersection = new GeoIntersectionClause(
-			locationField: "location",
-			points: latLonArray,
-			geometryType: "Point"
-		)
-		
-		def expected = rows(2)
-		def query = new Query(filter: new Filter(databaseName: DATABASE_NAME, tableName: TABLE_NAME, whereClause: intersection))
-		def result = queryExecutor.execute(query, QueryOptions.DEFAULT_OPTIONS)
-		assertOrderedQueryResult(expected, result)
-	}
-	
-	@Test
-	void "query intersection line"() {
-		def latLonArray = new LatLon[1][2]
-		latLonArray[0][0] = new LatLon(latDegrees: 11.92d, lonDegrees: 19.55d)
-		latLonArray[0][1] = new LatLon(latDegrees: 20d, lonDegrees: 19.55d)
-		def intersection = new GeoIntersectionClause(
-			locationField: "location",
-			points: latLonArray,
-			geometryType: "Line"
-		)
-		
-		def expected = rows(2)
-		def query = new Query(filter: new Filter(databaseName: DATABASE_NAME, tableName: TABLE_NAME, whereClause: intersection))
-		def result = queryExecutor.execute(query, QueryOptions.DEFAULT_OPTIONS)
-		assertOrderedQueryResult(expected, result)
-	}
-	
-	@Test
-	void "query intersection polygon"() {
-		def latLonArray = new LatLon[1][5]
-		latLonArray[0][0] = new LatLon(latDegrees: 12d, lonDegrees: 19d)
-		latLonArray[0][1] = new LatLon(latDegrees: 12d, lonDegrees: 20d)
-		latLonArray[0][2] = new LatLon(latDegrees: 11d, lonDegrees: 20d)
-		latLonArray[0][3] = new LatLon(latDegrees: 11d, lonDegrees: 19d)
-		latLonArray[0][4] = new LatLon(latDegrees: 12d, lonDegrees: 19d)
-		def intersection = new GeoIntersectionClause(
-			locationField: "location",
-			points: latLonArray,
-			geometryType: "Polygon"
-		)
-		
-		def expected = rows(2,0)
-		def query = new Query(filter: new Filter(databaseName: DATABASE_NAME, tableName: TABLE_NAME, whereClause: intersection))
-		def result = queryExecutor.execute(query, QueryOptions.DEFAULT_OPTIONS)
-		assertOrderedQueryResult(expected, result)
-	}
-	 
-	@Test
-	void "query within polygon"() {
-		def latLonArray = new LatLon[1][5]
-		latLonArray[0][0] = new LatLon(latDegrees: 12d, lonDegrees: 19d)
-		latLonArray[0][1] = new LatLon(latDegrees: 12d, lonDegrees: 20d)
-		latLonArray[0][2] = new LatLon(latDegrees: 11d, lonDegrees: 20d)
-		latLonArray[0][3] = new LatLon(latDegrees: 11d, lonDegrees: 19d)
-		latLonArray[0][4] = new LatLon(latDegrees: 12d, lonDegrees: 19d)
-		def within = new GeoWithinClause(
-			locationField: "location",
-			points: latLonArray
-		)
-		
-		def expected = rows(2,0)
-		def query = new Query(filter: new Filter(databaseName: DATABASE_NAME, tableName: TABLE_NAME, whereClause: within))
-		def result = queryExecutor.execute(query, QueryOptions.DEFAULT_OPTIONS)
-		assertOrderedQueryResult(expected, result)
-	}
+    @Test
+    void "query intersection point"() {
+        def latLonArray = new LatLon[1][1]
+        latLonArray[0][0] = new LatLon(latDegrees: 11.92d, lonDegrees: 19.55d)
+        def intersection = new GeoIntersectionClause(
+            locationField: "location",
+            points: latLonArray,
+            geometryType: "Point"
+        )
+        
+        def expected = rows(2)
+        def query = new Query(filter: new Filter(databaseName: DATABASE_NAME, tableName: TABLE_NAME, whereClause: intersection))
+        def result = queryExecutor.execute(query, QueryOptions.DEFAULT_OPTIONS)
+        assertOrderedQueryResult(expected, result)
+    }
+    
+    @Test
+    void "query intersection line"() {
+        def latLonArray = new LatLon[1][2]
+        latLonArray[0][0] = new LatLon(latDegrees: 11.92d, lonDegrees: 19.55d)
+        latLonArray[0][1] = new LatLon(latDegrees: 20d, lonDegrees: 19.55d)
+        def intersection = new GeoIntersectionClause(
+            locationField: "location",
+            points: latLonArray,
+            geometryType: "Line"
+        )
+        
+        def expected = rows(2)
+        def query = new Query(filter: new Filter(databaseName: DATABASE_NAME, tableName: TABLE_NAME, whereClause: intersection))
+        def result = queryExecutor.execute(query, QueryOptions.DEFAULT_OPTIONS)
+        assertOrderedQueryResult(expected, result)
+    }
+    
+    @Test
+    void "query intersection polygon"() {
+        def latLonArray = new LatLon[1][5]
+        latLonArray[0][0] = new LatLon(latDegrees: 12d, lonDegrees: 19d)
+        latLonArray[0][1] = new LatLon(latDegrees: 12d, lonDegrees: 20d)
+        latLonArray[0][2] = new LatLon(latDegrees: 11d, lonDegrees: 20d)
+        latLonArray[0][3] = new LatLon(latDegrees: 11d, lonDegrees: 19d)
+        latLonArray[0][4] = new LatLon(latDegrees: 12d, lonDegrees: 19d)
+        def intersection = new GeoIntersectionClause(
+            locationField: "location",
+            points: latLonArray,
+            geometryType: "Polygon"
+        )
+        
+        def expected = rows(2,0)
+        def query = new Query(filter: new Filter(databaseName: DATABASE_NAME, tableName: TABLE_NAME, whereClause: intersection))
+        def result = queryExecutor.execute(query, QueryOptions.DEFAULT_OPTIONS)
+        assertOrderedQueryResult(expected, result)
+    }
+     
+    @Test
+    void "query within polygon"() {
+        def latLonArray = new LatLon[1][5]
+        latLonArray[0][0] = new LatLon(latDegrees: 12d, lonDegrees: 19d)
+        latLonArray[0][1] = new LatLon(latDegrees: 12d, lonDegrees: 20d)
+        latLonArray[0][2] = new LatLon(latDegrees: 11d, lonDegrees: 20d)
+        latLonArray[0][3] = new LatLon(latDegrees: 11d, lonDegrees: 19d)
+        latLonArray[0][4] = new LatLon(latDegrees: 12d, lonDegrees: 19d)
+        def within = new GeoWithinClause(
+            locationField: "location",
+            points: latLonArray
+        )
+        
+        def expected = rows(2,0)
+        def query = new Query(filter: new Filter(databaseName: DATABASE_NAME, tableName: TABLE_NAME, whereClause: within))
+        def result = queryExecutor.execute(query, QueryOptions.DEFAULT_OPTIONS)
+        assertOrderedQueryResult(expected, result)
+    }
 
-	@Test(expected = NeonConnectionException)
-	void "exception thrown rather than trying to create an empty database"() {
-		def query = new Query(filter: new Filter(databaseName: "nonexistentdb", tableName: "nonexistentable"))
-		queryExecutor.execute(query, QueryOptions.DEFAULT_OPTIONS)
-	}
+    @Test(expected = NeonConnectionException)
+    void "exception thrown rather than trying to create an empty database"() {
+        def query = new Query(filter: new Filter(databaseName: "nonexistentdb", tableName: "nonexistentable"))
+        queryExecutor.execute(query, QueryOptions.DEFAULT_OPTIONS)
+    }
 
 }

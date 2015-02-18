@@ -14,15 +14,13 @@
  *
  */
 
-
 /**
  * Provides utility methods for getting information about neon
  * @class neon.util.infoUtils
  * @static
  */
 
-neon.util.infoUtils = (function () {
-
+neon.util.infoUtils = (function() {
     /*
      * Gets the version information for Neon
      * @method getNeonVersion
@@ -40,6 +38,4 @@ neon.util.infoUtils = (function () {
     return {
         getNeonVersion: getNeonVersion
     };
-
 })();
-

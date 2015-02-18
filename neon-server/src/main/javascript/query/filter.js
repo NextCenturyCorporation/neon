@@ -19,11 +19,11 @@
  * @class neon.query.Filter
  * @constructor
  */
-neon.query.Filter = function () {
-	// the database name will automatically be populated by the connection when a query is executed based
-	// on what the "use" method provided as a database
-	this.databaseName = undefined;
-	this.whereClause = undefined;
+neon.query.Filter = function() {
+    // the database name will automatically be populated by the connection when a query is executed based
+    // on what the "use" method provided as a database
+    this.databaseName = undefined;
+    this.whereClause = undefined;
 };
 
 /**
@@ -34,24 +34,23 @@ neon.query.Filter = function () {
  * it is executed. The table name may also be fully qualified with [databaseName.]tableName.
  * @return {neon.query.Filter} This filter object
  */
-neon.query.Filter.prototype.selectFrom = function (args) {
-	var parts = neon.util.arrayUtils.argumentsToArray(arguments);
-	if (parts.length === 1) {
-		// check for the fully qualified [database.]table
-		var table = parts[0].split(".");
-		if (table.length === 1) {
-			this.tableName = table[0];
-		} else {
-			this.databaseName = table[0];
-			this.tableName = table[1];
-		}
-	} else { // database and table passed in separately
-		this.databaseName = parts[0];
-		this.tableName = parts[1];
-	}
-	return this;
+neon.query.Filter.prototype.selectFrom = function(args) {
+    var parts = neon.util.arrayUtils.argumentsToArray(arguments);
+    if(parts.length === 1) {
+        // check for the fully qualified [database.]table
+        var table = parts[0].split(".");
+        if(table.length === 1) {
+            this.tableName = table[0];
+        } else {
+            this.databaseName = table[0];
+            this.tableName = table[1];
+        }
+    } else { // database and table passed in separately
+        this.databaseName = parts[0];
+        this.tableName = parts[1];
+    }
+    return this;
 };
-
 
 /**
  * Adds a *where* clause to the filter.
@@ -59,14 +58,14 @@ neon.query.Filter.prototype.selectFrom = function (args) {
  * @method where
  * @return {neon.query.Filter} This filter object
  */
-neon.query.Filter.prototype.where = function () {
-	if (arguments.length === 3) {
-		this.whereClause = neon.query.where(arguments[0], arguments[1], arguments[2]);
-	} else {
-		// must be a boolean/geospatial clause
-		this.whereClause = arguments[0];
-	}
-	return this;
+neon.query.Filter.prototype.where = function() {
+    if(arguments.length === 3) {
+        this.whereClause = neon.query.where(arguments[0], arguments[1], arguments[2]);
+    } else {
+        // must be a boolean/geospatial clause
+        this.whereClause = arguments[0];
+    }
+    return this;
 };
 
 /**
@@ -78,14 +77,14 @@ neon.query.Filter.prototype.where = function () {
  * @method withinDistance
  * @return {neon.query.Filter} This filter object
  */
-neon.query.Filter.prototype.withinDistance = function (locationField, center, distance, distanceUnit) {
-	return this.where(neon.query.withinDistance(locationField, center, distance, distanceUnit));
+neon.query.Filter.prototype.withinDistance = function(locationField, center, distance, distanceUnit) {
+    return this.where(neon.query.withinDistance(locationField, center, distance, distanceUnit));
 };
 
-neon.query.Filter.prototype.geoIntersection = function (locationField, points, geometryType) {
-	return this.where(neon.query.withinDistance(locationField, points, geometryType));
+neon.query.Filter.prototype.geoIntersection = function(locationField, points, geometryType) {
+    return this.where(neon.query.withinDistance(locationField, points, geometryType));
 };
 
-neon.query.Filter.prototype.geoWithin = function (locationField, points) {
-	return this.where(neon.query.withinDistance(locationField, points));
+neon.query.Filter.prototype.geoWithin = function(locationField, points) {
+    return this.where(neon.query.withinDistance(locationField, points));
 };

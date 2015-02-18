@@ -26,12 +26,12 @@ import org.slf4j.LoggerFactory
 @Provider
 class UnknownHostExceptionMapper implements ExceptionMapper<UnknownHostException> {
 
-	private static final Logger LOGGER = LoggerFactory.getLogger(UnknownHostExceptionMapper)
+    private static final Logger LOGGER = LoggerFactory.getLogger(UnknownHostExceptionMapper)
 
     @Override
     public Response toResponse(UnknownHostException exception) {
         LOGGER.error("Requested host is unknown to the server. " + exception.getMessage(), exception)
-    	return Response.status(502).entity("Requested host is unknown to the server. " + exception.getMessage()).type("text/plain").build()
+        return Response.status(502).entity("Requested host is unknown to the server. " + exception.getMessage()).type("text/plain").build()
     }
 
 }
