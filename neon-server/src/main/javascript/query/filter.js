@@ -88,3 +88,13 @@ neon.query.Filter.prototype.geoIntersection = function(locationField, points, ge
 neon.query.Filter.prototype.geoWithin = function(locationField, points) {
     return this.where(neon.query.withinDistance(locationField, points));
 };
+
+neon.query.Filter.getFilterState = function(databaseName, tableName, successCallback, errorCallback) {
+    return neon.util.ajaxUtils.doGet(
+        neon.serviceUrl('filterservice', 'filters/' + databaseName + '/' + tableName), {
+            success: successCallback,
+            error: errorCallback,
+            responseType: 'json'
+        }
+    );
+};

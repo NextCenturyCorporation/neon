@@ -224,13 +224,3 @@ neon.query.Connection.prototype.getFieldNames = function(tableName, successCallb
         }
     );
 };
-
-neon.query.Connection.prototype.getFilterState = function(tableName, successCallback, errorCallback) {
-    return neon.util.ajaxUtils.doGet(
-        neon.serviceUrl('filterservice', 'filters/' + this.database_ + '/' + tableName), {
-            success: successCallback,
-            error: errorCallback,
-            responseType: 'json'
-        }
-    );
-};

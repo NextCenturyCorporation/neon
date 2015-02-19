@@ -75,7 +75,7 @@ class FilterCache implements Serializable {
      */
     List<Filter> getFiltersForDataset(DataSet dataSet) {
         return cache.findResults { k, v ->
-            if (v.dataSet == dataSet) {
+            if(v.dataSet == dataSet) {
                 return v.filter
             }
         }
@@ -85,22 +85,86 @@ class FilterCache implements Serializable {
      * Gets the filter keys (filter + id) for the specified dataset. This is similar to getFiltersForDataset except
      * that it returns the whole filter key
      * @param dataSet
-     * @return
+     * @return A list of filter keys applied to the dataset
      */
     List<FilterKey> getFilterKeysForDataset(DataSet dataSet) {
         return cache.findResults { k, v ->
-            if (v.dataSet == dataSet) {
+            if(v.dataSet == dataSet) {
                 return v
             }
         }
     }
 
+    /**
+     * Gets any filters that are applied for all tables of the specified database name
+     * @param databaseName The database name
+     * @return A list of filters applied to that dataset
+     */
+    List<Filter> getFiltersForDatabase(String databaseName) {
+        return cache.findResults { k, v ->
+            if(v.dataSet.databaseName == databaseName) {
+                return v.filter
+            }
+        }
+    }
+
+    /**
+     * Gets the filter keys (filter + id) for the specified dataset. This is similar to getFiltersForDataset except
+     * that it returns the whole filter key
+     * @param dataSet
+     * @return A list of filter keys applied to the dataset
+     */
+    List<FilterKey> getFilterKeysForDatabase(String databaseName) {
+        return cache.findResults { k, v ->
+            if(v.dataSet.databaseName == databaseName) {
+                return v
+            }
+        }
+    }
+
+    /**
+     * Gets any filters that are applied for all databases with the specified table name
+     * @param tableName The table name
+     * @return A list of filters applied to that dataset
+     */
+    List<Filter> getFiltersForTables(String tableName) {
+        return cache.findResults { k, v ->
+            if(v.dataSet.tableName == tableName) {
+                return v.filter
+            }
+        }
+    }
+
+    /**
+     * Gets the filter keys (filter + id) for the specified dataset. This is similar to getFiltersForDataset except
+     * that it returns the whole filter key
+     * @param dataSet
+     * @return A list of filter keys applied to the dataset
+     */
+    List<FilterKey> getFilterKeysForTables(String tableName) {
+        return cache.findResults { k, v ->
+            if(v.dataSet.tableName == tableName) {
+                return v
+            }
+        }
+    }
+
+    /**
+     * Gets any filters that are applied for all datasets
+     * @return A list of filters applied to that dataset
+     */
     List<Filter> getAllFilters() {
         return cache.findResults {k, v ->
             return v.filter
         }
     }
 
+    /**
+     * Gets the filter keys (filter + id) for the specified dataset. This is similar to getFiltersForDataset except
+     * that it returns the whole filter key
+     * @param dataSet
+     * @return A list of filter keys applied to the dataset
+     */
     List<FilterKey> getAllFilterKeys() {
         return cache.findResults {k, v ->
             return v
