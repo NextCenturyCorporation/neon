@@ -1,0 +1,124 @@
+{
+	//"requireCurlyBraces": [],  //jshint covers this rule
+	"requireSpaceAfterKeywords": [
+		"do",
+		"else",
+		"case",
+		"try",
+		"void",
+		"with",
+		"return"
+	],
+	"disallowSpaceAfterKeywords": [
+		"if",
+		"for",
+		"while",
+		"switch",
+		"catch"
+	],
+	"requireSpaceBeforeBlockStatements": true,
+	//"requireParenthesesAroundIIFE": true,  //jshint covers this rule
+	"requireSpacesInConditionalExpression": {
+		"afterTest": true,
+		"beforeConsequent": true,
+		"afterConsequent": true,
+		"beforeAlternate": true
+	},
+	"requireSpacesInFunctionExpression": {
+		"beforeOpeningCurlyBrace": true
+	},
+	"disallowSpacesInFunctionExpression": {
+		"beforeOpeningRoundBrace": true
+	},
+	"requireSpacesInAnonymousFunctionExpression": {
+		"beforeOpeningCurlyBrace": true
+	},
+	"disallowSpacesInAnonymousFunctionExpression": {
+		"beforeOpeningRoundBrace": true
+	},
+	"requireSpacesInNamedFunctionExpression": {
+		"beforeOpeningCurlyBrace": true
+	},
+	"disallowSpacesInNamedFunctionExpression": {
+		"beforeOpeningRoundBrace": true
+	},
+	"disallowSpacesInCallExpression": true,
+	"disallowMultipleVarDecl": true,
+	"requireBlocksOnNewline": true,
+	"disallowPaddingNewlinesInBlocks": true,
+	"requirePaddingNewLinesInObjects": true,
+	"disallowEmptyBlocks": true,
+	"disallowSpacesInsideObjectBrackets": "all",
+	"disallowSpacesInsideArrayBrackets": "all",
+	"disallowSpacesInsideParentheses": true,
+	"disallowQuotedKeysInObjects": true,
+	//"disallowDanglingUnderscores": true, //Old code seems to use this A LOT -- ~200 errors
+	"disallowSpaceAfterObjectKeys": true,
+	"requireSpaceBeforeObjectValues": true,
+	"requireCommaBeforeLineBreak": true,
+	"requireOperatorBeforeLineBreak": [
+		"?",
+		"=",
+		"+",
+		"-",
+		"/",
+		"*",
+		"==",
+		"===",
+		"!=",
+		"!==",
+		">",
+		">=",
+		"<",
+		"<="
+	],
+	"disallowSpaceAfterPrefixUnaryOperators": [
+		"++",
+		"--",
+		"+",
+		"-",
+		"~",
+		"!"
+	],
+	"disallowSpaceBeforePostfixUnaryOperators": [
+		"++",
+		"--"
+	],
+	"requireSpaceBeforeBinaryOperators": [
+		"=",
+		"+",
+		"-",
+		"/",
+		"*",
+		"==",
+		"===",
+		"!=",
+		"!=="
+		// etc
+	],
+	"requireSpaceAfterBinaryOperators": [
+		"=",
+		"+",
+		"-",
+		"/",
+		"*",
+		"==",
+		"===",
+		"!=",
+		"!=="
+		// etc
+	],
+	"disallowMultipleLineBreaks": true,
+	"disallowMixedSpacesAndTabs": true,
+	"disallowTrailingWhitespace": true,
+	"disallowTrailingComma": true,
+	"disallowKeywordsOnNewLine": [
+		"else"
+	],
+	"requireDotNotation": true,
+	//yoda?
+	//"requireYodaConditions": true,
+	"disallowNewlineBeforeBlockStatements": true,
+	"validateParameterSeparator": ", ",
+    "validateIndentation": 4
+}

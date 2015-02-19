@@ -14,15 +14,13 @@
  *
  */
 
-
-
 /**
  * Provides utility methods for working with a log4javascript logger
  * @class neon.util.loggerUtils
  * @static
  */
 
-neon.util.loggerUtils = (function(){
+neon.util.loggerUtils = (function() {
     var popupAppender = new log4javascript.PopUpAppender();
     var browserConsoleAppender = new log4javascript.BrowserConsoleAppender();
     var layout = new log4javascript.PatternLayout("%d{HH:mm:ss} %-5p - %m%n");
@@ -35,7 +33,7 @@ neon.util.loggerUtils = (function(){
      * @method usePopupAppender
      * @param {Object} logger The log4javascript logger from which to attach/detach the popup appender
      */
-    function usePopupAppender(logger){
+    function usePopupAppender(logger) {
         logger.addAppender(popupAppender);
     }
 
@@ -44,7 +42,7 @@ neon.util.loggerUtils = (function(){
      * @method useBrowserConsoleAppender
      * @param {Object} logger The log4javascript logger from which to attach/detach the popup appender
      */
-    function useBrowserConsoleAppender(logger){
+    function useBrowserConsoleAppender(logger) {
         logger.addAppender(browserConsoleAppender);
     }
 
@@ -54,7 +52,7 @@ neon.util.loggerUtils = (function(){
      * @method getGlobalLogger
      * @return {Object} The global logger
      */
-    function getGlobablLogger(){
+    function getGlobablLogger() {
         return log4javascript.getLogger("[global]");
     }
 
@@ -65,15 +63,14 @@ neon.util.loggerUtils = (function(){
      * @return {Object} a log4javascript logger
      *
      */
-    function getLogger(name){
+    function getLogger(name) {
         return log4javascript.getLogger(name);
     }
 
     return {
         usePopupAppender: usePopupAppender,
         useBrowserConsoleAppender: useBrowserConsoleAppender,
-        getGlobalLogger:getGlobablLogger,
+        getGlobalLogger: getGlobablLogger,
         getLogger: getLogger
     };
-
 })();

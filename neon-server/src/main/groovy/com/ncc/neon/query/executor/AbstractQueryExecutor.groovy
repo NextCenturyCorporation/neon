@@ -35,78 +35,78 @@ import org.springframework.beans.factory.annotation.Autowired
 abstract class AbstractQueryExecutor implements QueryExecutor {
 
 
-	@Autowired
-	private SelectionState selectionState
+    @Autowired
+    private SelectionState selectionState
 
-	@Autowired
-	TransformerRegistry transformRegistry
+    @Autowired
+    TransformerRegistry transformRegistry
 
-	@Override
-	QueryResult execute(Query query, QueryOptions options) {
-		// cutoff queries where there is no selection but selectionOnly was specified. otherwise the WHERE clause
-		// created by the query executors to get the selected data will be empty the request for selectionOnly is
-		// effectively ignored
-		if (isEmptySelection(query, options)) {
-			return TabularQueryResult.EMPTY
-		}
-		QueryResult result = doExecute(query, options)
-		return transform(query.transforms, result)
-	}
+    @Override
+    QueryResult execute(Query query, QueryOptions options) {
+        // cutoff queries where there is no selection but selectionOnly was specified. otherwise the WHERE clause
+        // created by the query executors to get the selected data will be empty the request for selectionOnly is
+        // effectively ignored
+        if (isEmptySelection(query, options)) {
+            return TabularQueryResult.EMPTY
+        }
+        QueryResult result = doExecute(query, options)
+        return transform(query.transforms, result)
+    }
 
-	@Override
-	QueryResult execute(QueryGroup queryGroup, QueryOptions options) {
-		TabularQueryResult queryResult = new TabularQueryResult()
-		queryGroup.queries.each {
-			if (!isEmptySelection(it, options)) {
-				def result = doExecute(it, options)
-				queryResult.data.addAll(result.data)
-			}
-		}
-		return queryResult
-	}
+    @Override
+    QueryResult execute(QueryGroup queryGroup, QueryOptions options) {
+        TabularQueryResult queryResult = new TabularQueryResult()
+        queryGroup.queries.each {
+            if (!isEmptySelection(it, options)) {
+                def result = doExecute(it, options)
+                queryResult.data.addAll(result.data)
+            }
+        }
+        return queryResult
+    }
 
-	// This method is public due to http://jira.codehaus.org/browse/GROOVY-2433. While this doesn't look
-	// like it is being called in a closure, it is exhibiting the same symptoms.
+    // This method is public due to http://jira.codehaus.org/browse/GROOVY-2433. While this doesn't look
+    // like it is being called in a closure, it is exhibiting the same symptoms.
 
-	/**
-	 * Determines if the query is asking for selection only but there is no selection. In this case,
-	 * the data returned should be empty
-	 * @param query
-	 * @param options
-	 * @return true if the query will always return an empty result because it is querying on the empty selection
-	 */
-	boolean isEmptySelection(Query query, QueryOptions options) {
-		return options.selectionOnly &&
-				!selectionState.getFiltersForDataset(new DataSet(databaseName: query.databaseName, tableName: query.tableName))
-	}
+    /**
+     * Determines if the query is asking for selection only but there is no selection. In this case,
+     * the data returned should be empty
+     * @param query
+     * @param options
+     * @return true if the query will always return an empty result because it is querying on the empty selection
+     */
+    boolean isEmptySelection(Query query, QueryOptions options) {
+        return options.selectionOnly &&
+                !selectionState.getFiltersForDataset(new DataSet(databaseName: query.databaseName, tableName: query.tableName))
+    }
 
-	protected abstract QueryResult doExecute(Query query, QueryOptions options)
+    protected abstract QueryResult doExecute(Query query, QueryOptions options)
 
-	/**
-	 * Transforms the query if a transform is provided. If not, the original query result is return unchanged.
-	 * @param transform
-	 * @param queryResult
-	 * @return
-	 */
-	private QueryResult transform(Transform[] transforms, QueryResult queryResult) {
-		if(!transforms || transforms.length == 0){
-			return queryResult
-		}
+    /**
+     * Transforms the query if a transform is provided. If not, the original query result is return unchanged.
+     * @param transform
+     * @param queryResult
+     * @return
+     */
+    private QueryResult transform(Transform[] transforms, QueryResult queryResult) {
+        if(!transforms || transforms.length == 0){
+            return queryResult
+        }
 
-		QueryResult returnResult = queryResult
-		transforms.each { transform ->
-			String transformName = transform.transformName
-			Transformer transformer = transformRegistry.getTransformer(transformName)
+        QueryResult returnResult = queryResult
+        transforms.each { transform ->
+            String transformName = transform.transformName
+            Transformer transformer = transformRegistry.getTransformer(transformName)
 
-			if(!transformer){
-				throw new TransformerNotFoundException("Transform ${transformName} does not exist.")
-			}
+            if(!transformer){
+                throw new TransformerNotFoundException("Transform ${transformName} does not exist.")
+            }
 
-			returnResult = transformer.convert(returnResult, transform.params)
-		}
+            returnResult = transformer.convert(returnResult, transform.params)
+        }
 
-		return returnResult
-	}
+        return returnResult
+    }
 
 
 

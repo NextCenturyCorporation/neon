@@ -32,22 +32,22 @@ import org.codehaus.jackson.annotate.JsonIgnoreProperties
 @JsonIgnoreProperties(value = ['ignoreFilters_', 'selectionOnly_', 'ignoredFilterIds_'])
 class Query {
 
-	Filter filter
-	boolean isDistinct = false
-	List<String> fields = SelectClause.ALL_FIELDS
-	List<AggregateClause> aggregates = []
-	List<GroupByClause> groupByClauses = []
-	List<SortClause> sortClauses = []
-	LimitClause limitClause
-	OffsetClause offsetClause
-	Transform[] transforms
+    Filter filter
+    boolean isDistinct = false
+    List<String> fields = SelectClause.ALL_FIELDS
+    List<AggregateClause> aggregates = []
+    List<GroupByClause> groupByClauses = []
+    List<SortClause> sortClauses = []
+    LimitClause limitClause
+    OffsetClause offsetClause
+    Transform[] transforms
 
-	def getDatabaseName() {
-		filter.databaseName
-	}
+    def getDatabaseName() {
+        filter.databaseName
+    }
 
-	def getTableName() {
-		filter.tableName
-	}
+    def getTableName() {
+        filter.tableName
+    }
 
 }

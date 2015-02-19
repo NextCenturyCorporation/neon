@@ -21,14 +21,14 @@ import com.ncc.neon.query.result.Transformer
 
 
 class SampleTransformer implements Transformer{
-	String name = "Sample"
+    String name = "Sample"
 
-	@Override
-	QueryResult convert(QueryResult queryResult, params) {
-		def data = queryResult.getData();
-		data.each { rows ->
-			rows['foo'] = "bar"
-		}
-		return new TabularQueryResult(data)
-	}
+    @Override
+    QueryResult convert(QueryResult queryResult, params) {
+        def data = queryResult.getData();
+        data.each { rows ->
+            rows['foo'] = "bar"
+        }
+        return new TabularQueryResult(data)
+    }
 }

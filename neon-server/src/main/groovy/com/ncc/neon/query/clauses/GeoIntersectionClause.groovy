@@ -24,7 +24,7 @@ import com.ncc.neon.util.LatLon
  */
 @ToString(includeNames = true)
 class GeoIntersectionClause extends GeoClause{
-	String locationField
-	LatLon[][] points
-	String geometryType //Point, Line, or Polygon
+    String locationField
+    LatLon[][] points
+    String geometryType //Point, Line, or Polygon
 }

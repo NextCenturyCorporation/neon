@@ -14,8 +14,6 @@
  *
  */
 
-
-
 var neon = neon || {};
 neon.eventing = neon.eventing || {};
 neon.eventing.owf = neon.eventing.owf || {};
