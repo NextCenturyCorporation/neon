@@ -74,7 +74,7 @@ class MongoQueryExecutor extends AbstractQueryExecutor {
         def collection = db.getCollection(tableName)
         def resultSet = collection.find().limit(1000)
 
-        Set<String> fieldNamesSet = new HashSet<String>()
+        Set<String> fieldNamesSet = [] as Set
         resultSet.each { result ->
                 fieldNamesSet.addAll(result?.keySet())
         }
