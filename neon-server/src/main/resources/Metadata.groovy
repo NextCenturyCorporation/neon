@@ -111,7 +111,7 @@ metadata {
             }
         }
         test {
-            twitter36_subset {
+            twitter36 {
                 angular_example {
                     date {
                         value = "created_at"
@@ -139,6 +139,9 @@ metadata {
                     }
                     sort_by {
                         value = "created_at"
+                    }
+                    count_by { 
+                        value = "screen_name"
                     }
                 }
             }
