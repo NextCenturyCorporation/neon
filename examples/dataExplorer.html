@@ -25,7 +25,7 @@
                 $("#databases").empty();
                 var numDatabases = databases.length;
                 for (var ii = 0; ii < numDatabases; ii++) {
-                    var buttonString = '<input type="button" value="' + databases[ii] + '" />)';
+                    var buttonString = '<input type="button" class="btn btn-primary" value="' + databases[ii] + '" />)';
                     var newButton = $(buttonString).click(function (event) {
                         setDatabaseName(event);
                     });
@@ -45,7 +45,7 @@
                 $("#tables").empty();
                 var numTables = tables.length;
                 for (var ii = 0; ii < numTables; ii++) {
-                    var buttonString = '<input type="button" value="' + tables[ii] + '" />)';
+                    var buttonString = '<input type="button" class="btn btn-primary" value="' + tables[ii] + '" />)';
                     var newButton = $(buttonString).click(function (event) {
                         setTableName(event);
                     });
@@ -127,12 +127,14 @@
 
         <p id="tables"></p>
 
-        <p></p>NumItems: <input type="text" value="3" id="numLimit" size="5" maxlength="4">
-        <button id="updateLimit">Update</button>
+        <p></p>
+
+        <p><span class="section">NumItems:</span> <input type="text" value="3" id="numLimit" size="5" maxlength="4">
+        <button class="btn btn-primary" id="updateLimit">Update</button>
         </p>
 
-        <button id="prev">Prev</button>
-        <button id="next">Next</button>
+        <button class="btn btn-primary" id="prev">Prev</button>
+        <button class="btn btn-primary" id="next">Next</button>
     </div>
 </div>
 <div id="footer">Copyright 2014. Next Century Corporation</div>
