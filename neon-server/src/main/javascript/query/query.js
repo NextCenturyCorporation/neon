@@ -156,12 +156,12 @@ neon.query.MILE = 'mile';
 /**
  * Sets the *select* clause of the query to select data from the specified table
  * @method selectFrom
- * @param {...String} args The database/table to select from. The format is specified in
- * {{#crossLink "neon.query.Filter/selectFrom"}}{{/crossLink}}
+ * @param {String} databaseName
+ * @param {String} tableName table to select from
  * @return {neon.query.Query} This query object
  */
-neon.query.Query.prototype.selectFrom = function(args) {
-    this.filter.selectFrom.apply(this.filter, arguments);
+neon.query.Query.prototype.selectFrom = function(databaseName, tableName) {
+    this.filter.selectFrom(databaseName, tableName);
     return this;
 };
 
