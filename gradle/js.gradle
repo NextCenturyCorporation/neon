@@ -47,19 +47,19 @@ project.ext {
 
 task gruntjs(type: GruntTask) {
     description = 'the default grunt task in Gruntfile.js'
-    gruntArgs "--outfile=${jsOutputFileBase}"
+    gruntArgs "--outfile-base=${jsOutputFileBase}"
 }
 
 task concatjs(type: GruntTask) {
     description = 'runs the grunt javascript concatenation task'
-    gruntArgs "concat", "--outfile=${jsOutputFileBase}"
+    gruntArgs "concat", "--outfile-base=${jsOutputFileBase}"
 
 }
 
 task watch(type: com.ncc.common.GruntTask) {
     description = "Wrapper around grunt's watch task to rebuild javascript files if any change"
     background = true
-    gruntArgs "watch", "--outfile=${jsOutputFileBase}"
+    gruntArgs "watch", "--outfile-base=${jsOutputFileBase}"
 }
 
 // ensure that javascript tasks are properly configured to run when

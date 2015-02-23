@@ -14,8 +14,6 @@
  *
  */
 
-
-
 /**
  * This class has a list of the available channels that are used for messaging between widgets
  * @class neon.eventing.channels
@@ -40,4 +38,3 @@ neon.eventing.channels = {
      */
     ACTIVE_DATASET_CHANGED: 'active_dataset_changed'
 };
-

@@ -13,72 +13,72 @@ import java.nio.file.StandardWatchEventKinds
  import groovy.io.FileType
 
 class TransformLoader implements Runnable {
-	WatchService watchService = FileSystems.getDefault().newWatchService()
-	private final TransformerRegistry registry
-	private final Path path
-	private final Map<String, String> loadedTransforms = [:]
+    WatchService watchService = FileSystems.getDefault().newWatchService()
+    private final TransformerRegistry registry
+    private final Path path
+    private final Map<String, String> loadedTransforms = [:]
 
-	public TransformLoader(Path watchPath, TransformerRegistry transformRegistry) {
-		registry = transformRegistry
-		path = watchPath
-		path.register(watchService, StandardWatchEventKinds.ENTRY_MODIFY, StandardWatchEventKinds.ENTRY_DELETE)
-	}
+    public TransformLoader(Path watchPath, TransformerRegistry transformRegistry) {
+        registry = transformRegistry
+        path = watchPath
+        path.register(watchService, StandardWatchEventKinds.ENTRY_MODIFY, StandardWatchEventKinds.ENTRY_DELETE)
+    }
 
-	@SuppressWarnings("JavaIoPackageAccess")
-	public void run() {
-		def dir = new File(path.toString())
-		dir.eachFileMatch(FileType.FILES, ~/.*\.groovy/) { file ->
-			loadTransform(file.name)
-		}
+    @SuppressWarnings("JavaIoPackageAccess")
+    public void run() {
+        def dir = new File(path.toString())
+        dir.eachFileMatch(FileType.FILES, ~/.*\.groovy/) { file ->
+            loadTransform(file.name)
+        }
 
-		for ( ; ; ) {
-			WatchKey key = watchService.take()
-			for ( WatchEvent<?> event: key.pollEvents()){
-				handleEvent(event)
-			}
-			boolean valid = key.reset()
-			if ( !valid ) {
-				break
-			}
-		}
-	}
+        for ( ; ; ) {
+            WatchKey key = watchService.take()
+            for ( WatchEvent<?> event: key.pollEvents()){
+                handleEvent(event)
+            }
+            boolean valid = key.reset()
+            if ( !valid ) {
+                break
+            }
+        }
+    }
 
-	private void handleEvent(WatchEvent<?> event) {
-		WatchEvent.Kind kind = event.kind()
-		switch (kind.name()){
-			case "ENTRY_MODIFY":
-				if(event.context().toString().contains(".groovy")) {
-					replaceTransform(event.context().toString())
-				}
-				break
-			case "ENTRY_DELETE":
-				if(event.context().toString().contains(".groovy")) {
-					removeTransform(event.context().toString())
-				}
-				break
-		}
-	}
+    private void handleEvent(WatchEvent<?> event) {
+        WatchEvent.Kind kind = event.kind()
+        switch (kind.name()){
+            case "ENTRY_MODIFY":
+                if(event.context().toString().contains(".groovy")) {
+                    replaceTransform(event.context().toString())
+                }
+                break
+            case "ENTRY_DELETE":
+                if(event.context().toString().contains(".groovy")) {
+                    removeTransform(event.context().toString())
+                }
+                break
+        }
+    }
 
-	@SuppressWarnings("JavaIoPackageAccess")
-	private void loadTransform(String relativePath) {
-		def file = new File(path.toString(), relativePath)
+    @SuppressWarnings("JavaIoPackageAccess")
+    private void loadTransform(String relativePath) {
+        def file = new File(path.toString(), relativePath)
 
-		GroovyClassLoader loader = new GroovyClassLoader()
-		Transformer transform = loader.parseClass(file).newInstance()
-		loadedTransforms.put(relativePath, transform.getName())
-		registry.register(transform)
-	}
+        GroovyClassLoader loader = new GroovyClassLoader()
+        Transformer transform = loader.parseClass(file).newInstance()
+        loadedTransforms.put(relativePath, transform.getName())
+        registry.register(transform)
+    }
 
-	private void replaceTransform(String relativePath) {
-		removeTransform(relativePath)
-		loadTransform(relativePath)
-	}
+    private void replaceTransform(String relativePath) {
+        removeTransform(relativePath)
+        loadTransform(relativePath)
+    }
 
-	private void removeTransform(String relativePath) {
-		String name = loadedTransforms.get(relativePath)
-		if(name) {
-			Transformer transform = registry.removeTransformer(name)
-			GroovySystem.getMetaClassRegistry().removeMetaClass(transform.getClass())
-		}
-	}
+    private void removeTransform(String relativePath) {
+        String name = loadedTransforms.get(relativePath)
+        if(name) {
+            Transformer transform = registry.removeTransformer(name)
+            GroovySystem.getMetaClassRegistry().removeMetaClass(transform.getClass())
+        }
+    }
 }

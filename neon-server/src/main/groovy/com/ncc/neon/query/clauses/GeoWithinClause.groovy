@@ -27,6 +27,6 @@ import groovy.transform.ToString
  */
 @ToString(includeNames = true)
 class GeoWithinClause extends GeoClause {
-	String locationField
-	LatLon[][] points // Must be polygon, so at least one array of 4+ points
+    String locationField
+    LatLon[][] points // Must be polygon, so at least one array of 4+ points
 }

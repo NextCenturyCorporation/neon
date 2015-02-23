@@ -24,12 +24,11 @@
  * @param functionToRun  the function to run.
  * @method ready
  */
-neon.ready = function (functionToRun) {
-    $(function () {
-        if (neon.util.owfUtils.isRunningInOWF()) {
+neon.ready = function(functionToRun) {
+    $(function() {
+        if(neon.util.owfUtils.isRunningInOWF()) {
             OWF.ready(functionToRun);
-        }
-        else {
+        } else {
             functionToRun();
         }
     });
