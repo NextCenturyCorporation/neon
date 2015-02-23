@@ -20,8 +20,6 @@
  *     var connection = new neon.query.Connection();
  *     // use a mongo database on localhost
  *     connection.connect(neon.query.Connection.MONGO, "localhost");
- *     // use database mydb
- *     connection.use("mydb");
  *
  *     // queries through this connection will use the parameters specified above
  *     connection.executeQuery(query1, callback);
@@ -31,7 +29,6 @@
 neon.query.Connection = function() {
     this.host_ = undefined;
     this.databaseType_ = undefined;
-    this.database_ = undefined;
 };
 
 /**
@@ -58,15 +55,6 @@ neon.query.Connection.SPARK = 'sparksql';
 neon.query.Connection.prototype.connect = function(databaseType, host) {
     this.host_ = host;
     this.databaseType_ = databaseType;
-};
-
-/**
- * Specifies what database to use for queries.
- * @param {String} database The name of the database to use for queries
- * @method use
- */
-neon.query.Connection.prototype.use = function(database) {
-    this.database_ = database;
 };
 
 /**
@@ -110,23 +98,18 @@ neon.query.Connection.prototype.executeTextQuery = function(queryText, successCa
 /**
  * Gets the metadata for each of the columns in the table
  * @method getColumnMetadata
+ * @param {String} databaseName
  * @param {String} tableName The table whose metadata is being returned
  * @param {Function} successCallback
  * @return {neon.util.AjaxRequest}
  */
-neon.query.Connection.prototype.getColumnMetadata = function(tableName, successCallback) {
+neon.query.Connection.prototype.getColumnMetadata = function(databaseName, tableName, successCallback) {
     return neon.util.ajaxUtils.doGet(
-        neon.serviceUrl('queryservice', 'columnmetadata/' + this.database_ + '/' + tableName), {
+        neon.serviceUrl('queryservice', 'columnmetadata/' + databaseName + '/' + tableName), {
             success: successCallback,
             responseType: 'json'
         }
     );
-};
-
-neon.query.Connection.prototype.populateQueryDatabaseField_ = function(query) {
-    if(!query.filter.databaseName) {
-        query.filter.databaseName = this.database_;
-    }
 };
 
 /**
@@ -140,7 +123,6 @@ neon.query.Connection.prototype.populateQueryDatabaseField_ = function(query) {
  * @return {neon.util.AjaxRequest} The xhr request object
  */
 neon.query.Connection.prototype.executeQueryGroup = function(queryGroup, successCallback, errorCallback) {
-    this.populateQueryGroupDatabaseField_(queryGroup);
     return this.executeQueryService_(queryGroup, successCallback, errorCallback, 'querygroup');
 };
 
@@ -194,12 +176,13 @@ neon.query.Connection.prototype.getDatabaseNames = function(successCallback) {
 /**
  * Gets the tables names available for the current database
  * @method getTableNames
+ * @param {String} databaseName
  * @param {Function} successCallback The callback that contains the table names in an array.
  * @return {neon.util.AjaxRequest} The xhr request object
  */
-neon.query.Connection.prototype.getTableNames = function(successCallback) {
+neon.query.Connection.prototype.getTableNames = function(databaseName, successCallback) {
     return neon.util.ajaxUtils.doGet(
-        neon.serviceUrl('queryservice', 'tablenames/' + this.host_ + '/' + this.databaseType_ + '/' + this.database_), {
+        neon.serviceUrl('queryservice', 'tablenames/' + this.host_ + '/' + this.databaseType_ + '/' + databaseName), {
             success: successCallback,
             responseType: 'json'
         }
@@ -209,15 +192,16 @@ neon.query.Connection.prototype.getTableNames = function(successCallback) {
 /**
  * Executes a query that returns the field names from table
  * @method getFieldNames
+ * @param {String} databaseName
  * @param {String} tableName The table name whose fields are being returned
  * @param {Function} successCallback The callback to call when the field names are successfully retrieved
  * @param {Function} [errorCallback] The optional callback when an error occurs. This is a 3 parameter
  * function that contains the xhr, a short error status and the full error message.
  * @return {neon.util.AjaxRequest} The xhr request object
  */
-neon.query.Connection.prototype.getFieldNames = function(tableName, successCallback, errorCallback) {
+neon.query.Connection.prototype.getFieldNames = function(databaseName, tableName, successCallback, errorCallback) {
     return neon.util.ajaxUtils.doGet(
-        neon.serviceUrl('queryservice', 'fields/' + this.host_ + '/' + this.databaseType_ + '/' + this.database_ + '/' + tableName), {
+        neon.serviceUrl('queryservice', 'fields/' + this.host_ + '/' + this.databaseType_ + '/' + databaseName + '/' + tableName), {
             success: successCallback,
             error: errorCallback,
             responseType: 'json'
