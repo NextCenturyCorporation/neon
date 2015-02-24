@@ -186,16 +186,15 @@ neon.query.Query.prototype.withFields = function(fields) {
 /**
  * Sets the *where* clause of the query to determine how to select the data
  * @method where
- * The arguments can be in either multiple formats<br>
- * <ol>
- *    <li>A 3 argument array as follows:
- *      <ul>
- *          <li>arguments[0] - The property to filter on in the database</li>
- *          <li>arguments[1] - The filter operator</li>
- *          <li>arguments[2] - The value to filter against</li>
- *      </ul>
- *    </li>
- *    <li>A boolean operator (and/or)</li>
+ * The arguments can be either<br>
+ * 3 arguments as follows:
+ *  <ul>
+ *      <li>arguments[0] - The property to filter on in the database</li>
+ *      <li>arguments[1] - The filter operator</li>
+ *      <li>arguments[2] - The value to filter against</li>
+ *  </ul>
+ * OR <br>
+ * A boolean operator (neon.Query.and or neon.Query.or)
  * </ol>
  * @example
  *     where('someProperty','=',5)

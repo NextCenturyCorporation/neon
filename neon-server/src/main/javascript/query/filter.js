@@ -20,9 +20,8 @@
  * @constructor
  */
 neon.query.Filter = function() {
-    // the database name will automatically be populated by the connection when a query is executed based
-    // on what the "use" method provided as a database
     this.databaseName = undefined;
+    this.tableName = undefined;
     this.whereClause = undefined;
 };
 
@@ -49,7 +48,7 @@ neon.query.Filter.prototype.where = function() {
     if(arguments.length === 3) {
         this.whereClause = neon.query.where(arguments[0], arguments[1], arguments[2]);
     } else {
-        // must be a boolean/geospatial clause
+        // single argument is a boolean or a geospacial clause
         this.whereClause = arguments[0];
     }
     return this;

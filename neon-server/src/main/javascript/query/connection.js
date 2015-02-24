@@ -13,6 +13,7 @@
  * limitations under the License.
  *
  */
+
 /**
  * Stores the parameters a user is using to connect to the database. Queries will be executed through this connection.
  * @class neon.query.Connection
@@ -58,8 +59,7 @@ neon.query.Connection.prototype.connect = function(databaseType, host) {
 };
 
 /**
- * Executes the specified query and fires the callback when complete. This query object may be modified to have the
- * database name set if none was specified in the query.
+ * Executes the specified query and fires the callback when complete.
  * @method executeQuery
  * @param {neon.query.Query} query the query to execute
  * @param {Function} successCallback The callback to fire when the query successfully completes
@@ -67,32 +67,7 @@ neon.query.Connection.prototype.connect = function(databaseType, host) {
  * @return {neon.util.AjaxRequest} The xhr request object
  */
 neon.query.Connection.prototype.executeQuery = function(query, successCallback, errorCallback) {
-    this.populateQueryDatabaseField_(query);
     return this.executeQueryService_(query, successCallback, errorCallback, 'query');
-};
-
-/**
- * Executes a text based query.
- * Currently this does not use the value of the "use" method and a use statement must be specified as part of the query.
- * @method executeTextQuery
- * @param {String} queryText The query text
- * @param {Function} successCallback The callback to execute when the query is parsed, which contains the query result
- * @param {Function} [errorCallback] The optional callback when an error occurs. This is a 3 parameter function that
- * contains the xhr, a short error status and the full error message.
- * @return {neon.util.AjaxRequest} The xhr request object
- */
-neon.query.Connection.prototype.executeTextQuery = function(queryText, successCallback, errorCallback) {
-    return neon.util.ajaxUtils.doPost(
-        neon.serviceUrl('languageservice', 'query/' + this.host_ + '/' + this.databaseType_), {
-            data: {
-                text: queryText
-            },
-            contentType: 'application/x-www-form-urlencoded; charset=UTF-8',
-            responseType: 'json',
-            success: successCallback,
-            error: errorCallback
-        }
-    );
 };
 
 /**
@@ -114,23 +89,16 @@ neon.query.Connection.prototype.getColumnMetadata = function(databaseName, table
 
 /**
  * Executes the specified query group (a series of queries whose results are aggregate),
- * and fires the callback when complete. This query objects may be modified to have the
- * database name set if none was specified in the query.
+ * and fires the callback when complete.
  * @method executeQueryGroup
  * @param {neon.query.QueryGroup} queryGroup the query to execute
  * @param {Function} successCallback The callback to fire when the query successfully completes
- * @param {Function} [errorCallback] The optional callback when an error occurs. This is a 3 parameter function that contains the xhr, a short error status and the full error message.
+ * @param {Function} [errorCallback] The optional callback when an error occurs. This is a 3 parameter function that
+ * contains the xhr, a short error status and the full error message.
  * @return {neon.util.AjaxRequest} The xhr request object
  */
 neon.query.Connection.prototype.executeQueryGroup = function(queryGroup, successCallback, errorCallback) {
     return this.executeQueryService_(queryGroup, successCallback, errorCallback, 'querygroup');
-};
-
-neon.query.Connection.prototype.populateQueryGroupDatabaseField_ = function(queryGroup) {
-    var me = this;
-    _.each(queryGroup.queries, function(query) {
-        me.populateQueryDatabaseField_(query);
-    });
 };
 
 neon.query.Connection.prototype.executeQueryService_ = function(query, successCallback, errorCallback, serviceName) {
