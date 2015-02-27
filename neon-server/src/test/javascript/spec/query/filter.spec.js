@@ -13,26 +13,24 @@
  * limitations under the License.
  *
  */
-describe('filter', function () {
-
-    it('splits a fully qualified table name', function () {
+describe('filter', function() {
+    xit('splits a fully qualified table name', function() {
         var filter = new neon.query.Filter().selectFrom("dbName.dbTable");
         expect(filter.databaseName).toEqual("dbName");
         expect(filter.tableName).toEqual("dbTable");
     });
 
-    it('selects both the database and table', function () {
+    it('selects both the database and table', function() {
         var filter = new neon.query.Filter().selectFrom("dbName", "dbTable");
         expect(filter.databaseName).toEqual("dbName");
         expect(filter.tableName).toEqual("dbTable");
     });
 
-    it('selects only the table with a single argument', function () {
+    xit('selects only the table with a single argument', function() {
         // when a filter is used by a query, the query will automatically put the database name is, so that is
         // why this functionality exists
         var filter = new neon.query.Filter().selectFrom("dbTable");
         expect(filter.databaseName).toBeUndefined();
         expect(filter.tableName).toEqual("dbTable");
     });
-
 });

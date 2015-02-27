@@ -177,7 +177,7 @@ describe('messenger', function () {
         callbacks[callbackName] = callback;
         messenger.events(callbacks);
 
-        var newMessenger = new neon.eventing.Messenger()
+        var newMessenger = new neon.eventing.Messenger();
         newMessenger.publish(channelName, message);
 
         expect(callback).toHaveBeenCalledWith(message);
