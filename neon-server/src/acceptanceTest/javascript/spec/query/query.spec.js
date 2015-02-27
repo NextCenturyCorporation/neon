@@ -14,12 +14,11 @@
  *
  */
 
-
 /**
  * This is an end to end acceptance test to verify that queries can be executed against a mongo instance.
  * These tests parallel those in the MongoQueryExecutorIntegrationTest.
  */
-describe('query mapping', function () {
+describe('query mapping', function() {
     // aliases for easier test writing
     var where = neon.query.where;
     var or = neon.query.or;
@@ -38,63 +37,59 @@ describe('query mapping', function () {
     var filterId = "filterA";
 
     // helpers to run async tests against the correct objects
-    var executeQueryAndWait = function (asyncFunction, query) {
+    var executeQueryAndWait = function(asyncFunction, query) {
         return neontest.executeAndWait(connection, asyncFunction, query);
     };
 
-    var sendMessageAndWait = function (asyncFunction, args) {
+    var sendMessageAndWait = function(asyncFunction, args) {
         return neontest.executeAndWait(messenger, asyncFunction, args);
     };
 
-
-    beforeEach(function () {
+    beforeEach(function() {
         // host is generated dynamically during the build and included in the acceptance test helper file
         connection.connect(neon.query.Connection.MONGO, host);
-        connection.use(databaseName);
 
-        if (!allData) {
+        if(!allData) {
             allData = getJSONFixture('data.json');
         }
     });
 
-    it('get field names', function () {
+    it('get field names', function() {
         var result = executeQueryAndWait(connection.getFieldNames, tableName);
         var expected = ['_id', 'firstname', 'lastname', 'city', 'state', 'salary', 'hiredate', 'location'];
-        runs(function () {
+        runs(function() {
             expect(result.get()).toBeArrayWithSameElements(expected);
         });
-
     });
 
-
-    it('query all data', function () {
+    it('query all data', function() {
         assertQueryResults(baseQuery(), allData);
     });
 
-    it('can use a fully qualified table name to override the database', function () {
+    it('can use a fully qualified table name to override the database', function() {
         // set the connection to another database and the fully qualified database name should override it
         connection.use("invalidDatabase");
         var query = new neon.query.Query().selectFrom(databaseName + '.' + tableName);
         assertQueryResults(query, allData);
     });
 
-    it('can use a multiple arguments in the select statement to override the database', function () {
+    it('can use a multiple arguments in the select statement to override the database', function() {
         // set the connection to another database and the fully qualified database name should override it
         connection.use("invalidDatabase");
         var query = new neon.query.Query().selectFrom(databaseName, tableName);
         assertQueryResults(query, allData);
     });
 
-    it('select subset of fields from result', function () {
+    it('select subset of fields from result', function() {
         var fields = ['firstname', 'lastname'];
         var expected = [];
-        allData.forEach(function (row) {
+        allData.forEach(function(row) {
             var expectedRow = {};
             // the _id field is always included from mongo
             expectedRow._id = row._id;
-            fields.forEach(function (field) {
+            fields.forEach(function(field) {
                 // some rows do not have all fields, so skip those
-                if (row[field]) {
+                if(row[field]) {
                     expectedRow[field] = row[field];
                 }
             });
@@ -103,7 +98,7 @@ describe('query mapping', function () {
         assertQueryResults(baseQuery().withFields(fields[0], fields[1]), expected);
     });
 
-    it('select derived field', function () {
+    it('select derived field', function() {
         var expectedData = getJSONFixture('groupByMonth.json');
         var groupByMonthClause = new neon.query.GroupByFunctionClause(neon.query.MONTH, 'hiredate', 'hire_month');
         // aggregate fields are automatically included in the select even though withFields is specified
@@ -111,28 +106,28 @@ describe('query mapping', function () {
         assertQueryResults(query, expectedData);
     });
 
-    it('query WHERE', function () {
+    it('query WHERE', function() {
         var whereStateClause = or(where('state', '=', 'VA'), where('state', '=', 'DC'));
         var salaryAndStateClause = and(where('salary', '>=', 100000), whereStateClause);
         var query = baseQuery().where(salaryAndStateClause);
         assertQueryResults(query, rows(0, 2, 4));
     });
 
-    it('query WHERE field is null or missing', function () {
+    it('query WHERE field is null or missing', function() {
         var whereLastNameNullClause = where('lastname', '=', null);
         var query = baseQuery().where(whereLastNameNullClause);
         var expectedData = getJSONFixture('null_or_missing.json');
         assertQueryResults(query, expectedData);
     });
 
-    it('query WHERE field is not null and not missing', function () {
+    it('query WHERE field is not null and not missing', function() {
         var whereLastNameNotNullClause = where('lastname', '!=', null);
         var query = baseQuery().where(whereLastNameNotNullClause);
         var expectedData = getJSONFixture('not_null_and_not_missing.json');
         assertQueryResults(query, expectedData);
     });
 
-    it('group by and sort', function () {
+    it('group by and sort', function() {
         var query = baseQuery()
             .groupBy('state', 'city')
             .sortBy('state', neon.query.ASCENDING, 'city', neon.query.DESCENDING)
@@ -141,7 +136,7 @@ describe('query mapping', function () {
         assertQueryResults(query, expectedData);
     });
 
-    it('group by average', function () {
+    it('group by average', function() {
         var query = baseQuery()
             .groupBy('state')
             .sortBy('state', neon.query.ASCENDING)
@@ -150,7 +145,7 @@ describe('query mapping', function () {
         assertQueryResults(query, expectedData);
     });
 
-    it('group by max', function () {
+    it('group by max', function() {
         var query = baseQuery()
             .groupBy('state')
             .sortBy('state', neon.query.ASCENDING)
@@ -159,8 +154,7 @@ describe('query mapping', function () {
         assertQueryResults(query, expectedData);
     });
 
-
-    it('group by with generated aggregate field name', function () {
+    it('group by with generated aggregate field name', function() {
         var query = baseQuery()
             .groupBy('state')
             .sortBy('state', neon.query.ASCENDING)
@@ -169,8 +163,7 @@ describe('query mapping', function () {
         assertQueryResults(query, expectedData);
     });
 
-
-    it('group by min', function () {
+    it('group by min', function() {
         var query = baseQuery()
             .groupBy('state')
             .sortBy('state', neon.query.ASCENDING)
@@ -179,7 +172,7 @@ describe('query mapping', function () {
         assertQueryResults(query, expectedData);
     });
 
-    it('group by count', function () {
+    it('group by count', function() {
         var query = baseQuery()
             .groupBy('state')
             .sortBy('state', neon.query.ASCENDING)
@@ -188,7 +181,24 @@ describe('query mapping', function () {
         assertQueryResults(query, expectedData);
     });
 
-    it('count all fields', function () {
+    it('count all fields', function() {
+        var query = baseQuery()
+            .aggregate(neon.query.COUNT, '*', 'counter');
+        var expectedData = getJSONFixture('count.json');
+        assertQueryResults(query, expectedData);
+    });
+
+    it('count all fields with different name', function() {
+        var query = baseQuery()
+            .aggregate(neon.query.COUNT, '*', 'test');
+        var expectedData = getJSONFixture('count.json');
+        expectedData[0].test = expectedData[0].counter;
+        delete expectedData[0].counter;
+
+        assertQueryResults(query, expectedData);
+    });
+
+    it('count all fields', function() {
         var query = baseQuery()
             .aggregate(neon.query.COUNT, '*', 'counter');
         var expectedData = getJSONFixture('count.json');
