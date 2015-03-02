@@ -31,7 +31,7 @@ class TransformService {
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     String transform(String inputJson, @QueryParam("replacethis") String replaceThis, @QueryParam("replacewith") String replaceWith) {
-        def output = inputJson.toString().replaceAll(replaceThis,replaceWith)
+        def output = inputJson.toString().replaceAll(replaceThis, replaceWith)
         // if the input data is not an array, transform it to an array
         if ( !output.startsWith("[")) {
             output = "[" + output + "]"
