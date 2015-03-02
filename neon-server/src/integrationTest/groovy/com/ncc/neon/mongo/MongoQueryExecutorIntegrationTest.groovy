@@ -142,13 +142,13 @@ class MongoQueryExecutorIntegrationTest extends AbstractQueryExecutorIntegration
             points: latLonArray,
             geometryType: "Point"
         )
-        
+
         def expected = rows(2)
         def query = new Query(filter: new Filter(databaseName: DATABASE_NAME, tableName: TABLE_NAME, whereClause: intersection))
         def result = queryExecutor.execute(query, QueryOptions.DEFAULT_OPTIONS)
         assertOrderedQueryResult(expected, result)
     }
-    
+
     @Test
     void "query intersection line"() {
         def latLonArray = new LatLon[1][2]
@@ -159,13 +159,13 @@ class MongoQueryExecutorIntegrationTest extends AbstractQueryExecutorIntegration
             points: latLonArray,
             geometryType: "Line"
         )
-        
+
         def expected = rows(2)
         def query = new Query(filter: new Filter(databaseName: DATABASE_NAME, tableName: TABLE_NAME, whereClause: intersection))
         def result = queryExecutor.execute(query, QueryOptions.DEFAULT_OPTIONS)
         assertOrderedQueryResult(expected, result)
     }
-    
+
     @Test
     void "query intersection polygon"() {
         def latLonArray = new LatLon[1][5]
@@ -179,13 +179,13 @@ class MongoQueryExecutorIntegrationTest extends AbstractQueryExecutorIntegration
             points: latLonArray,
             geometryType: "Polygon"
         )
-        
+
         def expected = rows(2,0)
         def query = new Query(filter: new Filter(databaseName: DATABASE_NAME, tableName: TABLE_NAME, whereClause: intersection))
         def result = queryExecutor.execute(query, QueryOptions.DEFAULT_OPTIONS)
         assertOrderedQueryResult(expected, result)
     }
-     
+
     @Test
     void "query within polygon"() {
         def latLonArray = new LatLon[1][5]
@@ -198,8 +198,8 @@ class MongoQueryExecutorIntegrationTest extends AbstractQueryExecutorIntegration
             locationField: "location",
             points: latLonArray
         )
-        
-        def expected = rows(2,0)
+
+        def expected = rows(2, 0)
         def query = new Query(filter: new Filter(databaseName: DATABASE_NAME, tableName: TABLE_NAME, whereClause: within))
         def result = queryExecutor.execute(query, QueryOptions.DEFAULT_OPTIONS)
         assertOrderedQueryResult(expected, result)

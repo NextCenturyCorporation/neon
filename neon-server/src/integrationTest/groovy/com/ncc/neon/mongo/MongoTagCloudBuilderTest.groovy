@@ -68,27 +68,27 @@ class MongoTagCloudBuilderTest {
 
     @Test
     void "tag frequencies"() {
-        Map<String,Integer> counts = tagBuilder.getTagCounts(db,"records","tags",3)
+        Map<String,Integer> counts = tagBuilder.getTagCounts(db, "records", "tags", 3)
 
         assert counts.size() == 3
 
         // should be in descending order
         def iter = counts.entrySet().iterator()
-        assertEntry(iter.next(),"tag2",3)
-        assertEntry(iter.next(),"tag3",2)
-        assertEntry(iter.next(),"tag1",1)
+        assertEntry(iter.next(), "tag2", 3)
+        assertEntry(iter.next(), "tag3", 2)
+        assertEntry(iter.next(), "tag1", 1)
     }
 
     @Test
     void "tag frequencies with limit"() {
-        Map<String,Integer> counts = tagBuilder.getTagCounts(db,"records","tags",2)
+        Map<String,Integer> counts = tagBuilder.getTagCounts(db, "records", "tags", 2)
 
         assert counts.size() == 2
 
         // should be in descending order
         def iter = counts.entrySet().iterator()
-        assertEntry(iter.next(),"tag2",3)
-        assertEntry(iter.next(),"tag3",2)
+        assertEntry(iter.next(), "tag2", 3)
+        assertEntry(iter.next(), "tag3", 2)
     }
 
 
