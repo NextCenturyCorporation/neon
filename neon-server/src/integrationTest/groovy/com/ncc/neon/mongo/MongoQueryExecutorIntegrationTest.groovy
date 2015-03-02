@@ -180,7 +180,7 @@ class MongoQueryExecutorIntegrationTest extends AbstractQueryExecutorIntegration
             geometryType: "Polygon"
         )
 
-        def expected = rows(2,0)
+        def expected = rows(2, 0)
         def query = new Query(filter: new Filter(databaseName: DATABASE_NAME, tableName: TABLE_NAME, whereClause: intersection))
         def result = queryExecutor.execute(query, QueryOptions.DEFAULT_OPTIONS)
         assertOrderedQueryResult(expected, result)
