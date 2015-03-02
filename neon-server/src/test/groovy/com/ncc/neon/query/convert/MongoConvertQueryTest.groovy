@@ -79,7 +79,7 @@ class MongoConvertQueryTest extends AbstractConversionTest {
         assert query.query == simpleQuery
         BasicDBObject orClause = createOrClause()
         BasicDBObject filterClause = new BasicDBObject(FIELD_NAME, FIELD_VALUE)
-        BasicDBObject compoundClause = new BasicDBObject('$and',[orClause,filterClause])
+        BasicDBObject compoundClause = new BasicDBObject('$and', [orClause, filterClause])
 
         assert query.whereClauseParams == compoundClause
         assert query.selectParams == new BasicDBObject()
