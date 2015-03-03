@@ -34,7 +34,7 @@ neon.query.Filter = function() {
  * it is executed. The table name may also be fully qualified with [databaseName.]tableName.
  * @return {neon.query.Filter} This filter object
  */
-neon.query.Filter.prototype.selectFrom = function(args) {
+neon.query.Filter.prototype.selectFrom = function() {
     var parts = neon.util.arrayUtils.argumentsToArray(arguments);
     if(parts.length === 1) {
         // check for the fully qualified [database.]table

@@ -71,7 +71,6 @@ neon.eventing.Messenger.prototype.publish = function(channel, message) {
  * @method subscribe
  */
 neon.eventing.Messenger.prototype.subscribe = function(channel, callback) {
-    var me = this;
     neon.eventing.eventBus_.subscribe(channel, callback, this.id_);
 };
 
