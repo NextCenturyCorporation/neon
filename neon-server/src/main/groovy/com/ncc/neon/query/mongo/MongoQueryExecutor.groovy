@@ -15,19 +15,23 @@
  */
 
 package com.ncc.neon.query.mongo
+
+import com.mongodb.CommandFailureException
 import com.mongodb.DB
 import com.mongodb.MongoClient
 import com.ncc.neon.connect.ConnectionManager
-import com.ncc.neon.query.executor.AbstractQueryExecutor
 import com.ncc.neon.query.Query
 import com.ncc.neon.query.QueryOptions
-import com.ncc.neon.query.result.QueryResult
+import com.ncc.neon.query.executor.AbstractQueryExecutor
 import com.ncc.neon.query.filter.FilterState
 import com.ncc.neon.query.filter.SelectionState
+import com.ncc.neon.query.result.QueryResult
+import org.apache.commons.lang.exception.ExceptionUtils
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
+
 /**
  * Executes queries against a mongo data store
  */
@@ -50,7 +54,14 @@ class MongoQueryExecutor extends AbstractQueryExecutor {
         AbstractMongoQueryWorker worker = createMongoQueryWorker(query)
         MongoConversionStrategy mongoConversionStrategy = new MongoConversionStrategy(filterState: filterState, selectionState: selectionState)
         MongoQuery mongoQuery = mongoConversionStrategy.convertQuery(query, options)
-        return worker.executeQuery(mongoQuery)
+
+        try {
+            return worker.executeQuery(mongoQuery)
+        }
+        catch(CommandFailureException e) {
+            LOGGER.error("", e)
+            return new MongoQueryResult([], e.code.toString(), ExceptionUtils.getStackTrace(e))
+        }
     }
 
     @Override

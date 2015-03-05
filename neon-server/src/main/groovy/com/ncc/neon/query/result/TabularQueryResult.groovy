@@ -24,13 +24,21 @@ class TabularQueryResult implements QueryResult{
     public static final EMPTY = new TabularQueryResult(Collections.EMPTY_LIST)
 
     final List<Map<String, Object>> data
+    final String errorCode
+    final String stackTrace
 
     public TabularQueryResult() {
-        this([])
+        this([], "", "")
     }
 
-    public TabularQueryResult(List<Map<String, Object>> table){
+    public TabularQueryResult(List<Map<String, Object>> table) {
+        this(table, "", "")
+    }
+
+    public TabularQueryResult(List<Map<String, Object>> table, String errorCode, String stackTrace) {
         this.data = table
+        this.errorCode = errorCode
+        this.stackTrace = stackTrace
     }
 }
 
