@@ -1,5 +1,5 @@
 /*
- * Copyright 2013 Next Century Corporation
+ * Copyright 2015 Next Century Corporation
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -14,24 +14,16 @@
  *
  */
 
-package com.ncc.neon.query.result
-/**
- * Query results of a tabular data store.
- * This is represented as a list of rows, where a row is a map of column names to values.
- */
-class TabularQueryResult implements QueryResult{
+package com.ncc.neon.services
 
-    public static final EMPTY = new TabularQueryResult(Collections.EMPTY_LIST)
+import org.apache.commons.lang.exception.ExceptionUtils
 
-    final List<Map<String, Object>> data
+class ExceptionMapperResponse {
+    final String error
+    final String stackTrace
 
-    public TabularQueryResult() {
-        this([])
-    }
-
-    public TabularQueryResult(List<Map<String, Object>> table){
-        this.data = table
+    ExceptionMapperResponse(String error, Exception exception) {
+        this.error = error
+        this.stackTrace = ExceptionUtils.getStackTrace(exception)
     }
 }
-
-

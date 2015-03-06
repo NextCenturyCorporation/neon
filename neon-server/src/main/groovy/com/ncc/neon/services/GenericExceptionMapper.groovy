@@ -30,8 +30,9 @@ class GenericExceptionMapper implements ExceptionMapper<Exception> {
     @Override
     public Response toResponse(Exception exception) {
         // Log any unhandled server exceptions and return an internal server error for them.
-        LOGGER.error(exception.getMessage(), exception)
-        return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(exception.getMessage()).type("text/plain").build()
+        LOGGER.error(exception.message, exception)
+        ExceptionMapperResponse response = new ExceptionMapperResponse("Unknown Error", exception)
+        return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(response).type("application/json").build()
     }
 
 }

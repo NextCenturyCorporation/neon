@@ -29,8 +29,4 @@ class MongoQueryResult extends TabularQueryResult {
     MongoQueryResult(Iterable<DBObject> results) {
         super(results.collect { it.toMap() } as List)
     }
-
-    MongoQueryResult(Iterable<DBObject> results, String errorCode, String stackTrace) {
-        super(results.collect { it.toMap() } as List, errorCode, stackTrace)
-    }
 }
