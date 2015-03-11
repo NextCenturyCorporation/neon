@@ -49,10 +49,6 @@ class SparkSQLQueryExecutor extends AbstractQueryExecutor {
     QueryResult doExecute(Query query, QueryOptions options) {
         return runAndRelease { client ->
             SparkSQLConversionStrategy conversionStrategy = new SparkSQLConversionStrategy(filterState: filterState, selectionState: selectionState)
-            LOGGER.error("Got a query, checking for aggregations... {}", query.aggregates)
-            query.aggregates.each { agg ->
-                LOGGER.error("Aggregation {}", agg)
-            }
             String sparkSQLQuery = conversionStrategy.convertQuery(query, options)
             LOGGER.debug("Query: {}", sparkSQLQuery)
             int offset = query.offsetClause ? query.offsetClause.offset : 0
