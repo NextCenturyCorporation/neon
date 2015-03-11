@@ -49,10 +49,32 @@ class SparkSQLQueryExecutor extends AbstractQueryExecutor {
     QueryResult doExecute(Query query, QueryOptions options) {
         return runAndRelease { client ->
             SparkSQLConversionStrategy conversionStrategy = new SparkSQLConversionStrategy(filterState: filterState, selectionState: selectionState)
+            LOGGER.error("Got a query, checking for aggregations... {}", query.aggregates)
+            query.aggregates.each { agg ->
+                LOGGER.error("Aggregation {}", agg)
+            }
             String sparkSQLQuery = conversionStrategy.convertQuery(query, options)
             LOGGER.debug("Query: {}", sparkSQLQuery)
             int offset = query.offsetClause ? query.offsetClause.offset : 0
             List<Map> resultList = client.executeQuery(sparkSQLQuery, offset)
+            // Make sure the aggregate fields have the proper capitalization, since Hive will
+            // convert them to lower case (NEON-1009).
+            query.aggregates.each { agg ->
+                def requestedName = agg.name
+                def mangledName = agg.name.toLowerCase()
+                // Nothing needs to be done if the requested name was already lower case
+                if (requestedName != mangledName) {
+                    resultList.each { record ->
+                        // Only do the conversion if the requested name is not there but the mangled
+                        // name is.
+                        if (!record.containsKey(requestedName) && record.containsKey(mangledName)) {
+                            def value = record[mangledName]
+                            record.remove(mangledName)
+                            record[requestedName] = value
+                        }
+                    }
+                }
+            }
             return  new TabularQueryResult(resultList)
         }
     }
