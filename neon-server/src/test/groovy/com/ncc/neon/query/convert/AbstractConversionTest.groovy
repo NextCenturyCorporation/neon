@@ -181,6 +181,13 @@ abstract class AbstractConversionTest {
     }
 
     @Test
+    void "test query where contains"() {
+        givenQueryHasWhereContainsFooClause()
+        def query = convertQuery(simpleQuery)
+        assertQueryWithWhereContainsFooClause(query)
+    }
+
+    @Test
     void "test ignoring specific filter"() {
         givenFilterStateHasOneFilter()
         def query = convertQuery(simpleQuery, new QueryOptions(ignoredFilterIds: ["filterA"] as HashSet))
@@ -217,6 +224,8 @@ abstract class AbstractConversionTest {
     protected abstract void assertQueryWithWhereNullClause(query)
 
     protected abstract void assertQueryWithWhereNotNullClause(query)
+
+    protected abstract void assertQueryWithWhereContainsFooClause(query)
 
     protected abstract void assertQueryWithEmptyFilter(query)
 
@@ -258,6 +267,10 @@ abstract class AbstractConversionTest {
 
     private void givenQueryHasWhereNotNullClause() {
         simpleQuery.filter.whereClause = new SingularWhereClause(lhs: FIELD_NAME, operator: "!=", rhs: null)
+    }
+
+    private void givenQueryHasWhereContainsFooClause() {
+        simpleQuery.filter.whereClause = new SingularWhereClause(lhs: FIELD_NAME, operator: "contains", rhs: "foo")
     }
 
     private void givenQueryHasSimpleWhereClause() {
