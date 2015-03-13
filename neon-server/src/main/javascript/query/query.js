@@ -160,7 +160,7 @@ neon.query.MILE = 'mile';
  * {{#crossLink "neon.query.Filter/selectFrom"}}{{/crossLink}}
  * @return {neon.query.Query} This query object
  */
-neon.query.Query.prototype.selectFrom = function(args) {
+neon.query.Query.prototype.selectFrom = function() {
     this.filter.selectFrom.apply(this.filter, arguments);
     return this;
 };
