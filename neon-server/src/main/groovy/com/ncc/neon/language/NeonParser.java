@@ -21,11 +21,11 @@ public class NeonParser extends Parser {
 		LIMIT=26, OFFSET=27, SORT=28, SORT_DIRECTION=29, WHOLE_NUMBER=30, NUMBER=31, 
 		STRING=32, WHITESPACE=33;
 	public static final String[] tokenNames = {
-		"<INVALID>", "'max'", "'avg'", "'last'", "'sum'", "')'", "','", "'min'", 
-		"'('", "'count'", "';'", "'first'", "AND", "OR", "'*'", "'>'", "'>='", 
-		"'<'", "'<='", "'='", "'!='", "USE", "SELECT", "FROM", "WHERE", "GROUP", 
-		"LIMIT", "OFFSET", "SORT", "SORT_DIRECTION", "WHOLE_NUMBER", "NUMBER", 
-		"STRING", "WHITESPACE"
+		"<INVALID>", "'avg'", "'count'", "'sum'", "'last'", "'('", "')'", "'min'", 
+		"';'", "'max'", "','", "'first'", "AND", "OR", "'*'", "'>'", "'>='", "'<'", 
+		"'<='", "'='", "'!='", "USE", "SELECT", "FROM", "WHERE", "GROUP", "LIMIT", 
+		"OFFSET", "SORT", "SORT_DIRECTION", "WHOLE_NUMBER", "NUMBER", "STRING", 
+		"WHITESPACE"
 	};
 	public static final int
 		RULE_statement = 0, RULE_database = 1, RULE_query = 2, RULE_select = 3, 
@@ -91,18 +91,18 @@ public class NeonParser extends Parser {
 			setState(40); database();
 			setState(42);
 			_la = _input.LA(1);
-			if (_la==10) {
+			if (_la==8) {
 				{
-				setState(41); match(10);
+				setState(41); match(8);
 				}
 			}
 
 			setState(44); query();
 			setState(46);
 			_la = _input.LA(1);
-			if (_la==10) {
+			if (_la==8) {
 				{
-				setState(45); match(10);
+				setState(45); match(8);
 				}
 			}
 
@@ -120,8 +120,8 @@ public class NeonParser extends Parser {
 	}
 
 	public static class DatabaseContext extends ParserRuleContext {
-		public TerminalNode USE() { return getToken(NeonParser.USE, 0); }
 		public TerminalNode STRING() { return getToken(NeonParser.STRING, 0); }
+		public TerminalNode USE() { return getToken(NeonParser.USE, 0); }
 		public DatabaseContext(ParserRuleContext parent, int invokingState) {
 			super(parent, invokingState);
 		}
@@ -161,9 +161,7 @@ public class NeonParser extends Parser {
 		public WhereContext where() {
 			return getRuleContext(WhereContext.class,0);
 		}
-		public SelectContext select() {
-			return getRuleContext(SelectContext.class,0);
-		}
+		public TerminalNode FROM() { return getToken(NeonParser.FROM, 0); }
 		public TerminalNode STRING() { return getToken(NeonParser.STRING, 0); }
 		public AdditionalClausesContext additionalClauses(int i) {
 			return getRuleContext(AdditionalClausesContext.class,i);
@@ -171,7 +169,9 @@ public class NeonParser extends Parser {
 		public List<AdditionalClausesContext> additionalClauses() {
 			return getRuleContexts(AdditionalClausesContext.class);
 		}
-		public TerminalNode FROM() { return getToken(NeonParser.FROM, 0); }
+		public SelectContext select() {
+			return getRuleContext(SelectContext.class,0);
+		}
 		public QueryContext(ParserRuleContext parent, int invokingState) {
 			super(parent, invokingState);
 		}
@@ -271,10 +271,10 @@ public class NeonParser extends Parser {
 	}
 
 	public static class SelectFieldsContext extends ParserRuleContext {
-		public TerminalNode ALL_FIELDS() { return getToken(NeonParser.ALL_FIELDS, 0); }
 		public FieldListContext fieldList() {
 			return getRuleContext(FieldListContext.class,0);
 		}
+		public TerminalNode ALL_FIELDS() { return getToken(NeonParser.ALL_FIELDS, 0); }
 		public SelectFieldsContext(ParserRuleContext parent, int invokingState) {
 			super(parent, invokingState);
 		}
@@ -352,10 +352,10 @@ public class NeonParser extends Parser {
 			setState(75);
 			_errHandler.sync(this);
 			_la = _input.LA(1);
-			while (_la==6) {
+			while (_la==10) {
 				{
 				{
-				setState(71); match(6);
+				setState(71); match(10);
 				setState(72); match(STRING);
 				}
 				}
@@ -417,16 +417,16 @@ public class NeonParser extends Parser {
 	}
 
 	public static class WhereClauseContext extends ParserRuleContext {
-		public WhereClauseContext whereClause(int i) {
-			return getRuleContext(WhereClauseContext.class,i);
+		public SimpleWhereClauseContext simpleWhereClause() {
+			return getRuleContext(SimpleWhereClauseContext.class,0);
 		}
 		public TerminalNode AND() { return getToken(NeonParser.AND, 0); }
 		public List<WhereClauseContext> whereClause() {
 			return getRuleContexts(WhereClauseContext.class);
 		}
 		public TerminalNode OR() { return getToken(NeonParser.OR, 0); }
-		public SimpleWhereClauseContext simpleWhereClause() {
-			return getRuleContext(SimpleWhereClauseContext.class,0);
+		public WhereClauseContext whereClause(int i) {
+			return getRuleContext(WhereClauseContext.class,i);
 		}
 		public WhereClauseContext(ParserRuleContext parent, int invokingState) {
 			super(parent, invokingState);
@@ -459,11 +459,11 @@ public class NeonParser extends Parser {
 			{
 			setState(87);
 			switch (_input.LA(1)) {
-			case 8:
+			case 5:
 				{
-				setState(82); match(8);
+				setState(82); match(5);
 				setState(83); whereClause(0);
-				setState(84); match(5);
+				setState(84); match(6);
 				}
 				break;
 			case STRING:
@@ -527,15 +527,15 @@ public class NeonParser extends Parser {
 	}
 
 	public static class SimpleWhereClauseContext extends ParserRuleContext {
-		public TerminalNode WHOLE_NUMBER() { return getToken(NeonParser.WHOLE_NUMBER, 0); }
 		public TerminalNode STRING(int i) {
 			return getToken(NeonParser.STRING, i);
 		}
+		public TerminalNode WHOLE_NUMBER() { return getToken(NeonParser.WHOLE_NUMBER, 0); }
 		public OperatorContext operator() {
 			return getRuleContext(OperatorContext.class,0);
 		}
-		public TerminalNode NUMBER() { return getToken(NeonParser.NUMBER, 0); }
 		public List<TerminalNode> STRING() { return getTokens(NeonParser.STRING); }
+		public TerminalNode NUMBER() { return getToken(NeonParser.NUMBER, 0); }
 		public SimpleWhereClauseContext(ParserRuleContext parent, int invokingState) {
 			super(parent, invokingState);
 		}
@@ -579,6 +579,9 @@ public class NeonParser extends Parser {
 	}
 
 	public static class AdditionalClausesContext extends ParserRuleContext {
+		public GroupContext group() {
+			return getRuleContext(GroupContext.class,0);
+		}
 		public OffsetContext offset() {
 			return getRuleContext(OffsetContext.class,0);
 		}
@@ -587,9 +590,6 @@ public class NeonParser extends Parser {
 		}
 		public SortContext sort() {
 			return getRuleContext(SortContext.class,0);
-		}
-		public GroupContext group() {
-			return getRuleContext(GroupContext.class,0);
 		}
 		public AdditionalClausesContext(ParserRuleContext parent, int invokingState) {
 			super(parent, invokingState);
@@ -653,10 +653,10 @@ public class NeonParser extends Parser {
 	public static class OperatorContext extends ParserRuleContext {
 		public TerminalNode GTE() { return getToken(NeonParser.GTE, 0); }
 		public TerminalNode LT() { return getToken(NeonParser.LT, 0); }
-		public TerminalNode LTE() { return getToken(NeonParser.LTE, 0); }
-		public TerminalNode NE() { return getToken(NeonParser.NE, 0); }
 		public TerminalNode GT() { return getToken(NeonParser.GT, 0); }
 		public TerminalNode EQ() { return getToken(NeonParser.EQ, 0); }
+		public TerminalNode NE() { return getToken(NeonParser.NE, 0); }
+		public TerminalNode LTE() { return getToken(NeonParser.LTE, 0); }
 		public OperatorContext(ParserRuleContext parent, int invokingState) {
 			super(parent, invokingState);
 		}
@@ -698,11 +698,11 @@ public class NeonParser extends Parser {
 	}
 
 	public static class SortContext extends ParserRuleContext {
-		public SortClauseContext sortClause(int i) {
-			return getRuleContext(SortClauseContext.class,i);
-		}
 		public List<SortClauseContext> sortClause() {
 			return getRuleContexts(SortClauseContext.class);
+		}
+		public SortClauseContext sortClause(int i) {
+			return getRuleContext(SortClauseContext.class,i);
 		}
 		public TerminalNode SORT() { return getToken(NeonParser.SORT, 0); }
 		public SortContext(ParserRuleContext parent, int invokingState) {
@@ -731,10 +731,10 @@ public class NeonParser extends Parser {
 			setState(118);
 			_errHandler.sync(this);
 			_la = _input.LA(1);
-			while (_la==6) {
+			while (_la==10) {
 				{
 				{
-				setState(114); match(6);
+				setState(114); match(10);
 				setState(115); sortClause();
 				}
 				}
@@ -835,10 +835,10 @@ public class NeonParser extends Parser {
 			setState(131);
 			_errHandler.sync(this);
 			_la = _input.LA(1);
-			while (_la==6) {
+			while (_la==10) {
 				{
 				{
-				setState(127); match(6);
+				setState(127); match(10);
 				setState(128); groupClause();
 				}
 				}
@@ -860,10 +860,10 @@ public class NeonParser extends Parser {
 	}
 
 	public static class GroupClauseContext extends ParserRuleContext {
+		public TerminalNode STRING() { return getToken(NeonParser.STRING, 0); }
 		public FunctionContext function() {
 			return getRuleContext(FunctionContext.class,0);
 		}
-		public TerminalNode STRING() { return getToken(NeonParser.STRING, 0); }
 		public GroupClauseContext(ParserRuleContext parent, int invokingState) {
 			super(parent, invokingState);
 		}
@@ -918,14 +918,14 @@ public class NeonParser extends Parser {
 	}
 
 	public static class FunctionContext extends ParserRuleContext {
+		public FunctionNameContext functionName() {
+			return getRuleContext(FunctionNameContext.class,0);
+		}
+		public TerminalNode STRING() { return getToken(NeonParser.STRING, 0); }
 		public CountContext count() {
 			return getRuleContext(CountContext.class,0);
 		}
 		public TerminalNode ALL_FIELDS() { return getToken(NeonParser.ALL_FIELDS, 0); }
-		public TerminalNode STRING() { return getToken(NeonParser.STRING, 0); }
-		public FunctionNameContext functionName() {
-			return getRuleContext(FunctionNameContext.class,0);
-		}
 		public FunctionContext(ParserRuleContext parent, int invokingState) {
 			super(parent, invokingState);
 		}
@@ -950,9 +950,9 @@ public class NeonParser extends Parser {
 				enterOuterAlt(_localctx, 1);
 				{
 				setState(138); functionName();
-				setState(139); match(8);
+				setState(139); match(5);
 				setState(140); match(STRING);
-				setState(141); match(5);
+				setState(141); match(6);
 				}
 				break;
 
@@ -960,9 +960,9 @@ public class NeonParser extends Parser {
 				enterOuterAlt(_localctx, 2);
 				{
 				setState(143); count();
-				setState(144); match(8);
+				setState(144); match(5);
 				setState(145); match(ALL_FIELDS);
-				setState(146); match(5);
+				setState(146); match(6);
 				}
 				break;
 			}
@@ -1008,19 +1008,19 @@ public class NeonParser extends Parser {
 				setState(150); match(11);
 				}
 				break;
-			case 3:
+			case 4:
 				enterOuterAlt(_localctx, 2);
 				{
-				setState(151); match(3);
-				}
-				break;
-			case 1:
-				enterOuterAlt(_localctx, 3);
-				{
-				setState(152); match(1);
+				setState(151); match(4);
 				}
 				break;
 			case 9:
+				enterOuterAlt(_localctx, 3);
+				{
+				setState(152); match(9);
+				}
+				break;
+			case 2:
 				enterOuterAlt(_localctx, 4);
 				{
 				setState(153); count();
@@ -1032,16 +1032,16 @@ public class NeonParser extends Parser {
 				setState(154); match(7);
 				}
 				break;
-			case 2:
+			case 1:
 				enterOuterAlt(_localctx, 6);
 				{
-				setState(155); match(2);
+				setState(155); match(1);
 				}
 				break;
-			case 4:
+			case 3:
 				enterOuterAlt(_localctx, 7);
 				{
-				setState(156); match(4);
+				setState(156); match(3);
 				}
 				break;
 			default:
@@ -1080,7 +1080,7 @@ public class NeonParser extends Parser {
 		try {
 			enterOuterAlt(_localctx, 1);
 			{
-			setState(159); match(9);
+			setState(159); match(2);
 			}
 		}
 		catch (RecognitionException re) {
@@ -1095,8 +1095,8 @@ public class NeonParser extends Parser {
 	}
 
 	public static class LimitContext extends ParserRuleContext {
-		public TerminalNode WHOLE_NUMBER() { return getToken(NeonParser.WHOLE_NUMBER, 0); }
 		public TerminalNode LIMIT() { return getToken(NeonParser.LIMIT, 0); }
+		public TerminalNode WHOLE_NUMBER() { return getToken(NeonParser.WHOLE_NUMBER, 0); }
 		public LimitContext(ParserRuleContext parent, int invokingState) {
 			super(parent, invokingState);
 		}
@@ -1133,8 +1133,8 @@ public class NeonParser extends Parser {
 	}
 
 	public static class OffsetContext extends ParserRuleContext {
-		public TerminalNode WHOLE_NUMBER() { return getToken(NeonParser.WHOLE_NUMBER, 0); }
 		public TerminalNode OFFSET() { return getToken(NeonParser.OFFSET, 0); }
+		public TerminalNode WHOLE_NUMBER() { return getToken(NeonParser.WHOLE_NUMBER, 0); }
 		public OffsetContext(ParserRuleContext parent, int invokingState) {
 			super(parent, invokingState);
 		}
@@ -1203,34 +1203,34 @@ public class NeonParser extends Parser {
 		"\2\2\bA\3\2\2\2\nF\3\2\2\2\fH\3\2\2\2\16P\3\2\2\2\20Y\3\2\2\2\22f\3\2"+
 		"\2\2\24n\3\2\2\2\26p\3\2\2\2\30r\3\2\2\2\32{\3\2\2\2\34\177\3\2\2\2\36"+
 		"\u008a\3\2\2\2 \u0096\3\2\2\2\"\u009f\3\2\2\2$\u00a1\3\2\2\2&\u00a3\3"+
-		"\2\2\2(\u00a6\3\2\2\2*,\5\4\3\2+-\7\f\2\2,+\3\2\2\2,-\3\2\2\2-.\3\2\2"+
-		"\2.\60\5\6\4\2/\61\7\f\2\2\60/\3\2\2\2\60\61\3\2\2\2\61\3\3\2\2\2\62\63"+
+		"\2\2\2(\u00a6\3\2\2\2*,\5\4\3\2+-\7\n\2\2,+\3\2\2\2,-\3\2\2\2-.\3\2\2"+
+		"\2.\60\5\6\4\2/\61\7\n\2\2\60/\3\2\2\2\60\61\3\2\2\2\61\3\3\2\2\2\62\63"+
 		"\7\27\2\2\63\64\7\"\2\2\64\5\3\2\2\2\65\66\5\b\5\2\66\67\7\31\2\2\679"+
 		"\7\"\2\28:\5\16\b\298\3\2\2\29:\3\2\2\2:>\3\2\2\2;=\5\24\13\2<;\3\2\2"+
 		"\2=@\3\2\2\2><\3\2\2\2>?\3\2\2\2?\7\3\2\2\2@>\3\2\2\2AB\7\30\2\2BC\5\n"+
 		"\6\2C\t\3\2\2\2DG\7\20\2\2EG\5\f\7\2FD\3\2\2\2FE\3\2\2\2G\13\3\2\2\2H"+
-		"M\7\"\2\2IJ\7\b\2\2JL\7\"\2\2KI\3\2\2\2LO\3\2\2\2MK\3\2\2\2MN\3\2\2\2"+
+		"M\7\"\2\2IJ\7\f\2\2JL\7\"\2\2KI\3\2\2\2LO\3\2\2\2MK\3\2\2\2MN\3\2\2\2"+
 		"N\r\3\2\2\2OM\3\2\2\2PQ\7\32\2\2QR\5\20\t\2R\17\3\2\2\2ST\b\t\1\2TU\7"+
-		"\n\2\2UV\5\20\t\2VW\7\7\2\2WZ\3\2\2\2XZ\5\22\n\2YS\3\2\2\2YX\3\2\2\2Z"+
+		"\7\2\2UV\5\20\t\2VW\7\b\2\2WZ\3\2\2\2XZ\5\22\n\2YS\3\2\2\2YX\3\2\2\2Z"+
 		"c\3\2\2\2[\\\f\5\2\2\\]\7\16\2\2]b\5\20\t\6^_\f\4\2\2_`\7\17\2\2`b\5\20"+
 		"\t\5a[\3\2\2\2a^\3\2\2\2be\3\2\2\2ca\3\2\2\2cd\3\2\2\2d\21\3\2\2\2ec\3"+
 		"\2\2\2fg\7\"\2\2gh\5\26\f\2hi\t\2\2\2i\23\3\2\2\2jo\5\30\r\2ko\5\34\17"+
 		"\2lo\5&\24\2mo\5(\25\2nj\3\2\2\2nk\3\2\2\2nl\3\2\2\2nm\3\2\2\2o\25\3\2"+
-		"\2\2pq\t\3\2\2q\27\3\2\2\2rs\7\36\2\2sx\5\32\16\2tu\7\b\2\2uw\5\32\16"+
+		"\2\2pq\t\3\2\2q\27\3\2\2\2rs\7\36\2\2sx\5\32\16\2tu\7\f\2\2uw\5\32\16"+
 		"\2vt\3\2\2\2wz\3\2\2\2xv\3\2\2\2xy\3\2\2\2y\31\3\2\2\2zx\3\2\2\2{}\7\""+
 		"\2\2|~\7\37\2\2}|\3\2\2\2}~\3\2\2\2~\33\3\2\2\2\177\u0080\7\33\2\2\u0080"+
-		"\u0085\5\36\20\2\u0081\u0082\7\b\2\2\u0082\u0084\5\36\20\2\u0083\u0081"+
+		"\u0085\5\36\20\2\u0081\u0082\7\f\2\2\u0082\u0084\5\36\20\2\u0083\u0081"+
 		"\3\2\2\2\u0084\u0087\3\2\2\2\u0085\u0083\3\2\2\2\u0085\u0086\3\2\2\2\u0086"+
 		"\35\3\2\2\2\u0087\u0085\3\2\2\2\u0088\u008b\7\"\2\2\u0089\u008b\5 \21"+
 		"\2\u008a\u0088\3\2\2\2\u008a\u0089\3\2\2\2\u008b\37\3\2\2\2\u008c\u008d"+
-		"\5\"\22\2\u008d\u008e\7\n\2\2\u008e\u008f\7\"\2\2\u008f\u0090\7\7\2\2"+
-		"\u0090\u0097\3\2\2\2\u0091\u0092\5$\23\2\u0092\u0093\7\n\2\2\u0093\u0094"+
-		"\7\20\2\2\u0094\u0095\7\7\2\2\u0095\u0097\3\2\2\2\u0096\u008c\3\2\2\2"+
+		"\5\"\22\2\u008d\u008e\7\7\2\2\u008e\u008f\7\"\2\2\u008f\u0090\7\b\2\2"+
+		"\u0090\u0097\3\2\2\2\u0091\u0092\5$\23\2\u0092\u0093\7\7\2\2\u0093\u0094"+
+		"\7\20\2\2\u0094\u0095\7\b\2\2\u0095\u0097\3\2\2\2\u0096\u008c\3\2\2\2"+
 		"\u0096\u0091\3\2\2\2\u0097!\3\2\2\2\u0098\u00a0\7\r\2\2\u0099\u00a0\7"+
-		"\5\2\2\u009a\u00a0\7\3\2\2\u009b\u00a0\5$\23\2\u009c\u00a0\7\t\2\2\u009d"+
-		"\u00a0\7\4\2\2\u009e\u00a0\7\6\2\2\u009f\u0098\3\2\2\2\u009f\u0099\3\2"+
+		"\6\2\2\u009a\u00a0\7\13\2\2\u009b\u00a0\5$\23\2\u009c\u00a0\7\t\2\2\u009d"+
+		"\u00a0\7\3\2\2\u009e\u00a0\7\5\2\2\u009f\u0098\3\2\2\2\u009f\u0099\3\2"+
 		"\2\2\u009f\u009a\3\2\2\2\u009f\u009b\3\2\2\2\u009f\u009c\3\2\2\2\u009f"+
-		"\u009d\3\2\2\2\u009f\u009e\3\2\2\2\u00a0#\3\2\2\2\u00a1\u00a2\7\13\2\2"+
+		"\u009d\3\2\2\2\u009f\u009e\3\2\2\2\u00a0#\3\2\2\2\u00a1\u00a2\7\4\2\2"+
 		"\u00a2%\3\2\2\2\u00a3\u00a4\7\34\2\2\u00a4\u00a5\7 \2\2\u00a5\'\3\2\2"+
 		"\2\u00a6\u00a7\7\35\2\2\u00a7\u00a8\7 \2\2\u00a8)\3\2\2\2\22,\609>FMY"+
 		"acnx}\u0085\u008a\u0096\u009f";

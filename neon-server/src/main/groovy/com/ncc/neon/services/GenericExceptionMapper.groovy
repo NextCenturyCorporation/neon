@@ -25,8 +25,8 @@ import org.slf4j.LoggerFactory
 @Provider
 class GenericExceptionMapper implements ExceptionMapper<Exception> {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(GenericExceptionMapper) 
-     
+    private static final Logger LOGGER = LoggerFactory.getLogger(GenericExceptionMapper)
+
     @Override
     public Response toResponse(Exception exception) {
         // Log any unhandled server exceptions and return an internal server error for them.

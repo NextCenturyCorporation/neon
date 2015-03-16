@@ -36,5 +36,5 @@ class GenericExceptionMapperTest {
         assert response.getStatus() == 500
         assert response.getEntity().toString() == "sample message"
     }
-    
+
 }

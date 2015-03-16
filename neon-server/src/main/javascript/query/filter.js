@@ -20,35 +20,21 @@
  * @constructor
  */
 neon.query.Filter = function() {
-    // the database name will automatically be populated by the connection when a query is executed based
-    // on what the "use" method provided as a database
     this.databaseName = undefined;
+    this.tableName = undefined;
     this.whereClause = undefined;
 };
 
 /**
  * Sets the *select* clause of the filter to select data from the specified table
  * @method selectFrom
- * @param {...String} args The database/table to select from. This may be the database and table name or just arg table
- * name, in which case the database specified in the "use" method of the connection will be added to the query when
- * it is executed. The table name may also be fully qualified with [databaseName.]tableName.
+ * @param {String} databaseName
+ * @param {String} tableName Table to select from
  * @return {neon.query.Filter} This filter object
  */
-neon.query.Filter.prototype.selectFrom = function() {
-    var parts = neon.util.arrayUtils.argumentsToArray(arguments);
-    if(parts.length === 1) {
-        // check for the fully qualified [database.]table
-        var table = parts[0].split(".");
-        if(table.length === 1) {
-            this.tableName = table[0];
-        } else {
-            this.databaseName = table[0];
-            this.tableName = table[1];
-        }
-    } else { // database and table passed in separately
-        this.databaseName = parts[0];
-        this.tableName = parts[1];
-    }
+neon.query.Filter.prototype.selectFrom = function(databaseName, tableName) {
+    this.databaseName = databaseName;
+    this.tableName = tableName;
     return this;
 };
 
@@ -62,7 +48,7 @@ neon.query.Filter.prototype.where = function() {
     if(arguments.length === 3) {
         this.whereClause = neon.query.where(arguments[0], arguments[1], arguments[2]);
     } else {
-        // must be a boolean/geospatial clause
+        // single argument is a boolean or a geospacial clause
         this.whereClause = arguments[0];
     }
     return this;

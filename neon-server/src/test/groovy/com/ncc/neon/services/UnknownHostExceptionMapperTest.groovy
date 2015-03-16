@@ -36,5 +36,5 @@ class UnknownHostExceptionMapperTest {
         assert response.getStatus() == 502
         assert response.getEntity().toString() == "Requested host is unknown to the server. sampleServer"
     }
-    
+
 }

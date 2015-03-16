@@ -14,13 +14,12 @@
  *
  */
 
-describe('messaging using the standard neon event bus', function () {
-
+describe('messaging using the standard neon event bus', function() {
     afterEach(function() {
         postal.utils.reset();
     });
 
-    it('publish/subscribe message', function () {
+    it('publish/subscribe message', function() {
         var eventBus = new neon.eventing.EventBus();
 
         var channel = 'aChannel';
@@ -56,8 +55,8 @@ describe('messaging using the standard neon event bus', function () {
         var callback1 = jasmine.createSpy();
         var callback2 = jasmine.createSpy();
 
-        var subscriber1 = eventBus.subscribe(channel, callback1, 'messengerId1');
-        var subscriber2 = eventBus.subscribe(channel, callback2, 'messengerId1');
+        eventBus.subscribe(channel, callback1, 'messengerId1');
+        eventBus.subscribe(channel, callback2, 'messengerId1');
 
         eventBus.publish(channel, 'aMessage', 'messengerId2');
         eventBus.unsubscribe(channel, 'messengerId1');
@@ -67,5 +66,4 @@ describe('messaging using the standard neon event bus', function () {
         expect(callback1.callCount).toEqual(1);
         expect(callback2.callCount).toEqual(1);
     });
-
 });

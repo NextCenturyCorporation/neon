@@ -115,9 +115,9 @@ class FilterService {
             return filterState.getFiltersForTables(tableName)
         } else if(tableName == "*") {
             return filterState.getFiltersForDatabase(databaseName)
-        } else {
-            DataSet dataset = new DataSet(databaseName: databaseName, tableName: tableName)
-            return filterState.getFiltersForDataset(dataset)
         }
+
+        DataSet dataset = new DataSet(databaseName: databaseName, tableName: tableName)
+        return filterState.getFiltersForDataset(dataset)
     }
 }
