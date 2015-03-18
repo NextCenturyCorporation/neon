@@ -224,6 +224,18 @@ abstract class AbstractQueryExecutorIntegrationTest {
     }
 
     @Test
+    void "count with mixed case field"() {
+        // This is specifically because Hive (and therefore Spark SQL when used through the Hive
+        // connector) converts all field names to lower case
+
+        def countClause = new AggregateClause(name: 'mIxEdCaSe', operation: 'count', field: '*')
+        def result = queryExecutor.execute(new Query(filter: ALL_DATA_FILTER,
+                aggregates: [countClause]), QueryOptions.DEFAULT_OPTIONS)
+        def expected = readJson('mixedcase.json')
+        assertOrderedQueryResult(expected, result)
+    }
+
+    @Test
     void "count field with missing value"() {
         def countClause = new AggregateClause(name: 'counter', operation: 'count', field: 'lastname')
         def result = queryExecutor.execute(new Query(filter: ALL_DATA_FILTER,
