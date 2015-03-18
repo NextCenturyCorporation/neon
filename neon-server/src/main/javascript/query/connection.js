@@ -95,7 +95,7 @@ neon.query.Connection.prototype.executeQuery = function(query, successCallback, 
  */
 neon.query.Connection.prototype.executeTextQuery = function(queryText, successCallback, errorCallback) {
     return neon.util.ajaxUtils.doPost(
-        neon.serviceUrl('languageservice', 'query/' + this.host_ + '/' + this.databaseType_), {
+        neon.serviceUrl('languageservice', 'query/' + encodeURIComponent(this.host_) + '/' + encodeURIComponent(this.databaseType_)), {
             data: {
                 text: queryText
             },
@@ -116,7 +116,7 @@ neon.query.Connection.prototype.executeTextQuery = function(queryText, successCa
  */
 neon.query.Connection.prototype.getColumnMetadata = function(tableName, successCallback) {
     return neon.util.ajaxUtils.doGet(
-        neon.serviceUrl('queryservice', 'columnmetadata/' + this.database_ + '/' + tableName), {
+        neon.serviceUrl('queryservice', 'columnmetadata/' + encodeURIComponent(this.database_) + '/' + encodeURIComponent(tableName)), {
             success: successCallback,
             responseType: 'json'
         }
@@ -158,7 +158,7 @@ neon.query.Connection.prototype.executeQueryService_ = function(query, successCa
     } else if(query.ignoredFilterIds_) {
         var filterIds = [];
         query.ignoredFilterIds_.forEach(function(id) {
-            filterIds.push("ignoredFilterIds=" + id);
+            filterIds.push("ignoredFilterIds=" + encodeURIComponent(id));
         });
         opts.push(filterIds.join("&"));
     }
@@ -168,7 +168,7 @@ neon.query.Connection.prototype.executeQueryService_ = function(query, successCa
 
     return neon.util.ajaxUtils.doPostJSON(
         query,
-        neon.serviceUrl('queryservice', serviceName + '/' + this.host_ + '/' + this.databaseType_, opts.join('&')),
+        neon.serviceUrl('queryservice', serviceName + '/' + encodeURIComponent(this.host_) + '/' + encodeURIComponent(this.databaseType_), opts.join('&')),
         {
             success: successCallback,
             error: errorCallback
@@ -185,7 +185,7 @@ neon.query.Connection.prototype.executeQueryService_ = function(query, successCa
 
 neon.query.Connection.prototype.getDatabaseNames = function(successCallback) {
     return neon.util.ajaxUtils.doGet(
-        neon.serviceUrl('queryservice', 'databasenames/' + this.host_ + '/' + this.databaseType_), {
+        neon.serviceUrl('queryservice', 'databasenames/' + encodeURIComponent(this.host_) + '/' + encodeURIComponent(this.databaseType_)), {
             success: successCallback,
             responseType: 'json'
         }
@@ -201,7 +201,7 @@ neon.query.Connection.prototype.getDatabaseNames = function(successCallback) {
 
 neon.query.Connection.prototype.getTableNames = function(successCallback) {
     return neon.util.ajaxUtils.doGet(
-        neon.serviceUrl('queryservice', 'tablenames/' + this.host_ + '/' + this.databaseType_ + '/' + this.database_), {
+        neon.serviceUrl('queryservice', 'tablenames/' + encodeURIComponent(this.host_) + '/' + encodeURIComponent(this.databaseType_) + '/' + encodeURIComponent(this.database_)), {
             success: successCallback,
             responseType: 'json'
         }
@@ -219,7 +219,7 @@ neon.query.Connection.prototype.getTableNames = function(successCallback) {
  */
 neon.query.Connection.prototype.getFieldNames = function(tableName, successCallback, errorCallback) {
     return neon.util.ajaxUtils.doGet(
-        neon.serviceUrl('queryservice', 'fields/' + this.host_ + '/' + this.databaseType_ + '/' + this.database_ + '/' + tableName), {
+        neon.serviceUrl('queryservice', 'fields/' + encodeURIComponent(this.host_) + '/' + encodeURIComponent(this.databaseType_) + '/' + encodeURIComponent(this.database_) + '/' + encodeURIComponent(tableName)), {
             success: successCallback,
             error: errorCallback,
             responseType: 'json'

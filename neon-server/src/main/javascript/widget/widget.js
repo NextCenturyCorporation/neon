@@ -50,7 +50,7 @@ neon.widget = (function() {
      */
     function getSavedState(id, successCallback) {
         return neon.util.ajaxUtils.doGet(
-            neon.serviceUrl('widgetservice', 'restorestate/' + id), {
+            neon.serviceUrl('widgetservice', 'restorestate/' + encodeURIComponent(id)), {
                 success: function(data) {
                     if(!data) {
                         return;
@@ -112,7 +112,7 @@ neon.widget = (function() {
     function buildInstanceIdQueryString(qualifier) {
         var queryString = '';
         if(qualifier) {
-            queryString = 'qualifier=' + buildQualifierString(qualifier);
+            queryString = 'qualifier=' + encodeURIComponent(buildQualifierString(qualifier));
         }
         return queryString;
     }
@@ -126,7 +126,7 @@ neon.widget = (function() {
      */
     function getWidgetInitializationData(widget, successCallback) {
         return neon.util.ajaxUtils.doGet(
-            neon.serviceUrl('widgetservice', 'widgetinitialization/' + widget), {
+            neon.serviceUrl('widgetservice', 'widgetinitialization/' + encodeURIComponent(widget)), {
                 success: successCallback
             }
         );
@@ -143,7 +143,7 @@ neon.widget = (function() {
      */
     function getWidgetDatasetMetadata(databaseName, tableName, widgetName, successCallback) {
         return neon.util.ajaxUtils.doGet(
-            neon.serviceUrl('widgetservice', 'widgetdataset/' + databaseName + '/' + tableName + '/' + widgetName),
+            neon.serviceUrl('widgetservice', 'widgetdataset/' + encodeURIComponent(databaseName) + '/' + encodeURIComponent(tableName) + '/' + encodeURIComponent(widgetName)),
             {
                 success: function(result) {
                     // The result is an array in the format:
