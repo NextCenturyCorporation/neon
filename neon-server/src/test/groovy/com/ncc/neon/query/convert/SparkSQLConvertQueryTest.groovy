@@ -91,6 +91,11 @@ class SparkSQLConvertQueryTest extends AbstractConversionTest {
     }
 
     @Override
+    protected void assertQueryWithWhereContainsFooClause(query) {
+        assert query.toLowerCase() == "select * from ${DATABASE_NAME}.${TABLE_NAME} where ${FIELD_NAME} like '%foo%'"
+    }
+
+    @Override
     protected void assertQueryWithEmptyFilter(query) {
         assertStandardSparkSQLStatement(query)
     }
