@@ -19,7 +19,6 @@ package com.ncc.neon.services
 import com.ncc.neon.connect.ConnectionInfo
 import com.ncc.neon.connect.ConnectionManager
 import com.ncc.neon.connect.DataSources
-import com.ncc.neon.metadata.model.ColumnMetadata
 import com.ncc.neon.query.*
 import com.ncc.neon.query.executor.QueryExecutor
 import com.ncc.neon.query.result.QueryResult
@@ -39,9 +38,6 @@ class QueryService {
 
     @Autowired
     QueryExecutorFactory queryExecutorFactory
-
-    @Autowired
-    MetadataResolver metadataResolver
 
     @Autowired
     ConnectionManager connectionManager
@@ -112,22 +108,6 @@ class QueryService {
 
         QueryExecutor queryExecutor = getExecutor(host, databaseType)
         return queryExecutor.getFieldNames(databaseName, tableName)
-    }
-
-    /**
-     * Gets metadata associated with the columns of the table
-     * @param databaseName The database containing the data
-     * @param tableName The table containing the data
-     * @return The list of metadata associated with the columns
-     */
-    @GET
-    @Produces(MediaType.APPLICATION_JSON)
-    @Path("columnmetadata/{databaseName}/{tableName}")
-    List<ColumnMetadata> getColumnMetadata(
-            @PathParam("databaseName") String databaseName,
-            @PathParam("tableName") String tableName
-    ) {
-        return metadataResolver.retrieve(databaseName, tableName, [] as Set)
     }
 
     /**

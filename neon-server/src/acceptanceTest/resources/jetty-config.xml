@@ -5,9 +5,4 @@
         <Arg>acceptance.test</Arg>
         <Arg>true</Arg>
     </Call>
-    <Call class="java.lang.System" name="setProperty">
-        <Arg>metadata.file</Arg>
-        <Arg>TestMetadata.groovy</Arg>
-    </Call>
-
 </Configure>

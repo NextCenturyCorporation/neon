@@ -45,23 +45,4 @@ class WidgetServiceTest {
     void "restore widget state that doesn't exist"() {
         assert service.restoreState("invalidState") == "{}"
     }
-
-    @Test
-    void "object is not found in metadata store"() {
-        def resolver = [getWidgetInitializationData: {
-            widgetName -> new WidgetInitializationMetadata(widgetName: widgetName)
-        }] as MetadataResolver
-        service.metadataResolver = resolver
-        assert !service.getWidgetInitialization("widget")
-    }
-
-    @Test
-    void "object is found in metadata store"() {
-        String data = "data"
-        def resolver = [getWidgetInitializationData: {
-            widgetName -> new WidgetInitializationMetadata(widgetName: widgetName, initDataJson: data)
-        }] as MetadataResolver
-        service.metadataResolver = resolver
-        assert service.getWidgetInitialization("widget") == data
-    }
 }

@@ -98,7 +98,6 @@ dependencies {
         exclude module: 'groovy'
     }
     compile "commons-lang:commons-lang:$commonsLangVersion"
-    compile project(":metadata")
 
     providedCompile "javax.servlet:javax.servlet-api:$javaxServletVersion"
 

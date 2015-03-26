@@ -107,22 +107,6 @@ neon.query.Connection.prototype.executeTextQuery = function(queryText, successCa
     );
 };
 
-/**
- * Gets the metadata for each of the columns in the table
- * @method getColumnMetadata
- * @param {String} tableName The table whose metadata is being returned
- * @param {Function} successCallback
- * @return {neon.util.AjaxRequest}
- */
-neon.query.Connection.prototype.getColumnMetadata = function(tableName, successCallback) {
-    return neon.util.ajaxUtils.doGet(
-        neon.serviceUrl('queryservice', 'columnmetadata/' + this.database_ + '/' + tableName), {
-            success: successCallback,
-            responseType: 'json'
-        }
-    );
-};
-
 neon.query.Connection.prototype.populateQueryDatabaseField_ = function(query) {
     if(!query.filter.databaseName) {
         query.filter.databaseName = this.database_;
