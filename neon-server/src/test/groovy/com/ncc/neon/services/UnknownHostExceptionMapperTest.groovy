@@ -35,7 +35,7 @@ class UnknownHostExceptionMapperTest {
     void "map exception to response"() {
         Response response = mapper.toResponse(testException)
         assert response.getStatus() == 502
-        assert (response.getEntity() instanceof ExceptionMapperResponse) == true
+        assert (response.getEntity() instanceof ExceptionMapperResponse)
         assert ((ExceptionMapperResponse) response.getEntity()).getError() == 'Requested host is unknown to the server.'
         assert ((ExceptionMapperResponse) response.getEntity()).getMessage() == 'sampleServer'
         assert response.getMetadata().getFirst('Content-Type') == MediaType.APPLICATION_JSON_TYPE

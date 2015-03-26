@@ -35,7 +35,7 @@ class GenericExceptionMapperTest {
     void "map exception to response"() {
         Response response = mapper.toResponse(testException)
         assert response.getStatus() == 500
-        assert (response.getEntity() instanceof ExceptionMapperResponse) == true
+        assert (response.getEntity() instanceof ExceptionMapperResponse)
         assert ((ExceptionMapperResponse) response.getEntity()).getError() == 'Unknown Error'
         assert ((ExceptionMapperResponse) response.getEntity()).getMessage() == 'sample message'
         assert response.getMetadata().getFirst('Content-Type') == MediaType.APPLICATION_JSON_TYPE
