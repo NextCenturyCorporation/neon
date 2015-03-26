@@ -15,6 +15,7 @@
  */
 package com.ncc.neon.services
 
+import javax.ws.rs.core.MediaType
 import javax.ws.rs.core.Response
 
 import org.junit.Before
@@ -34,7 +35,10 @@ class UnknownHostExceptionMapperTest {
     void "map exception to response"() {
         Response response = mapper.toResponse(testException)
         assert response.getStatus() == 502
-        assert response.getEntity().toString() == "Requested host is unknown to the server. sampleServer"
+        assert (response.getEntity() instanceof ExceptionMapperResponse) == true
+        assert ((ExceptionMapperResponse) response.getEntity()).getError() == 'Requested host is unknown to the server.'
+        assert ((ExceptionMapperResponse) response.getEntity()).getMessage() == 'sampleServer'
+        assert response.getMetadata().getFirst('Content-Type') == MediaType.APPLICATION_JSON_TYPE
     }
     
 }

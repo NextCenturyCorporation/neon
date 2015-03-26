@@ -20,10 +20,12 @@ import org.apache.commons.lang.exception.ExceptionUtils
 
 class ExceptionMapperResponse {
     final String error
+    final String message
     final String stackTrace
 
     ExceptionMapperResponse(String error, Exception exception) {
         this.error = error
+        this.message = exception.getMessage()
         this.stackTrace = ExceptionUtils.getStackTrace(exception)
     }
 }
