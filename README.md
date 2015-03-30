@@ -43,7 +43,7 @@ If you are using Tomcat, run the following command to create a Neon war file:
 
 Copy the Neon war file to your Tomcat directory webapps:
 
-        cp ./neon-server/build/libs/neon-0.9.0-SNAPSHOT.war [tomcat]/webapps
+        cp ./neon-server/build/libs/neon-1.1.0-SNAPSHOT.war [tomcat]/webapps
 
 To view the examples, copy the [neon-dir]/examples/*.html file to the [tomcat]/webapps/ directory.  If the Tomcat server is not running on port 8080, then the examples will need to be changed so that the Neon.js file can be found.  Modify the line:
 
