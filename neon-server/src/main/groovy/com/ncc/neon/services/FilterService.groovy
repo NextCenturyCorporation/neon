@@ -34,8 +34,8 @@ import javax.ws.rs.core.MediaType
 @Path("/filterservice")
 class FilterService {
 
-    /** empty dataset returned when invalid filter is removed or when the filters are cleared */
-    private static final DataSet EMPTY_DATASET = new DataSet(databaseName: "", tableName: "")
+    /** empty filter returned when invalid filter is removed or when the filters are cleared */
+    private static final Filter EMPTY_FILTER = new Filter(databaseName: "", tableName: "")
 
     @Autowired
     FilterState filterState
@@ -51,7 +51,7 @@ class FilterService {
     @Produces(MediaType.APPLICATION_JSON)
     FilterEvent addFilter(FilterKey filterKey) {
         filterState.addFilter(filterKey)
-        return new FilterEvent(type: "ADD", dataSet: filterKey.dataSet)
+        return new FilterEvent(type: "ADD", filter: filterKey.filter)
 
     }
 
@@ -66,8 +66,7 @@ class FilterService {
     @Path("removefilter")
     FilterEvent removeFilter(String id) {
         FilterKey removed = filterState.removeFilter(id)
-        DataSet dataset = removed ? removed.dataSet : EMPTY_DATASET
-        return new FilterEvent(type: "REMOVE", dataSet: dataset)
+        return new FilterEvent(type: "REMOVE", filter: removed?.filter ?: EMPTY_FILTER)
     }
 
     /**
@@ -82,7 +81,7 @@ class FilterService {
     FilterEvent replaceFilter(FilterKey filterKey) {
         removeFilter(filterKey.id)
         addFilter(filterKey)
-        return new FilterEvent(type: "REPLACE", dataSet: filterKey.dataSet)
+        return new FilterEvent(type: "REPLACE", filter: filterKey.filter)
     }
 
     /**
@@ -95,6 +94,6 @@ class FilterService {
     FilterEvent clearFilters() {
         filterState.clearAllFilters()
         // use an empty dataset since the clear can span multiple datasets
-        return new FilterEvent(type: "CLEAR", dataSet: EMPTY_DATASET)
+        return new FilterEvent(type: "CLEAR", filter: EMPTY_FILTER)
     }
 }

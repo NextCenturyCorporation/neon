@@ -29,7 +29,7 @@ class FilterEvent {
     /** a string description of the type of event */
     String type
 
-    /** the datset the filter changed on */
-    DataSet dataSet
+    /** the changed filter */
+    Filter filter
 
 }
