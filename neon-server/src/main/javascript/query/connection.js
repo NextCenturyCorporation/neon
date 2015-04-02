@@ -226,3 +226,21 @@ neon.query.Connection.prototype.getFieldNames = function(tableName, successCallb
         }
     );
 };
+
+/**
+ * Executes a query that returns a map of the table names available in the database and the field names in each table
+ * @method getTableNamesAndFieldNames
+ * @param {Function} successCallback The callback to call when the field names are successfully retrieved
+ * @param {Function} [errorCallback] The optional callback when an error occurs. This is a 3 parameter
+ * function that contains the xhr, a short error status and the full error message.
+ * @return {neon.util.AjaxRequest} The xhr request object
+ */
+neon.query.Connection.prototype.getTableNamesAndFieldNames = function(successCallback, errorCallback) {
+    return neon.util.ajaxUtils.doGet(
+        neon.serviceUrl('queryservice', 'tablesandfields/' + this.host_ + '/' + this.databaseType_ + '/' + this.database_), {
+            success: successCallback,
+            error: errorCallback,
+            responseType: 'json'
+        }
+    );
+};
