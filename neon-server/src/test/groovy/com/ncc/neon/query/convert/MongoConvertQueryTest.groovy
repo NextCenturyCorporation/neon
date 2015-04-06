@@ -100,6 +100,13 @@ class MongoConvertQueryTest extends AbstractConversionTest {
     }
 
     @Override
+    protected void assertQueryWithWhereContainsFooClause(query) {
+        assert query.query == simpleQuery
+        assert query.whereClauseParams == new BasicDBObject(FIELD_NAME, new BasicDBObject('$regex', 'foo'))
+        assert query.selectParams == new BasicDBObject()
+    }
+
+    @Override
     protected void assertQueryWithEmptyFilter(query) {
         standardQueryAsserts(query)
     }

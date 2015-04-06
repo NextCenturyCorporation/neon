@@ -59,9 +59,13 @@ class SparkSQLWhereClause {
     }
 
     private String renderClause(SingularWhereClause clause) {
-        stringBuilder << formatLhs(clause.lhs, clause.rhs)
-        stringBuilder << " " << formatOperator(clause) << " "
-        stringBuilder << formatRhs(clause.rhs)
+        if (clause.operator == 'contains') {
+            stringBuilder << formatContains(clause)
+        } else {
+            stringBuilder << formatLhs(clause.lhs, clause.rhs)
+            stringBuilder << " " << formatOperator(clause) << " "
+            stringBuilder << formatRhs(clause.rhs)
+        }
     }
 
     private String renderClause(BooleanWhereClause clause, String operator) {
@@ -83,6 +87,10 @@ class SparkSQLWhereClause {
 
     private String renderClause(OrWhereClause clause) {
         renderClause(clause, "or")
+    }
+
+    private static String formatContains(clause) {
+        return "${clause.lhs} like '%${clause.rhs}%'"
     }
 
     private static String formatLhs(lhs, rhs) {
