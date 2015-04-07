@@ -16,6 +16,7 @@
 
 package com.ncc.neon.services
 
+import com.mongodb.CommandFailureException
 import javax.ws.rs.core.Response
 import javax.ws.rs.ext.ExceptionMapper
 import javax.ws.rs.ext.Provider
@@ -23,16 +24,19 @@ import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
 @Provider
-class GenericExceptionMapper implements ExceptionMapper<Exception> {
+class CommandFailureExceptionMapper implements ExceptionMapper<CommandFailureException> {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(GenericExceptionMapper)
+    private static final Logger LOGGER = LoggerFactory.getLogger(CommandFailureExceptionMapper)
+    private static final Map<Integer, String> CODE_TO_MESSAGE = [
+        16389: "Query execution failed because there was too much data.",
+        16945: "Query execution failed because there was too much data."
+    ]
 
     @Override
-    public Response toResponse(Exception exception) {
-        // Log any unhandled server exceptions and return an internal server error for them.
+    public Response toResponse(CommandFailureException exception) {
         LOGGER.error(exception.message, exception)
-        ExceptionMapperResponse response = new ExceptionMapperResponse("Unknown Error", exception)
+        final String MESSAGE = CODE_TO_MESSAGE[exception.code] ?: "Query execution failed due to an unknown error."
+        ExceptionMapperResponse response = new ExceptionMapperResponse(MESSAGE, exception)
         return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(response).type("application/json").build()
     }
-
 }
