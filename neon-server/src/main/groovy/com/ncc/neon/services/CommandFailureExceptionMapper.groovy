@@ -26,12 +26,12 @@ import org.slf4j.LoggerFactory
 @Provider
 class CommandFailureExceptionMapper implements ExceptionMapper<CommandFailureException> {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(CommandFailureExceptionMapper) 
+    private static final Logger LOGGER = LoggerFactory.getLogger(CommandFailureExceptionMapper)
     private static final Map<Integer, String> CODE_TO_MESSAGE = [
         16389: "Query execution failed because there was too much data.",
         16945: "Query execution failed because there was too much data."
     ]
-     
+
     @Override
     public Response toResponse(CommandFailureException exception) {
         LOGGER.error(exception.message, exception)
