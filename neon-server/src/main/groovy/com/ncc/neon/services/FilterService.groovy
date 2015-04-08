@@ -34,11 +34,18 @@ import javax.ws.rs.core.MediaType
 @Path("/filterservice")
 class FilterService {
 
-    /** empty filter returned when invalid filter is removed or when the filters are cleared */
-    private static final Filter EMPTY_FILTER = new Filter(databaseName: "", tableName: "")
-
     @Autowired
     FilterState filterState
+
+    /**
+     * Creates and returns an empty filter containing only the given database and table names
+     * @param databaseName
+     * @param tableName
+     * @return
+     */
+    private Filter createEmptyFilter(String databaseName, String tableName) {
+        return new Filter(databaseName: databaseName, tableName: tableName)
+    }
 
     /**
      * Add a filter
@@ -51,8 +58,9 @@ class FilterService {
     @Produces(MediaType.APPLICATION_JSON)
     FilterEvent addFilter(FilterKey filterKey) {
         filterState.addFilter(filterKey)
-        return new FilterEvent(type: "ADD", filter: filterKey.filter)
-
+        Filter added = filterKey.filter
+        Filter removed = createEmptyFilter(added.databaseName, added.tableName)
+        return new FilterEvent(type: "ADD", addedFilter: added, removedFilter: removed)
     }
 
     /**
@@ -65,8 +73,10 @@ class FilterService {
     @Produces(MediaType.APPLICATION_JSON)
     @Path("removefilter")
     FilterEvent removeFilter(String id) {
-        FilterKey removed = filterState.removeFilter(id)
-        return new FilterEvent(type: "REMOVE", filter: removed?.filter ?: EMPTY_FILTER)
+        FilterKey filterKey = filterState.removeFilter(id)
+        Filter removed = filterKey?.filter ?: createEmptyFilter("", "")
+        Filter added = createEmptyFilter(removed.databaseName, removed.tableName)
+        return new FilterEvent(type: "REMOVE", addedFilter: added, removedFilter: removed)
     }
 
     /**
@@ -79,9 +89,9 @@ class FilterService {
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     FilterEvent replaceFilter(FilterKey filterKey) {
-        removeFilter(filterKey.id)
-        addFilter(filterKey)
-        return new FilterEvent(type: "REPLACE", filter: filterKey.filter)
+        Filter removed = removeFilter(filterKey.id).removedFilter
+        Filter added = addFilter(filterKey).addedFilter
+        return new FilterEvent(type: "REPLACE", addedFilter: added, removedFilter: removed)
     }
 
     /**
@@ -94,6 +104,7 @@ class FilterService {
     FilterEvent clearFilters() {
         filterState.clearAllFilters()
         // use an empty dataset since the clear can span multiple datasets
-        return new FilterEvent(type: "CLEAR", filter: EMPTY_FILTER)
+        Filter empty = createEmptyFilter("", "")
+        return new FilterEvent(type: "CLEAR", addedFilter: empty, removedFilter: empty)
     }
 }

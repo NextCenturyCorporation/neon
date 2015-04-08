@@ -29,7 +29,9 @@ class FilterEvent {
     /** a string description of the type of event */
     String type
 
-    /** the changed filter */
-    Filter filter
+    /** the added filter for add and replace events */
+    Filter addedFilter
 
+    /** the removed filter for replace and remove events */
+    Filter removedFilter
 }

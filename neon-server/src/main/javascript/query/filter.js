@@ -88,31 +88,3 @@ neon.query.Filter.prototype.geoIntersection = function(locationField, points, ge
 neon.query.Filter.prototype.geoWithin = function(locationField, points) {
     return this.where(neon.query.withinDistance(locationField, points));
 };
-
-/**
- * Returns the field names from the left-hand-side of the where clauses in the given filter.
- * @param {Object} The Neon filter JSON object
- * @method getFieldNames
- * @return {Object} The map containing all field names in the given filter as keys
- */
-neon.query.Filter.getFieldNames = function(filter) {
-    var fieldNames = {};
-
-    // Create a helper function to recursively iterate over an array of where clause objects.
-    var helper = function(clauses) {
-        if(clauses.length === 1) {
-            if(clauses[0].whereClauses) {
-                return helper(clauses[0].whereClauses);
-            }
-            return [clauses[0].lhs];
-        }
-
-        return helper(clauses.slice(0, 1)).concat(helper(clauses.slice(1)));
-    };
-
-    var fieldNamesArray = helper([filter.whereClause]);
-    for(var i = 0; i < fieldNamesArray.length; ++i) {
-        fieldNames[fieldNamesArray[i]] = true;
-    }
-    return fieldNames;
-};

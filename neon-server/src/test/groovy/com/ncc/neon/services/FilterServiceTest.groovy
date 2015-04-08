@@ -45,7 +45,7 @@ class FilterServiceTest {
         FilterEvent event = filterService.addFilter(filterKey)
         filterStateMock.verify(filterState)
         assert event.type == "ADD"
-        assert event.filter == filter
+        assert event.addedFilter == filter
     }
 
     @Test
@@ -57,7 +57,7 @@ class FilterServiceTest {
         FilterEvent event = filterService.removeFilter(ID)
         filterStateMock.verify(filterState)
         assert event.type == "REMOVE"
-        assert event.filter == filter
+        assert event.removedFilter == filter
     }
 
     @Test
@@ -71,8 +71,8 @@ class FilterServiceTest {
         assert event.type == "REMOVE"
 
         // explicitly check for empty string, not null
-        assert event.filter.databaseName == ""
-        assert event.filter.tableName == ""
+        assert event.removedFilter.databaseName == ""
+        assert event.removedFilter.tableName == ""
 
     }
 
@@ -87,7 +87,9 @@ class FilterServiceTest {
         FilterEvent event = filterService.replaceFilter(filterKey)
         filterStateMock.verify(filterState)
         assert event.type == "REPLACE"
-        assert event.filter == filter
+        assert event.addedFilter == filter
+        assert event.removedFilter.databaseName == ""
+        assert event.removedFilter.tableName == ""
     }
 
 }
