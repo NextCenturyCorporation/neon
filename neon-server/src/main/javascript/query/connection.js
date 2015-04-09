@@ -30,6 +30,7 @@
 neon.query.Connection = function() {
     this.host_ = undefined;
     this.databaseType_ = undefined;
+    this.messenger = new neon.eventing.Messenger();
 };
 
 /**
@@ -47,7 +48,7 @@ neon.query.Connection.MONGO = 'mongo';
 neon.query.Connection.SPARK = 'sparksql';
 
 /**
- * Specifies what database type and host the queries will be executed against.
+ * Specifies what database type and host the queries will be executed against and publishes a CONNECT_TO_HOST event.
  * @method connect
  * @param {String} databaseType What type of database is being connected to. The constants in this class specify the
  * valid database types.
@@ -56,6 +57,10 @@ neon.query.Connection.SPARK = 'sparksql';
 neon.query.Connection.prototype.connect = function(databaseType, host) {
     this.host_ = host;
     this.databaseType_ = databaseType;
+    this.messenger.publish(neon.eventing.channels.CONNECT_TO_HOST, {
+        host: host,
+        type: databaseType
+    });
 };
 
 /**
