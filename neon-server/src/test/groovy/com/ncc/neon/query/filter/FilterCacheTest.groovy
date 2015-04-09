@@ -108,7 +108,7 @@ class FilterCacheTest {
         List<FilterKey> filterKeys = filterCache.getFilterKeysForDataset(dataSet)
 
         // no guaranteed order for the filters so sort them first
-        Collections.sort(filterKeys, [compare: {key1,key2 -> key1.id <=> key2.id}] as Comparator)
+        Collections.sort(filterKeys, [compare: {key1, key2 -> key1.id <=> key2.id}] as Comparator)
 
         assert filterKeys[0].id == "filterA"
         assert filterKeys[0].filter == filterA

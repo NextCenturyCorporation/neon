@@ -22,7 +22,7 @@ import org.codehaus.jackson.annotate.JsonIgnoreProperties
 /**
  * Metadata about a column.
  */
-@JsonIgnoreProperties(["databaseName","tableName"])
+@JsonIgnoreProperties(["databaseName", "tableName"])
 @ToString(includeNames = true)
 class ColumnMetadata {
 

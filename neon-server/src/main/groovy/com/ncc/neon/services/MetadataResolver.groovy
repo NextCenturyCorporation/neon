@@ -35,7 +35,7 @@ import javax.annotation.PostConstruct
 class MetadataResolver {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(MetadataResolver)
-    private static final METADATA_FILE_NAME = System.getProperty("metadata.file","Metadata.groovy")
+    private static final METADATA_FILE_NAME = System.getProperty("metadata.file", "Metadata.groovy")
 
     @Delegate
     @Autowired

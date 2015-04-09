@@ -24,7 +24,7 @@ import org.codehaus.jackson.annotate.JsonIgnoreProperties
  * Contains metadata about the active data set.
  */
 
-@JsonIgnoreProperties(["databaseName","tableName","widgetName"])
+@JsonIgnoreProperties(["databaseName", "tableName", "widgetName"])
 @ToString(includeNames = true)
 class WidgetAndDatasetMetadata {
     String widgetName

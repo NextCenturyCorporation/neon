@@ -106,10 +106,10 @@ class MongoConnectionClientTest {
     void "connect to multiple hosts"() {
         String host1 = "notarealhost1:12345"
         String host2 = "notarealhost2:23456"
-        ConnectionInfo info = new ConnectionInfo(dataSource: DataSources.mongo, host: [host1,host2].join(","))
+        ConnectionInfo info = new ConnectionInfo(dataSource: DataSources.mongo, host: [host1, host2].join(","))
         // trigger the overridden constructor that stores the hosts for the test
         new MongoConnectionClient(info)
-        assertHosts([host1,host2])
+        assertHosts([host1, host2])
     }
 
     private static void assertHosts(def hostPortPairs) {

@@ -74,14 +74,14 @@ abstract class AbstractConversionTest {
     @Test
     void "test converting a query with a filter in the FilterState but ignore filters"() {
         givenFilterStateHasOneFilter()
-        def query = convertQuery(simpleQuery,new QueryOptions(ignoreFilters: true, selectionOnly: false))
+        def query = convertQuery(simpleQuery, new QueryOptions(ignoreFilters: true, selectionOnly: false))
         assertSimplestConvertQuery(query)
     }
 
     @Test
     void "test converting a query with a selection"() {
         givenSelectionStateHasOneFilter()
-        def query = convertQuery(simpleQuery,new QueryOptions(ignoreFilters: false, selectionOnly: true))
+        def query = convertQuery(simpleQuery, new QueryOptions(ignoreFilters: false, selectionOnly: true))
         assertQueryWithWhereClause(query)
     }
 
@@ -89,7 +89,7 @@ abstract class AbstractConversionTest {
     void "test converting a compound query with a selection"() {
         givenSelectionStateHasOneFilter()
         givenQueryHasOrWhereClause()
-        def query = convertQuery(simpleQuery,new QueryOptions(ignoreFilters: false, selectionOnly: true))
+        def query = convertQuery(simpleQuery, new QueryOptions(ignoreFilters: false, selectionOnly: true))
         assertQueryWithOrWhereClauseAndFilter(query)
     }
 
@@ -97,7 +97,7 @@ abstract class AbstractConversionTest {
     void "test selection not used"() {
         givenSelectionStateHasOneFilter()
         givenQueryHasSimpleWhereClause()
-        def query = convertQuery(simpleQuery,new QueryOptions(ignoreFilters: false, selectionOnly: false))
+        def query = convertQuery(simpleQuery, new QueryOptions(ignoreFilters: false, selectionOnly: false))
         assertQueryWithWhereClause(query)
     }
 

@@ -20,7 +20,6 @@ import com.ncc.neon.query.clauses.DistanceUnit
 import org.codehaus.jackson.JsonParser
 import org.codehaus.jackson.map.DeserializationContext
 import org.codehaus.jackson.map.JsonDeserializer
-import org.codehaus.jackson.map.annotate.JsonDeserialize
 
 
 class DistanceUnitDeserializer extends JsonDeserializer<DistanceUnit> {
