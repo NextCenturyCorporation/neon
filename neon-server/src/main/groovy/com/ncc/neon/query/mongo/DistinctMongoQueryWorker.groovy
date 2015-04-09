@@ -60,7 +60,7 @@ class DistinctMongoQueryWorker extends AbstractMongoQueryWorker {
     private List limitSkipDistinctResults(MongoQuery mongoQuery, List distinct) {
         int listSize = distinct.size()
         int startIndex = mongoQuery.query.offsetClause ? mongoQuery.query.offsetClause.offset : 0
-        int endIndex = mongoQuery.query.limitClause ? Math.min(listSize,(startIndex + mongoQuery.query.limitClause.limit)) : listSize
+        int endIndex = mongoQuery.query.limitClause ? Math.min(listSize, (startIndex + mongoQuery.query.limitClause.limit)) : listSize
 
         // only copy the sublist if we're not returning the whole list to avoid an unnecessary copy
         return (startIndex > 0 || endIndex < listSize) ? distinct[startIndex..<endIndex] : distinct

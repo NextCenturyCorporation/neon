@@ -1,5 +1,5 @@
 /*
- * Copyright 2013 Next Century Corporation
+ * Copyright 2015 Next Century Corporation
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -14,19 +14,18 @@
  *
  */
 
-package com.ncc.neon.query.jackson
+package com.ncc.neon.services
 
-import com.ncc.neon.query.clauses.DistanceUnit
-import org.codehaus.jackson.JsonParser
-import org.codehaus.jackson.map.DeserializationContext
-import org.codehaus.jackson.map.JsonDeserializer
+import org.apache.commons.lang.exception.ExceptionUtils
 
+class ExceptionMapperResponse {
+    final String error
+    final String message
+    final String stackTrace
 
-class DistanceUnitDeserializer extends JsonDeserializer<DistanceUnit> {
-
-    @Override
-    DistanceUnit deserialize(JsonParser jp, DeserializationContext ctxt) {
-        def unit = jp.text
-        return DistanceUnit.valueOf(unit.toUpperCase(Locale.US))
+    ExceptionMapperResponse(String error, Exception exception) {
+        this.error = error
+        this.message = exception.getMessage()
+        this.stackTrace = ExceptionUtils.getStackTrace(exception)
     }
 }

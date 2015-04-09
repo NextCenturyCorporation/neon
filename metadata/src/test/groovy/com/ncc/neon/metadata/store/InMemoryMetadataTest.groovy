@@ -45,7 +45,7 @@ class InMemoryMetadataTest {
     private InMemoryMetadata metadata
 
 
-    @SuppressWarnings(['PublicInstanceField','NonFinalPublicField']) // public for junit to use
+    @SuppressWarnings(['PublicInstanceField', 'NonFinalPublicField']) // public for junit to use
     @Rule
     public TemporaryFolder folder = new TemporaryFolder()
 

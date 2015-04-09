@@ -149,7 +149,7 @@ abstract class AbstractQueryExecutorIntegrationTest {
         def whereLastNameNullClause = new SingularWhereClause(lhs: 'lastname', operator: '=', rhs: null)
         def expected = readJson('null_or_missing.json')
         def result = queryExecutor.execute(createQueryWithWhereClause(whereLastNameNullClause), QueryOptions.DEFAULT_OPTIONS)
-        assertUnorderedQueryResult(expected,result)
+        assertUnorderedQueryResult(expected, result)
     }
 
     @Test
@@ -157,7 +157,7 @@ abstract class AbstractQueryExecutorIntegrationTest {
         def whereLastNameNotNullClause = new SingularWhereClause(lhs: 'lastname', operator: '!=', rhs: null)
         def expected = readJson('not_null_and_not_missing.json')
         def result = queryExecutor.execute(createQueryWithWhereClause(whereLastNameNotNullClause), QueryOptions.DEFAULT_OPTIONS)
-        assertUnorderedQueryResult(expected,result)
+        assertUnorderedQueryResult(expected, result)
     }
 
     @Test
@@ -220,6 +220,18 @@ abstract class AbstractQueryExecutorIntegrationTest {
         def result = queryExecutor.execute(new Query(filter: ALL_DATA_FILTER,
                 aggregates: [countClause]), QueryOptions.DEFAULT_OPTIONS)
         def expected = readJson('count.json')
+        assertOrderedQueryResult(expected, result)
+    }
+
+    @Test
+    void "count with mixed case field"() {
+        // This is specifically because Hive (and therefore Spark SQL when used through the Hive
+        // connector) converts all field names to lower case
+
+        def countClause = new AggregateClause(name: 'mIxEdCaSe', operation: 'count', field: '*')
+        def result = queryExecutor.execute(new Query(filter: ALL_DATA_FILTER,
+                aggregates: [countClause]), QueryOptions.DEFAULT_OPTIONS)
+        def expected = readJson('mixedcase.json')
         assertOrderedQueryResult(expected, result)
     }
 
@@ -454,7 +466,7 @@ abstract class AbstractQueryExecutorIntegrationTest {
         def salaryFilterKey = new FilterKey(id: salaryFilterId, filter: salaryFilter)
         queryExecutor.filterState.addFilter(salaryFilterKey)
 
-        def result = queryExecutor.execute(ALL_DATA_QUERY, new QueryOptions(ignoredFilterIds: [dcStateFilterId,salaryFilterId] as HashSet))
+        def result = queryExecutor.execute(ALL_DATA_QUERY, new QueryOptions(ignoredFilterIds: [dcStateFilterId, salaryFilterId] as HashSet))
         assertUnorderedQueryResult(getAllData(), result)
 
         // clear the filters, and there should be no filters applied

@@ -32,7 +32,7 @@ import java.nio.file.Path
 class ProductionAppContext {
 
     /**
-     * Uses this Class to get a resource folder from the classpath and return a Path to 
+     * Uses this Class to get a resource folder from the classpath and return a Path to
      * that folder.
      * @return A Path object representing the transforms folder found on the classpath.
      */
@@ -47,7 +47,7 @@ class ProductionAppContext {
         return FileSystems.getDefault().getPath(pathString)
     }
 
-    @Bean 
+    @Bean
     TransformerRegistry transformerRegistry() {
         TransformerRegistry registry = new TransformerRegistry()
         List<Transformer> registeredTransformers = []

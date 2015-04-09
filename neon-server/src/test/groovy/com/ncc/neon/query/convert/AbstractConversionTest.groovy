@@ -74,14 +74,14 @@ abstract class AbstractConversionTest {
     @Test
     void "test converting a query with a filter in the FilterState but ignore filters"() {
         givenFilterStateHasOneFilter()
-        def query = convertQuery(simpleQuery,new QueryOptions(ignoreFilters: true, selectionOnly: false))
+        def query = convertQuery(simpleQuery, new QueryOptions(ignoreFilters: true, selectionOnly: false))
         assertSimplestConvertQuery(query)
     }
 
     @Test
     void "test converting a query with a selection"() {
         givenSelectionStateHasOneFilter()
-        def query = convertQuery(simpleQuery,new QueryOptions(ignoreFilters: false, selectionOnly: true))
+        def query = convertQuery(simpleQuery, new QueryOptions(ignoreFilters: false, selectionOnly: true))
         assertQueryWithWhereClause(query)
     }
 
@@ -89,7 +89,7 @@ abstract class AbstractConversionTest {
     void "test converting a compound query with a selection"() {
         givenSelectionStateHasOneFilter()
         givenQueryHasOrWhereClause()
-        def query = convertQuery(simpleQuery,new QueryOptions(ignoreFilters: false, selectionOnly: true))
+        def query = convertQuery(simpleQuery, new QueryOptions(ignoreFilters: false, selectionOnly: true))
         assertQueryWithOrWhereClauseAndFilter(query)
     }
 
@@ -97,7 +97,7 @@ abstract class AbstractConversionTest {
     void "test selection not used"() {
         givenSelectionStateHasOneFilter()
         givenQueryHasSimpleWhereClause()
-        def query = convertQuery(simpleQuery,new QueryOptions(ignoreFilters: false, selectionOnly: false))
+        def query = convertQuery(simpleQuery, new QueryOptions(ignoreFilters: false, selectionOnly: false))
         assertQueryWithWhereClause(query)
     }
 
@@ -181,6 +181,13 @@ abstract class AbstractConversionTest {
     }
 
     @Test
+    void "test query where contains"() {
+        givenQueryHasWhereContainsFooClause()
+        def query = convertQuery(simpleQuery)
+        assertQueryWithWhereContainsFooClause(query)
+    }
+
+    @Test
     void "test ignoring specific filter"() {
         givenFilterStateHasOneFilter()
         def query = convertQuery(simpleQuery, new QueryOptions(ignoredFilterIds: ["filterA"] as HashSet))
@@ -217,6 +224,8 @@ abstract class AbstractConversionTest {
     protected abstract void assertQueryWithWhereNullClause(query)
 
     protected abstract void assertQueryWithWhereNotNullClause(query)
+
+    protected abstract void assertQueryWithWhereContainsFooClause(query)
 
     protected abstract void assertQueryWithEmptyFilter(query)
 
@@ -258,6 +267,10 @@ abstract class AbstractConversionTest {
 
     private void givenQueryHasWhereNotNullClause() {
         simpleQuery.filter.whereClause = new SingularWhereClause(lhs: FIELD_NAME, operator: "!=", rhs: null)
+    }
+
+    private void givenQueryHasWhereContainsFooClause() {
+        simpleQuery.filter.whereClause = new SingularWhereClause(lhs: FIELD_NAME, operator: "contains", rhs: "foo")
     }
 
     private void givenQueryHasSimpleWhereClause() {

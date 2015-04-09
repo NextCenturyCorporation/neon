@@ -79,7 +79,7 @@ class MongoConvertQueryTest extends AbstractConversionTest {
         assert query.query == simpleQuery
         BasicDBObject orClause = createOrClause()
         BasicDBObject filterClause = new BasicDBObject(FIELD_NAME, FIELD_VALUE)
-        BasicDBObject compoundClause = new BasicDBObject('$and',[orClause,filterClause])
+        BasicDBObject compoundClause = new BasicDBObject('$and', [orClause, filterClause])
 
         assert query.whereClauseParams == compoundClause
         assert query.selectParams == new BasicDBObject()
@@ -96,6 +96,13 @@ class MongoConvertQueryTest extends AbstractConversionTest {
     protected void assertQueryWithWhereNotNullClause(query) {
         assert query.query == simpleQuery
         assert query.whereClauseParams == new BasicDBObject(FIELD_NAME, new BasicDBObject('$ne', null))
+        assert query.selectParams == new BasicDBObject()
+    }
+
+    @Override
+    protected void assertQueryWithWhereContainsFooClause(query) {
+        assert query.query == simpleQuery
+        assert query.whereClauseParams == new BasicDBObject(FIELD_NAME, new BasicDBObject('$regex', 'foo'))
         assert query.selectParams == new BasicDBObject()
     }
 

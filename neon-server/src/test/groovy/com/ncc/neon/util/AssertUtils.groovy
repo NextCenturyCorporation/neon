@@ -28,6 +28,6 @@ import static org.junit.Assert.assertTrue
 class AssertUtils {
 
     static def assertEqualCollections(expected, actual) {
-        assertTrue("expected ${expected}, actual: ${actual}",CollectionUtils.isEqualCollection(expected,actual))
+        assertTrue("expected ${expected}, actual: ${actual}", CollectionUtils.isEqualCollection(expected, actual))
     }
 }
