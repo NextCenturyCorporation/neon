@@ -40,5 +40,5 @@ class UnknownHostExceptionMapperTest {
         assert ((ExceptionMapperResponse) response.getEntity()).getMessage() == 'sampleServer'
         assert response.getMetadata().getFirst('Content-Type') == MediaType.APPLICATION_JSON_TYPE
     }
-    
+
 }

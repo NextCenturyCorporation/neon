@@ -14,16 +14,15 @@
  *
  */
 
-describe('messaging using the OWF event bus', function () {
-
-    afterEach(function () {
+describe('messaging using the OWF event bus', function() {
+    afterEach(function() {
         neon.mock.owf.clearChannels();
     });
 
-    it('publish/subscribe OWF messages', function () {
+    it('publish/subscribe OWF messages', function() {
         OWF.getInstanceId = function() {
             return uuid.v4();
-        }
+        };
 
         neon.eventing.eventBusTestUtils.testPublishSubscribe(new neon.eventing.owf.OWFEventBus());
     });

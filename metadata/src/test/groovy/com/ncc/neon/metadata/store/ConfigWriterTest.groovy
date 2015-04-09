@@ -24,11 +24,11 @@ class ConfigWriterTest {
     void "written configuration can be read back into ConfigObject"() {
 
         ConfigObject obj = new ConfigObject(v:10d, w:5f, x:2, y:"str", z:true)
-        def map = [a:1,b:2,c:obj,g:"ignoreMe"]
+        def map = [a:1, b:2, c:obj, g:"ignoreMe"]
         def excludes = ["g"] as Set
 
         // write the config and read it back to test it
-        String config  = new ConfigWriter(excludes).writeConfig("config",map)
+        String config  = new ConfigWriter(excludes).writeConfig("config", map)
 
         def restored = new ConfigSlurper().parse(config)["config"]
 

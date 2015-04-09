@@ -36,7 +36,7 @@ class SelectClauseTest {
         // should default to all fields
         assert selectClause.selectAllFields
 
-        selectClause.fields = ["field1","field2"]
+        selectClause.fields = ["field1", "field2"]
         assert !selectClause.selectAllFields
     }
 

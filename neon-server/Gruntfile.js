@@ -77,8 +77,17 @@ module.exports = function(grunt) {
             options: {
                 jshintrc: '../.jshintrc'
             },
-            // check both the preconcat and concatenated files
-            files: [].concat('<%= concat.nodeps.src %>').concat(['<%= concat.nodeps.dest %>'])
+            source: {
+                // check both the preconcat and concatenated files
+                files: {
+                    src: [].concat('<%= concat.nodeps.src %>').concat(['<%= concat.nodeps.dest %>'])
+                }
+            },
+            tests: {
+                files: {
+                    src: ['src/acceptanceTest/javascript/spec/**/*.spec.js', 'src/test/javascript/spec/**/*.spec.js']
+                }
+            }
         },
         jasmine: {
             unit: {
@@ -97,8 +106,15 @@ module.exports = function(grunt) {
                 reporterOutput: 'reports/jscs.xml',
                 reporter: 'checkstyle'
             },
-            files: {
-                src: ['Gruntfile.js', 'src/main/javascript/**/*.js']
+            source: {
+                files: {
+                    src: ['Gruntfile.js', 'src/main/javascript/**/*.js']
+                }
+            },
+            tests: {
+                files: {
+                    src: ['src/acceptanceTest/javascript/spec/**/*.spec.js', 'src/test/javascript/spec/**/*.spec.js']
+                }
             }
         }
     });

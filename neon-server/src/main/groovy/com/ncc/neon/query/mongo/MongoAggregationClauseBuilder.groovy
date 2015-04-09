@@ -101,11 +101,11 @@ class MongoAggregationClauseBuilder {
 
         // compare the field to null (either it's null or doesn't exist). if this returns true, return null,
         // otherwise return the original field value (as long as that value is not null, that's all that matters)
-        def ifNull = new BasicDBObject('$ifNull',['$'+field,null])
+        def ifNull = new BasicDBObject('$ifNull', ['$'+field, null])
 
         // now compare that previous value (which is either null or the original field value) against null. if
         // it is not equal to null, this condition will return true. if it is null, this condition returns false
-        def notNull = new BasicDBObject('$ne', [null,ifNull])
+        def notNull = new BasicDBObject('$ne', [null, ifNull])
 
         // if the final value is not null, add 1 to the field, otherwise don't count it
         def conditionalCount = [notNull, 1, 0]

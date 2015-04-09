@@ -40,5 +40,5 @@ class GenericExceptionMapperTest {
         assert ((ExceptionMapperResponse) response.getEntity()).getMessage() == 'sample message'
         assert response.getMetadata().getFirst('Content-Type') == MediaType.APPLICATION_JSON_TYPE
     }
-    
+
 }

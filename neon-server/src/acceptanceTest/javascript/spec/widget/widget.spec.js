@@ -13,80 +13,86 @@
  * limitations under the License.
  *
  */
-describe('widgets', function () {
+/*global neontest*/
 
+describe('widgets', function() {
     // helper to execute async functions
-    var executeAndWait = function (asyncFunction, args) {
+    var executeAndWait = function(asyncFunction, args) {
         // the target is null since there is no "this" context for these functions (they are "static")
         return neontest.executeAndWait(null, asyncFunction, args);
     };
 
-    it('save and restore states', function () {
+    it('save and restore states', function() {
         // simulate state from two different widgets with different ids
         var instanceId1 = "id1";
-        var state1 = {"s1": "val1"};
+        var state1 = {
+            s1: "val1"
+        };
         var restoredState1;
         var instanceId2 = "id2";
-        var state2 = {"s2": "val2"};
+        var state2 = {
+            s2: "val2"
+        };
         var restoredState2;
 
         executeAndWait(neon.widget.saveState, [instanceId1, state1]);
-        runs(function () {
+        runs(function() {
             executeAndWait(neon.widget.saveState, [instanceId2, state2]);
-            runs(function () {
+            runs(function() {
                 restoredState1 = executeAndWait(neon.widget.getSavedState, instanceId1);
-                runs(function () {
+                runs(function() {
                     restoredState2 = executeAndWait(neon.widget.getSavedState, instanceId2);
-                    runs(function () {
+                    runs(function() {
                         expect(restoredState1.get()).toEqual(state1);
                         expect(restoredState2.get()).toEqual(state2);
                     });
                 });
-
             });
         });
     });
 
-    it('get an empty state if none exists', function () {
+    it('get an empty state if none exists', function() {
         var empty = executeAndWait(neon.widget.getSavedState, 'invalidWidgetId');
-        runs(function () {
+        runs(function() {
             expect(empty.get()).toEqual({});
         });
     });
 
-    it('gets widget initialization data', function () {
-        var expected = {"key1": "value1"};
+    it('gets widget initialization data', function() {
+        var expected = {
+            key1: "value1"
+        };
         var actual = executeAndWait(neon.widget.getWidgetInitializationData, 'widget1');
-        runs(function () {
+        runs(function() {
             expect(actual.get()).toEqual(expected);
         });
     });
 
-    it('get empty initialization data if none exists', function () {
+    it('get empty initialization data if none exists', function() {
         var empty = executeAndWait(neon.widget.getWidgetInitializationData, 'invalidWidget');
-        runs(function () {
+        runs(function() {
             expect(empty.get()).toBe('');
         });
     });
 
-
-    it('gets widget dataset data', function () {
-        var expected = {"aSelector": "someValue"};
+    it('gets widget dataset data', function() {
+        var expected = {
+            aSelector: "someValue"
+        };
         var actual = executeAndWait(neon.widget.getWidgetDatasetMetadata, ['database1', 'table1', 'widget1']);
-        runs(function () {
+        runs(function() {
             expect(actual.get()).toEqual(expected);
         });
     });
 
-    it('gets empty widget dataset data if none exists', function () {
+    it('gets empty widget dataset data if none exists', function() {
         var empty = executeAndWait(neon.widget.getWidgetDatasetMetadata, ['invalidDatabase', 'invalidWidget', 'invalidWidget']);
-        runs(function () {
+        runs(function() {
             expect(empty.get()).toEqual({});
         });
     });
 
-
-    it('gets a unique instance id', function () {
+    it('gets a unique instance id', function() {
         // instanceId1a and 1b should be the same
         var instanceId1a = neon.widget.getInstanceId('qualifier1');
         var instanceId1b = neon.widget.getInstanceId('qualifier1');
@@ -101,5 +107,4 @@ describe('widgets', function () {
         expect(instanceId2).not.toEqual(globalInstanceId1a);
         expect(globalInstanceId1a).toEqual(globalInstanceId1b);
     });
-
 });
