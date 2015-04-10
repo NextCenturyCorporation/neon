@@ -28,13 +28,11 @@ class FilterServiceTest {
     private FilterService filterService
     private FilterKey filterKey
     Filter filter
-    private DataSet dataSet
 
     @Before
     void before() {
         filterService = new FilterService()
-        dataSet = new DataSet(databaseName: "testDB", tableName: "testTable")
-        filter = new Filter(databaseName: dataSet.databaseName, tableName: dataSet.tableName)
+        filter = new Filter(databaseName: "testDB", tableName: "testTable")
         filterKey = new FilterKey(id: ID, filter: filter)
     }
 
@@ -47,7 +45,7 @@ class FilterServiceTest {
         FilterEvent event = filterService.addFilter(filterKey)
         filterStateMock.verify(filterState)
         assert event.type == "ADD"
-        assert event.dataSet == dataSet
+        assert event.addedFilter == filter
     }
 
     @Test
@@ -59,7 +57,7 @@ class FilterServiceTest {
         FilterEvent event = filterService.removeFilter(ID)
         filterStateMock.verify(filterState)
         assert event.type == "REMOVE"
-        assert event.dataSet == dataSet
+        assert event.removedFilter == filter
     }
 
     @Test
@@ -73,8 +71,8 @@ class FilterServiceTest {
         assert event.type == "REMOVE"
 
         // explicitly check for empty string, not null
-        assert event.dataSet.databaseName == ""
-        assert event.dataSet.tableName == ""
+        assert event.removedFilter.databaseName == ""
+        assert event.removedFilter.tableName == ""
 
     }
 
@@ -89,7 +87,9 @@ class FilterServiceTest {
         FilterEvent event = filterService.replaceFilter(filterKey)
         filterStateMock.verify(filterState)
         assert event.type == "REPLACE"
-        assert event.dataSet == dataSet
+        assert event.addedFilter == filter
+        assert event.removedFilter.databaseName == ""
+        assert event.removedFilter.tableName == ""
     }
 
 }
