@@ -80,6 +80,10 @@ class SparkSQLConversionStrategy {
     }
 
     private static String functionToString(FieldFunction fieldFunction) {
+        if(fieldFunction.operation == 'dayOfWeek') {
+            return "(pmod(from_unixtime(unix_timestamp(${escapeFieldName(fieldFunction.field)}),'u'),7)+1) as ${fieldFunction.name}"
+        }
+
         return "${fieldFunction.operation}(${escapeFieldName(fieldFunction.field)}) as ${fieldFunction.name}"
     }
 
