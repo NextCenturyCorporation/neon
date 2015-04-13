@@ -81,6 +81,7 @@ class SparkSQLConversionStrategy {
 
     private static String functionToString(FieldFunction fieldFunction) {
         if(fieldFunction.operation == 'dayOfWeek') {
+            /* pmod 7 + 1 is changing the day of week scale from monday = 1 to sunday = 1 to match MongoDB dayOfWeek */
             return "(pmod(from_unixtime(unix_timestamp(${escapeFieldName(fieldFunction.field)}),'u'),7)+1) as ${fieldFunction.name}"
         }
 
