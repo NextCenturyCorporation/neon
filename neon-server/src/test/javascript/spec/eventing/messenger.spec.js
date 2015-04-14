@@ -113,12 +113,12 @@ describe('messenger', function() {
         var callback3 = jasmine.createSpy('callback3');
 
         messenger1.events({
-            activeDatasetChanged: callback1,
+            connectToHost: callback1,
             filtersChanged: callback2,
             selectionChanged: callback3
         });
-        messenger2.publish(neon.eventing.channels.ACTIVE_DATASET_CHANGED, {
-            id: "activeDatasetChanged"
+        messenger2.publish(neon.eventing.channels.CONNECT_TO_HOST, {
+            id: "connectToHost"
         });
         messenger2.publish(neon.eventing.channels.FILTERS_CHANGED, {
             id: "filtersChanged"
@@ -140,14 +140,14 @@ describe('messenger', function() {
         var callback3 = jasmine.createSpy('callback3');
 
         messenger1.events({
-            activeDatasetChanged: callback1,
+            connectToHost: callback1,
             filtersChanged: callback2,
             selectionChanged: callback3
         });
         messenger1.removeEvents();
 
-        messenger2.publish(neon.eventing.channels.ACTIVE_DATASET_CHANGED, {
-            id: "activeDatasetChanged"
+        messenger2.publish(neon.eventing.channels.CONNECT_TO_HOST, {
+            id: "connectToHost"
         });
         messenger2.publish(neon.eventing.channels.FILTERS_CHANGED, {
             id: "filtersChanged"
@@ -173,9 +173,9 @@ describe('messenger', function() {
         });
     });
 
-    it('should be notified when a message is published to the active dataset changed channel', function() {
-        testGlobalNeonEventReceived(neon.eventing.channels.ACTIVE_DATASET_CHANGED, 'activeDatasetChanged', {
-            id: "activeDatasetChanged"
+    it('should be notified when a message is published to the connect to host channel', function() {
+        testGlobalNeonEventReceived(neon.eventing.channels.CONNECT_TO_HOST, 'connectToHost', {
+            id: "connectToHost"
         });
     });
 
