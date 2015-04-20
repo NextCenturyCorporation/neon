@@ -47,6 +47,17 @@ class SparkSQLConversionStrategy {
 
     }
 
+    String mergeQuery(String databaseName, String tableName, String select, String groupBy, String orderBy, String limit) {
+        StringBuilder joinedQuery = new StringBuilder();
+
+        joinedQuery << select
+
+        Query query = new Query(filter: new Filter(databaseName: databaseName, tableName: tableName))
+        applyWhereStatement(joinedQuery, query, new QueryOptions())
+
+        joinedQuery << groupBy << orderBy << limit
+    }
+
     private static void applySelectFromStatement(StringBuilder builder, Query query) {
         def modifier = query.isDistinct ? "DISTINCT " : ""
         builder << "select ${modifier}" << buildFieldList(query) << " from " << query.filter.databaseName << "." << query.filter.tableName

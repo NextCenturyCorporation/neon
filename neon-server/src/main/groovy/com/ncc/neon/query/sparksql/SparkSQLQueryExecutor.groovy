@@ -22,6 +22,7 @@ import com.ncc.neon.query.executor.AbstractQueryExecutor
 import com.ncc.neon.query.filter.FilterState
 import com.ncc.neon.query.filter.SelectionState
 import com.ncc.neon.query.result.QueryResult
+import com.ncc.neon.query.result.ArrayCountPair
 import com.ncc.neon.query.result.TabularQueryResult
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -81,6 +82,16 @@ class SparkSQLQueryExecutor extends AbstractQueryExecutor {
             }
     }
 
+    public hashtags(String host, String db, String coll, String field) {
+        String query = "select explode(${field}), count(*) from " + db + "." + coll + " group by explode(${field})"
+
+        return runAndRelease { client ->
+            List<Map> resultList = client.executeQuery(sparkSQLQuery, offset)
+            fixHiveNames(query.aggregates, resultList)
+            return  new TabularQueryResult(resultList)
+        }
+    }
+
     @Override
     List<String> showDatabases() {
         LOGGER.debug("Executing SHOW DATABASES")
@@ -132,6 +143,24 @@ class SparkSQLQueryExecutor extends AbstractQueryExecutor {
         finally {
             // neon uses connection pooling, so all this does is release it back into the pool
             client?.close()
+        }
+    }
+
+    List<ArrayCountPair> getArrayCounts(String databaseName, String tableName, String field, int limit = 40) {
+        String select = "SELECT tagvar, count(1) as countvar FROM " + databaseName + "." + tableName + " LATERAL VIEW explode(" + field + ") tmptable AS tagvar"
+        String groupBy = " GROUP BY tagvar"
+        String orderBy = " ORDER BY countvar DESC"
+        String sort = " LIMIT " + limit
+
+        String qry = "SELECT tagvar, count(1) as countvar FROM test.gbdate LATERAL VIEW explode(hashtags) gbdate2 AS tagvar GROUP BY tagvar ORDER BY countvar DESC LIMIT 10"
+
+        return runAndRelease { client ->
+            SparkSQLConversionStrategy conversionStrategy = new SparkSQLConversionStrategy(filterState: filterState, selectionState: selectionState)
+            String sparkSQLQuery = conversionStrategy.mergeQuery(databaseName, tableName, select, groupBy, orderBy, sort)
+            int offset = 0
+            List<Map> resultList = client.executeQuery(sparkSQLQuery, offset)
+            //return  new TabularQueryResult(resultList)
+            return resultList
         }
     }
 }

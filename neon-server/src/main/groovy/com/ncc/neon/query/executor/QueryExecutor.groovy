@@ -21,12 +21,12 @@ import com.ncc.neon.query.Query
 import com.ncc.neon.query.QueryGroup
 import com.ncc.neon.query.QueryOptions
 import com.ncc.neon.query.result.QueryResult
+import com.ncc.neon.query.result.ArrayCountPair
 
 /**
  * Executes a query against a generic data source
  */
 public interface QueryExecutor {
-
     /**
      * Executes a query against a generic data source given the current filter and selection state.
      * @param query An object that represents the query we wish to execute
@@ -62,4 +62,10 @@ public interface QueryExecutor {
      */
     List<String> getFieldNames(String databaseName, String tableName)
 
+    /**
+     * Gets the count for distinct values in an array field
+     * @param field the field of the table on which to perform the count
+     * @param limit limit number of result pairs to return
+     */
+    List<ArrayCountPair> getArrayCounts(String databaseName, String tableName, String field, int limit)
 }

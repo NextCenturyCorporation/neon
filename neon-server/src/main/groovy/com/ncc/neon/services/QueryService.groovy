@@ -23,6 +23,7 @@ import com.ncc.neon.metadata.model.ColumnMetadata
 import com.ncc.neon.query.*
 import com.ncc.neon.query.executor.QueryExecutor
 import com.ncc.neon.query.result.QueryResult
+import com.ncc.neon.query.result.ArrayCountPair
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
 
@@ -182,6 +183,16 @@ class QueryService {
         QueryExecutor queryExecutor = getExecutor(host, databaseType)
         return queryExecutor.showTables(database)
     }
+
+    @GET
+    @Produces(MediaType.APPLICATION_JSON)
+    @Path("arraycounts/{host}/{dbType}/{db}/{tableName}")
+    public List<ArrayCountPair> getArrayCounts(@PathParam("host") String host, @PathParam("dbType") String dbType, @PathParam("db") String db,
+      @PathParam("tableName") String tableName, @QueryParam("field") String field, @DefaultValue("50") @QueryParam("limit") int limit) {
+        QueryExecutor queryExecutor = getExecutor(host, dbType)
+        return queryExecutor.getArrayCounts(db, tableName, field, limit)
+    }
+
 
     private QueryResult execute(String host, String databaseType, def query, QueryOptions options) {
         QueryExecutor queryExecutor = getExecutor(host, databaseType)

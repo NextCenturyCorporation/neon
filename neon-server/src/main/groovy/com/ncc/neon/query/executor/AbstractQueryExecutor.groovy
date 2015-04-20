@@ -107,7 +107,4 @@ abstract class AbstractQueryExecutor implements QueryExecutor {
 
         return returnResult
     }
-
-
-
 }
