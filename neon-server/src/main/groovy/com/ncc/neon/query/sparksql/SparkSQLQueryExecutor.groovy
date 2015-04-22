@@ -82,16 +82,6 @@ class SparkSQLQueryExecutor extends AbstractQueryExecutor {
             }
     }
 
-    public hashtags(String host, String db, String coll, String field) {
-        String query = "select explode(${field}), count(*) from " + db + "." + coll + " group by explode(${field})"
-
-        return runAndRelease { client ->
-            List<Map> resultList = client.executeQuery(sparkSQLQuery, offset)
-            fixHiveNames(query.aggregates, resultList)
-            return  new TabularQueryResult(resultList)
-        }
-    }
-
     @Override
     List<String> showDatabases() {
         LOGGER.debug("Executing SHOW DATABASES")
@@ -151,8 +141,6 @@ class SparkSQLQueryExecutor extends AbstractQueryExecutor {
         String groupBy = " GROUP BY tagvar"
         String orderBy = " ORDER BY countvar DESC"
         String sort = " LIMIT " + limit
-
-        String qry = "SELECT tagvar, count(1) as countvar FROM test.gbdate LATERAL VIEW explode(hashtags) gbdate2 AS tagvar GROUP BY tagvar ORDER BY countvar DESC LIMIT 10"
 
         return runAndRelease { client ->
             SparkSQLConversionStrategy conversionStrategy = new SparkSQLConversionStrategy(filterState: filterState, selectionState: selectionState)

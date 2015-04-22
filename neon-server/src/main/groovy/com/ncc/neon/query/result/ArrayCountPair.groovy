@@ -17,6 +17,6 @@
 package com.ncc.neon.query.result
 
 class ArrayCountPair {
-    final def key
-    final int count
+    def key
+    int count
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2014 Next Century Corporation
+ * Copyright 2013 Next Century Corporation
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -14,14 +14,22 @@
  *
  */
 
-package com.ncc.neon.services.demo
+package com.ncc.neon.query.result
+/**
+ * Query results of a tabular data store.
+ * This is represented as a list of rows, where a row is a map of column names to values.
+ */
+class ListQueryResult<T> implements QueryResult{
 
-import groovy.transform.Immutable
+    final List<T> data
 
-@Immutable
-class TagCountPair {
+    public ListQueryResult() {
+        this([])
+    }
 
-    final String tag
-    final int count
-
+    public ListQueryResult(List<T> list){
+        this.data = list
+    }
 }
+
+

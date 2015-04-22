@@ -48,7 +48,7 @@ class SparkSQLConversionStrategy {
     }
 
     String mergeQuery(String databaseName, String tableName, String select, String groupBy, String orderBy, String limit) {
-        StringBuilder joinedQuery = new StringBuilder();
+        StringBuilder joinedQuery = new StringBuilder()
 
         joinedQuery << select
 

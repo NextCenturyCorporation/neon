@@ -15,9 +15,7 @@
  */
 
 package com.ncc.neon.query.mongo
-import com.mongodb.BasicDBObject
 import com.mongodb.DB
-import com.mongodb.DBObject
 import com.mongodb.MongoClient
 import com.ncc.neon.connect.ConnectionManager
 import com.ncc.neon.query.executor.AbstractQueryExecutor
@@ -25,9 +23,9 @@ import com.ncc.neon.query.Query
 import com.ncc.neon.query.QueryOptions
 import com.ncc.neon.query.result.QueryResult
 import com.ncc.neon.query.result.ArrayCountPair
+import com.ncc.neon.query.filter.Filter
 import com.ncc.neon.query.filter.FilterState
 import com.ncc.neon.query.filter.SelectionState
-import com.ncc.neon.query.filter.DataSet
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
@@ -102,31 +100,13 @@ class MongoQueryExecutor extends AbstractQueryExecutor {
         connectionManager.connection.mongo
     }
 
-    DBObject mergeNeonFilters(DBObject query, String databaseName, String collectionName ) {
-        DataSet dataSet = new DataSet(databaseName: databaseName, tableName: collectionName)
-        List neonFiltersAndSelection = []
-
-        neonFiltersAndSelection.addAll(MongoConversionStrategy.createWhereClausesForFilters(dataSet, filterState))
-
-        // the demo only shows selected data - right now selection is basically a temporary filter so only show selected
-        neonFiltersAndSelection.addAll(MongoConversionStrategy.createWhereClausesForFilters(dataSet, selectionState))
-
-        // TODO: Do we need to flatten  - the lists added to this should be empty, but it looks like this list contains 2 empty list objects if not flattened first
-        neonFiltersAndSelection = neonFiltersAndSelection.flatten()
-
-        if (neonFiltersAndSelection) {
-            DBObject matchNeonFilters = MongoConversionStrategy.buildMongoWhereClause((List) neonFiltersAndSelection)
-            return new BasicDBObject('$and', [matchNeonFilters, query])
-        }
-        // no neon filters/selection, just return the original query
-        return query
-    }
-
     List<ArrayCountPair> getArrayCounts(String databaseName, String tableName, String field, int limit) {
+        DB database = mongo.getDB(databaseName)
+
         ArrayCountQueryWorker worker = new ArrayCountQueryWorker(mongo)
 
-        //work out query weirdness ==== do the whole merge thing
-
-        return worker.executeQuery(query)
+        Query query = new Query(filter: new Filter(databaseName: databaseName, tableName: tableName))
+        MongoQuery mongoQuery = new MongoQuery(query: query)
+        return worker.executeQuery(mongoQuery, database, field, limit, filterState, selectionState)
     }
 }
