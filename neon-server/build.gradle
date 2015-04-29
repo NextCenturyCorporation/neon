@@ -204,7 +204,6 @@ task generateMongoJson {
     doLast {
         def mongoJsonGenerator = new MongoJSONGenerator()
         mongoJsonGenerator.generateJson(testDataDir, outputDir, ~/data.json/)
-        mongoJsonGenerator.generateJson(testDataDir, outputDir, ~/tagcloud.json/)
     }
 }
 
@@ -272,7 +271,7 @@ def getTagName() {
 
     def stdout = new ByteArrayOutputStream()
     exec {
-        // If Neon dir does not have .git/, or built on a system without git, this will fail. 
+        // If Neon dir does not have .git/, or built on a system without git, this will fail.
 	// This will continue anyway.
         ignoreExitValue = true
         commandLine 'git', 'describe', '--tags', '--long'
@@ -281,7 +280,7 @@ def getTagName() {
     }
     def tagString = stdout.toString().trim()
     if (tagString == null || tagString.length() == 0)
-    { 
+    {
        return version
     }
     def firstDash = tagString.indexOf("-")
@@ -289,7 +288,7 @@ def getTagName() {
     {
 	return version
     }
-    def newTagString = version + tagString.substring(firstDash)    
+    def newTagString = version + tagString.substring(firstDash)
     return newTagString
 }
 

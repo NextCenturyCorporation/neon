@@ -9,6 +9,9 @@
         "location": {
             "type": "Point",
             "coordinates": [14.0, 22.0]
-        }
+        },
+        "tags": [
+            "tag2"
+        ]
     }
 ]

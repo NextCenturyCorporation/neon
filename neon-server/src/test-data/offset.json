@@ -10,7 +10,12 @@
         "location": {
             "type": "Point",
             "coordinates": [20.0 , 12.0]
-        }
+        },
+        "tags": [
+            "tag1",
+            "tag2",
+            "tag3"
+        ]
     },
     {
         "_id": "5137b623a9f279d831b6fb8c",
@@ -23,7 +28,10 @@
         "location": {
             "type": "Point",
             "coordinates": [11.0, -23.0]
-        }
+        },
+        "tags": [
+            "tag2"
+        ]
     },
     {
         "_id": "5137b623a9f279d831b6fb8a",
@@ -36,7 +44,10 @@
         "location": {
             "type": "Point",
             "coordinates": [12.0, 11.0]
-        }
+        },
+        "tags": [
+            "tag2"
+        ]
     },
     {
         "_id": "5137b623a9f279d831b6fb88",
@@ -49,6 +60,10 @@
         "location": {
             "type": "Point",
             "coordinates": [19.55, 11.92]
-        }
+        },
+        "tags": [
+            "tag2",
+            "tag3"
+        ]
     }
 ]

@@ -10,7 +10,12 @@
         "location": {
             "type": "Point",
             "coordinates": [20.0 , 12.0]
-        }
+        },
+        "tags": [
+            "tag1",
+            "tag2",
+            "tag3"
+        ]
     },
     {
         "_id": "5137b623a9f279d831b6fb89",
@@ -23,7 +28,10 @@
         "location": {
             "type": "Point",
             "coordinates": [10.0, 7.0]
-        }
+        },
+        "tags": [
+            "tag2"
+        ]
     },
     {
         "_id": "5137b623a9f279d831b6fb8b",
@@ -35,6 +43,9 @@
         "location": {
             "type": "Point",
             "coordinates": [14.0, 22.0]
-        }
+        },
+        "tags": [
+            "tag2"
+        ]
     }
 ]
