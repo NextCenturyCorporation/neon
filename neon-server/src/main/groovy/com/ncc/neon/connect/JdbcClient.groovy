@@ -23,6 +23,12 @@ import org.slf4j.LoggerFactory
 
 import java.sql.*
 
+import groovy.json.JsonSlurper
+import groovy.json.JsonException
+
+@SuppressWarnings("UnusedImport")
+import groovy.json.internal.Exceptions$JsonInternalException
+
 /**
  * Wrapper for JDBC API
  */
@@ -142,12 +148,22 @@ class JdbcClient implements Closeable {
         }
     }
 
+    @SuppressWarnings('EmptyCatchBlock')
     private def getValue(ResultSetMetaData metadata, ResultSet resultSet, int index) {
         def val = resultSet.getObject(index)
+
         // timestamps are time-zone less, but we assume UTC
-        if (val && metadata.getColumnType(index) == Types.TIMESTAMP) {
+        if(val && metadata.getColumnType(index) == Types.TIMESTAMP) {
             // use joda time because not all jdbc drivers (e.g. Spark SQL) support timezones - they return in local time
             val = new DateTime(val.time).withZoneRetainFields(DateTimeZone.UTC).toDate()
+        } else if(val && metadata.getColumnType(index) == Types.VARCHAR && val[0] == "[") {
+            try {
+                val = new JsonSlurper().parseText(val)
+            } catch(JsonException jsonE) {
+                //Do nothing -- don't touch the val if it is not json
+            } catch(Exceptions$JsonInternalException internalJsonE) {
+                //Do nothing -- don't touch the val if it is not json
+            }
         }
         return val
     }

@@ -60,7 +60,7 @@ describe('query mapping', function() {
 
     it('get field names', function() {
         var result = executeQueryAndWait(connection.getFieldNames, [databaseName, tableName]);
-        var expected = ['_id', 'firstname', 'lastname', 'city', 'state', 'salary', 'hiredate', 'location'];
+        var expected = ['_id', 'firstname', 'lastname', 'city', 'state', 'salary', 'hiredate', 'location', 'tags'];
         runs(function() {
             expect(result.get()).toBeArrayWithSameElements(expected);
         });

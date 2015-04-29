@@ -184,6 +184,15 @@ class QueryService {
         return queryExecutor.showTables(database)
     }
 
+    /**
+     * Gets a sorted list of key, count pairs for an array field in the database
+     * @param host The host the database is running on
+     * @param dbType the type of the database
+     * @param db the database name
+     * @param tableName the name of the collection or table
+     * @param field The array field to count on
+     * @param limit The number of pairs to return; defaults to 50 if not set
+     */
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     @Path("arraycounts/{host}/{dbType}/{db}/{tableName}")

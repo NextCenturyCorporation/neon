@@ -28,6 +28,7 @@ import com.ncc.neon.util.DateUtils
 import org.json.JSONArray
 import org.junit.After
 import org.junit.Test
+import com.ncc.neon.query.result.ArrayCountPair
 
 /**
  * Integration test that verifies the neon server properly translates database specific queries.
@@ -443,6 +444,7 @@ abstract class AbstractQueryExecutorIntegrationTest {
     }
 
     @Test
+    @SuppressWarnings('Println')
     void "ignore filters"() {
         String filterId = "filterId"
         def dcStateFilter = createFilterWithWhereClause(new SingularWhereClause(lhs: 'state', operator: '=', rhs: 'DC'))
@@ -737,6 +739,41 @@ abstract class AbstractQueryExecutorIntegrationTest {
     void "show tables"(){
         def tables = queryExecutor.showTables(DATABASE_NAME)
         assert tables.contains(TABLE_NAME)
+    }
+
+    @SuppressWarnings("Println")
+    private void assertEntry(def entry, String tag, int count) {
+        println(entry)
+        assert entry.key == tag
+        assert entry.count == count
+
+    }
+
+    @Test
+    void "test array count"(){
+        String db = DATABASE_NAME
+        String tableName = TABLE_NAME
+        String field = "tags"
+        int limit = 50
+
+        List<ArrayCountPair> result = queryExecutor.getArrayCounts(db, tableName, field, limit)
+        assert result.size == 3
+        assertEntry(result[0], "tag2", 8)
+        assertEntry(result[1], "tag3", 2)
+        assertEntry(result[2], "tag1", 1)
+    }
+
+    @Test
+    void "test array count limiting"(){
+        String db = DATABASE_NAME
+        String tableName = TABLE_NAME
+        String field = "tags"
+        int limit = 2
+
+        List<ArrayCountPair> result = queryExecutor.getArrayCounts(db, tableName, field, limit)
+        assert result.size == 2
+        assertEntry(result[0], "tag2", 8)
+        assertEntry(result[1], "tag3", 2)
     }
 
 

@@ -137,16 +137,16 @@ class SparkSQLQueryExecutor extends AbstractQueryExecutor {
     }
 
     List<ArrayCountPair> getArrayCounts(String databaseName, String tableName, String field, int limit = 40) {
-        String select = "SELECT tagvar, count(1) as countvar FROM " + databaseName + "." + tableName + " LATERAL VIEW explode(" + field + ") tmptable AS tagvar"
-        String groupBy = " GROUP BY tagvar"
-        String orderBy = " ORDER BY countvar DESC"
+        String select = "SELECT key, count(1) as count FROM " + databaseName + "." + tableName + " LATERAL VIEW explode(" + field + ") tmptable AS key"
+        String groupBy = " GROUP BY key"
+        String orderBy = " ORDER BY count DESC"
         String sort = " LIMIT " + limit
 
         return runAndRelease { client ->
             SparkSQLConversionStrategy conversionStrategy = new SparkSQLConversionStrategy(filterState: filterState, selectionState: selectionState)
             String sparkSQLQuery = conversionStrategy.mergeQuery(databaseName, tableName, select, groupBy, orderBy, sort)
             int offset = 0
-            List<Map> resultList = client.executeQuery(sparkSQLQuery, offset)
+            List<ArrayCountPair> resultList = client.executeQuery(sparkSQLQuery, offset)
             //return  new TabularQueryResult(resultList)
             return resultList
         }
