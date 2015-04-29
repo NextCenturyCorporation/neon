@@ -43,7 +43,7 @@ project.ext {
     jsonVersion = "20090211"
     mongoDriverVersion = "2.11.3"
     jodaTimeVersion = "2.1"
-    c3p0Version = "0.9.5-pre8"
+    c3p0Version = "0.9.5"
     jacksonVersion = "1.9.2"
 }
 
