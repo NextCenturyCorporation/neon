@@ -682,8 +682,14 @@ describe('query mapping', function() {
      */
     function assertEventType(eventType, event) {
         expect(event.type).toEqual(eventType);
-        expect(event.dataSet.databaseName).toEqual(databaseName);
-        expect(event.dataSet.tableName).toEqual(tableName);
+        if(event.addedFilter) {
+            expect(event.addedFilter.databaseName).toEqual(databaseName);
+            expect(event.addedFilter.tableName).toEqual(tableName);
+        }
+        if(event.removedFilter) {
+            expect(event.removedFilter.databaseName).toEqual(databaseName);
+            expect(event.removedFilter.tableName).toEqual(tableName);
+        }
     }
 
     /**

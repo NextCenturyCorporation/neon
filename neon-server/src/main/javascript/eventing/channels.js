@@ -33,8 +33,8 @@ neon.eventing.channels = {
     FILTERS_CHANGED: 'filters_changed',
 
     /**
-     * @property ACTIVE_DATASET_CHANGED
+     * @property CONNECT_TO_HOST
      * @type {string}
      */
-    ACTIVE_DATASET_CHANGED: 'active_dataset_changed'
+    CONNECT_TO_HOST: 'connect_to_host'
 };

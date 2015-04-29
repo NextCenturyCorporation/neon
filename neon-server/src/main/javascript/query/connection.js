@@ -30,6 +30,7 @@
 neon.query.Connection = function() {
     this.host_ = undefined;
     this.databaseType_ = undefined;
+    this.messenger = new neon.eventing.Messenger();
 };
 
 /**
@@ -47,7 +48,7 @@ neon.query.Connection.MONGO = 'mongo';
 neon.query.Connection.SPARK = 'sparksql';
 
 /**
- * Specifies what database type and host the queries will be executed against.
+ * Specifies what database type and host the queries will be executed against and publishes a CONNECT_TO_HOST event.
  * @method connect
  * @param {String} databaseType What type of database is being connected to. The constants in this class specify the
  * valid database types.
@@ -56,6 +57,10 @@ neon.query.Connection.SPARK = 'sparksql';
 neon.query.Connection.prototype.connect = function(databaseType, host) {
     this.host_ = host;
     this.databaseType_ = databaseType;
+    this.messenger.publish(neon.eventing.channels.CONNECT_TO_HOST, {
+        host: host,
+        type: databaseType
+    });
 };
 
 /**
@@ -171,6 +176,25 @@ neon.query.Connection.prototype.getFieldNames = function(databaseName, tableName
     return neon.util.ajaxUtils.doGet(
         neon.serviceUrl('queryservice', 'fields/' + encodeURIComponent(this.host_) + '/' + encodeURIComponent(this.databaseType_) +
           '/' + encodeURIComponent(databaseName) + '/' + encodeURIComponent(tableName)), {
+            success: successCallback,
+            error: errorCallback,
+            responseType: 'json'
+        }
+    );
+};
+
+/**
+ * Executes a query that returns a map of the table names available in the database and the field names in each table
+ * @method getTableNamesAndFieldNames
+ * @param {String} databaseName
+ * @param {Function} successCallback The callback to call when the field names are successfully retrieved
+ * @param {Function} [errorCallback] The optional callback when an error occurs. This is a 3 parameter
+ * function that contains the xhr, a short error status and the full error message.
+ * @return {neon.util.AjaxRequest} The xhr request object
+ */
+neon.query.Connection.prototype.getTableNamesAndFieldNames = function(databaseName, successCallback, errorCallback) {
+    return neon.util.ajaxUtils.doGet(
+        neon.serviceUrl('queryservice', 'tablesandfields/' + encodeURIComponent(this.host_) + '/' + encodeURIComponent(this.databaseType_) + '/' + encodeURIComponent(databaseName)), {
             success: successCallback,
             error: errorCallback,
             responseType: 'json'

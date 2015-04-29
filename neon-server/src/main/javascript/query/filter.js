@@ -77,7 +77,7 @@ neon.query.Filter.prototype.geoWithin = function(locationField, points) {
 
 neon.query.Filter.getFilterState = function(databaseName, tableName, successCallback, errorCallback) {
     return neon.util.ajaxUtils.doGet(
-        neon.serviceUrl('filterservice', 'filters/' + databaseName + '/' + tableName), {
+        neon.serviceUrl('filterservice', 'filters/' + encodeURIComponent(databaseName) + '/' + encodeURIComponent(tableName)), {
             success: successCallback,
             error: errorCallback,
             responseType: 'json'
