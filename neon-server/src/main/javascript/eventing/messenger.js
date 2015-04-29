@@ -131,8 +131,8 @@ neon.eventing.Messenger.prototype.createGlobalChannelSubscriptions_ = function(n
             callback: neonCallbacks.filtersChanged
         },
         {
-            channel: neon.eventing.channels.ACTIVE_DATASET_CHANGED,
-            callback: neonCallbacks.activeDatasetChanged
+            channel: neon.eventing.channels.CONNECT_TO_HOST,
+            callback: neonCallbacks.connectToHost
         }
     ];
 };

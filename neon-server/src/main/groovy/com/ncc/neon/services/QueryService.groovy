@@ -115,6 +115,30 @@ class QueryService {
     }
 
     /**
+     * Get all the columns for all the tables from the supplied connection.
+     * @param host The host the database is running on
+     * @param databaseType the type of database
+     * @param databaseName The database containing the data
+     * @return The result of the query
+     */
+    @GET
+    @Produces(MediaType.APPLICATION_JSON)
+    @Path("tablesandfields/{host}/{databaseType}/{databaseName}")
+    Map<String, List<String>> getTablesAndFields(
+            @PathParam("host") String host,
+            @PathParam("databaseType") String databaseType,
+            @PathParam("databaseName") String databaseName) {
+
+        List<String> tableNames = getTableNames(host, databaseType, databaseName)
+        QueryExecutor queryExecutor = getExecutor(host, databaseType)
+        Map<String, List<String>> tablesAndFields = [:]
+        tableNames.each { tableName ->
+            tablesAndFields[tableName] = queryExecutor.getFieldNames(databaseName, tableName)
+        }
+        return tablesAndFields
+    }
+
+    /**
      * Gets metadata associated with the columns of the table
      * @param databaseName The database containing the data
      * @param tableName The table containing the data
