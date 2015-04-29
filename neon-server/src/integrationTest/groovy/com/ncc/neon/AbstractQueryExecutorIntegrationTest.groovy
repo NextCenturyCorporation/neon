@@ -741,12 +741,9 @@ abstract class AbstractQueryExecutorIntegrationTest {
         assert tables.contains(TABLE_NAME)
     }
 
-    @SuppressWarnings("Println")
     private void assertEntry(def entry, String tag, int count) {
-        println(entry)
         assert entry.key == tag
         assert entry.count == count
-
     }
 
     @Test
