@@ -70,6 +70,10 @@ class JSONToCSVConverter {
                         if (field =~ DATE_REGEX) {
                             val = val.replaceAll("T", " ").replaceAll("Z", "")
                         }
+                        if(field == 'tags') {
+                            val = val.join(":")
+                            val = val.replaceAll('"', '')
+                        }
                     }
                     rowWithEmptyValues << val
                 }

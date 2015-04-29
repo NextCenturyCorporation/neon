@@ -27,7 +27,7 @@ import java.sql.Connection
 import java.sql.Statement
 
 class SparkSQLDataInserter extends DefaultTask{
-    private static final def FIELD_TYPES = [_id: "string", firstname: "string", lastname: "string", city: "string", state: "string", salary: "int", hiredate: "timestamp"]
+    private static final def FIELD_TYPES = [_id: "string", firstname: "string", lastname: "string", city: "string", state: "string", salary: "int", hiredate: "timestamp", tags: "array<string>"]
 
     // default values. build will override these
     String host = "spark:10000"
@@ -101,7 +101,7 @@ class SparkSQLDataInserter extends DefaultTask{
         def script = new StringBuilder()
         script.append("create external table ${databaseName}.${tableName} (")
         script.append(fields)
-        script.append(") row format delimited fields terminated by ',' location '${destFolder}'")
+        script.append(") row format delimited fields terminated by ',' collection items terminated by ':' location '${destFolder}'")
         return script.toString()
     }
 
