@@ -444,7 +444,6 @@ abstract class AbstractQueryExecutorIntegrationTest {
     }
 
     @Test
-    @SuppressWarnings('Println')
     void "ignore filters"() {
         String filterId = "filterId"
         def dcStateFilter = createFilterWithWhereClause(new SingularWhereClause(lhs: 'state', operator: '=', rhs: 'DC'))
