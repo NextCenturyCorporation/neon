@@ -201,3 +201,12 @@ neon.query.Connection.prototype.getTableNamesAndFieldNames = function(databaseNa
         }
     );
 };
+
+neon.query.Connection.prototype.executeArrayCountQuery = function(databaseName, tableName, field, limit, successCallback, errorCallback) {
+    return neon.uril.ajaxUtils.doGet(neon.serviceUrl(
+        'arraycounts', this.host + '/' + this.databaseType_ + '/' + databaseName + '/' + tableName + '/', 'field=' + field + (limit ? 'limit=' + limit : '')), {
+        success: successCallback,
+        error: errorCallback,
+        responseType: 'json'
+    });
+}
