@@ -33,7 +33,6 @@ class ArrayCountQueryWorker extends AbstractMongoQueryWorker {
     private SelectionState selectionState
     private DB database
 
-
     ArrayCountQueryWorker(MongoClient mongo) {
         super(mongo)
     }

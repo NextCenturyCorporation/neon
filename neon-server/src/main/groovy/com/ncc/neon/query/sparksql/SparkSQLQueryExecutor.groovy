@@ -147,7 +147,6 @@ class SparkSQLQueryExecutor extends AbstractQueryExecutor {
             String sparkSQLQuery = conversionStrategy.mergeQuery(databaseName, tableName, select, groupBy, orderBy, sort)
             int offset = 0
             List<ArrayCountPair> resultList = client.executeQuery(sparkSQLQuery, offset)
-            //return  new TabularQueryResult(resultList)
             return resultList
         }
     }
