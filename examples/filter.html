@@ -1,6 +1,6 @@
 <html>
 <head>
-    <meta charset="UTF-8"> 
+    <meta charset="UTF-8">
     <script src="http://localhost:8080/neon/js/neon.js"></script>
 
     <script>
@@ -12,8 +12,6 @@
         connection.connect(neon.query.Connection.MONGO,"localhost");
 
         var databaseName = "test";
-        connection.use(databaseName);
-
         var tableName = "earthquakes";
 
         // this can be any value. each key can contain 1 or more filters
@@ -35,7 +33,7 @@
             //Add a click handler to the query button
             $("#query-button").click(function () {
                 $("#result").html('Starting query...');
-                var query = new neon.query.Query().selectFrom(tableName).withFields('mag');
+                var query = new neon.query.Query().selectFrom(databaseName, tableName).withFields('mag');
                 //Execute the query and display the results.
                 connection.executeQuery(query, function (result) {
                     $('#message').html('');
@@ -47,7 +45,7 @@
             $("#add-button").click(function () {
                 var whereClause = neon.query.where("mag", ">", 5);
                 var filter = new neon.query.Filter().selectFrom(databaseName, tableName).where(whereClause);
-                    
+
                 messenger.replaceFilter(filterKey, filter);
             });
 
