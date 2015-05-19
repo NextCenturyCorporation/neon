@@ -45,5 +45,6 @@ project.ext {
     jodaTimeVersion = "2.1"
     c3p0Version = "0.9.5-pre8"
     jacksonVersion = "1.9.2"
+	calciteVersion = "1.2.0-incubating"
 }
 

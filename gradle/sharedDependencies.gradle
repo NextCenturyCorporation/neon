@@ -16,12 +16,17 @@
 
 repositories {
     mavenCentral()
+    maven {
+        url "http://conjars.org/repo"
+    }
 }
 
 dependencies {
     compile "org.json:json:$jsonVersion"
     compile "org.mongodb:mongo-java-driver:$mongoDriverVersion"
-
+	compile "org.apache.calcite:calcite-core:$calciteVersion"
+	compile "org.apache.calcite:calcite-mongodb:$calciteVersion"
+	
     // commons-daemon 1.0.3 throws a bad organisation error (directory structure and pom don't match), so use a different version
     compile "commons-daemon:commons-daemon:$commonsDaemonVersion"
     compile "joda-time:joda-time:$jodaTimeVersion"

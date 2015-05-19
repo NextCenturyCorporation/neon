@@ -37,6 +37,9 @@ class QueryExecutorFactory {
 
     @Resource
     private QueryExecutor sparkSQLQueryExecutor
+	
+    @Resource
+	private QueryExecutor calciteQueryExecutor
 
     @Autowired
     private ConnectionManager connectionManager
@@ -55,6 +58,8 @@ class QueryExecutorFactory {
                 return mongoQueryExecutor
             case DataSources.sparksql:
                 return sparkSQLQueryExecutor
+			case DataSources.calcite:
+				return calciteQueryExecutor
             default:
                 throw new NeonConnectionException("Unsupported database type ${databaseType}")
         }
