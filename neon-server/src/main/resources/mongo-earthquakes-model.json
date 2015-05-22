@@ -33,7 +33,7 @@
         {
           name: 'EARTHQUAKES',
           type: 'view',
-          sql: 'select cast(_MAP[\'time\'] AS date) AS eqtime, cast(_MAP[\'longitude\'] AS float) AS longitude, cast(_MAP[\'latitude\'] AS float) AS latitude, cast(_MAP[\'mag\'] AS float) AS mag, cast(_MAP[\'place\'] AS varchar(128)) AS place,\n cast(_MAP[\'_id\'] AS integer) AS id from \"mongo_raw\".\"earthquakes\"'
+          sql: 'select cast(_MAP[\'time\'] AS date) AS eqtime, cast(_MAP[\'longitude\'] AS float) AS longitude, cast(_MAP[\'latitude\'] AS float) AS latitude, cast(_MAP[\'mag\'] AS float) AS mag, cast(_MAP[\'magType\'] AS varchar(16)) AS magType,\n cast(_MAP[\'place\'] AS varchar(128)) AS place,\n cast(_MAP[\'_id\'] AS integer) AS id from \"mongo_raw\".\"earthquakes\"'
         }
       ]
     }
