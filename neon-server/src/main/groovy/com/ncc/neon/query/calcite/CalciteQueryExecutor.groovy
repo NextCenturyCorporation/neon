@@ -65,7 +65,8 @@ class CalciteQueryExecutor extends AbstractQueryExecutor {
 		props.put("model", CalciteQueryExecutor.class.getResource("/mongo-earthquakes-model.json").getPath());
 		Connection connection =
 		DriverManager.getConnection("jdbc:calcite:", props);
-        SparkSQLConversionStrategy conversionStrategy = new SparkSQLConversionStrategy(filterState: filterState, selectionState: selectionState)
+        SparkSQLConversionStrategy conversionStrategy = 
+			new SparkSQLConversionStrategy(filterState: filterState, selectionState: selectionState, derivedFieldsQuotedWith:"\"");
         String jdbcQuery = conversionStrategy.convertQuery(query, options)
 		// Should be: "select id, magnitude, place from earthquakes where magnitude > 6"
 		System.err.println("Query = " + jdbcQuery);

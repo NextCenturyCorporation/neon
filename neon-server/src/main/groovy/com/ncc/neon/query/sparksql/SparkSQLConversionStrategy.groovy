@@ -35,6 +35,12 @@ class SparkSQLConversionStrategy {
 
     private final FilterState filterState
     private final SelectionState selectionState
+	
+	/** If the underlying database needs the names of derived fields to be quoted in the JDBC query, specify 
+	 * the quote character (e.g. " or ') in the constructor. Default is unquoted fields. 
+	 * For example:
+	 *      select count(mag) as "count", magType from test.earthquakes group by magType */
+	private String derivedFieldsQuotedWith = "";
 
     String convertQuery(Query query, QueryOptions queryOptions) {
         StringBuilder builder = new StringBuilder()
@@ -47,12 +53,12 @@ class SparkSQLConversionStrategy {
 
     }
 
-    private static void applySelectFromStatement(StringBuilder builder, Query query) {
+    private void applySelectFromStatement(StringBuilder builder, Query query) {
         def modifier = query.isDistinct ? "DISTINCT " : ""
         builder << "select ${modifier}" << buildFieldList(query) << " from " << query.filter.databaseName << "." << query.filter.tableName
     }
 
-    private static def buildFieldList(Query query) {
+    private def buildFieldList(Query query) {
         def fields = []
         query.aggregates.each { aggregate ->
             fields << functionToString(aggregate)
@@ -71,21 +77,21 @@ class SparkSQLConversionStrategy {
         return fields.join(", ")
     }
 
-    private static String escapeFieldName(String fieldName) {
+    private String escapeFieldName(String fieldName) {
         return fieldName?.startsWith("_") ? "`${fieldName}`" : fieldName
     }
 
-    private static String groupByClauseToString(GroupByClause groupBy) {
+    private String groupByClauseToString(GroupByClause groupBy) {
         groupBy instanceof GroupByFieldClause ? escapeFieldName(groupBy.field) : functionToString(groupBy)
     }
 
-    private static String functionToString(FieldFunction fieldFunction) {
+    private String functionToString(FieldFunction fieldFunction) {
         if(fieldFunction.operation == 'dayOfWeek') {
             /* pmod 7 + 1 is changing the day of week scale from monday = 1 to sunday = 1 to match MongoDB dayOfWeek */
-            return "(pmod(from_unixtime(unix_timestamp(${escapeFieldName(fieldFunction.field)}),'u'),7)+1) as ${fieldFunction.name}"
+            return "(pmod(from_unixtime(unix_timestamp(${escapeFieldName(fieldFunction.field)}),'u'),7)+1) as ${derivedFieldsQuotedWith}${fieldFunction.name}${derivedFieldsQuotedWith}"
         }
 
-        return "${fieldFunction.operation}(${escapeFieldName(fieldFunction.field)}) as ${fieldFunction.name}"
+        return "${fieldFunction.operation}(${escapeFieldName(fieldFunction.field)}) as ${derivedFieldsQuotedWith}${fieldFunction.name}${derivedFieldsQuotedWith}"
     }
 
     private void applyWhereStatement(StringBuilder builder, Query query, QueryOptions queryOptions) {
@@ -114,7 +120,7 @@ class SparkSQLConversionStrategy {
         return whereClauses
     }
 
-    private static def createWhereClausesForFilters(DataSet dataSet, def filterCache, def ignoredFilterIds = []) {
+    private def createWhereClausesForFilters(DataSet dataSet, def filterCache, def ignoredFilterIds = []) {
         def whereClauses = []
 
         List<FilterKey> filterKeys = filterCache.getFilterKeysForDataset(dataSet)
@@ -130,7 +136,7 @@ class SparkSQLConversionStrategy {
         return whereClauses
     }
 
-    private static void applyGroupByStatement(StringBuilder builder, Query query) {
+    private void applyGroupByStatement(StringBuilder builder, Query query) {
         def groupByClauses = []
         groupByClauses.addAll(query.groupByClauses)
 
@@ -141,20 +147,23 @@ class SparkSQLConversionStrategy {
 
     }
 
-    private static void applySortByStatement(StringBuilder builder, Query query) {
+    private void applySortByStatement(StringBuilder builder, Query query) {
         List sortClauses = query.sortClauses
         if (sortClauses) {
             builder << " order by " << sortClauses.collect { escapeFieldName(it.fieldName) + ((it.sortOrder == SortOrder.ASCENDING) ? " ASC" : " DESC") }.join(", ")
         }
     }
 
-    private static void applyLimitStatement(StringBuilder builder, Query query) {
+    private void applyLimitStatement(StringBuilder builder, Query query) {
         if (query.limitClause != null) {
             builder << " limit " << query.limitClause.limit
         }
+		if (query.offsetClause != null) {
+			builder << " offset " << query.offsetClause.offset;
+		}
     }
 
-    private static SparkSQLWhereClause createWhereClauseParams(List whereClauses) {
+    private SparkSQLWhereClause createWhereClauseParams(List whereClauses) {
         if (!whereClauses) {
             return null
         }
