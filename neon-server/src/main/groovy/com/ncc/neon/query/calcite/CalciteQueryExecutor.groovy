@@ -23,7 +23,9 @@ import com.ncc.neon.query.result.QueryResult
 import com.ncc.neon.query.result.TabularQueryResult
 import com.ncc.neon.query.filter.FilterState
 import com.ncc.neon.query.filter.SelectionState
+import com.ncc.neon.query.sparksql.SparkSQLConversionStrategy
 import java.sql.Connection;
+import java.sql.DatabaseMetaData;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
@@ -59,12 +61,15 @@ class CalciteQueryExecutor extends AbstractQueryExecutor {
 		System.err.println("Executing doExecute");
 		
 		Properties props = new Properties();
+		// TODO: Have mechansism to specify which schema file to use
 		props.put("model", CalciteQueryExecutor.class.getResource("/mongo-earthquakes-model.json").getPath());
 		Connection connection =
 		DriverManager.getConnection("jdbc:calcite:", props);
-		ResultSet resultSet = connection.createStatement().executeQuery(
-				"select id, magnitude, place from earthquakes where magnitude > 6");
-
+        SparkSQLConversionStrategy conversionStrategy = new SparkSQLConversionStrategy(filterState: filterState, selectionState: selectionState)
+        String jdbcQuery = conversionStrategy.convertQuery(query, options)
+		// Should be: "select id, magnitude, place from earthquakes where magnitude > 6"
+		System.err.println("Query = " + jdbcQuery);
+		ResultSet resultSet = connection.createStatement().executeQuery(jdbcQuery);
         QueryResult results = convertResults(resultSet);
 		return results;
     }
@@ -73,21 +78,57 @@ class CalciteQueryExecutor extends AbstractQueryExecutor {
     List<String> showDatabases() {
         LOGGER.info("Executing getDatabaseNames")
 		System.err.println("Executing getDatabaseNames");
-        return new ArrayList<String>();
+
+		Properties props = new Properties();
+		// TODO: Have mechansism to specify which schema file to use
+		props.put("model", CalciteQueryExecutor.class.getResource("/mongo-earthquakes-model.json").getPath());
+		Connection connection =	DriverManager.getConnection("jdbc:calcite:", props)
+		DatabaseMetaData metadata = connection.getMetaData();
+		ResultSet results = metadata.getSchemas();
+		List<String> resultList = getField("TABLE_SCHEM", results);
+		
+		return resultList;
     }
 
     @Override
     List<String> showTables(String dbName) {
         LOGGER.info("Executing getCollectionNames on database {}", dbName)
-		System.err.println("Executing getCollectionNames on database {}", dbName);
-        return new ArrayList<String>()
+		System.err.println("Executing getCollectionNames on database " + dbName);
+		
+		// Calcite does some weird capitalization stuff, and haven't figured it out totally.
+		// In the mean time, shove evertything uppercase
+		dbName = dbName.toUpperCase();
+
+		Properties props = new Properties();
+		// TODO: Have mechansism to specify which schema file to use
+		props.put("model", CalciteQueryExecutor.class.getResource("/mongo-earthquakes-model.json").getPath());
+		Connection connection =	DriverManager.getConnection("jdbc:calcite:", props)
+		DatabaseMetaData metadata = connection.getMetaData();
+		ResultSet results = metadata.getTables(null, dbName, null, null);
+		List<String> resultList = getField("TABLE_NAME", results);
+		
+		return resultList;
     }
 
     @Override
     List<String> getFieldNames(String databaseName, String tableName) {
         LOGGER.info("Executing getFieldNames on table {}", tableName)
-		System.err.println("Executing getFieldNames on table {}", tableName);
-        return new ArrayList<String>()
+		System.err.println("Executing getFieldNames on table " + tableName);
+
+		// Calcite does some weird capitalization stuff, and haven't figured it out totally.
+		// In the mean time, shove evertything uppercase
+		databaseName = databaseName.toUpperCase();
+		tableName = tableName.toUpperCase();
+		
+		Properties props = new Properties();
+		// TODO: Have mechansism to specify which schema file to use
+		props.put("model", CalciteQueryExecutor.class.getResource("/mongo-earthquakes-model.json").getPath());
+		Connection connection =	DriverManager.getConnection("jdbc:calcite:", props)
+		DatabaseMetaData metadata = connection.getMetaData();
+		ResultSet results = metadata.getColumns(null, databaseName, tableName, null);
+		List<String> resultList = getField("COLUMN_NAME", results);
+				
+		return resultList;
     }
 	
 	/** Copy a SQL ResultSet into a Neon QueryResult
@@ -107,6 +148,36 @@ class CalciteQueryExecutor extends AbstractQueryExecutor {
 		}
 		QueryResult converted = new TabularQueryResult(resultTable);
 		return converted;
+	}
+
+	/** Pull a single field from the ResultSet into a list.
+	 */
+	static ArrayList<String> getField(String fieldName, ResultSet resultSet) {
+		List<String> stringList = new ArrayList<String>();
+		final ResultSetMetaData metaData = resultSet.getMetaData();
+		while (resultSet.next()) {
+			stringList.add(resultSet.getString(fieldName));
+		}
+		return stringList;
+	}
+
+	/** Convenience method for shoving a result in a ResultSet into a single string you can easily look at.
+	 */
+	static ArrayList<String> prettyStringifyResults(ResultSet resultSet) {
+		List<String> stringList = new ArrayList<String>();
+		final ResultSetMetaData metaData = resultSet.getMetaData();
+		while (resultSet.next()) {
+			int n = metaData.getColumnCount();
+			if (n > 0) {
+				String str = "[";
+				for (int i = 1; i <= n; i++) {
+					str = str + metaData.getColumnLabel(i) + "=" + resultSet.getString(i) + ",";
+				}
+				str = str.substring(0, str.length()-1) + "]";
+				stringList.add(str);
+			}
+		}
+		return stringList;
 	}
 
 }
