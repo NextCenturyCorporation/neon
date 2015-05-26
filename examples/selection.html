@@ -1,6 +1,6 @@
 <html>
 <head>
-    <meta charset="UTF-8"> 
+    <meta charset="UTF-8">
     <script src="http://localhost:8080/neon/js/neon.js"></script>
 
     <script>
@@ -12,8 +12,6 @@
         connection.connect(neon.query.Connection.MONGO,"localhost");
 
         var databaseName = "test";
-        connection.use(databaseName);
-
         var tableName = "earthquakes";
 
         // sends and receive messages about what elements are selected

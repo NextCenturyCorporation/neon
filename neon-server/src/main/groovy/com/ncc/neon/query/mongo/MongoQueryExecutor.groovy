@@ -39,6 +39,8 @@ class MongoQueryExecutor extends AbstractQueryExecutor {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(MongoQueryExecutor)
 
+    private static final GET_FIELD_NAMES_LIMIT = 1000
+
     @Autowired
     private FilterState filterState
 
@@ -73,8 +75,12 @@ class MongoQueryExecutor extends AbstractQueryExecutor {
     List<String> getFieldNames(String databaseName, String tableName) {
         def db = mongo.getDB(databaseName)
         def collection = db.getCollection(tableName)
-        def result = collection.findOne()
-        return (result?.keySet() as List) ?: []
+        def resultSet = collection.find().limit(GET_FIELD_NAMES_LIMIT)
+        Set<String> fieldNameSet = [] as Set
+        resultSet.each { result ->
+            fieldNameSet.addAll(result?.keySet())
+        }
+        return (fieldNameSet as List) ?: []
     }
 
     private AbstractMongoQueryWorker createMongoQueryWorker(Query query) {
