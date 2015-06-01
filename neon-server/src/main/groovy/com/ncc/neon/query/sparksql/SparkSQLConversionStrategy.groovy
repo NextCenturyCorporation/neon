@@ -55,7 +55,7 @@ class SparkSQLConversionStrategy {
 
     private void applySelectFromStatement(StringBuilder builder, Query query) {
         def modifier = query.isDistinct ? "DISTINCT " : ""
-        builder << "select ${modifier}" << buildFieldList(query) << " from " << query.filter.databaseName << "." << query.filter.tableName
+        builder << "select ${modifier}" << buildFieldList(query) << " from ${derivedFieldsQuotedWith}" << query.filter.databaseName << "${derivedFieldsQuotedWith}.${derivedFieldsQuotedWith}" << query.filter.tableName << "${derivedFieldsQuotedWith}"
     }
 
     private def buildFieldList(Query query) {

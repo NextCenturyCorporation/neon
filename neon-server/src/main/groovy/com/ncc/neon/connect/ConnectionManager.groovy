@@ -33,6 +33,7 @@ class ConnectionManager {
 
     ConnectionClientFactory mongoConnectionFactory = new MongoConnectionClientFactory()
     ConnectionClientFactory sparkSQLConnectionFactory = new JdbcConnectionClientFactory("org.apache.hive.jdbc.HiveDriver", "hive2")
+	ConnectionClientFactory calciteConnectionFactory = new CalciteConnectionClientFactory()
 
     // note this current request connection is a unique object per request (the bean has a request scope annotation on it)
     @Autowired
@@ -77,6 +78,9 @@ class ConnectionManager {
         if (connectionInfo.dataSource == DataSources.sparksql) {
             return sparkSQLConnectionFactory
         }
+		if (connectionInfo.dataSource == DataSources.calcite) {
+			return calciteConnectionFactory
+		}
         throw new NeonConnectionException("Could not connect to data source of type ${connectionInfo.dataSource}")
     }
 

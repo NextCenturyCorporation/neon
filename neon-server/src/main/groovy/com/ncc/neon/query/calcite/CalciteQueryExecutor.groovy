@@ -26,7 +26,6 @@ import com.ncc.neon.query.filter.SelectionState
 import com.ncc.neon.query.sparksql.SparkSQLConversionStrategy
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
-import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 //import java.util.HashMap;
@@ -58,17 +57,12 @@ class CalciteQueryExecutor extends AbstractQueryExecutor {
     @Override
     QueryResult doExecute(Query query, QueryOptions options) {
 		LOGGER.info("Executing doExecute");
-		System.err.println("Executing doExecute");
+
+		Connection connection = connectionManager.connection.getCalciteConxn(query.databaseName);
 		
-		Properties props = new Properties();
-		// TODO: Have mechansism to specify which schema file to use
-		props.put("model", CalciteQueryExecutor.class.getResource("/mongo-earthquakes-model.json").getPath());
-		Connection connection =
-		DriverManager.getConnection("jdbc:calcite:", props);
         SparkSQLConversionStrategy conversionStrategy = 
 			new SparkSQLConversionStrategy(filterState: filterState, selectionState: selectionState, derivedFieldsQuotedWith:"\"");
         String jdbcQuery = conversionStrategy.convertQuery(query, options)
-		// Should be: "select id, magnitude, place from earthquakes where magnitude > 6"
 		System.err.println("Query = " + jdbcQuery);
 		ResultSet resultSet = connection.createStatement().executeQuery(jdbcQuery);
         QueryResult results = convertResults(resultSet);
@@ -80,14 +74,16 @@ class CalciteQueryExecutor extends AbstractQueryExecutor {
         LOGGER.info("Executing getDatabaseNames")
 		System.err.println("Executing getDatabaseNames");
 
-		Properties props = new Properties();
-		// TODO: Have mechansism to specify which schema file to use
-		props.put("model", CalciteQueryExecutor.class.getResource("/mongo-earthquakes-model.json").getPath());
-		Connection connection =	DriverManager.getConnection("jdbc:calcite:", props)
+		Connection connection = connectionManager.connection.getCalciteConxn("test");
+		
+		// Haven't figured this out yet.
+//		Properties props = new Properties();
+//		// TODO: Have mechansism to specify which schema file to use
+//		props.put("model", CalciteQueryExecutor.class.getResource("/mongo-earthquakes-model.json").getPath());
+//		Connection connection =	DriverManager.getConnection("jdbc:calcite:", props)
 		DatabaseMetaData metadata = connection.getMetaData();
 		ResultSet results = metadata.getSchemas();
 		List<String> resultList = getField("TABLE_SCHEM", results);
-		
 		return resultList;
     }
 
@@ -98,12 +94,10 @@ class CalciteQueryExecutor extends AbstractQueryExecutor {
 		
 		// Calcite does some weird capitalization stuff, and haven't figured it out totally.
 		// In the mean time, shove evertything uppercase
-		dbName = dbName.toUpperCase();
-
-		Properties props = new Properties();
-		// TODO: Have mechansism to specify which schema file to use
-		props.put("model", CalciteQueryExecutor.class.getResource("/mongo-earthquakes-model.json").getPath());
-		Connection connection =	DriverManager.getConnection("jdbc:calcite:", props)
+//		dbName = dbName.toUpperCase();
+		
+		Connection connection = connectionManager.connection.getCalciteConxn(dbName);
+		
 		DatabaseMetaData metadata = connection.getMetaData();
 		ResultSet results = metadata.getTables(null, dbName, null, null);
 		List<String> resultList = getField("TABLE_NAME", results);
@@ -116,15 +110,14 @@ class CalciteQueryExecutor extends AbstractQueryExecutor {
         LOGGER.info("Executing getFieldNames on table {}", tableName)
 		System.err.println("Executing getFieldNames on table " + tableName);
 
+		
 		// Calcite does some weird capitalization stuff, and haven't figured it out totally.
 		// In the mean time, shove evertything uppercase
-		databaseName = databaseName.toUpperCase();
-		tableName = tableName.toUpperCase();
+//		databaseName = databaseName.toUpperCase();
+//		tableName = tableName.toUpperCase();
+//
+		Connection connection = connectionManager.connection.getCalciteConxn(databaseName);
 		
-		Properties props = new Properties();
-		// TODO: Have mechansism to specify which schema file to use
-		props.put("model", CalciteQueryExecutor.class.getResource("/mongo-earthquakes-model.json").getPath());
-		Connection connection =	DriverManager.getConnection("jdbc:calcite:", props)
 		DatabaseMetaData metadata = connection.getMetaData();
 		ResultSet results = metadata.getColumns(null, databaseName, tableName, null);
 		List<String> resultList = getField("COLUMN_NAME", results);

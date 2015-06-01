@@ -90,11 +90,11 @@ class SparkSQLWhereClause {
     }
 
     private static String formatContains(clause) {
-        return "${clause.lhs} like '%${clause.rhs}%'"
+        return "\"${clause.lhs}\" like '%${clause.rhs}%'"
     }
 
     private static String formatLhs(lhs, rhs) {
-        return rhs instanceof Date ? "unix_timestamp(${lhs})" : lhs
+        return rhs instanceof Date ? "unix_timestamp(\"${lhs}\")" : "\"${lhs}\""
     }
 
     private static String formatOperator(clause) {
