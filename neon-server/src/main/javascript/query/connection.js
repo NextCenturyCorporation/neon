@@ -209,4 +209,4 @@ neon.query.Connection.prototype.executeArrayCountQuery = function(databaseName, 
         error: errorCallback,
         responseType: 'json'
     });
-}
+};
