@@ -9,10 +9,20 @@
         </encoder>
     </appender>
 
+    <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <pattern>%d{HH:mm:ss.SSS} [%-5level] %logger{15} - %msg%n%rEx</pattern>
+            <immediateFlush>false</immediateFlush>
+        </encoder>
+    </appender>
+
     <logger name="com.excilys.ebi.gatling.http" level="DEBUG"/>
 
     <root level="ALL">
         <appender-ref ref="FILE"/>
+    </root>
+    <root level="WARN">
+        <appender-ref ref="CONSOLE" />
     </root>
 
 </configuration>

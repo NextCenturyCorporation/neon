@@ -47,7 +47,7 @@ task integrationTest(type: Test) {
     dependsOn 'integrationTestClasses'
 
     if (isMongoEnabled()) {
-        dependsOn 'insertMongoDataIntegrationTest','insertMongoDataTagCloudTest'
+        dependsOn 'insertMongoDataIntegrationTest'
     }
     if (isSparkSQLEnabled()) {
         dependsOn 'insertSparkSQLDataIntegrationTest'
@@ -80,25 +80,6 @@ task deleteMongoDataIntegrationTestBeforeInsert(type: com.ncc.neon.data.MongoDat
     databaseName = 'neonintegrationtest'
 }
 
-
-// TODO: NEON-1106, NEON-1107 the tag cloud data insert/delete are only here because neon does not fully support the queries needed for the tag cloud
-task insertMongoDataTagCloudTest(type: com.ncc.neon.data.MongoDataInserter) {
-    dependsOn 'deleteMongoDataTagCloudTestBeforeInsert', 'generateMongoJson'
-    host = getMongoHost()
-    databaseName = 'neonmongotagcloud'
-    dataFileName = 'tagcloud.json'
-}
-
-task deleteMongoDataTagCloudTestBeforeInsert(type: com.ncc.neon.data.MongoDataDeleter) {
-    host = getMongoHost()
-    databaseName = 'neonmongotagcloud'
-}
-
-task deleteMongoDataTagCloudTest(type: com.ncc.neon.data.MongoDataDeleter) {
-    host = getMongoHost()
-    databaseName = 'neonmongotagcloud'
-}
-
 task insertSparkSQLDataIntegrationTest(type: com.ncc.neon.data.SparkSQLDataInserter) {
     description = "Inserts test data used for spark sql integration tests"
     dependsOn 'deleteSparkSQLDataIntegrationTestBeforeInsert', 'generateSparkSQLCSV', 'generateSparkSQLJson'
@@ -118,7 +99,7 @@ task afterIntegrationTest {
     group = TEST_GROUP
     description = "Cleans up test data after the integration tests"
     if (isMongoEnabled()) {
-        dependsOn 'deleteMongoDataIntegrationTest', 'deleteMongoDataTagCloudTest'
+        dependsOn 'deleteMongoDataIntegrationTest'
     }
     if (isSparkSQLEnabled()) {
         dependsOn 'deleteSparkSQLDataIntegrationTest'

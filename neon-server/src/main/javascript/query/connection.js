@@ -203,10 +203,11 @@ neon.query.Connection.prototype.getTableNamesAndFieldNames = function(databaseNa
 };
 
 neon.query.Connection.prototype.executeArrayCountQuery = function(databaseName, tableName, field, limit, successCallback, errorCallback) {
-    return neon.uril.ajaxUtils.doGet(neon.serviceUrl(
-        'arraycounts', this.host + '/' + this.databaseType_ + '/' + databaseName + '/' + tableName + '/', 'field=' + field + (limit ? 'limit=' + limit : '')), {
+    return neon.util.ajaxUtils.doGet(neon.serviceUrl(
+        'queryservice/arraycounts', encodeURIComponent(this.host_) + '/' + encodeURIComponent(this.databaseType_) + '/' + encodeURIComponent(databaseName) + '/' + encodeURIComponent(tableName),
+        'field=' + field + (limit ? '&limit=' + limit : '')), {
         success: successCallback,
         error: errorCallback,
         responseType: 'json'
     });
-}
+};
