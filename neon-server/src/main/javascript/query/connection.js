@@ -48,6 +48,13 @@ neon.query.Connection.MONGO = 'mongo';
 neon.query.Connection.SPARK = 'sparksql';
 
 /**
+ * Indicates the database type is Calcite
+ * @property CALCITE
+ * @type {String}
+ */
+neon.query.Connection.CALCITE = 'calcite';
+
+/**
  * Specifies what database type and host the queries will be executed against and publishes a CONNECT_TO_HOST event.
  * @method connect
  * @param {String} databaseType What type of database is being connected to. The constants in this class specify the

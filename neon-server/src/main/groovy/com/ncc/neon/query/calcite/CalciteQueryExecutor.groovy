@@ -61,7 +61,7 @@ class CalciteQueryExecutor extends AbstractQueryExecutor {
 		Connection connection = connectionManager.connection.getCalciteConxn(query.databaseName);
 		
         SparkSQLConversionStrategy conversionStrategy = 
-			new SparkSQLConversionStrategy(filterState: filterState, selectionState: selectionState, derivedFieldsQuotedWith:"\"");
+			new SparkSQLConversionStrategy(filterState: filterState, selectionState: selectionState, quoteAllIdentifiers: true);
         String jdbcQuery = conversionStrategy.convertQuery(query, options)
 		System.err.println("Query = " + jdbcQuery);
 		ResultSet resultSet = connection.createStatement().executeQuery(jdbcQuery);
@@ -74,27 +74,18 @@ class CalciteQueryExecutor extends AbstractQueryExecutor {
         LOGGER.info("Executing getDatabaseNames")
 		System.err.println("Executing getDatabaseNames");
 
-		Connection connection = connectionManager.connection.getCalciteConxn("test");
+		// Calcite doesn't have a concept of connecting to a host without specifying what database
+		// you are connecting to, so there is no way to query the host for available databases first.
+		// Even if you connect to a database, you can't query for other available databases.
 		
-		// Haven't figured this out yet.
-//		Properties props = new Properties();
-//		// TODO: Have mechansism to specify which schema file to use
-//		props.put("model", CalciteQueryExecutor.class.getResource("/mongo-earthquakes-model.json").getPath());
-//		Connection connection =	DriverManager.getConnection("jdbc:calcite:", props)
-		DatabaseMetaData metadata = connection.getMetaData();
-		ResultSet results = metadata.getSchemas();
-		List<String> resultList = getField("TABLE_SCHEM", results);
-		return resultList;
+		// So Calcite does not support this operation.
+		return new ArrayList<String>(0);
     }
 
     @Override
     List<String> showTables(String dbName) {
         LOGGER.info("Executing getCollectionNames on database {}", dbName)
 		System.err.println("Executing getCollectionNames on database " + dbName);
-		
-		// Calcite does some weird capitalization stuff, and haven't figured it out totally.
-		// In the mean time, shove evertything uppercase
-//		dbName = dbName.toUpperCase();
 		
 		Connection connection = connectionManager.connection.getCalciteConxn(dbName);
 		
@@ -107,15 +98,10 @@ class CalciteQueryExecutor extends AbstractQueryExecutor {
 
     @Override
     List<String> getFieldNames(String databaseName, String tableName) {
-        LOGGER.info("Executing getFieldNames on table {}", tableName)
+		LOGGER.info("Executing getFieldNames on table {}", tableName)
 		System.err.println("Executing getFieldNames on table " + tableName);
 
 		
-		// Calcite does some weird capitalization stuff, and haven't figured it out totally.
-		// In the mean time, shove evertything uppercase
-//		databaseName = databaseName.toUpperCase();
-//		tableName = tableName.toUpperCase();
-//
 		Connection connection = connectionManager.connection.getCalciteConxn(databaseName);
 		
 		DatabaseMetaData metadata = connection.getMetaData();

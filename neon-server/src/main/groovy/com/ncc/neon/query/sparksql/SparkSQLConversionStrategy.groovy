@@ -36,12 +36,15 @@ class SparkSQLConversionStrategy {
     private final FilterState filterState
     private final SelectionState selectionState
 	
-	/** If the underlying database needs the names of derived fields to be quoted in the JDBC query, specify 
-	 * the quote character (e.g. " or ') in the constructor. Default is unquoted fields. 
-	 * For example:
-	 *      select count(mag) as "count", magType from test.earthquakes group by magType */
-	private String derivedFieldsQuotedWith = "";
-
+	/** If the underlying database requires field names in queries be quoted (e.g. Calcite mucks with capitalization
+	 * if you don't) */
+	private boolean quoteAllIdentifiers = false
+	
+	/** Get the forced quote character. */
+	String getQ() {
+		return quoteAllIdentifiers ? "\"" : "";	
+	}
+	
     String convertQuery(Query query, QueryOptions queryOptions) {
         StringBuilder builder = new StringBuilder()
         applySelectFromStatement(builder, query)
@@ -55,7 +58,7 @@ class SparkSQLConversionStrategy {
 
     private void applySelectFromStatement(StringBuilder builder, Query query) {
         def modifier = query.isDistinct ? "DISTINCT " : ""
-        builder << "select ${modifier}" << buildFieldList(query) << " from ${derivedFieldsQuotedWith}" << query.filter.databaseName << "${derivedFieldsQuotedWith}.${derivedFieldsQuotedWith}" << query.filter.tableName << "${derivedFieldsQuotedWith}"
+        builder << "select ${modifier}" << buildFieldList(query) << " from ${q}" << query.filter.databaseName << "${q}.${q}" << query.filter.tableName << "${q}"
     }
 
     private def buildFieldList(Query query) {
@@ -78,7 +81,8 @@ class SparkSQLConversionStrategy {
     }
 
     private String escapeFieldName(String fieldName) {
-        return fieldName?.startsWith("_") ? "`${fieldName}`" : fieldName
+		// Supporting two different quoting styles for two different underlying databases
+        return quoteAllIdentifiers ? "${q}${fieldName}${q}" : fieldName?.startsWith("_") ? "`${fieldName}`" : fieldName
     }
 
     private String groupByClauseToString(GroupByClause groupBy) {
@@ -88,10 +92,10 @@ class SparkSQLConversionStrategy {
     private String functionToString(FieldFunction fieldFunction) {
         if(fieldFunction.operation == 'dayOfWeek') {
             /* pmod 7 + 1 is changing the day of week scale from monday = 1 to sunday = 1 to match MongoDB dayOfWeek */
-            return "(pmod(from_unixtime(unix_timestamp(${escapeFieldName(fieldFunction.field)}),'u'),7)+1) as ${derivedFieldsQuotedWith}${fieldFunction.name}${derivedFieldsQuotedWith}"
+            return "(pmod(from_unixtime(unix_timestamp(${escapeFieldName(fieldFunction.field)}),'u'),7)+1) as ${q}${fieldFunction.name}${q}"
         }
 
-        return "${fieldFunction.operation}(${escapeFieldName(fieldFunction.field)}) as ${derivedFieldsQuotedWith}${fieldFunction.name}${derivedFieldsQuotedWith}"
+        return "${fieldFunction.operation}(${escapeFieldName(fieldFunction.field)}) as ${q}${fieldFunction.name}${q}"
     }
 
     private void applyWhereStatement(StringBuilder builder, Query query, QueryOptions queryOptions) {

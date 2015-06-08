@@ -9,7 +9,6 @@
         // neon.SERVER_URL = "http://localhost:8080/neon"
         neon.SERVER_URL = "/neon";
         var connection = new neon.query.Connection();
-        //connection.connect(neon.query.Connection.CALCITE,"jdbc:mysql://localhost");
         connection.connect(neon.query.Connection.CALCITE,"mongo:localhost");
 
         //Database names
