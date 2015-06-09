@@ -120,7 +120,6 @@ neon.query.Connection.prototype.executeQueryService_ = function(query, successCa
     if(query.selectionOnly_) {
         opts.push("selectionOnly=true");
     }
-
     return neon.util.ajaxUtils.doPostJSON(
         query,
         neon.serviceUrl('queryservice', serviceName + '/' + encodeURIComponent(this.host_) + '/' + encodeURIComponent(this.databaseType_), opts.join('&')),
@@ -130,6 +129,45 @@ neon.query.Connection.prototype.executeQueryService_ = function(query, successCa
         }
     );
 };
+
+// DANIEL'S CODE HERE ========================================================================================
+/**
+ * Executes the specified export request and fires the callback when complete.
+ * @method executeExport
+ * @param {neon.query.Query} query the query to export data for
+ * @param {Function} successCallback The callback to fire when the export request successfully completes.
+ * @param {Function} [errorCallBack] The optional callback when an error occurs. (finish up explanation here later.)
+ * @param {String} visualization An string containing the name of the visualization for which to export data.
+ * @return {neon.util.AjaxRequest} The xhr request object
+ */
+neon.query.Connection.prototype.executeExport = function(query, successCallback, errorCallback, visualization) {
+    // Rewriting the query to querystring code for now, but can be easily turned into 
+    // a helper method and pulled out of both here and executeQueryService_.
+    var opts = [];
+
+    if(query.ignoreFilters_) {
+        opts.push("ignoreFilters=true");
+    } else if(query.ignoredFilterIds_) {
+        var filterIds = [];
+        query.ignoredFilterIds_.forEach(function(id) {
+            filterIds.push("ignoredFilterIds=" + encodeURIComponent(id));
+        });
+        opts.push(filterIds.join("&"));
+    }
+    if(query.selectionOnly_) {
+        opts.push("selectionOnly=true");
+    }
+    opts.push("visualization=" + visualization);
+    //window.alert(neon.serviceUrl('exportservice', 'csv' +'/' + encodeURIComponent(this.host_) + '/' + encodeURIComponent(this.databaseType_), opts.join('&')));
+    return neon.util.ajaxUtils.doPost(
+        neon.serviceUrl('exportservice', 'csv' +'/' + encodeURIComponent(this.host_) + '/' + encodeURIComponent(this.databaseType_), ''),
+        {
+            success: successCallback,
+            error: errorCallback
+        }
+    );
+};
+// DANIEL'S CODE END =========================================================================================
 
 /**
  * Gets a list of database names
