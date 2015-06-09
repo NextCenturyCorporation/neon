@@ -35,9 +35,9 @@ class ExportService {
     /**
      * I'll need a better description for this later.
      */
-    @GET
+    @POST
     @Consumes(MediaType.APPLICATION_JSON)
-    @Produces(MediaType.TEXT_PLAIN)
+    @Produces(MediaType.APPLICATION_JSON)
     @Path("csv/{host}/{databaseType}")
     /*public String sayHello(@PathParam("host") String host,
                            @PathParam("databaseType") String databaseType,
@@ -53,6 +53,6 @@ class ExportService {
     }*/
     public String sayHello(@PathParam("host") String host,
                            @PathParam("databaseType") String databaseType) {
-        return "Response is ${host}, ${databaseType}.";
+        return "{\"data\": \"/neon/examples/earthquakes2.csv\"}";
     }
 }

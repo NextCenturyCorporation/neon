@@ -115,7 +115,9 @@ neon.query.Connection.prototype.executeQueryService_ = function(query, successCa
         query.ignoredFilterIds_.forEach(function(id) {
             filterIds.push("ignoredFilterIds=" + encodeURIComponent(id));
         });
-        opts.push(filterIds.join("&"));
+        if(filterIds.length > 0) {
+            opts.push(filterIds.join("&"));
+        }
     }
     if(query.selectionOnly_) {
         opts.push("selectionOnly=true");
@@ -152,14 +154,16 @@ neon.query.Connection.prototype.executeExport = function(query, successCallback,
         query.ignoredFilterIds_.forEach(function(id) {
             filterIds.push("ignoredFilterIds=" + encodeURIComponent(id));
         });
-        opts.push(filterIds.join("&"));
+        if(filterIds.length > 0) {
+            opts.push(filterIds.join("&"));
+        }
     }
     if(query.selectionOnly_) {
         opts.push("selectionOnly=true");
     }
     opts.push("visualization=" + visualization);
-    //window.alert(neon.serviceUrl('exportservice', 'csv' +'/' + encodeURIComponent(this.host_) + '/' + encodeURIComponent(this.databaseType_), opts.join('&')));
-    return neon.util.ajaxUtils.doPost(
+    return neon.util.ajaxUtils.doPostJSON(
+        query,
         neon.serviceUrl('exportservice', 'csv' +'/' + encodeURIComponent(this.host_) + '/' + encodeURIComponent(this.databaseType_), ''),
         {
             success: successCallback,
