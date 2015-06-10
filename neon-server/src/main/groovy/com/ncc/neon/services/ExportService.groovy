@@ -51,7 +51,7 @@ class ExportService {
         if(!directory.exists()) {
             directory.mkdir();
         }
-        File file = new File("${directory.absolutePath}/" + "test.ods");
+        File file = new File("${directory.absolutePath}/" + "test.csv");
         if(!file.exists() && !file.createNewFile()) {
             // Temp code. Needs to fail more gracefully than this. Perhaps just 
             // return an empty string and let the error callback handle it clientside?
