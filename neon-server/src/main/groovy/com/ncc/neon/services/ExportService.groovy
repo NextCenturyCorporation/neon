@@ -57,7 +57,12 @@ class ExportService {
             // return an empty string and let the error callback handle it clientside?
             return "{\"data\": \"fileDoesNotExistAndFailedToCreateNewFile\"}";
         }
-        generateQueryResultsTable(result, file);
+        if(visualization == "queryResultsTable") {
+            generateQueryResultsTable(result, file);
+        }
+        else if(visualization == "timelineSelector") {
+            generateTimelineSelector(result, file);
+        }
         return "{\"data\": \"/neon/export/${file.name}\"}";
     }
 
@@ -77,5 +82,43 @@ class ExportService {
             }; 
             file << "\n";
         };
+    }
+
+    /**
+     * Guess what? More descriptions needed.
+     */
+    private void generateTimelineSelector(QueryResult result, File file) {
+        List<Map<String, Object>> data = result.data;
+        boolean month = false;
+        boolean day = false;
+        boolean hour = false;
+        file.write "Date\tCount\tYear";
+        if((data[0])["month"] != null) {
+            file << "\tMonth";
+            month = true;
+        }
+        if((data[0])["day"] != null) {
+            file << "\tDay";
+            day = true;
+        }
+        if((data[0])["hour"] != null) {
+            file << "\tHour";
+            hour = true;
+        }
+        file << "\n";
+        data.each {record ->
+            file << "${record["date"]}\t${record["count"]}\t${record["year"]}" + 
+                (month?"\t${record["month"]}":"") + 
+                (day?"\t${record["day"]}":"") + 
+                (hour?"\t${record["hour"]}":"") + 
+                "\n";
+        };
+    }
+
+    /**
+     * Descriptions will be here eventually, I promise.
+     */
+    private void generateMap(QueryResult result, File file) {
+        List<Map<String, Object>> data = result.data;
     }
 }
