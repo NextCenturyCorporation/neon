@@ -39,20 +39,43 @@ class ExportService {
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     @Path("csv/{host}/{databaseType}")
-    /*public String sayHello(@PathParam("host") String host,
+    public String executeExport(@PathParam("host") String host,
                            @PathParam("databaseType") String databaseType,
                            @DefaultValue("false") @QueryParam("ignoreFilters") boolean ignoreFilters,
                            @DefaultValue("false") @QueryParam("selectionOnly") boolean selectionOnly,
                            @QueryParam("ignoredFilterIds") Set<String> ignoredFilterIds,
                            @QueryParam("visualization") String visualization,
                            Query query) {
-        System.out.println("Made it this far.");
         QueryResult result = queryService.executeQuery(host, databaseType, ignoreFilters, selectionOnly, ignoredFilterIds, query);
-        
-        return "{\"title\": \"Hello there, ${visualization}.\"}";
-    }*/
-    public String sayHello(@PathParam("host") String host,
-                           @PathParam("databaseType") String databaseType) {
-        return "{\"data\": \"/neon/examples/earthquakes2.csv\"}";
+        File directory = new File("export");
+        if(!directory.exists()) {
+            directory.mkdir();
+        }
+        File file = new File("${directory.absolutePath}/" + "test.ods");
+        if(!file.exists() && !file.createNewFile()) {
+            // Temp code. Needs to fail more gracefully than this. Perhaps just 
+            // return an empty string and let the error callback handle it clientside?
+            return "{\"data\": \"fileDoesNotExistAndFailedToCreateNewFile\"}";
+        }
+        generateQueryResultsTable(result, file);
+        return "{\"data\": \"/neon/export/${file.name}\"}";
+    }
+
+    /**
+     * Will also need a better description for this.
+     */
+    private void generateQueryResultsTable(QueryResult result, File file) {
+        List<Map<String, Object>> data = result.data;
+        file.write "";
+        data[0].keySet().each {
+            file << "$it\t"
+        };
+        file << "\n";
+        data.each { record ->
+            record.values().each { field ->
+                file << "$field\t";
+            }; 
+            file << "\n";
+        };
     }
 }

@@ -164,7 +164,7 @@ neon.query.Connection.prototype.executeExport = function(query, successCallback,
     opts.push("visualization=" + visualization);
     return neon.util.ajaxUtils.doPostJSON(
         query,
-        neon.serviceUrl('exportservice', 'csv' +'/' + encodeURIComponent(this.host_) + '/' + encodeURIComponent(this.databaseType_), ''),
+        neon.serviceUrl('exportservice', 'csv' +'/' + encodeURIComponent(this.host_) + '/' + encodeURIComponent(this.databaseType_), opts.join('&')),
         {
             success: successCallback,
             error: errorCallback
