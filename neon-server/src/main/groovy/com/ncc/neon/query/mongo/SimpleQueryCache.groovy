@@ -25,29 +25,28 @@ import org.apache.commons.jcs.engine.control.CompositeCacheManager
 import org.apache.commons.jcs.engine.CompositeCacheAttributes
 
 /**
- * interface for a simple caching service
+ * Simple caching service for queries.  When a query is made to Mongo, it is first 
+ * sent to here to see if it has been cached.  Internally, it turns the MongoQuery into
+ * a string and stores it in JavaCachingSystem (JCS).  
+ *
+ * https://commons.apache.org/proper/commons-jcs/index.html
+ *
+ * TODO:  
+ *    -- Use Tomcat to manage this rather than simple singleton pattern
+ *    -- Manage memory used, or at least figure out how much it is using
+ *    -- use cache.ccf file rather than manual
+ *    -- (?) Track cache hits and misses and adjust num objects stored
  */
 public class SimpleQueryCache {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SimpleQueryCache)
 
-        /*
-          See:   https://commons.apache.org/proper/commons-jcs/getting_started/intro.html
-          for how to use JCS
+    private CacheAccess<String, QueryResult> cache = null
 
-          jcs.default=
-          jcs.default.cacheattributes=org.apache.commons.jcs.engine.CompositeCacheAttributes
-          jcs.default.cacheattributes.MaxObjects=1000
-          jcs.default.cacheattributes.MemoryCacheName=org.apache.commons.jcs.engine.memory.lru.LRUMemoryCache
-        */
-    static SimpleQueryCache instance
+    static SimpleQueryCache instance = new SimpleQueryCache()
 
-    static private CacheAccess<MongoQuery, QueryResult> cache = null;
-
-    static synchronized SimpleQueryCache getInstance()
+    public static synchronized SimpleQueryCache getInstance()
     {
-        LOGGER.error("got to getinstance")
-        if (instance == null ) { instance = new SimpleQueryCache() } 
         return instance
     }
         
@@ -57,55 +56,39 @@ public class SimpleQueryCache {
 
     void initializeCache()
     {
-        if (cache == null) {
-            try {
-
-                CompositeCacheManager ccm = CompositeCacheManager.getUnconfiguredInstance()
-                Properties props = new Properties()
-                props.put("jcs.default","DC")
-                props.put("jcs.default.cacheattributes", "org.apache.commons.jcs.engine.CompositeCacheAttributes")
-                props.put("jcs.default.cacheattributes.MaxObjects","1000")
-                props.put("jcs.default.cacheattributes.MemoryCacheName", "org.apache.commons.jcs.engine.memory.lru.LRUMemoryCache")
-
-                ccm.configure(props);
-                cache = JCS.getInstance("default")
-                LOGGER.error("got to here.  cache is now: " + cache)
-            }
-            catch (CacheException e) {
-                LOGGER.error("Problem initializing cache: " + e.getMessage())
-            }
+        try {
+            CompositeCacheManager ccm = CompositeCacheManager.getUnconfiguredInstance()
+            Properties props = new Properties()
+            props.put("jcs.default","")
+            props.put("jcs.default.cacheattributes", "org.apache.commons.jcs.engine.CompositeCacheAttributes")
+            props.put("jcs.default.cacheattributes.MaxObjects","1000")
+            props.put("jcs.default.cacheattributes.MemoryCacheName", 
+                "org.apache.commons.jcs.engine.memory.lru.LRUMemoryCache")
+            ccm.configure(props)
+            cache = JCS.getInstance("default")
+        }
+        catch (CacheException e) {
+            LOGGER.error("Problem initializing cache: " + e.getMessage())
         }
     }
 
     QueryResult get(MongoQuery mongoQuery) {
-    
-        LOGGER.error("got to get")
-        if ( cache == null ) {
-            initializeCache()
-            if ( cache == null ) {
-                LOGGER.error("cache is nulll!!!!")
-               return null
-            }
+        if ( cache == null )  {
+            return null
         }
-
-        QueryResult result = cache.get(mongoQuery)
-            if (result != null) { System.err.println("cache hit") }
-            else { System.err.println("cache miss") }
-        return result
+        String s = mongoQuery.toString()
+        return cache.get(s)
     }
 
     void put(MongoQuery mongoQuery, QueryResult result) {
         if ( cache == null ) {
-            initializeCache()
-            if ( cache == null ) {
-                LOGGER.error("cache is nulll!!!!")
-               return null
-            }
+            return 
         }
 
         try {
-            cache.put(mongoQuery, result)
-                }
+            String s = mongoQuery.toString()
+            cache.put(s, result)
+        }
         catch (CacheException e) {
             LOGGER.debug("Problem putting cache: %s", e.getMessage())
         }

@@ -19,6 +19,8 @@ repositories {
 }
 
 dependencies {
+    compile "org.apache.commons:commons-jcs:2.0-beta-1"
+    compile "org.apache.commons:commons-jcs-jcache:2.0-beta-1"
     compile "org.json:json:$jsonVersion"
     compile "org.mongodb:mongo-java-driver:$mongoDriverVersion"
 

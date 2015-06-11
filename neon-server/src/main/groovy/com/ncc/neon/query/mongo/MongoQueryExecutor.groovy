@@ -55,7 +55,13 @@ class MongoQueryExecutor extends AbstractQueryExecutor {
         AbstractMongoQueryWorker worker = createMongoQueryWorker(query)
         MongoConversionStrategy mongoConversionStrategy = new MongoConversionStrategy(filterState: filterState, selectionState: selectionState)
         MongoQuery mongoQuery = mongoConversionStrategy.convertQuery(query, options)
-        return worker.executeQuery(mongoQuery)
+
+        QueryResult qr = SimpleQueryCache.getInstance().get(mongoQuery)        
+        if (qr == null) {
+            qr = worker.executeQuery(mongoQuery)           
+            SimpleQueryCache.getInstance().put(mongoQuery, qr)
+        }
+        return qr
     }
 
     @Override
