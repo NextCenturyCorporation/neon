@@ -56,13 +56,16 @@ class MongoQueryExecutor extends AbstractQueryExecutor {
         AbstractMongoQueryWorker worker = createMongoQueryWorker(query)
         MongoConversionStrategy mongoConversionStrategy = new MongoConversionStrategy(filterState: filterState, selectionState: selectionState)
         MongoQuery mongoQuery = mongoConversionStrategy.convertQuery(query, options)
+        return getQueryResult(worker, mongoQuery)
+    }
 
-        QueryResult qr = SimpleQueryCache.getSimpleQueryCacheInstance().get(mongoQuery)
-        if (qr == null) {
-            qr = worker.executeQuery(mongoQuery)
-            SimpleQueryCache.getSimpleQueryCacheInstance().put(mongoQuery, qr)
+    QueryResult getQueryResult(AbstractMongoQueryWorker worker, MongoQuery mongoQuery) {
+        QueryResult queryResult = SimpleQueryCache.getSimpleQueryCacheInstance().get(mongoQuery)
+        if(!queryResult) {
+            queryResult = worker.executeQuery(mongoQuery)
+            SimpleQueryCache.getSimpleQueryCacheInstance().put(mongoQuery, queryResult)
         }
-        return qr
+        return queryResult
     }
 
     @Override
@@ -115,11 +118,9 @@ class MongoQueryExecutor extends AbstractQueryExecutor {
 
     List<ArrayCountPair> getArrayCounts(String databaseName, String tableName, String field, int limit) {
         DB database = mongo.getDB(databaseName)
-
-        ArrayCountQueryWorker worker = new ArrayCountQueryWorker(mongo)
-
+        ArrayCountQueryWorker worker = new ArrayCountQueryWorker(mongo).withDatabase(database)
         Query query = new Query(filter: new Filter(databaseName: databaseName, tableName: tableName))
-        MongoQuery mongoQuery = new MongoQuery(query: query)
-        return worker.executeQuery(mongoQuery, database, field, limit, filterState, selectionState)
+        MongoQuery mongoQuery = worker.createArrayCountQuery(new MongoQuery(query: query), field, limit, filterState, selectionState)
+        return getQueryResult(worker, mongoQuery).getData()
     }
 }
