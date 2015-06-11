@@ -59,7 +59,7 @@ neon.query.Query.prototype.toString = function() {
     this.aggregates.forEach(function(d) {
         s = s + ", AGGREGATE " + d.operation +  " ON " + d.field + " (named " + d.name + ")";
     });
-    if (this.limitClause != undefined) {
+    if (this.limitClause !== undefined) {
         s = s + ", LIMIT " + this.limitClause.limit;
     }
     return s;
