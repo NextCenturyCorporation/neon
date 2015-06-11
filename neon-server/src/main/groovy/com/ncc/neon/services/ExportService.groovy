@@ -63,6 +63,15 @@ class ExportService {
         else if(visualization == "timelineSelector") {
             generateTimelineSelector(result, file);
         }
+        else if(visualization == "map") {
+            generateMap(result, file);
+        }
+        else if(visualization == "linechart") {
+            generateLineChart(result, file);
+        }
+        else if(visualization == "barchart") {
+            generateBarChart(result, file);
+        }
         return "{\"data\": \"/neon/export/${file.name}\"}";
     }
 
@@ -117,8 +126,35 @@ class ExportService {
 
     /**
      * Descriptions will be here eventually, I promise.
+     * This is basically the same as generateQueryResults. In the end, 
+     * the big difference will be in the names they put on their sheets.
      */
     private void generateMap(QueryResult result, File file) {
+        List<Map<String, Object>> data = result.data;
+        file.write "";
+        data[0].keySet().each {
+            file << "$it\t"
+        };
+        file << "\n";
+        data.each { record ->
+            record.values().each { field ->
+                file << "$field\t";
+            }; 
+            file << "\n";
+        };
+    }
+
+    /**
+     * Descriptions will be here eventually, I promise.
+     */
+    private void generateLineChart(QueryResult result, File file) {
+        List<Map<String, Object>> data = result.data;
+    }
+
+    /**
+     * Descriptions will be here eventually, I promise.
+     */
+    private void generateBarChart(QueryResult result, File file) {
         List<Map<String, Object>> data = result.data;
     }
 }
