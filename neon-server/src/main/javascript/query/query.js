@@ -43,7 +43,8 @@ neon.query.Query = function() {
 
 /**
  * Produce a human-readable representation of the query
- * @type {string}
+ * @method toString
+ * @return {string}
  */
 neon.query.Query.prototype.toString = function() {
     var s = " ";
