@@ -15,6 +15,7 @@
  */
 
 package com.ncc.neon.query.mongo
+
 import com.mongodb.DB
 import com.mongodb.MongoClient
 import com.ncc.neon.connect.ConnectionManager
@@ -55,7 +56,13 @@ class MongoQueryExecutor extends AbstractQueryExecutor {
         AbstractMongoQueryWorker worker = createMongoQueryWorker(query)
         MongoConversionStrategy mongoConversionStrategy = new MongoConversionStrategy(filterState: filterState, selectionState: selectionState)
         MongoQuery mongoQuery = mongoConversionStrategy.convertQuery(query, options)
-        return worker.executeQuery(mongoQuery)
+
+        QueryResult qr = SimpleQueryCache.getSimpleQueryCacheInstance().get(mongoQuery)
+        if (qr == null) {
+            qr = worker.executeQuery(mongoQuery)
+            SimpleQueryCache.getSimpleQueryCacheInstance().put(mongoQuery, qr)
+        }
+        return qr
     }
 
     @Override
@@ -102,7 +109,7 @@ class MongoQueryExecutor extends AbstractQueryExecutor {
         return new SimpleMongoQueryWorker(mongo)
     }
 
-    private MongoClient getMongo(){
+    private MongoClient getMongo() {
         connectionManager.connection.mongo
     }
 

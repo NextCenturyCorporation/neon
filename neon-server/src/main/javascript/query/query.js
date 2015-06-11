@@ -42,6 +42,31 @@ neon.query.Query = function() {
 };
 
 /**
+ * Produce a human-readable representation of the query
+ * @method toString
+ * @return {string}
+ */
+neon.query.Query.prototype.toString = function() {
+    var s = " ";
+    this.fields.forEach(function(d) {
+        s = s + " SELECT " + d;
+    });
+    this.sortClauses.forEach(function(d) {
+        s = s + ", SORTBY " + d.fieldName + " (" + d.sortOrder + ")";
+    });
+    this.groupByClauses.forEach(function(d) {
+        s = s + ", GROUPBY " + d.field;
+    });
+    this.aggregates.forEach(function(d) {
+        s = s + ", AGGREGATE " + d.operation +  " ON " + d.field + " (named " + d.name + ")";
+    });
+    if (this.limitClause !== undefined) {
+        s = s + ", LIMIT " + this.limitClause.limit;
+    }
+    return s;
+};
+
+/**
  * The aggregation operation to count items
  * @property COUNT
  * @type {String}

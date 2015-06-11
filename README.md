@@ -62,6 +62,8 @@ to point to the appropriate port.
 
 **[Developer Quick Start Guide][4]** - A quick tour of how to develop apps that use Neon.
 
+**[XDATA Summer Camp 2015 Neon Dashboard Documentation][6]** - Documentation for the Neon Dashboard used for the 2015 XDATA Summer Camp.
+
 ## Additional Information
 
 Email: neon-support@nextcentury.com
@@ -79,3 +81,4 @@ Copyright 2014 Next Century Corporation
 [3]: https://github.com/NextCenturyCorporation/neon/wiki/Deploying-Neon
 [4]: https://github.com/NextCenturyCorporation/neon/wiki/Developer-Quick-Start-Guide
 [5]: http://neonframework.org
+[6]: https://github.com/NextCenturyCorporation/neon-gtd/wiki/XDATA-Summer-Camp-2015-Neon-Dashboard-Documentation
