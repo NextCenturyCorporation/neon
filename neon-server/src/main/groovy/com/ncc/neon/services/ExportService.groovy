@@ -16,7 +16,6 @@
 
 package com.ncc.neon.services
 
-
 import com.ncc.neon.query.*
 import com.ncc.neon.query.result.QueryResult
 import org.springframework.beans.factory.annotation.Autowired
@@ -33,128 +32,92 @@ class ExportService {
     QueryService queryService
 
     /**
-     * I'll need a better description for this later.
+     * Executes an export request by generating one or multiple CSV files and 
+     * returning a link to it or to a .zip archive of them, if there are multiple.
+     * @param host The host the database is running on
+     * @param databaseType the type of database
+     * @param data A list of maps, each one containing a query, the filename that query's data should be written to,
+     * and a list of fields to write data from.
+     * @return A link to the generated CSV file or .zip archive.
      */
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     @Path("csv/{host}/{databaseType}")
     public String executeExport(@PathParam("host") String host,
-                           @PathParam("databaseType") String databaseType,
-                           @DefaultValue("false") @QueryParam("ignoreFilters") boolean ignoreFilters,
-                           @DefaultValue("false") @QueryParam("selectionOnly") boolean selectionOnly,
-                           @QueryParam("ignoredFilterIds") Set<String> ignoredFilterIds,
-                           @QueryParam("visualization") String visualization,
-                           Query query) {
-        QueryResult result = queryService.executeQuery(host, databaseType, ignoreFilters, selectionOnly, ignoredFilterIds, query);
-        File directory = new File("export");
-        if(!directory.exists()) {
-            directory.mkdir();
+                            @PathParam("databaseType") String databaseType,
+                           List<Map<String, Object>> data) {
+        List<String> files = [];
+        String toReturn;
+        data.each { query_fields_object ->
+            boolean ignoreFilters = query_fields_object.query.ignoreFilters_
+            boolean selectionOnly = query_fields_object.query.selectionOnly_
+            Set<String> ignoredFilterIds = query_fields_object.query.ignoredFilterIds_
+            query_fields_object.query.remove("ignoreFilters_")
+            query_fields_object.query.remove("selectionOnly_")
+            query_fields_object.query.remove("ignoredFilterIds_")
+            QueryResult result = queryService.executeQuery(host, databaseType, ignoreFilters, selectionOnly, ignoredFilterIds, (Query)query_fields_object.query)
+            File directory = new File("export")
+            if(!directory.exists()) {
+                directory.mkdir()
+            }
+            File file = new File("${directory.absolutePath}/${query_fields_object.name}.csv")
+            if(!file.exists() && !file.createNewFile()) {
+                return Response.status(Response.status.INTERNAL_SERVER_ERROR).entity("Could not find or create a file.").type(MediaType.APPLICATION_JSON).build();
+            }
+            files.add(file.name)
+            generateCSV(result, file, query_fields_object.fields)
         }
-        File file = new File("${directory.absolutePath}/" + "test.csv");
-        if(!file.exists() && !file.createNewFile()) {
-            // Temp code. Needs to fail more gracefully than this. Perhaps just 
-            // return an empty string and let the error callback handle it clientside?
-            return "{\"data\": \"fileDoesNotExistAndFailedToCreateNewFile\"}";
+        if(files.size() > 1) {
+            // TODO Zip up all the files into a .zip
+            // Set toReturn equal to the .zip file
         }
-        if(visualization == "queryResultsTable") {
-            generateQueryResultsTable(result, file);
+        else if(files.size()) {
+            toReturn = "{\"data\": \"/neon/export/${files[0]}\"}"
         }
-        else if(visualization == "timelineSelector") {
-            generateTimelineSelector(result, file);
-        }
-        else if(visualization == "map") {
-            generateMap(result, file);
-        }
-        else if(visualization == "linechart") {
-            generateLineChart(result, file);
-        }
-        else if(visualization == "barchart") {
-            generateBarChart(result, file);
-        }
-        return "{\"data\": \"/neon/export/${file.name}\"}";
+        return toReturn
     }
 
     /**
-     * Will also need a better description for this.
+     * Generates a CSV file.
+     * @param result the QueryResult containing the records to write data from.
+     * @param file The file to write data to.
+     * @param fields A list of maps that represent the fields to write from the records, both as they will appear in the QueryResult and in prettified forms. 
+     * e.g. [{"query":"field1", "pretty":"Field 1"}, {"query":"field2", "pretty":"Field 2"}]
      */
-    private void generateQueryResultsTable(QueryResult result, File file) {
-        List<Map<String, Object>> data = result.data;
-        file.write "";
-        data[0].keySet().each {
-            file << "$it\t"
-        };
-        file << "\n";
+    private void generateCSV(QueryResult result, File file, List<Map<String, String>> fields) {
+        file.write ""
+        List<String> queryNames = []
+        fields.each { field ->
+            queryNames.add(field["query"])
+            file << "${field["pretty"]}\t"
+        }
+        file << "\n"
+        List<Map<String, Object>> data = result.data
         data.each { record ->
-            record.values().each { field ->
-                file << "$field\t";
-            }; 
-            file << "\n";
-        };
-    }
-
-    /**
-     * Guess what? More descriptions needed.
-     */
-    private void generateTimelineSelector(QueryResult result, File file) {
-        List<Map<String, Object>> data = result.data;
-        boolean month = false;
-        boolean day = false;
-        boolean hour = false;
-        file.write "Date\tCount\tYear";
-        if((data[0])["month"] != null) {
-            file << "\tMonth";
-            month = true;
+            queryNames.each { field ->
+                file << "${record[field]}\t"
+            }
+            file << "\n"
         }
-        if((data[0])["day"] != null) {
-            file << "\tDay";
-            day = true;
-        }
-        if((data[0])["hour"] != null) {
-            file << "\tHour";
-            hour = true;
-        }
-        file << "\n";
-        data.each {record ->
-            file << "${record["date"]}\t${record["count"]}\t${record["year"]}" + 
-                (month?"\t${record["month"]}":"") + 
-                (day?"\t${record["day"]}":"") + 
-                (hour?"\t${record["hour"]}":"") + 
-                "\n";
-        };
-    }
-
-    /**
-     * Descriptions will be here eventually, I promise.
-     * This is basically the same as generateQueryResults. In the end, 
-     * the big difference will be in the names they put on their sheets.
-     */
-    private void generateMap(QueryResult result, File file) {
-        List<Map<String, Object>> data = result.data;
-        file.write "";
-        data[0].keySet().each {
-            file << "$it\t"
-        };
-        file << "\n";
-        data.each { record ->
-            record.values().each { field ->
-                file << "$field\t";
-            }; 
-            file << "\n";
-        };
-    }
-
-    /**
-     * Descriptions will be here eventually, I promise.
-     */
-    private void generateLineChart(QueryResult result, File file) {
-        List<Map<String, Object>> data = result.data;
-    }
-
-    /**
-     * Descriptions will be here eventually, I promise.
-     */
-    private void generateBarChart(QueryResult result, File file) {
-        List<Map<String, Object>> data = result.data;
     }
 }
+
+/**
+ * {[
+ *     {
+ *         "query": query object,
+ *         "name": name of file w/o extension,
+ *         "fields": [{
+ *                       "query": name of field in query object,
+ *                       "pretty": prettified name of field
+ *                   }, {
+ *                       etc.
+ *                   }
+ *               ]
+ *     }, {
+ *         "query": next query object,
+ *          etc.
+ *     }
+ * ]}
+ */

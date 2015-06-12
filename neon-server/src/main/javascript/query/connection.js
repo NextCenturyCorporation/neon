@@ -107,21 +107,7 @@ neon.query.Connection.prototype.executeQueryGroup = function(queryGroup, success
 };
 
 neon.query.Connection.prototype.executeQueryService_ = function(query, successCallback, errorCallback, serviceName) {
-    var opts = [];
-    if(query.ignoreFilters_) {
-        opts.push("ignoreFilters=true");
-    } else if(query.ignoredFilterIds_) {
-        var filterIds = [];
-        query.ignoredFilterIds_.forEach(function(id) {
-            filterIds.push("ignoredFilterIds=" + encodeURIComponent(id));
-        });
-        if(filterIds.length > 0) {
-            opts.push(filterIds.join("&"));
-        }
-    }
-    if(query.selectionOnly_) {
-        opts.push("selectionOnly=true");
-    }
+    var opts = this.optsFromQuery(query);
     return neon.util.ajaxUtils.doPostJSON(
         query,
         neon.serviceUrl('queryservice', serviceName + '/' + encodeURIComponent(this.host_) + '/' + encodeURIComponent(this.databaseType_), opts.join('&')),
@@ -132,38 +118,21 @@ neon.query.Connection.prototype.executeQueryService_ = function(query, successCa
     );
 };
 
-// DANIEL'S CODE HERE ========================================================================================
 /**
  * Executes the specified export request and fires the callback when complete.
  * @method executeExport
  * @param {neon.query.Query} query the query to export data for
- * @param {Function} successCallback The callback to fire when the export request successfully completes.
- * @param {Function} [errorCallBack] The optional callback when an error occurs. (finish up explanation here later.)
- * @param {String} visualization An string containing the name of the visualization for which to export data.
+ * @param {Function} successCallback The callback to fire when the export request successfully completes. Takes 
+ * a JSON object with the export URL stored in it's data field as a parameter.
+ * @param {Function} [errorCallBack] The optional callback when an error occurs. This function takes the server's
+ * response as a parameter.
  * @return {neon.util.AjaxRequest} The xhr request object
  */
-neon.query.Connection.prototype.executeExport = function(query, successCallback, errorCallback, visualization) {
-    // Rewriting the query to querystring code for now, but can be easily turned into 
-    // a helper method and pulled out of both here and executeQueryService_.
+neon.query.Connection.prototype.executeExport = function(data, successCallback, errorCallback) {
+    // opts is left blank for now, because the new ExportService will pull the data from the query object itself.
     var opts = [];
-
-    if(query.ignoreFilters_) {
-        opts.push("ignoreFilters=true");
-    } else if(query.ignoredFilterIds_) {
-        var filterIds = [];
-        query.ignoredFilterIds_.forEach(function(id) {
-            filterIds.push("ignoredFilterIds=" + encodeURIComponent(id));
-        });
-        if(filterIds.length > 0) {
-            opts.push(filterIds.join("&"));
-        }
-    }
-    if(query.selectionOnly_) {
-        opts.push("selectionOnly=true");
-    }
-    opts.push("visualization=" + visualization);
     return neon.util.ajaxUtils.doPostJSON(
-        query,
+        data,
         neon.serviceUrl('exportservice', 'csv' +'/' + encodeURIComponent(this.host_) + '/' + encodeURIComponent(this.databaseType_), opts.join('&')),
         {
             success: successCallback,
@@ -171,7 +140,31 @@ neon.query.Connection.prototype.executeExport = function(query, successCallback,
         }
     );
 };
-// DANIEL'S CODE END =========================================================================================
+
+/**
+ * Helper method for executeQueryService_ and executeExport. Pulls certain fields from a Query object
+ * into an array in a form able to be easily pulled together into a URL query string. 
+ * @param {neon.query.Query} query The Query object from which to pull the query string options.
+ * @return An array with the options in field=value form.
+ */
+neon.query.Connection.prototype.optsFromQuery = function(query) {
+    var opts = [];
+    if(query.ignoreFilters_) {
+        opts.push("ignoreFilters=true");
+    } else if(query.ignoredFilterIds_) {
+        var filterIds = [];
+        query.ignoredFilterIds_.forEach(function(id) {
+            filterIds.push("ignoredFilterIds=" + encodeURIComponent(id));
+        });
+        if(filterIds.length) {
+            opts.push(filterIds.join("&"));
+        }
+    }
+    if(query.selectionOnly_) {
+        opts.push("selectionOnly=true");
+    }
+    return opts;
+}
 
 /**
  * Gets a list of database names
