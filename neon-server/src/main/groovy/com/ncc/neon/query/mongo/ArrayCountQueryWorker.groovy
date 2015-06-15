@@ -27,38 +27,34 @@ import com.ncc.neon.query.result.ArrayCountPair
 import com.ncc.neon.query.result.ListQueryResult
 
 class ArrayCountQueryWorker extends AbstractMongoQueryWorker {
-    private String field
-    private int limit
-    private FilterState filterState
-    private SelectionState selectionState
     private DB database
 
     ArrayCountQueryWorker(MongoClient mongo) {
         super(mongo)
     }
 
-    List<ArrayCountPair> executeQuery(MongoQuery mongoQuery, DB database, String field, int limit, FilterState filterState, SelectionState selectionState) {
-        this.field = field
-        this.limit = limit
-        this.filterState = filterState
-        this.selectionState = selectionState
+    ArrayCountQueryWorker withDatabase(DB database) {
         this.database = database
-        return executeQuery(mongoQuery).getData()
+        return this
     }
 
-    @Override
-    QueryResult executeQuery(MongoQuery mongoQuery) {
-        addMatchQuery(mongoQuery)
+    MongoQuery createArrayCountQuery(MongoQuery mongoQuery, String field, int limit, FilterState filterState, SelectionState selectionState) {
+        addMatchQuery(mongoQuery, filterState, selectionState)
 
         DBObject project = new BasicDBObject('$project', new BasicDBObject(field, 1))
         mongoQuery.query.aggregates << project
         DBObject unwind = new BasicDBObject('$unwind', '$' + field)
         mongoQuery.query.aggregates << unwind
 
-        addGroupFields(mongoQuery)
+        addGroupFields(mongoQuery, field)
         addSort(mongoQuery)
-        addLimit(mongoQuery)
+        addLimit(mongoQuery, limit)
 
+        return mongoQuery
+    }
+
+    @Override
+    QueryResult executeQuery(MongoQuery mongoQuery) {
         Map<String, Integer> arrayCounts = [:]
         Iterator<DBObject> results = database.getCollection(mongoQuery.query.getTableName()).aggregate(mongoQuery.query.aggregates[0],
                 mongoQuery.query.aggregates[1..mongoQuery.query.aggregates.size()-1].toArray(new DBObject[0])).results().iterator()
@@ -73,8 +69,8 @@ class ArrayCountQueryWorker extends AbstractMongoQueryWorker {
         return new ListQueryResult(arrayCountList)
     }
 
-    private void addMatchQuery(MongoQuery mongoQuery) {
-        DBObject matchQuery = mergeWithNeonFilters(new BasicDBObject(), mongoQuery.query.getDatabaseName(), mongoQuery.query.getTableName())
+    private void addMatchQuery(MongoQuery mongoQuery, FilterState filterState, SelectionState selectionState) {
+        DBObject matchQuery = mergeWithNeonFilters(new BasicDBObject(), mongoQuery.query.getDatabaseName(), mongoQuery.query.getTableName(), filterState, selectionState)
 
         if(!((BasicDBObject)matchQuery).isEmpty()) {
             DBObject match = new BasicDBObject('$match',matchQuery)
@@ -82,7 +78,7 @@ class ArrayCountQueryWorker extends AbstractMongoQueryWorker {
         }
     }
 
-    private void addGroupFields(MongoQuery mongoQuery) {
+    private void addGroupFields(MongoQuery mongoQuery, String field) {
         DBObject groupFields = new BasicDBObject()
         groupFields.put('_id', '$' + field)
         groupFields.put('count', new BasicDBObject('$sum', 1))
@@ -95,7 +91,7 @@ class ArrayCountQueryWorker extends AbstractMongoQueryWorker {
         mongoQuery.query.aggregates << sort
     }
 
-    private void addLimit(MongoQuery mongoQuery) {
+    private void addLimit(MongoQuery mongoQuery, int limit) {
         if (limit > 0) {
             mongoQuery.query.aggregates << new BasicDBObject('$limit', limit)
         }
@@ -109,7 +105,7 @@ class ArrayCountQueryWorker extends AbstractMongoQueryWorker {
         return arrayCountList
     }
 
-    private DBObject mergeWithNeonFilters(DBObject query, String databaseName, String collectionName ) {
+    private DBObject mergeWithNeonFilters(DBObject query, String databaseName, String collectionName, FilterState filterState, SelectionState selectionState) {
         // hook into some methods here that will use neon's filters/selection since this query can't yet be executed through neon
         DataSet dataSet = new DataSet(databaseName: databaseName, tableName: collectionName)
         List neonFiltersAndSelection = []

@@ -74,24 +74,23 @@ public class SimpleQueryCache {
     }
 
     QueryResult get(MongoQuery mongoQuery) {
-        if (cache == null) {
+        if(!cache) {
             return null
         }
-        String s = mongoQuery.toString()
-        return cache.get(s)
+        String queryString = mongoQuery.toString()
+        return cache.get(queryString)
     }
 
     void put(MongoQuery mongoQuery, QueryResult result) {
-        if (cache == null) {
+        if(!cache) {
             return
         }
-
+        String queryString = mongoQuery.toString()
         try {
-            String s = mongoQuery.toString()
-            cache.put(s, result)
+            cache.put(queryString, result)
         }
         catch (CacheException e) {
-            LOGGER.debug("Problem putting cache: %s", e.getMessage())
+            LOGGER.debug("Problem putting cache: %queryString", e.getMessage())
         }
     }
 
