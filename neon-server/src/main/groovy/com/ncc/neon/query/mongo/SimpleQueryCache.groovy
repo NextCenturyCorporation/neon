@@ -6,7 +6,7 @@
  *
  *     http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing, software
+  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
@@ -30,10 +30,17 @@ import org.apache.commons.jcs.engine.control.CompositeCacheManager
  *
  * https://commons.apache.org/proper/commons-jcs/index.html
  *
+ * Note:   config file is src/main/resources/cache.ccf, which gets 
+ *         copied to neon/classes/cache.ccf on tomcat
+ *
  * TODO:
  *    -- Use Tomcat to manage this rather than simple singleton pattern
  *    -- Manage memory used, or at least figure out how much it is using
- *    -- use cache.ccf file rather than manual
+ *    -- Use disk cache
+ *    -- invalidate cache when data changes
+ *    -- re-pull cache when restarted or cache invalidated
+ *    -- prioritize cache
+ *    -- turn caching on / off dynamically
  *    -- (?) Track cache hits and misses and adjust num objects stored
  */
 public class SimpleQueryCache {
@@ -58,18 +65,11 @@ public class SimpleQueryCache {
 
     void initializeCache() {
         try {
-            CompositeCacheManager ccm = CompositeCacheManager.getUnconfiguredInstance()
-            Properties props = new Properties()
-            props.put("jcs.default", "")
-            props.put("jcs.default.cacheattributes", "org.apache.commons.jcs.engine.CompositeCacheAttributes")
-            props.put("jcs.default.cacheattributes.MaxObjects", "1000")
-            props.put("jcs.default.cacheattributes.MemoryCacheName",
-                    "org.apache.commons.jcs.engine.memory.lru.LRUMemoryCache")
-            ccm.configure(props)
             cache = JCS.getInstance("default")
         }
         catch (CacheException e) {
             LOGGER.error("Problem initializing cache: ", e.getMessage())
+            e.printStackTrace()
         }
     }
 
@@ -78,7 +78,8 @@ public class SimpleQueryCache {
             return null
         }
         String queryString = mongoQuery.toString()
-        return cache.get(queryString)
+        QueryResult result = cache.get(queryString)
+        return result
     }
 
     void put(MongoQuery mongoQuery, QueryResult result) {
