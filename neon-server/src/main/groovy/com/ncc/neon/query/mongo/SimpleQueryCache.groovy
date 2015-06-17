@@ -21,7 +21,6 @@ import org.slf4j.LoggerFactory
 import org.apache.commons.jcs.JCS
 import org.apache.commons.jcs.access.CacheAccess
 import org.apache.commons.jcs.access.exception.CacheException
-import org.apache.commons.jcs.engine.control.CompositeCacheManager
 
 /**
  * Simple caching service for queries.  When a query is made to Mongo, it is first
@@ -30,7 +29,7 @@ import org.apache.commons.jcs.engine.control.CompositeCacheManager
  *
  * https://commons.apache.org/proper/commons-jcs/index.html
  *
- * Note:   config file is src/main/resources/cache.ccf, which gets 
+ * Note:   config file is src/main/resources/cache.ccf, which gets
  *         copied to neon/classes/cache.ccf on tomcat
  *
  * TODO:
@@ -69,7 +68,6 @@ public class SimpleQueryCache {
         }
         catch (CacheException e) {
             LOGGER.error("Problem initializing cache: ", e.getMessage())
-            e.printStackTrace()
         }
     }
 
