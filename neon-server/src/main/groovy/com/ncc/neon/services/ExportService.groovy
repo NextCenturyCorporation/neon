@@ -21,6 +21,10 @@ import com.ncc.neon.query.clauses.*
 import com.ncc.neon.query.export.*
 import com.ncc.neon.query.filter.Filter
 import com.ncc.neon.query.result.QueryResult
+import org.apache.poi.ss.usermodel.Cell
+import org.apache.poi.ss.usermodel.Row
+import org.apache.poi.ss.usermodel.Sheet
+import org.apache.poi.xssf.usermodel.XSSFWorkbook
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
 
@@ -36,8 +40,31 @@ import groovy.json.JsonOutput
 @Path("/exportservice")
 class ExportService {
 
+    static final int CSV = 0
+    static final int XLSX = 1
+
     @Autowired
     QueryService queryService
+
+    @POST
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    @Path("export/{host}/{databaseType}")
+    public String executeExport(@PathParam("host") String host,
+                                @PathParam("databaseType") String databaseType,
+                                ExportBundle bundle) {
+        //int type = Integer.parseInt(fileType)
+        String ret
+        switch(bundle.fileType) {
+            case CSV:
+                ret = executeCSVExport(host, databaseType, bundle)
+                break
+            case XLSX:
+                ret = executeExcelExport(host, databaseType, bundle)
+                break
+        }
+        return ret
+    }
 
     /**
      * Executes a CSV export request by generating one or multiple CSV files and 
@@ -48,39 +75,53 @@ class ExportService {
      * and a list of fields to write data from.
      * @return A link to the generated .csv file or .zip archive.
      */
-    @POST
-    @Consumes(MediaType.APPLICATION_JSON)
-    @Produces(MediaType.APPLICATION_JSON)
-    @Path("csv/{host}/{databaseType}")
-    public String executeCSVExport(@PathParam("host") String host,
-                            @PathParam("databaseType") String databaseType,
-                           List<ExportQuery> data) {
+    public String executeCSVExport(String host, String databaseType, ExportBundle bundle) {
         List<File> files = []
-        data.each { exportQuery ->
+        bundle.data.each { exportQuery ->
             QueryResult result = queryService.executeQuery(host, databaseType, exportQuery.ignoreFilters, exportQuery.selectionOnly, exportQuery.ignoredFilterIds, exportQuery.query)
-            File file = createCSVWithName(exportQuery.name)
-            files.add(file)
-            generateCSV(result, file, exportQuery.fields)
+            files.add(generateCSV(result, exportQuery.fields, exportQuery.name))
         }
+
         HashMap<String, String> toReturn = new HashMap<String, String>()
         if(files.size() > 1) {
-            ZipOutputStream zip = new ZipOutputStream(new FileOutputStream("${directory.absolutePath}${file.separator}test.zip"))
-            files.each { toZip ->
-                byte[] bytes = toZip.getBytes()
-                if(bytes.length) {
-                    zip.putNextEntry(new ZipEntry(toZip.name))
-                    zip.write(bytes, 0, bytes.length)
-                    zip.closeEntry()
-                }
-            }
-            zip.close()
-            // TODO replace 'test.zip' with user ID.zip or something like that.
-            toReturn.put("data", "/neon/export/test.zip")
+            String result = generateZipFile("${directory.absolutePath}${file.separator}${bundle.name}.zip", "${bundle.name}.zip", files);
+            toReturn.put("data", result)
         }
         else if(files.size()) {
             toReturn.put("data","/neon/export/${files[0].name}")
         }
+
         return JsonOutput.toJson(toReturn)
+    }
+
+    /**
+     * Generates a CSV file.
+     * @param result the QueryResult containing the records to write data from.
+     * @param fields A list of maps that represent the fields to write from the records, both as they will appear in the QueryResult and in prettified forms.
+     * e.g. [{"query":"field1", "pretty":"Field 1"}, {"query":"field2", "pretty":"Field 2"}]
+     * @param fileName The name of the file to find or create and write data to.
+     * @return the File object representing the file written to.
+     */
+    private File generateCSV(QueryResult result, List<ExportField> fields, String fileName) {
+        File file = createCSVWithName(fileName)
+        // Clear file of anything that was in it before.
+        file.write ""
+        // Write out field names in top row.
+        List<String> queryNames = []
+        fields.each { field ->
+            queryNames.add(field.query)
+            file << "${field.pretty}\t"
+        }
+        file << "\n"
+        // Write out field values for each record.
+        List<Map<String, Object>> data = result.data
+        data.each { record ->
+            queryNames.each { field ->
+                file << "${record[field]}\t"
+            }
+            file << "\n"
+        }
+        return file
     }
 
     /**
@@ -101,27 +142,99 @@ class ExportService {
         return file
     }
 
-    /**
-     * Generates a CSV file.
-     * @param result the QueryResult containing the records to write data from.
-     * @param file The file to write data to.
-     * @param fields A list of maps that represent the fields to write from the records, both as they will appear in the QueryResult and in prettified forms. 
-     * e.g. [{"query":"field1", "pretty":"Field 1"}, {"query":"field2", "pretty":"Field 2"}]
+    /** 
+     * Generates a zip file at the provided location on disk, with the provided name, and containing the files in the provided list.
+     * @param filePath The absolute path of the zip file to create - e.g. "/server/location/on/disk/export/test.zip".
+     * @param fileName The name of the zip file to create, without the path - e.g. "test.zip".
+     * @param files A list of File objects representing the files to be added to the zip file.
+     * @return The server URL of the zip file created. Should always be /neon/export/${fileName} unless something is changed in executeCSVExport().
      */
-    private void generateCSV(QueryResult result, File file, List<ExportField> fields) {
-        file.write ""
+    private String generateZipFile(String filePath, String fileName, List<File> files) {
+        ZipOutputStream zip = new ZipOutputStream(new FileOutputStream(filePath))
+        files.each { toZip ->
+            byte[] bytes = toZip.getBytes()
+            if(bytes.length) {
+                zip.putNextEntry(new ZipEntry(toZip.name))
+                zip.write(bytes, 0, bytes.length)
+                zip.closeEntry()
+            }
+        }
+        zip.close()
+        return "/neon/export/${fileName}"
+    }
+
+    /**
+     * Executes an Excel export request by generating a spreadsheet with one or multiple sheets and returning a link to it.
+     * @param host The host the database is running on
+     * @param databaseType the type of database
+     * @param data A list of maps, each one containing a query, the name of the sheet that query's data should be written to,
+     * and a list of fields to write data from.
+     * @return A link to the generated .xlsx file.
+     */
+    public String executeExcelExport(String host, String databaseType, ExportBundle bundle) {
+        XSSFWorkbook wb = new XSSFWorkbook()
+        File file = createExcelWithName(bundle.name)
+        bundle.data.each { exportQuery ->
+            QueryResult result = queryService.executeQuery(host, databaseType, exportQuery.ignoreFilters, exportQuery.selectionOnly, exportQuery.ignoredFilterIds, exportQuery.query)
+            generateSheet(wb, result, exportQuery.fields, exportQuery.name)
+        }
+
+        FileOutputStream out = new FileOutputStream(file)
+        wb.write(out)
+        out.close()
+
+        HashMap<String, String> toReturn = new HashMap<String, String>()
+        toReturn.put("data", "/neon/export/${file.name}")
+        return JsonOutput.toJson(toReturn)
+    }
+
+    /**
+     * Creates a new sheet in the given Excel workbook and 
+     */
+    private void generateSheet(XSSFWorkbook wb, QueryResult result, List<ExportField> fields, String sheetName) {
+        Sheet sheet = wb.createSheet()
+        wb.setSheetName(wb.getNumberOfSheets() - 1, sheetName)
+        Row headers = sheet.createRow(0)
+        Cell c = null
+
+        int rowNum = 1
+        int cellNum = 0
         List<String> queryNames = []
         fields.each { field ->
             queryNames.add(field.query)
-            file << "${field.pretty}\t"
+            c = headers.createCell(cellNum)
+            c.setCellValue(field.pretty)
+            cellNum++
         }
-        file << "\n"
-        List<Map<String, Object>> data = result.data
-        data.each { record ->
+
+        Row r = null
+        result.data.each { record ->
+            r = sheet.createRow(rowNum)
+            cellNum = 0
             queryNames.each { field ->
-                file << "${record[field]}\t"
+                c = r.createCell(cellNum)
+                c.setCellValue("${record[field]}")
+                cellNum++
             }
-            file << "\n"
+            rowNum++
         }
+    }
+
+    /**
+     * Opens or creates a Fileobject for an Excel file with the given name and returns it. If a file of the given name is unable to be found
+     * or created, returns an error message.
+     * @param name The name - not including file extension - of the Excel file to be created.
+     * @return The File object representing the Excel file with the given name, or an error message if one could not be found or created.
+     */
+    private File createExcelWithName(String name) {
+        File directory = new File("export")
+        if(!directory.exists()) {
+            directory.mkdir()
+        }
+        File file = new File("${directory.absolutePath}${File.separator}${name}.xlsx")
+        if(!file.exists() && !file.createNewFile()) {
+            return Response.status(Response.status.INTERNAL_SERVER_ERROR).entity("Could not find or create a file.").type(MediaType.APPLICATION_JSON).build()
+        }
+        return file
     }
 }
