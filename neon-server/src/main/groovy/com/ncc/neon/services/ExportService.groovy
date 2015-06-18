@@ -40,8 +40,16 @@ import groovy.json.JsonOutput
 @Path("/exportservice")
 class ExportService {
 
+    // Enums are type-safe and so don't work when communicating with javascript, so these are used to dfiene values for what type of file to export.
+    // These values match up with the values given for the same-named file types in connection.js
     static final int CSV = 0
     static final int XLSX = 1
+
+    // If no fields are given for a query, this is the number of records in the result to search through for fields.
+    static final int NUM_SEARCH_RECORDS = 1000
+
+    // The name of the directory in which to place files for export after they are created.
+    static final String dirPath = "export"
 
     @Autowired
     QueryService queryService
@@ -53,7 +61,6 @@ class ExportService {
     public String executeExport(@PathParam("host") String host,
                                 @PathParam("databaseType") String databaseType,
                                 ExportBundle bundle) {
-        //int type = Integer.parseInt(fileType)
         String ret
         switch(bundle.fileType) {
             case CSV:
@@ -81,14 +88,14 @@ class ExportService {
             QueryResult result = queryService.executeQuery(host, databaseType, exportQuery.ignoreFilters, exportQuery.selectionOnly, exportQuery.ignoredFilterIds, exportQuery.query)
             files.add(generateCSV(result, exportQuery.fields, exportQuery.name))
         }
-
+        String exportDir = getExportDir()
         HashMap<String, String> toReturn = new HashMap<String, String>()
         if(files.size() > 1) {
-            String result = generateZipFile("${directory.absolutePath}${file.separator}${bundle.name}.zip", "${bundle.name}.zip", files);
+            String result = generateZipFile("${exportDir}${File.separator}${bundle.name}.zip", "${bundle.name}.zip", files);
             toReturn.put("data", result)
         }
         else if(files.size()) {
-            toReturn.put("data","/neon/export/${files[0].name}")
+            toReturn.put("data","/neon/${dirPath}/${files[0].name}")
         }
 
         return JsonOutput.toJson(toReturn)
@@ -103,6 +110,9 @@ class ExportService {
      * @return the File object representing the file written to.
      */
     private File generateCSV(QueryResult result, List<ExportField> fields, String fileName) {
+        if(fields.size() == 0) {
+            fields = getFields(NUM_SEARCH_RECORDS, result.data)
+        }
         File file = createCSVWithName(fileName)
         // Clear file of anything that was in it before.
         file.write ""
@@ -131,15 +141,24 @@ class ExportService {
      * @return The File object representing the CSV file with the given name, or an error message if one could not be found or created.
      */
     private File createCSVWithName(String name) {
-        File directory = new File("export")
-        if(!directory.exists()) {
-            directory.mkdir()
-        }
-        File file = new File("${directory.absolutePath}${File.separator}${name}.csv")
+        String exportDir = getExportDir()
+        File file = new File("${exportDir}${File.separator}${name}.csv")
         if(!file.exists() && !file.createNewFile()) {
             return Response.status(Response.status.INTERNAL_SERVER_ERROR).entity("Could not find or create a file.").type(MediaType.APPLICATION_JSON).build()
         }
         return file
+    }
+
+    /**
+     * Helper method that makes sure the export directory on the server exists before returning a string containing it's absolute path on disk.
+     * @return The absolute path of the export directory.
+     */
+    private String getExportDir() {
+        File directory = new File("$dirPath")
+        if(!directory.exists()) {
+            directory.mkdir()
+        }
+        return directory.absolutePath
     }
 
     /** 
@@ -192,6 +211,9 @@ class ExportService {
      * Creates a new sheet in the given Excel workbook and 
      */
     private void generateSheet(XSSFWorkbook wb, QueryResult result, List<ExportField> fields, String sheetName) {
+        if(fields.size() == 0) {
+            fields = getFields(NUM_SEARCH_RECORDS, result.data)
+        }
         Sheet sheet = wb.createSheet()
         wb.setSheetName(wb.getNumberOfSheets() - 1, sheetName)
         Row headers = sheet.createRow(0)
@@ -236,5 +258,33 @@ class ExportService {
             return Response.status(Response.status.INTERNAL_SERVER_ERROR).entity("Could not find or create a file.").type(MediaType.APPLICATION_JSON).build()
         }
         return file
+    }
+
+    /**
+     * Helper method that looks through the first toLookThrough maps in a list of maps (e.g. the data field of a QueryResult) and returns 
+     * a list of ExportFields, one for each key found in those maps.
+     * @param toLookThrough The maximum number of maps to look through for fields.
+     * @param data The list of maps to look through for fields.
+     * @return a list of ExportFields
+     */
+    private List<ExportField> getFields(int toLookThrough, List<Map<String, Object>> data) {
+        int numResults = toLookThrough
+        if(data.size() < toLookThrough) {
+            numResults = data.size()
+        }
+        HashSet<String> fields = new HashSet<String>()
+        for(int count = 0; count < numResults; count++) {
+            data.get(count).keySet().each { field ->
+                fields.add(field)
+            }
+        }
+        List<ExportField> toReturn = []
+        fields.each { field ->
+            ExportField f = new ExportField()
+            f.query = field
+            f.pretty = field
+            toReturn.add(f)
+        }
+        return toReturn
     }
 }
