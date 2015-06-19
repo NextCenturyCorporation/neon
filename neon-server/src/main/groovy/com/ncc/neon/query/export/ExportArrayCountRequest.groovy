@@ -16,18 +16,17 @@
 
 package com.ncc.neon.query.export
 
-import com.ncc.neon.query.Query
 import groovy.transform.ToString
 
 
 
 @ToString(includeNames = true)
-class ExportQuery {
+class ExportArrayCountRequest implements ExportRequest {
 
-	Query query
+	String database
+	String table
+	String field
+	int limit
 	String name
 	List<ExportField> fields
-	boolean ignoreFilters
-	boolean selectionOnly
-	Set<String> ignoredFilterIds
 }

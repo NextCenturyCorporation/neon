@@ -16,14 +16,18 @@
 
 package com.ncc.neon.query.export
 
-import groovy.transform.ToString
+import org.codehaus.jackson.annotate.JsonSubTypes
+import org.codehaus.jackson.annotate.JsonTypeInfo
 
+/**
+ * Marker interface just to give context that implementors are ExportRequests.
+ * Also provides JSON metadata to determine which implementation to use.
+ */
 
-
-@ToString(includeNames = true)
-class ExportBundle {
-
-	String name
-	int fileType
-	List<ExportRequest> data
+@JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.PROPERTY, property = "type")
+@JsonSubTypes([
+    @JsonSubTypes.Type(value = ExportQueryRequest, name = 'query'),
+    @JsonSubTypes.Type(value = ExportArrayCountRequest, name =  'arraycount')
+])
+public interface ExportRequest {
 }

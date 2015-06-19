@@ -20,6 +20,7 @@ import com.ncc.neon.query.*
 import com.ncc.neon.query.clauses.*
 import com.ncc.neon.query.export.*
 import com.ncc.neon.query.filter.Filter
+import com.ncc.neon.query.result.ArrayCountPair
 import com.ncc.neon.query.result.QueryResult
 import org.apache.poi.ss.usermodel.Cell
 import org.apache.poi.ss.usermodel.Row
@@ -84,9 +85,9 @@ class ExportService {
      */
     public String executeCSVExport(String host, String databaseType, ExportBundle bundle) {
         List<File> files = []
-        bundle.data.each { exportQuery ->
-            QueryResult result = queryService.executeQuery(host, databaseType, exportQuery.ignoreFilters, exportQuery.selectionOnly, exportQuery.ignoredFilterIds, exportQuery.query)
-            files.add(generateCSV(result, exportQuery.fields, exportQuery.name))
+        bundle.data.each { exportRequest ->
+            List<Map<String, Object>> result = getResult(host, databaseType, exportRequest)
+            files.add(generateCSV(result, exportRequest.fields, exportRequest.name))
         }
         String exportDir = getExportDir()
         HashMap<String, String> toReturn = new HashMap<String, String>()
@@ -109,9 +110,9 @@ class ExportService {
      * @param fileName The name of the file to find or create and write data to.
      * @return the File object representing the file written to.
      */
-    private File generateCSV(QueryResult result, List<ExportField> fields, String fileName) {
+    private File generateCSV(List<Map<String, Object>> result, List<ExportField> fields, String fileName) {
         if(fields.size() == 0) {
-            fields = getFields(NUM_SEARCH_RECORDS, result.data)
+            fields = getFields(NUM_SEARCH_RECORDS, result)
         }
         File file = createCSVWithName(fileName)
         // Clear file of anything that was in it before.
@@ -124,8 +125,7 @@ class ExportService {
         }
         file << "\n"
         // Write out field values for each record.
-        List<Map<String, Object>> data = result.data
-        data.each { record ->
+        result.each { record ->
             queryNames.each { field ->
                 file << "${record[field]}\t"
             }
@@ -179,7 +179,7 @@ class ExportService {
             }
         }
         zip.close()
-        return "/neon/export/${fileName}"
+        return "/neon/${dirPath}/${fileName}"
     }
 
     /**
@@ -193,9 +193,9 @@ class ExportService {
     public String executeExcelExport(String host, String databaseType, ExportBundle bundle) {
         XSSFWorkbook wb = new XSSFWorkbook()
         File file = createExcelWithName(bundle.name)
-        bundle.data.each { exportQuery ->
-            QueryResult result = queryService.executeQuery(host, databaseType, exportQuery.ignoreFilters, exportQuery.selectionOnly, exportQuery.ignoredFilterIds, exportQuery.query)
-            generateSheet(wb, result, exportQuery.fields, exportQuery.name)
+        bundle.data.each { exportRequest ->
+            List<Map<String, Object>> result = getResult(host, databaseType, exportRequest)
+            generateSheet(wb, result, exportRequest.fields, exportRequest.name)
         }
 
         FileOutputStream out = new FileOutputStream(file)
@@ -203,16 +203,16 @@ class ExportService {
         out.close()
 
         HashMap<String, String> toReturn = new HashMap<String, String>()
-        toReturn.put("data", "/neon/export/${file.name}")
+        toReturn.put("data", "/neon/${dirPath}/${file.name}")
         return JsonOutput.toJson(toReturn)
     }
 
     /**
      * Creates a new sheet in the given Excel workbook and 
      */
-    private void generateSheet(XSSFWorkbook wb, QueryResult result, List<ExportField> fields, String sheetName) {
+    private void generateSheet(XSSFWorkbook wb, List<Map<String, Object>> result, List<ExportField> fields, String sheetName) {
         if(fields.size() == 0) {
-            fields = getFields(NUM_SEARCH_RECORDS, result.data)
+            fields = getFields(NUM_SEARCH_RECORDS, result)
         }
         Sheet sheet = wb.createSheet()
         wb.setSheetName(wb.getNumberOfSheets() - 1, sheetName)
@@ -230,7 +230,7 @@ class ExportService {
         }
 
         Row r = null
-        result.data.each { record ->
+        result.each { record ->
             r = sheet.createRow(rowNum)
             cellNum = 0
             queryNames.each { field ->
@@ -284,6 +284,24 @@ class ExportService {
             f.query = field
             f.pretty = field
             toReturn.add(f)
+        }
+        return toReturn
+    }
+
+    private List<Map<String, Object>> getResult(String host, String databaseType, ExportRequest request) {
+        List<Map<String, Object>> toReturn = new ArrayList<Map<String, Object>>()
+        if(request instanceof ExportQueryRequest) {
+            QueryResult result = queryService.executeQuery(host, databaseType, request.ignoreFilters, request.selectionOnly, request.ignoredFilterIds, request.query)
+            toReturn = result.data
+        }
+        else if(request instanceof ExportArrayCountRequest) {
+            List<ArrayCountPair> results = queryService.getArrayCounts(host, databaseType, request.database, request.table, request.field, request.limit)
+            results.each { result ->
+                HashMap<String, Object> obj = new HashMap<String, Object>()
+                obj.put("key", result.key)
+                obj.put("count", result.count)
+                toReturn.push(obj)
+            }
         }
         return toReturn
     }

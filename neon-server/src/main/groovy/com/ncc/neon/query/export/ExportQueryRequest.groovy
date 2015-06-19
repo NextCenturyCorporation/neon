@@ -16,14 +16,18 @@
 
 package com.ncc.neon.query.export
 
+import com.ncc.neon.query.Query
 import groovy.transform.ToString
 
 
 
 @ToString(includeNames = true)
-class ExportBundle {
+class ExportQueryRequest implements ExportRequest {
 
+	Query query
 	String name
-	int fileType
-	List<ExportRequest> data
+	List<ExportField> fields
+	boolean ignoreFilters
+	boolean selectionOnly
+	Set<String> ignoredFilterIds
 }
