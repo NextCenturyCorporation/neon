@@ -57,8 +57,8 @@ public class SimpleQueryCache {
     // the most important queries can be saved.  Currently really high, so cache everything
     static final double QUERY_TIME_LIMIT = 9999999.0
 
-    // How often to print; every X times a query is 'get'.  Want 
-    static final int PRINTLIMIT = 20;
+    // How often to print; every X times a query is 'get'.
+    static final int PRINTLIMIT = 20
 
     int keyMiss = 0
     int keyHit = 0
