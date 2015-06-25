@@ -1,5 +1,5 @@
 /*
- * Copyright 2013 Next Century Corporation
+ * Copyright 2015 Next Century Corporation
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -18,7 +18,10 @@ package com.ncc.neon.query.export
 
 import groovy.transform.ToString
 
-
+/**
+ * A structure for holding ExportRequests, as well as the name of the file those requests should be written to and the type of file
+ * they should be written as.
+ */
 
 @ToString(includeNames = true)
 class ExportBundle {

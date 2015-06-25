@@ -132,8 +132,11 @@ neon.query.Connection.prototype.executeQueryService_ = function(query, successCa
     );
 };
 
-
-var FileTypes = Object.freeze({
+/**
+ * This contains the integer values for each type of file the program can attempt to export to. These values match up with the static
+ * final ints declared in ExportService.groovy, and serve as psuedo-enums.
+ */
+var FILE_TYPES = Object.freeze({
     CSV: 0,
     XLSX: 1
 });
@@ -149,14 +152,12 @@ var FileTypes = Object.freeze({
  * @return {neon.util.AjaxRequest} The xhr request object
  */
 neon.query.Connection.prototype.executeExport = function(data, successCallback, errorCallback, fileType) {
-    var type;
-    if(fileType == 'csv') {
-        type = FileTypes.CSV;
+    if(fileType === 'csv') {
+        data.fileType = FILE_TYPES.CSV;
     }
-    else if(fileType == 'xlsx') {
-        type = FileTypes.XLSX;
+    else if(fileType === 'xlsx') {
+        data.fileType = FILE_TYPES.XLSX;
     }
-    data.fileType = type;
     return neon.util.ajaxUtils.doPostJSON(
         data,
         neon.serviceUrl('exportservice', 'export' +'/' + encodeURIComponent(this.host_) + '/' + encodeURIComponent(this.databaseType_), ''),

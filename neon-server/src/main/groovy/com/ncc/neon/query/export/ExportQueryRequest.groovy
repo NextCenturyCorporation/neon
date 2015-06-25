@@ -1,5 +1,5 @@
 /*
- * Copyright 2013 Next Century Corporation
+ * Copyright 2015 Next Century Corporation
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -19,7 +19,9 @@ package com.ncc.neon.query.export
 import com.ncc.neon.query.Query
 import groovy.transform.ToString
 
-
+/**
+ * An ExportRequest which contains fields necessary to call QueryService's executeQuery method and pull data from the result.
+ */
 
 @ToString(includeNames = true)
 class ExportQueryRequest implements ExportRequest {
