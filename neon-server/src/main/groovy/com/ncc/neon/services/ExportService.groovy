@@ -27,13 +27,14 @@ import org.apache.commons.io.output.CloseShieldOutputStream
 import org.apache.poi.ss.usermodel.Cell
 import org.apache.poi.ss.usermodel.Row
 import org.apache.poi.ss.usermodel.Sheet
-import org.apache.poi.xssf.usermodel.XSSFWorkbook
+import org.apache.poi.xssf.streaming.SXSSFWorkbook
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
 
 import java.util.concurrent.ConcurrentHashMap
 import java.util.zip.ZipEntry
 import java.util.zip.ZipOutputStream
+import java.nio.charset.Charset
 import javax.ws.rs.*
 import javax.ws.rs.core.MediaType
 import javax.ws.rs.core.StreamingOutput
@@ -116,7 +117,7 @@ class ExportService {
     private StreamingOutput createStreamingOutput(ExportData data) {
         return new StreamingOutput() {
             public void write(OutputStream output) throws java.io.IOException, WebApplicationException {
-                ZipOutputStream zipOut = new ZipOutputStream(output)
+                ZipOutputStream zipOut = new ZipOutputStream(output, Charset.forName("UTF-8"))
                 try {
                     switch(data.bundle.fileType) {
                         case XLSX:
@@ -161,7 +162,7 @@ class ExportService {
      * Writes the given fields from the given list of results into a file of the given name on the given output stream.
      * @param result The list of query results from which to pull fields.
      * @param fieldLst The list of fields to pull from the results.
-     * @param name The name of the zip file entry to place the pulled fields into.
+     * @param name The name of the zip file entry into which to place the pulled fields.
      * @param output The stream to which to write the export data.
      */
 	private void addCSV(List<Map<String, Object>> result, List<ExportField> fieldList, String name, ZipOutputStream output) {
@@ -174,13 +175,17 @@ class ExportService {
         // Write out field names in the top row.
         fields.each { field ->
             queryNames.add(field.query)
-            output << "${field.pretty}\t"
+            output <<"\"${field.pretty.replaceAll("\"", "\"\"")}\","
         }
         output << "\n"
         // Write out field values for each record.
         result.each { record ->
             queryNames.each { field ->
-                output << "${record[field]}\t"
+                String s = null
+                if(record[field] instanceof String) {
+                    s = record[field].replaceAll("\"", "\"\"")
+                }
+                output << "\"${s?:record[field]}\","
             }
             output << "\n"
         }
@@ -202,7 +207,8 @@ class ExportService {
      */
     private void executeExcelExport(String host, String databaseType, ExportBundle bundle, ZipOutputStream output) {
         output.putNextEntry(new ZipEntry("${bundle.name}.xlsx"))
-        XSSFWorkbook workbook = new XSSFWorkbook()
+        SXSSFWorkbook workbook = new SXSSFWorkbook(500)
+        workbook.setCompressTempFiles(true)
         bundle.data.each { request ->
             List<Map<String, Object>> result = getResult(host, databaseType, request)
             generateSheet(workbook, result, request.fields, request.name)
@@ -210,6 +216,7 @@ class ExportService {
         // Check http://stackoverflow.com/questions/22321790/xssfworkbook-write-method-closing-output-steam-implicitly for why this is being done.
         workbook.write(new CloseShieldOutputStream(output))
         output.closeEntry()
+        workbook.dispose()
     }
 
     /**
@@ -219,7 +226,7 @@ class ExportService {
      * @param fields A list of the fields to pull from result and write to the sheet.
      * @param sheetName The name of the sheet to be created.
      */
-    private void generateSheet(XSSFWorkbook workbook, List<Map<String, Object>> result, List<ExportField> fieldList, String sheetName) {
+    private void generateSheet(SXSSFWorkbook workbook, List<Map<String, Object>> result, List<ExportField> fieldList, String sheetName) {
         List<ExportField> fields = fieldList
         if(fields.size() == 0) {
             fields = getFields(NUM_SEARCH_RECORDS, result)
