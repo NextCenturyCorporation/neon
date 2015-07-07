@@ -58,7 +58,7 @@ public class SimpleQueryCache {
     static final double QUERY_TIME_LIMIT = 9999999.0
 
     // Make this true to turn on printing of statistics
-    private final static boolean showStatistics = false
+    static final boolean SHOW_STATISTICS = false
 
     // How often to print; every X times a query is 'get'.
     static final int PRINTLIMIT = 20
@@ -129,7 +129,7 @@ public class SimpleQueryCache {
      * Try to figure out what the queries are, what they were doing, how often they hit versus miss
      */
     void showSummaryStatistics() {
-        if (!showStatistics) {
+        if (!SHOW_STATISTICS) {
             return
         }
         if ((keyMiss + keyHit) % 20 != 0) {
