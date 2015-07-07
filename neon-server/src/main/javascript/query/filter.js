@@ -20,9 +20,15 @@
  * @constructor
  */
 neon.query.Filter = function() {
+    this.filterName = undefined;
     this.databaseName = undefined;
     this.tableName = undefined;
     this.whereClause = undefined;
+};
+
+neon.query.Filter.prototype.name = function(name) {
+    this.filterName = name;
+    return this;
 };
 
 /**
