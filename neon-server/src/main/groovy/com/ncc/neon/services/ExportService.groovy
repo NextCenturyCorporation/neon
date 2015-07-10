@@ -59,7 +59,7 @@ class ExportService {
     private static final int NUM_SEARCH_RECORDS = 1000
 
     // Map for storing uniqueID -> data pairs.
-    private static final Map MAP = new ConcurrentHashMap<String, ExportData>()
+    private static final Map ID_TO_DATA_PAIRS = new ConcurrentHashMap<String, ExportData>()
 
     @Autowired
     private QueryService queryService
@@ -87,7 +87,7 @@ class ExportService {
         data.host = host
         data.databaseType = databaseType
         data.bundle = bundle
-        MAP.put(uniqueID, data)
+        ID_TO_DATA_PAIRS.put(uniqueID, data)
         Map<String, String> toReturn = [data:uniqueID]
         return JsonOutput.toJson(toReturn)
     }
@@ -102,10 +102,10 @@ class ExportService {
     @Produces("application/zip")
 	@Path("generateZip/{uniqueID}")
 	public Response executeExport(@PathParam("uniqueID") String identifier) {
-        if(MAP[identifier] == null) {
+        if(ID_TO_DATA_PAIRS[identifier] == null) {
             return Response.status(400).build()
         }
-        ExportData data = MAP.remove(identifier)
+        ExportData data = ID_TO_DATA_PAIRS.remove(identifier)
         return Response.ok(createStreamingOutput(data)).build()
 	}
 
