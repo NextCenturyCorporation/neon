@@ -97,9 +97,9 @@ dependencies {
     compile "org.apache.poi:poi-ooxml:$poiVersion"
     compile "org.apache.poi:poi-ooxml-schemas:$poiVersion"
     compile "org.apache.poi:ooxml-schemas:$ooxmlSchemasVersion"
-    
-    compile "commons-fileupload:commons-fileupload:$commonsFileUploadVersion"
+
     compile "com.sun.jersey.contribs:jersey-multipart:$jerseyVersion"
+    compile "org.mongodb:mongodb-driver:$mongodbVersion"
 
     compile "commons-io:commons-io:$commonsIoVersion"
     compile("org.codehaus.groovy.modules.http-builder:http-builder:$httpBuilderVersion") {

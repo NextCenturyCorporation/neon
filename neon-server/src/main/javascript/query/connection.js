@@ -138,7 +138,7 @@ neon.query.Connection.prototype.executeQueryService_ = function(query, successCa
  * @param {neon.query.Query} query the query to export data for
  * @param {Function} successCallback The callback to fire when the export request successfully completes. Takes 
  * a JSON object with the export URL stored in it's data field as a parameter.
- * @param {Function} [errorCallBack] The optional callback when an error occurs. This function takes the server's
+ * @param {Function} [errorCallback] The optional callback when an error occurs. This function takes the server's
  * response as a parameter.
  * @return {neon.util.AjaxRequest} The xhr request object
  */
@@ -146,7 +146,7 @@ neon.query.Connection.prototype.executeExport = function(data, successCallback, 
     data.fileType = fileType;
     return neon.util.ajaxUtils.doPostJSON(
         data,
-        neon.serviceUrl('exportservice', 'export' +'/' + encodeURIComponent(this.host_) + '/' + encodeURIComponent(this.databaseType_), ''),
+        neon.serviceUrl('exportservice', 'export/' + encodeURIComponent(this.host_) + '/' + encodeURIComponent(this.databaseType_), ''),
         {
             success: successCallback,
             error: errorCallback
@@ -158,9 +158,8 @@ neon.query.Connection.prototype.executeExport = function(data, successCallback, 
  * 
  */
 neon.query.Connection.prototype.executeUploadFile = function(file, successCallback, errorCallback) {
-    // Hopefully I don't have to manually make an XMLHttpRequest in the end - for now, though, it's the only way I've found to get to the server at all.
     var xhr = new XMLHttpRequest();
-    xhr.open('POST', neon.serviceUrl('importservice', 'upload' + '/' + encodeURIComponent(this.host_) + '/' + encodeURIComponent(this.databaseType_), ''));
+    xhr.open('POST', neon.serviceUrl('importservice', 'upload/' + encodeURIComponent(this.host_) + '/' + encodeURIComponent(this.databaseType_), ''));
     xhr.onload = function() {
         if(xhr.status === 200) {
             successCallback(xhr.response);
@@ -170,23 +169,25 @@ neon.query.Connection.prototype.executeUploadFile = function(file, successCallba
     }
     xhr.send(file);
     return;
+};
 
-
-    window.alert(JSON.stringify(file))
-    var opts = [];
-    opts.push("")
-    return neon.util.ajaxUtils.doPost(
-        neon.serviceUrl('importservice', 'upload' + '/' + encodeURIComponent(this.host_) + '/' + encodeURIComponent(this.databaseType_), ''),
-        {
+neon.query.Connection.prototype.executeDropData = function(identifier, successCallback) {
+    return neon.util.ajaxUtils.doGet(
+        neon.serviceUrl('importservice', 'drop/' + encodeURIComponent(this.host_) + '/' + encodeURIComponent(this.databaseType_) + '/' + encodeURIComponent(identifier)), {
             success: successCallback,
-            error: errorCallback,
-            data: file,
-            responseType: 'json',
-            processData: false,
-            contentType: 'multipart/form-data'
+            responseType: 'json'
         }
     );
+};
 
+neon.query.Connection.prototype.executeConfirmTypeGuesses = function(guesses, identifier, successCallback, errorCallback) {
+    return neon.util.ajaxUtils.doPostJSON(
+        guesses,
+        neon.serviceUrl('importservice', 'convert/' + encodeURIComponent(this.host_) + '/' + encodeURIComponent(this.databaseType_) + '/' + encodeURIComponent(identifier), ''), {
+            success: successCallback,
+            error: errorCallback
+        }
+    );
 }
 
 /**

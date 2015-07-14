@@ -16,17 +16,19 @@
 
 package com.ncc.neon.services
 
-import org.springframework.stereotype.Component
+import com.ncc.neon.user_import.UserFieldDataBundle
+import com.ncc.neon.user_import.ImportHelper
+import com.ncc.neon.user_import.ImportHelperFactory
+
+import org.apache.commons.io.LineIterator
+import org.apache.commons.io.IOUtils
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.web.bind.annotation.RequestParam
-import org.apache.commons.fileupload.MultipartStream
-import org.apache.commons.fileupload.servlet.ServletFileUpload
-import com.sun.jersey.multipart.MultiPart
-import com.sun.jersey.multipart.BodyPart
+import org.springframework.stereotype.Component
 import com.sun.jersey.multipart.FormDataParam
 
 import javax.ws.rs.*
 import javax.ws.rs.core.MediaType
+import javax.ws.rs.core.Response
 
 import groovy.json.JsonOutput
 
@@ -38,33 +40,44 @@ import groovy.json.JsonOutput
 @Path("/importservice")
 class ImportService {
 
-	@POST
+    @Autowired
+    ImportHelperFactory importHelperFactory
+
+    @POST
     @Consumes(MediaType.MULTIPART_FORM_DATA)
     @Produces(MediaType.APPLICATION_JSON)
     @Path("upload/{host}/{databaseType}")
-    public String getFile(@PathParam("host") String host,
-                          @PathParam("databaseType") String databaseType,
-                          @FormDataParam("file") InputStream dataInputStream) {
+    public String uploadData(@PathParam("host") String host,
+                             @PathParam("databaseType") String databaseType,
+                             @FormDataParam("file") InputStream dataInputStream) {
+        LineIterator lineIter = IOUtils.lineIterator(dataInputStream, "UTF-8")
+        String identifier = UUID.randomUUID().toString()
+        ImportHelper helper = importHelperFactory.getImportHelper(databaseType)
+        List typeGuesses = helper.uploadData(host, identifier, lineIter)
+        Map<String, String> toReturn = [identifier:identifier, types:typeGuesses]
+        return JsonOutput.toJson(toReturn)
+    }
 
-        /*
-         * From Jersey. Uses a stream, so appears to work for even very large files. I tested by giving it a 363.4 mB file and it worked fine.
-         * I obviously wasn't processing the whole thing, but I see no reason why it should fail if I do, given the use of a stream to get data.
-         */
-        byte[] buff = new byte[24]
-        dataInputStream.read(buff)
-        byte[] buff2 = new byte[24]
-        dataInputStream.read(buff2)
-        String s = new String(buff)
-        s = s + new String(buff2)
-        Map m = [data: s]
+    @GET
+    @Produces(MediaType.APPLICATION_JSON)
+    @Path("drop/{host}/{databaseType}/{identifier}")
+    public String dropDataset(@PathParam("host") String host,
+                              @PathParam("databaseType") String databaseType,
+                              @PathParam("identifier")String identifier) {
+        ImportHelper helper = importHelperFactory.getImportHelper(databaseType)
+        return JsonOutput.toJson([success: helper.dropData(host, identifier)])
+    }
 
-        /*
-         * This tried to use the Apache fileupload library, but it didn't work - kept saying there was no reader for multipart form data.
-        ByteArrayInputStream bStream = new ByteArrayInputStream(data.getBytes())
-        @SuppressWarnings("deprecated")
-        MultipartStream mStream = new MultipartStream(bStream, "---------------------------123206693813157131941135385742".toByteArray(), 1024, new MultipartStream.ProgressNotifier())
-        Map m = [data: ServletFileUpload.isMultipartContent(data)]
-        */
-        return JsonOutput.toJson(m)
+    @POST
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    @Path("convert/{host}/{databaseType}/{identifier}")
+    public Response convertFields(@PathParam("host") String host,
+                                @PathParam("databaseType") String databaseType,
+                                @PathParam("identifier") String identifier,
+                                UserFieldDataBundle data) {
+        ImportHelper helper = importHelperFactory.getImportHelper(databaseType)
+        List failedFields = helper.convertFields(host, identifier, data)
+        return Response.status((failedFields) ? 418 : 200).entity(JsonOutput.toJson(failedFields)).build() // Empty lists evaluate to false.
     }
 }
