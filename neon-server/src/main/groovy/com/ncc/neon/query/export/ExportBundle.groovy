@@ -1,5 +1,5 @@
 /*
- * Copyright 2013 Next Century Corporation
+ * Copyright 2015 Next Century Corporation
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -14,16 +14,19 @@
  *
  */
 
-describe('array utils', function() {
-    it('converts function arguments to an array', function() {
-        var args;
+package com.ncc.neon.query.export
 
-        function setArgs() {
-            args = arguments;
-        }
-        setArgs('a', 'b', 'c');
+import groovy.transform.ToString
 
-        var argsArray = neon.util.arrayUtils.argumentsToArray(args);
-        expect(argsArray).toBeEqualArray(['a','b','c']);
-    });
-});
+/**
+ * A structure for holding ExportRequests, as well as the name of the file those requests should be written to and the type of file
+ * they should be written as.
+ */
+
+@ToString(includeNames = true)
+class ExportBundle {
+
+	String name
+	int fileType
+	List<ExportRequest> data
+}
