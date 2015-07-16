@@ -43,6 +43,17 @@ class ImportService {
     @Autowired
     ImportHelperFactory importHelperFactory
 
+    /**
+     * Uploads data from a stream of a CSV spreadsheet into a database on the given host, and
+     * returns a list of fields found in the spreadsheet with guesses as to their types, as well
+     * as an identifier which can be used to access the new database.
+     * @param host The host on which the data store to upload to is running.
+     * @param databaseType The type of the data store to upload to.
+     * @param dataInputStream The stream containing the spreadsheet to read.
+     * @return A map containing a string identifier that can be used to access the newly-created
+     * database in the future, as well as a list of field names found in the spreadsheet and guesses
+     * as to their types.
+     */
     @POST
     @Consumes(MediaType.MULTIPART_FORM_DATA)
     @Produces(MediaType.APPLICATION_JSON)
@@ -58,6 +69,14 @@ class ImportService {
         return JsonOutput.toJson(toReturn)
     }
 
+    /**
+     * Drops a user-created database, given the host it's running on, the type of database it's running on,
+     * and its identifier.
+     * @param host The host on which the data store to drop from is running.
+     * @param databaseType The type of the data store the data to drop is in.
+     * @param identifier The identifier of the database to drop.
+     * @return A JSON formatted object with a success field that tells whether or not the drop succeeded.
+     */
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     @Path("drop/{host}/{databaseType}/{identifier}")
@@ -68,6 +87,18 @@ class ImportService {
         return JsonOutput.toJson([success: helper.dropData(host, identifier)])
     }
 
+    /**
+     * Attempts to convert fields in a user-created database to types specified by the user, given the host
+     * the databse is on, the host type, the database's idenifying string, and a {@link UserFieldDataBundle} -
+     * a bundle of data containing a date format string and a list of pairs of fields and types.
+     * @param host The host on which to data store to convert in is running.
+     * @param databaseType The type of data store the type of data to convert is in.
+     * @param identifier The identifier of the database storing the data to convert.
+     * @param data The bundle of data containing a user-given date format string and a list of fields and
+     * the types they should be converted to.
+     * @return A response containing a list of fields that failed to convert. Response code is 200 if no fields
+     * failed and 418 otherwise.
+     */
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)

@@ -32,7 +32,7 @@ public interface ImportHelper {
      * @param reader A LineIterator pointing to the data that should be added.
      * @return A list of {@link FieldTypePair} objects, containing record fields and guesses as to their types.
      */
-    public List uploadData(String host, String identifier, LineIterator reader)
+    List uploadData(String host, String identifier, LineIterator reader)
 
     /**
      * Drops a set of user-given data from a data store, given its identifier.
@@ -40,7 +40,19 @@ public interface ImportHelper {
      * @param identifier The identifier associated with the data to be dropped.
      * @return True if the data was successfully dropped, false (or an exception) otherwise.
      */
-    public boolean dropData(String host, String identifier)
+    boolean dropData(String host, String identifier)
 
-    public List convertFields(String host, String identifier, UserFieldDataBundle bundle)
+    /**
+     * Given a {@link UserFieldDataBundle} (a date pattern string and a list of fields and corresponding types),
+     * attempts to convert the given fields in the given database to their given type. Any fields that cannot be
+     * converted to that type are added to a list and ignored, and the list of fields that failed to convert is
+     * returned.
+     * @param host The host on which the data store is running.
+     * @param identifier The identifier of the database within the data store.
+     * @param bundle A bundle of information containing a list of fields and corresponding conversion types, as
+     * well as a date format string that describes the format in which to attempt to parse dates. If this date
+     * format string is null, uses the default list of date strings instead.
+     * @return The list of fields that failed to convert and what type they were attempting to convert to.
+     */
+    List convertFields(String host, String identifier, UserFieldDataBundle bundle)
 }

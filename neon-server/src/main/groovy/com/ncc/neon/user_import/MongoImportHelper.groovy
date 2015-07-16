@@ -102,6 +102,12 @@ class MongoImportHelper implements ImportHelper {
         return failedFields
     }
 
+    /**
+     * Gets a database form the given mongo instance, given its identifier.
+     * @param mongo The mongo instance from which to get the database.
+     * @param identifier The identifier linked to the database to get.
+     * @return The database on the given mongo instane with the given identifier.
+     */
     private DB getDatabase(MongoClient mongo, String identifier) {
         DB metaDatabase = mongo.getDB(ImportUtilities.MONGO_META_DB_NAME)
         DBCollection metaCollection = metaDatabase.getCollection(ImportUtilities.MONGO_META_COLL_NAME)
@@ -109,6 +115,13 @@ class MongoImportHelper implements ImportHelper {
         return mongo.getDB(metaRecord.get("databaseName"))
     }
 
+    /**
+     * Adds metadata for a user-created database to the given mongo instance. Utilizes a database dedicated to storing information
+     * about user-created databases.
+     * @param mongo The mongo instance on which to put the metadata for the given database.
+     * @param databaseName The name of the database for which to store metadata.
+     * @param identifier The identifier with which the database of the given name is associated.
+     */
     private void addMetadata(MongoClient mongo, String databaseName, String identifier) {
         DB metaDatabase = mongo.getDB(ImportUtilities.MONGO_META_DB_NAME)
         DBCollection metaCollection = metaDatabase.getCollection(ImportUtilities.MONGO_META_COLL_NAME)
@@ -118,6 +131,13 @@ class MongoImportHelper implements ImportHelper {
         metaCollection.insert(metaRecord)
     }
 
+    /**
+     * Guesses the types of the given list of fields in the given collection. Does this by attempting to convert them to various types of objects,
+     * starting off strict and getting less so as they fail to convert. Returns a list with each of the given fields associated with a type string.
+     * @param collection The collection whose fields should be checked.
+     * @param fields The list of fields whose types should be checked.
+     * @return A list of the given fields, each wrapped in a {@link FieldTypePair} object to accociate them with their guessed type.
+     */
     private List guessTypes(DBCollection collection, List fields) {
         long numRecords = (collection.count() > ImportUtilities.NUM_TYPE_CHECKED_RECORDS) ? ImportUtilities.NUM_TYPE_CHECKED_RECORDS : collection.count()
         List fieldsAndTypes = []
