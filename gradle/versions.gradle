@@ -47,6 +47,5 @@ project.ext {
     jacksonVersion = "1.9.2"
     poiVersion = "3.12"
     ooxmlSchemasVersion="1.0"
-    commonsFileUploadVersion="1.3.1"
 }
 

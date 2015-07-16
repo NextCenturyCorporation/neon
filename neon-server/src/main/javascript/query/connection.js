@@ -155,41 +155,6 @@ neon.query.Connection.prototype.executeExport = function(data, successCallback, 
 };
 
 /**
- * 
- */
-neon.query.Connection.prototype.executeUploadFile = function(file, successCallback, errorCallback) {
-    // Hopefully I don't have to manually make an XMLHttpRequest in the end - for now, though, it's the only way I've found to get to the server at all.
-    var xhr = new XMLHttpRequest();
-    xhr.open('POST', neon.serviceUrl('importservice', 'upload' + '/' + encodeURIComponent(this.host_) + '/' + encodeURIComponent(this.databaseType_), ''));
-    xhr.onload = function() {
-        if(xhr.status === 200) {
-            successCallback(xhr.response);
-        } else {
-            errorCallback(xhr.response);
-        }
-    }
-    xhr.send(file);
-    return;
-
-
-    window.alert(JSON.stringify(file))
-    var opts = [];
-    opts.push("")
-    return neon.util.ajaxUtils.doPost(
-        neon.serviceUrl('importservice', 'upload' + '/' + encodeURIComponent(this.host_) + '/' + encodeURIComponent(this.databaseType_), ''),
-        {
-            success: successCallback,
-            error: errorCallback,
-            data: file,
-            responseType: 'json',
-            processData: false,
-            contentType: 'multipart/form-data'
-        }
-    );
-
-}
-
-/**
  * Gets a list of database names
  * @method getDatabaseNames
  * @param {Function} successCallback The callback that contains the database names in an array.
