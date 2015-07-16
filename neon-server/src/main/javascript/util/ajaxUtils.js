@@ -108,6 +108,31 @@ neon.util.ajaxUtils = (function() {
     }
 
     /**
+     * Asynchronously posts binary data to the specified URL.
+     * @method doPostBinary
+     * @param {Blob} binary The binary data to be uploaded.
+     * @param {String} url The URL to post to.
+     * @param {Function} successCallback The function to call when the post successfuly completes.
+     * This function takes the server's response as its parameter.
+     * @param {Function} errorCallback The function to call when an error occurs. This function
+     * takes the server's response as its parameter.
+     */
+    function doPostBinary(binary, url, successCallback, errorCallback) {
+        var xhr = new XMLHttpRequest();
+        xhr.open('POST', url);
+        xhr.onload = function() {
+            if(xhr.status === 200) {
+                successCallback(xhr.response);
+            } else {
+                errorCallback(xhr.response);
+            }
+            hideDefaultSpinner();
+        };
+        showDefaultSpinner();
+        xhr.send(binary);
+    }
+
+    /**
      * Makes an ajax GET request
      * @method doGet
      * @param {String} url The url to get
@@ -162,6 +187,7 @@ neon.util.ajaxUtils = (function() {
     return {
         doPost: doPost,
         doPostJSON: doPostJSON,
+        doPostBinary: doPostBinary,
         doGet: doGet,
         doDelete: doDelete,
         setStartStopCallbacks: setStartStopCallbacks,

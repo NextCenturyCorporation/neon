@@ -1,3 +1,19 @@
+/*
+ * Copyright 2015 Next Century Corporation
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ */
+
 package com.ncc.neon.user_import
 
 import org.apache.commons.io.LineIterator
@@ -10,6 +26,9 @@ import com.mongodb.DBCursor
 import com.mongodb.DBObject
 import com.mongodb.BasicDBObject
 
+/**
+ * Implements methods to add, remove, and convert fields of records in a mongo database.
+ */
 @Component
 class MongoImportHelper implements ImportHelper {
     
@@ -46,29 +65,32 @@ class MongoImportHelper implements ImportHelper {
     boolean dropData(String host, String identifier) {
         MongoClient mongo = new MongoClient(host, 27017)
         getDatabase(mongo, identifier).dropDatabase()
+        DB metaDatabase = mongo.getDB(ImportUtilities.MONGO_META_DB_NAME)
+        DBCollection metaCollection = metaDatabase.getCollection(ImportUtilities.MONGO_META_COLL_NAME)
+        metaCollection.remove([databaseName: identifier] as BasicDBObject)
+        if(!metaCollection.getCount()) {
+            metaDatabase.dropDatabase()
+        }
+        mongo.close()
         return true
     }
 
     @Override
     List convertFields(String host, String identifier, UserFieldDataBundle bundle) {
         List<FieldTypePair> fields = bundle.fields, failedFields = [], tempFailed = []
-        DBCollection collection = getDatabase(new MongoClient(host, 27017), identifier).getCollection(ImportUtilities.MONGO_USERDATA_COLL_NAME)
+        MongoClient mongo = new MongoClient(host, 27017)
+        DBCollection collection = getDatabase(mongo, identifier).getCollection(ImportUtilities.MONGO_USERDATA_COLL_NAME)
         DBCursor cursor = collection.find()
         while(cursor.hasNext()) {
             BasicDBObject record = cursor.next() as BasicDBObject
             fields.each { field ->
                 String s = record.get(field.name) as String
-                if(s == "" || (field.type =~ /(?i)integer|long|double|float(?-i)/ && s=~ /(?i)none|null(?-i)/ && s.length() == 4)) {
+                if(s == "" || (field.type =~ /(?i)integer|long|double|float(?-i)/ && s =~ /(?i)none|null(?-i)/ && s.length() == 4)) {
                     record.removeField(field.name) // TODO - As it is this is pretty permanent. Given the file size restriction maybe this is okay because they can just re-upload?
                     return
                 }
                 Object result = ImportUtilities.convertValueToType(record.get(field.name), field.type, bundle.format)
-                if(!result) {
-                    tempFailed.add(field)
-                }
-                else {
-                    record.put(field.name, result)
-                }
+                (result) ? record.put(field.name, result) : tempFailed.add(field)
             }
             failedFields.addAll(tempFailed)
             fields.removeAll(tempFailed)
@@ -76,6 +98,7 @@ class MongoImportHelper implements ImportHelper {
             collection.save(record)
         }
         cursor.close()
+        mongo.close()
         return failedFields
     }
 

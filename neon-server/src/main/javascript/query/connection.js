@@ -155,20 +155,14 @@ neon.query.Connection.prototype.executeExport = function(data, successCallback, 
 };
 
 /**
- * 
+ * Sends a file to be imported to the server.
+ * @method executeUploadFile
+ * @param {File} file The file to upload.
+ * @param {Function} successCallback The function to call when the request successfully completes. This function takes the server's response as a parameter.
+ * @param {Function} errorCallback The function to call when an error occurs. This function takes the server's response as a parameter.
  */
 neon.query.Connection.prototype.executeUploadFile = function(file, successCallback, errorCallback) {
-    var xhr = new XMLHttpRequest();
-    xhr.open('POST', neon.serviceUrl('importservice', 'upload/' + encodeURIComponent(this.host_) + '/' + encodeURIComponent(this.databaseType_), ''));
-    xhr.onload = function() {
-        if(xhr.status === 200) {
-            successCallback(xhr.response);
-        } else {
-            errorCallback(xhr.response);
-        }
-    }
-    xhr.send(file);
-    return;
+    neon.util.ajaxUtils.doPostBinary(file, neon.serviceUrl('importservice', 'upload/' + encodeURIComponent(this.host_) + '/' + encodeURIComponent(this.databaseType_), ''), successCallback, errorCallback);
 };
 
 neon.query.Connection.prototype.executeDropData = function(identifier, successCallback) {

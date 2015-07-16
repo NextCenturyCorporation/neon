@@ -78,6 +78,6 @@ class ImportService {
                                 UserFieldDataBundle data) {
         ImportHelper helper = importHelperFactory.getImportHelper(databaseType)
         List failedFields = helper.convertFields(host, identifier, data)
-        return Response.status((failedFields) ? 418 : 200).entity(JsonOutput.toJson(failedFields)).build() // Empty lists evaluate to false.
+        return Response.status((failedFields) ? 418 : 200).entity(JsonOutput.toJson(failedFields)).build()
     }
 }
