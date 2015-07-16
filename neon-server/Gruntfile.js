@@ -107,11 +107,17 @@ module.exports = function(grunt) {
                 reporter: 'checkstyle'
             },
             source: {
+                options: {
+                    reporterOutput: 'reports/source-jscs.xml'
+                },
                 files: {
                     src: ['Gruntfile.js', 'src/main/javascript/**/*.js']
                 }
             },
             tests: {
+                options: {
+                    reporterOutput: 'reports/tests-jscs.xml'
+                },
                 files: {
                     src: ['src/acceptanceTest/javascript/spec/**/*.spec.js', 'src/test/javascript/spec/**/*.spec.js']
                 }

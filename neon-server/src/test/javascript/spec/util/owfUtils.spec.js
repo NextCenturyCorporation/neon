@@ -14,24 +14,23 @@
  *
  */
 
-describe('OWF utils', function () {
-
+describe('OWF utils', function() {
     // save off the OWF namespace since some tests will modify it
     var OWFNamespace = OWF;
 
-    afterEach(function () {
+    afterEach(function() {
         OWF = OWFNamespace;
     });
 
-    it('returns false when OWF is not defined', function () {
+    it('returns false when OWF is not defined', function() {
         OWF = undefined;
         expect(neon.util.owfUtils.isRunningInOWF()).toBeFalsy();
     });
 
-    it('returns false when OWF says it is not running in OWF', function () {
+    it('returns false when OWF says it is not running in OWF', function() {
         OWF = {
             Util: {
-                isRunningInOWF: function () {
+                isRunningInOWF: function() {
                     return false;
                 }
             }
@@ -42,15 +41,14 @@ describe('OWF utils', function () {
         expect(neon.util.owfUtils.isRunningInOWF()).toBeFalsy();
     });
 
-    it('return true when running OWF', function () {
+    it('return true when running OWF', function() {
         OWF = {
             Util: {
-                isRunningInOWF: function () {
+                isRunningInOWF: function() {
                     return true;
                 }
             }
         };
         expect(neon.util.owfUtils.isRunningInOWF()).toBeTruthy();
     });
-
 });
