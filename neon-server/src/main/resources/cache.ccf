@@ -1,0 +1,14 @@
+# DEFAULT CACHE REGION
+
+# Note, the DC means that we use a disk cache
+jcs.default=
+jcs.default.cacheattributes=org.apache.commons.jcs.engine.CompositeCacheAttributes
+jcs.default.cacheattributes.MaxObjects=500
+jcs.default.cacheattributes.MemoryCacheName=org.apache.commons.jcs.engine.memory.lru.LRUMemoryCache
+
+# Disk Cache
+# jcs.auxiliary.DC=org.apache.commons.jcs.auxiliary.disk.indexed.IndexedDiskCacheFactory
+# jcs.auxiliary.DC.attributes=org.apache.commons.jcs.auxiliary.disk.indexed.IndexedDiskCacheAttributes
+# jcs.auxiliary.DC.attributes.DiskPath=/tmp/jcsCache
+
+        
