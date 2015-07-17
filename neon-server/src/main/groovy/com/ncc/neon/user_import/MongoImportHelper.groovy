@@ -32,13 +32,12 @@ import com.mongodb.BasicDBObject
 @Component
 class MongoImportHelper implements ImportHelper {
     
-    // TODO adapt this to accept some pretty name, even if only to store in the meta-information database.
     @Override
-    List uploadData(String host, String identifier, LineIterator reader) {
+    List uploadData(String host, String userName, String prettyName, LineIterator reader) {
         MongoClient mongo = new MongoClient(host, 27017)
-        DB database = mongo.getDB(identifier)
+        DB database = mongo.getDB(makeUglyName(userName, prettyName))
         DBCollection collection = database.getCollection(ImportUtilities.MONGO_USERDATA_COLL_NAME)
-        addMetadata(mongo, database.getName(), identifier)
+        addMetadata(mongo, userName, prettyName)
 
         String row = ImportUtilities.getNextWholeRow(reader)
         if(!row || !reader.hasNext()) {
@@ -62,12 +61,18 @@ class MongoImportHelper implements ImportHelper {
     }
 
     @Override
-    boolean dropData(String host, String identifier) {
+    boolean dropData(String host, String userName, String prettyName) {
         MongoClient mongo = new MongoClient(host, 27017)
-        getDatabase(mongo, identifier).dropDatabase()
+        DB databaseToDrop = getDatabase(mongo, [userName: userName, prettyName: prettyName])
+        if(databaseToDrop.getCollectionNames()) {
+            databaseToDrop.dropDatabase()
+        }
+        else {
+            return false
+        }
         DB metaDatabase = mongo.getDB(ImportUtilities.MONGO_META_DB_NAME)
         DBCollection metaCollection = metaDatabase.getCollection(ImportUtilities.MONGO_META_COLL_NAME)
-        metaCollection.remove([databaseName: identifier] as BasicDBObject)
+        metaCollection.remove([userName: userName, prettyName: prettyName] as BasicDBObject)
         if(!metaCollection.getCount()) {
             metaDatabase.dropDatabase()
         }
@@ -76,10 +81,13 @@ class MongoImportHelper implements ImportHelper {
     }
 
     @Override
-    List convertFields(String host, String identifier, UserFieldDataBundle bundle) {
+    List convertFields(String host, String userName, String prettyName, UserFieldDataBundle bundle) {
         List<FieldTypePair> fields = bundle.fields, failedFields = [], tempFailed = []
         MongoClient mongo = new MongoClient(host, 27017)
-        DBCollection collection = getDatabase(mongo, identifier).getCollection(ImportUtilities.MONGO_USERDATA_COLL_NAME)
+        DBCollection collection = getDatabase(mongo, [userName: userName, prettyName: prettyName])?.getCollection(ImportUtilities.MONGO_USERDATA_COLL_NAME)
+        if(collection == null) {
+            return null
+        }
         DBCursor cursor = collection.find()
         while(cursor.hasNext()) {
             BasicDBObject record = cursor.next() as BasicDBObject
@@ -105,13 +113,13 @@ class MongoImportHelper implements ImportHelper {
     /**
      * Gets a database form the given mongo instance, given its identifier.
      * @param mongo The mongo instance from which to get the database.
-     * @param identifier The identifier linked to the database to get.
-     * @return The database on the given mongo instane with the given identifier.
+     * @param identifier The Map containing username and database name linked to the database to get.
+     * @return The database on the given mongo instance with the given identifier.
      */
-    private DB getDatabase(MongoClient mongo, String identifier) {
+    private DB getDatabase(MongoClient mongo, Map identifier) {
         DB metaDatabase = mongo.getDB(ImportUtilities.MONGO_META_DB_NAME)
         DBCollection metaCollection = metaDatabase.getCollection(ImportUtilities.MONGO_META_COLL_NAME)
-        DBObject metaRecord = metaCollection.findOne([identifier: identifier] as BasicDBObject)
+        DBObject metaRecord = metaCollection.findOne(identifier as BasicDBObject)
         return mongo.getDB(metaRecord.get("databaseName"))
     }
 
@@ -119,15 +127,16 @@ class MongoImportHelper implements ImportHelper {
      * Adds metadata for a user-created database to the given mongo instance. Utilizes a database dedicated to storing information
      * about user-created databases.
      * @param mongo The mongo instance on which to put the metadata for the given database.
-     * @param databaseName The name of the database for which to store metadata.
+     * @param userName The name of the user creating the database.
      * @param identifier The identifier with which the database of the given name is associated.
      */
-    private void addMetadata(MongoClient mongo, String databaseName, String identifier) {
+    private void addMetadata(MongoClient mongo, String userName, String prettyName) {
         DB metaDatabase = mongo.getDB(ImportUtilities.MONGO_META_DB_NAME)
         DBCollection metaCollection = metaDatabase.getCollection(ImportUtilities.MONGO_META_COLL_NAME)
         DBObject metaRecord = new BasicDBObject()
-        metaRecord.append("identifier", identifier)
-        metaRecord.append("databaseName", databaseName)
+        metaRecord.append("userName", userName)
+        metaRecord.append("prettyName", prettyName)
+        metaRecord.append("databaseName", makeUglyName(userName, prettyName))
         metaCollection.insert(metaRecord)
     }
 
@@ -158,5 +167,15 @@ class MongoImportHelper implements ImportHelper {
             fieldsAndTypes.add(pair)
         }
         return fieldsAndTypes
+    }
+
+    /**
+     * Takes a username and "pretty" human-readable name and uses them to generate an ugly, more unique name.
+     * @param userName The username to use in making the ugly name.
+     * @param pretttyName The human-readable name to use in making the ugly name.
+     * @return The ugly name created from the given username and pretty name.
+     */
+    private String makeUglyName(String userName, String prettyName) {
+        return "$userName${ImportUtilities.SEPARATOR}$prettyName"
     }
 }

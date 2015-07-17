@@ -45,55 +45,61 @@ class ImportService {
 
     /**
      * Uploads data from a stream of a CSV spreadsheet into a database on the given host, and
-     * returns a list of fields found in the spreadsheet with guesses as to their types, as well
-     * as an identifier which can be used to access the new database.
+     * returns a list of fields found in the spreadsheet with guesses as to their types.
      * @param host The host on which the data store to upload to is running.
      * @param databaseType The type of the data store to upload to.
+     * @param user The name of the user with which to associate this data.
+     * @param prettyName The "pretty" name of the database in which to put this data.
      * @param dataInputStream The stream containing the spreadsheet to read.
-     * @return A map containing a string identifier that can be used to access the newly-created
-     * database in the future, as well as a list of field names found in the spreadsheet and guesses
+     * @return A map containing a new username if none was given, with which the new database is
+     * associated, as well as a list of field names found in the spreadsheet and guesses
      * as to their types.
      */
     @POST
     @Consumes(MediaType.MULTIPART_FORM_DATA)
     @Produces(MediaType.APPLICATION_JSON)
     @Path("upload/{host}/{databaseType}")
-    public String uploadData(@PathParam("host") String host,
-                             @PathParam("databaseType") String databaseType,
-                             @FormDataParam("file") InputStream dataInputStream) {
+    public Response uploadData(@PathParam("host") String host,
+                               @PathParam("databaseType") String databaseType,
+                               @FormDataParam("user") String user,
+                               @FormDataParam("data") String prettyName,
+                               @FormDataParam("file") InputStream dataInputStream) {
         LineIterator lineIter = IOUtils.lineIterator(dataInputStream, "UTF-8")
-        String identifier = UUID.randomUUID().toString()
+        String userName = user ?: UUID.randomUUID().toString()
         ImportHelper helper = importHelperFactory.getImportHelper(databaseType)
-        List typeGuesses = helper.uploadData(host, identifier, lineIter)
-        Map<String, String> toReturn = [identifier:identifier, types:typeGuesses]
-        return JsonOutput.toJson(toReturn)
+        List typeGuesses = helper.uploadData(host, userName, prettyName, lineIter)
+        Map<String, String> toReturn = [types:typeGuesses, user: (user) ? '' : userName] // Only give a username back if we weren't given one.
+        return Response.status(200).entity(JsonOutput.toJson(toReturn)).build()
     }
 
     /**
      * Drops a user-created database, given the host it's running on, the type of database it's running on,
-     * and its identifier.
+     * and the user and pretty names associated with it.
      * @param host The host on which the data store to drop from is running.
      * @param databaseType The type of the data store the data to drop is in.
-     * @param identifier The identifier of the database to drop.
+     * @param userName The username associated with the database to drop.
+     * @param prettyName The "pretty" name of the database to drop.
      * @return A JSON formatted object with a success field that tells whether or not the drop succeeded.
      */
     @GET
     @Produces(MediaType.APPLICATION_JSON)
-    @Path("drop/{host}/{databaseType}/{identifier}")
+    @Path("drop/{host}/{databaseType}")
     public String dropDataset(@PathParam("host") String host,
                               @PathParam("databaseType") String databaseType,
-                              @PathParam("identifier")String identifier) {
+                              @QueryParam("user") String userName,
+                              @QueryParam("data") String prettyName) {
         ImportHelper helper = importHelperFactory.getImportHelper(databaseType)
-        return JsonOutput.toJson([success: helper.dropData(host, identifier)])
+        return JsonOutput.toJson([success: helper.dropData(host, userName, prettyName)])
     }
 
     /**
      * Attempts to convert fields in a user-created database to types specified by the user, given the host
-     * the databse is on, the host type, the database's idenifying string, and a {@link UserFieldDataBundle} -
+     * the databse is on, the host type, the database's user and prettified names, and a {@link UserFieldDataBundle} -
      * a bundle of data containing a date format string and a list of pairs of fields and types.
      * @param host The host on which to data store to convert in is running.
      * @param databaseType The type of data store the type of data to convert is in.
-     * @param identifier The identifier of the database storing the data to convert.
+     * @param userName The username associated with the database storing the data to convert.
+     * @param prettyName The "pretty" name of the database storing the data to convert.
      * @param data The bundle of data containing a user-given date format string and a list of fields and
      * the types they should be converted to.
      * @return A response containing a list of fields that failed to convert. Response code is 200 if no fields
@@ -102,13 +108,14 @@ class ImportService {
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-    @Path("convert/{host}/{databaseType}/{identifier}")
+    @Path("convert/{host}/{databaseType}")
     public Response convertFields(@PathParam("host") String host,
-                                @PathParam("databaseType") String databaseType,
-                                @PathParam("identifier") String identifier,
-                                UserFieldDataBundle data) {
+                                  @PathParam("databaseType") String databaseType,
+                                  @QueryParam("user") String userName,
+                                  @QueryParam("data") String prettyName,
+                                  UserFieldDataBundle data) {
         ImportHelper helper = importHelperFactory.getImportHelper(databaseType)
-        List failedFields = helper.convertFields(host, identifier, data)
+        List failedFields = helper.convertFields(host, userName, prettyName, data)
         return Response.status((failedFields) ? 418 : 200).entity(JsonOutput.toJson(failedFields)).build()
     }
 }

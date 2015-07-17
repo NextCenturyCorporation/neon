@@ -157,27 +157,31 @@ neon.query.Connection.prototype.executeExport = function(data, successCallback, 
 /**
  * Sends a file to be imported to the server.
  * @method executeUploadFile
- * @param {File} file The file to upload.
+ * @param {FormData} data A FormData object containing the file to upload, as well as username and name of the database to upload it to.
  * @param {Function} successCallback The function to call when the request successfully completes. This function takes the server's response as a parameter.
  * @param {Function} errorCallback The function to call when an error occurs. This function takes the server's response as a parameter.
  */
-neon.query.Connection.prototype.executeUploadFile = function(file, successCallback, errorCallback) {
-    neon.util.ajaxUtils.doPostBinary(file, neon.serviceUrl('importservice', 'upload/' + encodeURIComponent(this.host_) + '/' + encodeURIComponent(this.databaseType_), ''), successCallback, errorCallback);
+neon.query.Connection.prototype.executeUploadFile = function(data, successCallback, errorCallback) {
+    neon.util.ajaxUtils.doPostBinary(data, neon.serviceUrl('importservice', 'upload/' + encodeURIComponent(this.host_) + '/' + encodeURIComponent(this.databaseType_), ''),
+        successCallback, errorCallback);
 };
 
-neon.query.Connection.prototype.executeDropData = function(identifier, successCallback) {
+neon.query.Connection.prototype.executeDropData = function(user, data, successCallback, errorCallback) {
     return neon.util.ajaxUtils.doGet(
-        neon.serviceUrl('importservice', 'drop/' + encodeURIComponent(this.host_) + '/' + encodeURIComponent(this.databaseType_) + '/' + encodeURIComponent(identifier)), {
+        neon.serviceUrl('importservice', 'drop/' + encodeURIComponent(this.host_) + '/' + encodeURIComponent(this.databaseType_) + '?user=' + encodeURIComponent(user) +
+            '&data=' + encodeURIComponent(data)), {
             success: successCallback,
+            error: errorCallback,
             responseType: 'json'
         }
     );
 };
 
-neon.query.Connection.prototype.executeConfirmTypeGuesses = function(guesses, identifier, successCallback, errorCallback) {
+neon.query.Connection.prototype.executeConfirmTypeGuesses = function(guesses, user, data, successCallback, errorCallback) {
     return neon.util.ajaxUtils.doPostJSON(
         guesses,
-        neon.serviceUrl('importservice', 'convert/' + encodeURIComponent(this.host_) + '/' + encodeURIComponent(this.databaseType_) + '/' + encodeURIComponent(identifier), ''), {
+        neon.serviceUrl('importservice', 'convert/' + encodeURIComponent(this.host_) + '/' + encodeURIComponent(this.databaseType_) +
+            '?user=' + encodeURIComponent(user) + '&data=' + encodeURIComponent(data), ''), {
             success: successCallback,
             error: errorCallback
         }

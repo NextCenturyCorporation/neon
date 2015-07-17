@@ -24,23 +24,25 @@ import org.apache.commons.io.LineIterator
 public interface ImportHelper {
     /**
      * Takes a LineIterator that points to a spreadsheet, and adds the data from the spreadsheet
-     * into a data store running at the given host, with the given identifier for the added data.
-     * Also guesses at the data type of each field found for entries in the spreadsheet, and
-     * returns those guesses on completion.
+     * into a data store running at the given host, with the given associated user and pretty name
+     * for the added data. Also guesses at the data type of each field found for entries in the
+     * spreadsheet, and returns those guesses on completion.
      * @param host The host on which the data store is running.
-     * @param identifier The identifier with which to associate the added data.
+     * @param userName The user name with which to associate the added data.
+     * @param prettyName The "pretty" database name with which to associate the added data.
      * @param reader A LineIterator pointing to the data that should be added.
      * @return A list of {@link FieldTypePair} objects, containing record fields and guesses as to their types.
      */
-    List uploadData(String host, String identifier, LineIterator reader)
+    List uploadData(String host, String userName, String prettyName, LineIterator reader)
 
     /**
-     * Drops a set of user-given data from a data store, given its identifier.
+     * Drops a set of user-given data from a data store, given its associated username and pretty name.
      * @paramhost The host on which the data store is running.
-     * @param identifier The identifier associated with the data to be dropped.
+     * @param userName The user name associated with the data to be dropped.
+     * @param prettyName the "pretty" database name associated with the data to be dropped.
      * @return True if the data was successfully dropped, false (or an exception) otherwise.
      */
-    boolean dropData(String host, String identifier)
+    boolean dropData(String host, String userName, String prettyName)
 
     /**
      * Given a {@link UserFieldDataBundle} (a date pattern string and a list of fields and corresponding types),
@@ -48,11 +50,13 @@ public interface ImportHelper {
      * converted to that type are added to a list and ignored, and the list of fields that failed to convert is
      * returned.
      * @param host The host on which the data store is running.
-     * @param identifier The identifier of the database within the data store.
+     * @param userName The username associated with the database within the data store.
+     * @param prettyName The "pretty" database name associated with the database within the data store.
      * @param bundle A bundle of information containing a list of fields and corresponding conversion types, as
      * well as a date format string that describes the format in which to attempt to parse dates. If this date
      * format string is null, uses the default list of date strings instead.
-     * @return The list of fields that failed to convert and what type they were attempting to convert to.
+     * @return The list of fields that failed to convert and what type they were attempting to convert to. If there
+     * was an issue accessing the database or table, returns null.
      */
-    List convertFields(String host, String identifier, UserFieldDataBundle bundle)
+    List convertFields(String host, String userName, String prettyName, UserFieldDataBundle bundle)
 }

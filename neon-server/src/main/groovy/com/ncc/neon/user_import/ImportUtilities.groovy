@@ -38,6 +38,9 @@ class ImportUtilities {
     // Number of records to pull from a database forthe purposes of checking types.
     static final int NUM_TYPE_CHECKED_RECORDS = 100
 
+    // Currently, database "ugly" names are just user name, then a separator, then pretty name. This defines the separator.
+    static final String SEPARATOR = "~"
+
     // Various mongo-specific values. Defines the database and collection name in which to store information about user-defined data, as well as
     // the collection name in which to put user-defined data (since every user-defined data set is given its own database).
     static final String MONGO_META_DB_NAME = "customDataInfo"
