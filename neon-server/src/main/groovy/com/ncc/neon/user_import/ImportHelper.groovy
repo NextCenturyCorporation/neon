@@ -30,10 +30,12 @@ public interface ImportHelper {
      * @param host The host on which the data store is running.
      * @param userName The user name with which to associate the added data.
      * @param prettyName The "pretty" database name with which to associate the added data.
-     * @param reader A LineIterator pointing to the data that should be added.
+     * @param fileType The type of spreadsheet containing the data to be added.
+     * @param stream An InputStream containing the data that should be added.
      * @return A list of {@link FieldTypePair} objects, containing record fields and guesses as to their types.
+     * If an error occurs, returns a one-element list of strings describing the error.
      */
-    List uploadData(String host, String userName, String prettyName, LineIterator reader)
+    List uploadData(String host, String userName, String prettyName, String fileType, InputStream stream)
 
     /**
      * Drops a set of user-given data from a data store, given its associated username and pretty name.

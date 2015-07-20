@@ -16,8 +16,14 @@
 
 package com.ncc.neon.user_import
 
+import org.apache.commons.io.IOUtils
 import org.apache.commons.io.LineIterator
 import org.springframework.stereotype.Component
+
+import org.apache.poi.xssf.usermodel.XSSFWorkbook
+import org.apache.poi.xssf.usermodel.XSSFSheet
+import org.apache.poi.xssf.usermodel.XSSFRow
+import org.apache.poi.xssf.usermodel.XSSFCell
 
 import com.mongodb.MongoClient
 import com.mongodb.DB
@@ -33,15 +39,26 @@ import com.mongodb.BasicDBObject
 class MongoImportHelper implements ImportHelper {
     
     @Override
-    List uploadData(String host, String userName, String prettyName, LineIterator reader) {
+    List uploadData(String host, String userName, String prettyName, String fileType, InputStream stream) {
+        if(fileType.equalsIgnoreCase("csv")) {
+            return uploadCSV(host, userName, prettyName, IOUtils.lineIterator(stream, "UTF-8"))
+        }
+        else if(fileType.equalsIgnoreCase("xlsx")) {
+            return uploadExcel(host, userName, prettyName, stream)
+        }
+        else {
+            return ["Import not supported for this file type."]
+        }
+    }
+
+    List uploadCSV(String host, String userName, String prettyName, LineIterator reader) {
         MongoClient mongo = new MongoClient(host, 27017)
-        DB database = mongo.getDB(makeUglyName(userName, prettyName))
-        DBCollection collection = database.getCollection(ImportUtilities.MONGO_USERDATA_COLL_NAME)
+        DBCollection collection = mongo.getDB(makeUglyName(userName, prettyName)).getCollection(ImportUtilities.MONGO_USERDATA_COLL_NAME)
         addMetadata(mongo, userName, prettyName)
 
         String row = ImportUtilities.getNextWholeRow(reader)
         if(!row || !reader.hasNext()) {
-            return null
+            return ["There was no data in this file to import."]
         }
         List fields = ImportUtilities.getCellsFromRow(row)
 
@@ -56,6 +73,32 @@ class MongoImportHelper implements ImportHelper {
             row = ImportUtilities.getNextWholeRow(reader)
         }
         List guesses = guessTypes(collection, fields)
+        mongo.close()
+        return guesses
+    }
+
+    List uploadExcel(String host, String userName, String prettyName, InputStream stream) {
+        XSSFWorkbook workbook = new XSSFWorkbook(stream)
+        if(workbook.getNumberOfSheets() < 1 || workbook.getSheetAt(0).getLastRowNum() < 1) {
+            return ["There was no data in this file to import."]
+        }
+        XSSFSheet sheet = workbook.getSheetAt(0)
+        MongoClient mongo = new MongoClient(host, 27017)
+        DBCollection collection = mongo.getDB(makeUglyName(userName, prettyName)).getCollection(sheet.getSheetName())
+        addMetadata(mongo, userName, prettyName)
+        List fields = []
+        XSSFRow row = sheet.getRow(0).each { cell ->
+            fields << cell.getStringCellValue()
+        }
+        for(int x = 1; x <= sheet.getLastRowNum(); x++) {
+            DBObject record = new BasicDBObject()
+            sheet.getRow(x).each { cell ->
+                record.append(fields[cell.getColumnIndex()], cell.getStringCellValue())
+            }
+            collection.insert(record)
+        }
+        List guesses = guessTypes(collection, fields)
+        workbook.close()
         mongo.close()
         return guesses
     }
@@ -88,6 +131,7 @@ class MongoImportHelper implements ImportHelper {
         if(collection == null) {
             return null
         }
+        int recordNum = 1
         DBCursor cursor = collection.find()
         while(cursor.hasNext()) {
             BasicDBObject record = cursor.next() as BasicDBObject
@@ -98,12 +142,13 @@ class MongoImportHelper implements ImportHelper {
                     return
                 }
                 Object result = ImportUtilities.convertValueToType(record.get(field.name), field.type, bundle.format)
-                (result) ? record.put(field.name, result) : tempFailed.add(field)
+                !(result == null) ? record.put(field.name, result) : tempFailed.add(field)
             }
             failedFields.addAll(tempFailed)
             fields.removeAll(tempFailed)
             tempFailed.clear()
             collection.save(record)
+            recordNum++
         }
         cursor.close()
         mongo.close()

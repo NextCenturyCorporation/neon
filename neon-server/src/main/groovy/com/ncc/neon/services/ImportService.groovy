@@ -20,8 +20,6 @@ import com.ncc.neon.user_import.UserFieldDataBundle
 import com.ncc.neon.user_import.ImportHelper
 import com.ncc.neon.user_import.ImportHelperFactory
 
-import org.apache.commons.io.LineIterator
-import org.apache.commons.io.IOUtils
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
 import com.sun.jersey.multipart.FormDataParam
@@ -63,11 +61,14 @@ class ImportService {
                                @PathParam("databaseType") String databaseType,
                                @FormDataParam("user") String user,
                                @FormDataParam("data") String prettyName,
+                               @FormDataParam("type") String fileType,
                                @FormDataParam("file") InputStream dataInputStream) {
-        LineIterator lineIter = IOUtils.lineIterator(dataInputStream, "UTF-8")
         String userName = user ?: UUID.randomUUID().toString()
         ImportHelper helper = importHelperFactory.getImportHelper(databaseType)
-        List typeGuesses = helper.uploadData(host, userName, prettyName, lineIter)
+        List typeGuesses = helper.uploadData(host, userName, prettyName, fileType, dataInputStream)
+        if(typeGuesses[0] instanceof String) {
+            return Response.status(500).entity(typeGuesses[0]).build()
+        }
         Map<String, String> toReturn = [types:typeGuesses, user: (user) ? '' : userName] // Only give a username back if we weren't given one.
         return Response.status(200).entity(JsonOutput.toJson(toReturn)).build()
     }

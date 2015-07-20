@@ -249,7 +249,7 @@ class ImportUtilities {
                     return Float.parseFloat(value)
                     break
                 case "Date":
-                    return DateUtils.parseDate(value, (datePatterns) ?: DATE_PATTERNS)
+                    return DateUtils.parseDate(value, DATE_PATTERNS + datePatterns)
                     break
                 default:
                     return value.toString()
