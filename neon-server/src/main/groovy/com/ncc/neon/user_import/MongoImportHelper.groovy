@@ -131,7 +131,6 @@ class MongoImportHelper implements ImportHelper {
         if(collection == null) {
             return null
         }
-        int recordNum = 1
         DBCursor cursor = collection.find()
         while(cursor.hasNext()) {
             BasicDBObject record = cursor.next() as BasicDBObject
@@ -142,13 +141,12 @@ class MongoImportHelper implements ImportHelper {
                     return
                 }
                 Object result = ImportUtilities.convertValueToType(record.get(field.name), field.type, bundle.format)
-                !(result == null) ? record.put(field.name, result) : tempFailed.add(field)
+                (result != null) ? record.put(field.name, result) : tempFailed.add(field)
             }
             failedFields.addAll(tempFailed)
             fields.removeAll(tempFailed)
             tempFailed.clear()
             collection.save(record)
-            recordNum++
         }
         cursor.close()
         mongo.close()
