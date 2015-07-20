@@ -98,7 +98,7 @@ class MongoImportHelper implements ImportHelper {
                     return
                 }
                 Object result = ImportUtilities.convertValueToType(record.get(field.name), field.type, bundle.format)
-                (result) ? record.put(field.name, result) : tempFailed.add(field)
+                (result != null) ? record.put(field.name, result) : tempFailed.add(field)
             }
             failedFields.addAll(tempFailed)
             fields.removeAll(tempFailed)
