@@ -77,6 +77,7 @@ class MongoImportHelper implements ImportHelper {
         return guesses
     }
 
+    // TODO (maybe?) - switch collection to use sheet name instead of dfault collection name. For right now, doing that breaks field type conversion.
     List uploadExcel(String host, String userName, String prettyName, InputStream stream) {
         XSSFWorkbook workbook = new XSSFWorkbook(stream)
         if(workbook.getNumberOfSheets() < 1 || workbook.getSheetAt(0).getLastRowNum() < 1) {
@@ -84,16 +85,16 @@ class MongoImportHelper implements ImportHelper {
         }
         XSSFSheet sheet = workbook.getSheetAt(0)
         MongoClient mongo = new MongoClient(host, 27017)
-        DBCollection collection = mongo.getDB(makeUglyName(userName, prettyName)).getCollection(sheet.getSheetName())
+        DBCollection collection = mongo.getDB(makeUglyName(userName, prettyName)).getCollection(ImportUtilities.MONGO_USERDATA_COLL_NAME)
         addMetadata(mongo, userName, prettyName)
         List fields = []
         XSSFRow row = sheet.getRow(0).each { cell ->
-            fields << cell.getStringCellValue()
+            fields << cell.toString()
         }
         for(int x = 1; x <= sheet.getLastRowNum(); x++) {
             DBObject record = new BasicDBObject()
             sheet.getRow(x).each { cell ->
-                record.append(fields[cell.getColumnIndex()], cell.getStringCellValue())
+                record.append(fields[cell.getColumnIndex()], cell.toString())
             }
             collection.insert(record)
         }
@@ -135,8 +136,8 @@ class MongoImportHelper implements ImportHelper {
         while(cursor.hasNext()) {
             BasicDBObject record = cursor.next() as BasicDBObject
             fields.each { field ->
-                String s = record.get(field.name) as String
-                if(s == "" || (field.type =~ /(?i)integer|long|double|float(?-i)/ && s =~ /(?i)none|null(?-i)/ && s.length() == 4)) {
+                String s = record.get(field.name)?.toString()
+                if(!s || (field.type =~ /(?i)integer|long|double|float(?-i)/ && s =~ /(?i)none|null(?-i)/ && s.length() == 4)) { // !s serves for both s == null and s == ""
                     record.removeField(field.name) // TODO - As it is this is pretty permanent. Given the file size restriction maybe this is okay because they can just re-upload?
                     return
                 }
@@ -197,7 +198,9 @@ class MongoImportHelper implements ImportHelper {
         fields.each { field ->
             List valuesOfField = []
             records.each { record ->
-                valuesOfField.add(record.get(field))
+                if(record.get(field) != null) {
+                    valuesOfField.add(record.get(field))
+                }
             }
             FieldTypePair pair = null
             // Sets the pair type equals to the first type that matches.
