@@ -36,5 +36,4 @@ class SingularWhereClause implements WhereClause, Serializable {
 
     @JsonDeserialize(using = QueryValueDeserializer)
     def rhs
-
 }
