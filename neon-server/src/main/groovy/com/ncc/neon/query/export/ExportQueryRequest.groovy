@@ -1,5 +1,5 @@
 /*
- * Copyright 2013 Next Century Corporation
+ * Copyright 2015 Next Century Corporation
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -14,16 +14,22 @@
  *
  */
 
-describe('array utils', function() {
-    it('converts function arguments to an array', function() {
-        var args;
+package com.ncc.neon.query.export
 
-        function setArgs() {
-            args = arguments;
-        }
-        setArgs('a', 'b', 'c');
+import com.ncc.neon.query.Query
+import groovy.transform.ToString
 
-        var argsArray = neon.util.arrayUtils.argumentsToArray(args);
-        expect(argsArray).toBeEqualArray(['a','b','c']);
-    });
-});
+/**
+ * An ExportRequest which contains fields necessary to call QueryService's executeQuery method and pull data from the result.
+ */
+
+@ToString(includeNames = true)
+class ExportQueryRequest implements ExportRequest {
+
+	Query query
+	String name
+	List<ExportField> fields
+	boolean ignoreFilters
+	boolean selectionOnly
+	Set<String> ignoredFilterIds
+}

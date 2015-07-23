@@ -115,15 +115,38 @@ neon.query.Connection.prototype.executeQueryService_ = function(query, successCa
         query.ignoredFilterIds_.forEach(function(id) {
             filterIds.push("ignoredFilterIds=" + encodeURIComponent(id));
         });
-        opts.push(filterIds.join("&"));
+        if(filterIds.length) {
+            opts.push(filterIds.join("&"));
+        }
     }
     if(query.selectionOnly_) {
         opts.push("selectionOnly=true");
     }
-
     return neon.util.ajaxUtils.doPostJSON(
         query,
         neon.serviceUrl('queryservice', serviceName + '/' + encodeURIComponent(this.host_) + '/' + encodeURIComponent(this.databaseType_), opts.join('&')),
+        {
+            success: successCallback,
+            error: errorCallback
+        }
+    );
+};
+
+/**
+ * Executes the specified export request and fires the callback when complete.
+ * @method executeExport
+ * @param {neon.query.Query} query the query to export data for
+ * @param {Function} successCallback The callback to fire when the export request successfully completes. Takes 
+ * a JSON object with the export URL stored in it's data field as a parameter.
+ * @param {Function} [errorCallBack] The optional callback when an error occurs. This function takes the server's
+ * response as a parameter.
+ * @return {neon.util.AjaxRequest} The xhr request object
+ */
+neon.query.Connection.prototype.executeExport = function(data, successCallback, errorCallback, fileType) {
+    data.fileType = fileType;
+    return neon.util.ajaxUtils.doPostJSON(
+        data,
+        neon.serviceUrl('exportservice', 'export' +'/' + encodeURIComponent(this.host_) + '/' + encodeURIComponent(this.databaseType_), ''),
         {
             success: successCallback,
             error: errorCallback

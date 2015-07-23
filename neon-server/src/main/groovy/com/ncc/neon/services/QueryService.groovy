@@ -202,7 +202,6 @@ class QueryService {
         return queryExecutor.getArrayCounts(db, tableName, field, limit)
     }
 
-
     private QueryResult execute(String host, String databaseType, def query, QueryOptions options) {
         QueryExecutor queryExecutor = getExecutor(host, databaseType)
         return queryExecutor.execute(query, options)

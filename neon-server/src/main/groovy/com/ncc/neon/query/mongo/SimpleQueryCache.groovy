@@ -1,5 +1,5 @@
 /*
- * Copyright 2013 Next Century Corporation
+ * Copyright 2015 Next Century Corporation
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -57,9 +57,13 @@ public class SimpleQueryCache {
     // the most important queries can be saved.  Currently really high, so cache everything
     static final double QUERY_TIME_LIMIT = 9999999.0
 
+    // Make this true to turn on printing of statistics
+    static final boolean SHOW_STATISTICS = false
+
     // How often to print; every X times a query is 'get'.
     static final int PRINTLIMIT = 20
 
+    // Counters for cache hits and misses
     int keyMiss = 0
     int keyHit = 0
 
@@ -94,10 +98,8 @@ public class SimpleQueryCache {
         QueryResult result = cache.get(queryString)
         if (result == null) {
             keyMiss++
-            LOGGER.debug("Cache miss")
         } else {
             keyHit++
-            LOGGER.debug("Cache hit")
         }
         showSummaryStatistics()
         return result
@@ -127,6 +129,9 @@ public class SimpleQueryCache {
      * Try to figure out what the queries are, what they were doing, how often they hit versus miss
      */
     void showSummaryStatistics() {
+        if (!SHOW_STATISTICS) {
+            return
+        }
         if ((keyMiss + keyHit) % 20 != 0) {
             return
         }

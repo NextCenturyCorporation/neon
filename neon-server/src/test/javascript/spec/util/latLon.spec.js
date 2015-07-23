@@ -14,10 +14,8 @@
  *
  */
 
-
-describe('latitude/longitude pair', function () {
-
-    it('accepts valid latitude/longitude pairs', function () {
+describe('latitude/longitude pair', function() {
+    it('accepts valid latitude/longitude pairs', function() {
         assertLatLon(new neon.util.LatLon(25.2, -125), 25.2, -125);
         assertLatLon(new neon.util.LatLon(-90, -180), -90, -180);
         assertLatLon(new neon.util.LatLon(90, 180), 90, 180);
@@ -43,7 +41,7 @@ describe('latitude/longitude pair', function () {
      * @param latDegrees
      * @param lonDegrees
      */
-    function latLonFunc(latDegrees,lonDegrees) {
+    function latLonFunc(latDegrees, lonDegrees) {
         return function() {
             return new neon.util.LatLon(latDegrees,lonDegrees);
         };
