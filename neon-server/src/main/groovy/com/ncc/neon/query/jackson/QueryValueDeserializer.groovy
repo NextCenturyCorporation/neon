@@ -37,10 +37,7 @@ class QueryValueDeserializer extends JsonDeserializer<Object> {
      * a 'type' key value pair. The type acts as an override, enforcing the attempted parsing of known types (e.g. date)
      */
     @Override
-    @SuppressWarnings('Println')
     Object deserialize(JsonParser jp, DeserializationContext ctxt) throws IOException, JsonProcessingException {
-        println(jp.currentToken)
-        println(jp.text)
         switch (jp.currentToken) {
             case JsonToken.VALUE_STRING:
                 // check if the string is a date, if not, fallback to plain string
@@ -89,6 +86,6 @@ class QueryValueDeserializer extends JsonDeserializer<Object> {
             return DateUtils.tryToParseDate(value)
         }
 
-        return null
+        return value
     }
 }
