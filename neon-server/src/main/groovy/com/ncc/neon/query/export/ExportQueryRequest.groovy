@@ -1,5 +1,5 @@
 /*
- * Copyright 2013 Next Century Corporation
+ * Copyright 2015 Next Century Corporation
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -14,24 +14,22 @@
  *
  */
 
-package com.ncc.neon.query.filter
-import com.ncc.neon.query.clauses.WhereClause
+package com.ncc.neon.query.export
+
+import com.ncc.neon.query.Query
 import groovy.transform.ToString
 
-
 /**
- * A filter is applied to a DataSet and can contain a whereClause
+ * An ExportRequest which contains fields necessary to call QueryService's executeQuery method and pull data from the result.
  */
+
 @ToString(includeNames = true)
-class Filter implements Serializable {
+class ExportQueryRequest implements ExportRequest {
 
-    private static final long serialVersionUID = 7238913369114626126L
-
-    String databaseName
-    String tableName
-
-    String filterName
-
-    WhereClause whereClause
-
+	Query query
+	String name
+	List<ExportField> fields
+	boolean ignoreFilters
+	boolean selectionOnly
+	Set<String> ignoredFilterIds
 }

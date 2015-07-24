@@ -14,8 +14,6 @@
  *
  */
 
-
-
 // some of this class is tested in the integration query.spec.js. This covers the unit tests.
 describe('query', function() {
     it('withFields should wrap a non-array single param in an array', function() {
@@ -130,7 +128,7 @@ describe('query', function() {
         expect(query.groupByClauses[3].field).toBe('yon');
     });
 
-    it('aggregate should use a name if provided', function(){
+    it('aggregate should use a name if provided', function() {
         var query = new neon.query.Query();
         query.aggregate('op', 'foo', 'bar');
         expect(query.aggregates.length).toBe(1);

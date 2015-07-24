@@ -13,8 +13,8 @@
  * limitations under the License.
  *
  */
-describe('neon.widget', function () {
 
+describe('neon.widget', function() {
     var databaseName = "!@#$%^&*?/\\";
     var encodedDatabaseName = "!%40%23%24%25%5E%26*%3F%2F%5C";
     var encodedTableName = "%5C%2F%3F*%26%5E%25%24%23%40!";
@@ -32,21 +32,21 @@ describe('neon.widget', function () {
         spyOn($, "ajax");
 
         neon.widget.getInstanceId(value);
-        expect($.ajax.mostRecentCall.args[0]["url"]).toEqual(server + widgetService + 'instanceid?qualifier=' + encodedValue);
+        expect($.ajax.mostRecentCall.args[0].url).toEqual(server + widgetService + 'instanceid?qualifier=' + encodedValue);
     });
 
     it("should encode qualifier appropriately in getSavedState request url", function() {
         spyOn($, "ajax");
 
         neon.widget.getSavedState(value);
-        expect($.ajax.mostRecentCall.args[0]["url"]).toEqual(server + widgetService + 'restorestate/' + encodedValue);
+        expect($.ajax.mostRecentCall.args[0].url).toEqual(server + widgetService + 'restorestate/' + encodedValue);
     });
 
     it("should encode qualifier appropriately in getWidgetDatasetMetadata request url", function() {
         spyOn($, "ajax");
 
         neon.widget.getWidgetDatasetMetadata(databaseName, tableName, value);
-        expect($.ajax.mostRecentCall.args[0]["url"]).toEqual(server + widgetService + 'widgetdataset/' + 
+        expect($.ajax.mostRecentCall.args[0].url).toEqual(server + widgetService + 'widgetdataset/' +
             encodedDatabaseName + '/' + encodedTableName + '/' + encodedValue);
     });
 
@@ -54,7 +54,7 @@ describe('neon.widget', function () {
         spyOn($, "ajax");
 
         neon.widget.getWidgetInitializationData(value);
-        expect($.ajax.mostRecentCall.args[0]["url"]).toEqual(server + widgetService + 'widgetinitialization/' + 
+        expect($.ajax.mostRecentCall.args[0].url).toEqual(server + widgetService + 'widgetinitialization/' +
             encodedValue);
     });
 
@@ -62,11 +62,11 @@ describe('neon.widget', function () {
         spyOn($, "ajax");
 
         neon.widget.saveState(tableName, value);
-        expect($.ajax.mostRecentCall.args[0]["url"]).toEqual(server + widgetService + 'savestate');
+        expect($.ajax.mostRecentCall.args[0].url).toEqual(server + widgetService + 'savestate');
 
         // data values are passed along in json via POST and not url encoded.  The value will be wrapped in an object
         // twice.
-        expect($.ajax.mostRecentCall.args[0]["data"].indexOf(tableName)).toBeGreaterThan(-1);
-        expect($.ajax.mostRecentCall.args[0]["data"].indexOf(JSON.stringify(JSON.stringify(value)))).toBeGreaterThan(-1);
+        expect($.ajax.mostRecentCall.args[0].data.indexOf(tableName)).toBeGreaterThan(-1);
+        expect($.ajax.mostRecentCall.args[0].data.indexOf(JSON.stringify(JSON.stringify(value)))).toBeGreaterThan(-1);
     });
 });

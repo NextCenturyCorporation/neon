@@ -75,15 +75,23 @@ module.exports = function(grunt) {
         },
         jshint: {
             options: {
-                jshintrc: '../.jshintrc'
+                jshintrc: '../.jshintrc',
+                reporter: "jslint",
+                reporterOutput: "reports/jslint.xml"
             },
             source: {
+                options: {
+                    reporterOutput: "reports/source-jslint.xml"
+                },
                 // check both the preconcat and concatenated files
                 files: {
                     src: [].concat('<%= concat.nodeps.src %>').concat(['<%= concat.nodeps.dest %>'])
                 }
             },
             tests: {
+                options: {
+                    reporterOutput: "reports/tests-jslint.xml"
+                },
                 files: {
                     src: ['src/acceptanceTest/javascript/spec/**/*.spec.js', 'src/test/javascript/spec/**/*.spec.js']
                 }
@@ -107,11 +115,17 @@ module.exports = function(grunt) {
                 reporter: 'checkstyle'
             },
             source: {
+                options: {
+                    reporterOutput: 'reports/source-jscs.xml'
+                },
                 files: {
                     src: ['Gruntfile.js', 'src/main/javascript/**/*.js']
                 }
             },
             tests: {
+                options: {
+                    reporterOutput: 'reports/tests-jscs.xml'
+                },
                 files: {
                     src: ['src/acceptanceTest/javascript/spec/**/*.spec.js', 'src/test/javascript/spec/**/*.spec.js']
                 }

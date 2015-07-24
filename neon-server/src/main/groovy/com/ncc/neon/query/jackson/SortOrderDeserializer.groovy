@@ -26,6 +26,6 @@ class SortOrderDeserializer extends JsonDeserializer<SortOrder> {
 
     @Override
     SortOrder deserialize(JsonParser jp, DeserializationContext ctxt) {
-        return SortOrder.fromDirection(jp.valueAsInt)
+        return SortOrder.fromDirection(jp.getValueAsInt(1)) // Defaults to ascending order sort, if given order is invalid.
     }
 }
