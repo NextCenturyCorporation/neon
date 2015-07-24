@@ -41,23 +41,13 @@ class ImportService {
     @Autowired
     ImportHelperFactory importHelperFactory
 
-    /**
-     * Uploads data from a stream of a CSV spreadsheet into a database on the given host, and
-     * returns a list of fields found in the spreadsheet with guesses as to their types.
-     * @param host The host on which the data store to upload to is running.
-     * @param databaseType The type of the data store to upload to.
-     * @param user The name of the user with which to associate this data.
-     * @param prettyName The "pretty" name of the database in which to put this data.
-     * @param dataInputStream The stream containing the spreadsheet to read.
-     * @return A map containing a new username if none was given, with which the new database is
-     * associated, as well as a list of field names found in the spreadsheet and guesses
-     * as to their types.
-     */
+    // Uploads a file, storing it wholesale in a data store, and triggers an asynchronous method to attempt to
+    // find out what types the fields of records in the file are. Returns a job ID associated with the file.
     @POST
     @Consumes(MediaType.MULTIPART_FORM_DATA)
     @Produces(MediaType.APPLICATION_JSON)
     @Path("upload/{host}/{databaseType}")
-    public Response uploadData(@PathParam("host") String host,
+    public Response uploadFile(@PathParam("host") String host,
                                @PathParam("databaseType") String databaseType,
                                @FormDataParam("user") String user,
                                @FormDataParam("data") String prettyName,
@@ -65,58 +55,61 @@ class ImportService {
                                @FormDataParam("file") InputStream dataInputStream) {
         String userName = user ?: UUID.randomUUID().toString()
         ImportHelper helper = importHelperFactory.getImportHelper(databaseType)
-        List typeGuesses = helper.uploadData(host, userName, prettyName, fileType, dataInputStream)
-        if(typeGuesses[0] instanceof String) {
-            return Response.status(500).entity(typeGuesses[0]).build()
-        }
-        Map<String, String> toReturn = [types:typeGuesses, user: (user) ? '' : userName] // Only give a username back if we weren't given one.
-        return Response.status(200).entity(JsonOutput.toJson(toReturn)).build()
+        Map jobID = helper.uploadFile(host, userName, prettyName, fileType, dataInputStream)
+        return Response.status(200).entity(JsonOutput.toJson(jobID)).build()
     }
 
-    /**
-     * Drops a user-created database, given the host it's running on, the type of database it's running on,
-     * and the user and pretty names associated with it.
-     * @param host The host on which the data store to drop from is running.
-     * @param databaseType The type of the data store the data to drop is in.
-     * @param userName The username associated with the database to drop.
-     * @param prettyName The "pretty" name of the database to drop.
-     * @return A JSON formatted object with a success field that tells whether or not the drop succeeded.
-     */
+    // Checks on the status of finding out what types the fields in records of a file are,
+    // given the job ID associated with it.
+    @GET
+    @Produces(MediaType.APPLICATION_JSON)
+    @Path("guesses/{host}/{databaseType}/{uuid}")
+    public Response checkTypeGuessStatus(@PathParam("host") String host,
+                                             @PathParam("databaseType") String databaseType,
+                                             @PathParam("uuid") String jobUUID) {
+        ImportHelper helper = importHelperFactory.getImportHelper(databaseType)
+        Map guesses = helper.checkTypeGuessStatus(host, jobUUID)
+        return Response.ok().entity(JsonOutput.toJson(guesses)).build()
+    }
+
+    // Given user-defined type alues for the fields of a file, triggers an asynchronous method that pulls that file out of storage and
+    // parses through it to get records, creating a database for them and converting the fields of its records as it goes along.
+    //Returns the job ID associated with the file.
+    @POST
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    @Path("convert/{host}/{databaseType}/{uuid}")
+    public Response loadAndConvertFields(@PathParam("host") String host,
+                                         @PathParam("databaseType") String databaseType,
+                                         @PathParam("uuid") String uuid,
+                                         UserFieldDataBundle data) {
+        ImportHelper helper = importHelperFactory.getImportHelper(databaseType)
+        Map jobID = helper.loadAndConvertFields(host, uuid, data)
+        return Response.ok(JsonOutput.toJson(jobID)).build()
+    }
+
+    // Checks on the status of parsing a file for records and moving them into a datastore, given the job ID associated with the file.
+    @GET
+    @Produces(MediaType.APPLICATION_JSON)
+    @Path("progress/{host}/{databaseType}/{uuid}")
+    public Response checkImportStatus(@PathParam("host") String host,
+                                      @PathParam("databaseType") String databaseType,
+                                      @PathParam("uuid") String uuid) {
+        ImportHelper helper = importHelperFactory.getImportHelper(databaseType)
+        Map importStatus = helper.checkImportStatus(host, uuid)
+        return Response.ok().entity(JsonOutput.toJson(importStatus)).build()
+    }
+
+    // Drops a set of user-given data from a data store, given its associated username and "pretty", human-readable name.
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     @Path("drop/{host}/{databaseType}")
-    public String dropDataset(@PathParam("host") String host,
+    public Response dropDataset(@PathParam("host") String host,
                               @PathParam("databaseType") String databaseType,
                               @QueryParam("user") String userName,
                               @QueryParam("data") String prettyName) {
         ImportHelper helper = importHelperFactory.getImportHelper(databaseType)
-        return JsonOutput.toJson([success: helper.dropData(host, userName, prettyName)])
-    }
-
-    /**
-     * Attempts to convert fields in a user-created database to types specified by the user, given the host
-     * the databse is on, the host type, the database's user and prettified names, and a {@link UserFieldDataBundle} -
-     * a bundle of data containing a date format string and a list of pairs of fields and types.
-     * @param host The host on which to data store to convert in is running.
-     * @param databaseType The type of data store the type of data to convert is in.
-     * @param userName The username associated with the database storing the data to convert.
-     * @param prettyName The "pretty" name of the database storing the data to convert.
-     * @param data The bundle of data containing a user-given date format string and a list of fields and
-     * the types they should be converted to.
-     * @return A response containing a list of fields that failed to convert. Response code is 200 if no fields
-     * failed and 418 otherwise.
-     */
-    @POST
-    @Consumes(MediaType.APPLICATION_JSON)
-    @Produces(MediaType.APPLICATION_JSON)
-    @Path("convert/{host}/{databaseType}")
-    public Response convertFields(@PathParam("host") String host,
-                                  @PathParam("databaseType") String databaseType,
-                                  @QueryParam("user") String userName,
-                                  @QueryParam("data") String prettyName,
-                                  UserFieldDataBundle data) {
-        ImportHelper helper = importHelperFactory.getImportHelper(databaseType)
-        List failedFields = helper.convertFields(host, userName, prettyName, data)
-        return Response.status((failedFields) ? 418 : 200).entity(JsonOutput.toJson(failedFields)).build()
+        Map success = helper.dropDataset(host, userName, prettyName)
+        return Response.ok().entity(JsonOutput.toJson(success)).build()
     }
 }

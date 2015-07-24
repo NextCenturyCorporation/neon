@@ -16,6 +16,8 @@
 
 package com.ncc.neon.user_import
 
+import com.ncc.neon.user_import.exceptions.BadSheetException
+
 import org.apache.commons.io.LineIterator
 import org.apache.commons.lang.time.DateUtils
 
@@ -43,6 +45,7 @@ class ImportUtilities {
 
     // Various mongo-specific values. Defines the database and collection name in which to store information about user-defined data, as well as
     // the collection name in which to put user-defined data (since every user-defined data set is given its own database).
+    static final String MONGO_UPLOAD_DB_NAME = "Uploads"
     static final String MONGO_META_DB_NAME = "customDataInfo"
     static final String MONGO_META_COLL_NAME = "customDataInfo"
     static final String MONGO_USERDATA_COLL_NAME = "Data"
@@ -124,6 +127,46 @@ class ImportUtilities {
         return count
     }
 
+    /**
+     * Takes a map of field names to lists of values for those field names (e.g. [grade: ['A', 'B', 'C', 'D'], gpaValue: ['4', '3', '2', '1']])
+     * and attempts to determine what type of data each list of field values contains. Returns a list of {@link FieldTypePair}s, which simply
+     * relate field name to the guessed type of data in that field.
+     *
+     * This method assumes that the values given in the lists are strings - it may work if they are other types of data, but is not guaranteed to.
+     * Possible types to check for are:
+     * Integer
+     * Long
+     * Double
+     * Float
+     * Date
+     * String (the default, if none of the others are valid)
+     * @param fieldsAndValues A map of field names to lists of values for the field of that name.
+     * @param return Type The type of object to return the results as. The default is a list, but it can also handle maps from name to type.
+     * @return A list of FieldTypePairs, which relate field names to guessed type of data for those field names.
+     */
+    static Object getTypeGuesses(Map fieldsAndValues, String returnType = "list") {
+        List fields = fieldsAndValues.keySet() as List
+        List fieldsAndTypes = []
+        fields.each { field ->
+            FieldTypePair pair = null
+            List valuesOfField = fieldsAndValues.get(field)
+            pair = (!pair && ImportUtilities.isListIntegers(valuesOfField)) ? new FieldTypePair(name: field, type: "Integer") : pair
+            pair = (!pair && ImportUtilities.isListLongs(valuesOfField)) ? new FieldTypePair(name: field, type: "Long") : pair
+            pair = (!pair && ImportUtilities.isListDoubles(valuesOfField)) ? new FieldTypePair(name: field, type: "Double") : pair
+            pair = (!pair && ImportUtilities.isListFloats(valuesOfField)) ? new FieldTypePair(name: field, type: "Float") : pair
+            pair = (!pair && ImportUtilities.isListDates(valuesOfField)) ? new FieldTypePair(name: field, type: "Date") : pair
+            pair = (!pair) ? new FieldTypePair(name: field, type: "String") : pair
+            fieldsAndTypes.add(pair)
+        }
+        if(returnType == "map") {
+            Map m = [:]
+            fieldsAndTypes.each { ftPair ->
+                m.put(ftPair.name, ftPair.type)
+            }
+            return m
+        }
+        return fieldsAndTypes
+    }
 
     /**
      * Checks whether or not a list of objects can be converted to integers. Returns true if every object can be, or false otherwise.
@@ -260,16 +303,13 @@ class ImportUtilities {
         }
     }
 
-/*
- * ===============================================================================================================================
- * Private classes.
- * ===============================================================================================================================
- */
-
     /**
-     * Simple exception class to throw when something is found to be wrong with a set ofuser-given data. 
+     * Takes a username and "pretty" human-readable name and uses them to generate an ugly, more unique name.
+     * @param userName The username to use in making the ugly name.
+     * @param pretttyName The human-readable name to use in making the ugly name.
+     * @return The ugly name created from the given username and pretty name.
      */
-    @InheritConstructors
-    private class BadSheetException extends Exception {
+    static String makeUglyName(String userName, String prettyName) {
+        return "$userName$SEPARATOR$prettyName"
     }
 }

@@ -20,10 +20,16 @@ import org.apache.commons.io.IOUtils
 import org.apache.commons.io.LineIterator
 import org.springframework.stereotype.Component
 
+import org.apache.poi.xssf.streaming.SXSSFWorkbook
 import org.apache.poi.xssf.usermodel.XSSFWorkbook
 import org.apache.poi.xssf.usermodel.XSSFSheet
 import org.apache.poi.xssf.usermodel.XSSFRow
 import org.apache.poi.xssf.usermodel.XSSFCell
+
+import com.monitorjbl.xlsx.StreamingReader
+import com.monitorjbl.xlsx.exceptions.MissingSheetException
+
+import javax.annotation.Resource
 
 import com.mongodb.MongoClient
 import com.mongodb.DB
@@ -32,87 +38,79 @@ import com.mongodb.DBCursor
 import com.mongodb.DBObject
 import com.mongodb.BasicDBObject
 
+import com.mongodb.gridfs.GridFS
+import com.mongodb.gridfs.GridFSInputFile
+import com.mongodb.gridfs.GridFSDBFile
+
 /**
  * Implements methods to add, remove, and convert fields of records in a mongo database.
  */
 @Component
 class MongoImportHelper implements ImportHelper {
+
+    @Resource
+    MongoImportHelperProcessor mongoImportHelperProcessor
     
     @Override
-    List uploadData(String host, String userName, String prettyName, String fileType, InputStream stream) {
-        if(fileType.equalsIgnoreCase("csv")) {
-            return uploadCSV(host, userName, prettyName, IOUtils.lineIterator(stream, "UTF-8"))
-        }
-        else if(fileType.equalsIgnoreCase("xlsx")) {
-            return uploadExcel(host, userName, prettyName, stream)
-        }
-        else {
-            return ["Import not supported for this file type."]
-        }
-    }
-
-    List uploadCSV(String host, String userName, String prettyName, LineIterator reader) {
+    Map uploadFile(String host, String userName, String prettyName, String fileType, InputStream stream) {
+        String id = UUID.randomUUID().toString()
         MongoClient mongo = new MongoClient(host, 27017)
-        DBCollection collection = mongo.getDB(makeUglyName(userName, prettyName)).getCollection(ImportUtilities.MONGO_USERDATA_COLL_NAME)
-        addMetadata(mongo, userName, prettyName)
-
-        String row = ImportUtilities.getNextWholeRow(reader)
-        if(!row || !reader.hasNext()) {
-            return ["There was no data in this file to import."]
-        }
-        List fields = ImportUtilities.getCellsFromRow(row)
-
-        row = ImportUtilities.getNextWholeRow(reader)
-        while(row) {
-            List values = ImportUtilities.getCellsFromRow(row)
-            DBObject record = new BasicDBObject()
-            for(int x = 0; x < values.size(); x++) {
-                record.append(fields[x], values[x])
-            }
-            collection.insert(record)
-            row = ImportUtilities.getNextWholeRow(reader)
-        }
-        List guesses = guessTypes(collection, fields)
+        GridFS gridFS = new GridFS(mongo.getDB(ImportUtilities.MONGO_UPLOAD_DB_NAME))
+        GridFSInputFile inFile = gridFS.createFile(stream)
+        inFile.put("identifier", id)
+        inFile.put("userName", userName)
+        inFile.put("prettyName", prettyName)
+        inFile.put("fileType", fileType)
+        inFile.save()
         mongo.close()
-        return guesses
-    }
-
-    // TODO (maybe?) - switch collection to use sheet name instead of dfault collection name. For right now, doing that breaks field type conversion.
-    List uploadExcel(String host, String userName, String prettyName, InputStream stream) {
-        XSSFWorkbook workbook = new XSSFWorkbook(stream)
-        if(workbook.getNumberOfSheets() < 1 || workbook.getSheetAt(0).getLastRowNum() < 1) {
-            return ["There was no data in this file to import."]
-        }
-        XSSFSheet sheet = workbook.getSheetAt(0)
-        MongoClient mongo = new MongoClient(host, 27017)
-        DBCollection collection = mongo.getDB(makeUglyName(userName, prettyName)).getCollection(ImportUtilities.MONGO_USERDATA_COLL_NAME)
-        addMetadata(mongo, userName, prettyName)
-        List fields = []
-        XSSFRow row = sheet.getRow(0).each { cell ->
-            fields << cell.toString()
-        }
-        for(int x = 1; x <= sheet.getLastRowNum(); x++) {
-            DBObject record = new BasicDBObject()
-            sheet.getRow(x).each { cell ->
-                record.append(fields[cell.getColumnIndex()], cell.toString())
-            }
-            collection.insert(record)
-        }
-        List guesses = guessTypes(collection, fields)
-        workbook.close()
-        mongo.close()
-        return guesses
+        mongoImportHelperProcessor.processTypeGuesses(host, id)
+        return [jobID: id]
     }
 
     @Override
-    boolean dropData(String host, String userName, String prettyName) {
+    Map checkTypeGuessStatus(String host, String uuid) {
+        MongoClient mongo = new MongoClient(host, 27017)
+        GridFS gridFS = new GridFS(mongo.getDB(ImportUtilities.MONGO_UPLOAD_DB_NAME))
+        GridFSDBFile dbFile = gridFS.findOne([identifier: uuid] as BasicDBObject)
+        List guesses = fieldGuessesToList(dbFile.get("programGuesses"))
+        mongo.close()
+        return (guesses) ? [complete: true, guesses: guesses, jobID: uuid] : [complete: false, guesses: null, jobID: uuid]
+    }
+
+    @Override
+    Map loadAndConvertFields(String host, String uuid, UserFieldDataBundle bundle) {
+        mongoImportHelperProcessor.processLoadAndConvert(host, uuid, bundle.format, bundle.fields)
+        return [jobID: uuid]
+    }
+
+    @Override
+    Map checkImportStatus(String host, String uuid) {
+        MongoClient mongo = new MongoClient(host, 27017)
+        GridFS gridFS = new GridFS(mongo.getDB(ImportUtilities.MONGO_UPLOAD_DB_NAME))
+        GridFSDBFile dbFile = gridFS.findOne([identifier: uuid] as BasicDBObject)
+        if(dbFile == null) {
+            return [complete: false, numFinished: -1, failed: [], jobID: uuid] // If the GridFS file doesn't exist, return a numFinished value of -1.
+        }
+        boolean complete = dbFile.get("complete")
+        int numFinished = mongo.getDB(ImportUtilities.makeUglyName(dbFile.get("userName"),
+            dbFile.get("prettyName"))).getCollection(ImportUtilities.MONGO_USERDATA_COLL_NAME).count()
+        List failedFields = dbFile.get("failedFields")
+        if(complete) {
+            gridFS.remove(dbFile)
+        }
+        mongo.close()
+        return [complete: complete, numFinished: numFinished, failedFields: failedFields, jobID: uuid]
+    }
+
+    @Override
+    Map dropDataset(String host, String userName, String prettyName) {
         MongoClient mongo = new MongoClient(host, 27017)
         DB databaseToDrop = getDatabase(mongo, [userName: userName, prettyName: prettyName])
         if(databaseToDrop.getCollectionNames()) {
             databaseToDrop.dropDatabase()
         }
         else {
-            return false
+            return [success: false]
         }
         DB metaDatabase = mongo.getDB(ImportUtilities.MONGO_META_DB_NAME)
         DBCollection metaCollection = metaDatabase.getCollection(ImportUtilities.MONGO_META_COLL_NAME)
@@ -121,107 +119,24 @@ class MongoImportHelper implements ImportHelper {
             metaDatabase.dropDatabase()
         }
         mongo.close()
-        return true
+        return [success: true]
     }
 
-    @Override
-    List convertFields(String host, String userName, String prettyName, UserFieldDataBundle bundle) {
-        List<FieldTypePair> fields = bundle.fields, failedFields = [], tempFailed = []
-        MongoClient mongo = new MongoClient(host, 27017)
-        DBCollection collection = getDatabase(mongo, [userName: userName, prettyName: prettyName])?.getCollection(ImportUtilities.MONGO_USERDATA_COLL_NAME)
-        if(collection == null) {
-            return null
+    // Helper method, converts a map of field names to type guesses into a list of FieldTypePairs.
+    private List fieldGuessesToList(Map fieldGuesses) {
+        List keys = fieldGuesses.keySet() as List
+        List toReturn = []
+        keys.each { key ->
+            toReturn.add(new FieldTypePair(name: key, type: fieldGuesses.get(key)))
         }
-        DBCursor cursor = collection.find()
-        while(cursor.hasNext()) {
-            BasicDBObject record = cursor.next() as BasicDBObject
-            fields.each { field ->
-                String s = record.get(field.name)?.toString()
-                if(!s || (field.type =~ /(?i)integer|long|double|float(?-i)/ && s =~ /(?i)none|null(?-i)/ && s.length() == 4)) { // !s serves for both s == null and s == ""
-                    record.removeField(field.name) // TODO - As it is this is pretty permanent. Given the file size restriction maybe this is okay because they can just re-upload?
-                    return
-                }
-                Object result = ImportUtilities.convertValueToType(record.get(field.name), field.type, bundle.format)
-                (result != null) ? record.put(field.name, result) : tempFailed.add(field)
-            }
-            failedFields.addAll(tempFailed)
-            fields.removeAll(tempFailed)
-            tempFailed.clear()
-            collection.save(record)
-        }
-        cursor.close()
-        mongo.close()
-        return failedFields
+        return toReturn
     }
 
-    /**
-     * Gets a database form the given mongo instance, given its identifier.
-     * @param mongo The mongo instance from which to get the database.
-     * @param identifier The Map containing username and database name linked to the database to get.
-     * @return The database on the given mongo instance with the given identifier.
-     */
+    // Helper method, gets a user-given database by identifier (this would be ugly name, for the moment).
     private DB getDatabase(MongoClient mongo, Map identifier) {
         DB metaDatabase = mongo.getDB(ImportUtilities.MONGO_META_DB_NAME)
         DBCollection metaCollection = metaDatabase.getCollection(ImportUtilities.MONGO_META_COLL_NAME)
         DBObject metaRecord = metaCollection.findOne(identifier as BasicDBObject)
         return mongo.getDB(metaRecord.get("databaseName"))
-    }
-
-    /**
-     * Adds metadata for a user-created database to the given mongo instance. Utilizes a database dedicated to storing information
-     * about user-created databases.
-     * @param mongo The mongo instance on which to put the metadata for the given database.
-     * @param userName The name of the user creating the database.
-     * @param identifier The identifier with which the database of the given name is associated.
-     */
-    private void addMetadata(MongoClient mongo, String userName, String prettyName) {
-        DB metaDatabase = mongo.getDB(ImportUtilities.MONGO_META_DB_NAME)
-        DBCollection metaCollection = metaDatabase.getCollection(ImportUtilities.MONGO_META_COLL_NAME)
-        DBObject metaRecord = new BasicDBObject()
-        metaRecord.append("userName", userName)
-        metaRecord.append("prettyName", prettyName)
-        metaRecord.append("databaseName", makeUglyName(userName, prettyName))
-        metaCollection.insert(metaRecord)
-    }
-
-    /**
-     * Guesses the types of the given list of fields in the given collection. Does this by attempting to convert them to various types of objects,
-     * starting off strict and getting less so as they fail to convert. Returns a list with each of the given fields associated with a type string.
-     * @param collection The collection whose fields should be checked.
-     * @param fields The list of fields whose types should be checked.
-     * @return A list of the given fields, each wrapped in a {@link FieldTypePair} object to accociate them with their guessed type.
-     */
-    private List guessTypes(DBCollection collection, List fields) {
-        long numRecords = (collection.count() > ImportUtilities.NUM_TYPE_CHECKED_RECORDS) ? ImportUtilities.NUM_TYPE_CHECKED_RECORDS : collection.count()
-        List fieldsAndTypes = []
-        List records = collection.find().limit(numRecords as int).toArray() // Safe so long as NUM_TYPE_CHECKED_RECORDS is reasonable.
-        fields.each { field ->
-            List valuesOfField = []
-            records.each { record ->
-                if(record.get(field) != null) {
-                    valuesOfField.add(record.get(field))
-                }
-            }
-            FieldTypePair pair = null
-            // Sets the pair type equals to the first type that matches.
-            pair = (!pair && ImportUtilities.isListIntegers(valuesOfField)) ? new FieldTypePair(name: field, type: "Integer") : pair
-            pair = (!pair && ImportUtilities.isListLongs(valuesOfField)) ? new FieldTypePair(name: field, type: "Long") : pair
-            pair = (!pair && ImportUtilities.isListDoubles(valuesOfField)) ? new FieldTypePair(name: field, type: "Double") : pair
-            pair = (!pair && ImportUtilities.isListFloats(valuesOfField)) ? new FieldTypePair(name: field, type: "Float") : pair
-            pair = (!pair && ImportUtilities.isListDates(valuesOfField)) ? new FieldTypePair(name: field, type: "Date") : pair
-            pair = (!pair) ? new FieldTypePair(name: field, type: "String") : pair
-            fieldsAndTypes.add(pair)
-        }
-        return fieldsAndTypes
-    }
-
-    /**
-     * Takes a username and "pretty" human-readable name and uses them to generate an ugly, more unique name.
-     * @param userName The username to use in making the ugly name.
-     * @param pretttyName The human-readable name to use in making the ugly name.
-     * @return The ugly name created from the given username and pretty name.
-     */
-    private String makeUglyName(String userName, String prettyName) {
-        return "$userName${ImportUtilities.SEPARATOR}$prettyName"
     }
 }

@@ -166,27 +166,41 @@ neon.query.Connection.prototype.executeUploadFile = function(data, successCallba
         successCallback, errorCallback);
 };
 
+neon.query.Connection.prototype.executeCheckTypeGuesses = function(uuid, successCallback) {
+    return neon.util.ajaxUtils.doGet(
+        neon.serviceUrl('importservice', 'guesses/' + encodeURIComponent(this.host_) + '/' + encodeURIComponent(this.databaseType_) + '/' + encodeURIComponent(uuid), ''), {
+            success: successCallback
+        }
+    );
+};
+
+neon.query.Connection.prototype.executeLoadFileIntoDB = function(data, uuid, successCallback, errorCallback) {
+    neon.util.ajaxUtils.doPostJSON(data, neon.serviceUrl('importservice', 'convert/' + encodeURIComponent(this.host_) + '/' + encodeURIComponent(this.databaseType_) +
+        '/' + encodeURIComponent(uuid), ''), {
+            success: successCallback,
+            error: errorCallback
+        }
+    );
+};
+
+neon.query.Connection.prototype.executeCheckImportProgress = function(uuid, successCallback) {
+    return neon.util.ajaxUtils.doGet(
+        neon.serviceUrl('importservice', 'progress/' + encodeURIComponent(this.host_) + '/' + encodeURIComponent(this.databaseType_) + '/' + encodeURIComponent(uuid), ''), {
+            success: successCallback
+        }
+    );
+};
+
 neon.query.Connection.prototype.executeDropData = function(user, data, successCallback, errorCallback) {
     return neon.util.ajaxUtils.doGet(
         neon.serviceUrl('importservice', 'drop/' + encodeURIComponent(this.host_) + '/' + encodeURIComponent(this.databaseType_) + '?user=' + encodeURIComponent(user) +
-            '&data=' + encodeURIComponent(data)), {
+            '&data=' + encodeURIComponent(data), ''), {
             success: successCallback,
             error: errorCallback,
             responseType: 'json'
         }
     );
 };
-
-neon.query.Connection.prototype.executeConfirmTypeGuesses = function(guesses, user, data, successCallback, errorCallback) {
-    return neon.util.ajaxUtils.doPostJSON(
-        guesses,
-        neon.serviceUrl('importservice', 'convert/' + encodeURIComponent(this.host_) + '/' + encodeURIComponent(this.databaseType_) +
-            '?user=' + encodeURIComponent(user) + '&data=' + encodeURIComponent(data), ''), {
-            success: successCallback,
-            error: errorCallback
-        }
-    );
-}
 
 /**
  * Gets a list of database names
