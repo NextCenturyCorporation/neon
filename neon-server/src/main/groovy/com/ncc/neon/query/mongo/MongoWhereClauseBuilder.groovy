@@ -33,7 +33,7 @@ class MongoWhereClauseBuilder {
 
     /** Maps an operator string to the mongo driver equivalent */
     private static final OPERATOR_MAPPING = ['<': '$lt', '<=': '$lte', '>': '$gt', '>=': '$gte', '!=': '$ne',
-            'in': '$in', 'notin': '$nin', 'not', '$not']
+            'in': '$in', 'notin': '$nin', 'not': '$not']
 
     private MongoWhereClauseBuilder() {
         // utility class, no public constructor needed
@@ -51,7 +51,7 @@ class MongoWhereClauseBuilder {
             rhs = rhsVal
         } else if(clause.operator == 'contains') {
             rhs = Pattern.compile(rhsVal)
-        } else if(clause.operator == 'notcontains') {
+        } else if(clause.operator == 'notcontains' || clause.operator == 'not contains') {
             rhs = new BasicDBObject(OPERATOR_MAPPING['not'], Pattern.compile(rhsVal))
         } else {
             def opString = OPERATOR_MAPPING[clause.operator]
