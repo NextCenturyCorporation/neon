@@ -29,7 +29,7 @@ import org.apache.poi.xssf.usermodel.XSSFCell
 import com.monitorjbl.xlsx.StreamingReader
 import com.monitorjbl.xlsx.exceptions.MissingSheetException
 
-import javax.annotation.Resource
+import org.springframework.beans.factory.annotation.Autowired
 
 import com.mongodb.MongoClient
 import com.mongodb.DB
@@ -48,8 +48,8 @@ import com.mongodb.gridfs.GridFSDBFile
 @Component
 class MongoImportHelper implements ImportHelper {
 
-    @Resource
-    MongoImportHelperProcessor mongoImportHelperProcessor
+    @Autowired
+    private ImportHelperProcessor mongoImportHelperProcessor
     
     @Override
     Map uploadFile(String host, String userName, String prettyName, String fileType, InputStream stream) {
@@ -124,7 +124,7 @@ class MongoImportHelper implements ImportHelper {
 
     // Helper method, converts a map of field names to type guesses into a list of FieldTypePairs.
     private List fieldGuessesToList(Map fieldGuesses) {
-        List keys = fieldGuesses.keySet() as List
+        List keys = fieldGuesses?.keySet() as List
         List toReturn = []
         keys.each { key ->
             toReturn.add(new FieldTypePair(name: key, type: fieldGuesses.get(key)))

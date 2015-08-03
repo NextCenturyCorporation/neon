@@ -106,17 +106,22 @@ class MongoImportHelperProcessor implements ImportHelperProcessor {
                 fieldsAndValues.put(cell.getContents().toString(), [])
             }
             StreamingRow row = iterator.next()
-            for(int count = 0; count < ImportUtilities.NUM_TYPE_CHECKED_RECORDS && row; x++) {
+            for(int count = 0; count < ImportUtilities.NUM_TYPE_CHECKED_RECORDS && row; count++) {
                 for(int col = 0; col < fields.size(); col++) {
-                    if(row.getCell(x)) { // Only add the value to the map if it's non-null.
-                        fieldsAndValues.put(fields.get(x), row.getCell(x).getContents().toString())
+                    if(row.getCell(col)) { // Only add the value to the map if it's non-null.
+                        fieldsAndValues.get(fields.get(col)).add(row.getCell(col).getContents().toString())
                     }
                 }
-                row = iterator.next()
+                row = iterator.hasNext() ? iterator.next() : null
             }
             Map fieldsAndTypes = ImportUtilities.getTypeGuesses(fieldsAndValues, "map") // Apparently mongo can't deserialize listsof FieldTypePairs for storage. :/
             file.put("programGuesses", fieldsAndTypes)
             file.save()
+        }
+        catch(Exception e) {
+            println e.getClass()
+            println e.getMessage()
+            e.printStackTrace()
         }
         finally{
             sheet.close()
@@ -178,15 +183,14 @@ class MongoImportHelperProcessor implements ImportHelperProcessor {
     }
 
     // Need to make this method shorter... somehow.
-    void processLoadAndConvertExcel(MongoClient mongo, GridFSDBFile file, String dateFormat, List<FieldTypePair> fieldtypePairs) {
+    void processLoadAndConvertExcel(MongoClient mongo, GridFSDBFile file, String dateFormat, List<FieldTypePair> fieldTypePairs) {
         StreamingReader sheet
         Map fieldsToTypes = [:]
-        fieldTypePairs.each {field, type ->
-            fieldsToTypes.put(field, type)
+        fieldTypePairs.each {ftPair ->
+            fieldsToTypes.put(ftPair.name, ftPair.type)
         }
         Set<FieldTypePair> failedFields = [] as Set
         DBCollection collection = mongo.getDB(ImportUtilities.makeUglyName(file.get("userName"), file.get("prettyName"))).getCollection(ImportUtilities.MONGO_USERDATA_COLL_NAME)
-
         try {
             sheet = StreamingReader.builder().sheetIndex(0).read(file.getInputStream())
             Iterator iterator = sheet.iterator()
@@ -198,7 +202,7 @@ class MongoImportHelperProcessor implements ImportHelperProcessor {
                 fieldNamesInOrder << cell.getContents().toString()
             }
             StreamingRow row = iterator.next()
-            for(int count = 0; count < 100 && row; x++) {
+            while(row) {
                 List values = []
                 for(int col = 0; col < fieldNamesInOrder.size(); col++) {
                     values << row.getCell(col)?.getContents()?.toString()
@@ -208,8 +212,13 @@ class MongoImportHelperProcessor implements ImportHelperProcessor {
                     failedFields << ftPair
                     fieldsToTypes.put(ftPair.name, "String") // If a field failed to convert, set its type to string to prevent exceptions being thrown for that field on future records.
                 }
-                row = iterator.next()
+                row = iterator.hasNext() ? iterator.next() : null
             }
+        }
+        catch(Exception e) {
+            println e.getClass()
+            println e.getMessage()
+            e.printStackTrace()
         }
         finally {
             sheet.close()
