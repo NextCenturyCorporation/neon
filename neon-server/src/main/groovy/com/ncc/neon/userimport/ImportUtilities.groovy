@@ -14,17 +14,18 @@
  *
  */
 
-package com.ncc.neon.user_import
+package com.ncc.neon.userimport
 
-import com.ncc.neon.user_import.exceptions.BadSheetException
+import com.ncc.neon.userimport.exceptions.BadSheetException
+
+import java.text.ParseException
 
 import org.apache.commons.io.LineIterator
 import org.apache.commons.lang.time.DateUtils
 
-import groovy.transform.InheritConstructors
-
 /**
- * Provides a number of non-database-specific variables and functions useful for import functionality.
+ * Provides a number of non-database-specific variables and functions useful for import functionality. In addition, can hold variables that
+ * define what amounts to config info for various database types.
  */
 class ImportUtilities {
 
@@ -34,13 +35,15 @@ class ImportUtilities {
  * ===============================================================================================================================
  */
 
-    // Maximum allowed length of a single line. Determines when the line getter should stop atempting to grab lines from the stream to complete a row.
+    // Maximum allowed length of a single row. Determines when the row getter should stop atempting to grab lines from the stream to complete a row.
+    // Note that the row getter only compares length to this value on encountering a newline character.
     static final int MAX_ROW_LENGTH = 500000
 
-    // Number of records to pull from a database forthe purposes of checking types.
+    // Number of records to pull from a database for the purposes of determining types.
     static final int NUM_TYPE_CHECKED_RECORDS = 100
 
-    // Currently, database "ugly" names are just user name, then a separator, then pretty name. This defines the separator.
+    // Currently, database "ugly" (backend - what they're called on the machine, out of the users' view) names are just user name, then
+    // a separator, then pretty name. This defines the separator.
     static final String SEPARATOR = "~"
 
     // Various mongo-specific values. Defines the database and collection name in which to store information about user-defined data, as well as
@@ -65,7 +68,7 @@ class ImportUtilities {
 
     /**
      * Gets the next complete row of a spreadsheet pointed to by the given LineIterator. Throws an exception if there is no next
-     * complete (non-malformed) row, or if the next complete row exceeds a number of characters defined by MAX_ROW_LENGTH. 
+     * complete (non-malformed) row, or if the next complete row exceeds a number of characters defined by MAX_ROW_LENGTH.
      * This length check is a protection against attempting to load an entire sheet into memory while searching for the end of a malformed
      * cell, but note that it will not work if the length limit is exceeded before ever encountering a newline character - in that case, the
      * LineIterator given as a parameter will simply continue to read until it hits the end of the file, hits a new line, or runs out of
@@ -112,7 +115,7 @@ class ImportUtilities {
 
 
     /**
-     * Counts the instances of a given char in a char array.
+     * Counts the instances of a given character in a char array.
      * @param letters The char array in which to search for the given character.
      * @param delineator The character to search for in the given array.
      * @return The number of times the specified character was found in the given char array.
@@ -131,8 +134,7 @@ class ImportUtilities {
      * Takes a map of field names to lists of values for those field names (e.g. [grade: ['A', 'B', 'C', 'D'], gpaValue: ['4', '3', '2', '1']])
      * and attempts to determine what type of data each list of field values contains. Returns a list of {@link FieldTypePair}s, which simply
      * relate field name to the guessed type of data in that field.
-     *
-     * This method assumes that the values given in the lists are strings - it may work if they are other types of data, but is not guaranteed to.
+     * This method assumes that the values given in the lists are strings - it may work correctly if they are not, but is not guaranteed to.
      * Possible types to check for are:
      * Integer
      * Long
@@ -144,7 +146,7 @@ class ImportUtilities {
      * @param return Type The type of object to return the results as. The default is a list, but it can also handle maps from name to type.
      * @return A list of FieldTypePairs, which relate field names to guessed type of data for those field names.
      */
-    static Object getTypeGuesses(Map fieldsAndValues, String returnType = "list") {
+    static List getTypeGuesses(Map fieldsAndValues) {
         List fields = fieldsAndValues.keySet() as List
         List fieldsAndTypes = []
         fields.each { field ->
@@ -158,20 +160,13 @@ class ImportUtilities {
             pair = (!pair) ? new FieldTypePair(name: field, type: "String") : pair
             fieldsAndTypes.add(pair)
         }
-        if(returnType == "map") {
-            Map m = [:]
-            fieldsAndTypes.each { ftPair ->
-                m.put(ftPair.name, ftPair.type)
-            }
-            return m
-        }
         return fieldsAndTypes
     }
 
     /**
-     * Checks whether or not a list of objects can be converted to integers. Returns true if every object can be, or false otherwise.
-     * @param list The list of objects to check.
-     * @return Whether or not all objects in the list can be converted to integers.
+     * Checks whether or not a list of strings can be converted to integers. Returns true if every object can be, or false otherwise.
+     * @param list The list of strings to check.
+     * @return Whether or not all strings in the list can be converted to integers.
      */
     static boolean isListIntegers(List list) {
         try {
@@ -190,9 +185,9 @@ class ImportUtilities {
 
 
     /**
-     * Checks whether or not a list of objects can be converted to longs. Returns true if every object can be, or false otherwise.
-     * @param list The list of objects to check.
-     * @return Whether or not all objects in the list can be converted to longs.
+     * Checks whether or not a list of strings can be converted to longs. Returns true if every object can be, or false otherwise.
+     * @param list The list of strings to check.
+     * @return Whether or not all strings in the list can be converted to longs.
      */
     static boolean isListLongs(List list) {
         try {
@@ -211,9 +206,9 @@ class ImportUtilities {
 
 
     /**
-     * Checks whether or not a list of objects can be converted to doubles. Returns true if every object can be, or false otherwise.
-     * @param list The list of objects to check.
-     * @return Whether or not all objects in the list can be converted to doubles.
+     * Checks whether or not a list of strings can be converted to doubles. Returns true if every object can be, or false otherwise.
+     * @param list The list of strings to check.
+     * @return Whether or not all strings in the list can be converted to doubles.
      */
     static boolean isListDoubles(List list) {
         try {
@@ -231,9 +226,9 @@ class ImportUtilities {
     }
 
     /**
-     * Checks whether or not a list of objects can be converted to floats. Returns true if every object can be, or false otherwise.
-     * @param list The list of objects to check.
-     * @return Whether or not all objects in the list can be converted to floats.
+     * Checks whether or not a list of strings can be converted to floats. Returns true if every object can be, or false otherwise.
+     * @param list The list of strings to check.
+     * @return Whether or not all strings in the list can be converted to floats.
      */
     static boolean isListFloats(List list) {
         try {
@@ -260,13 +255,12 @@ class ImportUtilities {
             list.each { value ->
                 DateUtils.parseDate(value, DATE_PATTERNS)
             }
-        } catch (Exception e) {
+        } catch (IllegalArgumentException | ParseException e) {
             return false
         }
         return true
     }
 
-    // TODO add support for arrays. Also, do we want to throw an exception on unsupported type rather than default to string?
     /**
      * Attempts to convert the given object to the given type. Has support for integer, long, double, float, date, and string conversion.
      * If an unsupported type is given, defaults to string conversion. Also takes an optional string array containing date string matchers,
@@ -274,37 +268,35 @@ class ImportUtilities {
      * @param value The object to attempt to convert.
      * @param type The type to which to attempt to convert the given object.
      * @param datePatterns An optional parameter giving a list of date strings to use when attempting to convert to a date. Defaults to null.
-     * @return The given input value, converted to the given type or to a string if the given type is not valid.
+     * If no list of strings is given, defaults to using a list of date strings defined by DATE_PATTERNS.
+     * @return The given input value, converted to the given type or to a string if the given type is not valid. If an invalid type is
+     * given - e.g. value = "Hello" and type = "Integer" - returns a ConversionFailureResult containing the given value and type.
      */
     static Object convertValueToType(Object value, String type, String[] datePatterns = null) {
         try {
             switch(type) {
                 case "Integer":
                     return Integer.parseInt(value)
-                    break
                 case "Long":
                     return Long.parseLong(value)
-                    break
                 case "Double":
                     return Double.parseDouble(value)
-                    break
                 case "Float":
                     return Float.parseFloat(value)
-                    break
                 case "Date":
                     return DateUtils.parseDate(value, datePatterns ?: DATE_PATTERNS)
-                    break
+                case "String":
                 default:
                     return value.toString()
             }
         }
-        catch(Exception e) {
-            return null
+        catch(NumberFormatException | IllegalArgumentException | ParseException e) {
+            return new ConversionFailureResult([value: value, type: type])
         }
     }
 
     /**
-     * Takes a username and "pretty" human-readable name and uses them to generate an ugly, more unique name.
+     * Takes a username and "pretty" human-readable name and uses them to generate an "ugly", more unique name.
      * @param userName The username to use in making the ugly name.
      * @param pretttyName The human-readable name to use in making the ugly name.
      * @return The ugly name created from the given username and pretty name.

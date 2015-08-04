@@ -16,9 +16,9 @@
 
 package com.ncc.neon.services
 
-import com.ncc.neon.user_import.UserFieldDataBundle
-import com.ncc.neon.user_import.ImportHelper
-import com.ncc.neon.user_import.ImportHelperFactory
+import com.ncc.neon.userimport.UserFieldDataBundle
+import com.ncc.neon.userimport.ImportHelper
+import com.ncc.neon.userimport.ImportHelperFactory
 
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component

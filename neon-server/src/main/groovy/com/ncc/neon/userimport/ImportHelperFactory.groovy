@@ -14,7 +14,7 @@
  *
  */
 
-package com.ncc.neon.user_import
+package com.ncc.neon.userimport
 
 import com.ncc.neon.connect.DataSources
 import com.ncc.neon.connect.NeonConnectionException
@@ -24,7 +24,7 @@ import javax.annotation.Resource
 /**
  * Provides an easy means to obtain import helpers for various types of databases.
  */
- 
+
 @Component
 class ImportHelperFactory {
 

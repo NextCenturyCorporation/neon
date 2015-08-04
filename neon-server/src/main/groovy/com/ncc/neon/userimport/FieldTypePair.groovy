@@ -13,17 +13,15 @@
  * limitations under the License.
  *
  */
-
-package com.ncc.neon.user_import
+package com.ncc.neon.userimport
 
 import groovy.transform.ToString
 
 /**
- * A structure for holding a list of FieldTypePairs and a date format string.
+ * Simple container that holds a field name and the type of data associated with that field name.
  */
-
 @ToString(includeNames = true)
-public class UserFieldDataBundle {
-    String format
-    List<FieldTypePair> fields
+public class FieldTypePair {
+    String name
+    String type
 }

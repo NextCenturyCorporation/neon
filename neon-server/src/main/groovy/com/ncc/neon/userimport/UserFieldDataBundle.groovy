@@ -14,13 +14,16 @@
  *
  */
 
-package com.ncc.neon.user_import.exceptions
+package com.ncc.neon.userimport
 
-import groovy.transform.InheritConstructors
+import groovy.transform.ToString
 
 /**
- * Simple exception to throw when a program is given a kind of file it can't parse.
+ * Simple structure for holding a list of FieldTypePairs and a date format string.
  */
-@InheritConstructors
-class UnsupportedFiletypeException extends Exception {
+
+@ToString(includeNames = true)
+public class UserFieldDataBundle {
+    String format
+    List<FieldTypePair> fields
 }

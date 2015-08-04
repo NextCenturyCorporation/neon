@@ -14,13 +14,13 @@
  *
  */
 
-package com.ncc.neon.user_import.exceptions
+package com.ncc.neon.userimport.exceptions
 
 import groovy.transform.InheritConstructors
 
 /**
- * Simple exception class to throw when something is found to be wrong with a set of user-given data. 
+ * Simple exception to throw when a program is given a kind of file it can't parse.
  */
 @InheritConstructors
-class BadSheetException extends Exception {
+class UnsupportedFiletypeException extends Exception {
 }

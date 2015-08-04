@@ -14,19 +14,18 @@
  *
  */
 
-package com.ncc.neon.user_import
-
-import com.monitorjbl.xlsx.StreamingReader
-import groovy.transform.ToString
+package com.ncc.neon.userimport
 
 /**
- * A structure for holding a list of FieldTypePairs and a date format string.
+ * Simple container that denotes that a given value failed to be converted to a given type. Used by the convertValueToType method of ImportUtilities.
  */
+class ConversionFailureResult {
 
-@ToString(includeNames = true)
-public class ExcelUploadData {
-    String uuid
-    StreamingReader reader
-    int rowsDone
-    boolean complete
+	Object value
+	String type
+
+	@Override
+	String toString() {
+		return "Failed to convert object ${value.toString} of type ${value.getClass()} to type $type."
+	}
 }
