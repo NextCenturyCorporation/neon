@@ -120,14 +120,14 @@ class FilterService {
     @Produces(MediaType.APPLICATION_JSON)
     List getFilters(@PathParam("databaseName") String databaseName, @PathParam("tableName") String tableName) {
         if(databaseName == "*" && tableName == "*") {
-            return filterState.getAllFilters()
+            return filterState.getAllFilterKeys()
         } else if(databaseName == "*") {
-            return filterState.getFiltersForTables(tableName)
+            return filterState.getFilterKeysForTables(tableName)
         } else if(tableName == "*") {
-            return filterState.getFiltersForDatabase(databaseName)
+            return filterState.getFilterKeysForDatabase(databaseName)
         }
 
         DataSet dataset = new DataSet(databaseName: databaseName, tableName: tableName)
-        return filterState.getFiltersForDataset(dataset)
+        return filterState.getFilterKeysForDataset(dataset)
     }
 }
