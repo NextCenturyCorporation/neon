@@ -77,16 +77,16 @@ class MongoImportHelper implements ImportHelper {
         GridFS gridFS = new GridFS(mongo.getDB(ImportUtilities.MONGO_UPLOAD_DB_NAME))
         GridFSDBFile dbFile = gridFS.findOne([identifier: uuid] as BasicDBObject)
         if(dbFile == null) {
-            return [complete: false, numFinished: -1, failedFields: [], jobID: uuid] // If the GridFS file doesn't exist, return a numFinished value of -1.
+            return [complete: false, numCompleted: -1, failedFields: [], jobID: uuid] // If the GridFS file doesn't exist, return a numCompleted value of -1.
         }
         boolean complete = dbFile.get("complete")
-        int numFinished = dbFile.get("numCompleted") ?: 0
+        int numCompleted = dbFile.get("numCompleted") ?: 0
         List failedFields = fieldTypePairMapToList(dbFile.get("failedFields"))
         if(complete && !failedFields) {
             gridFS.remove(dbFile)
         }
         mongo.close()
-        return [complete: complete, numFinished: numFinished, failedFields: failedFields, jobID: uuid]
+        return [complete: complete, numCompleted: numCompleted, failedFields: failedFields, jobID: uuid]
     }
 
     @Override

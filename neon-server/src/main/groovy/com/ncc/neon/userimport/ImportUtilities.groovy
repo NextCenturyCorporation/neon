@@ -113,7 +113,6 @@ class ImportUtilities {
         return cells
     }
 
-
     /**
      * Counts the instances of a given character in a char array.
      * @param letters The char array in which to search for the given character.
@@ -135,13 +134,7 @@ class ImportUtilities {
      * and attempts to determine what type of data each list of field values contains. Returns a list of {@link FieldTypePair}s, which simply
      * relate field name to the guessed type of data in that field.
      * This method assumes that the values given in the lists are strings - it may work correctly if they are not, but is not guaranteed to.
-     * Possible types to check for are:
-     * Integer
-     * Long
-     * Double
-     * Float
-     * Date
-     * String (the default, if none of the others are valid)
+     * Possible types to check for are: Integer, Long, Double, Float, Date, and String (the default, if none of the others are valid)
      * @param fieldsAndValues A map of field names to lists of values for the field of that name.
      * @param return Type The type of object to return the results as. The default is a list, but it can also handle maps from name to type.
      * @return A list of FieldTypePairs, which relate field names to guessed type of data for those field names.

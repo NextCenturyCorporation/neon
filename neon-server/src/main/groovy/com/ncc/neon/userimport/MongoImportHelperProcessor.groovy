@@ -38,10 +38,15 @@ import com.monitorjbl.xlsx.StreamingReader
 import com.monitorjbl.xlsx.impl.StreamingRow
 
 /**
- * Houses the asynchronous methods that do the actual labor of importing data, as well as a number of helper methods and methods to handle different types of input.
+ * Houses the asynchronous methods that do the actual labor of importing data into mongo data stores, as well as a number
+ * of helper methods and methods to handle different types of input.
  */
 @Component
 class MongoImportHelperProcessor implements ImportHelperProcessor {
+
+    // For use by the various loadAndConvert methods. Updating loading/conversion progress is relatively expensive, so only
+    // do it every so many records. For now, 137 was chosen because it's a prime number whose multiples look fairly random.
+    private static final int UPDATE_FREQUENCY = 137
 
     @Async
     @Override
@@ -59,7 +64,6 @@ class MongoImportHelperProcessor implements ImportHelperProcessor {
                     processTypeGuessesExcel(gridFile)
                     break
                 default:
-                    mongo.close()
                     throw new UnsupportedFiletypeException("Can't parse files of type ${fileType}!")
             }
         }
@@ -68,7 +72,12 @@ class MongoImportHelperProcessor implements ImportHelperProcessor {
         }
     }
 
-    void processTypeGuessesCSV(GridFSDBFile file) {
+    /**
+     * Gets type guesses for fields of information stored in CSV format and stores them as metadata in the GridFSDBFile that
+     * stores the CSV file.
+     * @param file The GridFSDBFile storing the CSV file for which to make field type guesses.
+     */
+    private void processTypeGuessesCSV(GridFSDBFile file) {
         LineIterator iter = IOUtils.lineIterator(file.getInputStream(), "UTF-8")
         String row = ImportUtilities.getNextWholeRow(iter)
         if(!row || !iter.hasNext()) {
@@ -89,12 +98,15 @@ class MongoImportHelperProcessor implements ImportHelperProcessor {
             }
             row = ImportUtilities.getNextWholeRow(iter)
         }
-        Map fieldsAndTypes = fieldTypePairListToMap(ImportUtilities.getTypeGuesses(fieldsAndValues))
-        file.put("programGuesses", fieldsAndTypes)
-        file.save()
+        updateFile(file, [programGuesses: fieldTypePairListToMap(ImportUtilities.getTypeGuesses(fieldsAndValues))])
     }
 
-    void processTypeGuessesExcel(GridFSDBFile file) {
+    /**
+     * Gets type guesses for fields of information stored in XLSX format and stores them as metadata in the GridFSDBFile that
+     * stores the XLSX file.
+     * @param file The GridFSDBFile storing the XLSX file for which to make field type guesses.
+     */
+    private void processTypeGuessesExcel(GridFSDBFile file) {
         StreamingReader sheet
         try {
             sheet = StreamingReader.builder().sheetIndex(0).read(file.getInputStream())
@@ -117,8 +129,7 @@ class MongoImportHelperProcessor implements ImportHelperProcessor {
                 }
                 row = iterator.hasNext() ? iterator.next() : null
             }
-            file.put("programGuesses", fieldTypePairListToMap(ImportUtilities.getTypeGuesses(fieldsAndValues)))
-            file.save()
+            updateFile(file, [programGuesses: fieldTypePairListToMap(ImportUtilities.getTypeGuesses(fieldsAndValues))])
         }
         finally{
             sheet.close()
@@ -131,6 +142,7 @@ class MongoImportHelperProcessor implements ImportHelperProcessor {
         MongoClient mongo = new MongoClient(host, 27017)
         GridFSDBFile gridFile = new GridFS(mongo.getDB(ImportUtilities.MONGO_UPLOAD_DB_NAME)).findOne([identifier: uuid] as BasicDBObject)
         String fileType = gridFile.get("fileType")
+        updateFile(gridFile, [complete: false, numCompleted: 0])
         try {
             if(alreadyLoaded(mongo, gridFile)) {
                 processConvert(mongo, gridFile, dateFormat, fieldTypePairs)
@@ -153,9 +165,21 @@ class MongoImportHelperProcessor implements ImportHelperProcessor {
         }
     }
 
-    void processLoadAndConvertCSV(MongoClient mongo, GridFSDBFile file, String dateFormat, List<FieldTypePair> fieldTypePairs) {
-        file.put("numCompleted", 0)
-        file.save()
+    /**
+     * Reads a raw CSV file from the given GridFSDFile line by line, grabbing records, converting their fields into the types
+     * given in fieldTypePairs, and then storing them in a database on the given mongo instance. The database's name is
+     * generated using the userName and prettyName metadata in the file. This method assumes that there is only one record
+     * per line of the file, and that the file contains nothing but records and a list of field names on the first line.
+     * If any fields fail to convert for at least one record, these fields and the type they were attempting to be converted to are
+     * stored as metadata in the given file.
+     * @param mongo The mongo instance on which the database in which to convert records is located.
+     * @param file The GridFSDBFile containing metadata that allows for finding of the database in which to convert records.
+     * @param dateFormat The date format string to be used when attempting to convert any record to a Date.
+     * @param fieldTypePairs A list of field names and what types they should be converted to.
+     */
+    private void processLoadAndConvertCSV(MongoClient mongo, GridFSDBFile file, String dateFormat, List<FieldTypePair> fieldTypePairs) {
+        int numCompleted = 0
+        updateFile(file, [numCompleted: numCompleted])
         LineIterator iter = IOUtils.lineIterator(file.getInputStream(), "UTF-8")
         Map fieldsToTypes = fieldTypePairListToMap(fieldTypePairs)
         Set<FieldTypePair> failedFields = [] as Set
@@ -167,7 +191,6 @@ class MongoImportHelperProcessor implements ImportHelperProcessor {
         }
         List fieldNamesInOrder = ImportUtilities.getCellsFromRow(row)
         row = ImportUtilities.getNextWholeRow(iter)
-        int numCompleted = 0
         while(row) {
             List values = ImportUtilities.getCellsFromRow(row)
             List<FieldTypePair> failed = addRecord(collection, fieldNamesInOrder, values, fieldsToTypes, dateFormat)
@@ -176,71 +199,77 @@ class MongoImportHelperProcessor implements ImportHelperProcessor {
                 fieldsToTypes.put(ftPair.name, "String") // If a field failed to convert, set its type to string to prevent exceptions being thrown for that field on future records.
             }
             row = ImportUtilities.getNextWholeRow(iter)
-            if(numCompleted++ % 1037 == 0 || !row) {
-                file.put("numCompleted", numCompleted)
-                file.save()
+            if(numCompleted++ % UPDATE_FREQUENCY == 0) {
+                updateFile(file, [numCompleted: numCompleted])
             }
         }
-        file.put("failedFields", fieldTypePairListToMap(failedFields as List))
-        file.save()
+        updateFile(file, [numCompleted: numCompleted, failedFields: fieldTypePairListToMap(failedFields as List)])
         addMetadata(mongo, file)
     }
 
-    // Need to make this method shorter... somehow.
-    void processLoadAndConvertExcel(MongoClient mongo, GridFSDBFile file, String dateFormat, List<FieldTypePair> fieldTypePairs) {
-        int numCompleted = 0
+    /**
+     * Reads a raw XLSX file from the given GridFSDFile into a temporary file on disk, and then reads through it line by line,
+     * grabbing records, converting their fields into the types given in fieldTypePairs, and then storing them in a database
+     * on the given mongo instance. The database's name is generated using the userName and prettyName metadata in the file.
+     * This method assumes that there is only one record per line of the file, and that the file contains nothing but records
+     * and a list of field names on the first line.
+     * If any fields fail to convert for at least one record, these fields and the type they were attempting to be converted to are
+     * stored as metadata in the given file.
+     * @param mongo The mongo instance on which the database in which to convert records is located.
+     * @param file The GridFSDBFile containing metadata that allows for finding of the database in which to convert records.
+     * @param dateFormat The date format string to be used when attempting to convert any record to a Date.
+     * @param fieldTypePairs A list of field names and what types they should be converted to.
+     */
+    private void processLoadAndConvertExcel(MongoClient mongo, GridFSDBFile file, String dateFormat, List<FieldTypePair> fieldTypePairs) {
         StreamingReader sheet
-        Map fieldsToTypes = fieldTypePairListToMap(fieldTypePairs)
-        Set<FieldTypePair> failedFields = [] as Set
-        DBCollection collection = mongo.getDB(ImportUtilities.makeUglyName(file.get("userName"), file.get("prettyName"))).getCollection(ImportUtilities.MONGO_USERDATA_COLL_NAME)
         try {
             sheet = StreamingReader.builder().sheetIndex(0).read(file.getInputStream())
+            int numCompleted = 0
+            Map fieldsToTypes = fieldTypePairListToMap(fieldTypePairs)
+            Set<FieldTypePair> failedFields = [] as Set
+            DBCollection collection = mongo.getDB(ImportUtilities.makeUglyName(file.get("userName"), file.get("prettyName"))).getCollection(ImportUtilities.MONGO_USERDATA_COLL_NAME)
             Iterator iterator = sheet.iterator()
             if(!iterator.hasNext()) { // An initial call to hasNext is needed to "prime" the sheet iterator, so we may as well make use of the result.
                 throw new BadSheetException("No data in this file to process!")
             }
-            List fieldNamesInOrder = []
-            iterator.next().each { cell -> // Assuming here that the first row will not have any empty cells in the middle e.g. "A, B, , D".
-                fieldNamesInOrder << cell.getContents().toString()
-            }
-            while(iterator.hasNext()) {
-                StreamingRow row = iterator.next()
-                List values = []
-                for(int col = 0; col < fieldNamesInOrder.size(); col++) {
-                    values << row.getCell(col)?.getContents()?.toString()
+            List fieldNamesInOrder = getCellsFromExcelRow(iterator.next(), -1, true)
+            iterator.each { row ->
+                List values = getCellsFromExcelRow(row, fieldNamesInOrder.size())
+                addRecord(collection, fieldNamesInOrder, values, fieldsToTypes, dateFormat).each { failedFTPair ->
+                    failedFields << failedFTPair
+                    fieldsToTypes.put(failedFTPair.name, "String") // If a field failed to convert, set its type to string to avoid exceptions on future records.
                 }
-                List<FieldTypePair> failed = addRecord(collection, fieldNamesInOrder, values, fieldsToTypes, dateFormat)
-                failed.each { ftPair ->
-                    failedFields << ftPair
-                    fieldsToTypes.put(ftPair.name, "String") // If a field failed to convert, set its type to string to prevent exceptions being thrown for that field on future records.
-                }
-                if(numCompleted++ % 137 == 0 || !iterator.hasNext()) {
-                    file.put("numCompleted", numCompleted)
-                    file.save()
+                if(numCompleted++ % UPDATE_FREQUENCY == 0) {
+                    updateFile(file, [numCompleted: numCompleted])
                 }
             }
-            file.put("failedFields", fieldTypePairListToMap(failedFields as List))
+            updateFile(file, [numCompleted: numCompleted, failedFields: fieldTypePairListToMap(failedFields as List)])
         }
         finally {
-            file.save()
             sheet.close()
         }
         addMetadata(mongo, file)
     }
 
-    // Simply converts the fields of records in a database - no adding new records, just conversion. To be called if the user messes up when giving field
-    // types the first time, so we don't wind up adding duplicate records the the database.
-    void processConvert(MongoClient mongo, GridFSDBFile file, String dateFormat, List<FieldTypePair> fieldTypePairs) {
+    /**
+     * Converts the fields of records in a database without adding any new ones to it. Used when the user messes up with their type
+     * guesses on the first try to prevent multiple-loading of records into a database. Records progress as metadata in the given
+     * GridFSDBFile as it goes along.
+     * If any fields fail to convert for at least one record, these fields and the type they were attempting to be converted to are
+     * stored as metadata in the given file.
+     * @param mongo The mongo instance on which the database in which to convert records is located.
+     * @param file The GridFSDBFile containing metadata that allows for finding of the database in which to convert records.
+     * @param dateFormat The date format string to be used when attempting to convert any record to a Date.
+     * @param fieldTypePairs A list of field names and what types they should be converted to.
+     */
+    private void processConvert(MongoClient mongo, GridFSDBFile file, String dateFormat, List<FieldTypePair> fieldTypePairs) {
         int numCompleted = 0
-        file.put("numCompleted", numCompleted)
-        file.put("complete", false)
-        file.save()
+        updateFile(file, [numCompleted: numCompleted, complete: false])
         List<FieldTypePair> pairs = fieldTypePairs
         DBCollection collection = mongo.getDB(ImportUtilities.makeUglyName(file.get("userName"), file.get("prettyName"))).getCollection(ImportUtilities.MONGO_USERDATA_COLL_NAME)
         DBCursor cursor = collection.find()
         Set<FieldTypePair> failedFields = [] as Set
         cursor.each { record ->
-            List<FieldTypePair> failed = []
             pairs.each { ftPair ->
                 String stringValue = record.get(ftPair.name) as String
                 if(!stringValue || (ftPair.type =~ /(?i)integer|long|double|float(?-i)/ && stringValue =~ /(?i)none|null(?-i)/ && stringValue.length() == 4)) {
@@ -248,27 +277,39 @@ class MongoImportHelperProcessor implements ImportHelperProcessor {
                 }
                 Object objectValue = ImportUtilities.convertValueToType(stringValue, ftPair.type, dateFormat)
                 if(objectValue instanceof ConversionFailureResult) {
-                    record.put(ftPair.name, objectValue)
+                    failedFields.add(ftPair)
                 }
                 else {
-                    failed.add(ftPair)
+                    record.put(ftPair.name, objectValue)
                 }
             }
-            failed.each { ftPair ->
-                failedFields << ftPair
+            failedFields.each { ftPair ->
                 pairs.remove(ftPair) // If a field failed to convert, stop trying to convert it on future records.
             }
-            if(numCompleted++ % 137 == 0) {
-                file.put("numCompleted", numCompleted)
-                file.save()
+            if(numCompleted++ % UPDATE_FREQUENCY == 0) {
+                updateFile(file, [numCompleted: numCompleted])
             }
         }
-        file.putAll(["complete": true, "numCompleted": numCompleted, "failedFields": fieldTypePairListToMap(failedFields as List)] as BasicDBObject)
-        file.save()
+        updateFile(file, [complete: true, numCompleted: numCompleted, failedFields: fieldTypePairListToMap(failedFields as List)])
     }
 
-    // Helper method. Adds a single record to the given collection, and returns which fields if any failed to convert during the process.
-    List<FieldTypePair> addRecord(DBCollection collection, List namesInOrder, List valuesInOrder, Map namesToTypes, String dateFormat) {
+    /**
+     * Helper method that adds a single record to a mongo collection, given a list of field names and string representations of
+     * values, a map of which fields should be converted to which types, and a date format string to use when attempting
+     * to convert field values to dates. The field name and value lists must be in order with respect to each other. That is, the
+     * field name at index 0 of one list must match up with the value at index 0 of the other.
+     * Returns a list of any fields that failed to convert, as well as what type they were attempting to be converted to.
+     * @param collection The DBCollection into which to insert the record.
+     * @param namesInOrder A list containing the names of fields the record could have (could because it's possible for some of those
+     * fields to be null). This list must be in order with respect to the values list for this method to work properly.
+     * @param valuesInOrder A list containing the values of fields this record has (any number of these values can be null). This list
+     * must be in order with respect to the field names list in order for this method to work properly.
+     * @param namesToTypes A map of field names to which type those fields should be converted to.
+     * @param dateFormat A date formatting string to be used when attempting to convert a field into a Date. This can be null.
+     * @return A list of FieldTypePairs containing the names of any fields which failed to convert, as well as the types they were
+     * attempting to be converted to.
+     */
+    private List<FieldTypePair> addRecord(DBCollection collection, List namesInOrder, List valuesInOrder, Map namesToTypes, String dateFormat) {
         List<FieldTypePair> failedFields = []
         DBObject record = new BasicDBObject()
         for(int x = 0; x < namesInOrder.size() && x < valuesInOrder.size(); x++) {
@@ -290,9 +331,13 @@ class MongoImportHelperProcessor implements ImportHelperProcessor {
         return failedFields
     }
 
-    // Helper method. Adds an entry for a set of user-given data in the meta database. Also marks the GridFSFile containing that data as completed,
-    // so it can be deleted the next time its status is asked for.
-    void addMetadata(MongoClient mongo, GridFSDBFile file) {
+    /**
+     * Helper method that adds information about user-given data into a meta-database. This allows the ability to track which databases
+     * are user-added, as well as provide some information about them at a later time if needed.
+     * @param mongo The mongo instance in which to store the meta-database.
+     * @param file The GridFSDBFile whose metadata contains the information that will be more permanently stored in the meta-database.
+     */
+    private void addMetadata(MongoClient mongo, GridFSDBFile file) {
         DB metaDatabase = mongo.getDB(ImportUtilities.MONGO_META_DB_NAME)
         DBCollection metaCollection = metaDatabase.getCollection(ImportUtilities.MONGO_META_COLL_NAME)
         DBObject metaRecord = new BasicDBObject()
@@ -300,12 +345,44 @@ class MongoImportHelperProcessor implements ImportHelperProcessor {
         metaRecord.append("prettyName", file.get("prettyName"))
         metaRecord.append("databaseName", ImportUtilities.makeUglyName(file.get("userName"), file.get("prettyName")))
         metaCollection.insert(metaRecord)
-
-        file.put("complete", true)
-        file.save()
+        updateFile(file, [complete: true])
     }
 
-    Map fieldTypePairListToMap(List ftPairs) {
+    /**
+     * Helper method that gets a list of the contents of cells in a StreamingRow. If usingIterator is false, this is done numerically
+     * and stops after the specified number of columns. If usingIterator is true, gets every existent cell value, regardless of position,
+     * and ignores any blank cells.
+     * For example, if the row given was "1, 2, 3, , 5, , , 8" then getCellsFromExcelRow(row, 6) would return [1, 2, 3, null, 5, null],
+     * while getCellsFromExcelRow(row, 6, true) would return [1, 2, 3, 5, 8].
+     * @param row The row from which to get cells.
+     * @param numberOfColumns The number of columns to get cells from, starting from 0, before stopping if not using an iterator. If
+     * this number is negative, simply returns an empty list.
+     * @param usingIterator Whether or not to use an iterator. If true, uses an iterator and so ignores blank cells and gathers from
+     * any number of columns. If false, does not ignore lank cells and only gathers from the given number of columns. Defaults to false.
+     */
+    private List getCellsFromExcelRow(StreamingRow row, int numberOfColumns, boolean usingIterator = false) {
+        List toReturn = []
+        if(usingIterator) {
+            row.asList().collect { cell ->
+                 toReturn << cell.getContents().toString()
+            }
+        }
+        else {
+            for(int col = 0; col < numberOfColumns; col++) {
+                toReturn << row.getCell(col)?.getContents()?.toString()
+            }
+        }
+        return toReturn
+    }
+
+    /**
+     * Helper method that converts a list of FieldTypePairs to a map from name to type. Used because mongo doesn't know how to
+     * deserialize FieldTypePairs for storage. For instance, a FieldTypePair with name "theName" and type "theType" would be
+     * converted to a map entry [theName: "theType"]
+     * @param ftPairs A list of FieldTypePairs to convert to a map.
+     * @return A mapwhose keys are the names of the input FieldTypePairs and whose values are their corresponding types.
+     */
+    private Map fieldTypePairListToMap(List ftPairs) {
         Map m = [:]
         ftPairs.each { ftPair ->
             m.put(ftPair.name, ftPair.type)
@@ -313,9 +390,30 @@ class MongoImportHelperProcessor implements ImportHelperProcessor {
         return m
     }
 
-    // Determines if a file has already been loaded into a database by checking ifthere is already a database with the same name as this one would have.
-    boolean alreadyLoaded(MongoClient mongo, GridFSDBFile file) {
+    /**
+     * Helper method that determines whether there is a already a database in mongo for the information in the given file. If there is
+     * already a database whose name is the same as the name that would be generated by the given file's username and "pretty" name, and if that
+     * database has a collection in it with the name given to user-imported collections, and if that collection has at least one record in it,
+     * returns true. Else, returns false.
+     * @param nomgo The mongo instance in which to search.
+     * @param file The GridFSDBFile whose metadata contains the username and "pretty" name associated with the database to look for.
+     * @return True if the conditions above are met, or false otherwise.
+     */
+    private boolean alreadyLoaded(MongoClient mongo, GridFSDBFile file) {
         DBCollection collection = mongo.getDB(ImportUtilities.makeUglyName(file.get("userName"), file.get("prettyName"))).getCollection(ImportUtilities.MONGO_USERDATA_COLL_NAME)
-        return (collection && collection.count > 0)
+        return (collection && collection.count() > 0)
+    }
+
+    /**
+     * Helper method that adds all of the key/value pairs in the given map to the given GridFSDBFile.
+     * Made because mongodb's native putAll method doesn't appear to work.
+     * @param file The GridFSDBFile to which to add values.
+     * @param fieldsToUpdate A map containing key/value pairs to be added to the file.
+     */
+    private void updateFile(GridFSDBFile file, Map fieldsToUpdate) {
+        fieldsToUpdate.each { key, value ->
+            file.put(key as String, value)
+        }
+        file.save()
     }
 }

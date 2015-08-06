@@ -41,8 +41,18 @@ class ImportService {
     @Autowired
     ImportHelperFactory importHelperFactory
 
-    // Uploads a file, storing it wholesale in a data store, and triggers an asynchronous method to attempt to
-    // find out what types the fields of records in the file are. Returns a job ID associated with the file.
+    /**
+     * Uploads a file, storing it wholesale in a data store, and triggers an asynchronous method to attempt to
+     * find out what types the fields of records in the file are. Returns a job ID associated with the file.
+     * @param host The host on which the database is running.
+     * @param databaseType The type of database in which the data is stored.
+     * @param user The username to be associated with the data in the file.
+     * @param prettyName The "pretty", human-readable database name to be associated with the data in the file.
+     * @param fileType The extension of the file, used to determine how it should be parsed later.
+     * @param dataInputStream The input stream containing the contents of the file.
+     * @return A JSON object containing the job ID associated with the uploaded data, to be used throughout the rest
+     * of the upload process - for more information on its exact format, check the documentation of {@link ImportHelper}.
+     */
     @POST
     @Consumes(MediaType.MULTIPART_FORM_DATA)
     @Produces(MediaType.APPLICATION_JSON)
@@ -59,8 +69,15 @@ class ImportService {
         return Response.status(200).entity(JsonOutput.toJson(jobID)).build()
     }
 
-    // Checks on the status of finding out what types the fields in records of a file are,
-    // given the job ID associated with it.
+    /**
+     * Checks on the status of finding out what types the fields in records of a file are, given the job ID
+     * associated with it.
+     * @param host The host on which the database is running.
+     * @param databaseType The type of database in which the data is stored.
+     * @param uuid The job ID associated with the file whose records are being checked.
+     * @return A JSON object containing a list of fields found in the file, as well as guesses as to their types - for
+     * more information on its exact format, check the documentation of {@link ImportHelper}.
+     */
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     @Path("guesses/{host}/{databaseType}/{uuid}")
@@ -72,9 +89,17 @@ class ImportService {
         return Response.ok().entity(JsonOutput.toJson(guesses)).build()
     }
 
-    // Given user-defined type alues for the fields of a file, triggers an asynchronous method that pulls that file out of storage and
-    // parses through it to get records, creating a database for them and converting the fields of its records as it goes along.
-    //Returns the job ID associated with the file.
+    /**
+     *Given user-defined type values for the fields of a file, triggers an asynchronous method that pulls that file out of storage and
+     * parses through it to get records, creating a database for them and converting the fields of its records as it goes along.
+     * @param host The host on which the database is running.
+     * @param databaseType The type of database in which the data is stored.
+     * @param uuid The job ID associated with the data to be parsed and converted.
+     * @param data A {@link UserFieldDataBundle} containing the user's decisions for what type of data each field is, as well as a date
+     * format string to be used when attempting to convert fields to dates.
+     * @return A JSON object giving returning the same job ID that was given - for more informationon its exact format, check the
+     * documentation of {@link ImportHelper}.
+     */ 
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
@@ -88,7 +113,14 @@ class ImportService {
         return Response.ok(JsonOutput.toJson(jobID)).build()
     }
 
-    // Checks on the status of parsing a file for records and moving them into a datastore, given the job ID associated with the file.
+    /**
+     * Checks on the status of parsing a file for records and moving them into a datastore, given the job ID associated with the file.
+     * @param host The host on which the database is running.
+     * @param databaseType The type of database in which the data is stored.
+     * @param uuid The job ID associated with the data whose import status to check.
+     * @return A JSON object giving the status of the import - for more informationon its exact format, check the documentation
+     * of {@link ImportHelper}.
+     */
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     @Path("progress/{host}/{databaseType}/{uuid}")
@@ -100,7 +132,15 @@ class ImportService {
         return Response.ok().entity(JsonOutput.toJson(importStatus)).build()
     }
 
-    // Drops a set of user-given data from a data store, given its associated username and "pretty", human-readable name.
+    /**
+     * Drops a set of user-given data from a data store, given its associated username and "pretty", human-readable name.
+     * @param host The host on which the database is running.
+     * @param databaseType The type of database in which the data is stored.
+     * @param userName The username associated with the data to drop.
+     * @param prettyName The "pretty", human-readable name associated with the data to drop.
+     * @return A JSON object giving the status of the drop - for more information on its exact format, check the documentation
+     * of {@link ImportHelper}.
+     */
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     @Path("drop/{host}/{databaseType}")
