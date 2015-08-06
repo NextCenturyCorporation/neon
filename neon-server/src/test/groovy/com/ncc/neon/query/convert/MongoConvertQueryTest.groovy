@@ -17,6 +17,9 @@
 package com.ncc.neon.query.convert
 import com.mongodb.BasicDBObject
 import com.ncc.neon.query.mongo.MongoConversionStrategy
+
+import java.util.regex.Pattern
+
 /*
  Tests the MongoConversionStrategy.convertQuery()
  correctly converts Query objects into MongoQuery objects
@@ -102,7 +105,14 @@ class MongoConvertQueryTest extends AbstractConversionTest {
     @Override
     protected void assertQueryWithWhereContainsFooClause(query) {
         assert query.query == simpleQuery
-        assert query.whereClauseParams == new BasicDBObject(FIELD_NAME, new BasicDBObject('$regex', 'foo'))
+        assert query.whereClauseParams == new BasicDBObject(FIELD_NAME, Pattern.compile('foo'))
+        assert query.selectParams == new BasicDBObject()
+    }
+
+    @Override
+    protected void assertQueryWithWhereNotContainsFooClause(query) {
+        assert query.query == simpleQuery
+        assert query.whereClauseParams == new BasicDBObject(FIELD_NAME, new BasicDBObject('$not', Pattern.compile('foo')))
         assert query.selectParams == new BasicDBObject()
     }
 
