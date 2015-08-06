@@ -41,7 +41,7 @@ class QueryValueDeserializer extends JsonDeserializer<Object> {
         switch (jp.currentToken) {
             case JsonToken.VALUE_STRING:
                 // check if the string is a date, if not, fallback to plain string
-                if(jp.text ==~ /\d\d\d\d-\d\d-\d\dT\d\d:\d\d:\d\dZ/) {
+                if(jp.text ==~ /\d\d\d\d-\d\d-\d\dT\d\d:\d\d:\d\d(?:\.\d\d\d)?Z/) {
                     return  DateUtils.tryToParseDate(jp.text)
                 }
                 return DEFAULT_SERIALIZER.deserialize(jp, ctxt)
@@ -82,7 +82,7 @@ class QueryValueDeserializer extends JsonDeserializer<Object> {
     }
 
     Object tryToParseObject(String type, String value) {
-        if(type && type.equalsIgnoreCase("date") || !type && value ==~ /\d\d\d\d-\d\d-\d\dT\d\d:\d\d:\d\dZ/) {
+        if(type && type.equalsIgnoreCase("date") || !type && value ==~ /\d\d\d\d-\d\d-\d\dT\d\d:\d\d:\d\d(?:\.\d\d\d)?Z/) {
             return DateUtils.tryToParseDate(value)
         }
 
