@@ -3,7 +3,7 @@
 # Note, the DC means that we use a disk cache
 jcs.default=
 jcs.default.cacheattributes=org.apache.commons.jcs.engine.CompositeCacheAttributes
-jcs.default.cacheattributes.MaxObjects=500
+jcs.default.cacheattributes.MaxObjects=0
 jcs.default.cacheattributes.MemoryCacheName=org.apache.commons.jcs.engine.memory.lru.LRUMemoryCache
 
 # Disk Cache
