@@ -185,7 +185,7 @@ abstract class AbstractConversionTest {
     void "test query where contains"() {
         givenQueryHasWhereContainsFooClause()
         def query = convertQuery(simpleQuery)
-        //assertQueryWithWhereContainsFooClause(query)
+        assertQueryWithWhereContainsFooClause(query)
     }
 
     @Test
@@ -193,7 +193,7 @@ abstract class AbstractConversionTest {
     void "test query where not contains"() {
         givenQueryHasWhereNotContainsFooClause()
         def query = convertQuery(simpleQuery)
-        //assertQueryWithWhereNotContainsFooClause(query)
+        assertQueryWithWhereNotContainsFooClause(query)
     }
 
     @Test

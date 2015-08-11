@@ -105,14 +105,25 @@ class MongoConvertQueryTest extends AbstractConversionTest {
     @Override
     protected void assertQueryWithWhereContainsFooClause(query) {
         assert query.query == simpleQuery
-        assert query.whereClauseParams == new BasicDBObject(FIELD_NAME, Pattern.compile('foo'))
+        // Since contain clauses inject Pattern objects into BasicBDObjects, we need to test the fields explicitly.
+        // Pattern.equals() tests only object equivalence, not that that two patterns render to the same pattern string.
+        // Instead, pull the patterns out and test use Pattern.pattern() to test their renders.
+        assert query.whereClauseParams.toString() == (new BasicDBObject(FIELD_NAME, Pattern.compile('foo'))).toString()
+        assert query.whereClauseParams.containsKey(FIELD_NAME) == true
+        assert query.whereClauseParams.get(FIELD_NAME).pattern() == Pattern.compile('foo').pattern()
         assert query.selectParams == new BasicDBObject()
     }
 
     @Override
     protected void assertQueryWithWhereNotContainsFooClause(query) {
         assert query.query == simpleQuery
-        assert query.whereClauseParams == new BasicDBObject(FIELD_NAME, new BasicDBObject('$not', Pattern.compile('foo')))
+        // Since contain clauses inject Pattern objects into BasicBDObjects, we need to test the fields explicitly.
+        // Pattern.equals() tests only object equivalence, not that that two patterns render to the same pattern string.
+        // Instead, pull the patterns out and test use Pattern.pattern() to test their renders.
+        assert query.whereClauseParams.toString() == (new BasicDBObject(FIELD_NAME, new BasicDBObject('$not', Pattern.compile('foo')))).toString()
+        assert query.whereClauseParams.containsKey(FIELD_NAME) == true
+        assert query.whereClauseParams.get(FIELD_NAME).containsKey('$not') == true
+        assert query.whereClauseParams.get(FIELD_NAME).get('$not').pattern() == Pattern.compile('foo').pattern()
         assert query.selectParams == new BasicDBObject()
     }
 
