@@ -16,14 +16,24 @@
 
 package com.ncc.neon.userimport
 
-import groovy.transform.ToString
+import com.ncc.neon.query.jackson.SortOrderDeserializer
+import org.codehaus.jackson.map.annotate.JsonDeserialize
 
 /**
- * Simple structure for holding a list of FieldTypePairs and a date format string.
+ * Enumeration for the different possible types to which the fields of database records can be converted.
  */
+@JsonDeserialize(using = FieldTypeDeserializer)
+enum FieldType {
 
-@ToString(includeNames = true)
-public class UserFieldDataBundle {
-    String dateFormat
-    List<FieldTypePair> fields
+    INTEGER("INTEGER"), LONG("LONG"), FLOAT("FLOAT"), DOUBLE("DOUBLE"), DATE("DATE"), STRING("STRING")
+
+    String stringValue
+
+    FieldType(stringValue) {
+        this.stringValue = stringValue
+    }
+
+    static FieldType fromString(String stringVal) {
+        return FieldType.values().find { it.stringValue == stringVal } ?: STRING
+    }
 }

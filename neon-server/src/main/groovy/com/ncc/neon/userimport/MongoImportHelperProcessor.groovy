@@ -51,7 +51,7 @@ class MongoImportHelperProcessor implements ImportHelperProcessor {
     @Async
     @Override
     void processTypeGuesses(String host, String uuid) {
-        MongoClient mongo = new MongoClient(host, 27017)
+        MongoClient mongo = new MongoClient(host)
         GridFS gridFS = new GridFS(mongo.getDB(ImportUtilities.MONGO_UPLOAD_DB_NAME))
         GridFSDBFile gridFile = gridFS.findOne([identifier: uuid] as BasicDBObject)
         String fileType = gridFile.get("fileType")
@@ -91,14 +91,14 @@ class MongoImportHelperProcessor implements ImportHelperProcessor {
         row = ImportUtilities.getNextWholeRow(iter)
         for(int counter = 0; counter < ImportUtilities.NUM_TYPE_CHECKED_RECORDS && row; counter++) {
             List rowValues = ImportUtilities.getCellsFromRow(row)
-            for(int x = 0; x < fields.size() && x < rowValues.size(); x++) {
-                if(rowValues.get(x)) { // Only add the value to the map if it's non-null and not an empty string.
-                    fieldsAndValues.get(fields.get(x)).add(rowValues.get(x))
+            for(int field = 0; field < fields.size() && field < rowValues.size(); field++) {
+                if(rowValues.get(field)) { // Only add the value to the map if it's non-null and not an empty string.
+                    fieldsAndValues.get(fields.get(field)).add(rowValues.get(field))
                 }
             }
             row = ImportUtilities.getNextWholeRow(iter)
         }
-        updateFile(file, [programGuesses: fieldTypePairListToMap(ImportUtilities.getTypeGuesses(fieldsAndValues))])
+        updateFile(file, [programGuesses: fieldTypePairListToStorageMap(ImportUtilities.getTypeGuesses(fieldsAndValues))])
     }
 
     /**
@@ -129,9 +129,9 @@ class MongoImportHelperProcessor implements ImportHelperProcessor {
                 }
                 row = iterator.hasNext() ? iterator.next() : null
             }
-            updateFile(file, [programGuesses: fieldTypePairListToMap(ImportUtilities.getTypeGuesses(fieldsAndValues))])
+            updateFile(file, [programGuesses: fieldTypePairListToStorageMap(ImportUtilities.getTypeGuesses(fieldsAndValues))])
         }
-        finally{
+        finally {
             sheet.close()
         }
     }
@@ -139,7 +139,7 @@ class MongoImportHelperProcessor implements ImportHelperProcessor {
     @Async
     @Override
     void processLoadAndConvert(String host, String uuid, String dateFormat, List<FieldTypePair> fieldTypePairs) {
-        MongoClient mongo = new MongoClient(host, 27017)
+        MongoClient mongo = new MongoClient(host)
         GridFSDBFile gridFile = new GridFS(mongo.getDB(ImportUtilities.MONGO_UPLOAD_DB_NAME)).findOne([identifier: uuid] as BasicDBObject)
         String fileType = gridFile.get("fileType")
         updateFile(gridFile, [complete: false, numCompleted: 0])
@@ -183,7 +183,7 @@ class MongoImportHelperProcessor implements ImportHelperProcessor {
         LineIterator iter = IOUtils.lineIterator(file.getInputStream(), "UTF-8")
         Map fieldsToTypes = fieldTypePairListToMap(fieldTypePairs)
         Set<FieldTypePair> failedFields = [] as Set
-        DBCollection collection = mongo.getDB(ImportUtilities.makeUglyName(file.get("userName"), file.get("prettyName"))).getCollection(ImportUtilities.MONGO_USERDATA_COLL_NAME)
+        DBCollection collection = mongo.getDB(getDatabaseName(file.get("userName"), file.get("prettyName"))).getCollection(ImportUtilities.MONGO_USERDATA_COLL_NAME)
 
         String row = ImportUtilities.getNextWholeRow(iter)
         if(!row || !iter.hasNext()) {
@@ -196,14 +196,14 @@ class MongoImportHelperProcessor implements ImportHelperProcessor {
             List<FieldTypePair> failed = addRecord(collection, fieldNamesInOrder, values, fieldsToTypes, dateFormat)
             failed.each { ftPair ->
                 failedFields << ftPair
-                fieldsToTypes.put(ftPair.name, "String") // If a field failed to convert, set its type to string to prevent exceptions being thrown for that field on future records.
+                fieldsToTypes.put(ftPair.name, FieldType.STRING) // If a field failed to convert, set its type to string to prevent exceptions being thrown for that field on future records.
             }
             row = ImportUtilities.getNextWholeRow(iter)
             if(numCompleted++ % UPDATE_FREQUENCY == 0) {
                 updateFile(file, [numCompleted: numCompleted])
             }
         }
-        updateFile(file, [numCompleted: numCompleted, failedFields: fieldTypePairListToMap(failedFields as List)])
+        updateFile(file, [numCompleted: numCompleted, failedFields: fieldTypePairListToStorageMap(failedFields as List)])
         addMetadata(mongo, file)
     }
 
@@ -227,7 +227,7 @@ class MongoImportHelperProcessor implements ImportHelperProcessor {
             int numCompleted = 0
             Map fieldsToTypes = fieldTypePairListToMap(fieldTypePairs)
             Set<FieldTypePair> failedFields = [] as Set
-            DBCollection collection = mongo.getDB(ImportUtilities.makeUglyName(file.get("userName"), file.get("prettyName"))).getCollection(ImportUtilities.MONGO_USERDATA_COLL_NAME)
+            DBCollection collection = mongo.getDB(getDatabaseName(file.get("userName"), file.get("prettyName"))).getCollection(ImportUtilities.MONGO_USERDATA_COLL_NAME)
             Iterator iterator = sheet.iterator()
             if(!iterator.hasNext()) { // An initial call to hasNext is needed to "prime" the sheet iterator, so we may as well make use of the result.
                 throw new BadSheetException("No data in this file to process!")
@@ -237,13 +237,13 @@ class MongoImportHelperProcessor implements ImportHelperProcessor {
                 List values = getCellsFromExcelRow(row, fieldNamesInOrder.size())
                 addRecord(collection, fieldNamesInOrder, values, fieldsToTypes, dateFormat).each { failedFTPair ->
                     failedFields << failedFTPair
-                    fieldsToTypes.put(failedFTPair.name, "String") // If a field failed to convert, set its type to string to avoid exceptions on future records.
+                    fieldsToTypes.put(failedFTPair.name, FieldType.STRING) // If a field failed to convert, set its type to string to avoid exceptions on future records.
                 }
                 if(numCompleted++ % UPDATE_FREQUENCY == 0) {
                     updateFile(file, [numCompleted: numCompleted])
                 }
             }
-            updateFile(file, [numCompleted: numCompleted, failedFields: fieldTypePairListToMap(failedFields as List)])
+            updateFile(file, [numCompleted: numCompleted, failedFields: fieldTypePairListToStorageMap(failedFields as List)])
         }
         finally {
             sheet.close()
@@ -266,13 +266,14 @@ class MongoImportHelperProcessor implements ImportHelperProcessor {
         int numCompleted = 0
         updateFile(file, [numCompleted: numCompleted, complete: false])
         List<FieldTypePair> pairs = fieldTypePairs
-        DBCollection collection = mongo.getDB(ImportUtilities.makeUglyName(file.get("userName"), file.get("prettyName"))).getCollection(ImportUtilities.MONGO_USERDATA_COLL_NAME)
+        DBCollection collection = mongo.getDB(getDatabaseName(file.get("userName"), file.get("prettyName"))).getCollection(ImportUtilities.MONGO_USERDATA_COLL_NAME)
         DBCursor cursor = collection.find()
         Set<FieldTypePair> failedFields = [] as Set
         cursor.each { record ->
             pairs.each { ftPair ->
                 String stringValue = record.get(ftPair.name) as String
-                if(!stringValue || (ftPair.type =~ /(?i)integer|long|double|float(?-i)/ && stringValue =~ /(?i)none|null(?-i)/ && stringValue.length() == 4)) {
+                if(!stringValue || (stringValue.length() == 4 && stringValue =~ /(?i)none|null(?-i)/) &&
+                    (ftPair.type == FieldType.INTEGER || ftPair.type == FieldType.LONG || ftPair.type == FieldType.DOUBLE || ftPair.type == FieldType.FLOAT)) {
                     return // Don't add anything if the field is null, an empty string, or a "non-existent" value for numeric types.
                 }
                 Object objectValue = ImportUtilities.convertValueToType(stringValue, ftPair.type, dateFormat)
@@ -290,7 +291,7 @@ class MongoImportHelperProcessor implements ImportHelperProcessor {
                 updateFile(file, [numCompleted: numCompleted])
             }
         }
-        updateFile(file, [complete: true, numCompleted: numCompleted, failedFields: fieldTypePairListToMap(failedFields as List)])
+        updateFile(file, [complete: true, numCompleted: numCompleted, failedFields: fieldTypePairListToStorageMap(failedFields as List)])
     }
 
     /**
@@ -312,19 +313,20 @@ class MongoImportHelperProcessor implements ImportHelperProcessor {
     private List<FieldTypePair> addRecord(DBCollection collection, List namesInOrder, List valuesInOrder, Map namesToTypes, String dateFormat) {
         List<FieldTypePair> failedFields = []
         DBObject record = new BasicDBObject()
-        for(int x = 0; x < namesInOrder.size() && x < valuesInOrder.size(); x++) {
-            String stringVal = valuesInOrder[x]
-            String type = namesToTypes.get(namesInOrder[x])
-            if(!stringVal || (type =~ /(?i)integer|long|double|float(?-i)/ && stringVal =~ /(?i)none|null(?-i)/ && stringVal.length() == 4)) {
+        for(int field = 0; field < namesInOrder.size() && field < valuesInOrder.size(); field++) {
+            String stringValue = valuesInOrder[field]
+            FieldType type = namesToTypes.get(namesInOrder[field])
+            if(!stringValue || (stringValue.length() == 4 && stringValue =~ /(?i)none|null(?-i)/) &&
+                (ftPair.type == FieldType.INTEGER || ftPair.type == FieldType.LONG || ftPair.type == FieldType.DOUBLE || ftPair.type == FieldType.FLOAT)) {
                 continue // Don't add anything if the field is null, an empty string, or a "non-existent" value for numeric types.
             }
-            Object objectVal = ImportUtilities.convertValueToType(stringVal, type, dateFormat)
-            if(objectVal instanceof ConversionFailureResult) {
-                record.put(namesInOrder[x], stringVal)
-                failedFields.add([name: namesInOrder[x], type: type] as FieldTypePair)
+            Object objectValue = ImportUtilities.convertValueToType(stringValue, type, dateFormat)
+            if(objectValue instanceof ConversionFailureResult) {
+                record.put(namesInOrder[field], stringValue)
+                failedFields.add([name: namesInOrder[field], type: type] as FieldTypePair)
             }
             else {
-                record.put(namesInOrder[x], objectVal)
+                record.put(namesInOrder[field], objectValue)
             }
         }
         collection.insert(record)
@@ -343,7 +345,7 @@ class MongoImportHelperProcessor implements ImportHelperProcessor {
         DBObject metaRecord = new BasicDBObject()
         metaRecord.append("userName", file.get("userName"))
         metaRecord.append("prettyName", file.get("prettyName"))
-        metaRecord.append("databaseName", ImportUtilities.makeUglyName(file.get("userName"), file.get("prettyName")))
+        metaRecord.append("databaseName", getDatabaseName(file.get("userName"), file.get("prettyName")))
         metaCollection.insert(metaRecord)
         updateFile(file, [complete: true])
     }
@@ -376,18 +378,30 @@ class MongoImportHelperProcessor implements ImportHelperProcessor {
     }
 
     /**
-     * Helper method that converts a list of FieldTypePairs to a map from name to type. Used because mongo doesn't know how to
-     * deserialize FieldTypePairs for storage. For instance, a FieldTypePair with name "theName" and type "theType" would be
-     * converted to a map entry [theName: "theType"]
+     * Helper method that converts a list of FieldTypePairs to a map from name to type, to more easily access the type property.
      * @param ftPairs A list of FieldTypePairs to convert to a map.
-     * @return A mapwhose keys are the names of the input FieldTypePairs and whose values are their corresponding types.
+     * @return A map whose keys are the names of the input FieldTypePairs and whose values are their corresponding types.
      */
     private Map fieldTypePairListToMap(List ftPairs) {
-        Map m = [:]
+        Map fieldTypePairMap = [:]
         ftPairs.each { ftPair ->
-            m.put(ftPair.name, ftPair.type)
+            fieldTypePairMap.put(ftPair.name, ftPair.type)
         }
-        return m
+        return fieldTypePairMap
+    }
+
+    /**
+     * Helper method that converts a list of FieldTypePairs to a map from name to type, and converts type from a FieldType to a string.
+     * Used because mongo doesn't know how to deserialize FieldTypePairs for storage but does know how to deserialize maps.
+     * @param ftPairs A list of FieldTypePairs to convert to a map.
+     * @return A map whose keys are the names of the input FieldTypePairs and whose values are their corresponding types.
+     */
+    private Map fieldTypePairListToStorageMap(List ftPairs) {
+        Map fieldTypePairMap = [:]
+        ftPairs.each { ftPair ->
+            fieldTypePairMap.put(ftPair.name, ftPair.type as String)
+        }
+        return fieldTypePairMap
     }
 
     /**
@@ -400,7 +414,7 @@ class MongoImportHelperProcessor implements ImportHelperProcessor {
      * @return True if the conditions above are met, or false otherwise.
      */
     private boolean alreadyLoaded(MongoClient mongo, GridFSDBFile file) {
-        DBCollection collection = mongo.getDB(ImportUtilities.makeUglyName(file.get("userName"), file.get("prettyName"))).getCollection(ImportUtilities.MONGO_USERDATA_COLL_NAME)
+        DBCollection collection = mongo.getDB(getDatabaseName(file.get("userName"), file.get("prettyName"))).getCollection(ImportUtilities.MONGO_USERDATA_COLL_NAME)
         return (collection && collection.count() > 0)
     }
 
@@ -415,5 +429,18 @@ class MongoImportHelperProcessor implements ImportHelperProcessor {
             file.put(key as String, value)
         }
         file.save()
+    }
+
+    /**
+     * Helper method that gets the "ugly", more unique database name created from the given username and "pretty", human-readable
+     * database name. As part of this, removes any issue characters that would cause problems as part of a mongo database name.
+     * @param userName The username associated with the ugly database name to be created.
+     * @param prettyName The "pretty", human-readable database name associated with the ugly database name to be created.
+     * @return The "ugly", more unique database name generatd from the given username and "pretty" database name.
+     */
+    private String getDatabaseName(String userName, String prettyName) {
+        String safeUserName = userName.replaceAll(/^\$|[ \t\n\.]/, "_")
+        String safePrettyName = prettyName.replaceAll(/[ \t\n\.]/, "_")
+        return ImportUtilities.makeUglyName(safeUserName, safePrettyName)
     }
 }

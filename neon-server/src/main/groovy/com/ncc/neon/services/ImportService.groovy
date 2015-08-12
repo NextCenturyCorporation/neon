@@ -66,7 +66,7 @@ class ImportService {
         String userName = user ?: UUID.randomUUID().toString()
         ImportHelper helper = importHelperFactory.getImportHelper(databaseType)
         Map jobID = helper.uploadFile(host, userName, prettyName, fileType, dataInputStream)
-        return Response.status(200).entity(JsonOutput.toJson(jobID)).build()
+        return Response.ok().entity(JsonOutput.toJson(jobID)).build()
     }
 
     /**
@@ -90,7 +90,7 @@ class ImportService {
     }
 
     /**
-     *Given user-defined type values for the fields of a file, triggers an asynchronous method that pulls that file out of storage and
+     * Given user-defined type values for the fields of a file, triggers an asynchronous method that pulls that file out of storage and
      * parses through it to get records, creating a database for them and converting the fields of its records as it goes along.
      * @param host The host on which the database is running.
      * @param databaseType The type of database in which the data is stored.
@@ -99,7 +99,7 @@ class ImportService {
      * format string to be used when attempting to convert fields to dates.
      * @return A JSON object giving returning the same job ID that was given - for more informationon its exact format, check the
      * documentation of {@link ImportHelper}.
-     */ 
+     */
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)

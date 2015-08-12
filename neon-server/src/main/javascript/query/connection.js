@@ -155,9 +155,9 @@ neon.query.Connection.prototype.executeExport = function(data, successCallback, 
 };
 
 /**
- * Sends a file to be imported to the server.
+ * Sends a file to be imported into a database and fires the callback when complete.
  * @method executeUploadFile
- * @param {FormData} data A FormData object containing the file to upload, as well as username and name of the database to upload it to.
+ * @param {FormData} data A FormData object containing the file to upload, as well as its type and a username and name of the database to upload it to.
  * @param {Function} successCallback The function to call when the request successfully completes. This function takes the server's response as a parameter.
  * @param {Function} errorCallback The function to call when an error occurs. This function takes the server's response as a parameter.
  */
@@ -166,6 +166,12 @@ neon.query.Connection.prototype.executeUploadFile = function(data, successCallba
         successCallback, errorCallback);
 };
 
+/**
+ * Checks on the status of a type-guessing operation with the given uuid and fires the callback when complete.
+ * @method executeCheckTypeGuesses
+ * @param {String} uuid The uuid associated with the type-guessing operation to check on.
+ * @param {Function} successCallback The function to call when the request successfully completes. This function takes the server's response as a parameter.
+ */
 neon.query.Connection.prototype.executeCheckTypeGuesses = function(uuid, successCallback) {
     return neon.util.ajaxUtils.doGet(
         neon.serviceUrl('importservice', 'guesses/' + encodeURIComponent(this.host_) + '/' + encodeURIComponent(this.databaseType_) + '/' + encodeURIComponent(uuid), ''), {
@@ -174,6 +180,13 @@ neon.query.Connection.prototype.executeCheckTypeGuesses = function(uuid, success
     );
 };
 
+/**
+ * Initiates the process of importing records from a file into a database and converting them from strings to more appropriate types, and fires the callback when complete.
+ * @method executeLoadFileIntoDB
+ * @param {Object} data An object that contains a date formatting string and a list of objects that contain field names and type names to go with them.
+ * @param {Function} successCallback The function to call when the request successfully completes. This function takes the server's response as a parameter.
+ * @param {Function} errorCallback The function to call when an error occurs. This function takes the server's response as a parameter.
+ */
 neon.query.Connection.prototype.executeLoadFileIntoDB = function(data, uuid, successCallback, errorCallback) {
     neon.util.ajaxUtils.doPostJSON(data, neon.serviceUrl('importservice', 'convert/' + encodeURIComponent(this.host_) + '/' + encodeURIComponent(this.databaseType_) +
         '/' + encodeURIComponent(uuid), ''), {
@@ -183,6 +196,12 @@ neon.query.Connection.prototype.executeLoadFileIntoDB = function(data, uuid, suc
     );
 };
 
+/**
+ * Checks on the status of an import and conversion operation with the given uuid and fires the callback when complete.
+ * @method executeCheckImportProgress
+ * @param {String} uuid The uuid associated with the import and conversion operation to check on.
+ * @param {Function} successCallback The function to call when the request successfully completes. This function takes the server's response as a parameter.
+ */
 neon.query.Connection.prototype.executeCheckImportProgress = function(uuid, successCallback) {
     return neon.util.ajaxUtils.doGet(
         neon.serviceUrl('importservice', 'progress/' + encodeURIComponent(this.host_) + '/' + encodeURIComponent(this.databaseType_) + '/' + encodeURIComponent(uuid), ''), {
@@ -191,7 +210,15 @@ neon.query.Connection.prototype.executeCheckImportProgress = function(uuid, succ
     );
 };
 
-neon.query.Connection.prototype.executeDropData = function(user, data, successCallback, errorCallback) {
+/**
+ * Sends a request to remove a dataset associated with the given username and satabase name, and fires the callback when complete.
+ * @method executeRemoveDataset
+ * @param {String} user The username associated with the database to drop.
+ * @param {String} data The database name associated with the database to drop.
+ * @param {Function} successCallback The function to call when the request successfully completes. This function takes the server's response as a parameter.
+ * @param {Function} errorCallback The funtion to cakk when an error occrus. This function takes the server's response as a parameter.
+ */
+neon.query.Connection.prototype.executeRemoveDataset = function(user, data, successCallback, errorCallback) {
     return neon.util.ajaxUtils.doGet(
         neon.serviceUrl('importservice', 'drop/' + encodeURIComponent(this.host_) + '/' + encodeURIComponent(this.databaseType_) + '?user=' + encodeURIComponent(user) +
             '&data=' + encodeURIComponent(data), ''), {

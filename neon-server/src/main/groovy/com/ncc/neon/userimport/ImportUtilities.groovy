@@ -46,8 +46,9 @@ class ImportUtilities {
     // a separator, then pretty name. This defines the separator.
     static final String SEPARATOR = "~"
 
-    // Various mongo-specific values. Defines the database and collection name in which to store information about user-defined data, as well as
-    // the collection name in which to put user-defined data (since every user-defined data set is given its own database).
+    // Various mongo-specific values. Defines the name of the database and collection in which to store information about user-defined data, the
+    // name of the GridFS database in which to store raw files, and the collection name in which to put user-defined data (since every user-defined
+    // data set is given its own database).
     static final String MONGO_UPLOAD_DB_NAME = "Uploads"
     static final String MONGO_META_DB_NAME = "customDataInfo"
     static final String MONGO_META_COLL_NAME = "customDataInfo"
@@ -67,8 +68,8 @@ class ImportUtilities {
  */
 
     /**
-     * Gets the next complete row of a spreadsheet pointed to by the given LineIterator. Throws an exception if there is no next
-     * complete (non-malformed) row, or if the next complete row exceeds a number of characters defined by MAX_ROW_LENGTH.
+     * Gets the next complete row of a plaintext spreadsheet (CSV, etc.) pointed to by the given LineIterator. Throws an exception if there
+     * is no next complete, non-malformed row, or if the next complete row exceeds a number of characters defined by MAX_ROW_LENGTH.
      * This length check is a protection against attempting to load an entire sheet into memory while searching for the end of a malformed
      * cell, but note that it will not work if the length limit is exceeded before ever encountering a newline character - in that case, the
      * LineIterator given as a parameter will simply continue to read until it hits the end of the file, hits a new line, or runs out of
@@ -81,7 +82,7 @@ class ImportUtilities {
             return null
         }
         String line = iter.next()
-        while(countSpecificChar(line as char[], '"' as char) % 2 != 0) {
+        while(countSpecificChar(line as char[], '\"' as char) % 2 != 0) {
             if(iter.hasNext() && line.length() < MAX_ROW_LENGTH) {
                 // next() strips out the newline character - if it was in the middle of a row, we want to add it back in.
                 line = line + "\n" + iter.next()
@@ -102,7 +103,7 @@ class ImportUtilities {
      * @param beginEndCellChar The character used to singify the beginning and ending of a single cell. Defaults to a quotation mark.
      * @return A list of the individual cells in the given row.
      */
-    static List getCellsFromRow(String line, String cellDelineator = ',', char beginEndCellChar = '"' as char) {
+    static List getCellsFromRow(String line, String cellDelineator = ',', char beginEndCellChar = '\"' as char) {
         List cells = line.split(cellDelineator)
         for(int x = cells.size() - 1; x >= 0; x--) {
             if(countSpecificChar(cells.get(x) as char[], beginEndCellChar) % 2 != 0) {
@@ -145,12 +146,12 @@ class ImportUtilities {
         fields.each { field ->
             FieldTypePair pair = null
             List valuesOfField = fieldsAndValues.get(field)
-            pair = (!pair && ImportUtilities.isListIntegers(valuesOfField)) ? new FieldTypePair(name: field, type: "Integer") : pair
-            pair = (!pair && ImportUtilities.isListLongs(valuesOfField)) ? new FieldTypePair(name: field, type: "Long") : pair
-            pair = (!pair && ImportUtilities.isListDoubles(valuesOfField)) ? new FieldTypePair(name: field, type: "Double") : pair
-            pair = (!pair && ImportUtilities.isListFloats(valuesOfField)) ? new FieldTypePair(name: field, type: "Float") : pair
-            pair = (!pair && ImportUtilities.isListDates(valuesOfField)) ? new FieldTypePair(name: field, type: "Date") : pair
-            pair = (!pair) ? new FieldTypePair(name: field, type: "String") : pair
+            pair = (!pair && ImportUtilities.isListIntegers(valuesOfField)) ? new FieldTypePair(name: field, type: FieldType.INTEGER) : pair
+            pair = (!pair && ImportUtilities.isListLongs(valuesOfField)) ? new FieldTypePair(name: field, type: FieldType.LONG) : pair
+            pair = (!pair && ImportUtilities.isListDoubles(valuesOfField)) ? new FieldTypePair(name: field, type: FieldType.DOUBLE) : pair
+            pair = (!pair && ImportUtilities.isListFloats(valuesOfField)) ? new FieldTypePair(name: field, type: FieldType.FLOAT) : pair
+            pair = (!pair && ImportUtilities.isListDates(valuesOfField)) ? new FieldTypePair(name: field, type: FieldType.DATE) : pair
+            pair = (!pair) ? new FieldTypePair(name: field, type: FieldType.STRING) : pair
             fieldsAndTypes.add(pair)
         }
         return fieldsAndTypes
@@ -176,7 +177,6 @@ class ImportUtilities {
         return true
     }
 
-
     /**
      * Checks whether or not a list of strings can be converted to longs. Returns true if every object can be, or false otherwise.
      * @param list The list of strings to check.
@@ -196,7 +196,6 @@ class ImportUtilities {
         }
         return true
     }
-
 
     /**
      * Checks whether or not a list of strings can be converted to doubles. Returns true if every object can be, or false otherwise.
@@ -265,20 +264,20 @@ class ImportUtilities {
      * @return The given input value, converted to the given type or to a string if the given type is not valid. If an invalid type is
      * given - e.g. value = "Hello" and type = "Integer" - returns a ConversionFailureResult containing the given value and type.
      */
-    static Object convertValueToType(Object value, String type, String[] datePatterns = null) {
+    static Object convertValueToType(Object value, FieldType type, String[] datePatterns = null) {
         try {
             switch(type) {
-                case "Integer":
+                case FieldType.INTEGER:
                     return Integer.parseInt(value)
-                case "Long":
+                case FieldType.LONG:
                     return Long.parseLong(value)
-                case "Double":
+                case FieldType.DOUBLE:
                     return Double.parseDouble(value)
-                case "Float":
+                case FieldType.FLOAT:
                     return Float.parseFloat(value)
-                case "Date":
+                case FieldType.DATE:
                     return DateUtils.parseDate(value, datePatterns ?: DATE_PATTERNS)
-                case "String":
+                case FieldType.STRING:
                 default:
                     return value.toString()
             }

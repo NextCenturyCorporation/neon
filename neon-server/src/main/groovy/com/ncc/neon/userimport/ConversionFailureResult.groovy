@@ -26,6 +26,6 @@ class ConversionFailureResult {
 
 	@Override
 	String toString() {
-		return "Failed to convert object ${value.toString} of type ${value.getClass()} to type $type."
+		return "Failed to convert object ${value.toString()} of type ${value.getClass()} to type ${type}."
 	}
 }

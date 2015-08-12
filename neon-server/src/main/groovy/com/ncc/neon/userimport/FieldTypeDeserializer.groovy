@@ -16,14 +16,17 @@
 
 package com.ncc.neon.userimport
 
-import groovy.transform.ToString
+import org.codehaus.jackson.JsonParser
+import org.codehaus.jackson.map.DeserializationContext
+import org.codehaus.jackson.map.JsonDeserializer
 
 /**
- * Simple structure for holding a list of FieldTypePairs and a date format string.
+ * Deserializer for FieldType enums.
  */
+class FieldTypeDeserializer extends JsonDeserializer<FieldType> {
 
-@ToString(includeNames = true)
-public class UserFieldDataBundle {
-    String dateFormat
-    List<FieldTypePair> fields
+    @Override
+    FieldType deserialize(JsonParser jp, DeserializationContext ctxt) {
+        return FieldType.fromString(jp.getText())
+    }
 }

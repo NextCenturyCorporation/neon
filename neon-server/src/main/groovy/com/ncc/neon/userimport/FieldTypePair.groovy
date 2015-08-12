@@ -13,6 +13,7 @@
  * limitations under the License.
  *
  */
+
 package com.ncc.neon.userimport
 
 import groovy.transform.ToString
@@ -23,5 +24,5 @@ import groovy.transform.ToString
 @ToString(includeNames = true)
 public class FieldTypePair {
     String name
-    String type
+    FieldType type
 }

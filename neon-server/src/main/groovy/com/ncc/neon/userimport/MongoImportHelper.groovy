@@ -42,7 +42,7 @@ class MongoImportHelper implements ImportHelper {
     @Override
     Map uploadFile(String host, String userName, String prettyName, String fileType, InputStream stream) {
         String id = UUID.randomUUID().toString()
-        MongoClient mongo = new MongoClient(host, 27017)
+        MongoClient mongo = new MongoClient(host)
         GridFS gridFS = new GridFS(mongo.getDB(ImportUtilities.MONGO_UPLOAD_DB_NAME))
         GridFSInputFile inFile = gridFS.createFile(stream)
         inFile.put("identifier", id)
@@ -57,7 +57,7 @@ class MongoImportHelper implements ImportHelper {
 
     @Override
     Map checkTypeGuessStatus(String host, String uuid) {
-        MongoClient mongo = new MongoClient(host, 27017)
+        MongoClient mongo = new MongoClient(host)
         GridFS gridFS = new GridFS(mongo.getDB(ImportUtilities.MONGO_UPLOAD_DB_NAME))
         GridFSDBFile dbFile = gridFS.findOne([identifier: uuid] as BasicDBObject)
         List guesses = fieldTypePairMapToList(dbFile.get("programGuesses"))
@@ -67,13 +67,13 @@ class MongoImportHelper implements ImportHelper {
 
     @Override
     Map loadAndConvertFields(String host, String uuid, UserFieldDataBundle bundle) {
-        mongoImportHelperProcessor.processLoadAndConvert(host, uuid, bundle.format, bundle.fields)
+        mongoImportHelperProcessor.processLoadAndConvert(host, uuid, bundle.dateFormat, bundle.fields)
         return [jobID: uuid]
     }
 
     @Override
     Map checkImportStatus(String host, String uuid) {
-        MongoClient mongo = new MongoClient(host, 27017)
+        MongoClient mongo = new MongoClient(host)
         GridFS gridFS = new GridFS(mongo.getDB(ImportUtilities.MONGO_UPLOAD_DB_NAME))
         GridFSDBFile dbFile = gridFS.findOne([identifier: uuid] as BasicDBObject)
         if(dbFile == null) {
@@ -91,7 +91,7 @@ class MongoImportHelper implements ImportHelper {
 
     @Override
     Map dropDataset(String host, String userName, String prettyName) {
-        MongoClient mongo = new MongoClient(host, 27017)
+        MongoClient mongo = new MongoClient(host)
         DB databaseToDrop = getDatabase(mongo, [userName: userName, prettyName: prettyName])
         if(databaseToDrop.getCollectionNames()) {
             databaseToDrop.dropDatabase()
@@ -131,7 +131,7 @@ class MongoImportHelper implements ImportHelper {
      * with the identifier value on the given instance of mongo.
      * @param mongo The instance of mongo on which to search for the database associated with the given identifier.
      * @param identifier A map of the form [identifier: (String)] that can be used to find the desired database.
-     *@return the DB for the database associated with the given identifier value.
+     * @return the DB for the database associated with the given identifier value.
      */
     private DB getDatabase(MongoClient mongo, Map identifier) {
         DB metaDatabase = mongo.getDB(ImportUtilities.MONGO_META_DB_NAME)
