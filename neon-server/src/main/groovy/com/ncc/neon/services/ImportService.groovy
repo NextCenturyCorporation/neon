@@ -21,6 +21,7 @@ import com.ncc.neon.userimport.ImportHelper
 import com.ncc.neon.userimport.ImportHelperFactory
 
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Component
 import com.sun.jersey.multipart.FormDataParam
 
@@ -37,6 +38,12 @@ import groovy.json.JsonOutput
 @Component
 @Path("/importservice")
 class ImportService {
+
+    // This value determines whether or not import may be used, and is determined to the value of importEnabled in
+    // neon-server/src/main/resources/app.properties. If that property is set to false, ALL import functions will
+    // return 403 Forbidden messages rather than actually doing anything.
+    @Value("\${importEnabled}")
+    boolean importEnabled
 
     @Autowired
     ImportHelperFactory importHelperFactory
@@ -63,6 +70,9 @@ class ImportService {
                                @FormDataParam("data") String prettyName,
                                @FormDataParam("type") String fileType,
                                @FormDataParam("file") InputStream dataInputStream) {
+        if(!importEnabled) {
+            return Response.status(403).build()
+        }
         String userName = user ?: UUID.randomUUID().toString()
         ImportHelper helper = importHelperFactory.getImportHelper(databaseType)
         Map jobID = helper.uploadFile(host, userName, prettyName, fileType, dataInputStream)
@@ -84,6 +94,9 @@ class ImportService {
     public Response checkTypeGuessStatus(@PathParam("host") String host,
                                              @PathParam("databaseType") String databaseType,
                                              @PathParam("uuid") String jobUUID) {
+        if(!importEnabled) {
+            return Response.status(403).build()
+        }
         ImportHelper helper = importHelperFactory.getImportHelper(databaseType)
         Map guesses = helper.checkTypeGuessStatus(host, jobUUID)
         return Response.ok().entity(JsonOutput.toJson(guesses)).build()
@@ -108,6 +121,9 @@ class ImportService {
                                          @PathParam("databaseType") String databaseType,
                                          @PathParam("uuid") String uuid,
                                          UserFieldDataBundle data) {
+        if(!importEnabled) {
+            return Response.status(403).build()
+        }
         ImportHelper helper = importHelperFactory.getImportHelper(databaseType)
         Map jobID = helper.loadAndConvertFields(host, uuid, data)
         return Response.ok(JsonOutput.toJson(jobID)).build()
@@ -127,6 +143,9 @@ class ImportService {
     public Response checkImportStatus(@PathParam("host") String host,
                                       @PathParam("databaseType") String databaseType,
                                       @PathParam("uuid") String uuid) {
+        if(!importEnabled) {
+            return Response.status(403).build()
+        }
         ImportHelper helper = importHelperFactory.getImportHelper(databaseType)
         Map importStatus = helper.checkImportStatus(host, uuid)
         return Response.ok().entity(JsonOutput.toJson(importStatus)).build()
@@ -148,6 +167,10 @@ class ImportService {
                               @PathParam("databaseType") String databaseType,
                               @QueryParam("user") String userName,
                               @QueryParam("data") String prettyName) {
+        println importEnabled
+        if(!importEnabled) {
+            return Response.status(403).build()
+        }
         ImportHelper helper = importHelperFactory.getImportHelper(databaseType)
         Map success = helper.dropDataset(host, userName, prettyName)
         return Response.ok().entity(JsonOutput.toJson(success)).build()
