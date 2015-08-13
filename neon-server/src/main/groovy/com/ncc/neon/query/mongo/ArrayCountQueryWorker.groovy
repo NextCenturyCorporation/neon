@@ -60,13 +60,8 @@ class ArrayCountQueryWorker extends AbstractMongoQueryWorker {
                 mongoQuery.query.aggregates[1..mongoQuery.query.aggregates.size()-1].toArray(new DBObject[0])).results().iterator()
         while (results.hasNext()) {
             DBObject row = results.next()
+            // Don't convert the keys to strings because users wouldn't be able to set filters on the keys (since they don't match the values in the database).
             def key = row.get('_id')
-            if(key instanceof Number) {
-                // Use BigDecimal to convert numbers to strings and avoid scientific notation.
-                key = new BigDecimal(key).toPlainString()
-            } else {
-                key = (String) key
-            }
             int count = ((Number) row.get('count')).intValue()
             arrayCounts[key] = count
         }
