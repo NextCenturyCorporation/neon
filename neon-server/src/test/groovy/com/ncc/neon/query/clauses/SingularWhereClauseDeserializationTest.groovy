@@ -44,8 +44,44 @@ class SingularWhereClauseDeserializationTest {
     }
 
     @Test
-    void "date deserialization"(){
-        SingularWhereClause deserialized = deserializeWithRhsOf("2013-10-11")
+    void "date string deserialization"(){
+        SingularWhereClause deserialized = deserializeWithRhsOf("2013-10-11T01:42:59Z")
+        assert deserialized.rhs instanceof Date
+    }
+
+    @Test
+    void "partial date string is not deserialized"(){
+        SingularWhereClause deserialized = deserializeWithRhsOf("2013-10-11T01:42")
+        assert deserialized.rhs == "2013-10-11T01:42"
+    }
+
+    @Test
+    void "object string deserialization"(){
+        SingularWhereClause deserialized = deserializeWithRhsOf(['value': 'str'])
+        assert deserialized.rhs == "str"
+    }
+
+    @Test
+    void "object with date string deserialization"(){
+        SingularWhereClause deserialized = deserializeWithRhsOf(['value': '2012-11-10T09:08:07Z'])
+        assert deserialized.rhs instanceof Date
+    }
+
+    @Test
+    void "object with unknown type deserialization"(){
+        SingularWhereClause deserialized = deserializeWithRhsOf(['value': 'str', 'type': 'foo'])
+        assert deserialized.rhs == "str"
+    }
+
+    @Test
+    void "object with date type deserialization"(){
+        SingularWhereClause deserialized = deserializeWithRhsOf(['value': '2012-11-10', 'type': 'date'])
+        assert deserialized.rhs instanceof Date
+    }
+
+    @Test
+    void "object with date type deserialization is case insensitive"(){
+        SingularWhereClause deserialized = deserializeWithRhsOf(['value': '2012-11-10', 'type': 'dAtE'])
         assert deserialized.rhs instanceof Date
     }
 

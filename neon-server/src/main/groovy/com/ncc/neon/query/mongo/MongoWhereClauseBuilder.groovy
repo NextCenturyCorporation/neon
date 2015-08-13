@@ -23,6 +23,8 @@ import com.ncc.neon.query.clauses.WithinDistanceClause
 import com.ncc.neon.query.clauses.GeoWithinClause
 import com.ncc.neon.query.clauses.GeoIntersectionClause
 
+import java.util.regex.Pattern
+
 
 /**
  * Creates a WHERE clause for mongodb
@@ -31,7 +33,7 @@ class MongoWhereClauseBuilder {
 
     /** Maps an operator string to the mongo driver equivalent */
     private static final OPERATOR_MAPPING = ['<': '$lt', '<=': '$lte', '>': '$gt', '>=': '$gte', '!=': '$ne',
-            'in': '$in', 'notin': '$nin', 'contains': '$regex']
+            'in': '$in', 'notin': '$nin', 'not': '$not']
 
     private MongoWhereClauseBuilder() {
         // utility class, no public constructor needed
@@ -45,8 +47,12 @@ class MongoWhereClauseBuilder {
         }
 
         // no operator actually used for equals - it's just a simple key value pair
-        if (clause.operator == '=') {
+        if(clause.operator == '=') {
             rhs = rhsVal
+        } else if(clause.operator == 'contains') {
+            rhs = Pattern.compile(rhsVal)
+        } else if(clause.operator == 'notcontains' || clause.operator == 'not contains') {
+            rhs = new BasicDBObject(OPERATOR_MAPPING['not'], Pattern.compile(rhsVal))
         } else {
             def opString = OPERATOR_MAPPING[clause.operator]
             rhs = new BasicDBObject(opString, rhsVal)

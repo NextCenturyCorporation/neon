@@ -30,6 +30,8 @@ class Filter implements Serializable {
     String databaseName
     String tableName
 
+    String filterName
+
     WhereClause whereClause
 
 }
