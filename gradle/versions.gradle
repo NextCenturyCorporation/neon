@@ -44,7 +44,7 @@ project.ext {
     mongoDriverVersion = "2.13.1"
     jodaTimeVersion = "2.1"
     c3p0Version = "0.9.5"
-    jacksonVersion = "1.9.2"
+    jacksonVersion = "1.9.13"
     poiVersion = "3.12"
     ooxmlSchemasVersion="1.0"
 }
