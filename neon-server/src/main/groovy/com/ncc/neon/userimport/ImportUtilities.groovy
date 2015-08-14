@@ -68,69 +68,6 @@ class ImportUtilities {
  */
 
     /**
-     * Gets the next complete row of a plaintext spreadsheet (CSV, etc.) pointed to by the given LineIterator. Throws an exception if there
-     * is no next complete, non-malformed row, or if the next complete row exceeds a number of characters defined by MAX_ROW_LENGTH.
-     * This length check is a protection against attempting to load an entire sheet into memory while searching for the end of a malformed
-     * cell, but note that it will not work if the length limit is exceeded before ever encountering a newline character - in that case, the
-     * LineIterator given as a parameter will simply continue to read until it hits the end of the file, hits a new line, or runs out of
-     * memory if the string it is writing to gets too large.
-     * @param iter The LineIterator pointing to the spreadsheet from which to get the next row.
-     * @return The next complete row of the spreadsheet pointed to by the given LineIterator.
-     */
-    static String getNextWholeRow(LineIterator iter) {
-        if(!iter.hasNext()) {
-            return null
-        }
-        String line = iter.next()
-        while(countSpecificChar(line as char[], '\"' as char) % 2 != 0) {
-            if(iter.hasNext() && line.length() < MAX_ROW_LENGTH) {
-                // next() strips out the newline character - if it was in the middle of a row, we want to add it back in.
-                line = line + "\n" + iter.next()
-            }
-            else {
-                throw new BadSheetException("Invalid data. End of file or maximum legal row length reached with a cell left unterminated (no ending quotation mark).")
-            }
-        }
-        return line
-    }
-
-    /**
-     * Splits a string containing the contents of one row of a spreadsheet into multiple cells. Cell boundaries are determined by a given delineator string,
-     * and a char is given as the start and end point of individual cells. E.g. in the row ["Hello", "goodbye"\n] comma would be the delineator, and
-     * quotation marks would be the cell start and end point character. Comma and quotation marks are the default values for these, respectively.
-     * @param lne The spreadsheet row to split into cells.
-     * @param cellDelineator The string that signifies transition from one cell to the next. Defaults to a comma.
-     * @param beginEndCellChar The character used to singify the beginning and ending of a single cell. Defaults to a quotation mark.
-     * @return A list of the individual cells in the given row.
-     */
-    static List getCellsFromRow(String line, String cellDelineator = ',', char beginEndCellChar = '\"' as char) {
-        List cells = line.split(cellDelineator)
-        for(int x = cells.size() - 1; x >= 0; x--) {
-            if(countSpecificChar(cells.get(x) as char[], beginEndCellChar) % 2 != 0) {
-                // If the split occured in the middle of a cell, stick the parts together and add the delineator back in.
-                cells.set(x - 1, cells.get(x - 1) + cellDelineator + cells.remove(x))
-            }
-        }
-        return cells
-    }
-
-    /**
-     * Counts the instances of a given character in a char array.
-     * @param letters The char array in which to search for the given character.
-     * @param delineator The character to search for in the given array.
-     * @return The number of times the specified character was found in the given char array.
-     */
-    static int countSpecificChar(char[] letters, char delineator) {
-        int count = 0
-        for(int x = 0; x < letters.length; x++) {
-            if(letters[x] == delineator) {
-                count++
-            }
-        }
-        return count
-    }
-
-    /**
      * Takes a map of field names to lists of values for those field names (e.g. [grade: ['A', 'B', 'C', 'D'], gpaValue: ['4', '3', '2', '1']])
      * and attempts to determine what type of data each list of field values contains. Returns a list of {@link FieldTypePair}s, which simply
      * relate field name to the guessed type of data in that field.

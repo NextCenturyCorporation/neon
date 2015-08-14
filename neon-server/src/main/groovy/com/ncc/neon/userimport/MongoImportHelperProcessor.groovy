@@ -18,7 +18,10 @@ package com.ncc.neon.userimport
 
 import com.ncc.neon.userimport.exceptions.BadSheetException
 import com.ncc.neon.userimport.exceptions.UnsupportedFiletypeException
+import com.ncc.neon.userimport.readers.SheetReader
+import com.ncc.neon.userimport.readers.SheetReaderFactory
 
+import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.scheduling.annotation.Async
 import org.springframework.stereotype.Component
 
@@ -48,6 +51,9 @@ class MongoImportHelperProcessor implements ImportHelperProcessor {
     // do it every so many records. For now, 137 was chosen because it's a prime number whose multiples look fairly random.
     private static final int UPDATE_FREQUENCY = 137
 
+    @Autowired
+    SheetReaderFactory sheetReaderFactory
+
     @Async
     @Override
     void processTypeGuesses(String host, String uuid) {
@@ -67,6 +73,7 @@ class MongoImportHelperProcessor implements ImportHelperProcessor {
                     throw new UnsupportedFiletypeException("Can't parse files of type ${fileType}!")
             }
         }
+        catch(Exception e){e.printStackTrace()}
         finally {
             mongo.close()
         }
@@ -78,27 +85,25 @@ class MongoImportHelperProcessor implements ImportHelperProcessor {
      * @param file The GridFSDBFile storing the CSV file for which to make field type guesses.
      */
     private void processTypeGuessesCSV(GridFSDBFile file) {
-        LineIterator iter = IOUtils.lineIterator(file.getInputStream(), "UTF-8")
-        String row = ImportUtilities.getNextWholeRow(iter)
-        if(!row || !iter.hasNext()) {
-            throw new BadSheetException("No data in this file to process!")
+        SheetReader reader = sheetReaderFactory.getSheetReader("csv").initialize(file.getInputStream())
+        if(!reader) {
+            throw new BadSheetException("No records in this file to read!")
         }
-        List fields = ImportUtilities.getCellsFromRow(row)
+        List fields = reader.getSheetFieldNames()
         Map fieldsAndValues = [:]
         fields.each { field ->
             fieldsAndValues.put(field, [])
         }
-        row = ImportUtilities.getNextWholeRow(iter)
-        for(int counter = 0; counter < ImportUtilities.NUM_TYPE_CHECKED_RECORDS && row; counter++) {
-            List rowValues = ImportUtilities.getCellsFromRow(row)
-            for(int field = 0; field < fields.size() && field < rowValues.size(); field++) {
-                if(rowValues.get(field)) { // Only add the value to the map if it's non-null and not an empty string.
-                    fieldsAndValues.get(fields.get(field)).add(rowValues.get(field))
+        for(int counter = 0; counter < ImportUtilities.NUM_TYPE_CHECKED_RECORDS && reader.hasNext(); counter++) {
+            List record = reader.next()
+            for(int field = 0; field < fields.size() && field < record.size(); field++) {
+                if(record[field]) {
+                    fieldsAndValues[(fields[field])] << record[field]
                 }
             }
-            row = ImportUtilities.getNextWholeRow(iter)
         }
         updateFile(file, [programGuesses: fieldTypePairListToStorageMap(ImportUtilities.getTypeGuesses(fieldsAndValues))])
+        reader.close()
     }
 
     /**
@@ -107,32 +112,29 @@ class MongoImportHelperProcessor implements ImportHelperProcessor {
      * @param file The GridFSDBFile storing the XLSX file for which to make field type guesses.
      */
     private void processTypeGuessesExcel(GridFSDBFile file) {
-        StreamingReader sheet
+        SheetReader reader
         try {
-            sheet = StreamingReader.builder().sheetIndex(0).read(file.getInputStream())
-            Iterator iterator = sheet.iterator()
-            if(!iterator.hasNext()) { // An initial call to hasNext is needed to "prime" the sheet iterator, so we may as well make use of the result.
-                throw new BadSheetException("No data in this file to process!")
+            reader = sheetReaderFactory.getSheetReader("xlsx").initialize(file.getInputStream())
+            if(!reader) {
+                throw new BadSheetException("No records in this file to read!")
             }
-            List fields = []
+            List fields = reader.getSheetFieldNames()
             Map fieldsAndValues = [:]
-            iterator.next().each { cell ->
-                fields << cell.getContents().toString()
-                fieldsAndValues.put(cell.getContents().toString(), [])
+            fields.each { field ->
+                fieldsAndValues.put(field, [])
             }
-            StreamingRow row = iterator.next()
-            for(int count = 0; count < ImportUtilities.NUM_TYPE_CHECKED_RECORDS && row; count++) {
-                for(int col = 0; col < fields.size(); col++) {
-                    if(row.getCell(col)) { // Only add the value to the map if it's non-null.
-                        fieldsAndValues.get(fields.get(col)).add(row.getCell(col).getContents().toString())
+            for(int count = 0; count < ImportUtilities.NUM_TYPE_CHECKED_RECORDS && reader.hasNext(); count++) {
+                List record = reader.next()
+                for(int field = 0; field < fields.size(); field++) {
+                    if(record[field]) {
+                        fieldsAndValues[(fields[field])] << record[field]
                     }
                 }
-                row = iterator.hasNext() ? iterator.next() : null
             }
             updateFile(file, [programGuesses: fieldTypePairListToStorageMap(ImportUtilities.getTypeGuesses(fieldsAndValues))])
         }
         finally {
-            sheet.close()
+            reader?.close()
         }
     }
 
@@ -160,6 +162,7 @@ class MongoImportHelperProcessor implements ImportHelperProcessor {
                     throw new UnsupportedFiletypeException("Can't parse files of type ${fileType}!")
             }
         }
+        catch(Exception e){e.printStackTrace()}
         finally {
             mongo.close()
         }
@@ -179,32 +182,26 @@ class MongoImportHelperProcessor implements ImportHelperProcessor {
      */
     private void processLoadAndConvertCSV(MongoClient mongo, GridFSDBFile file, String dateFormat, List<FieldTypePair> fieldTypePairs) {
         int numCompleted = 0
-        updateFile(file, [numCompleted: numCompleted])
-        LineIterator iter = IOUtils.lineIterator(file.getInputStream(), "UTF-8")
+        SheetReader reader = sheetReaderFactory.getSheetReader("csv").initialize(file.getInputStream())
+        if(!reader) {
+            throw new BadSheetException("No records in this file to read!")
+        }
         Map fieldsToTypes = fieldTypePairListToMap(fieldTypePairs)
         Set<FieldTypePair> failedFields = [] as Set
         DBCollection collection = mongo.getDB(getDatabaseName(file.get("userName"), file.get("prettyName"))).getCollection(ImportUtilities.MONGO_USERDATA_COLL_NAME)
-
-        String row = ImportUtilities.getNextWholeRow(iter)
-        if(!row || !iter.hasNext()) {
-            throw new BadSheetException("No data in this file to process!")
-        }
-        List fieldNamesInOrder = ImportUtilities.getCellsFromRow(row)
-        row = ImportUtilities.getNextWholeRow(iter)
-        while(row) {
-            List values = ImportUtilities.getCellsFromRow(row)
-            List<FieldTypePair> failed = addRecord(collection, fieldNamesInOrder, values, fieldsToTypes, dateFormat)
-            failed.each { ftPair ->
+        List fieldNamesInOrder = reader.getSheetFieldNames()
+        reader.each { record ->
+            addRecord(collection, fieldNamesInOrder, record, fieldsToTypes, dateFormat).each { ftPair ->
                 failedFields << ftPair
                 fieldsToTypes.put(ftPair.name, FieldType.STRING) // If a field failed to convert, set its type to string to prevent exceptions being thrown for that field on future records.
             }
-            row = ImportUtilities.getNextWholeRow(iter)
             if(numCompleted++ % UPDATE_FREQUENCY == 0) {
                 updateFile(file, [numCompleted: numCompleted])
             }
         }
         updateFile(file, [numCompleted: numCompleted, failedFields: fieldTypePairListToStorageMap(failedFields as List)])
         addMetadata(mongo, file)
+        reader.close()
     }
 
     /**
@@ -221,21 +218,19 @@ class MongoImportHelperProcessor implements ImportHelperProcessor {
      * @param fieldTypePairs A list of field names and what types they should be converted to.
      */
     private void processLoadAndConvertExcel(MongoClient mongo, GridFSDBFile file, String dateFormat, List<FieldTypePair> fieldTypePairs) {
-        StreamingReader sheet
+        SheetReader reader
         try {
-            sheet = StreamingReader.builder().sheetIndex(0).read(file.getInputStream())
+            reader = sheetReaderFactory.getSheetReader("xlsx").initialize(file.getInputStream())
+            if(!reader) {
+                throw new BadSheetException("No records in this file to read!")
+            }
             int numCompleted = 0
             Map fieldsToTypes = fieldTypePairListToMap(fieldTypePairs)
             Set<FieldTypePair> failedFields = [] as Set
             DBCollection collection = mongo.getDB(getDatabaseName(file.get("userName"), file.get("prettyName"))).getCollection(ImportUtilities.MONGO_USERDATA_COLL_NAME)
-            Iterator iterator = sheet.iterator()
-            if(!iterator.hasNext()) { // An initial call to hasNext is needed to "prime" the sheet iterator, so we may as well make use of the result.
-                throw new BadSheetException("No data in this file to process!")
-            }
-            List fieldNamesInOrder = getCellsFromExcelRow(iterator.next(), -1, true)
-            iterator.each { row ->
-                List values = getCellsFromExcelRow(row, fieldNamesInOrder.size())
-                addRecord(collection, fieldNamesInOrder, values, fieldsToTypes, dateFormat).each { failedFTPair ->
+            List fieldNamesInOrder = reader.getSheetFieldNames()
+            reader.each { record ->
+                addRecord(collection, fieldNamesInOrder, record, fieldsToTypes, dateFormat).each { failedFTPair ->
                     failedFields << failedFTPair
                     fieldsToTypes.put(failedFTPair.name, FieldType.STRING) // If a field failed to convert, set its type to string to avoid exceptions on future records.
                 }
@@ -244,11 +239,11 @@ class MongoImportHelperProcessor implements ImportHelperProcessor {
                 }
             }
             updateFile(file, [numCompleted: numCompleted, failedFields: fieldTypePairListToStorageMap(failedFields as List)])
+            addMetadata(mongo, file)
         }
         finally {
-            sheet.close()
+            reader?.close()
         }
-        addMetadata(mongo, file)
     }
 
     /**
@@ -348,33 +343,6 @@ class MongoImportHelperProcessor implements ImportHelperProcessor {
         metaRecord.append("databaseName", getDatabaseName(file.get("userName"), file.get("prettyName")))
         metaCollection.insert(metaRecord)
         updateFile(file, [complete: true])
-    }
-
-    /**
-     * Helper method that gets a list of the contents of cells in a StreamingRow. If usingIterator is false, this is done numerically
-     * and stops after the specified number of columns. If usingIterator is true, gets every existent cell value, regardless of position,
-     * and ignores any blank cells.
-     * For example, if the row given was "1, 2, 3, , 5, , , 8" then getCellsFromExcelRow(row, 6) would return [1, 2, 3, null, 5, null],
-     * while getCellsFromExcelRow(row, 6, true) would return [1, 2, 3, 5, 8].
-     * @param row The row from which to get cells.
-     * @param numberOfColumns The number of columns to get cells from, starting from 0, before stopping if not using an iterator. If
-     * this number is negative, simply returns an empty list.
-     * @param usingIterator Whether or not to use an iterator. If true, uses an iterator and so ignores blank cells and gathers from
-     * any number of columns. If false, does not ignore lank cells and only gathers from the given number of columns. Defaults to false.
-     */
-    private List getCellsFromExcelRow(StreamingRow row, int numberOfColumns, boolean usingIterator = false) {
-        List toReturn = []
-        if(usingIterator) {
-            row.asList().collect { cell ->
-                 toReturn << cell.getContents().toString()
-            }
-        }
-        else {
-            for(int col = 0; col < numberOfColumns; col++) {
-                toReturn << row.getCell(col)?.getContents()?.toString()
-            }
-        }
-        return toReturn
     }
 
     /**

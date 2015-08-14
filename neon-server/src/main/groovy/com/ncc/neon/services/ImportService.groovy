@@ -167,7 +167,6 @@ class ImportService {
                               @PathParam("databaseType") String databaseType,
                               @QueryParam("user") String userName,
                               @QueryParam("data") String prettyName) {
-        println importEnabled
         if(!importEnabled) {
             return Response.status(403).build()
         }
