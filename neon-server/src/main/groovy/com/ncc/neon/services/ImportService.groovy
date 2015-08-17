@@ -42,8 +42,11 @@ class ImportService {
     // This value determines whether or not import may be used, and is determined to the value of importEnabled in
     // neon-server/src/main/resources/app.properties. If that property is set to false, ALL import functions will
     // return 403 Forbidden messages rather than actually doing anything.
-    @Value("\${importEnabled}")
-    boolean importEnabled
+    @SuppressWarnings("GStringExpressionWithinString")
+    @Value('\${importEnabled}')
+    String importPropertyValue
+
+    boolean importEnabled = (Boolean)importPropertyValue
 
     @Autowired
     ImportHelperFactory importHelperFactory

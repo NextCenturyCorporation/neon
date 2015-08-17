@@ -14,15 +14,19 @@
  *
  */
 
-package com.ncc.neon.userimport
+package com.ncc.neon.userimport.types
 
-import groovy.transform.ToString
+import org.codehaus.jackson.JsonParser
+import org.codehaus.jackson.map.DeserializationContext
+import org.codehaus.jackson.map.JsonDeserializer
 
 /**
- * Simple container that holds a field name and the type of data associated with that field name.
+ * Deserializer for FieldType enums.
  */
-@ToString(includeNames = true)
-public class FieldTypePair {
-    String name
-    FieldType type
+class FieldTypeDeserializer extends JsonDeserializer<FieldType> {
+
+    @Override
+    FieldType deserialize(JsonParser jp, DeserializationContext ctxt) {
+        return FieldType.fromString(jp.getText())
+    }
 }

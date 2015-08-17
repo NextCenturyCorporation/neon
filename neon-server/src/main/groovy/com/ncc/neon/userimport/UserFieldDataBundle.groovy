@@ -18,6 +18,8 @@ package com.ncc.neon.userimport
 
 import groovy.transform.ToString
 
+import com.ncc.neon.userimport.types.FieldTypePair
+
 /**
  * Simple structure for holding a list of FieldTypePairs and a date format string.
  */

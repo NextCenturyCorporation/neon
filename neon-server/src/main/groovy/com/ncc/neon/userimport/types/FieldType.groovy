@@ -14,9 +14,8 @@
  *
  */
 
-package com.ncc.neon.userimport
+package com.ncc.neon.userimport.types
 
-import com.ncc.neon.query.jackson.SortOrderDeserializer
 import org.codehaus.jackson.map.annotate.JsonDeserialize
 
 /**

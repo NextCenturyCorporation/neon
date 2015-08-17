@@ -30,6 +30,9 @@ import com.mongodb.gridfs.GridFS
 import com.mongodb.gridfs.GridFSInputFile
 import com.mongodb.gridfs.GridFSDBFile
 
+import com.ncc.neon.userimport.types.ImportUtilities
+import com.ncc.neon.userimport.types.FieldTypePair
+
 /**
  * Implements methods to add, remove, and convert fields of records in a mongo database.
  */

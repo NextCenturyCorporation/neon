@@ -18,6 +18,8 @@ package com.ncc.neon.userimport
 
 import org.springframework.scheduling.annotation.Async
 
+import com.ncc.neon.userimport.types.FieldTypePair
+
 /**
  * Provides asynchronous methods for use by import helpers to work on a data store.
  */

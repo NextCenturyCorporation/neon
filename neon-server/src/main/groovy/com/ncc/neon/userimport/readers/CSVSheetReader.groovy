@@ -16,7 +16,7 @@
 
 package com.ncc.neon.userimport.readers
 
-import com.ncc.neon.userimport.ImportUtilities
+import com.ncc.neon.userimport.types.ImportUtilities
 import com.ncc.neon.userimport.exceptions.BadSheetException
 
 import org.apache.commons.io.IOUtils
@@ -100,7 +100,7 @@ class CSVSheetReader extends SheetReader {
      */
     private List cellsFromRow(String row, String cellDivider = ",", char textDelimiter = "\"" as char) {
         if(!row) {
-            return null
+            return []
         }
         List cells = row.split(cellDivider)
         for(int step = cells.size() - 1; step >= 0; step--) {

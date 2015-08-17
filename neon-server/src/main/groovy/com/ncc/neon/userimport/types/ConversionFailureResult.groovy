@@ -14,7 +14,7 @@
  *
  */
 
-package com.ncc.neon.userimport
+package com.ncc.neon.userimport.types
 
 /**
  * Simple container that denotes that a given value failed to be converted to a given type. Used by the convertValueToType method of ImportUtilities.

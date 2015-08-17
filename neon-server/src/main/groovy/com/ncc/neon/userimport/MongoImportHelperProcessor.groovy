@@ -25,9 +25,6 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.scheduling.annotation.Async
 import org.springframework.stereotype.Component
 
-import org.apache.commons.io.IOUtils
-import org.apache.commons.io.LineIterator
-
 import com.mongodb.MongoClient
 import com.mongodb.DB
 import com.mongodb.DBCollection
@@ -37,8 +34,14 @@ import com.mongodb.BasicDBObject
 import com.mongodb.gridfs.GridFS
 import com.mongodb.gridfs.GridFSDBFile
 
-import com.monitorjbl.xlsx.StreamingReader
-import com.monitorjbl.xlsx.impl.StreamingRow
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
+
+import com.ncc.neon.userimport.types.ImportUtilities
+import com.ncc.neon.userimport.types.ConversionFailureResult
+import com.ncc.neon.userimport.types.FieldType
+import com.ncc.neon.userimport.types.FieldTypePair
+
 
 /**
  * Houses the asynchronous methods that do the actual labor of importing data into mongo data stores, as well as a number
@@ -50,6 +53,8 @@ class MongoImportHelperProcessor implements ImportHelperProcessor {
     // For use by the various loadAndConvert methods. Updating loading/conversion progress is relatively expensive, so only
     // do it every so many records. For now, 137 was chosen because it's a prime number whose multiples look fairly random.
     private static final int UPDATE_FREQUENCY = 137
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(MongoImportHelperProcessor)
 
     @Autowired
     SheetReaderFactory sheetReaderFactory
@@ -72,9 +77,9 @@ class MongoImportHelperProcessor implements ImportHelperProcessor {
                 default:
                     throw new UnsupportedFiletypeException("Can't parse files of type ${fileType}!")
             }
-        }
-        catch(Exception e){e.printStackTrace()}
-        finally {
+        } catch(UnsupportedFiletypeException e){
+            LOGGER.error(e.getMessage(), e)
+        } finally {
             mongo.close()
         }
     }
@@ -161,9 +166,9 @@ class MongoImportHelperProcessor implements ImportHelperProcessor {
                     mongo.close()
                     throw new UnsupportedFiletypeException("Can't parse files of type ${fileType}!")
             }
-        }
-        catch(Exception e){e.printStackTrace()}
-        finally {
+        } catch(UnsupportedFiletypeException e){
+            LOGGER.error(e.getMessage(), e)
+        } finally {
             mongo.close()
         }
     }
@@ -274,8 +279,7 @@ class MongoImportHelperProcessor implements ImportHelperProcessor {
                 Object objectValue = ImportUtilities.convertValueToType(stringValue, ftPair.type, dateFormat)
                 if(objectValue instanceof ConversionFailureResult) {
                     failedFields.add(ftPair)
-                }
-                else {
+                } else {
                     record.put(ftPair.name, objectValue)
                 }
             }

@@ -14,13 +14,10 @@
  *
  */
 
-package com.ncc.neon.userimport
-
-import com.ncc.neon.userimport.exceptions.BadSheetException
+package com.ncc.neon.userimport.types
 
 import java.text.ParseException
 
-import org.apache.commons.io.LineIterator
 import org.apache.commons.lang.time.DateUtils
 
 /**
