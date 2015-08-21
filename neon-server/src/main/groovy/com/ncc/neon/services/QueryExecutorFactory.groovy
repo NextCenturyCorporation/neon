@@ -38,6 +38,9 @@ class QueryExecutorFactory {
     @Resource
     private QueryExecutor sparkSQLQueryExecutor
 
+    @Resource
+    private QueryExecutor elasticSearchQueryExecutor
+
     @Autowired
     private ConnectionManager connectionManager
 
@@ -55,6 +58,8 @@ class QueryExecutorFactory {
                 return mongoQueryExecutor
             case DataSources.sparksql:
                 return sparkSQLQueryExecutor
+            case DataSources.elasticsearch:
+                return elasticSearchQueryExecutor
             default:
                 throw new NeonConnectionException("Unsupported database type ${databaseType}")
         }
