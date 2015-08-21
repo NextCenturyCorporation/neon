@@ -25,4 +25,6 @@ import groovy.transform.ToString
 public class FieldTypePair {
     String name
     FieldType type
+    // If FieldType is OBJECT, objectFTPairs is a list of FieldTypePair objects for this object's values
+    List<FieldTypePair> objectFTPairs
 }

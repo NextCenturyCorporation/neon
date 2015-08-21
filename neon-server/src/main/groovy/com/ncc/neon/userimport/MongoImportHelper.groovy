@@ -123,7 +123,18 @@ class MongoImportHelper implements ImportHelper {
         List keys = fieldGuesses?.keySet() as List
         List toReturn = []
         keys.each { key ->
-            toReturn.add(new FieldTypePair(name: key, type: fieldGuesses.get(key)))
+            if(fieldGuesses.get(key)  instanceof List) {
+                toReturn.add(new FieldTypePair(
+                    name: key,
+                    type: fieldGuesses.get(key)[0],
+                    objectFTPairs: fieldTypePairMapToList(fieldGuesses.get(key)[1])
+                ))
+            } else {
+                toReturn.add(new FieldTypePair(
+                    name: key,
+                    type: fieldGuesses.get(key)
+                ))
+            }
         }
         return toReturn
     }

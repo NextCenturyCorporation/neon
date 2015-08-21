@@ -85,6 +85,7 @@ class ImportUtilities {
             pair = (!pair && ImportUtilities.isListDoubles(valuesOfField)) ? new FieldTypePair(name: field, type: FieldType.DOUBLE) : pair
             pair = (!pair && ImportUtilities.isListFloats(valuesOfField)) ? new FieldTypePair(name: field, type: FieldType.FLOAT) : pair
             pair = (!pair && ImportUtilities.isListDates(valuesOfField)) ? new FieldTypePair(name: field, type: FieldType.DATE) : pair
+            pair = (!pair && ImportUtilities.isListObjects(valuesOfField)) ? new FieldTypePair(name: field, type: FieldType.OBJECT, objectFTPairs: ImportUtilities.getTypeGuesses(ImportUtilities.retrieveObjectFieldsAndValues(valuesOfField as String))) : pair
             pair = (!pair) ? new FieldTypePair(name: field, type: FieldType.STRING) : pair
             fieldsAndTypes.add(pair)
         }
@@ -188,17 +189,41 @@ class ImportUtilities {
     }
 
     /**
-     * Attempts to convert the given object to the given type. Has support for integer, long, double, float, date, and string conversion.
+     * Checks whether or not a list of strings can be converted to objects. Returns true if every string can be, or false otherwise.
+     * @param list The list of strings to test.
+     * @return Whether or not all strings in the list can be converted to objects.
+     */
+    static boolean isListObjects(List list) {
+        try {
+            def areObjects = true;
+            list.each { value ->
+                value = ImportUtilities.removeQuotations(value);
+                if(value.equalsIgnoreCase("none") || value.equalsIgnoreCase("null") || value.equalsIgnoreCase("")) {
+                    return
+                } else if(Eval.me(value) instanceof Map || Eval.me(value) instanceof List) {
+                    return
+                } else {
+                    areObjects = false
+                }
+            }
+            return areObjects
+        } catch(Exception e) {
+            return false
+        }
+    }
+
+    /**
+     * Attempts to convert the given string to the given type. Has support for integer, long, double, float, date, and string conversion.
      * If an unsupported type is given, defaults to string conversion. Also takes an optional string array containing date string matchers,
      * for conversion to date.
-     * @param value The object to attempt to convert.
+     * @param value The string to attempt to convert.
      * @param type The type to which to attempt to convert the given object.
      * @param datePatterns An optional parameter giving a list of date strings to use when attempting to convert to a date. Defaults to null.
      * If no list of strings is given, defaults to using a list of date strings defined by DATE_PATTERNS.
      * @return The given input value, converted to the given type or to a string if the given type is not valid. If an invalid type is
      * given - e.g. value = "Hello" and type = "Integer" - returns a ConversionFailureResult containing the given value and type.
      */
-    static Object convertValueToType(Object value, FieldType type, String[] datePatterns = null) {
+    static Object convertValueToType(String value, FieldType type, String[] datePatterns = null) {
         try {
             switch(type) {
                 case FieldType.INTEGER:
@@ -211,14 +236,68 @@ class ImportUtilities {
                     return Float.parseFloat(value)
                 case FieldType.DATE:
                     return DateUtils.parseDate(value, datePatterns ?: DATE_PATTERNS)
+                case FieldType.OBJECT:
+                    return ImportUtilities.convertValueToObject(value)
                 case FieldType.STRING:
                 default:
                     return value.toString()
             }
         }
-        catch(NumberFormatException | IllegalArgumentException | ParseException e) {
+        catch(NumberFormatException | IllegalArgumentException | ParseException | NoSuchMethodException e) {
             return new ConversionFailureResult([value: value, type: type])
         }
+    }
+
+    /**
+     * Converts value to an object and converts all items in the object to their guessed values
+     * @param value String representation of the object to convert
+     * @return An object representation of the string given
+     */
+    static Object convertValueToObject(String value) {
+        Map convertedValue = [:]
+        def val = Eval.me(ImportUtilities.removeQuotations(value))
+        if(val instanceof Map) {
+            val.keySet().each { key ->
+                List fieldAndType = ImportUtilities.getTypeGuesses([key: [val[key] as String]])
+                Object objectValue = ImportUtilities.convertValueToType(val[key] as String, fieldAndType[0].type)
+                convertedValue.put(key, objectValue)
+            }
+
+            return convertedValue
+        } else {
+            throw new NoSuchMethodException()
+        }
+    }
+
+    /**
+     * 
+     * @param values
+     * @return
+     */
+    static Map retrieveObjectFieldsAndValues(String values) {
+        def vals = Eval.me(values)
+        Map pairs = [:]
+
+        vals.each { it ->
+            def obj
+            if(it instanceof String) {
+                obj = Eval.me(it)
+            } else {
+                obj = it
+            }
+
+            def objKeys = obj.keySet()
+
+            objKeys.each { key ->
+                if(pairs[key]) {
+                    pairs[key].push(obj[key] as String)
+                } else {
+                    pairs.put(key, [obj[key] as String])
+                }
+            }
+        }
+
+        return pairs
     }
 
     /**
@@ -229,5 +308,20 @@ class ImportUtilities {
      */
     static String makeUglyName(String userName, String prettyName) {
         return "$userName$SEPARATOR$prettyName"
+    }
+
+    /**
+     * Strips extra quotations that are on the beginning and the end of a string
+     * @param value The string to strip
+     * @return If there are quotations on the beginning and end of value, it returns the value
+     * with those quotations removed. Otherwise, value is returned with no change
+     */
+    static String removeQuotations(String value) {
+        if((value.substring(0,1) == '"' && value.substring(value.length() - 1) == '"') ||
+            (value.substring(0,1) == '\'' && value.substring(value.length() - 1) == '\'')) {
+            return value.substring(1, value.length() - 1)
+        }
+
+        return value
     }
 }
