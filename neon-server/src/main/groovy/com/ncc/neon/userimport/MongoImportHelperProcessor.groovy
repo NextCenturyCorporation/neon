@@ -300,7 +300,7 @@ class MongoImportHelperProcessor implements ImportHelperProcessor {
             // Don't add anything if the field is null, an empty string, or a "non-existent" value for numeric types.
             if(!stringValue || (stringValue.length() == 4 && stringValue =~ /(?i)none|null(?-i)/) &&
                 (ftPair.type == FieldType.INTEGER || ftPair.type == FieldType.LONG || ftPair.type == FieldType.DOUBLE || ftPair.type == FieldType.FLOAT)) {
-                continue 
+                continue
             }
             // Fields of type OBJECT contain a list, instead of just a type, in namesToTypes that contain the type and a map of fields to types for each
             // value in the OBJECT, respectively.
