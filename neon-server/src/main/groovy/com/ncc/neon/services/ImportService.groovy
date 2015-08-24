@@ -71,7 +71,7 @@ class ImportService {
                                @FormDataParam("data") String prettyName,
                                @FormDataParam("type") String fileType,
                                @FormDataParam("file") InputStream dataInputStream) {
-        if(!Boolean.parseBoolean(importEnabled)) {
+        if(!isImportEnabled()) {
             return Response.status(403).build()
         }
         String userName = user ?: UUID.randomUUID().toString()
@@ -95,7 +95,7 @@ class ImportService {
     public Response checkTypeGuessStatus(@PathParam("host") String host,
                                              @PathParam("databaseType") String databaseType,
                                              @PathParam("uuid") String jobUUID) {
-        if(!Boolean.parseBoolean(importEnabled)) {
+        if(!isImportEnabled()) {
             return Response.status(403).build()
         }
         ImportHelper helper = importHelperFactory.getImportHelper(databaseType)
@@ -122,7 +122,7 @@ class ImportService {
                                          @PathParam("databaseType") String databaseType,
                                          @PathParam("uuid") String uuid,
                                          UserFieldDataBundle data) {
-        if(!Boolean.parseBoolean(importEnabled)) {
+        if(!isImportEnabled()) {
             return Response.status(403).build()
         }
         ImportHelper helper = importHelperFactory.getImportHelper(databaseType)
@@ -144,7 +144,7 @@ class ImportService {
     public Response checkImportStatus(@PathParam("host") String host,
                                       @PathParam("databaseType") String databaseType,
                                       @PathParam("uuid") String uuid) {
-        if(!Boolean.parseBoolean(importEnabled)) {
+        if(!isImportEnabled()) {
             return Response.status(403).build()
         }
         ImportHelper helper = importHelperFactory.getImportHelper(databaseType)
@@ -168,11 +168,19 @@ class ImportService {
                               @PathParam("databaseType") String databaseType,
                               @QueryParam("user") String userName,
                               @QueryParam("data") String prettyName) {
-        if(!Boolean.parseBoolean(importEnabled)) {
+        if(!isImportEnabled()) {
             return Response.status(403).build()
         }
         ImportHelper helper = importHelperFactory.getImportHelper(databaseType)
         Map success = helper.dropDataset(host, userName, prettyName)
         return Response.ok().entity(JsonOutput.toJson(success)).build()
+    }
+
+     /**
+     * Returns the boolean representation of the variable isEnabled
+     * @return True if import is enabled, false otherwise
+     */
+    private boolean isImportEnabled() {
+        return Boolean.parseBoolean(importEnabled)
     }
 }
