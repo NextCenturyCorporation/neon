@@ -20,6 +20,8 @@ import java.text.ParseException
 
 import org.apache.commons.lang.time.DateUtils
 
+import org.codehaus.groovy.control.MultipleCompilationErrorsException
+
 /**
  * Provides a number of non-database-specific variables and functions useful for import functionality. In addition, can hold variables that
  * define what amounts to config info for various database types.
@@ -69,7 +71,7 @@ class ImportUtilities {
      * and attempts to determine what type of data each list of field values contains. Returns a list of {@link FieldTypePair}s, which simply
      * relate field name to the guessed type of data in that field.
      * This method assumes that the values given in the lists are strings - it may work correctly if they are not, but is not guaranteed to.
-     * Possible types to check for are: Integer, Long, Double, Float, Date, and String (the default, if none of the others are valid)
+     * Possible types to check for are: Integer, Long, Double, Float, Date, Object, and String (the default, if none of the others are valid)
      * @param fieldsAndValues A map of field names to lists of values for the field of that name.
      * @param return Type The type of object to return the results as. The default is a list, but it can also handle maps from name to type.
      * @return A list of FieldTypePairs, which relate field names to guessed type of data for those field names.
@@ -195,25 +197,24 @@ class ImportUtilities {
      */
     static boolean isListObjects(List list) {
         try {
-            def areObjects = true;
+            def areObjects = true
             list.each { value ->
-                value = ImportUtilities.removeQuotations(value);
-                if(value.equalsIgnoreCase("none") || value.equalsIgnoreCase("null") || value.equalsIgnoreCase("")) {
+                def val = ImportUtilities.removeQuotations(value)
+                if(val.equalsIgnoreCase("none") || val.equalsIgnoreCase("null") || val.equalsIgnoreCase("")) {
                     return
-                } else if(Eval.me(value) instanceof Map || Eval.me(value) instanceof List) {
+                } else if(Eval.me(val) instanceof Map || Eval.me(val) instanceof List) {
                     return
-                } else {
-                    areObjects = false
                 }
+                areObjects = false
             }
             return areObjects
-        } catch(Exception e) {
+        } catch(MissingPropertyException | MultipleCompilationErrorsException e) {
             return false
         }
     }
 
     /**
-     * Attempts to convert the given string to the given type. Has support for integer, long, double, float, date, and string conversion.
+     * Attempts to convert the given string to the given type. Has support for integer, long, double, float, date, object, and string conversion.
      * If an unsupported type is given, defaults to string conversion. Also takes an optional string array containing date string matchers,
      * for conversion to date.
      * @param value The string to attempt to convert.
@@ -262,17 +263,17 @@ class ImportUtilities {
                 Object objectValue = ImportUtilities.convertValueToType(val[key] as String, fieldAndType[0].type)
                 convertedValue.put(key, objectValue)
             }
-
-            return convertedValue
         } else {
             throw new NoSuchMethodException()
         }
+        return convertedValue
     }
 
     /**
-     * 
-     * @param values
-     * @return
+     * Converts a string representation of an object to a mapping of each of the objects field names to
+     * all the values the field names have in the object
+     * @param values String representation of an object
+     * @return Mapping of field names to all the values in the object the field name contains
      */
     static Map retrieveObjectFieldsAndValues(String values) {
         def vals = Eval.me(values)
@@ -317,8 +318,8 @@ class ImportUtilities {
      * with those quotations removed. Otherwise, value is returned with no change
      */
     static String removeQuotations(String value) {
-        if((value.substring(0,1) == '"' && value.substring(value.length() - 1) == '"') ||
-            (value.substring(0,1) == '\'' && value.substring(value.length() - 1) == '\'')) {
+        if((value.substring(0, 1) == '"' && value.substring(value.length() - 1) == '"') ||
+            (value.substring(0, 1) == '\'' && value.substring(value.length() - 1) == '\'')) {
             return value.substring(1, value.length() - 1)
         }
 

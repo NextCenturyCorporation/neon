@@ -44,9 +44,8 @@ class ImportService {
     // return 403 Forbidden messages rather than actually doing anything.
     @SuppressWarnings("GStringExpressionWithinString")
     @Value('\${importEnabled}')
-    String importPropertyValue
 
-    boolean importEnabled = (Boolean)importPropertyValue
+    boolean importEnabled
 
     @Autowired
     ImportHelperFactory importHelperFactory
