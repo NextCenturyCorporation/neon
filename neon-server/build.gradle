@@ -99,7 +99,6 @@ dependencies {
     compile "org.apache.poi:ooxml-schemas:$ooxmlSchemasVersion"
 
     compile "com.sun.jersey.contribs:jersey-multipart:$jerseyVersion"
-    compile "org.mongodb:mongodb-driver:$mongodbVersion"
     compile "com.monitorjbl:xlsx-streamer:$xlsxStreamerVersion"
 
     compile "commons-io:commons-io:$commonsIoVersion"
