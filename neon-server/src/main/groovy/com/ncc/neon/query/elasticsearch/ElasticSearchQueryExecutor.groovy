@@ -34,6 +34,9 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
 
 import org.elasticsearch.action.admin.cluster.state.ClusterStateRequest
+import org.elasticsearch.action.admin.indices.mapping.get.GetMappingsResponse
+import org.elasticsearch.action.admin.indices.mapping.get.GetMappingsRequest
+import org.elasticsearch.cluster.metadata.MappingMetaData
 import org.elasticsearch.common.collect.ImmutableOpenMap
 import org.elasticsearch.client.Client
 import org.elasticsearch.cluster.metadata.IndexMetaData
@@ -69,15 +72,19 @@ class ElasticSearchQueryExecutor extends AbstractQueryExecutor {
         ImmutableOpenMap<String, IndexMetaData> indecesMap = client.admin().cluster().state(new ClusterStateRequest())
             .actionGet().getState().getMetaData().indices()
 
-        String[] ra = indecesMap.keys().toArray(String)
-
-        return Arrays.asList(ra);
+        return Arrays.asList(indecesMap.keys().toArray(String));
     }
 
     @Override
     List<String> showTables(String dbName) {
-        LOGGER.debug("Executing SHOW TABLES IN {}", dbName)
-        return null
+        LOGGER.debug("Executing SHOW TABLES IN " + dbName)
+
+        Client client = getClient()
+
+        GetMappingsResponse mappingResponse = client.admin().indices().getMappings(new GetMappingsRequest().indices(dbName)).get()
+        ImmutableOpenMap<String, MappingMetaData> typesMap = mappingResponse.mappings().get(dbName)
+
+        return Arrays.asList(typesMap.keys().toArray(String));
     }
 
     @Override
