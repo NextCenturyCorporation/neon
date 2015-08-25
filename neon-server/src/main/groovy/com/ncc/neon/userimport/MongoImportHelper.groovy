@@ -112,6 +112,20 @@ class MongoImportHelper implements ImportHelper {
         return [success: true]
     }
 
+    @Override
+    boolean doesDatabaseExist(String host, String userName, String prettyName) {
+        boolean dbExists = false
+        MongoClient mongo = new MongoClient(host)
+        List<String> dbs = mongo.getDatabaseNames()
+        String dbNameToFind = mongoImportHelperProcessor.getDatabaseName(userName, prettyName)
+        dbs.each { dbName ->
+            if(dbName == dbNameToFind) {
+                dbExists = true
+            }
+        }
+        return dbExists
+    }
+
     /**
      * Helper method that converts a map from field names to types guesses into a list of FieldTypePairs. This
      * is necessary because mongo doesn't know how to deserialize FieldTypePairs for storage, and so guesses

@@ -50,4 +50,13 @@ public interface ImportHelperProcessor {
 	 */
 	@Async
 	void processLoadAndConvert(String host, String uuid, String dateFormat, List<FieldTypePair> fieldTypePairs)
+
+    /**
+     * Helper method that gets the "ugly", more unique database name created from the given username and "pretty", human-readable
+     * database name. As part of this, removes any issue characters that would cause problems as part of the database name.
+     * @param userName The username associated with the ugly database name to be created.
+     * @param prettyName The "pretty", human-readable database name associated with the ugly database name to be created.
+     * @return The "ugly", more unique database name generated from the given username and "pretty" database name.
+     */
+    String getDatabaseName(String userName, String prettyName)
 }

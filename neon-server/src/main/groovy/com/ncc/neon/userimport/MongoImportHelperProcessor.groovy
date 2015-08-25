@@ -142,6 +142,13 @@ class MongoImportHelperProcessor implements ImportHelperProcessor {
         }
     }
 
+    @Override
+    String getDatabaseName(String userName, String prettyName) {
+        String safeUserName = userName.replaceAll(/^\$|[ \t\n\.]/, "_")
+        String safePrettyName = prettyName.replaceAll(/[ \t\n\.]/, "_")
+        return ImportUtilities.makeUglyName(safeUserName, safePrettyName)
+    }
+
     /**
      * Reads a raw CSV or XLSX file from the given GridFSDFile line by line, grabbing records, converting their fields into the types
      * given in fieldTypePairs, and then storing them in a database on the given mongo instance. The database's name is
@@ -480,18 +487,5 @@ class MongoImportHelperProcessor implements ImportHelperProcessor {
             file.put(key as String, value)
         }
         file.save()
-    }
-
-    /**
-     * Helper method that gets the "ugly", more unique database name created from the given username and "pretty", human-readable
-     * database name. As part of this, removes any issue characters that would cause problems as part of a mongo database name.
-     * @param userName The username associated with the ugly database name to be created.
-     * @param prettyName The "pretty", human-readable database name associated with the ugly database name to be created.
-     * @return The "ugly", more unique database name generatd from the given username and "pretty" database name.
-     */
-    private String getDatabaseName(String userName, String prettyName) {
-        String safeUserName = userName.replaceAll(/^\$|[ \t\n\.]/, "_")
-        String safePrettyName = prettyName.replaceAll(/[ \t\n\.]/, "_")
-        return ImportUtilities.makeUglyName(safeUserName, safePrettyName)
     }
 }

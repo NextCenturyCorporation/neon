@@ -89,10 +89,19 @@ public interface ImportHelper {
      * other reason.
      * @param host The host on which the data store containing the database to be dropped is running.
      * @param userName The username associated with the database to be dropped.
-     * @param prettyName The "Pretty" human-readable name associated with the database to be dropped.
+     * @param prettyName The "pretty" human-readable name associated with the database to be dropped.
      * @return A map, of the form [success: (boolean)], where the boolean value is whether or not dropping the database was
      * successful. If true, the database was dropped. If false, the database either did not exist, or the drop failed for some
      * other reason.
      */
     Map dropDataset(String host, String userName, String prettyName)
+
+    /**
+     * Checks whether the database associated with the given username and "pretty" name exists.
+     * @param host The host on which the data store containing the database to look for is running.
+     * @param userName The username associated with the database to look for.
+     * @param prettyName The "pretty" human-readable name associated with the database to look for.
+     * @return True if the database with the given username and "pretty" name exists on the host. False otherwise.
+     */
+    boolean doesDatabaseExist(String host, String userName, String prettyName)
 }
