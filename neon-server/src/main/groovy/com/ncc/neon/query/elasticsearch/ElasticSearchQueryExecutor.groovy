@@ -17,6 +17,7 @@
 package com.ncc.neon.query.elasticsearch
 
 import java.util.Arrays
+import java.util.HashMap
 
 import com.ncc.neon.connect.ConnectionManager
 import com.ncc.neon.query.executor.AbstractQueryExecutor
@@ -36,6 +37,8 @@ import org.springframework.stereotype.Component
 import org.elasticsearch.action.admin.cluster.state.ClusterStateRequest
 import org.elasticsearch.action.admin.indices.mapping.get.GetMappingsResponse
 import org.elasticsearch.action.admin.indices.mapping.get.GetMappingsRequest
+import org.elasticsearch.action.admin.indices.mapping.get.GetFieldMappingsResponse
+import org.elasticsearch.action.admin.indices.mapping.get.GetFieldMappingsRequest
 import org.elasticsearch.cluster.metadata.MappingMetaData
 import org.elasticsearch.common.collect.ImmutableOpenMap
 import org.elasticsearch.client.Client
@@ -61,12 +64,13 @@ class ElasticSearchQueryExecutor extends AbstractQueryExecutor {
 
     @Override
     QueryResult doExecute(Query query, QueryOptions options) {
+        //TODO
         return null
     }
 
     @Override
     List<String> showDatabases() {
-        LOGGER.debug("Executing SHOW DATABASES")
+        LOGGER.debug("Executing showDatabases to retrieve indices")
         Client client = getClient()
 
         ImmutableOpenMap<String, IndexMetaData> indecesMap = client.admin().cluster().state(new ClusterStateRequest())
@@ -77,7 +81,7 @@ class ElasticSearchQueryExecutor extends AbstractQueryExecutor {
 
     @Override
     List<String> showTables(String dbName) {
-        LOGGER.debug("Executing SHOW TABLES IN " + dbName)
+        LOGGER.debug("Executing showTables for index " + dbName + " to get type mappings")
 
         Client client = getClient()
 
@@ -89,10 +93,22 @@ class ElasticSearchQueryExecutor extends AbstractQueryExecutor {
 
     @Override
     List<String> getFieldNames(String databaseName, String tableName) {
-        return null
+        LOGGER.debug("Executing getFieldNames for index " + databaseName + " type " + tableName)
+
+        Client client = getClient()
+
+        GetMappingsRequest request = new GetMappingsRequest().indices(databaseName).types(tableName)
+        GetMappingsResponse mappingResponse = client.admin().indices().getMappings(request).get()
+        HashMap fields = mappingResponse.mappings().get(databaseName).get(tableName).getSourceAsMap().get('properties')
+
+        println(fields)
+        println(fields.keySet())
+
+        return new ArrayList<String>(fields.keySet());;
     }
 
     List<ArrayCountPair> getArrayCounts(String databaseName, String tableName, String field, int limit = 40) {
+        //TODO
         return null
     }
 }
