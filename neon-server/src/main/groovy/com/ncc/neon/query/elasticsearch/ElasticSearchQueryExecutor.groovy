@@ -101,9 +101,6 @@ class ElasticSearchQueryExecutor extends AbstractQueryExecutor {
         GetMappingsResponse mappingResponse = client.admin().indices().getMappings(request).get()
         HashMap fields = mappingResponse.mappings().get(databaseName).get(tableName).getSourceAsMap().get('properties')
 
-        println(fields)
-        println(fields.keySet())
-
         return new ArrayList<String>(fields.keySet());;
     }
 
