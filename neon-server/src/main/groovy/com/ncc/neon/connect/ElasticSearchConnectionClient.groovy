@@ -17,6 +17,11 @@
 package com.ncc.neon.connect
 
 import org.elasticsearch.client.Client
+import org.elasticsearch.common.settings.ImmutableSettings
+import org.elasticsearch.common.settings.Settings;
+import org.elasticsearch.common.transport.InetSocketTransportAddress;
+import org.elasticsearch.client.transport.TransportClient;
+
 
 /**
  * Holds a connection to elasticsearch
@@ -25,8 +30,10 @@ class ElasticSearchConnectionClient implements ConnectionClient{
     Client client
 
     public ElasticSearchConnectionClient(ConnectionInfo info){
-        String[] connectionUrl = info.host.split(':', 1)
-        connectViaTransport(connectionUrl[0], (connectionUrl[1] ?: 9300))
+        String[] connectionUrl = info.host.split(':', 2)
+        String host = connectionUrl[0]
+        int port = Integer.parseInt(connectionUrl[1])
+        connectViaTransport(host, (port ?: 9300))
     }
 
     private void connectViaTransport(String host, int port) {

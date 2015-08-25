@@ -16,11 +16,16 @@
 
 package com.ncc.neon.query.elasticsearch
 
+import java.util.Arrays
+
 import com.ncc.neon.connect.ConnectionManager
 import com.ncc.neon.query.executor.AbstractQueryExecutor
 import com.ncc.neon.query.filter.FilterState
 import com.ncc.neon.query.filter.SelectionState
+import com.ncc.neon.query.result.ArrayCountPair
 import com.ncc.neon.query.result.QueryResult
+import com.ncc.neon.query.QueryOptions
+import com.ncc.neon.query.Query
 
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -28,10 +33,15 @@ import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
 
-@Component
-class SparkSQLQueryExecutor extends AbstractQueryExecutor {
+import org.elasticsearch.action.admin.cluster.state.ClusterStateRequest
+import org.elasticsearch.common.collect.ImmutableOpenMap
+import org.elasticsearch.client.Client
+import org.elasticsearch.cluster.metadata.IndexMetaData
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(SparkSQLQueryExecutor)
+@Component
+class ElasticSearchQueryExecutor extends AbstractQueryExecutor {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(ElasticSearchQueryExecutor)
 
     @Autowired
     private FilterState filterState
@@ -42,6 +52,9 @@ class SparkSQLQueryExecutor extends AbstractQueryExecutor {
     @Autowired
     private ConnectionManager connectionManager
 
+    private Client getClient() {
+        return connectionManager.connection.client
+    }
 
     @Override
     QueryResult doExecute(Query query, QueryOptions options) {
@@ -51,7 +64,14 @@ class SparkSQLQueryExecutor extends AbstractQueryExecutor {
     @Override
     List<String> showDatabases() {
         LOGGER.debug("Executing SHOW DATABASES")
-        return null
+        Client client = getClient()
+
+        ImmutableOpenMap<String, IndexMetaData> indecesMap = client.admin().cluster().state(new ClusterStateRequest())
+            .actionGet().getState().getMetaData().indices()
+
+        String[] ra = indecesMap.keys().toArray(String)
+
+        return Arrays.asList(ra);
     }
 
     @Override
