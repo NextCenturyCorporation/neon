@@ -64,7 +64,6 @@ class ElasticSearchQueryExecutor extends AbstractQueryExecutor {
 
     @Override
     QueryResult doExecute(Query query, QueryOptions options) {
-        //TODO
         return null
     }
 
@@ -73,10 +72,10 @@ class ElasticSearchQueryExecutor extends AbstractQueryExecutor {
         LOGGER.debug("Executing showDatabases to retrieve indices")
         Client client = getClient()
 
-        ImmutableOpenMap<String, IndexMetaData> indecesMap = client.admin().cluster().state(new ClusterStateRequest())
-            .actionGet().getState().getMetaData().indices()
+        def stateResponse = client.admin.cluster.state {}
+        def indices = stateResponse.actionGet().state.metaData.indices().key().toArray(String)
 
-        return Arrays.asList(indecesMap.keys().toArray(String));
+        return Arrays.asList(indeces);
     }
 
     @Override
@@ -85,10 +84,10 @@ class ElasticSearchQueryExecutor extends AbstractQueryExecutor {
 
         Client client = getClient()
 
-        GetMappingsResponse mappingResponse = client.admin().indices().getMappings(new GetMappingsRequest().indices(dbName)).get()
-        ImmutableOpenMap<String, MappingMetaData> typesMap = mappingResponse.mappings().get(dbName)
+        def mappingsResponse = client.admin.indices.getMappings {}
 
-        return Arrays.asList(typesMap.keys().toArray(String));
+        def mappings = mappingsResponse.actionGet().mappings().get(dbName).keys().toArray(String)
+        return Arrays.asList(mappings)
     }
 
     @Override
@@ -97,15 +96,12 @@ class ElasticSearchQueryExecutor extends AbstractQueryExecutor {
 
         Client client = getClient()
 
-        GetMappingsRequest request = new GetMappingsRequest().indices(databaseName).types(tableName)
-        GetMappingsResponse mappingResponse = client.admin().indices().getMappings(request).get()
-        HashMap fields = mappingResponse.mappings().get(databaseName).get(tableName).getSourceAsMap().get('properties')
-
+        def fieldsResponse = client.admin().indices().getMappings {}
+        def fields = fieldsResponse.actionGet().mappings().get(databaseName).get(tableName).getSourceAsMap().get('properties')
         return new ArrayList<String>(fields.keySet());;
     }
 
     List<ArrayCountPair> getArrayCounts(String databaseName, String tableName, String field, int limit = 40) {
-        //TODO
         return null
     }
 }

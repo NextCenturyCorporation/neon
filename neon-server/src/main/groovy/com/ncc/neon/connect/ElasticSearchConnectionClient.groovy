@@ -37,8 +37,20 @@ class ElasticSearchConnectionClient implements ConnectionClient{
     }
 
     private void connectViaTransport(String host, int port) {
-        Settings settings = ImmutableSettings.settingsBuilder().put("client.transport.ignore_cluster_name", true).put("client.transport.sniff", true).build();
-        client = new TransportClient(settings).addTransportAddress(new InetSocketTransportAddress(host, port));
+        client = new TransportClient(ImmutableSettings.settingsBuilder {
+            client {
+              transport {
+                ignore_cluster_name = true
+                sniff = true
+              }
+            }
+        })
+
+        // add transport addresses
+        client.addTransportAddress(new InetSocketTransportAddress(host, port))
+
+        //Settings settings = ImmutableSettings.settingsBuilder().put("client.transport.ignore_cluster_name", true).put("client.transport.sniff", true).build();
+        //client = new TransportClient(settings).addTransportAddress(new InetSocketTransportAddress(host, port));
     }
 
     /**
