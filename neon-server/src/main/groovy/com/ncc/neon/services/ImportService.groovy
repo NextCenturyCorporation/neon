@@ -178,8 +178,11 @@ class ImportService {
             return Response.status(403).entity(JsonOutput.toJson(IMPORT_DISABLED_ERROR_RESPONSE)).build()
         }
         ImportHelper helper = importHelperFactory.getImportHelper(databaseType)
-        Map success = helper.dropDataset(host, userName, prettyName)
-        return Response.ok().entity(JsonOutput.toJson(success)).build()
+        Map result = helper.dropDataset(host, userName, prettyName)
+        if(!result.success) {
+            return Response.status(404).entity(JsonOutput.toJson([status: 404, message: "No dataset exists with the given username and database name"])).build()
+        }
+        return Response.ok().entity(JsonOutput.toJson(result)).build()
     }
 
      /**

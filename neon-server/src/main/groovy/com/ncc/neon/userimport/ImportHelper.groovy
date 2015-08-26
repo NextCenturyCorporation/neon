@@ -85,7 +85,7 @@ public interface ImportHelper {
 
     /**
      * Drops the database associated with the given username and "pretty" name, removing it from the data store. Returns a map
-     * containing a success value -true if dropping the database was a success, or false if it didn't exist or failed for some
+     * containing a success value of true if dropping the database was a success, or false if it didn't exist or failed for some
      * other reason.
      * @param host The host on which the data store containing the database to be dropped is running.
      * @param userName The username associated with the database to be dropped.
