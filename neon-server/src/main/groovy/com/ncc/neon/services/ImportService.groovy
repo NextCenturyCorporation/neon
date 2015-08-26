@@ -71,7 +71,7 @@ class ImportService {
                                @PathParam("databaseType") String databaseType,
                                @FormDataParam("user") String user,
                                @FormDataParam("data") String prettyName,
-                               @FormDataParam("type") String fileType,
+                               @FormDataParam("fileType") String fileType,
                                @FormDataParam("file") InputStream dataInputStream) {
         if(!isImportEnabled()) {
             return Response.status(403).entity(JsonOutput.toJson(IMPORT_DISABLED_ERROR_RESPONSE)).build()
