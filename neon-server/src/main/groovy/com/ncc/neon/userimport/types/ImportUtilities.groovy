@@ -57,7 +57,9 @@ class ImportUtilities {
     // For information on the format of date pattern strings, check here: http://docs.oracle.com/javase/6/docs/api/java/text/SimpleDateFormat.html
     static final String[] DATE_PATTERNS = [
         "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'",
-        "yyyy-MM-dd HH:mm:ss.SSS"
+        "yyyy-MM-dd HH:mm:ss.SSS",
+        "yyyy-MM-dd'T'HH:mm:ss'Z'",
+        "yyyy-MM-dd HH:mm:ss"
     ]
 
 /*
@@ -182,6 +184,9 @@ class ImportUtilities {
     static boolean isListDates(List list) {
         try {
             list.each { value ->
+                if(value.equalsIgnoreCase("none") || value.equalsIgnoreCase("null") || value.equalsIgnoreCase("")) {
+                    return
+                }
                 DateUtils.parseDate(value, DATE_PATTERNS)
             }
         } catch (IllegalArgumentException | ParseException e) {
@@ -208,7 +213,7 @@ class ImportUtilities {
                 areObjects = false
             }
             return areObjects
-        } catch(MissingPropertyException | MultipleCompilationErrorsException e) {
+        } catch(MissingPropertyException | MissingMethodException | MultipleCompilationErrorsException e) {
             return false
         }
     }

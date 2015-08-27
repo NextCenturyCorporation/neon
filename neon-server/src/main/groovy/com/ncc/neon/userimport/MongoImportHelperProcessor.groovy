@@ -224,7 +224,8 @@ class MongoImportHelperProcessor implements ImportHelperProcessor {
                 if(recordValue instanceof String) {
                     // Don't add anything if the field is null, an empty string, or a "non-existent" value for numeric types.
                     if(!recordValue || (recordValue.length() == 4 && recordValue =~ /(?i)none|null(?-i)/) &&
-                        (ftPair.type == FieldType.INTEGER || ftPair.type == FieldType.LONG || ftPair.type == FieldType.DOUBLE || ftPair.type == FieldType.FLOAT)) {
+                        (ftPair.type == FieldType.INTEGER || ftPair.type == FieldType.LONG || ftPair.type == FieldType.DOUBLE
+                            || ftPair.type == FieldType.FLOAT  || ftPair.type == FieldType.DATE)) {
                         return
                     }
                     Object convertedValue = ImportUtilities.convertValueToType(recordValue, ftPair.type, dateFormat)
@@ -306,7 +307,8 @@ class MongoImportHelperProcessor implements ImportHelperProcessor {
             def type = namesToTypes.get(namesInOrder[field])
             // Don't add anything if the field is null, an empty string, or a "non-existent" value for numeric types.
             if(!stringValue || (stringValue.length() == 4 && stringValue =~ /(?i)none|null(?-i)/) &&
-                (ftPair.type == FieldType.INTEGER || ftPair.type == FieldType.LONG || ftPair.type == FieldType.DOUBLE || ftPair.type == FieldType.FLOAT)) {
+                (ftPair.type == FieldType.INTEGER || ftPair.type == FieldType.LONG || ftPair.type == FieldType.DOUBLE ||
+                    ftPair.type == FieldType.FLOAT || ftPair.type == FieldType.DATE)) {
                 continue
             }
             // Fields of type OBJECT contain a list, instead of just a type, in namesToTypes that contain the type and a map of fields to types for each
@@ -367,7 +369,8 @@ class MongoImportHelperProcessor implements ImportHelperProcessor {
 
             // Don't add anything if the field is null, an empty string, or a "non-existent" value for numeric types.
             if(!stringValue || (stringValue.length() == 4 && stringValue =~ /(?i)none|null(?-i)/) &&
-                (type == FieldType.INTEGER || type == FieldType.LONG || type == FieldType.DOUBLE || type == FieldType.FLOAT)) {
+                (type == FieldType.INTEGER || type == FieldType.LONG || type == FieldType.DOUBLE
+                    || type == FieldType.FLOAT || type == FieldType.DATE)) {
                 return
             }
 
@@ -403,7 +406,8 @@ class MongoImportHelperProcessor implements ImportHelperProcessor {
 
             // Don't add anything if the field is null, an empty string, or a "non-existent" value for numeric types.
             if(!stringValue || (stringValue.length() == 4 && stringValue =~ /(?i)none|null(?-i)/) &&
-                (pair.type == FieldType.INTEGER || pair.type == FieldType.LONG || pair.type == FieldType.DOUBLE || pair.type == FieldType.FLOAT)) {
+                (pair.type == FieldType.INTEGER || pair.type == FieldType.LONG || pair.type == FieldType.DOUBLE
+                    || pair.type == FieldType.FLOAT || pair.type == FieldType.DATE)) {
                 return
             }
 
