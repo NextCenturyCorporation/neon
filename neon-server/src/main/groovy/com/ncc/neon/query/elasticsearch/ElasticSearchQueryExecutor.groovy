@@ -30,7 +30,7 @@ import com.ncc.neon.query.result.QueryResult
 import com.ncc.neon.query.QueryOptions
 import com.ncc.neon.query.Query
 import com.ncc.neon.query.result.TabularQueryResult
-
+import org.elasticsearch.index.query.QueryBuilders
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
@@ -90,9 +90,10 @@ class ElasticSearchQueryExecutor extends AbstractQueryExecutor {
         //Build the sorters for the sort clause
         def sorters = (query.sortClauses ?: []).collect(ElasticSearchQueryExecutor.&resolveSortClause)
 
+
         //Build the SearchQuery
         def source = new SearchSourceBuilder()
-            .postFilter(whereFilter)
+            .query(QueryBuilders.filteredQuery(null, whereFilter))
             .explain(false)
             .from((query.offsetClause ? query.offsetClause.offset : 0) as int)
             .size((query.limitClause ? query.limitClause.limit : 45) as int)
