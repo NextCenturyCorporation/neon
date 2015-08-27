@@ -49,6 +49,13 @@ import org.elasticsearch.index.query.FilterBuilders
 import org.elasticsearch.search.aggregations.AggregationBuilders
 import org.elasticsearch.search.aggregations.AbstractAggregationBuilder
 
+import org.elasticsearch.cluster.metadata.IndexMetaData
+import org.elasticsearch.action.admin.cluster.state.ClusterStateRequest
+import org.elasticsearch.action.admin.cluster.state.ClusterStateResponse
+import org.elasticsearch.action.admin.indices.mapping.get.GetMappingsRequest
+import org.elasticsearch.action.admin.indices.mapping.get.GetMappingsResponse
+import org.elasticsearch.cluster.metadata.MappingMetaData
+
 @Component
 class ElasticSearchQueryExecutor extends AbstractQueryExecutor {
 
@@ -142,19 +149,36 @@ class ElasticSearchQueryExecutor extends AbstractQueryExecutor {
     @Override
     List<String> showDatabases() {
         LOGGER.debug("Executing showDatabases to retrieve indices")
-        getClient().admin.cluster.state({}).actionGet().state.metaData.indices.collect { it.key }
+        Client client = getClient()
+
+        ImmutableOpenMap<String, IndexMetaData> indecesMap = client.admin().cluster().state(new ClusterStateRequest())
+             .actionGet().getState().getMetaData().indices()
+
+        return Arrays.asList(indecesMap.keys().toArray(String));
     }
 
     @Override
     List<String> showTables(String dbName) {
         LOGGER.debug("Executing showTables for index " + dbName + " to get type mappings")
-        getMappings().get(dbName).collect { it.key }
+        Client client = getClient()
+
+        GetMappingsResponse mappingResponse = client.admin().indices().getMappings(new GetMappingsRequest().indices(dbName)).get()
+        ImmutableOpenMap<String, MappingMetaData> typesMap = mappingResponse.mappings().get(dbName)
+
+        return Arrays.asList(typesMap.keys().toArray(String));
     }
 
     @Override
     List<String> getFieldNames(String databaseName, String tableName) {
         LOGGER.debug("Executing getFieldNames for index " + databaseName + " type " + tableName)
-        getMappings().get(databaseName).get(tableName).getSourceAsMap().get('properties').collect { it.key }
+
+        Client client = getClient()
+
+        GetMappingsRequest request = new GetMappingsRequest().indices(databaseName).types(tableName)
+        GetMappingsResponse mappingResponse = client.admin().indices().getMappings(request).get()
+        HashMap fields = mappingResponse.mappings().get(databaseName).get(tableName).getSourceAsMap().get('properties')
+
+        return new ArrayList<String>(fields.keySet());;
     }
 
     List<ArrayCountPair> getArrayCounts(String databaseName, String tableName, String field, int limit = 40) {

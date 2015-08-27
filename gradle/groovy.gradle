@@ -26,7 +26,7 @@ repositories{
 }
 
 dependencies {
-    compile "org.codehaus.groovy:groovy-all:$groovyVersion:indy"
+    compile "org.codehaus.groovy:groovy-all:$groovyVersion"
     testCompile "junit:junit:$junitVersion"
 }
 

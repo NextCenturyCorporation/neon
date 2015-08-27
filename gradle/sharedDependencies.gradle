@@ -30,14 +30,14 @@ dependencies {
     compile "com.mchange:c3p0:$c3p0Version"
     compile "org.codehaus.jackson:jackson-core-asl:$jacksonVersion"
 
-    //compile ("org.elasticsearch:elasticsearch:1.7.0") {
-      //  exclude module: 'asm'
-    //}
-
-    compile ('org.elasticsearch:elasticsearch-groovy:1.7.0') {
-        exclude module: 'groovy-all'
+    compile ("org.elasticsearch:elasticsearch:1.7.0") {
         exclude module: 'asm'
     }
+
+    //compile ('org.elasticsearch:elasticsearch-groovy:1.7.0') {
+    //    exclude module: 'groovy-all'
+    //    exclude module: 'asm'
+    //}
 
     //Because: https://github.com/elastic/elasticsearch/issues/9891
     compile 'com.spatial4j:spatial4j:0.4.1'
