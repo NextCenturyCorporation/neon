@@ -38,4 +38,10 @@ dependencies {
         exclude module: 'groovy-all'
         exclude module: 'asm'
     }
+
+    //Because: https://github.com/elastic/elasticsearch/issues/9891
+    compile 'com.spatial4j:spatial4j:0.4.1'
+    compile('com.vividsolutions:jts:1.13') {
+        exclude module: 'xercesImpl'
+    }
 }
