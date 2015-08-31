@@ -40,6 +40,8 @@ import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
 
+import org.elasticsearch.search.aggregations.AggregationBuilder
+import org.elasticsearch.search.sort.SortBuilder
 import org.elasticsearch.index.query.FilterBuilder
 import org.elasticsearch.index.query.FilterBuilders
 import org.elasticsearch.index.query.QueryBuilders
@@ -89,11 +91,11 @@ class ElasticSearchQueryExecutor extends AbstractQueryExecutor {
         }
 
         //Build the elasticsearch filters for the where clauses
-        def inners = whereClauses.collect(ElasticSearchQueryExecutor.&resolveWhereClause) as FilterBuilder[]
+        def inners = whereClauses.collect(ElasticSearchQueryExecutor.&translateWhereClause) as FilterBuilder[]
         def whereFilter = FilterBuilders.boolFilter().must(FilterBuilders.andFilter(inners))
 
         //Build the sorters for the sort clause
-        def sorters = (query.sortClauses ?: []).collect(ElasticSearchQueryExecutor.&resolveSortClause)
+        def sorters = (query.sortClauses ?: []).collect(ElasticSearchQueryExecutor.&translateSortClause)
 
         //begin constructing the search
         def source = createSearchSourceBuilder(query).query(QueryBuilders.filteredQuery(null, whereFilter))
@@ -117,7 +119,7 @@ class ElasticSearchQueryExecutor extends AbstractQueryExecutor {
         //build the groupBy statement
         def groupByClauses = query.groupByClauses
         if (groupByClauses) {
-            def groupByAggregationBuilders = groupByClauses.collect(ElasticSearchQueryExecutor.&resolveGroupByClause)
+            def groupByAggregationBuilders = groupByClauses.collect(ElasticSearchQueryExecutor.&translateGroupByClause)
 
             //apply aggregations to the terminal group by clause
             aggregations.each { groupByAggregationBuilders.last().subAggregation(it) }
@@ -216,17 +218,17 @@ class ElasticSearchQueryExecutor extends AbstractQueryExecutor {
         clause.operation == 'count' && clause.field == '*'
     }
 
-    private static resolveSortClause(clause) {
+    private static SortBuilder translateSortClause(clause) {
         def order = clause.sortOrder == com.ncc.neon.query.clauses.SortOrder.ASCENDING ? SortOrder.ASC : SortOrder.DESC
         SortBuilders.fieldSort(clause.fieldName).order(order)
     }
 
-    private static resolveGroupByClause(clause) {
-        if (clause.getClass() == GroupByFieldClause) {
+    private static AggregationBuilder translateGroupByClause(clause) {
+        if (clause instanceof GroupByFieldClause) {
             return AggregationBuilders.terms(clause.field).field(clause.field as String)
         }
 
-        if (clause.getClass() == GroupByFunctionClause && clause.operation in ['year', 'month', 'dayOfMonth', 'hour', 'minute', 'second']) {
+        if (clause instanceof GroupByFunctionClause && clause.operation in ['year', 'month', 'dayOfMonth', 'hour', 'minute', 'second']) {
             def fn = AggregationBuilders.dateHistogram(clause.name).field(clause.field as String).&interval
             switch(clause.operation) {
             case 'year':
@@ -244,7 +246,7 @@ class ElasticSearchQueryExecutor extends AbstractQueryExecutor {
             }
         }
 
-        throw new RuntimeException("${clause} is not a valid bucket aggregation")
+        throw new RuntimeException("Unknown groupByClause: ${clause.getClass()}")
     }
 
     private static createWhereClausesForFilters(DataSet dataSet, filterCache, ignoredFilterIds = []) {
@@ -253,25 +255,25 @@ class ElasticSearchQueryExecutor extends AbstractQueryExecutor {
             .collect { it.filter.whereClause }
     }
 
-    private static resolveWhereClause(clause) {
+    private static FilterBuilder translateWhereClause(clause) {
         switch (clause.getClass()) {
         case AndWhereClause:
-            return resolveBooleanWhereClause(clause, FilterBuilders.&andFilter)
+            return translateBooleanWhereClause(clause, FilterBuilders.&andFilter)
         case OrWhereClause:
-            return resolveBooleanWhereClause(clause, FilterBuilders.&orFilter)
+            return translateBooleanWhereClause(clause, FilterBuilders.&orFilter)
         case SingularWhereClause:
-            return resolveSingularWhereClause(clause)
+            return translateSingularWhereClause(clause)
         default:
-            throw new RuntimeException("class ${clause.getClass()} is not a valid where clause")
+            throw new RuntimeException("Unknown where clause: ${clause.getClass()}")
         }
     }
 
-    private static resolveBooleanWhereClause(clause, combiner) {
-        def inners = clause.whereClauses.collect(ElasticSearchQueryExecutor.&resolveWhereClause) as FilterBuilder[]
-        FilterBuilders.boolFilter().must(combiner(inners) as FilterBuilder)
+    private static FilterBuilder translateBooleanWhereClause(clause, Closure<FilterBuilder> combiner) {
+        def inners = clause.whereClauses.collect(ElasticSearchQueryExecutor.&translateWhereClause)
+        FilterBuilders.boolFilter().must(combiner(inners))
     }
 
-    private static resolveSingularWhereClause(clause) {
+    private static FilterBuilder translateSingularWhereClause(clause) {
         if (clause.operator in ['<', '>', '<=', '>=']) {
             return {
                 switch (clause.operator) {
@@ -318,17 +320,27 @@ class ElasticSearchQueryExecutor extends AbstractQueryExecutor {
         aggMap
     }
 
-    private static extractGroupByAggregation(groupByClauses, value, metricAggs, hitCount, Map accumulator = new HashMap(), List results = new ArrayList()) {
+    private static List<Map<String, Object>> extractGroupByAggregation(groupByClauses, value, metricAggs, hitCount,
+                                                                       Map accumulator = new HashMap(),
+                                                                       List<Map<String, Object>> results = new ArrayList()) {
+
+        //The aggregation results from ES will be a tree of aggregation -> buckets -> aggregation -> buckets -> etc
+        //we want to flatten it into a list of buckets where we have one item in the list for each leaf in the tree.
+        //Each item is an accumulation of all the buckets along the path to the leaf.
+
         if (value instanceof MultiBucketsAggregation) {
+            //We process an aggregation by getting the list of buckets and calling extract again for each of them.
+            //For each bucket we copy the current accumulator, since we're branching into more paths in the tree.
             value.buckets.each {
                 def newAcc = new HashMap()
                 newAcc.putAll(accumulator)
                 extractGroupByAggregation(groupByClauses, it, metricAggs, hitCount, newAcc, results)
             }
-            return results
-        }
-
-        if (value instanceof MultiBucketsAggregation.Bucket) {
+        } else if (value instanceof MultiBucketsAggregation.Bucket) {
+            //We process a bucket by getting the current groupByClause and using it to get the value we're interested in
+            //from the bucket. Then if there are more groupByClauses, we recurse into extract using the rest of the clauses
+            //and the nested aggregation. If there are no more clauses to process, then we've reached the bottom of the tree
+            //we add any metric aggregations to the bucket and push it onto the result list.
             def currentClause = groupByClauses.head()
 
             switch (currentClause.getClass()) {
@@ -352,5 +364,7 @@ class ElasticSearchQueryExecutor extends AbstractQueryExecutor {
                 results.push(accumulator)
             }
         }
+
+        return results
     }
 }
