@@ -77,18 +77,9 @@ class ElasticSearchQueryExecutor extends AbstractQueryExecutor {
 
     @Override
     QueryResult doExecute(Query query, QueryOptions options) {
-        //Gather all the where clauses
-        def whereClauses = []
         def dataSet = new DataSet(databaseName: query.databaseName, tableName: query.tableName)
-        if (query.filter?.whereClause) {
-            whereClauses << query.filter.whereClause
-        }
-        if (!options.ignoreFilters) {
-            whereClauses.addAll(createWhereClausesForFilters(dataSet, filterState, options.ignoredFilterIds))
-        }
-        if (options.selectionOnly) {
-            whereClauses.addAll(createWhereClausesForFilters(dataSet, selectionState))
-        }
+
+        def whereClauses = collectWhereClauses(query, options)
 
         //Build the elasticsearch filters for the where clauses
         def inners = whereClauses.collect(ElasticSearchQueryExecutor.&translateWhereClause) as FilterBuilder[]
@@ -156,6 +147,19 @@ class ElasticSearchQueryExecutor extends AbstractQueryExecutor {
         }
 
         new TabularQueryResult(results.hits.collect { it.getSource() })
+    }
+
+    private Collection collectWhereClauses(Query query, QueryOptions options) {
+        def whereClauses = []
+        if (query.filter?.whereClause) {
+            whereClauses << query.filter.whereClause
+        }
+        if (!options.ignoreFilters) {
+            whereClauses.addAll(createWhereClausesForFilters(dataSet, filterState, options.ignoredFilterIds))
+        }
+        if (options.selectionOnly) {
+            whereClauses.addAll(createWhereClausesForFilters(dataSet, selectionState))
+        }
     }
 
     @Override
