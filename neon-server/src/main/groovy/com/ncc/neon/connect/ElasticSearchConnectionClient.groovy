@@ -22,7 +22,6 @@ import org.elasticsearch.common.settings.Settings;
 import org.elasticsearch.common.transport.InetSocketTransportAddress;
 import org.elasticsearch.client.transport.TransportClient;
 
-
 /**
  * Holds a connection to elasticsearch
  */
@@ -32,8 +31,8 @@ class ElasticSearchConnectionClient implements ConnectionClient{
     public ElasticSearchConnectionClient(ConnectionInfo info){
         String[] connectionUrl = info.host.split(':', 2)
         String host = connectionUrl[0]
-        int port = Integer.parseInt(connectionUrl[1])
-        connectViaTransport(host, (port ?: 9300))
+        int port = connectionUrl.length == 2 ? Integer.parseInt(connectionUrl[1]) : 9300
+        connectViaTransport(host, port)
     }
 
     private void connectViaTransport(String host, int port) {
