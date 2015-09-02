@@ -16,6 +16,7 @@
 
 package com.ncc.neon.query.elasticsearch
 
+import com.ncc.neon.connect.NeonConnectionException
 import com.ncc.neon.query.clauses.AndWhereClause
 import com.ncc.neon.query.clauses.GroupByFieldClause
 import com.ncc.neon.query.clauses.GroupByFunctionClause
@@ -50,11 +51,12 @@ import groovy.transform.Immutable
  */
 @Immutable
 class ElasticSearchConversionStrategy {
+    static final String STATS_AGG_PREFIX = "_statsFor_"
 
     private final FilterState filterState
     private final SelectionState selectionState
 
-    public def convertQuery(Query query, QueryOptions options) {
+    public SearchRequest convertQuery(Query query, QueryOptions options) {
         def dataSet = new DataSet(databaseName: query.databaseName, tableName: query.tableName)
         def whereClauses = collectWhereClauses(dataSet, query, options)
 
@@ -85,10 +87,10 @@ class ElasticSearchConversionStrategy {
         //search result; also, rather than pass individual metrics for each aggregation field, we'll simply
         //get stats on each field for which an aggregation exists thereby getting everything
         def aggregations = aggregates
-            .findAll({ !isCountAllAggregation(it) })
-            .collect({ it.field })
+            .findAll { !isCountAllAggregation(it) }
+            .collect { it.field }
             .unique()
-            .collect({ AggregationBuilders.stats("${STATS_AGG_PREFIX}${it}").field(it as String) })
+            .collect { AggregationBuilders.stats("${STATS_AGG_PREFIX}${it}").field(it as String) }
         return aggregations
     }
 
@@ -102,7 +104,7 @@ class ElasticSearchConversionStrategy {
             //on each aggregation, except the last - nest the next aggregation
             groupByAggregationBuilders
                 .take(groupByAggregationBuilders.size() - 1)
-                .eachWithIndex({ v, i -> v.subAggregation(groupByAggregationBuilders[i + 1]) })
+                .eachWithIndex { v, i -> v.subAggregation(groupByAggregationBuilders[i + 1]) }
 
             source.aggregation(groupByAggregationBuilders.head() as AbstractAggregationBuilder)
 
@@ -112,7 +114,7 @@ class ElasticSearchConversionStrategy {
         }
     }
 
-    private buildRequest(Query query, def source) {
+    private SearchRequest buildRequest(Query query, def source) {
         def request = createSearchRequest(source, query)
 
         if (query.filter?.tableName) {
@@ -172,7 +174,7 @@ class ElasticSearchConversionStrategy {
         case SingularWhereClause:
             return translateSingularWhereClause(clause)
         default:
-            throw new RuntimeException("Unknown where clause: ${clause.getClass()}")
+            throw new NeonConnectionException("Unknown where clause: ${clause.getClass()}")
         }
     }
 
@@ -192,7 +194,7 @@ class ElasticSearchConversionStrategy {
             }.call(FilterBuilders.rangeFilter(clause.lhs))(clause.rhs)
         }
 
-        if (clause.operator in ['contains', 'not contains']) {
+        if (clause.operator in ['contains', 'not contains', 'notcontains']) {
             def regexFilter = FilterBuilders.regexpFilter(clause.lhs, ".*${clause.rhs}.*")
             return clause.operator == 'contains' ? regexFilter : FilterBuilders.notFilter(regexFilter)
         }
@@ -202,7 +204,7 @@ class ElasticSearchConversionStrategy {
             return clause.operator == '=' ? termFilter : FilterBuilders.notFilter(termFilter)
         }
 
-        throw new RuntimeException("${clause.operator} is an invalid operator for a where clause")
+        throw new NeonConnectionException("${clause.operator} is an invalid operator for a where clause")
     }
 
     private static SortBuilder translateSortClause(clause) {
@@ -233,6 +235,6 @@ class ElasticSearchConversionStrategy {
             }
         }
 
-        throw new RuntimeException("Unknown groupByClause: ${clause.getClass()}")
+        throw new NeonConnectionException("Unknown groupByClause: ${clause.getClass()}")
     }
 }

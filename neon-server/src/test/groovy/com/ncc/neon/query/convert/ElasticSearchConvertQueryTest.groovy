@@ -16,8 +16,7 @@
 
 package com.ncc.neon.query.convert
 
-
-import java.util.regex.Pattern
+import com.ncc.neon.query.elasticsearch.ElasticSearchConversionStrategy
 
 /*
  Tests the ElasticSearchConversionStrategy
@@ -26,15 +25,20 @@ class ElasticSearchConvertQueryTest extends AbstractConversionTest {
     @Override
     protected def doConvertQuery(query, queryOptions) {
         ElasticSearchConversionStrategy conversionStrategy = new ElasticSearchConversionStrategy(filterState: filterState, selectionState: selectionState)
-        conversionStrategy.convertQuery(query, queryOptions)
+        return conversionStrategy.convertQuery(query, queryOptions)
     }
 
     @Override
     void assertSimplestConvertQuery(query) {
+        assert query.indices().length == 1
+        assert query.indices()[0] == DATABASE_NAME
+        assert query.types().length == 1
+        assert query.types()[0] == TABLE_NAME
     }
 
     @Override
     void assertQueryWithWhereClause(query) {
+
     }
 
     @Override
@@ -85,13 +89,7 @@ class ElasticSearchConvertQueryTest extends AbstractConversionTest {
     protected void assertQueryWithEmptyFilter(query) {
     }
 
-    protected BasicDBObject createOrClause() {
-    }
-
     @Override
     protected void assertSelectClausePopulated(query) {
-    }
-
-    private void standardQueryAsserts(query) {
     }
 }
