@@ -21,7 +21,7 @@ import com.ncc.neon.query.clauses.SelectClause
 import com.ncc.neon.query.clauses.GroupByFieldClause
 import com.ncc.neon.query.clauses.GroupByFunctionClause
 import com.ncc.neon.query.executor.AbstractQueryExecutor
-import com.ncc.neon.query.filter.DataSet
+//import com.ncc.neon.query.filter.DataSet
 import com.ncc.neon.query.filter.Filter
 import com.ncc.neon.query.filter.FilterState
 import com.ncc.neon.query.filter.SelectionState
@@ -43,9 +43,9 @@ import org.elasticsearch.action.search.SearchType
 import org.elasticsearch.index.query.FilterBuilder
 import org.elasticsearch.index.query.FilterBuilders
 import org.elasticsearch.index.query.QueryBuilders
-import org.elasticsearch.action.search.SearchRequest
-import org.elasticsearch.search.builder.SearchSourceBuilder
-import org.elasticsearch.search.aggregations.AbstractAggregationBuilder
+//import org.elasticsearch.action.search.SearchRequest
+//import org.elasticsearch.search.builder.SearchSourceBuilder
+//import org.elasticsearch.search.aggregations.AbstractAggregationBuilder
 import org.elasticsearch.common.collect.ImmutableOpenMap
 import org.elasticsearch.client.Client
 import org.elasticsearch.search.aggregations.bucket.MultiBucketsAggregation

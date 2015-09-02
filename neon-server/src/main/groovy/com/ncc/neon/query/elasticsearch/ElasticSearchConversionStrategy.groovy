@@ -20,16 +20,25 @@ import com.ncc.neon.query.clauses.AndWhereClause
 import com.ncc.neon.query.clauses.GroupByFieldClause
 import com.ncc.neon.query.clauses.GroupByFunctionClause
 import com.ncc.neon.query.clauses.OrWhereClause
+import com.ncc.neon.query.clauses.SelectClause
 import com.ncc.neon.query.clauses.SingularWhereClause
+import com.ncc.neon.query.filter.DataSet
 import com.ncc.neon.query.filter.FilterState
 import com.ncc.neon.query.filter.SelectionState
+import com.ncc.neon.query.Query
+import com.ncc.neon.query.QueryOptions
+
 
 import org.elasticsearch.action.search.SearchType
+import org.elasticsearch.action.search.SearchRequest
 import org.elasticsearch.index.query.FilterBuilder
 import org.elasticsearch.index.query.FilterBuilders
+import org.elasticsearch.index.query.QueryBuilders
+import org.elasticsearch.search.aggregations.AbstractAggregationBuilder
 import org.elasticsearch.search.aggregations.AggregationBuilder
 import org.elasticsearch.search.aggregations.AggregationBuilders
 import org.elasticsearch.search.aggregations.bucket.histogram.DateHistogram.Interval
+import org.elasticsearch.search.builder.SearchSourceBuilder
 import org.elasticsearch.search.sort.SortBuilder
 import org.elasticsearch.search.sort.SortBuilders
 import org.elasticsearch.search.sort.SortOrder
@@ -151,7 +160,7 @@ class ElasticSearchConversionStrategy {
 
     private static FilterBuilder translateBooleanWhereClause(clause, Closure<FilterBuilder> combiner) {
         def inners = clause.whereClauses.collect(ElasticSearchConversionStrategy.&translateWhereClause)
-        FilterBuilders.boolFilter().must(combiner(inners))
+        FilterBuilders.boolFilter().must(combiner(inners as FilterBuilder[]))
     }
 
     public static FilterBuilder translateWhereClause(clause) {
