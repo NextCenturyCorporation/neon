@@ -270,7 +270,7 @@ class ElasticSearchQueryExecutor extends AbstractQueryExecutor {
 
     private static FilterBuilder translateBooleanWhereClause(clause, Closure<FilterBuilder> combiner) {
         def inners = clause.whereClauses.collect(ElasticSearchQueryExecutor.&translateWhereClause)
-        FilterBuilders.boolFilter().must(combiner(inners))
+        FilterBuilders.boolFilter().must(combiner(inners as FilterBuilder[]))
     }
 
     private static FilterBuilder translateSingularWhereClause(clause) {
