@@ -72,7 +72,7 @@ class SparkSQLConvertQueryTest extends AbstractConversionTest {
 
     @Override
     protected void assertQueryWithGroupByClauses(query) {
-        assert query.toLowerCase() == "select ${FIELD_NAME_2}, sum(${FIELD_NAME}) as ${FIELD_NAME}_sum from ${DATABASE_NAME}.${TABLE_NAME} group by ${FIELD_NAME_2}, sum(${FIELD_NAME})".toLowerCase()
+        assert query.toLowerCase() == "select ${FIELD_NAME_2}, (pmod(from_unixtime(unix_timestamp(${FIELD_NAME}),'u'),7)+1) as ${FIELD_NAME}_dayOfWeek from ${DATABASE_NAME}.${TABLE_NAME} group by ${FIELD_NAME_2}, (pmod(from_unixtime(unix_timestamp(${FIELD_NAME}),'u'),7)+1)".toLowerCase()
     }
 
     @Override

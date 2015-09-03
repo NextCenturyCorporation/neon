@@ -17,11 +17,29 @@
 package com.ncc.neon.query.convert
 
 import com.ncc.neon.query.elasticsearch.ElasticSearchConversionStrategy
+import org.elasticsearch.common.xcontent.XContentHelper
+import org.elasticsearch.common.xcontent.XContentParser
+import org.junit.After
+import org.junit.Before
 
 /*
  Tests the ElasticSearchConversionStrategy
 */
 class ElasticSearchConvertQueryTest extends AbstractConversionTest {
+    def builderCallCount
+
+    @Before
+    void before() {
+        builderCallCount = 0
+
+        super.before()
+    }
+
+    @After
+    void after() {
+        GroovySystem.metaClassRegistry.removeMetaClass(ElasticSearchConversionStrategy)
+    }
+
     @Override
     protected def doConvertQuery(query, queryOptions) {
         ElasticSearchConversionStrategy conversionStrategy = new ElasticSearchConversionStrategy(filterState: filterState, selectionState: selectionState)
@@ -38,58 +56,141 @@ class ElasticSearchConvertQueryTest extends AbstractConversionTest {
 
     @Override
     void assertQueryWithWhereClause(query) {
+        XContentParser parser = XContentHelper.createParser(query.source())
+        def map = parser.map()
 
+        def whereFilter = [:]
+        whereFilter.term = [:]
+        whereFilter.term[FIELD_NAME] = FIELD_VALUE
+        assert map.query.filtered.filter.bool.must.and.filters.contains(whereFilter)
     }
 
     @Override
     protected void assertQueryWithSortClause(query) {
+        XContentParser parser = XContentHelper.createParser(query.source())
+        def map = parser.map()
+
+        def sortClause = [field: [order: 'asc']]
+        assert map.sort.contains(sortClause)
     }
 
     @Override
     protected void assertQueryWithLimitClause(query) {
+        XContentParser parser = XContentHelper.createParser(query.source())
+        def map = parser.map()
+        assert map.size == 5
     }
 
     @Override
     protected void assertQueryWithOffsetClause(query) {
+        XContentParser parser = XContentHelper.createParser(query.source())
+        def map = parser.map()
+
+        assert map.from == 2
     }
 
     @Override
+    @SuppressWarnings("Println")
     protected void assertQueryWithDistinctClause(query) {
+//        XContentParser parser = XContentHelper.createParser(query.source())
+//        def map = parser.map()
+        //FIXME
+        //println(map)
     }
 
     @Override
     protected void assertQueryWithAggregateClause(query) {
+        XContentParser parser = XContentHelper.createParser(query.source())
+        def map = parser.map()
+
+        assert map.aggregations
+        assert map.aggregations == [_statsFor_field:[stats:[field: FIELD_NAME]]]
     }
 
     @Override
+    @SuppressWarnings("Println")
     protected void assertQueryWithGroupByClauses(query) {
+        //XContentParser parser = XContentHelper.createParser(query.source())
+        //def map = parser.map()
+        //FIXME
+       // println(map)
     }
 
     @Override
     protected void assertQueryWithOrWhereClauseAndFilter(query) {
+        XContentParser parser = XContentHelper.createParser(query.source())
+        def map = parser.map()
+
+        def subclause1 = [term: [:]]
+        subclause1.term[FIELD_NAME] = FIELD_VALUE
+        def subclause2 = [term: [:]]
+        subclause2.term[FIELD_NAME_2] = FIELD_VALUE
+        def clause1 = [bool:[must:[or:[filters:[subclause1, subclause2]]]]]
+
+        def clause2 = [term: [:]]
+        clause2.term[FIELD_NAME] = FIELD_VALUE
+
+        map.query.filtered.filter.bool.must.and.filters.contains(clause1)
+        map.query.filtered.filter.bool.must.and.filters.contains(clause2)
     }
 
     @Override
     protected void assertQueryWithWhereNullClause(query) {
+        XContentParser parser = XContentHelper.createParser(query.source())
+        def map = parser.map()
+
+        def whereNullClause = [not: [filter: [exists: [field: FIELD_NAME]]]]
+
+        assert map.query.filtered.filter.bool.must.and.filters.contains(whereNullClause)
     }
 
     @Override
     protected void assertQueryWithWhereNotNullClause(query) {
+        XContentParser parser = XContentHelper.createParser(query.source())
+        def map = parser.map()
+
+        def notNullClause = [exists: [field: FIELD_NAME]]
+
+        assert map.query.filtered.filter.bool.must.and.filters.contains(notNullClause)
     }
 
     @Override
     protected void assertQueryWithWhereContainsFooClause(query) {
+        XContentParser parser = XContentHelper.createParser(query.source())
+        def map = parser.map()
+
+        def containsClause = [regexp: [:]]
+        containsClause.regexp[FIELD_NAME] = '.*foo.*'
+
+        assert map.query.filtered.filter.bool.must.and.filters.contains(containsClause)
     }
 
     @Override
     protected void assertQueryWithWhereNotContainsFooClause(query) {
+        XContentParser parser = XContentHelper.createParser(query.source())
+        def map = parser.map()
+
+        def containsClause = [not: [filter: [regexp: [:]]]]
+        containsClause.not.filter.regexp[FIELD_NAME] = '.*foo.*'
+
+        assert map.query.filtered.filter.bool.must.and.filters.contains(containsClause)
     }
 
     @Override
     protected void assertQueryWithEmptyFilter(query) {
+        XContentParser parser = XContentHelper.createParser(query.source())
+        def map = parser.map()
+
+        assert map.query.filtered.filter.bool.must.and.filters == []
+        assert map.query.filtered.filter.bool.must.and.filters.size() == 0
     }
 
     @Override
     protected void assertSelectClausePopulated(query) {
+        XContentParser parser = XContentHelper.createParser(query.source())
+        def map = parser.map()
+
+        assert map._source.includes.contains(FIELD_NAME)
+        assert map._source.includes.contains(FIELD_NAME_2)
     }
 }

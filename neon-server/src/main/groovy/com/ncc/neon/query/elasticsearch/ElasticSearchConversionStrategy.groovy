@@ -75,17 +75,15 @@ class ElasticSearchConversionStrategy {
         return request
     }
 
+    /*
+     * create the metric aggregations by doing a stats aggregation for any field where
+     * a calculation is requested - this gives us all of the metrics we could
+     * possibly need. Also, don't process the count all clauses here, since
+     * that will be available either through the hit count in the results, or as
+     * doc_count in the buckets
+    */
     private static convertAggregations(Query query, SearchSourceBuilder source) {
-        //create the metric aggregations by doing a stats aggregation for any field where
-        //a calculation is requested - this gives us all of the metrics we could
-        //possibly need. Also, don't process the count all clauses here, since
-        //that will be available either through the hit count in the results, or as
-        //doc_count in the buckets
-        def metricAggregations = query.aggregates
-            .findAll { !isCountAllAggregation(it) }
-            .collect { it.field }
-            .unique()
-            .collect { AggregationBuilders.stats("${STATS_AGG_PREFIX}${it}").field(it as String) }
+        def metricAggregations = getMetricAggregations(query)
 
         if (query.groupByClauses) {
             def bucketAggregations = query.groupByClauses.collect(ElasticSearchConversionStrategy.&convertGroupByClause)
@@ -93,33 +91,34 @@ class ElasticSearchConversionStrategy {
             //apply metricAggregations and sorting to the terminal group by clause
             metricAggregations.each(bucketAggregations.last().&subAggregation)
             query.sortClauses.each { sc ->
-                def aggregationClause = query.aggregates.find({ ac -> ac.name == sc.fieldName })
+                def aggregationClause = query.aggregates.find { ac -> ac.name == sc.fieldName }
                 def sortOrder = sc.sortOrder == com.ncc.neon.query.clauses.SortOrder.ASCENDING
 
                 bucketAggregations.last().order(isCountAllAggregation(aggregationClause) ?
                     Terms.Order.count(sortOrder) :
-
-                    Terms.Order.aggregation(
-                        "${STATS_AGG_PREFIX}${aggregationClause.field}" as String,
-                        aggregationClause.operation as String,
-                        sortOrder
-                    ))
+                    Terms.Order.aggregation("${STATS_AGG_PREFIX}${aggregationClause.field}" as String,
+                        aggregationClause.operation as String, sortOrder)
+                )
             }
 
             //on each aggregation, except the last - nest the next aggregation
-            bucketAggregations
-                .take(bucketAggregations.size() - 1)
+            bucketAggregations.take(bucketAggregations.size() - 1)
                 .eachWithIndex { v, i -> v.subAggregation(bucketAggregations[i + 1]) }
 
             source.aggregation(bucketAggregations.head() as AbstractAggregationBuilder)
-
         } else {
             //if there are no groupByClauses, apply sort and metricAggregations directly to source
             metricAggregations.each(source.&aggregation)
-            query.sortClauses
-                .collect(ElasticSearchConversionStrategy.&convertSortClause)
-                .each(source.&sort)
+            query.sortClauses.collect(ElasticSearchConversionStrategy.&convertSortClause).each(source.&sort)
         }
+    }
+
+    private static getMetricAggregations(Query query) {
+        return query.aggregates
+                .findAll { !isCountAllAggregation(it) }
+                .collect { it.field }
+                .unique()
+                .collect { AggregationBuilders.stats("${STATS_AGG_PREFIX}${it}").field(it as String) }
     }
 
     private static SearchRequest buildRequest(Query query, SearchSourceBuilder source) {
@@ -191,14 +190,10 @@ class ElasticSearchConversionStrategy {
         if (clause.operator in ['<', '>', '<=', '>=']) {
             return {
                 switch (clause.operator) {
-                    case '<':
-                        return it.&lt
-                    case '>':
-                        return it.&gt
-                    case '<=':
-                        return it.&lte
-                    case '>=':
-                        return it.&gte
+                    case '<': return it.&lt
+                    case '>': return it.&gt
+                    case '<=': return it.&lte
+                    case '>=': return it.&gte
                 }
             }.call(FilterBuilders.rangeFilter(clause.lhs as String))(clause.rhs as String)
         }
@@ -244,20 +239,13 @@ class ElasticSearchConversionStrategy {
                 }
 
                 switch (clause.operation) {
-                    case 'year':
-                        return template('YEAR')
-                    case 'month':
-                        return template('MONTH')
-                    case 'dayOfMonth':
-                        return template('DAY_OF_MONTH')
-                    case 'dayOfWeek':
-                        return template('DAY_OF_WEEK')
-                    case 'hour':
-                        return template('HOUR_OF_DAY')
-                    case 'minute':
-                        return template('MINUTE')
-                    case 'second':
-                        return template('SECOND')
+                    case 'year': return template('YEAR')
+                    case 'month': return template('MONTH')
+                    case 'dayOfMonth': return template('DAY_OF_MONTH')
+                    case 'dayOfWeek': return template('DAY_OF_WEEK')
+                    case 'hour': return template('HOUR_OF_DAY')
+                    case 'minute': return template('MINUTE')
+                    case 'second': return template('SECOND')
                 }
             }
         }

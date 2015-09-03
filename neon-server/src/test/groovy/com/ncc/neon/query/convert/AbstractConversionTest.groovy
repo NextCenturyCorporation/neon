@@ -314,7 +314,7 @@ abstract class AbstractConversionTest {
 
     private void givenQueryHasGroupByPopulated() {
         simpleQuery.groupByClauses = [new GroupByFieldClause(field: "${FIELD_NAME_2}"),
-                new GroupByFunctionClause(name: "${FIELD_NAME}_sum", operation: "sum", field: FIELD_NAME)]
+                new GroupByFunctionClause(name: "${FIELD_NAME}_dayOfWeek", operation: "dayOfWeek", field: FIELD_NAME)]
     }
 
 }
