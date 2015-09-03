@@ -93,11 +93,15 @@ class ElasticSearchConversionStrategy {
             metricAggregations.each(bucketAggregations.last().&subAggregation)
             query.sortClauses.each { sc ->
                 def aggregationClause = query.aggregates.find({ ac -> ac.name == sc.fieldName })
-                bucketAggregations.last().order(
+                def sortOrder = sc.sortOrder == com.ncc.neon.query.clauses.SortOrder.ASCENDING
+
+                bucketAggregations.last().order(isCountAllAggregation(aggregationClause) ?
+                    Terms.Order.count(sortOrder) :
+
                     Terms.Order.aggregation(
                         "${STATS_AGG_PREFIX}${aggregationClause.field}" as String,
                         aggregationClause.operation as String,
-                        sc.sortOrder == com.ncc.neon.query.clauses.SortOrder.ASCENDING
+                        sortOrder
                     ))
             }
 
@@ -123,6 +127,7 @@ class ElasticSearchConversionStrategy {
         if (query.filter?.tableName) {
             request.types([query.filter.tableName] as String[])
         }
+        request
     }
 
     private collectWhereClauses(DataSet dataSet, Query query, QueryOptions options) {
