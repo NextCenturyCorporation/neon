@@ -29,7 +29,6 @@ import com.ncc.neon.query.filter.SelectionState
 import com.ncc.neon.query.Query
 import com.ncc.neon.query.QueryOptions
 
-
 import org.elasticsearch.action.search.SearchType
 import org.elasticsearch.action.search.SearchRequest
 import org.elasticsearch.index.query.FilterBuilder
@@ -38,7 +37,7 @@ import org.elasticsearch.index.query.QueryBuilders
 import org.elasticsearch.search.aggregations.AbstractAggregationBuilder
 import org.elasticsearch.search.aggregations.AggregationBuilder
 import org.elasticsearch.search.aggregations.AggregationBuilders
-import org.elasticsearch.search.aggregations.bucket.histogram.DateHistogram.Interval
+import org.elasticsearch.search.aggregations.bucket.terms.Terms
 import org.elasticsearch.search.builder.SearchSourceBuilder
 import org.elasticsearch.search.sort.SortBuilder
 import org.elasticsearch.search.sort.SortBuilders
@@ -60,61 +59,65 @@ class ElasticSearchConversionStrategy {
         def dataSet = new DataSet(databaseName: query.databaseName, tableName: query.tableName)
         def whereClauses = collectWhereClauses(dataSet, query, options)
 
-        //Build the elasticsearch filters for the where clauses and sorters
+        //Build the elasticsearch filters for the where clauses
         def inners = whereClauses.collect(ElasticSearchConversionStrategy.&convertWhereClause) as FilterBuilder[]
         def whereFilter = FilterBuilders.boolFilter().must(FilterBuilders.andFilter(inners))
-        def sorters = (query.sortClauses ?: []).collect(ElasticSearchConversionStrategy.&convertSortClause)
-
         def source = createSearchSourceBuilder(query).query(QueryBuilders.filteredQuery(null, whereFilter))
 
         if (query.fields && query.fields != SelectClause.ALL_FIELDS) {
             source.fetchSource(query.fields as String[])
         }
 
-        sorters.each(source.&sort)
-        def aggregates = query.aggregates
-        def aggregations = buildAggregations(aggregates)
-        def groupByClauses = query.groupByClauses
-        buildGroupBy(groupByClauses, source, aggregations)
+        convertAggregations(query, source)
 
         def request = buildRequest(query, source)
-
         return request
     }
 
-    private buildAggregations(aggregates) {
-        //Build the metric aggregations - remove the count all aggregation since we can get that as part of the
-        //search result; also, rather than pass individual metrics for each aggregation field, we'll simply
-        //get stats on each field for which an aggregation exists thereby getting everything
-        def aggregations = aggregates
+    private static convertAggregations(Query query, SearchSourceBuilder source) {
+        //create the metric aggregations by doing a stats aggregation for any field where
+        //a calculation is requested - this gives us all of the metrics we could
+        //possibly need. Also, don't process the count all clauses here, since
+        //that will be available either through the hit count in the results, or as
+        //doc_count in the buckets
+        def metricAggregations = query.aggregates
             .findAll { !isCountAllAggregation(it) }
             .collect { it.field }
             .unique()
             .collect { AggregationBuilders.stats("${STATS_AGG_PREFIX}${it}").field(it as String) }
-        return aggregations
-    }
 
-    private buildGroupBy(groupByClauses, source, aggregations) {
-        if (groupByClauses) {
-            def groupByAggregationBuilders = groupByClauses.collect(ElasticSearchConversionStrategy.&convertGroupByClause)
+        if (query.groupByClauses) {
+            def bucketAggregations = query.groupByClauses.collect(ElasticSearchConversionStrategy.&convertGroupByClause)
 
-            //apply aggregations to the terminal group by clause
-            aggregations.each { groupByAggregationBuilders.last().subAggregation(it) }
+            //apply metricAggregations and sorting to the terminal group by clause
+            metricAggregations.each(bucketAggregations.last().&subAggregation)
+            query.sortClauses.each { sc ->
+                def aggregationClause = query.aggregates.find({ ac -> ac.name == sc.fieldName })
+                bucketAggregations.last().order(
+                    Terms.Order.aggregation(
+                        "${STATS_AGG_PREFIX}${aggregationClause.field}" as String,
+                        aggregationClause.operation as String,
+                        sc.sortOrder == com.ncc.neon.query.clauses.SortOrder.ASCENDING
+                    ))
+            }
 
             //on each aggregation, except the last - nest the next aggregation
-            groupByAggregationBuilders
-                .take(groupByAggregationBuilders.size() - 1)
-                .eachWithIndex { v, i -> v.subAggregation(groupByAggregationBuilders[i + 1]) }
+            bucketAggregations
+                .take(bucketAggregations.size() - 1)
+                .eachWithIndex { v, i -> v.subAggregation(bucketAggregations[i + 1]) }
 
-            source.aggregation(groupByAggregationBuilders.head() as AbstractAggregationBuilder)
+            source.aggregation(bucketAggregations.head() as AbstractAggregationBuilder)
 
         } else {
-            //if there are no groupByClauses, apply metrics aggregations directly
-            aggregations.each(source.&aggregation)
+            //if there are no groupByClauses, apply sort and metricAggregations directly to source
+            metricAggregations.each(source.&aggregation)
+            query.sortClauses
+                .collect(ElasticSearchConversionStrategy.&convertSortClause)
+                .each(source.&sort)
         }
     }
 
-    private SearchRequest buildRequest(Query query, def source) {
+    private static SearchRequest buildRequest(Query query, SearchSourceBuilder source) {
         def request = createSearchRequest(source, query)
 
         if (query.filter?.tableName) {
@@ -162,14 +165,14 @@ class ElasticSearchConversionStrategy {
 
     public static FilterBuilder convertWhereClause(clause) {
         switch (clause.getClass()) {
-        case AndWhereClause:
-            return convertBooleanWhereClause(clause, FilterBuilders.&andFilter)
-        case OrWhereClause:
-            return convertBooleanWhereClause(clause, FilterBuilders.&orFilter)
-        case SingularWhereClause:
-            return convertSingularWhereClause(clause)
-        default:
-            throw new NeonConnectionException("Unknown where clause: ${clause.getClass()}")
+            case AndWhereClause:
+                return convertBooleanWhereClause(clause, FilterBuilders.&andFilter)
+            case OrWhereClause:
+                return convertBooleanWhereClause(clause, FilterBuilders.&orFilter)
+            case SingularWhereClause:
+                return convertSingularWhereClause(clause)
+            default:
+                throw new NeonConnectionException("Unknown where clause: ${clause.getClass()}")
         }
     }
 
@@ -182,20 +185,20 @@ class ElasticSearchConversionStrategy {
         if (clause.operator in ['<', '>', '<=', '>=']) {
             return {
                 switch (clause.operator) {
-                case '<':
-                    return it.&lt
-                case '>':
-                    return it.&gt
-                case '<=':
-                    return it.&lte
-                case '>=':
-                    return it.&gte
+                    case '<':
+                        return it.&lt
+                    case '>':
+                        return it.&gt
+                    case '<=':
+                        return it.&lte
+                    case '>=':
+                        return it.&gte
                 }
-            }.call(FilterBuilders.rangeFilter(clause.lhs))(clause.rhs)
+            }.call(FilterBuilders.rangeFilter(clause.lhs as String))(clause.rhs as String)
         }
 
         if (clause.operator in ['contains', 'not contains', 'notcontains']) {
-            def regexFilter = FilterBuilders.regexpFilter(clause.lhs, ".*${clause.rhs}.*")
+            def regexFilter = FilterBuilders.regexpFilter(clause.lhs as String, ".*${clause.rhs}.*" as String)
             return clause.operator == 'contains' ? regexFilter : FilterBuilders.notFilter(regexFilter)
         }
 
@@ -213,30 +216,42 @@ class ElasticSearchConversionStrategy {
     }
 
     private static SortBuilder convertSortClause(clause) {
-        def order = clause.sortOrder == com.ncc.neon.query.clauses.SortOrder.ASCENDING ? SortOrder.ASC : SortOrder.DESC
-        SortBuilders.fieldSort(clause.fieldName).order(order)
+        def order = clause.sortOrder == com.ncc.neon.query.clauses.SortOrder.ASCENDING ?
+                SortOrder.ASC : SortOrder.DESC
+
+        SortBuilders.fieldSort(clause.fieldName as String).order(order)
     }
 
     private static AggregationBuilder convertGroupByClause(clause) {
         if (clause instanceof GroupByFieldClause) {
-            return AggregationBuilders.terms(clause.field).field(clause.field as String)
+            return AggregationBuilders.terms(clause.field as String).field(clause.field as String)
         }
 
-        if (clause instanceof GroupByFunctionClause && clause.operation in ['year', 'month', 'dayOfMonth', 'hour', 'minute', 'second']) {
-            def fn = AggregationBuilders.dateHistogram(clause.name).field(clause.field as String).&interval
-            switch(clause.operation) {
-            case 'year':
-                return fn(Interval.YEAR)
-            case 'month':
-                return fn(Interval.MONTH)
-            case 'dayOfMonth':
-                return fn(Interval.DAY)
-            case 'hour':
-                return fn(Interval.HOUR)
-            case 'minute':
-                return fn(Interval.MINUTE)
-            case 'second':
-                return fn(Interval.SECOND)
+        if (clause instanceof GroupByFunctionClause) {
+            if (clause.operation in ['year', 'month', 'dayOfMonth', 'dayOfWeek', 'hour', 'minute', 'second']) {
+                def template = {
+                    AggregationBuilders
+                        .terms(clause.name as String)
+                        .field(clause.field as String)
+                        .script("def calendar = java.util.Calendar.getInstance(); calendar.setTime(new Date(doc['time'].value)); calendar.get(java.util.Calendar.${it})" as String)
+                }
+
+                switch (clause.operation) {
+                    case 'year':
+                        return template('YEAR')
+                    case 'month':
+                        return template('MONTH')
+                    case 'dayOfMonth':
+                        return template('DAY_OF_MONTH')
+                    case 'dayOfWeek':
+                        return template('DAY_OF_WEEK')
+                    case 'hour':
+                        return template('HOUR_OF_DAY')
+                    case 'minute':
+                        return template('MINUTE')
+                    case 'second':
+                        return template('SECOND')
+                }
             }
         }
 
