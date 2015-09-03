@@ -167,7 +167,9 @@ class ElasticSearchQueryExecutor extends AbstractQueryExecutor {
                 accumulator.put(currentClause.field, value.key)
                 break
             case GroupByFunctionClause:
-                accumulator.put(groupByClauses.head().name, value.key)
+                def isDateClause = (currentClause.operation in ElasticSearchConversionStrategy.DATE_OPERATIONS
+                        && value.key.isNumber())
+                accumulator.put(groupByClauses.head().name, isDateClause ? value.key.toFloat() : value.key)
                 break
             default:
                 throw new NeonConnectionException("Bad implementation - ${currentClause.getClass()} is not a valid groupByClause")

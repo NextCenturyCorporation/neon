@@ -51,6 +51,7 @@ import groovy.transform.Immutable
 @Immutable
 class ElasticSearchConversionStrategy {
     static final String STATS_AGG_PREFIX = "_statsFor_"
+    static final String[] DATE_OPERATIONS = ['year', 'month', 'dayOfMonth', 'dayOfWeek', 'hour', 'minute', 'second']
 
     private final FilterState filterState
     private final SelectionState selectionState
@@ -233,12 +234,13 @@ class ElasticSearchConversionStrategy {
         }
 
         if (clause instanceof GroupByFunctionClause) {
-            if (clause.operation in ['year', 'month', 'dayOfMonth', 'dayOfWeek', 'hour', 'minute', 'second']) {
+            if (clause.operation in DATE_OPERATIONS) {
                 def template = {
                     AggregationBuilders
                         .terms(clause.name as String)
                         .field(clause.field as String)
                         .script("def calendar = java.util.Calendar.getInstance(); calendar.setTime(new Date(doc['time'].value)); calendar.get(java.util.Calendar.${it})" as String)
+                        .valueType(Terms.ValueType.LONG)
                 }
 
                 switch (clause.operation) {
