@@ -61,9 +61,9 @@ class ElasticSearchConversionStrategy {
         def whereClauses = collectWhereClauses(dataSet, query, options)
 
         //Build the elasticsearch filters for the where clauses and sorters
-        def inners = whereClauses.collect(ElasticSearchConversionStrategy.&translateWhereClause) as FilterBuilder[]
+        def inners = whereClauses.collect(ElasticSearchConversionStrategy.&convertWhereClause) as FilterBuilder[]
         def whereFilter = FilterBuilders.boolFilter().must(FilterBuilders.andFilter(inners))
-        def sorters = (query.sortClauses ?: []).collect(ElasticSearchConversionStrategy.&translateSortClause)
+        def sorters = (query.sortClauses ?: []).collect(ElasticSearchConversionStrategy.&convertSortClause)
 
         def source = createSearchSourceBuilder(query).query(QueryBuilders.filteredQuery(null, whereFilter))
 
@@ -82,7 +82,7 @@ class ElasticSearchConversionStrategy {
         return request
     }
 
-    private buildAggregations(def aggregates) {
+    private buildAggregations(aggregates) {
         //Build the metric aggregations - remove the count all aggregation since we can get that as part of the
         //search result; also, rather than pass individual metrics for each aggregation field, we'll simply
         //get stats on each field for which an aggregation exists thereby getting everything
@@ -94,9 +94,9 @@ class ElasticSearchConversionStrategy {
         return aggregations
     }
 
-    private buildGroupBy(def groupByClauses, def source, def aggregations) {
+    private buildGroupBy(groupByClauses, source, aggregations) {
         if (groupByClauses) {
-            def groupByAggregationBuilders = groupByClauses.collect(ElasticSearchConversionStrategy.&translateGroupByClause)
+            def groupByAggregationBuilders = groupByClauses.collect(ElasticSearchConversionStrategy.&convertGroupByClause)
 
             //apply aggregations to the terminal group by clause
             aggregations.each { groupByAggregationBuilders.last().subAggregation(it) }
@@ -136,21 +136,21 @@ class ElasticSearchConversionStrategy {
         return whereClauses
     }
 
-    private static SearchSourceBuilder createSearchSourceBuilder(Query params) {
+    public static SearchSourceBuilder createSearchSourceBuilder(Query params) {
         new SearchSourceBuilder()
             .explain(false)
             .from((params?.offsetClause ? params.offsetClause.offset : 0) as int)
             .size((params?.limitClause ? params.limitClause.limit : 45) as int)
     }
 
-    private static SearchRequest createSearchRequest(SearchSourceBuilder source, Query params) {
+    public static SearchRequest createSearchRequest(SearchSourceBuilder source, Query params) {
         new SearchRequest()
             .searchType(SearchType.DFS_QUERY_THEN_FETCH)
             .source(source)
             .indices(params?.filter?.databaseName ?: '_all')
     }
 
-    private static boolean isCountAllAggregation(clause) {
+    public static boolean isCountAllAggregation(clause) {
         clause.operation == 'count' && clause.field == '*'
     }
 
@@ -160,25 +160,25 @@ class ElasticSearchConversionStrategy {
             .collect { it.filter.whereClause }
     }
 
-    private static FilterBuilder translateBooleanWhereClause(clause, Closure<FilterBuilder> combiner) {
-        def inners = clause.whereClauses.collect(ElasticSearchConversionStrategy.&translateWhereClause)
-        FilterBuilders.boolFilter().must(combiner(inners as FilterBuilder[]))
-    }
-
-    public static FilterBuilder translateWhereClause(clause) {
+    public static FilterBuilder convertWhereClause(clause) {
         switch (clause.getClass()) {
         case AndWhereClause:
-            return translateBooleanWhereClause(clause, FilterBuilders.&andFilter)
+            return convertBooleanWhereClause(clause, FilterBuilders.&andFilter)
         case OrWhereClause:
-            return translateBooleanWhereClause(clause, FilterBuilders.&orFilter)
+            return convertBooleanWhereClause(clause, FilterBuilders.&orFilter)
         case SingularWhereClause:
-            return translateSingularWhereClause(clause)
+            return convertSingularWhereClause(clause)
         default:
             throw new NeonConnectionException("Unknown where clause: ${clause.getClass()}")
         }
     }
 
-    private static FilterBuilder translateSingularWhereClause(clause) {
+    private static FilterBuilder convertBooleanWhereClause(clause, Closure<FilterBuilder> combiner) {
+        def inners = clause.whereClauses.collect(ElasticSearchConversionStrategy.&convertWhereClause)
+        FilterBuilders.boolFilter().must(combiner(inners as FilterBuilder[]))
+    }
+
+    private static FilterBuilder convertSingularWhereClause(clause) {
         if (clause.operator in ['<', '>', '<=', '>=']) {
             return {
                 switch (clause.operator) {
@@ -200,19 +200,24 @@ class ElasticSearchConversionStrategy {
         }
 
         if (clause.operator in ['=', '!=']) {
-            def termFilter = FilterBuilders.termFilter(clause.lhs as String, clause.rhs as String)
-            return clause.operator == '=' ? termFilter : FilterBuilders.notFilter(termFilter)
+
+            def filter = clause.rhs ?
+                FilterBuilders.termFilter(clause.lhs as String, clause.rhs as String) :
+                FilterBuilders.existsFilter(clause.lhs as String)
+
+            //logical biconditional
+            return (clause.operator == '!=') == !clause.rhs ? filter : FilterBuilders.notFilter(filter)
         }
 
         throw new NeonConnectionException("${clause.operator} is an invalid operator for a where clause")
     }
 
-    private static SortBuilder translateSortClause(clause) {
+    private static SortBuilder convertSortClause(clause) {
         def order = clause.sortOrder == com.ncc.neon.query.clauses.SortOrder.ASCENDING ? SortOrder.ASC : SortOrder.DESC
         SortBuilders.fieldSort(clause.fieldName).order(order)
     }
 
-    private static AggregationBuilder translateGroupByClause(clause) {
+    private static AggregationBuilder convertGroupByClause(clause) {
         if (clause instanceof GroupByFieldClause) {
             return AggregationBuilders.terms(clause.field).field(clause.field as String)
         }

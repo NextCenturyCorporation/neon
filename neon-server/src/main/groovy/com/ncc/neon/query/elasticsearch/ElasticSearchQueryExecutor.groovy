@@ -35,7 +35,6 @@ import org.elasticsearch.client.Client
 import org.elasticsearch.common.collect.ImmutableOpenMap
 import org.elasticsearch.search.aggregations.AggregationBuilders
 import org.elasticsearch.search.aggregations.bucket.MultiBucketsAggregation
-
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
@@ -70,9 +69,11 @@ class ElasticSearchQueryExecutor extends AbstractQueryExecutor {
         def aggResults = results.aggregations
 
         if (aggregates && !groupByClauses) {
-            return new TabularQueryResult(extractMetricAggregations(aggregates, aggResults.asMap(), results.hits.totalHits))
+            return new TabularQueryResult([
+                    extractMetrics(aggregates, aggResults ? aggResults.asMap() : null, results.hits.totalHits)
+            ])
         } else if (groupByClauses) {
-            return new TabularQueryResult(extractGroupByAggregation(groupByClauses, aggResults.asList()[0], aggregates, results.hits.totalHits))
+            return new TabularQueryResult(extractBuckets(groupByClauses, aggResults.asList()[0], aggregates))
         }
         new TabularQueryResult(results.hits.collect { it.getSource() })
     }
@@ -97,12 +98,13 @@ class ElasticSearchQueryExecutor extends AbstractQueryExecutor {
 
     List<ArrayCountPair> getArrayCounts(String databaseName, String tableName, String field, int limit = 40) {
         getClient()
-            .search(createSearchRequest(
-                createSearchSourceBuilder(new Query(filter: new Filter(databaseName: databaseName, tableName: tableName)))
-                    .aggregation(AggregationBuilders.terms("arrayCount")
+            .search(
+                ElasticSearchConversionStrategy.createSearchRequest(
+                    ElasticSearchConversionStrategy.createSearchSourceBuilder(
+                            new Query(filter: new Filter(databaseName: databaseName, tableName: tableName)))
+                        .aggregation(AggregationBuilders.terms("arrayCount")
                             .field(field)
-                            .size(limit))
-                , null))
+                            .size(limit)) , null))
             .actionGet()
             .getAggregations()
             .asList()
@@ -119,22 +121,20 @@ class ElasticSearchQueryExecutor extends AbstractQueryExecutor {
         getClient().admin().indices().getMappings(new GetMappingsRequest()).actionGet().mappings
     }
 
-    private static extractMetricAggregations(aggregates, results, hitCount) {
-        def (findAllAgg, metricAggs) = aggregates.split(ElasticSearchQueryExecutor.&isCountAllAggregation)
-        def extractedAggs = metricAggs.collect { it -> extractMetricAggregation(it, results) }
-        if (findAllAgg) {
-            def aggMap = [:]
-            aggMap.put(findAllAgg[0].name, hitCount)
-            extractedAggs.push(aggMap)
-        }
-        extractedAggs
-    }
+    private static Map<String, Object> extractMetrics(clauses, results, totalCount) {
+        def (countAllClause, metricClauses) = clauses.split(ElasticSearchConversionStrategy.&isCountAllAggregation)
 
-    private static Map<String, Object> extractMetricAggregation(clause, aggs) {
-        def agg = aggs.get("${STATS_AGG_PREFIX}${clause.field}" as String)
-        def aggMap = [:]
-        aggMap.put(clause.name, agg[clause.operation])
-        aggMap
+        def metrics = metricClauses.inject([:]) { acc, clause ->
+            def result = results.get("${STATS_AGG_PREFIX}${clause.field}" as String)
+            acc.put(clause.name, result[clause.operation])
+            acc
+        }
+
+        if (countAllClause) {
+            metrics.put(countAllClause[0].name, totalCount)
+        }
+
+        metrics
     }
 
     /*
@@ -150,30 +150,17 @@ class ElasticSearchQueryExecutor extends AbstractQueryExecutor {
     * and the nested aggregation. If there are no more clauses to process, then we've reached the bottom of the tree
     * we add any metric aggregations to the bucket and push it onto the result list.
     */
-    private static List<Map<String, Object>> extractGroupByAggregation(groupByClauses, value, metricAggs, hitCount,
-                                                                       Map accumulator = [:],
-                                                                       List<Map<String, Object>> results = []) {
-        def result
-        if (value instanceof MultiBucketsAggregation) {
-            result = extractMultiBucketsAggregation(groupByClauses, value, metricAggs, hitCount, accumulator, results)
-        } else if (value instanceof MultiBucketsAggregation.Bucket) {
-            result = extractMultiBucketsAggregationBucket(groupByClauses, value, metricAggs, hitCount, accumulator, results)
-        }
-        return result
-    }
-
-    private static List<Map<String, Object>> extractMultiBucketsAggregation(groupByClauses, value, metricAggs, hitCount,
-                                                                            Map accumulator, List<Map<String, Object>> results) {
+    private static List<Map<String, Object>> extractBuckets(groupByClauses, value, metricAggs, Map accumulator = [:], List<Map<String, Object>> results = []) {
         value.buckets.each {
-            def newAcc = [:]
-            newAcc.putAll(accumulator)
-            extractGroupByAggregation(groupByClauses, it, metricAggs, hitCount, newAcc, results)
+            def newAccumulator = [:]
+            newAccumulator.putAll(accumulator)
+            extractBucket(groupByClauses, it, metricAggs, newAccumulator, results)
         }
+
         return results
     }
 
-    private static List<Map<String, Object>> extractMultiBucketsAggregationBucket(groupByClauses, value, metricAggs, hitCount,
-                                                                                  Map accumulator, List<Map<String, Object>> results) {
+    private static void extractBucket(groupByClauses, value, metricAggs, Map accumulator, List<Map<String, Object>> results) {
         def currentClause = groupByClauses.head()
         switch (currentClause.getClass()) {
             case GroupByFieldClause:
@@ -187,15 +174,13 @@ class ElasticSearchQueryExecutor extends AbstractQueryExecutor {
         }
 
         if (groupByClauses.tail()) {
-            extractGroupByAggregation(groupByClauses.tail(), value.getAggregations().asList().head(), metricAggs, hitCount, accumulator, results)
+            extractBuckets(groupByClauses.tail(), (MultiBucketsAggregation)value.getAggregations().asList().head(), metricAggs, accumulator, results)
         } else {
             def terminalAggs = value.getAggregations()
             if (terminalAggs) {
-                extractMetricAggregations(metricAggs, terminalAggs.asMap(), hitCount).each(accumulator.&putAll)
+                accumulator.putAll(extractMetrics(metricAggs, terminalAggs.asMap(), value.docCount))
             }
             results.push(accumulator)
         }
-        return results
     }
-
 }
