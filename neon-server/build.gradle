@@ -188,6 +188,7 @@ test {
     description = "Runs the neon unit tests"
     def props = [:]
     props['unit.test'] = true
+    props['mongo.host'] = getMongoHost()
     systemProperties props
 }
 
