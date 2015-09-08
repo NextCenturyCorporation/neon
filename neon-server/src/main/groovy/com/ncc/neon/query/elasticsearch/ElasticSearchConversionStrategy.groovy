@@ -83,6 +83,21 @@ class ElasticSearchConversionStrategy {
      * doc_count in the buckets
     */
     private static convertAggregations(Query query, SearchSourceBuilder source) {
+        if(query.isDistinct) {
+            if(query.fields.size() > 1) {
+                throw new NeonConnectionException("Distinct call requires only one field")
+            } else if(!query.fields) {
+                throw new NeonConnectionException("Distinct call requires one field")
+            }
+
+            def termsAggregations = AggregationBuilders.terms('distinct').field(query.fields[0]).size(0)
+            source.aggregation(termsAggregations)
+        } else {
+            convertMetricAggregations(query, source)
+        }
+    }
+
+    private static convertMetricAggregations(Query query, SearchSourceBuilder source) {
         def metricAggregations = getMetricAggregations(query)
 
         if (query.groupByClauses) {

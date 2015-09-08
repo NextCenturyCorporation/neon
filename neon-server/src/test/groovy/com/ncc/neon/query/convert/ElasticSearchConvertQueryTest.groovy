@@ -110,10 +110,15 @@ class ElasticSearchConvertQueryTest extends AbstractConversionTest {
     @Override
     @SuppressWarnings("Println")
     protected void assertQueryWithGroupByClauses(query) {
-        //XContentParser parser = XContentHelper.createParser(query.source())
-        //def map = parser.map()
-        //FIXME
-       // println(map)
+        XContentParser parser = XContentHelper.createParser(query.source())
+        def map = parser.map()
+
+        assert map.aggregations
+        assert map.aggregations[FIELD_NAME_2]
+        assert map.aggregations[FIELD_NAME_2].terms == [field: FIELD_NAME_2]
+
+        assert map.aggregations[FIELD_NAME_2].aggregations
+        assert map.aggregations[FIELD_NAME_2].aggregations["${FIELD_NAME}_dayOfWeek"]
     }
 
     @Override

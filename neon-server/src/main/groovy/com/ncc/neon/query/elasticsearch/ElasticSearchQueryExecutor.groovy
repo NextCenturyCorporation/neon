@@ -28,7 +28,7 @@ import com.ncc.neon.query.filter.SelectionState
 import com.ncc.neon.query.result.ArrayCountPair
 import com.ncc.neon.query.result.QueryResult
 import com.ncc.neon.query.result.TabularQueryResult
-
+import groovy.json.JsonOutput
 import org.elasticsearch.action.admin.cluster.state.ClusterStateRequest
 import org.elasticsearch.action.admin.indices.mapping.get.GetMappingsRequest
 import org.elasticsearch.client.Client
@@ -74,8 +74,21 @@ class ElasticSearchQueryExecutor extends AbstractQueryExecutor {
             ])
         } else if (groupByClauses) {
             return new TabularQueryResult(extractBuckets(groupByClauses, aggResults.asList()[0], aggregates))
+        } else if(query.isDistinct) {
+            return new TabularQueryResult(extractDistinct(query.fields[0], aggResults.asList()[0]))
         }
+
         new TabularQueryResult(results.hits.collect { it.getSource() })
+    }
+
+    List<Map<String, Object>> extractDistinct(String field, aggResult) {
+        def distinctValues = []
+        aggResult.buckets.each {
+            def accumulator = [:]
+            accumulator[field] = it.key
+            distinctValues.push(accumulator)
+        }
+        return distinctValues
     }
 
     @Override
