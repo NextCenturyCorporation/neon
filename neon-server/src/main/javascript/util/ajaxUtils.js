@@ -62,12 +62,6 @@ neon.util.ajaxUtils = (function() {
         params.error = opts.error;
         params.global = opts.global;
         params.async = opts.async;
-        // set a default error behavior is none is specified
-        if(!params.error) {
-            params.error = function(xhr, status, error) {
-                errorLogger.error('Error accessing ' + url, status, error);
-            };
-        }
         logRequest(params);
         var xhr = $.ajax(params);
         return new neon.util.AjaxRequest(xhr);
@@ -207,9 +201,44 @@ neon.util.AjaxRequest = function(xhr) {
 };
 
 /**
- * Cancels the request if it is in progress
- * @method cancel
+ * Aborts the request if it is in progress. This will call the error/fail handler with status set to
+ * 0.
+ * @method abort
  */
-neon.util.AjaxRequest.prototype.cancel = function() {
+neon.util.AjaxRequest.prototype.abort = function() {
     this.xhr.abort();
+    return this;
+};
+
+/**
+ * Takes a function that will be called if/when the request is successful.
+ *
+ * @method done
+ * @param {Function} callback
+ */
+neon.util.AjaxRequest.prototype.done = function(callback) {
+    this.xhr.done(callback);
+    return this;
+};
+
+/**
+ * Takes a function that will be called if/when the request fails.
+ *
+ * @method fail
+ * @param {Function} callback
+ */
+neon.util.AjaxRequest.prototype.fail = function(callback) {
+    this.xhr.fail(callback);
+    return this;
+};
+
+/**
+ * Takes a function that will be called if/when the request completes, whether it succeeds or fails
+ *
+ * @method always
+ * @param {Function} callback
+ */
+neon.util.AjaxRequest.prototype.always = function(callback) {
+    this.xhr.always(callback);
+    return this;
 };
