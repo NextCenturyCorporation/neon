@@ -25,7 +25,7 @@
 neon.SERVER_URL = neonServerUrl;
 
 describe('ajax utils', function() {
-    it('cancels ajax request', function() {
+    it('aborts ajax request', function() {
         var statusText = "";
         // transformServiceUrl is generated dynamically during the build and included in the acceptance test helper file
         var request = neon.util.ajaxUtils.doGet(transformServiceUrl + '/neon/timeouttest', {
@@ -34,7 +34,7 @@ describe('ajax utils', function() {
                 statusText = xhr.statusText;
             }
         });
-        request.cancel();
+        request.abort();
         waitsFor(function() {
             return statusText === 'abort';
         });
