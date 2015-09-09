@@ -1,3 +1,19 @@
+/*
+ * Copyright 2015 Next Century Corporation
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ */
+
 package com.ncc.neon.userimport
 
 import com.mongodb.MongoClient
@@ -14,7 +30,7 @@ import com.ncc.neon.userimport.types.FieldTypePair
 import com.ncc.neon.userimport.types.FieldType
 
 import org.junit.Before
-import org.junit.After
+import org.junit.AfterClass
 import org.junit.Test
 import org.junit.Assume
 
@@ -90,8 +106,8 @@ class MongoImportHelperTest {
         ] as ImportHelperProcessor
     }
 
-    @After
-    void after() {
+    @AfterClass
+    static void after() {
         MongoClient mongo = new MongoClient(HOST)
         String dbName = USERNAME + ImportUtilities.SEPARATOR + PRETTY_NAME
         List<String> dbs = mongo.getDatabaseNames()
@@ -111,9 +127,11 @@ class MongoImportHelperTest {
         }
         if(dbs.contains(ImportUtilities.MONGO_UPLOAD_DB_NAME)) {
             GridFS gridFS = new GridFS(mongo.getDB(ImportUtilities.MONGO_UPLOAD_DB_NAME))
-            GridFSDBFile dbFile = gridFS.findOne([userName: USERNAME, prettyName: PRETTY_NAME] as BasicDBObject)
-            if(dbFile) {
-                gridFS.remove(dbFile)
+            List<GridFSDBFile> dbFiles = gridFS.find([userName: USERNAME, prettyName: PRETTY_NAME] as BasicDBObject)
+            if(dbFiles.size()) {
+                for(dbFile in dbFiles) {
+                    gridFS.remove(dbFile)
+                }
             }
         }
         mongo.close()

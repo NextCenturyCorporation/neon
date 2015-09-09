@@ -204,10 +204,11 @@ class ImportUtilities {
         try {
             def areObjects = true
             list.each { value ->
-                def val = ImportUtilities.removeQuotations(value)
-                if(val.equalsIgnoreCase("none") || val.equalsIgnoreCase("null") || val.equalsIgnoreCase("")) {
+                if(value.equalsIgnoreCase("none") || value.equalsIgnoreCase("null") || value.equalsIgnoreCase("")) {
                     return
-                } else if(Eval.me(val) instanceof Map || Eval.me(val) instanceof List) {
+                }
+                def val = ImportUtilities.removeQuotations(value)
+                if(Eval.me(val) instanceof Map || Eval.me(val) instanceof List) {
                     return
                 }
                 areObjects = false
