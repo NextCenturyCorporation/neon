@@ -210,12 +210,13 @@ class ElasticSearchConversionStrategy {
 
         if (clause.operator in ['=', '!=']) {
 
-            def filter = clause.rhs ?
+            def hasValue = clause.rhs || clause.rhs == ''
+
+            def filter = hasValue ?
                 FilterBuilders.termFilter(clause.lhs as String, clause.rhs as String) :
                 FilterBuilders.existsFilter(clause.lhs as String)
 
-            //logical biconditional
-            return (clause.operator == '!=') == !clause.rhs ? filter : FilterBuilders.notFilter(filter)
+            return (clause.operator == '!=') == !hasValue ? filter : FilterBuilders.notFilter(filter)
         }
 
         throw new NeonConnectionException("${clause.operator} is an invalid operator for a where clause")
