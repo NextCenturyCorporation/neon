@@ -239,7 +239,7 @@ class ElasticSearchConversionStrategy {
                     AggregationBuilders
                         .terms(clause.name as String)
                         .field(clause.field as String)
-                        .script("def calendar = java.util.Calendar.getInstance(); calendar.setTime(new Date(doc['time'].value)); calendar.get(java.util.Calendar.${it})" as String)
+                        .script("def calendar = java.util.Calendar.getInstance(); calendar.setTime(new Date(doc['${clause.field}'].value)); calendar.get(java.util.Calendar.${it})" as String)
                         .size(0)
                 }
 
