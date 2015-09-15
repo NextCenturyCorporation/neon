@@ -49,5 +49,6 @@ project.ext {
     ooxmlSchemasVersion="1.0"
     mongodbVersion="3.0.2"
     xlsxStreamerVersion="0.2.7"
+    openCsvVersion="2.3"
 }
 

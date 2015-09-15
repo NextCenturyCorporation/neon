@@ -28,7 +28,7 @@ import com.ncc.neon.query.filter.SelectionState
 import com.ncc.neon.query.result.ArrayCountPair
 import com.ncc.neon.query.result.QueryResult
 import com.ncc.neon.query.result.TabularQueryResult
-import groovy.json.JsonOutput
+
 import org.elasticsearch.action.admin.cluster.state.ClusterStateRequest
 import org.elasticsearch.action.admin.indices.mapping.get.GetMappingsRequest
 import org.elasticsearch.client.Client

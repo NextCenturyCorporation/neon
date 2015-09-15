@@ -15,8 +15,7 @@
  */
 
 
-
-
+import com.ncc.neon.ElasticSearchJSONGenerator
 import org.json.JSONArray
 import com.ncc.neon.SparkSQLJSONGenerator
 import com.ncc.neon.MongoJSONGenerator
@@ -242,6 +241,32 @@ task generateSparkSQLCSV {
     }
 }
 
+task generateElasticSearchJson {
+    description = "Generates json files with that are used for validating elasticsearch test results"
+    def outputDir = "${testDataDir}/elasticsearch-json"
+    inputs.files { testDataInputFileTree }
+    outputs.dir { outputDir }
+    doLast {
+        new ElasticSearchJSONGenerator().generateJson(testDataDir, outputDir)
+    }
+}
+
+task generateElasticSearchCSV {
+    description = "Generates csv files for inserting test data into elasticsearch"
+    def outputDir = "${testDataDir}/elasticsearch-csv"
+    def inputFile = new File(testDataDir, 'data.json')
+    inputs.file { inputFile }
+    outputs.dir { outputDir }
+
+    doLast {
+        JSONToCSVConverter.convertToCSV(
+                new JSONArray(inputFile.text).toString(),
+                new File("${outputDir}/data.csv"),
+                new File("${outputDir}/fields.csv"),
+                ['location'] as Set)
+    }
+}
+
 // if the host is not specified just use an empty string and neon will choose defaults
 def getMongoHost() {
     return project.hasProperty("mongo.host") ? getProperty("mongo.host") : null
@@ -249,6 +274,10 @@ def getMongoHost() {
 
 def getSparkSQLHost() {
     return project.hasProperty("sparksql.host") ? getProperty("sparksql.host") : null
+}
+
+def getElasticSearchHost() {
+    return project.hasProperty("elasticsearch.host") ? getProperty("elasticsearch.host") : null
 }
 
 def getHdfsUrl() {

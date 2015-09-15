@@ -52,6 +52,9 @@ task integrationTest(type: Test) {
     if (isSparkSQLEnabled()) {
         dependsOn 'insertSparkSQLDataIntegrationTest'
     }
+    if(isElasticSearchEnabled()) {
+        dependsOn 'insertElasticSearchDataIntegrationTest'
+    }
 
     testClassesDir = sourceSets.integrationTest.output.classesDir
     classpath = sourceSets.integrationTest.runtimeClasspath
@@ -61,6 +64,7 @@ task integrationTest(type: Test) {
     props["mongo.host"] = getMongoHost()
     props["sparksql.host"] = getSparkSQLHost()
     props["hdfs.url"] = getHdfsUrl()
+    props["elasticsearch.host"] = getElasticSearchHost()
 
     props['integration.test'] = true
     systemProperties props
@@ -94,6 +98,19 @@ task deleteSparkSQLDataIntegrationTestBeforeInsert(type: com.ncc.neon.data.Spark
     databaseName = 'neonintegrationtest'
 }
 
+task insertElasticSearchDataIntegrationTest(type: com.ncc.neon.data.ElasticSearchDataInserter) {
+    description = "Inserts test data used for elasticsearch integration tests"
+    dependsOn 'deleteElasticSearchDataIntegrationTestBeforeInsert', 'generateElasticSearchCSV', 'generateElasticSearchJson'
+    host = getElasticSearchHost()
+    databaseName = 'neonintegrationtest'
+}
+
+task deleteElasticSearchDataIntegrationTestBeforeInsert(type: com.ncc.neon.data.ElasticSearchDataDeleter) {
+    description = "Deletes any old integration test data from elasticsearch left around from previous tests"
+    host= getElasticSearchHost()
+    databaseName = 'neonintegrationtest'
+}
+
 task afterIntegrationTest {
     // Tasks that are used for "finalizedBy" are still shown in './gradlew tasks' (GRADLE-2949), so put it in the correct group
     group = TEST_GROUP
@@ -103,6 +120,9 @@ task afterIntegrationTest {
     }
     if (isSparkSQLEnabled()) {
         dependsOn 'deleteSparkSQLDataIntegrationTest'
+    }
+    if(isElasticSearchEnabled()) {
+        //dependsOn 'deleteElasticSearchDataIntegrationTest'
     }
 }
 
@@ -120,10 +140,20 @@ task deleteSparkSQLDataIntegrationTest(type: com.ncc.neon.data.SparkSQLDataDelet
     databaseName = 'neonintegrationtest'
 }
 
+task deleteElasticSearchDataIntegrationTest(type: com.ncc.neon.data.ElasticSearchDataDeleter) {
+    description = "Deletes any integration test data from elasticsearch"
+    host = getElasticSearchHost()
+    databaseName = 'neonintegrationtest'
+}
+
 def isMongoEnabled() {
     return (getMongoHost() != null && getMongoHost() != "")
 }
 
 def isSparkSQLEnabled() {
     return (getSparkSQLHost() != null && getSparkSQLHost() != "")
+}
+
+def isElasticSearchEnabled() {
+    return (getElasticSearchHost() != null && getElasticSearchHost() != "")
 }

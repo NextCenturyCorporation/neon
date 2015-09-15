@@ -25,6 +25,7 @@ import com.ncc.neon.query.filter.Filter
 import com.ncc.neon.query.filter.FilterKey
 import com.ncc.neon.util.AssertUtils
 import com.ncc.neon.util.DateUtils
+import groovy.json.JsonOutput
 import org.json.JSONArray
 import org.junit.After
 import org.junit.Test
@@ -62,7 +63,7 @@ abstract class AbstractQueryExecutorIntegrationTest {
     /**
      * Gets the folder that the input json files are stored in. By defalut, the test-data
      * directory is used, but some databases (e.g. spark) will transform the data (such as by
-     * removing nested fields) and put it i na folder it can use
+     * removing nested fields) and put it in a folder it can use
      * @return
      */
     protected String getResultsJsonFolder() {
@@ -370,6 +371,7 @@ abstract class AbstractQueryExecutorIntegrationTest {
 
     @Test
     @SuppressWarnings('MethodSize') // method is slightly long because of some test setup but is still pretty straight forward
+    @SuppressWarnings('Println')
     void "add filter"() {
         String filterId = "filterId"
         def dcStateFilter = createFilterWithWhereClause(new SingularWhereClause(lhs: 'state', operator: '=', rhs: 'DC'))
@@ -379,6 +381,7 @@ abstract class AbstractQueryExecutorIntegrationTest {
         queryExecutor.filterState.addFilter(dcStateFilterKey)
         def dcStateResult = queryExecutor.execute(ALL_DATA_QUERY, QueryOptions.DEFAULT_OPTIONS)
         def dcStateRecords = rows(1, 2, 5)
+        println(JsonOutput.toJson(dcStateResult))
         assertUnorderedQueryResult(dcStateRecords, dcStateResult)
 
         // apply another filter and make sure both are applied

@@ -28,7 +28,6 @@ import com.ncc.neon.query.filter.FilterState
 import com.ncc.neon.query.filter.SelectionState
 import com.ncc.neon.query.Query
 import com.ncc.neon.query.QueryOptions
-
 import org.elasticsearch.action.search.SearchType
 import org.elasticsearch.action.search.SearchRequest
 import org.elasticsearch.index.query.FilterBuilder
@@ -60,6 +59,7 @@ class ElasticSearchConversionStrategy {
         def dataSet = new DataSet(databaseName: query.databaseName, tableName: query.tableName)
         def whereClauses = collectWhereClauses(dataSet, query, options)
 
+
         //Build the elasticsearch filters for the where clauses
         def inners = whereClauses.collect(ElasticSearchConversionStrategy.&convertWhereClause) as FilterBuilder[]
         def whereFilter = FilterBuilders.boolFilter().must(FilterBuilders.andFilter(inners))
@@ -71,8 +71,7 @@ class ElasticSearchConversionStrategy {
 
         convertAggregations(query, source)
 
-        def request = buildRequest(query, source)
-        return request
+        return buildRequest(query, source)
     }
 
     /*
@@ -203,14 +202,12 @@ class ElasticSearchConversionStrategy {
 
     private static FilterBuilder convertSingularWhereClause(clause) {
         if (clause.operator in ['<', '>', '<=', '>=']) {
-            return {
-                switch (clause.operator) {
+            return { switch (clause.operator) {
                     case '<': return it.&lt
                     case '>': return it.&gt
                     case '<=': return it.&lte
                     case '>=': return it.&gte
-                }
-            }.call(FilterBuilders.rangeFilter(clause.lhs as String))(clause.rhs as String)
+            }}.call(FilterBuilders.rangeFilter(clause.lhs as String))(clause.rhs as String)
         }
 
         if (clause.operator in ['contains', 'not contains', 'notcontains']) {
@@ -219,6 +216,9 @@ class ElasticSearchConversionStrategy {
         }
 
         if (clause.operator in ['=', '!=']) {
+            if(clause.rhs.getClass() == String) {
+                clause.rhs = clause.rhs.toLowerCase()
+            }
 
             def filter = clause.rhs ?
                 FilterBuilders.termFilter(clause.lhs as String, clause.rhs as String) :
