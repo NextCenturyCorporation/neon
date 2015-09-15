@@ -27,8 +27,15 @@ class mongodb {
 	service { "mongod":
 		ensure => "running",
 		require => Package["mongodb-org"]
-	}	
+	}
 }
+
+class { 'elasticsearch':
+	version => '1.7.1'
+}
+
+elasticsearch::instance { 'es-01': }
+
 
 class tomcat7 {
 	package { "tomcat7.noarch":

@@ -12,15 +12,31 @@ $addTomcatRepo = <<ADDTOMCATREPO
 	echo "Done adding tomcat repo"
 ADDTOMCATREPO
 
+$addElasticsearchRepo = <<ADDELASTICSEARCHREPO
+	echo "Setting up elastic search repo"
+	cp /puppet/yum/elasticsearch.repo /etc/yum.repos.d/
+	echo "Done adding elasticsearch repo"
+ADDELASTICSEARCHREPO
+
+$installAugeas = <<INSTALLAUGEAS
+	echo "Installing augeas - required by some of the puppet modules"
+	yum -y install augeas
+	echo "Done installing augeas"
+INSTALLAUGEAS
+
 $installPuppet = <<INSTALLPUPPET
 	echo "Installing puppet"
-	yum -y install puppet	
+	yum -y install puppet
+	puppet module install puppetlabs-stdlib
+	puppet module install elasticsearch-elasticsearch
 	echo "Done installing puppet"
 INSTALLPUPPET
 
 Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
 	config.vm.define "virtualbox" do |vbox|
 		vbox.vm.box = "puppetlabs/centos-6.5-64-puppet"
+
+		vbox.vm.provision "shell", inline: $installAugeas
 
 		vbox.vm.provision "shell", inline: $installPuppet
 
@@ -30,10 +46,13 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
 
 	    vbox.vm.provision "shell", inline: $addTomcatRepo
 
+	    vbox.vm.provision "shell", inline: $addElasticsearchRepo
+
 	    vbox.vm.provision "shell",
     	    inline: "puppet apply /puppet/default.pp"
 
 	    vbox.vm.network "forwarded_port", host: 4567, guest: 8080
+	    vbox.vm.network "forwarded_port", host: 4568, guest: 9200
 	end
 
 	config.vm.define "aws", autostart: false do |aws|   #install on ubuntu image
@@ -68,6 +87,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
     	    inline: "echo \"Applying puppet\" &&  puppet apply /puppet/ubuntu.pp"
 
 	    aws.vm.network "forwarded_port", host: 4567, guest: 8080
+	    aws.vm.network "forwarded_port", host: 4568, guest: 9200
 	end
 
 	config.vm.define "aws-centos", autostart: false do |aws|
@@ -98,6 +118,8 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
 		
 		aws.vm.synced_folder ".", "/vagrant", disabled: true
 
+		aws.vm.provision "shell", inline: $installAugeas
+
 		aws.vm.provision "shell", inline: $installPuppet
 
 	    aws.vm.synced_folder "./puppet/", "/puppet"
@@ -106,10 +128,13 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
 
     	aws.vm.provision "shell", inline: $addTomcatRepo
 
+    	aws.vm.provision "shell", inline: $addElasticsearchRepo
+
 	    aws.vm.provision "shell",
     	    inline: "puppet apply /puppet/default.pp"
 
 	    aws.vm.network "forwarded_port", host: 4567, guest: 8080
+	    aws.vm.network "forwarded_port", host: 4568, guest: 9200
 	end
 
 	config.vm.define "openstack", autostart: false do |osConfig|
@@ -137,6 +162,8 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
 
         osConfig.vm.synced_folder ".", "/vagrant", disabled: true
 
+		osConfig.vm.provision "shell", inline: $installAugeas
+
 		osConfig.vm.provision "shell", inline: $installPuppet
 
 	    osConfig.vm.synced_folder "./puppet/", "/puppet"
@@ -145,9 +172,12 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
 
     	osConfig.vm.provision "shell", inline: $addTomcatRepo
 
+    	osConfig.vm.provision "shell", inline: $addElasticsearchRepo
+
 	    osConfig.vm.provision "shell",
     	    inline: "puppet apply /puppet/default.pp"
 
 	    osConfig.vm.network "forwarded_port", host: 4567, guest: 8080
+	    osConfig.vm.network "forwarded_port", host: 4568, guest: 9200
 	end
 end	

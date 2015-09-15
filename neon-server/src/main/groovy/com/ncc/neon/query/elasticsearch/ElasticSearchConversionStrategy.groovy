@@ -220,12 +220,13 @@ class ElasticSearchConversionStrategy {
                 clause.rhs = clause.rhs.toLowerCase()
             }
 
-            def filter = clause.rhs ?
+            def hasValue = clause.rhs || clause.rhs == ''
+
+            def filter = hasValue ?
                 FilterBuilders.termFilter(clause.lhs as String, clause.rhs as String) :
                 FilterBuilders.existsFilter(clause.lhs as String)
 
-            //logical biconditional
-            return (clause.operator == '!=') == !clause.rhs ? filter : FilterBuilders.notFilter(filter)
+            return (clause.operator == '!=') == !hasValue ? filter : FilterBuilders.notFilter(filter)
         }
 
         throw new NeonConnectionException("${clause.operator} is an invalid operator for a where clause")
@@ -249,7 +250,7 @@ class ElasticSearchConversionStrategy {
                     AggregationBuilders
                         .terms(clause.name as String)
                         .field(clause.field as String)
-                        .script("def calendar = java.util.Calendar.getInstance(); calendar.setTime(new Date(doc['time'].value)); calendar.get(java.util.Calendar.${it})" as String)
+                        .script("def calendar = java.util.Calendar.getInstance(); calendar.setTime(new Date(doc['${clause.field}'].value)); calendar.get(java.util.Calendar.${it})" as String)
                         .size(0)
                 }
 
