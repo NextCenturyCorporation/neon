@@ -17,12 +17,15 @@
 package com.ncc.neon.query.elasticsearch
 
 import com.ncc.neon.connect.NeonConnectionException
+import com.ncc.neon.query.clauses.AggregateClause
 import com.ncc.neon.query.clauses.AndWhereClause
+import com.ncc.neon.query.clauses.FieldFunction
 import com.ncc.neon.query.clauses.GroupByFieldClause
 import com.ncc.neon.query.clauses.GroupByFunctionClause
 import com.ncc.neon.query.clauses.OrWhereClause
 import com.ncc.neon.query.clauses.SelectClause
 import com.ncc.neon.query.clauses.SingularWhereClause
+import com.ncc.neon.query.clauses.SortClause
 import com.ncc.neon.query.filter.DataSet
 import com.ncc.neon.query.filter.FilterState
 import com.ncc.neon.query.filter.SelectionState
@@ -37,12 +40,15 @@ import org.elasticsearch.search.aggregations.AbstractAggregationBuilder
 import org.elasticsearch.search.aggregations.AggregationBuilder
 import org.elasticsearch.search.aggregations.AggregationBuilders
 import org.elasticsearch.search.aggregations.bucket.terms.Terms
+import org.elasticsearch.search.aggregations.bucket.terms.TermsBuilder
 import org.elasticsearch.search.builder.SearchSourceBuilder
 import org.elasticsearch.search.sort.SortBuilder
 import org.elasticsearch.search.sort.SortBuilders
 import org.elasticsearch.search.sort.SortOrder
 
 import groovy.transform.Immutable
+
+import java.lang.reflect.Field
 
 /**
  * Converts a Query object into a BasicDbObject
@@ -96,23 +102,35 @@ class ElasticSearchConversionStrategy {
         }
     }
 
+    private static findMatchingSortClause(Query query, matchClause) {
+        query.sortClauses.find { sc ->
+            if (matchClause instanceof FieldFunction) {
+                return matchClause.name == sc.fieldName
+            }
+            if (matchClause instanceof GroupByFieldClause) {
+                return matchClause.field == sc.fieldName
+            }
+        }
+    }
+
     private static convertMetricAggregations(Query query, SearchSourceBuilder source) {
         def metricAggregations = getMetricAggregations(query)
 
         if (query.groupByClauses) {
-            def bucketAggregations = query.groupByClauses.collect(ElasticSearchConversionStrategy.&convertGroupByClause)
+            def bucketAggregations = query.groupByClauses.collect(ElasticSearchConversionStrategy.&convertGroupByClause.curry(query))
 
-            //apply metricAggregations and sorting to the terminal group by clause
+            //apply metricAggregations and any associated sorting to the terminal group by clause
             metricAggregations.each(bucketAggregations.last().&subAggregation)
-            query.sortClauses.each { sc ->
-                def aggregationClause = query.aggregates.find { ac -> ac.name == sc.fieldName }
-                def sortOrder = sc.sortOrder == com.ncc.neon.query.clauses.SortOrder.ASCENDING
-
-                bucketAggregations.last().order(isCountAllAggregation(aggregationClause) ?
-                    Terms.Order.count(sortOrder) :
-                    Terms.Order.aggregation("${STATS_AGG_PREFIX}${aggregationClause.field}" as String,
-                        aggregationClause.operation as String, sortOrder)
-                )
+            query.aggregates.each { ac ->
+                def sc = findMatchingSortClause(query, ac)
+                if (sc) {
+                    def sortOrder = sc.sortOrder == com.ncc.neon.query.clauses.SortOrder.ASCENDING
+                    bucketAggregations.last().order(isCountAllAggregation(ac) ?
+                        Terms.Order.count(sortOrder) :
+                        Terms.Order.aggregation("${STATS_AGG_PREFIX}${ac.field}" as String,
+                                ac.operation as String, sortOrder)
+                    )
+                }
             }
 
             //on each aggregation, except the last - nest the next aggregation
@@ -239,19 +257,28 @@ class ElasticSearchConversionStrategy {
         SortBuilders.fieldSort(clause.fieldName as String).order(order)
     }
 
-    private static AggregationBuilder convertGroupByClause(clause) {
+    private static AggregationBuilder convertGroupByClause(Query query, clause) {
+        def applySort = { TermsBuilder tb ->
+            def sc = findMatchingSortClause(query, clause)
+            if (sc) {
+                def sortOrder = sc.sortOrder == com.ncc.neon.query.clauses.SortOrder.ASCENDING
+                tb.order(Terms.Order.term(sortOrder))
+            }
+            return tb
+        }
+
         if (clause instanceof GroupByFieldClause) {
-            return AggregationBuilders.terms(clause.field as String).field(clause.field as String)
+            return applySort(AggregationBuilders.terms(clause.field as String).field(clause.field as String))
         }
 
         if (clause instanceof GroupByFunctionClause) {
             if (clause.operation in DATE_OPERATIONS) {
                 def template = {
-                    AggregationBuilders
+                    applySort(AggregationBuilders
                         .terms(clause.name as String)
                         .field(clause.field as String)
                         .script("def calendar = java.util.Calendar.getInstance(); calendar.setTime(new Date(doc['${clause.field}'].value)); calendar.get(java.util.Calendar.${it})" as String)
-                        .size(0)
+                        .size(0))
                 }
 
                 switch (clause.operation) {
