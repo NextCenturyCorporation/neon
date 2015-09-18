@@ -50,6 +50,7 @@ class ExcelSheetReader extends SheetReader {
         sheet = null
     }
 
+    @SuppressWarnings('CatchNullPointerException')
     @Override
     boolean hasNext() {
         try {
