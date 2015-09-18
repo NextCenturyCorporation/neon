@@ -43,7 +43,7 @@ class ExcelSheetReaderTest {
         reader = excelSheetReader.initialize(new FileInputStream(new File("src/test-data/excel-files/test-file-empty.xlsx")))
         assert !reader
     }
-    
+
     @Test
     void "close"() {
         SheetReader reader = excelSheetReader.initialize(new FileInputStream(new File("src/test-data/excel-files/test-file.xlsx")))
