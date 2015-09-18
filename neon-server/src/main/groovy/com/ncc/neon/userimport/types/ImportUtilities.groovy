@@ -250,7 +250,7 @@ class ImportUtilities {
                     return value.toString()
             }
         }
-        catch(NumberFormatException | IllegalArgumentException | ParseException | NoSuchMethodException e) {
+        catch(NumberFormatException | IllegalArgumentException | ParseException | NoSuchMethodException | MissingPropertyException e) {
             return new ConversionFailureResult([value: value, type: type])
         }
     }

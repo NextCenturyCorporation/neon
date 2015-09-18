@@ -52,7 +52,11 @@ class ExcelSheetReader extends SheetReader {
 
     @Override
     boolean hasNext() {
-        return iterator.hasNext()
+        try {
+            return iterator.hasNext()
+        } catch(NullPointerException e) {
+            return false
+        }
     }
 
     @Override
