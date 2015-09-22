@@ -94,4 +94,78 @@ describe('neon.query.Connection', function() {
         expect($.ajax.mostRecentCall.args[0].url).toEqual(server + queryService + 'columnmetadata/' +
             encodedDatabaseName + '/' + encodedTableName);
     });
+
+    it("should encode host and database type appropriately in executeExport request url", function() {
+        spyOn($, "ajax");
+
+        connection.executeExport({data: "testData"}, null, null, "csv");
+        expect($.ajax.mostRecentCall.args[0].data).toEqual('{"data":"testData","fileType":"csv"}');
+        expect($.ajax.mostRecentCall.args[0].url).toEqual(server + '/services/exportservice/export/' +
+            encodedHost + '/' + neon.query.Connection.MONGO);
+    });
+
+    it("should encode host, database type, and uuid appropriately in executeUploadFile request url", function() {
+        spyOn(XMLHttpRequest.prototype, "open");
+        spyOn(XMLHttpRequest.prototype, "send");
+
+        connection.executeUploadFile({data: "testData"});
+        expect(XMLHttpRequest.prototype.open).toHaveBeenCalledWith('POST', server + '/services/importservice/upload/' +
+            encodedHost + '/' + neon.query.Connection.MONGO);
+        expect(XMLHttpRequest.prototype.send).toHaveBeenCalledWith({data: "testData"});
+
+        connection.executeUploadFile({data: "testData"}, null, null, "differentHost", "differentDatabaseType");
+        expect(XMLHttpRequest.prototype.open).toHaveBeenCalledWith('POST', server + '/services/importservice/upload/' +
+            'differentHost/differentDatabaseType');
+        expect(XMLHttpRequest.prototype.send).toHaveBeenCalledWith({data: "testData"});
+    });
+
+    it("should encode host, database type, and uuid appropriately in executeCheckTypeGuesses request url", function() {
+        spyOn($, "ajax");
+
+        connection.executeCheckTypeGuesses("1234");
+        expect($.ajax.mostRecentCall.args[0].url).toEqual(server + '/services/importservice/guesses/' +
+            encodedHost + '/' + neon.query.Connection.MONGO + '/1234');
+
+        connection.executeCheckTypeGuesses("1234", null, "differentHost", "differentDatabaseType");
+        expect($.ajax.mostRecentCall.args[0].url).toEqual(server + '/services/importservice/guesses/' +
+            'differentHost/differentDatabaseType/1234');
+    });
+
+    it("should encode host, database type, and uuid appropriately in executeLoadFileIntoDB request url", function() {
+        spyOn($, "ajax");
+
+        connection.executeLoadFileIntoDB({data: "testData"}, "1234");
+        expect($.ajax.mostRecentCall.args[0].url).toEqual(server + '/services/importservice/convert/' +
+            encodedHost + '/' + neon.query.Connection.MONGO + '/1234');
+        expect($.ajax.mostRecentCall.args[0].data).toEqual('{"data":"testData"}');
+
+        connection.executeLoadFileIntoDB({}, "1234", null, null, "differentHost", "differentDatabaseType");
+        expect($.ajax.mostRecentCall.args[0].url).toEqual(server + '/services/importservice/convert/' +
+            'differentHost/differentDatabaseType/1234');
+        expect($.ajax.mostRecentCall.args[0].data).toEqual('{}');
+    });
+
+    it("should encode host, database type, and uuid appropriately in executeCheckImportProgress request url", function() {
+        spyOn($, "ajax");
+
+        connection.executeCheckImportProgress("1234");
+        expect($.ajax.mostRecentCall.args[0].url).toEqual(server + '/services/importservice/progress/' +
+            encodedHost + '/' + neon.query.Connection.MONGO + '/1234');
+
+        connection.executeCheckImportProgress("1234", null, "differentHost", "differentDatabaseType");
+        expect($.ajax.mostRecentCall.args[0].url).toEqual(server + '/services/importservice/progress/' +
+            'differentHost/differentDatabaseType/1234');
+    });
+
+    it("should encode host, database type, user, and data appropriately in executeRemoveDataset request url", function() {
+        spyOn($, "ajax");
+
+        connection.executeRemoveDataset("testUser", "testData");
+        expect($.ajax.mostRecentCall.args[0].url).toEqual(server + '/services/importservice/drop/' +
+            encodedHost + '/' + neon.query.Connection.MONGO + '?user=testUser&data=testData');
+
+        connection.executeRemoveDataset("testUser", "testData", null, null, "differentHost", "differentDatabaseType");
+        expect($.ajax.mostRecentCall.args[0].url).toEqual(server + '/services/importservice/drop/' +
+            'differentHost/differentDatabaseType?user=testUser&data=testData');
+    });
 });
