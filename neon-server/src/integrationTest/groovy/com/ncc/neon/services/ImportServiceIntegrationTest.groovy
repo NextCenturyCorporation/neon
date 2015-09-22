@@ -456,7 +456,7 @@ class ImportServiceIntegrationTest {
             assert entity.getString("jobID") == uuid
             assert entity.getJSONArray("failedFields")
         }
-        
+
         return entity
     }
 
@@ -466,7 +466,7 @@ class ImportServiceIntegrationTest {
         for(int i = 0; i < arrayToCheck.length(); i++) {
             assert arrayToCheck.get(i).name == checkAgainst[i].name
             assert arrayToCheck.get(i).type == (checkAgainst[i].type as String)
-            
+
             if(arrayToCheck.get(i).isNull("objectFTPairs") || arrayToCheck.get(i).objectFTPairs.length() == 0) {
                 assert (!checkAgainst[i].objectFTPairs || (checkAgainst[i].objectFTPairs.size() == 0))
             } else {

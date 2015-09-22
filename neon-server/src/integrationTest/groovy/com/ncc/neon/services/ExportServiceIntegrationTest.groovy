@@ -76,7 +76,7 @@ class ExportServiceIntegrationTest {
     private static final String RESULT_CSV_STRING1 = '"_id","First Name","Last Name","State","Location",\n"5137b623a9f279d831b6fb88","Maggie","Thomas","DC","[coordinates:[19.55, 11.92], type:Point]",\n'
     private static final String RESULT_CSV_STRING2 = '"key","count",\n"tag2","8",\n"tag3","2",\n"tag1","1",\n'
     private static final String RESULT_EXCEL_STRING = 'Key, Count, \ntag2, 8, \ntag3, 2, \ntag1, 1, \n\n_id, city, firstname, hiredate, lastname, location, salary, state, tags, \n5137b623a9f279d831b6fb88, Washington, Maggie, Fri Oct 14 20:00:00 EDT 2011, Thomas, [coordinates:[19.55, 11.92], type:Point], 175000, DC, [tag2, tag3], \n\n'
-    
+
     private static Query query
 
     private QueryService queryService
