@@ -18,17 +18,17 @@ package com.ncc.neon
 
 import com.ncc.neon.query.Query
 import com.ncc.neon.query.executor.QueryExecutor
-//import com.ncc.neon.query.QueryGroup
+import com.ncc.neon.query.QueryGroup
 import com.ncc.neon.query.QueryOptions
 import com.ncc.neon.query.clauses.*
 import com.ncc.neon.query.filter.Filter
 import com.ncc.neon.query.filter.FilterKey
-//import com.ncc.neon.util.AssertUtils
+import com.ncc.neon.util.AssertUtils
 import com.ncc.neon.util.DateUtils
 import org.json.JSONArray
 import org.junit.After
 import org.junit.Test
-//import com.ncc.neon.query.result.ArrayCountPair
+import com.ncc.neon.query.result.ArrayCountPair
 
 /**
  * Integration test that verifies the neon server properly translates database specific queries.
@@ -115,26 +115,26 @@ abstract class AbstractQueryExecutorIntegrationTest {
         queryExecutor.selectionState.clearAllFilters()
     }
 
-//    @Test
-//    void "field names"() {
-//        def fieldNames = queryExecutor.getFieldNames(DATABASE_NAME, TABLE_NAME)
-//        def expected = getAllData()[0].keySet()
-//        AssertUtils.assertEqualCollections(expected, fieldNames)
-//    }
-//
-//    @Test
-//    void "field names without a table returns empty collection"() {
-//        def names = queryExecutor.getFieldNames(DATABASE_NAME, "zsz")
-//        assert names != null
-//        assert !names.data
-//    }
-//
-//    @Test
-//    void "query all"() {
-//        def result = queryExecutor.execute(ALL_DATA_QUERY, QueryOptions.DEFAULT_OPTIONS)
-//        assertUnorderedQueryResult(getAllData(), result)
-//    }
-//
+    @Test
+    void "field names"() {
+        def fieldNames = queryExecutor.getFieldNames(DATABASE_NAME, TABLE_NAME)
+        def expected = getAllData()[0].keySet()
+        AssertUtils.assertEqualCollections(expected, fieldNames)
+    }
+
+    @Test
+    void "field names without a table returns empty collection"() {
+        def names = queryExecutor.getFieldNames(DATABASE_NAME, "zsz")
+        assert names != null
+        assert !names.data
+    }
+
+    @Test
+    void "query all"() {
+        def result = queryExecutor.execute(ALL_DATA_QUERY, QueryOptions.DEFAULT_OPTIONS)
+        assertUnorderedQueryResult(getAllData(), result)
+    }
+
     @Test
     void "query WHERE"() {
         def whereStateClause = new OrWhereClause(whereClauses: [new SingularWhereClause(lhs: 'state', operator: '=', rhs: 'VA'), new SingularWhereClause(lhs: 'state', operator: '=', rhs: 'DC')])
@@ -144,37 +144,37 @@ abstract class AbstractQueryExecutorIntegrationTest {
         def result = queryExecutor.execute(query, QueryOptions.DEFAULT_OPTIONS)
         assertUnorderedQueryResult(expected, result)
     }
-//
-//    @Test
-//    void "query WHERE field is null or missing"() {
-//        def whereLastNameNullClause = new SingularWhereClause(lhs: 'lastname', operator: '=', rhs: null)
-//        def expected = readJson('null_or_missing.json')
-//        def result = queryExecutor.execute(createQueryWithWhereClause(whereLastNameNullClause), QueryOptions.DEFAULT_OPTIONS)
-//        assertUnorderedQueryResult(expected, result)
-//    }
-//
-//    @Test
-//    void "query WHERE field is not null and not missing"() {
-//        def whereLastNameNotNullClause = new SingularWhereClause(lhs: 'lastname', operator: '!=', rhs: null)
-//        def expected = readJson('not_null_and_not_missing.json')
-//        def result = queryExecutor.execute(createQueryWithWhereClause(whereLastNameNotNullClause), QueryOptions.DEFAULT_OPTIONS)
-//        assertUnorderedQueryResult(expected, result)
-//    }
-//
-//    @Test
-//    void "group by and sort"() {
-//        def groupByStateClause = new GroupByFieldClause(field: 'state')
-//        def groupByCityClause = new GroupByFieldClause(field: 'city')
-//        def sortByStateClause = new SortClause(fieldName: 'state', sortOrder: SortOrder.ASCENDING)
-//        def sortByCityClause = new SortClause(fieldName: 'city', sortOrder: SortOrder.DESCENDING)
-//        def salaryAggregateClause = new AggregateClause(name: 'salary_sum', operation: 'sum', field: 'salary')
-//        def expected = readJson('groupByStateAsc_cityDesc_aggregateSalary.json')
-//        def result = queryExecutor.execute(new Query(filter: ALL_DATA_FILTER,
-//                groupByClauses: [groupByStateClause, groupByCityClause],
-//                aggregates: [salaryAggregateClause],
-//                sortClauses: [sortByStateClause, sortByCityClause]), QueryOptions.DEFAULT_OPTIONS)
-//        assertOrderedQueryResult(expected, result)
-//    }
+
+    @Test
+    void "query WHERE field is null or missing"() {
+        def whereLastNameNullClause = new SingularWhereClause(lhs: 'lastname', operator: '=', rhs: null)
+        def expected = readJson('null_or_missing.json')
+        def result = queryExecutor.execute(createQueryWithWhereClause(whereLastNameNullClause), QueryOptions.DEFAULT_OPTIONS)
+        assertUnorderedQueryResult(expected, result)
+    }
+
+    @Test
+    void "query WHERE field is not null and not missing"() {
+        def whereLastNameNotNullClause = new SingularWhereClause(lhs: 'lastname', operator: '!=', rhs: null)
+        def expected = readJson('not_null_and_not_missing.json')
+        def result = queryExecutor.execute(createQueryWithWhereClause(whereLastNameNotNullClause), QueryOptions.DEFAULT_OPTIONS)
+        assertUnorderedQueryResult(expected, result)
+    }
+
+    @Test
+    void "group by and sort"() {
+        def groupByStateClause = new GroupByFieldClause(field: 'state')
+        def groupByCityClause = new GroupByFieldClause(field: 'city')
+        def sortByStateClause = new SortClause(fieldName: 'state', sortOrder: SortOrder.ASCENDING)
+        def sortByCityClause = new SortClause(fieldName: 'city', sortOrder: SortOrder.DESCENDING)
+        def salaryAggregateClause = new AggregateClause(name: 'salary_sum', operation: 'sum', field: 'salary')
+        def expected = readJson('groupByStateAsc_cityDesc_aggregateSalary.json')
+        def result = queryExecutor.execute(new Query(filter: ALL_DATA_FILTER,
+                groupByClauses: [groupByStateClause, groupByCityClause],
+                aggregates: [salaryAggregateClause],
+                sortClauses: [sortByStateClause, sortByCityClause]), QueryOptions.DEFAULT_OPTIONS)
+        assertOrderedQueryResultWithoutId(expected, result)
+    }
 
     @Test
     void "group by average"() {
@@ -186,7 +186,7 @@ abstract class AbstractQueryExecutorIntegrationTest {
                 groupByClauses: [groupByStateClause],
                 aggregates: [salaryAverageClause],
                 sortClauses: [sortByStateClause]), QueryOptions.DEFAULT_OPTIONS)
-        assertOrderedQueryResult(expected, result)
+        assertOrderedQueryResultWithoutId(expected, result)
     }
 
     @Test
@@ -199,95 +199,96 @@ abstract class AbstractQueryExecutorIntegrationTest {
                 groupByClauses: [groupByStateClause],
                 aggregates: [salaryMinClause],
                 sortClauses: [sortByStateClause]), QueryOptions.DEFAULT_OPTIONS)
-        assertOrderedQueryResult(expected, result)
+        assertOrderedQueryResultWithoutId(expected, result)
     }
-//
-//    @Test
-//    void "group by max"() {
-//        def groupByStateClause = new GroupByFieldClause(field: 'state')
-//        def sortByStateClause = new SortClause(fieldName: 'state', sortOrder: SortOrder.ASCENDING)
-//        def salaryMaxClause = new AggregateClause(name: 'salary_max', operation: 'max', field: 'salary')
-//        def expected = readJson('groupByStateAsc_maxSalary.json')
-//        def result = queryExecutor.execute(new Query(filter: ALL_DATA_FILTER,
-//                groupByClauses: [groupByStateClause],
-//                aggregates: [salaryMaxClause],
-//                sortClauses: [sortByStateClause]), QueryOptions.DEFAULT_OPTIONS)
-//        assertOrderedQueryResult(expected, result)
-//    }
-//
-//    @Test
-//    void "count all fields"() {
-//        def countClause = new AggregateClause(name: 'counter', operation: 'count', field: '*')
-//        def result = queryExecutor.execute(new Query(filter: ALL_DATA_FILTER,
-//                aggregates: [countClause]), QueryOptions.DEFAULT_OPTIONS)
-//        def expected = readJson('count.json')
-//        assertOrderedQueryResult(expected, result)
-//    }
-//
-//    @Test
-//    void "count with mixed case field"() {
-//        // This is specifically because Hive (and therefore Spark SQL when used through the Hive
-//        // connector) converts all field names to lower case
-//
-//        def countClause = new AggregateClause(name: 'mIxEdCaSe', operation: 'count', field: '*')
-//        def result = queryExecutor.execute(new Query(filter: ALL_DATA_FILTER,
-//                aggregates: [countClause]), QueryOptions.DEFAULT_OPTIONS)
-//        def expected = readJson('mixedcase.json')
-//        assertOrderedQueryResult(expected, result)
-//    }
-//
-//    @Test
-//    void "count field with missing value"() {
-//        def countClause = new AggregateClause(name: 'counter', operation: 'count', field: 'lastname')
-//        def result = queryExecutor.execute(new Query(filter: ALL_DATA_FILTER,
-//                aggregates: [countClause]), QueryOptions.DEFAULT_OPTIONS)
-//        def expected = readJson('count_missing_field.json')
-//        assertOrderedQueryResult(expected, result)
-//    }
-//    @Test
-//    void "group by count"() {
-//        def groupByStateClause = new GroupByFieldClause(field: 'state')
-//        def sortByStateClause = new SortClause(fieldName: 'state', sortOrder: SortOrder.ASCENDING)
-//        def countClause = new AggregateClause(name: 'counter', operation: 'count', field: '*')
-//        def expected = readJson('groupByStateAsc_count.json')
-//        def result = queryExecutor.execute(new Query(filter: ALL_DATA_FILTER,
-//                groupByClauses: [groupByStateClause],
-//                aggregates: [countClause],
-//                sortClauses: [sortByStateClause]), QueryOptions.DEFAULT_OPTIONS)
-//        assertOrderedQueryResult(expected, result)
-//    }
-//
-//
-//    @Test
-//    void "group by count with limit"() {
-//        def groupByStateClause = new GroupByFieldClause(field: 'state')
-//        def sortByStateClause = new SortClause(fieldName: 'state', sortOrder: SortOrder.ASCENDING)
-//        def limitClause = new LimitClause(limit: 2)
-//        def countClause = new AggregateClause(name: 'counter', operation: 'count', field: '*')
-//        def expected = readJson('groupByStateAsc_limit.json')
-//        def result = queryExecutor.execute(new Query(filter: ALL_DATA_FILTER,
-//                groupByClauses: [groupByStateClause],
-//                aggregates: [countClause],
-//                limitClause: limitClause,
-//                sortClauses: [sortByStateClause]), QueryOptions.DEFAULT_OPTIONS)
-//        assertOrderedQueryResult(expected, result)
-//    }
-//
-//    @Test
-//    void "group by count with offset"() {
-//        def groupByStateClause = new GroupByFieldClause(field: 'state')
-//        def sortByStateClause = new SortClause(fieldName: 'state', sortOrder: SortOrder.ASCENDING)
-//        def offsetClause = new OffsetClause(offset: 1)
-//        def countClause = new AggregateClause(name: 'counter', operation: 'count', field: '*')
-//        def expected = readJson('groupByStateAsc_offset.json')
-//        def result = queryExecutor.execute(new Query(filter: ALL_DATA_FILTER,
-//                groupByClauses: [groupByStateClause],
-//                aggregates: [countClause],
-//                offsetClause: offsetClause,
-//                sortClauses: [sortByStateClause]), QueryOptions.DEFAULT_OPTIONS)
-//        assertOrderedQueryResult(expected, result)
-//    }
-//
+
+    @Test
+    void "group by max"() {
+        def groupByStateClause = new GroupByFieldClause(field: 'state')
+        def sortByStateClause = new SortClause(fieldName: 'state', sortOrder: SortOrder.ASCENDING)
+        def salaryMaxClause = new AggregateClause(name: 'salary_max', operation: 'max', field: 'salary')
+        def expected = readJson('groupByStateAsc_maxSalary.json')
+        def result = queryExecutor.execute(new Query(filter: ALL_DATA_FILTER,
+                groupByClauses: [groupByStateClause],
+                aggregates: [salaryMaxClause],
+                sortClauses: [sortByStateClause]), QueryOptions.DEFAULT_OPTIONS)
+        assertOrderedQueryResultWithoutId(expected, result)
+    }
+
+    @Test
+    void "count all fields"() {
+        def countClause = new AggregateClause(name: 'counter', operation: 'count', field: '*')
+        def result = queryExecutor.execute(new Query(filter: ALL_DATA_FILTER,
+                aggregates: [countClause]), QueryOptions.DEFAULT_OPTIONS)
+        def expected = readJson('count.json')
+        assertOrderedQueryResultWithoutId(expected, result)
+    }
+
+    @Test
+    void "count with mixed case field"() {
+        // This is specifically because Hive (and therefore Spark SQL when used through the Hive
+        // connector) converts all field names to lower case
+
+        def countClause = new AggregateClause(name: 'mIxEdCaSe', operation: 'count', field: '*')
+        def result = queryExecutor.execute(new Query(filter: ALL_DATA_FILTER,
+                aggregates: [countClause]), QueryOptions.DEFAULT_OPTIONS)
+        def expected = readJson('mixedcase.json')
+        assertOrderedQueryResultWithoutId(expected, result)
+    }
+
+    @Test
+    void "count field with missing value"() {
+        def countClause = new AggregateClause(name: 'counter', operation: 'count', field: 'lastname')
+        def result = queryExecutor.execute(new Query(filter: ALL_DATA_FILTER,
+                aggregates: [countClause]), QueryOptions.DEFAULT_OPTIONS)
+        def expected = readJson('count_missing_field.json')
+        assertOrderedQueryResultWithoutId(expected, result)
+    }
+
+    @Test
+    void "group by count"() {
+        def groupByStateClause = new GroupByFieldClause(field: 'state')
+        def sortByStateClause = new SortClause(fieldName: 'state', sortOrder: SortOrder.ASCENDING)
+        def countClause = new AggregateClause(name: 'counter', operation: 'count', field: '*')
+        def expected = readJson('groupByStateAsc_count.json')
+        def result = queryExecutor.execute(new Query(filter: ALL_DATA_FILTER,
+                groupByClauses: [groupByStateClause],
+                aggregates: [countClause],
+                sortClauses: [sortByStateClause]), QueryOptions.DEFAULT_OPTIONS)
+        assertOrderedQueryResultWithoutId(expected, result)
+    }
+
+
+    @Test
+    void "group by count with limit"() {
+        def groupByStateClause = new GroupByFieldClause(field: 'state')
+        def sortByStateClause = new SortClause(fieldName: 'state', sortOrder: SortOrder.ASCENDING)
+        def limitClause = new LimitClause(limit: 2)
+        def countClause = new AggregateClause(name: 'counter', operation: 'count', field: '*')
+        def expected = readJson('groupByStateAsc_limit.json')
+        def result = queryExecutor.execute(new Query(filter: ALL_DATA_FILTER,
+                groupByClauses: [groupByStateClause],
+                aggregates: [countClause],
+                limitClause: limitClause,
+                sortClauses: [sortByStateClause]), QueryOptions.DEFAULT_OPTIONS)
+        assertOrderedQueryResultWithoutId(expected, result)
+    }
+
+    @Test
+    void "group by count with offset"() {
+        def groupByStateClause = new GroupByFieldClause(field: 'state')
+        def sortByStateClause = new SortClause(fieldName: 'state', sortOrder: SortOrder.ASCENDING)
+        def offsetClause = new OffsetClause(offset: 1)
+        def countClause = new AggregateClause(name: 'counter', operation: 'count', field: '*')
+        def expected = readJson('groupByStateAsc_offset.json')
+        def result = queryExecutor.execute(new Query(filter: ALL_DATA_FILTER,
+                groupByClauses: [groupByStateClause],
+                aggregates: [countClause],
+                offsetClause: offsetClause,
+                sortClauses: [sortByStateClause]), QueryOptions.DEFAULT_OPTIONS)
+        assertOrderedQueryResultWithoutId(expected, result)
+    }
+
     @Test
     void "distinct"() {
         def expected = readJson('distinct.json')
@@ -425,7 +426,6 @@ abstract class AbstractQueryExecutorIntegrationTest {
 
     }
 
-
     @Test
     void "remove filter"() {
         // add some filters that can be removed (the add filters are tested separately)
@@ -505,7 +505,7 @@ abstract class AbstractQueryExecutorIntegrationTest {
         def result = queryExecutor.execute(query, QueryOptions.DEFAULT_OPTIONS)
         def expected = readJson('groupByMonth.json')
 
-        assertOrderedQueryResult(expected, result)
+        assertOrderedQueryResultWithoutId(expected, result)
     }
 
     @Test
@@ -602,176 +602,175 @@ abstract class AbstractQueryExecutorIntegrationTest {
         def result = queryExecutor.execute(query, QueryOptions.DEFAULT_OPTIONS)
         assertUnorderedQueryResult(expected, result)
     }
-//
-//    @Test
-//    void "date equals"() {
-//        def expected = rows(0)
-//        def whereEqualsDate = new SingularWhereClause(lhs: 'hiredate', operator: '=', rhs: DateUtils.tryToParseDate("2012-09-15T00:00:00Z"))
-//        def query = createQueryWithWhereClause(whereEqualsDate)
-//        def result = queryExecutor.execute(query, QueryOptions.DEFAULT_OPTIONS)
-//        assertOrderedQueryResult(expected, result)
-//    }
-//
-//    @Test
-//    @SuppressWarnings('CoupledTestCase') // this method incorrectly throws this codenarc error
-//    @SuppressWarnings('MethodSize') // there is a lot of setup in this method but it is pretty straightforward and would be harder to read if extracted
-//    void "query group aggregates results"() {
-//        def whereClause1 = new SingularWhereClause(lhs: 'state', operator: '=', rhs: 'VA')
-//        def query1 = createQueryWithWhereClause(whereClause1)
-//
-//        def whereClause2 = new SingularWhereClause(lhs: 'state', operator: '=', rhs: 'MD')
-//        def query2 = createQueryWithWhereClause(whereClause2)
-//
-//        def whereClause3 = new SingularWhereClause(lhs: 'state', operator: '=', rhs: 'DC')
-//        def query3 = createQueryWithWhereClause(whereClause3)
-//
-//        def queryGroup = new QueryGroup()
-//        queryGroup.queries << query1
-//        queryGroup.queries << query2
-//        queryGroup.queries << query3
-//
-//        def expected = readJson('queryGroup.json')
-//        def queryGroupResult = queryExecutor.execute(queryGroup, QueryOptions.DEFAULT_OPTIONS)
-//        assertOrderedQueryResult(expected, queryGroupResult)
-//    }
-//
-//    @Test
-//    void "select a subset of fields"() {
-//        def fields = ["_id", "firstname", "lastname", "salary"]
-//        def query = new Query(filter: ALL_DATA_FILTER, fields: fields)
-//        // one of the lastname values is not in the raw json, so don't include it in
-//        // the expected data
-//        def expected = getAllData().collect { row ->
-//            row.subMap(fields.findAll { row[it] })
-//        }
-//        def result = queryExecutor.execute(query, QueryOptions.DEFAULT_OPTIONS)
-//        assertUnorderedQueryResult(expected, result)
-//    }
-//
-//    @Test
-//    void "select a subset of fields from a group by query"() {
-//        def groupByMonthClause = new GroupByFunctionClause(name: 'hire_month', operation: 'month', field: 'hiredate')
-//        def salaryAggregateClause = new AggregateClause(name: 'salary_sum', operation: 'sum', field: 'salary')
-//        def sortByMonth = new SortClause(fieldName: 'hire_month', sortOrder: SortOrder.ASCENDING)
-//
-//        def query = new Query(filter: new Filter(databaseName: DATABASE_NAME, tableName: TABLE_NAME),
-//                groupByClauses: [groupByMonthClause], aggregates: [salaryAggregateClause], sortClauses: [sortByMonth], fields: ["hire_month"])
-//
-//        def result = queryExecutor.execute(query, QueryOptions.DEFAULT_OPTIONS)
-//        def expected = readJson('groupByMonth.json')
-//        assertOrderedQueryResult(expected, result)
-//    }
-//
-//    @Test
-//    @SuppressWarnings('MethodSize') // method is slightly long because of some test setup but is still pretty straight forward
-//    void "add selection"() {
-//        String filterId = "filterId"
-//        def dcStateFilter = createFilterWithWhereClause(new SingularWhereClause(lhs: 'state', operator: '=', rhs: 'DC'))
-//        FilterKey dcStateFilterKey = new FilterKey(id: filterId, filter: dcStateFilter)
-//
-//        // apply a selection and make sure only that data is returned
-//        queryExecutor.selectionState.addFilter(dcStateFilterKey)
-//        def dcStateResult = queryExecutor.execute(ALL_DATA_QUERY, new QueryOptions(selectionOnly: true))
-//        def dcStateRecords = rows(1, 2, 5)
-//        assertUnorderedQueryResult(dcStateRecords, dcStateResult)
-//
-//        // apply a filter and make sure both are applied
-//        def salaryFilter = createFilterWithWhereClause(new SingularWhereClause(lhs: 'salary', operator: '>', rhs: 85000))
-//        FilterKey salaryFilterKey = new FilterKey(id: filterId, filter: salaryFilter)
-//        queryExecutor.filterState.addFilter(salaryFilterKey)
-//
-//        def dcStateWithSalaryFilterRecords = rows(2, 5)
-//        def dcStateWithSalaryResult = queryExecutor.execute(ALL_DATA_QUERY, new QueryOptions(selectionOnly: true))
-//        assertUnorderedQueryResult(dcStateWithSalaryFilterRecords, dcStateWithSalaryResult)
-//    }
-//
-//    @Test
-//    void "remove selection"() {
-//        // add some selected items that can be removed (the add selected items are tested separately)
-//        String filterId = "filterId"
-//        def dcStateFilter = createFilterWithWhereClause(new SingularWhereClause(lhs: 'state', operator: '=', rhs: 'DC'))
-//        FilterKey dcStateFilterKey = new FilterKey(id: filterId, filter: dcStateFilter)
-//        queryExecutor.selectionState.addFilter(dcStateFilterKey)
-//
-//        def salaryFilter = createFilterWithWhereClause(new SingularWhereClause(lhs: 'salary', operator: '>', rhs: 85000))
-//        FilterKey salaryFilterKey = new FilterKey(id: filterId, filter: salaryFilter)
-//        queryExecutor.selectionState.addFilter(salaryFilterKey)
-//
-//        queryExecutor.selectionState.removeFilter(filterId)
-//        def allDataResult = queryExecutor.execute(ALL_DATA_QUERY, new QueryOptions(selectionOnly: true))
-//        assertUnorderedQueryResult([], allDataResult)
-//    }
-//
-//    @Test
-//    void "ignore selection"() {
-//        String filterId = "filterId"
-//        def dcStateFilter = createFilterWithWhereClause(new SingularWhereClause(lhs: 'state', operator: '=', rhs: 'DC'))
-//        FilterKey dcStateFilterKey = new FilterKey(id: filterId, filter: dcStateFilter)
-//
-//        // apply a selection, but execute the query that bypasses the selection, so all data should be returned
-//        queryExecutor.selectionState.addFilter(dcStateFilterKey)
-//        def allDataResult = queryExecutor.execute(ALL_DATA_QUERY, new QueryOptions(selectionOnly: false, ignoreFilters: false))
-//        assertUnorderedQueryResult(getAllData(), allDataResult)
-//    }
-//
-//    @Test
-//    void "clear selection"() {
-//        String filterId = "filterId"
-//        def dcStateFilter = createFilterWithWhereClause(new SingularWhereClause(lhs: 'state', operator: '=', rhs: 'DC'))
-//        FilterKey dcStateFilterKey = new FilterKey(id: filterId, filter: dcStateFilter)
-//
-//        // addSelection is tested separately, so we can be confident the selection is added properly
-//        queryExecutor.selectionState.addFilter(dcStateFilterKey)
-//        queryExecutor.selectionState.clearAllFilters()
-//
-//        def result = queryExecutor.execute(ALL_DATA_QUERY, new QueryOptions(selectionOnly: true))
-//        assertUnorderedQueryResult([], result)
-//    }
-//
-//    @Test
-//    void "show databases"(){
-//        def dbs = queryExecutor.showDatabases()
-//        assert dbs.contains(DATABASE_NAME)
-//    }
-//
-//    @Test
-//    void "show tables"(){
-//        def tables = queryExecutor.showTables(DATABASE_NAME)
-//        assert tables.contains(TABLE_NAME)
-//    }
-//
-//    private void assertEntry(def entry, String tag, int count) {
-//        assert entry.key == tag
-//        assert entry.count == count
-//    }
-//
-//    @Test
-//    void "test array count"(){
-//        String db = DATABASE_NAME
-//        String tableName = TABLE_NAME
-//        String field = "tags"
-//        int limit = 50
-//
-//        List<ArrayCountPair> result = queryExecutor.getArrayCounts(db, tableName, field, limit)
-//        assert result.size == 3
-//        assertEntry(result[0], "tag2", 8)
-//        assertEntry(result[1], "tag3", 2)
-//        assertEntry(result[2], "tag1", 1)
-//    }
-//
-//    @Test
-//    void "test array count limiting"(){
-//        String db = DATABASE_NAME
-//        String tableName = TABLE_NAME
-//        String field = "tags"
-//        int limit = 2
-//
-//        List<ArrayCountPair> result = queryExecutor.getArrayCounts(db, tableName, field, limit)
-//        assert result.size == 2
-//        assertEntry(result[0], "tag2", 8)
-//        assertEntry(result[1], "tag3", 2)
-//    }
 
+    @Test
+    void "date equals"() {
+        def expected = rows(0)
+        def whereEqualsDate = new SingularWhereClause(lhs: 'hiredate', operator: '=', rhs: DateUtils.tryToParseDate("2012-09-15T00:00:00Z"))
+        def query = createQueryWithWhereClause(whereEqualsDate)
+        def result = queryExecutor.execute(query, QueryOptions.DEFAULT_OPTIONS)
+        assertOrderedQueryResult(expected, result)
+    }
+
+    @Test
+    @SuppressWarnings('CoupledTestCase') // this method incorrectly throws this codenarc error
+    @SuppressWarnings('MethodSize') // there is a lot of setup in this method but it is pretty straightforward and would be harder to read if extracted
+    void "query group aggregates results"() {
+        def whereClause1 = new SingularWhereClause(lhs: 'state', operator: '=', rhs: 'VA')
+        def query1 = createQueryWithWhereClause(whereClause1)
+
+        def whereClause2 = new SingularWhereClause(lhs: 'state', operator: '=', rhs: 'MD')
+        def query2 = createQueryWithWhereClause(whereClause2)
+
+        def whereClause3 = new SingularWhereClause(lhs: 'state', operator: '=', rhs: 'DC')
+        def query3 = createQueryWithWhereClause(whereClause3)
+
+        def queryGroup = new QueryGroup()
+        queryGroup.queries << query1
+        queryGroup.queries << query2
+        queryGroup.queries << query3
+
+        def expected = readJson('queryGroup.json')
+        def queryGroupResult = queryExecutor.execute(queryGroup, QueryOptions.DEFAULT_OPTIONS)
+        assertUnorderedQueryResult(expected, queryGroupResult)
+    }
+
+    @Test
+    void "select a subset of fields"() {
+        def fields = ["_id", "firstname", "lastname", "salary"]
+        def query = new Query(filter: ALL_DATA_FILTER, fields: fields)
+        // one of the lastname values is not in the raw json, so don't include it in
+        // the expected data
+        def expected = getAllData().collect { row ->
+            row.subMap(fields.findAll { row[it] })
+        }
+        def result = queryExecutor.execute(query, QueryOptions.DEFAULT_OPTIONS)
+        assertUnorderedQueryResult(expected, result)
+    }
+
+    @Test
+    void "select a subset of fields from a group by query"() {
+        def groupByMonthClause = new GroupByFunctionClause(name: 'hire_month', operation: 'month', field: 'hiredate')
+        def salaryAggregateClause = new AggregateClause(name: 'salary_sum', operation: 'sum', field: 'salary')
+        def sortByMonth = new SortClause(fieldName: 'hire_month', sortOrder: SortOrder.ASCENDING)
+
+        def query = new Query(filter: new Filter(databaseName: DATABASE_NAME, tableName: TABLE_NAME),
+                groupByClauses: [groupByMonthClause], aggregates: [salaryAggregateClause], sortClauses: [sortByMonth], fields: ["hire_month"])
+
+        def result = queryExecutor.execute(query, QueryOptions.DEFAULT_OPTIONS)
+        def expected = readJson('groupByMonth.json')
+        assertOrderedQueryResultWithoutId(expected, result)
+    }
+
+    @Test
+    @SuppressWarnings('MethodSize') // method is slightly long because of some test setup but is still pretty straight forward
+    void "add selection"() {
+        String filterId = "filterId"
+        def dcStateFilter = createFilterWithWhereClause(new SingularWhereClause(lhs: 'state', operator: '=', rhs: 'DC'))
+        FilterKey dcStateFilterKey = new FilterKey(id: filterId, filter: dcStateFilter)
+
+        // apply a selection and make sure only that data is returned
+        queryExecutor.selectionState.addFilter(dcStateFilterKey)
+        def dcStateResult = queryExecutor.execute(ALL_DATA_QUERY, new QueryOptions(selectionOnly: true))
+        def dcStateRecords = rows(1, 2, 5)
+        assertUnorderedQueryResult(dcStateRecords, dcStateResult)
+
+        // apply a filter and make sure both are applied
+        def salaryFilter = createFilterWithWhereClause(new SingularWhereClause(lhs: 'salary', operator: '>', rhs: 85000))
+        FilterKey salaryFilterKey = new FilterKey(id: filterId, filter: salaryFilter)
+        queryExecutor.filterState.addFilter(salaryFilterKey)
+
+        def dcStateWithSalaryFilterRecords = rows(2, 5)
+        def dcStateWithSalaryResult = queryExecutor.execute(ALL_DATA_QUERY, new QueryOptions(selectionOnly: true))
+        assertUnorderedQueryResult(dcStateWithSalaryFilterRecords, dcStateWithSalaryResult)
+    }
+
+    @Test
+    void "remove selection"() {
+        // add some selected items that can be removed (the add selected items are tested separately)
+        String filterId = "filterId"
+        def dcStateFilter = createFilterWithWhereClause(new SingularWhereClause(lhs: 'state', operator: '=', rhs: 'DC'))
+        FilterKey dcStateFilterKey = new FilterKey(id: filterId, filter: dcStateFilter)
+        queryExecutor.selectionState.addFilter(dcStateFilterKey)
+
+        def salaryFilter = createFilterWithWhereClause(new SingularWhereClause(lhs: 'salary', operator: '>', rhs: 85000))
+        FilterKey salaryFilterKey = new FilterKey(id: filterId, filter: salaryFilter)
+        queryExecutor.selectionState.addFilter(salaryFilterKey)
+
+        queryExecutor.selectionState.removeFilter(filterId)
+        def allDataResult = queryExecutor.execute(ALL_DATA_QUERY, new QueryOptions(selectionOnly: true))
+        assertUnorderedQueryResult([], allDataResult)
+    }
+
+    @Test
+    void "ignore selection"() {
+        String filterId = "filterId"
+        def dcStateFilter = createFilterWithWhereClause(new SingularWhereClause(lhs: 'state', operator: '=', rhs: 'DC'))
+        FilterKey dcStateFilterKey = new FilterKey(id: filterId, filter: dcStateFilter)
+
+        // apply a selection, but execute the query that bypasses the selection, so all data should be returned
+        queryExecutor.selectionState.addFilter(dcStateFilterKey)
+        def allDataResult = queryExecutor.execute(ALL_DATA_QUERY, new QueryOptions(selectionOnly: false, ignoreFilters: false))
+        assertUnorderedQueryResult(getAllData(), allDataResult)
+    }
+
+    @Test
+    void "clear selection"() {
+        String filterId = "filterId"
+        def dcStateFilter = createFilterWithWhereClause(new SingularWhereClause(lhs: 'state', operator: '=', rhs: 'DC'))
+        FilterKey dcStateFilterKey = new FilterKey(id: filterId, filter: dcStateFilter)
+
+        // addSelection is tested separately, so we can be confident the selection is added properly
+        queryExecutor.selectionState.addFilter(dcStateFilterKey)
+        queryExecutor.selectionState.clearAllFilters()
+
+        def result = queryExecutor.execute(ALL_DATA_QUERY, new QueryOptions(selectionOnly: true))
+        assertUnorderedQueryResult([], result)
+    }
+
+    @Test
+    void "show databases"(){
+        def dbs = queryExecutor.showDatabases()
+        assert dbs.contains(DATABASE_NAME)
+    }
+
+    @Test
+    void "show tables"(){
+        def tables = queryExecutor.showTables(DATABASE_NAME)
+        assert tables.contains(TABLE_NAME)
+    }
+
+    private void assertEntry(def entry, String tag, int count) {
+        assert entry.key == tag
+        assert entry.count == count
+    }
+
+    @Test
+    void "test array count"(){
+        String db = DATABASE_NAME
+        String tableName = TABLE_NAME
+        String field = "tags"
+        int limit = 50
+
+        List<ArrayCountPair> result = queryExecutor.getArrayCounts(db, tableName, field, limit)
+        assert result.size == 3
+        assertEntry(result[0], "tag2", 8)
+        assertEntry(result[1], "tag3", 2)
+        assertEntry(result[2], "tag1", 1)
+    }
+
+    @Test
+    void "test array count limiting"(){
+        String db = DATABASE_NAME
+        String tableName = TABLE_NAME
+        String field = "tags"
+        int limit = 2
+
+        List<ArrayCountPair> result = queryExecutor.getArrayCounts(db, tableName, field, limit)
+        assert result.size == 2
+        assertEntry(result[0], "tag2", 8)
+        assertEntry(result[1], "tag3", 2)
+    }
 
     protected def assertOrderedQueryResult(expected, actual) {
         assertQueryResult(expected, actual, true)
@@ -781,7 +780,15 @@ abstract class AbstractQueryExecutorIntegrationTest {
         assertQueryResult(expected, actual, false)
     }
 
-    protected def assertQueryResult(expected, actual, ordered) {
+    protected def assertUnorderedQueryResultWithoutId(expected, actual) {
+        assertQueryResult(expected, actual, false, true)
+    }
+
+    protected def assertOrderedQueryResultWithoutId(expected, actual) {
+        assertQueryResult(expected, actual, true, true)
+    }
+
+    protected def assertQueryResult(expected, actual, ordered, stripId = false) {
         def data = actual.data
         assert expected.size() == data.size()
 
@@ -790,7 +797,16 @@ abstract class AbstractQueryExecutorIntegrationTest {
             // our expected data is json based. fixed-schema databases will have null values for those fields in
             // the actual data, so remove them to make it easier to compare
             // but don't remove the _id field. that is expected in all mongo rows (and it may be empty for aggregations)
-            def cleanedRow = map.findAll { it.value || it.key == '_id'}
+            def cleanedRow
+            if(stripId) {
+                cleanedRow = map.findAll { it.value != null  && it.value != "" && it.key != '_id' }
+
+                if(expected[index].containsKey('_id')) {
+                    expected[index].remove('_id')
+                }
+            } else {
+                cleanedRow = map.findAll { it.value || it.key == '_id'}
+            }i
             if (ordered) {
                 compareRowOrdered(expected[index], cleanedRow, "Row ${index}")
             } else {
@@ -803,12 +819,10 @@ abstract class AbstractQueryExecutorIntegrationTest {
         assert expectedRow == actualRow: message
     }
 
-    @SuppressWarnings
     protected static void compareRowUnordered(expectedRows, actualRow, message) {
         def match = false
 
         expectedRows.each { expectedRow ->
-
             if (!match && expectedRow == actualRow) {
                 match = true
             }
@@ -847,5 +861,4 @@ abstract class AbstractQueryExecutorIntegrationTest {
     private static def createFilterWithWhereClause(whereClause) {
         return new Filter(databaseName: DATABASE_NAME, tableName: TABLE_NAME, whereClause: whereClause)
     }
-
 }

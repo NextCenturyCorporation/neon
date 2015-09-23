@@ -58,7 +58,6 @@ class ElasticSearchDataInserter extends DefaultTask{
             println("WARNING:  index " + databaseName + " exists, but should not")
         } else {
             CreateIndexResponse created = indexClient.create(new CreateIndexRequest(databaseName)).actionGet()
-            println("Index created: " + created.acknowledged)
             if (!created.acknowledged) throw new RuntimeException("Could not create index!");
         }
 
@@ -75,7 +74,7 @@ class ElasticSearchDataInserter extends DefaultTask{
             .startObject("city").field("type", "string").field("index", "not_analyzed").endObject()
             .startObject("state").field("type", "string").field("index", "not_analyzed").endObject()
             .startObject("salary").field("type", "long").field("index", "not_analyzed").endObject()
-            .startObject("hiredate").field("type", "date").field("format", "date_optional_time").field("index", "not_analyzed").endObject()
+            .startObject("hiredate").field("type", "date").field("format", "date_optional_time||E MMM dd HH:mm:ss zzz yyyy").field("index", "not_analyzed").endObject()
             .startObject("tags").field("type", "string").field("index", "not_analyzed").endObject()
             .endObject()
             .endObject()
@@ -96,7 +95,6 @@ class ElasticSearchDataInserter extends DefaultTask{
         // First line is header info
         if (iterator.hasNext()) {
             header = iterator.next()
-            println("Header: " + header)
         } else {
             println("Error:  No header line")
         }
@@ -120,7 +118,6 @@ class ElasticSearchDataInserter extends DefaultTask{
             bulkRequest.add(indexRequest)
         }
 
-        println("finished with all csv, sending bulk execute")
         BulkResponse bulkResponse = bulkRequest.execute().actionGet()
         if (bulkResponse.hasFailures()) {
             println(" Bulk failures: ")
@@ -128,10 +125,8 @@ class ElasticSearchDataInserter extends DefaultTask{
                 println("\tfailure: " + JsonOutput.toJson(it))
             }
         }
-        println("done with bulk execute")
     }
 
-    @SuppressWarnings('Println')
     def processLine(String[] line, client) {
         String id
 

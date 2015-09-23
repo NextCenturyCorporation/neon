@@ -21,6 +21,8 @@ import com.ncc.neon.IntegrationTestContext
 import com.ncc.neon.connect.ConnectionInfo
 import com.ncc.neon.connect.DataSources
 import com.ncc.neon.query.elasticsearch.ElasticSearchQueryExecutor
+import org.joda.time.format.DateTimeFormat
+import org.joda.time.format.DateTimeFormatter
 import org.json.JSONArray
 import org.json.JSONObject
 import org.junit.Assume
@@ -73,8 +75,10 @@ class ElasticSearchQueryExecutorIntegrationTest extends AbstractQueryExecutorInt
         def map = [:]
         jsonObject.keys().each { key ->
             def value = jsonObject.get(key)
-
-            if (value instanceof JSONArray) {
+            if (key =~ AbstractQueryExecutorIntegrationTest.DATE_FIELD_REGEX) {
+                DateTimeFormatter formatIn = DateTimeFormat.forPattern("yyyy-MM-dd'T'HH:mm:ss'Z'")
+                map[key] = formatIn.withZoneUTC().parseDateTime(value).toString()
+            } else if (value instanceof JSONArray) {
                 map[key] = jsonArrayToList(value)
             } else if (value instanceof JSONObject) {
                 map[key] = jsonObjectToMap(value)

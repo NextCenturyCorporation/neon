@@ -72,7 +72,9 @@ class ElasticSearchQueryExecutor extends AbstractQueryExecutor {
                 extractMetrics(aggregates, aggResults ? aggResults.asMap() : null, results.hits.totalHits)
             ])
         } else if (groupByClauses) {
-            return new TabularQueryResult(extractBuckets(groupByClauses, aggResults.asList()[0], aggregates))
+            List<Map<String, Object>> buckets = extractBuckets(groupByClauses, aggResults.asList()[0], aggregates)
+            buckets = limitBuckets(buckets, query)
+            return new TabularQueryResult(buckets)
         } else if(query.isDistinct) {
             return new TabularQueryResult(extractDistinct(query, aggResults.asList()[0]))
         }
@@ -123,7 +125,6 @@ class ElasticSearchQueryExecutor extends AbstractQueryExecutor {
         getMappings().get(dbName).collect { it.key }
     }
 
-    @SuppressWarnings("Println")
     @Override
     List<String> getFieldNames(String databaseName, String tableName) {
         if(tableName) {
@@ -170,7 +171,9 @@ class ElasticSearchQueryExecutor extends AbstractQueryExecutor {
     }
 
     private static Map<String, Object> extractMetrics(clauses, results, totalCount) {
-        def (countAllClause, metricClauses) = clauses.split(ElasticSearchConversionStrategy.&isCountAllAggregation)
+        def (countAllClause, metricClauses) = clauses.split {
+            ElasticSearchConversionStrategy.isCountAllAggregation(it) || ElasticSearchConversionStrategy.isCountFieldAggregation(it)
+        }
 
         def metrics = metricClauses.inject([:]) { acc, clause ->
             def result = results.get("${STATS_AGG_PREFIX}${clause.field}" as String)
@@ -179,7 +182,6 @@ class ElasticSearchQueryExecutor extends AbstractQueryExecutor {
         }
 
         if (countAllClause) {
-            metrics.put('_id', [:])
             metrics.put(countAllClause[0].name, totalCount)
         }
         metrics
@@ -217,6 +219,7 @@ class ElasticSearchQueryExecutor extends AbstractQueryExecutor {
             case GroupByFunctionClause:
                 def isDateClause = (currentClause.operation in ElasticSearchConversionStrategy.DATE_OPERATIONS
                         && value.key.isNumber())
+
                 accumulator.put(groupByClauses.head().name, isDateClause ? value.key.toFloat() : value.key)
                 break
             default:
@@ -232,5 +235,16 @@ class ElasticSearchQueryExecutor extends AbstractQueryExecutor {
             }
             results.push(accumulator)
         }
+    }
+
+    private List<Map<String, Object>> limitBuckets(def buckets, Query query) {
+        int offset = ElasticSearchConversionStrategy.getOffset(query)
+        int limit = ElasticSearchConversionStrategy.getLimit(query)
+
+        int endIndex = ((limit - 1) + offset) < (buckets.size() - 1) ? ((limit - 1) + offset) : (buckets.size() - 1)
+        endIndex = (endIndex > offset ? endIndex: offset)
+        def result = buckets[offset .. endIndex]
+
+        return result
     }
 }
