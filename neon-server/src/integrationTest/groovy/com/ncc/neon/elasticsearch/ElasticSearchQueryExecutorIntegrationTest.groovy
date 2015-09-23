@@ -21,7 +21,6 @@ import com.ncc.neon.IntegrationTestContext
 import com.ncc.neon.connect.ConnectionInfo
 import com.ncc.neon.connect.DataSources
 import com.ncc.neon.query.elasticsearch.ElasticSearchQueryExecutor
-import com.ncc.neon.util.DateUtils
 import org.json.JSONArray
 import org.json.JSONObject
 import org.junit.Assume
@@ -74,9 +73,8 @@ class ElasticSearchQueryExecutorIntegrationTest extends AbstractQueryExecutorInt
         def map = [:]
         jsonObject.keys().each { key ->
             def value = jsonObject.get(key)
-            if (key =~ AbstractQueryExecutorIntegrationTest.DATE_FIELD_REGEX) {
-                map[key] = DateUtils.parseDate(value)
-            } else if (value instanceof JSONArray) {
+
+            if (value instanceof JSONArray) {
                 map[key] = jsonArrayToList(value)
             } else if (value instanceof JSONObject) {
                 map[key] = jsonObjectToMap(value)

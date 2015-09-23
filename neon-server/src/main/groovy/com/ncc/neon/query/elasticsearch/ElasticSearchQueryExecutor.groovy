@@ -28,7 +28,6 @@ import com.ncc.neon.query.filter.SelectionState
 import com.ncc.neon.query.result.ArrayCountPair
 import com.ncc.neon.query.result.QueryResult
 import com.ncc.neon.query.result.TabularQueryResult
-
 import org.elasticsearch.action.admin.cluster.state.ClusterStateRequest
 import org.elasticsearch.action.admin.indices.mapping.get.GetMappingsRequest
 import org.elasticsearch.client.Client
@@ -70,25 +69,46 @@ class ElasticSearchQueryExecutor extends AbstractQueryExecutor {
 
         if (aggregates && !groupByClauses) {
             return new TabularQueryResult([
-                    extractMetrics(aggregates, aggResults ? aggResults.asMap() : null, results.hits.totalHits)
+                extractMetrics(aggregates, aggResults ? aggResults.asMap() : null, results.hits.totalHits)
             ])
         } else if (groupByClauses) {
             return new TabularQueryResult(extractBuckets(groupByClauses, aggResults.asList()[0], aggregates))
         } else if(query.isDistinct) {
-            return new TabularQueryResult(extractDistinct(query.fields[0], aggResults.asList()[0]))
+            return new TabularQueryResult(extractDistinct(query, aggResults.asList()[0]))
         }
 
         new TabularQueryResult(results.hits.collect { it.getSource() })
     }
 
-    List<Map<String, Object>> extractDistinct(String field, aggResult) {
+    List<Map<String, Object>> extractDistinct(Query query, aggResult) {
+        String field = query.fields[0]
+
         def distinctValues = []
         aggResult.buckets.each {
             def accumulator = [:]
             accumulator[field] = it.key
             distinctValues.push(accumulator)
         }
+
+        distinctValues = sortDistinct(query, distinctValues)
+
+        int offset = ElasticSearchConversionStrategy.getOffset(query)
+        int limit = ElasticSearchConversionStrategy.getLimit(query)
+        int endIndex = ((limit - 1) + offset) < (distinctValues.size() - 1) ? ((limit - 1) + offset) : (distinctValues.size() - 1)
+        endIndex = (endIndex > offset ? endIndex: offset)
+        distinctValues = distinctValues[offset .. endIndex]
+
         return distinctValues
+    }
+
+    private List<Map<String, Object>> sortDistinct(Query query, values) {
+        if(query.sortClauses) {
+            return values.sort { a, b ->
+                a[query.fields[0]] <=> b[query.fields[0]]
+            }
+        }
+
+        return values
     }
 
     @Override
@@ -103,10 +123,25 @@ class ElasticSearchQueryExecutor extends AbstractQueryExecutor {
         getMappings().get(dbName).collect { it.key }
     }
 
+    @SuppressWarnings("Println")
     @Override
     List<String> getFieldNames(String databaseName, String tableName) {
-        LOGGER.debug("Executing getFieldNames for index " + databaseName + " type " + tableName)
-        getMappings().get(databaseName).get(tableName).getSourceAsMap().get('properties').collect { it.key }
+        if(tableName) {
+            LOGGER.debug("Executing getFieldNames for index " + databaseName + " type " + tableName)
+
+            def dbMappings = getMappings().get(databaseName)
+            if(dbMappings) {
+                def tableMappings = dbMappings.get(tableName)
+                if(tableMappings) {
+                    def fields = tableMappings.getSourceAsMap().get('properties').collect { it.key }
+                    if (fields) {
+                        fields.push("_id")
+                        return fields
+                    }
+                }
+            }
+        }
+        return []
     }
 
     List<ArrayCountPair> getArrayCounts(String databaseName, String tableName, String field, int limit = 40) {
@@ -144,9 +179,9 @@ class ElasticSearchQueryExecutor extends AbstractQueryExecutor {
         }
 
         if (countAllClause) {
+            metrics.put('_id', [:])
             metrics.put(countAllClause[0].name, totalCount)
         }
-
         metrics
     }
 

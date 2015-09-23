@@ -16,12 +16,21 @@
 
 package com.ncc.neon
 
+import org.joda.time.format.DateTimeFormat
+import org.joda.time.format.DateTimeFormatter
+
 class ElasticSearchJSONGenerator extends AbstractJSONGenerator {
     @Override
     protected void modifyJson(jsonArray) {
         jsonArray.length().times { index ->
             def row = jsonArray.get(index)
-            row.remove('location');
+
+            /*if(row.has('hiredate')) {
+                DateTimeFormatter formatIn = DateTimeFormat.forPattern("yyyy-MM-dd HH:mm:ss")
+                row.put('hiredate', formatIn.parseDateTime(row.get('hiredate')).toString())
+            }*/
+
+            row.remove('location')
         }
     }
 }

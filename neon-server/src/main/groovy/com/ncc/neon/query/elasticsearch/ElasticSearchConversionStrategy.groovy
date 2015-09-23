@@ -17,7 +17,6 @@
 package com.ncc.neon.query.elasticsearch
 
 import com.ncc.neon.connect.NeonConnectionException
-import com.ncc.neon.query.clauses.AggregateClause
 import com.ncc.neon.query.clauses.AndWhereClause
 import com.ncc.neon.query.clauses.FieldFunction
 import com.ncc.neon.query.clauses.GroupByFieldClause
@@ -25,7 +24,6 @@ import com.ncc.neon.query.clauses.GroupByFunctionClause
 import com.ncc.neon.query.clauses.OrWhereClause
 import com.ncc.neon.query.clauses.SelectClause
 import com.ncc.neon.query.clauses.SingularWhereClause
-import com.ncc.neon.query.clauses.SortClause
 import com.ncc.neon.query.filter.DataSet
 import com.ncc.neon.query.filter.FilterState
 import com.ncc.neon.query.filter.SelectionState
@@ -48,7 +46,7 @@ import org.elasticsearch.search.sort.SortOrder
 
 import groovy.transform.Immutable
 
-import java.lang.reflect.Field
+//import java.lang.reflect.Field
 
 /**
  * Converts a Query object into a BasicDbObject
@@ -69,6 +67,7 @@ class ElasticSearchConversionStrategy {
         //Build the elasticsearch filters for the where clauses
         def inners = whereClauses.collect(ElasticSearchConversionStrategy.&convertWhereClause) as FilterBuilder[]
         def whereFilter = FilterBuilders.boolFilter().must(FilterBuilders.andFilter(inners))
+
         def source = createSearchSourceBuilder(query).query(QueryBuilders.filteredQuery(null, whereFilter))
 
         if (query.fields && query.fields != SelectClause.ALL_FIELDS) {
@@ -89,9 +88,7 @@ class ElasticSearchConversionStrategy {
     */
     private static convertAggregations(Query query, SearchSourceBuilder source) {
         if(query.isDistinct) {
-            if(query.fields.size() > 1) {
-                throw new NeonConnectionException("Distinct call requires only one field")
-            } else if(!query.fields) {
+            if(!query.fields || query.fields.size() > 1) {
                 throw new NeonConnectionException("Distinct call requires one field")
             }
 
@@ -126,17 +123,16 @@ class ElasticSearchConversionStrategy {
                 if (sc) {
                     def sortOrder = sc.sortOrder == com.ncc.neon.query.clauses.SortOrder.ASCENDING
                     bucketAggregations.last().order(isCountAllAggregation(ac) ?
-                        Terms.Order.count(sortOrder) :
-                        Terms.Order.aggregation("${STATS_AGG_PREFIX}${ac.field}" as String,
-                                ac.operation as String, sortOrder)
+                            Terms.Order.count(sortOrder) :
+                            Terms.Order.aggregation("${STATS_AGG_PREFIX}${ac.field}" as String,
+                                    ac.operation as String, sortOrder)
                     )
                 }
             }
 
             //on each aggregation, except the last - nest the next aggregation
             bucketAggregations.take(bucketAggregations.size() - 1)
-                .eachWithIndex { v, i -> v.subAggregation(bucketAggregations[i + 1]) }
-
+                    .eachWithIndex { v, i -> v.subAggregation(bucketAggregations[i + 1]) }
             source.aggregation(bucketAggregations.head() as AbstractAggregationBuilder)
         } else {
             //if there are no groupByClauses, apply sort and metricAggregations directly to source
@@ -147,7 +143,7 @@ class ElasticSearchConversionStrategy {
 
     private static getMetricAggregations(Query query) {
         return query.aggregates
-                .findAll { !isCountAllAggregation(it) }
+                .findAll { !isCountAllAggregation(it) && !isCountFieldAggregation(it) }
                 .collect { it.field }
                 .unique()
                 .collect { AggregationBuilders.stats("${STATS_AGG_PREFIX}${it}").field(it as String) }
@@ -173,14 +169,35 @@ class ElasticSearchConversionStrategy {
         if (options.selectionOnly) {
             whereClauses.addAll(createWhereClausesForFilters(dataSet, selectionState))
         }
+
+        whereClauses.addAll(getCountFieldClauses(query))
+
         return whereClauses
+    }
+
+    private getCountFieldClauses(query) {
+        def clauses = []
+        query.aggregates.each {
+            if(isCountFieldAggregation(it)) {
+                clauses.push(new SingularWhereClause(lhs: it.field, operator: '!=', rhs: null))
+            }
+        }
+        return clauses
     }
 
     public static SearchSourceBuilder createSearchSourceBuilder(Query params) {
         new SearchSourceBuilder()
             .explain(false)
-            .from((params?.offsetClause ? params.offsetClause.offset : 0) as int)
-            .size((params?.limitClause ? params.limitClause.limit : 45) as int)
+            .from(getOffset(params))
+            .size(getLimit(params))
+    }
+
+    public static int getOffset(Query query) {
+        return (query?.offsetClause ? query.offsetClause.offset : 0) as int
+    }
+
+    public static int getLimit(Query query) {
+        return (query?.limitClause ? query.limitClause.limit : 45) as int
     }
 
     public static SearchRequest createSearchRequest(SearchSourceBuilder source, Query params) {
@@ -191,7 +208,11 @@ class ElasticSearchConversionStrategy {
     }
 
     public static boolean isCountAllAggregation(clause) {
-        clause.operation == 'count' && clause.field == '*'
+        clause && clause.operation == 'count' && clause.field == '*'
+    }
+
+    public static boolean isCountFieldAggregation(clause) {
+        clause && clause.operation == 'count' && clause.field != '*'
     }
 
     private static createWhereClausesForFilters(DataSet dataSet, filterCache, ignoredFilterIds = []) {
@@ -218,6 +239,7 @@ class ElasticSearchConversionStrategy {
         FilterBuilders.boolFilter().must(combiner(inners as FilterBuilder[]))
     }
 
+    @SuppressWarnings("MethodSize")
     private static FilterBuilder convertSingularWhereClause(clause) {
         if (clause.operator in ['<', '>', '<=', '>=']) {
             return { switch (clause.operator) {
@@ -234,10 +256,6 @@ class ElasticSearchConversionStrategy {
         }
 
         if (clause.operator in ['=', '!=']) {
-            if(clause.rhs.getClass() == String) {
-                clause.rhs = clause.rhs.toLowerCase()
-            }
-
             def hasValue = clause.rhs || clause.rhs == ''
 
             def filter = hasValue ?
@@ -245,6 +263,11 @@ class ElasticSearchConversionStrategy {
                 FilterBuilders.existsFilter(clause.lhs as String)
 
             return (clause.operator == '!=') == !hasValue ? filter : FilterBuilders.notFilter(filter)
+        }
+
+        if (clause.operator in ["in", "notin"]) {
+            def filter = FilterBuilders.termsFilter(clause.lhs as String, clause.rhs as String[])
+            return (clause.operator == "in") ? filter : FilterBuilders.notFilter(filter)
         }
 
         throw new NeonConnectionException("${clause.operator} is an invalid operator for a where clause")
@@ -257,6 +280,7 @@ class ElasticSearchConversionStrategy {
         SortBuilders.fieldSort(clause.fieldName as String).order(order)
     }
 
+    @SuppressWarnings("MethodSize")
     private static AggregationBuilder convertGroupByClause(Query query, clause) {
         def applySort = { TermsBuilder tb ->
             def sc = findMatchingSortClause(query, clause)
@@ -277,7 +301,7 @@ class ElasticSearchConversionStrategy {
                     applySort(AggregationBuilders
                         .terms(clause.name as String)
                         .field(clause.field as String)
-                        .script("def calendar = java.util.Calendar.getInstance(); calendar.setTime(new Date(doc['${clause.field}'].value)); calendar.get(java.util.Calendar.${it})" as String)
+                        .script("def calendar = java.util.Calendar.getInstance(); calendar.setTime(new Date(doc['${clause.field}'].value)); calendar.get(java.util.Calendar.${it}) + 1" as String)
                         .size(0))
                 }
 

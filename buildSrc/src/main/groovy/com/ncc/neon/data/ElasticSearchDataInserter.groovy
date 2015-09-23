@@ -20,6 +20,8 @@ import org.elasticsearch.common.xcontent.XContentBuilder
 import org.elasticsearch.common.xcontent.XContentFactory
 import org.gradle.api.DefaultTask
 import org.gradle.api.tasks.TaskAction
+import org.joda.time.format.DateTimeFormat
+import org.joda.time.format.DateTimeFormatter
 
 class ElasticSearchDataInserter extends DefaultTask{
     // default values. build will override these
@@ -68,13 +70,13 @@ class ElasticSearchDataInserter extends DefaultTask{
             .startObject(tableName)
             .startObject("properties")
             .startObject("_id").field("type", "string").field("index", "not_analyzed").endObject()
-            .startObject("firstname").field("type", "string").endObject()
-            .startObject("lastname").field("type", "string").endObject()
-            .startObject("city").field("type", "string").endObject()
-            .startObject("state").field("type", "string").endObject()
-            .startObject("salary").field("type", "long").endObject()
-            .startObject("hiredate").field("type", "date").field("format", "yyyy-MM-dd HH:mm:ss").endObject()
-            .startObject("tags").field("type", "string").endObject()
+            .startObject("firstname").field("type", "string").field("index", "not_analyzed").endObject()
+            .startObject("lastname").field("type", "string").field("index", "not_analyzed").endObject()
+            .startObject("city").field("type", "string").field("index", "not_analyzed").endObject()
+            .startObject("state").field("type", "string").field("index", "not_analyzed").endObject()
+            .startObject("salary").field("type", "long").field("index", "not_analyzed").endObject()
+            .startObject("hiredate").field("type", "date").field("format", "date_optional_time").field("index", "not_analyzed").endObject()
+            .startObject("tags").field("type", "string").field("index", "not_analyzed").endObject()
             .endObject()
             .endObject()
             .endObject())
@@ -129,17 +131,29 @@ class ElasticSearchDataInserter extends DefaultTask{
         println("done with bulk execute")
     }
 
+    @SuppressWarnings('Println')
     def processLine(String[] line, client) {
         String id
 
         XContentBuilder builder = XContentFactory.jsonBuilder().startObject()
         for (int ii = 0; ii < line.length; ii++) {
-            if (header[ii] == "latitude" || header[ii] == "longitude") {
-                builder.field(header[ii], Double.parseDouble(line[ii]))
-            } else if(header[ii] == "_id") {
-                id = line[ii]
-            } else {
-                builder.field(header[ii], line[ii])
+            if(line[ii] != 'N') {
+                if (header[ii] == "latitude" || header[ii] == "longitude") {
+                    builder.field(header[ii], Double.parseDouble(line[ii]))
+                } else if (header[ii] == "salary") {
+                    builder.field(header[ii], Integer.parseInt(line[ii]))
+                } else if (header[ii] == "tags") {
+                    def tags = line[ii].split(':')
+                    builder.field(header[ii], tags)
+                } else if (header[ii] == "_id") {
+                    id = line[ii]
+                    builder.field(header[ii], line[ii])
+                } else if (header[ii] == "hiredate") {
+                    DateTimeFormatter formatIn = DateTimeFormat.forPattern("yyyy-MM-dd HH:mm:ss")
+                    builder.field(header[ii], formatIn.withZoneUTC().parseDateTime(line[ii]).toDate())
+                } else {
+                    builder.field(header[ii], line[ii])
+                }
             }
         }
         builder.endObject()
