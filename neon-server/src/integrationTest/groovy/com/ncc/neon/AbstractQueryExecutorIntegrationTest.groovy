@@ -806,7 +806,7 @@ abstract class AbstractQueryExecutorIntegrationTest {
                 }
             } else {
                 cleanedRow = map.findAll { it.value || it.key == '_id'}
-            }i
+            }
             if (ordered) {
                 compareRowOrdered(expected[index], cleanedRow, "Row ${index}")
             } else {
