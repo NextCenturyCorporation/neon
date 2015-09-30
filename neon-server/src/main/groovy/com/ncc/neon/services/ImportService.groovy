@@ -50,6 +50,8 @@ class ImportService {
     ImportHelperFactory importHelperFactory
 
     static final Map IMPORT_DISABLED_ERROR_RESPONSE = [status: 403, message: "Import not enabled"]
+    static final Map EXISTING_DATABASE_ERROR_RESPONSE = [status: 406, message: "Username and database name combination already exist"]
+    static final Map NO_DATABASE_ERROR_RESPONSE = [status: 404, message: "No dataset exists with the given username and database name"]
 
     /**
      * Uploads a file, storing it wholesale in a data store, and triggers an asynchronous method to attempt to
@@ -79,7 +81,7 @@ class ImportService {
         String userName = user ?: UUID.randomUUID().toString()
         ImportHelper helper = importHelperFactory.getImportHelper(databaseType)
         if(helper.doesDatabaseExist(host, userName, prettyName)) {
-            def errorResponse = [status: 406, message: "Username and database name combination already exist"]
+            def errorResponse = EXISTING_DATABASE_ERROR_RESPONSE
             return Response.status(406).entity(JsonOutput.toJson(errorResponse)).build()
         }
         Map jobID = helper.uploadFile(host, userName, prettyName, fileType, dataInputStream)
@@ -180,7 +182,7 @@ class ImportService {
         ImportHelper helper = importHelperFactory.getImportHelper(databaseType)
         Map result = helper.dropDataset(host, userName, prettyName)
         if(!result.success) {
-            return Response.status(404).entity(JsonOutput.toJson([status: 404, message: "No dataset exists with the given username and database name"])).build()
+            return Response.status(404).entity(JsonOutput.toJson(NO_DATABASE_ERROR_RESPONSE)).build()
         }
         return Response.ok().entity(JsonOutput.toJson(result)).build()
     }

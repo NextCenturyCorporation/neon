@@ -80,12 +80,16 @@ class CSVSheetReaderTest {
     }
 
     @Test(expected=BadSheetException)
-    void "next throws bad sheet exception"() {
+    void "next throws bad sheet exception for malformed data"() {\
         csvSheetReader.initialize(new StringBufferInputStream("name,mother\n\"Joe,Lisa\nJanice,Bob"))
         // Should throw a BadSheetException due to malformed data (specifically "\"Joe")
         csvSheetReader.next()
-        csvSheetReader.initialize(new StringBufferInputStream("name,mother\n" + ('l' * (ImportUtilities.MAX_ROW_LENGTH + 1))))
-        // Should throw a BadSheetException due to row length being too long
+    }
+
+    @Test(expected=BadSheetException)
+    void "next throws bad sheet exception for malformed data row length"() {
+        csvSheetReader.initialize(new StringBufferInputStream("name,mother\n\"" + ('l' * (ImportUtilities.MAX_ROW_LENGTH))))
+        // Should throw a BadSheetException due to row length being too long on malformed data
         csvSheetReader.next()
     }
 
