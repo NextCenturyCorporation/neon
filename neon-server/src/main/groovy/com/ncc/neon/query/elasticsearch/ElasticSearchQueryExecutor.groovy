@@ -147,19 +147,21 @@ class ElasticSearchQueryExecutor extends AbstractQueryExecutor {
 
     List<ArrayCountPair> getArrayCounts(String databaseName, String tableName, String field, int limit = 40) {
         getClient()
-            .search(
-                ElasticSearchConversionStrategy.createSearchRequest(
-                    ElasticSearchConversionStrategy.createSearchSourceBuilder(
-                            new Query(filter: new Filter(databaseName: databaseName, tableName: tableName)))
-                        .aggregation(AggregationBuilders.terms("arrayCount")
-                            .field(field)
-                            .size(limit)) , null))
-            .actionGet()
-            .getAggregations()
-            .asList()
-            .head()
-            .getBuckets()
-            .collect { new ArrayCountPair(key: it.key, count: it.docCount) }
+        .search(ElasticSearchConversionStrategy.createSearchRequest(
+            ElasticSearchConversionStrategy.createSearchSourceBuilder(
+                new Query(filter: new Filter(databaseName: databaseName, tableName: tableName))
+            )
+            .aggregation(AggregationBuilders.terms("arrayCount")
+                .field(field)
+                .size(limit)
+            ) , null)
+        )
+        .actionGet()
+        .getAggregations()
+        .asList()
+        .head()
+        .getBuckets()
+        .collect { new ArrayCountPair(key: it.key, count: it.docCount) }
     }
 
     private Client getClient() {

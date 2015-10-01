@@ -122,7 +122,7 @@ task afterIntegrationTest {
         dependsOn 'deleteSparkSQLDataIntegrationTest'
     }
     if(isElasticSearchEnabled()) {
-        //dependsOn 'deleteElasticSearchDataIntegrationTest'
+        dependsOn 'deleteElasticSearchDataIntegrationTest'
     }
 }
 

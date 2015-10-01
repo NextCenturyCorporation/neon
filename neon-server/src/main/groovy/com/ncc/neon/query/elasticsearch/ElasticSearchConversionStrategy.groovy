@@ -46,8 +46,6 @@ import org.elasticsearch.search.sort.SortOrder
 
 import groovy.transform.Immutable
 
-//import java.lang.reflect.Field
-
 /**
  * Converts a Query object into a BasicDbObject
  */

@@ -108,7 +108,6 @@ class ElasticSearchConvertQueryTest extends AbstractConversionTest {
     }
 
     @Override
-    @SuppressWarnings("Println")
     protected void assertQueryWithGroupByClauses(query) {
         XContentParser parser = XContentHelper.createParser(query.source())
         def map = parser.map()
