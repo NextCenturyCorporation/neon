@@ -95,7 +95,8 @@ class ElasticSearchConvertQueryTest extends AbstractConversionTest {
         XContentParser parser = XContentHelper.createParser(query.source())
         def map = parser.map()
 
-        println(map)
+        assert map.aggregations
+        assert map.aggregations == [distinct: [terms: [field:'*', size:0]]]
     }
 
     @Override

@@ -15,18 +15,18 @@
  */
 package com.vividsolutions.jts.geom
 
-/** 
+/**
  * This is a mock object to avoid run-time issues with ElasticSearch features that are not used
- * by Neon.  The optional features use the Vivid Solutions JTS library which is not compatible 
+ * by Neon.  The optional features use the Vivid Solutions JTS library which is not compatible
  * with Apache 2.0.  Neon uses an ElasticSearch Query Builder that references JTS classes but does
  * not require them.  In a pure Java system, this is not an issue.  Howevever, Neon utilizes Groovy
- * code.  The Groovy runtime checks for the existence of all directly reference classes 
+ * code.  The Groovy runtime checks for the existence of all directly reference classes
  * regardless of whether or not they are required by our runtime methods.
  *
  * For more information, please reference the following ElasticSearch Issues,
  * - https://github.com/elastic/elasticsearch/issues/9891
  * - https://github.com/elastic/elasticsearch/issues/13397
- * 
+ *
  * This class will be removed when a cleaner solution is found or ElasticSearch releases
  * an update that replaces the optional JTS library with Apache SIS.
  */
