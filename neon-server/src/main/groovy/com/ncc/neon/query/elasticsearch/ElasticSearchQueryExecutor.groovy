@@ -145,7 +145,7 @@ class ElasticSearchQueryExecutor extends AbstractQueryExecutor {
         return []
     }
 
-    List<ArrayCountPair> getArrayCounts(String databaseName, String tableName, String field, int limit = 40) {
+    List<ArrayCountPair> getArrayCounts(String databaseName, String tableName, String field, int limit = 0) {
         getClient()
         .search(ElasticSearchConversionStrategy.createSearchRequest(
             ElasticSearchConversionStrategy.createSearchSourceBuilder(
