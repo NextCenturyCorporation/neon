@@ -1,5 +1,5 @@
 /*
- * Copyright 2013 Next Century Corporation
+ * Copyright 2015 Next Century Corporation
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -14,15 +14,17 @@
  *
  */
 
-defaultTasks 'clean', 'build'
+package com.ncc.neon.userimport.types
 
-allprojects {
-    version = "1.2.0-SNAPSHOT"
-}
+import groovy.transform.ToString
 
-// Versions are shared across all builds
-apply from: 'gradle/versions.gradle'
-
-task wrapper(type: Wrapper) {
-    gradleVersion = '2.1'
+/**
+ * Simple container that holds a field name and the type of data associated with that field name.
+ */
+@ToString(includeNames = true)
+public class FieldTypePair {
+    String name
+    FieldType type
+    // If FieldType is OBJECT, objectFTPairs is a list of FieldTypePair objects for this object's values
+    List<FieldTypePair> objectFTPairs
 }

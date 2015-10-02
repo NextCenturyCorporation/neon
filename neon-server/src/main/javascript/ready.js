@@ -29,7 +29,8 @@ neon.ready = function(functionToRun) {
         if(neon.util.owfUtils.isRunningInOWF()) {
             OWF.ready(functionToRun);
         } else {
-            functionToRun();
+            // Make sure the function is always called asynchronously for consistency
+            setTimeout(functionToRun, 0);
         }
     });
 };

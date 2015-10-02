@@ -138,7 +138,7 @@ neon.query.Connection.prototype.executeQueryService_ = function(query, successCa
  * @param {neon.query.Query} query the query to export data for
  * @param {Function} successCallback The callback to fire when the export request successfully completes. Takes 
  * a JSON object with the export URL stored in it's data field as a parameter.
- * @param {Function} [errorCallBack] The optional callback when an error occurs. This function takes the server's
+ * @param {Function} [errorCallback] The optional callback when an error occurs. This function takes the server's
  * response as a parameter.
  * @return {neon.util.AjaxRequest} The xhr request object
  */
@@ -146,10 +146,95 @@ neon.query.Connection.prototype.executeExport = function(data, successCallback, 
     data.fileType = fileType;
     return neon.util.ajaxUtils.doPostJSON(
         data,
-        neon.serviceUrl('exportservice', 'export' +'/' + encodeURIComponent(this.host_) + '/' + encodeURIComponent(this.databaseType_), ''),
+        neon.serviceUrl('exportservice', 'export/' + encodeURIComponent(this.host_) + '/' + encodeURIComponent(this.databaseType_), ''),
         {
             success: successCallback,
             error: errorCallback
+        }
+    );
+};
+
+/**
+ * Sends a file to be imported into a database and fires the callback when complete.
+ * @method executeUploadFile
+ * @param {FormData} data A FormData object containing the file to upload, as well as its type and a username and name of the database to upload it to.
+ * @param {Function} successCallback The function to call when the request successfully completes. This function takes the server's response as a parameter.
+ * @param {Function} errorCallback The function to call when an error occurs. This function takes the server's response as a parameter.
+ * @param {String} [host] The host to upload a file to when you don't want to upload to the default.
+ * @param {String} [databaseType] The type of database to upload a file to when you don't want the default.
+ */
+neon.query.Connection.prototype.executeUploadFile = function(data, successCallback, errorCallback, host, databaseType) {
+    neon.util.ajaxUtils.doPostBinary(data, neon.serviceUrl('importservice', 'upload/' + encodeURIComponent(host || this.host_) + '/' + encodeURIComponent(databaseType || this.databaseType_), ''),
+        successCallback, errorCallback);
+};
+
+/**
+ * Checks on the status of a type-guessing operation with the given uuid and fires the callback when complete.
+ * @method executeCheckTypeGuesses
+ * @param {String} uuid The uuid associated with the type-guessing operation to check on.
+ * @param {Function} successCallback The function to call when the request successfully completes. This function takes the server's response as a parameter.
+ * @param {String} [host] The host to upload a file to when you don't want to upload to the default.
+ * @param {String} [databaseType] The type of database to upload a file to when you don't want the default.
+ */
+neon.query.Connection.prototype.executeCheckTypeGuesses = function(uuid, successCallback, host, databaseType) {
+    return neon.util.ajaxUtils.doGet(
+        neon.serviceUrl('importservice', 'guesses/' + encodeURIComponent(host || this.host_) + '/' + encodeURIComponent(databaseType || this.databaseType_) + '/' + encodeURIComponent(uuid), ''), {
+            success: successCallback
+        }
+    );
+};
+
+/**
+ * Initiates the process of importing records from a file into a database and converting them from strings to more appropriate types, and fires the callback when complete.
+ * @method executeLoadFileIntoDB
+ * @param {Object} data An object that contains a date formatting string and a list of objects that contain field names and type names to go with them.
+ * @param {Function} successCallback The function to call when the request successfully completes. This function takes the server's response as a parameter.
+ * @param {Function} errorCallback The function to call when an error occurs. This function takes the server's response as a parameter.
+ * @param {String} [host] The host to upload a file to when you don't want to upload to the default.
+ * @param {String} [databaseType] The type of database to upload a file to when you don't want the default.
+ */
+neon.query.Connection.prototype.executeLoadFileIntoDB = function(data, uuid, successCallback, errorCallback, host, databaseType) {
+    neon.util.ajaxUtils.doPostJSON(data, neon.serviceUrl('importservice', 'convert/' + encodeURIComponent(host || this.host_) + '/' + encodeURIComponent(databaseType || this.databaseType_) +
+        '/' + encodeURIComponent(uuid), ''), {
+            success: successCallback,
+            error: errorCallback
+        }
+    );
+};
+
+/**
+ * Checks on the status of an import and conversion operation with the given uuid and fires the callback when complete.
+ * @method executeCheckImportProgress
+ * @param {String} uuid The uuid associated with the import and conversion operation to check on.
+ * @param {Function} successCallback The function to call when the request successfully completes. This function takes the server's response as a parameter.
+ * @param {String} [host] The host to upload a file to when you don't want to upload to the default.
+ * @param {String} [databaseType] The type of database to upload a file to when you don't want the default.
+ */
+neon.query.Connection.prototype.executeCheckImportProgress = function(uuid, successCallback, host, databaseType) {
+    return neon.util.ajaxUtils.doGet(
+        neon.serviceUrl('importservice', 'progress/' + encodeURIComponent(host || this.host_) + '/' + encodeURIComponent(databaseType || this.databaseType_) + '/' + encodeURIComponent(uuid), ''), {
+            success: successCallback
+        }
+    );
+};
+
+/**
+ * Sends a request to remove a dataset associated with the given username and satabase name, and fires the callback when complete.
+ * @method executeRemoveDataset
+ * @param {String} user The username associated with the database to drop.
+ * @param {String} data The database name associated with the database to drop.
+ * @param {Function} successCallback The function to call when the request successfully completes. This function takes the server's response as a parameter.
+ * @param {Function} errorCallback The funtion to cakk when an error occrus. This function takes the server's response as a parameter.
+ * @param {String} [host] The host to upload a file to when you don't want to upload to the default.
+ * @param {String} [databaseType] The type of database to upload a file to when you don't want the default.
+ */
+neon.query.Connection.prototype.executeRemoveDataset = function(user, data, successCallback, errorCallback, host, databaseType) {
+    return neon.util.ajaxUtils.doGet(
+        neon.serviceUrl('importservice', 'drop/' + encodeURIComponent(host || this.host_) + '/' + encodeURIComponent(databaseType || this.databaseType_) + '?user=' + encodeURIComponent(user) +
+            '&data=' + encodeURIComponent(data), ''), {
+            success: successCallback,
+            error: errorCallback,
+            responseType: 'json'
         }
     );
 };

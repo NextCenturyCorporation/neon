@@ -1,5 +1,5 @@
 /*
- * Copyright 2013 Next Century Corporation
+ * Copyright 2015 Next Century Corporation
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -14,15 +14,18 @@
  *
  */
 
-defaultTasks 'clean', 'build'
+package com.ncc.neon.userimport.types
 
-allprojects {
-    version = "1.2.0-SNAPSHOT"
-}
+/**
+ * Simple container that denotes that a given value failed to be converted to a given type. Used by the convertValueToType method of ImportUtilities.
+ */
+class ConversionFailureResult {
 
-// Versions are shared across all builds
-apply from: 'gradle/versions.gradle'
+	Object value
+	String type
 
-task wrapper(type: Wrapper) {
-    gradleVersion = '2.1'
+	@Override
+	String toString() {
+		return "Failed to convert object ${value.toString()} of type ${value.getClass()} to type ${type}."
+	}
 }

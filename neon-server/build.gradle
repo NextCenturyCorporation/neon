@@ -97,6 +97,10 @@ dependencies {
     compile "org.apache.poi:poi-ooxml:$poiVersion"
     compile "org.apache.poi:poi-ooxml-schemas:$poiVersion"
     compile "org.apache.poi:ooxml-schemas:$ooxmlSchemasVersion"
+
+    compile "com.sun.jersey.contribs:jersey-multipart:$jerseyVersion"
+    compile "com.monitorjbl:xlsx-streamer:$xlsxStreamerVersion"
+
     compile "commons-io:commons-io:$commonsIoVersion"
     compile("org.codehaus.groovy.modules.http-builder:http-builder:$httpBuilderVersion") {
         // we already include groovy-all
@@ -184,6 +188,7 @@ test {
     description = "Runs the neon unit tests"
     def props = [:]
     props['unit.test'] = true
+    props['mongo.host'] = getMongoHost()
     systemProperties props
 }
 

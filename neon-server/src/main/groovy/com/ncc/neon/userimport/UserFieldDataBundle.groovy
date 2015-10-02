@@ -1,5 +1,5 @@
 /*
- * Copyright 2013 Next Century Corporation
+ * Copyright 2015 Next Century Corporation
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -14,15 +14,18 @@
  *
  */
 
-defaultTasks 'clean', 'build'
+package com.ncc.neon.userimport
 
-allprojects {
-    version = "1.2.0-SNAPSHOT"
-}
+import groovy.transform.ToString
 
-// Versions are shared across all builds
-apply from: 'gradle/versions.gradle'
+import com.ncc.neon.userimport.types.FieldTypePair
 
-task wrapper(type: Wrapper) {
-    gradleVersion = '2.1'
+/**
+ * Simple structure for holding a list of FieldTypePairs and a date format string.
+ */
+
+@ToString(includeNames = true)
+public class UserFieldDataBundle {
+    String dateFormat
+    List<FieldTypePair> fields
 }

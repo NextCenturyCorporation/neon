@@ -1,5 +1,5 @@
 /*
- * Copyright 2013 Next Century Corporation
+ * Copyright 2015 Next Century Corporation
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -14,26 +14,25 @@
  *
  */
 
-package com.ncc.neon.query.clauses
+package com.ncc.neon.userimport.types
 
-import com.ncc.neon.query.jackson.QueryValueDeserializer
-import groovy.transform.ToString
 import org.codehaus.jackson.map.annotate.JsonDeserialize
 
-
-
 /**
- * A where clause which has a column name, operator, and value
+ * Enumeration for the different possible types to which the fields of database records can be converted.
  */
+@JsonDeserialize(using = FieldTypeDeserializer)
+enum FieldType {
 
-@ToString(includeNames = true)
-class SingularWhereClause implements WhereClause, Serializable {
+    INTEGER("INTEGER"), LONG("LONG"), FLOAT("FLOAT"), DOUBLE("DOUBLE"), DATE("DATE"), STRING("STRING"), OBJECT("OBJECT")
 
-    private static final long serialVersionUID = 5063293720269360039L
+    String stringValue
 
-    def lhs
-    def operator
+    FieldType(stringValue) {
+        this.stringValue = stringValue
+    }
 
-    @JsonDeserialize(using = QueryValueDeserializer)
-    def rhs
+    static FieldType fromString(String stringVal) {
+        return FieldType.values().find { it.stringValue == stringVal } ?: STRING
+    }
 }

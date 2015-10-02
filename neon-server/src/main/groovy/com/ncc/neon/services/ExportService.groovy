@@ -213,7 +213,7 @@ class ExportService {
             List<Map<String, Object>> result = getResult(host, databaseType, request)
             generateSheet(workbook, result, request.fields, request.name)
         }
-        // Wrapping output streamn in a CloseShieldOutputStream because write implicitly closes the stream it's called on.
+        // Wrapping output stream in a CloseShieldOutputStream because write implicitly closes the stream it's called on.
         // Check http://stackoverflow.com/questions/22321790/xssfworkbook-write-method-closing-output-steam-implicitly for more details.
         workbook.write(new CloseShieldOutputStream(output))
         output.closeEntry()

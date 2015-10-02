@@ -61,6 +61,8 @@ class SparkSQLWhereClause {
     private String renderClause(SingularWhereClause clause) {
         if (clause.operator == 'contains') {
             stringBuilder << formatContains(clause)
+        } else if(clause.operator == 'notcontains' || clause.operator == 'not contains') {
+            stringBuilder << formatNotContains(clause)
         } else {
             stringBuilder << formatLhs(clause.lhs, clause.rhs)
             stringBuilder << " " << formatOperator(clause) << " "
@@ -87,6 +89,10 @@ class SparkSQLWhereClause {
 
     private String renderClause(OrWhereClause clause) {
         renderClause(clause, "or")
+    }
+
+    private static String formatNotContains(clause) {
+        return "${clause.lhs} not like '%${clause.rhs}%'"
     }
 
     private static String formatContains(clause) {

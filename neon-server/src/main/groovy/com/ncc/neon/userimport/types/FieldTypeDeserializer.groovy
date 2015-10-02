@@ -1,5 +1,5 @@
 /*
- * Copyright 2013 Next Century Corporation
+ * Copyright 2015 Next Century Corporation
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -14,15 +14,19 @@
  *
  */
 
-defaultTasks 'clean', 'build'
+package com.ncc.neon.userimport.types
 
-allprojects {
-    version = "1.2.0-SNAPSHOT"
-}
+import org.codehaus.jackson.JsonParser
+import org.codehaus.jackson.map.DeserializationContext
+import org.codehaus.jackson.map.JsonDeserializer
 
-// Versions are shared across all builds
-apply from: 'gradle/versions.gradle'
+/**
+ * Deserializer for FieldType enums.
+ */
+class FieldTypeDeserializer extends JsonDeserializer<FieldType> {
 
-task wrapper(type: Wrapper) {
-    gradleVersion = '2.1'
+    @Override
+    FieldType deserialize(JsonParser jp, DeserializationContext ctxt) {
+        return FieldType.fromString(jp.getText())
+    }
 }
