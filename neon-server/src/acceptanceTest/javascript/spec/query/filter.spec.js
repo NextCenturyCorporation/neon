@@ -56,10 +56,10 @@ describe('neon.query.Filter', function() {
     }
 
     var addFilters = function(callback) {
-        var filter = new neon.query.Filter().selectFrom("db1", "t1").where("a", "=", 1);
-        var filter2 = new neon.query.Filter().selectFrom("db1", "t2").where("b", "=", 2);
-        var filter3 = new neon.query.Filter().selectFrom("db2", "t1").where("c", "=", 3);
-        var filter4 = new neon.query.Filter().selectFrom("db2", "t3").where("d", "=", 4);
+        var filter = new neon.query.Filter().selectFrom("db1", "t1").name("filter").where("a", "=", 1);
+        var filter2 = new neon.query.Filter().selectFrom("db1", "t2").name("filter2").where("b", "=", 2);
+        var filter3 = new neon.query.Filter().selectFrom("db2", "t1").name("filter3").where("c", "=", 3);
+        var filter4 = new neon.query.Filter().selectFrom("db2", "t3").name("filter4").where("d", "=", 4);
 
         neontest.executeAndWait(messenger, messenger.addFilter, [uuid(), filter]);
         runs(function() {
@@ -96,8 +96,8 @@ describe('neon.query.Filter', function() {
                     runs(function() {
                         result = result.get();
                         expect(result.length).toBe(2);
-                        expect(result[0].databaseName).toBe(databaseName);
-                        expect(result[1].databaseName).toBe(databaseName);
+                        expect(result[0].filter.databaseName).toBe(databaseName);
+                        expect(result[1].filter.databaseName).toBe(databaseName);
                     });
                 });
             });
@@ -110,8 +110,8 @@ describe('neon.query.Filter', function() {
                     runs(function() {
                         result = result.get();
                         expect(result.length).toBe(2);
-                        expect(result[0].tableName).toBe(tableName);
-                        expect(result[0].tableName).toBe(tableName);
+                        expect(result[0].filter.tableName).toBe(tableName);
+                        expect(result[0].filter.tableName).toBe(tableName);
                     });
                 });
             });
@@ -124,8 +124,8 @@ describe('neon.query.Filter', function() {
                     runs(function() {
                         result = result.get();
                         expect(result.length).toBe(1);
-                        expect(result[0].databaseName).toBe(databaseName);
-                        expect(result[0].tableName).toBe(tableName);
+                        expect(result[0].filter.databaseName).toBe(databaseName);
+                        expect(result[0].filter.tableName).toBe(tableName);
                     });
                 });
             });
