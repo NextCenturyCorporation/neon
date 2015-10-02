@@ -195,7 +195,7 @@ class ElasticSearchConversionStrategy {
     }
 
     public static int getLimit(Query query) {
-        return (query?.limitClause ? query.limitClause.limit : 45) as int
+        return (query?.limitClause ? query.limitClause.limit : (Integer.MAX_VALUE - getOffset(query))) as int
     }
 
     public static SearchRequest createSearchRequest(SearchSourceBuilder source, Query params) {
@@ -290,16 +290,19 @@ class ElasticSearchConversionStrategy {
         }
 
         if (clause instanceof GroupByFieldClause) {
-            return applySort(AggregationBuilders.terms(clause.field as String).field(clause.field as String))
+            return applySort(AggregationBuilders.terms(clause.field as String).field(clause.field as String).size(0))
         }
 
         if (clause instanceof GroupByFunctionClause) {
             if (clause.operation in DATE_OPERATIONS) {
+
                 def template = {
+                    def modifier = (it == 'MONTH' ? " + 1" : "")
+
                     applySort(AggregationBuilders
                         .terms(clause.name as String)
                         .field(clause.field as String)
-                        .script("def calendar = java.util.Calendar.getInstance(); calendar.setTime(new Date(doc['${clause.field}'].value)); calendar.get(java.util.Calendar.${it}) + 1" as String)
+                        .script("def calendar = java.util.Calendar.getInstance(); calendar.setTime(new Date(doc['${clause.field}'].value)); calendar.get(java.util.Calendar.${it})" + modifier as String)
                         .size(0))
                 }
 

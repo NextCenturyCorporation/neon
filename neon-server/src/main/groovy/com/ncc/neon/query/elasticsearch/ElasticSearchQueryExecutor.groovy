@@ -96,6 +96,7 @@ class ElasticSearchQueryExecutor extends AbstractQueryExecutor {
 
         int offset = ElasticSearchConversionStrategy.getOffset(query)
         int limit = ElasticSearchConversionStrategy.getLimit(query)
+
         int endIndex = ((limit - 1) + offset) < (distinctValues.size() - 1) ? ((limit - 1) + offset) : (distinctValues.size() - 1)
         endIndex = (endIndex > offset ? endIndex: offset)
         distinctValues = distinctValues[offset .. endIndex]
@@ -145,7 +146,7 @@ class ElasticSearchQueryExecutor extends AbstractQueryExecutor {
         return []
     }
 
-    List<ArrayCountPair> getArrayCounts(String databaseName, String tableName, String field, int limit = 0) {
+    List<ArrayCountPair> getArrayCounts(String databaseName, String tableName, String field, int limit = Integer.MAX_VALUE) {
         getClient()
         .search(ElasticSearchConversionStrategy.createSearchRequest(
             ElasticSearchConversionStrategy.createSearchSourceBuilder(

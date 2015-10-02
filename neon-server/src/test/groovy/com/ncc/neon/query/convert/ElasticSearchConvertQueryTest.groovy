@@ -115,7 +115,7 @@ class ElasticSearchConvertQueryTest extends AbstractConversionTest {
 
         assert map.aggregations
         assert map.aggregations[FIELD_NAME_2]
-        assert map.aggregations[FIELD_NAME_2].terms == [field: FIELD_NAME_2]
+        assert map.aggregations[FIELD_NAME_2].terms == [field: FIELD_NAME_2, size: 0]
 
         assert map.aggregations[FIELD_NAME_2].aggregations
         assert map.aggregations[FIELD_NAME_2].aggregations["${FIELD_NAME}_dayOfWeek"]
