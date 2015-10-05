@@ -80,6 +80,7 @@ class MongoImportHelper implements ImportHelper {
         GridFS gridFS = new GridFS(mongo.getDB(ImportUtilities.MONGO_UPLOAD_DB_NAME))
         GridFSDBFile dbFile = gridFS.findOne([identifier: uuid] as BasicDBObject)
         if(dbFile == null) {
+            mongo.close()
             return [complete: false, numCompleted: -1, failedFields: [], jobID: uuid] // If the GridFS file doesn't exist, return a numCompleted value of -1.
         }
         boolean complete = dbFile.get("complete")
@@ -96,10 +97,10 @@ class MongoImportHelper implements ImportHelper {
     Map dropDataset(String host, String userName, String prettyName) {
         MongoClient mongo = new MongoClient(host)
         DB databaseToDrop = getDatabase(mongo, [userName: userName, prettyName: prettyName])
-        if(databaseToDrop.getCollectionNames()) {
+        if(databaseToDrop) {
             databaseToDrop.dropDatabase()
-        }
-        else {
+        } else {
+            mongo.close()
             return [success: false]
         }
         DB metaDatabase = mongo.getDB(ImportUtilities.MONGO_META_DB_NAME)
@@ -110,6 +111,21 @@ class MongoImportHelper implements ImportHelper {
         }
         mongo.close()
         return [success: true]
+    }
+
+    @Override
+    boolean doesDatabaseExist(String host, String userName, String prettyName) {
+        boolean dbExists = false
+        MongoClient mongo = new MongoClient(host)
+        List<String> dbs = mongo.getDatabaseNames()
+        String dbNameToFind = mongoImportHelperProcessor.getDatabaseName(userName, prettyName)
+        dbs.each { dbName ->
+            if(dbName == dbNameToFind) {
+                dbExists = true
+            }
+        }
+        mongo.close()
+        return dbExists
     }
 
     /**
@@ -123,7 +139,18 @@ class MongoImportHelper implements ImportHelper {
         List keys = fieldGuesses?.keySet() as List
         List toReturn = []
         keys.each { key ->
-            toReturn.add(new FieldTypePair(name: key, type: fieldGuesses.get(key)))
+            if(fieldGuesses.get(key)  instanceof List) {
+                toReturn.add(new FieldTypePair(
+                    name: key,
+                    type: fieldGuesses.get(key)[0],
+                    objectFTPairs: fieldTypePairMapToList(fieldGuesses.get(key)[1])
+                ))
+            } else {
+                toReturn.add(new FieldTypePair(
+                    name: key,
+                    type: fieldGuesses.get(key)
+                ))
+            }
         }
         return toReturn
     }
@@ -134,12 +161,24 @@ class MongoImportHelper implements ImportHelper {
      * with the identifier value on the given instance of mongo.
      * @param mongo The instance of mongo on which to search for the database associated with the given identifier.
      * @param identifier A map of the form [identifier: (String)] that can be used to find the desired database.
-     * @return the DB for the database associated with the given identifier value.
+     * @return The DB for the database associated with the given identifier value or null if no database exists.
      */
     private DB getDatabase(MongoClient mongo, Map identifier) {
+        List<String> dbs = mongo.getDatabaseNames()
+        if(!dbs.contains(ImportUtilities.MONGO_META_DB_NAME)) {
+            return
+        }
         DB metaDatabase = mongo.getDB(ImportUtilities.MONGO_META_DB_NAME)
+        if(!metaDatabase.collectionExists(ImportUtilities.MONGO_META_COLL_NAME)) {
+            return
+        }
         DBCollection metaCollection = metaDatabase.getCollection(ImportUtilities.MONGO_META_COLL_NAME)
         DBObject metaRecord = metaCollection.findOne(identifier as BasicDBObject)
+        if(!metaRecord) {
+            return
+        } else if(!dbs.contains(metaRecord.get("databaseName"))) {
+            return
+        }
         return mongo.getDB(metaRecord.get("databaseName"))
     }
 }

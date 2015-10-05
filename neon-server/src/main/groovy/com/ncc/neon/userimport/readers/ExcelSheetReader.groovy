@@ -50,9 +50,14 @@ class ExcelSheetReader extends SheetReader {
         sheet = null
     }
 
+    @SuppressWarnings('CatchNullPointerException')
     @Override
     boolean hasNext() {
-        return iterator.hasNext()
+        try {
+            return iterator.hasNext()
+        } catch(NullPointerException e) {
+            return false
+        }
     }
 
     @Override

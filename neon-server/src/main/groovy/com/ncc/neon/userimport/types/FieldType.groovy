@@ -24,7 +24,7 @@ import org.codehaus.jackson.map.annotate.JsonDeserialize
 @JsonDeserialize(using = FieldTypeDeserializer)
 enum FieldType {
 
-    INTEGER("INTEGER"), LONG("LONG"), FLOAT("FLOAT"), DOUBLE("DOUBLE"), DATE("DATE"), STRING("STRING")
+    INTEGER("INTEGER"), LONG("LONG"), FLOAT("FLOAT"), DOUBLE("DOUBLE"), DATE("DATE"), STRING("STRING"), OBJECT("OBJECT")
 
     String stringValue
 

@@ -64,7 +64,7 @@ class CSVSheetReader extends SheetReader {
     }
 
     /**
-     * Heer method for next. Gets the next complete row of a spreadsheet. Throws an exception if there is no next complete, non-malformed
+     * Helper method for next. Gets the next complete row of a spreadsheet. Throws an exception if there is no next complete, non-malformed
      * row, or if the next complete row exceeds a number of characters defined by ImportUtilities.MAX_ROW_LENGTH. This length check is
      * a protection against attempting to load an entire sheet into memory while searching for the end of a malformed cell, but note that
      * it will not work if the length limit is exceeded before ever encountering a newline character - in that case, the LineIterator used
@@ -78,7 +78,7 @@ class CSVSheetReader extends SheetReader {
         }
         String row = iterator.next()
         while(countSpecificChar(row, '\"' as char) % 2 != 0) {
-            if(hasNext() && row.length < ImportUtilities.MAX_ROW_LENGTH) {
+            if(hasNext() && row.length() < ImportUtilities.MAX_ROW_LENGTH) {
                 row = row + "\n" + iterator.next()
             }
             else {

@@ -69,10 +69,8 @@ class MongoImportHelperProcessor implements ImportHelperProcessor {
         try {
             switch(fileType) {
                 case "csv":
-                    processTypeGuessesCSV(gridFile)
-                    break
                 case "xlsx":
-                    processTypeGuessesExcel(gridFile)
+                    processTypeGuessesFromFile(gridFile, fileType)
                     break
                 default:
                     throw new UnsupportedFiletypeException("Can't parse files of type ${fileType}!")
@@ -85,41 +83,15 @@ class MongoImportHelperProcessor implements ImportHelperProcessor {
     }
 
     /**
-     * Gets type guesses for fields of information stored in CSV format and stores them as metadata in the GridFSDBFile that
-     * stores the CSV file.
-     * @param file The GridFSDBFile storing the CSV file for which to make field type guesses.
+     * Gets type guesses for fields of information stored in CSV or XLSX format and stores them as metadata in the GridFSDBFile that
+     * stores the file.
+     * @param file The GridFSDBFile storing the file for which to make field type guesses.
+     * @param fileType
      */
-    private void processTypeGuessesCSV(GridFSDBFile file) {
-        SheetReader reader = sheetReaderFactory.getSheetReader("csv").initialize(file.getInputStream())
-        if(!reader) {
-            throw new BadSheetException("No records in this file to read!")
-        }
-        List fields = reader.getSheetFieldNames()
-        Map fieldsAndValues = [:]
-        fields.each { field ->
-            fieldsAndValues.put(field, [])
-        }
-        for(int counter = 0; counter < ImportUtilities.NUM_TYPE_CHECKED_RECORDS && reader.hasNext(); counter++) {
-            List record = reader.next()
-            for(int field = 0; field < fields.size() && field < record.size(); field++) {
-                if(record[field]) {
-                    fieldsAndValues[(fields[field])] << record[field]
-                }
-            }
-        }
-        updateFile(file, [programGuesses: fieldTypePairListToStorageMap(ImportUtilities.getTypeGuesses(fieldsAndValues))])
-        reader.close()
-    }
-
-    /**
-     * Gets type guesses for fields of information stored in XLSX format and stores them as metadata in the GridFSDBFile that
-     * stores the XLSX file.
-     * @param file The GridFSDBFile storing the XLSX file for which to make field type guesses.
-     */
-    private void processTypeGuessesExcel(GridFSDBFile file) {
+    private void processTypeGuessesFromFile(GridFSDBFile file, String fileType) {
         SheetReader reader
         try {
-            reader = sheetReaderFactory.getSheetReader("xlsx").initialize(file.getInputStream())
+            reader = sheetReaderFactory.getSheetReader(fileType).initialize(file.getInputStream())
             if(!reader) {
                 throw new BadSheetException("No records in this file to read!")
             }
@@ -128,17 +100,16 @@ class MongoImportHelperProcessor implements ImportHelperProcessor {
             fields.each { field ->
                 fieldsAndValues.put(field, [])
             }
-            for(int count = 0; count < ImportUtilities.NUM_TYPE_CHECKED_RECORDS && reader.hasNext(); count++) {
+            for(int counter = 0; counter < ImportUtilities.NUM_TYPE_CHECKED_RECORDS && reader.hasNext(); counter++) {
                 List record = reader.next()
-                for(int field = 0; field < fields.size(); field++) {
+                for(int field = 0; field < fields.size() && field < record.size(); field++) {
                     if(record[field]) {
                         fieldsAndValues[(fields[field])] << record[field]
                     }
                 }
             }
-            updateFile(file, [programGuesses: fieldTypePairListToStorageMap(ImportUtilities.getTypeGuesses(fieldsAndValues))])
-        }
-        finally {
+            updateFile(file, [programGuesses: fieldTypePairListToMap(ImportUtilities.getTypeGuesses(fieldsAndValues), true)])
+        } finally {
             reader?.close()
         }
     }
@@ -157,10 +128,8 @@ class MongoImportHelperProcessor implements ImportHelperProcessor {
             }
             switch(fileType) {
                 case "csv":
-                    processLoadAndConvertCSV(mongo, gridFile, dateFormat, fieldTypePairs)
-                    break
                 case "xlsx":
-                    processLoadAndConvertExcel(mongo, gridFile, dateFormat, fieldTypePairs)
+                    processLoadAndConvertFromFile(mongo, gridFile, dateFormat, fieldTypePairs, fileType)
                     break
                 default:
                     mongo.close()
@@ -173,8 +142,15 @@ class MongoImportHelperProcessor implements ImportHelperProcessor {
         }
     }
 
+    @Override
+    String getDatabaseName(String userName, String prettyName) {
+        String safeUserName = userName.replaceAll(/^\$|[ \t\n\.]/, "_")
+        String safePrettyName = prettyName.replaceAll(/[ \t\n\.]/, "_")
+        return ImportUtilities.makeUglyName(safeUserName, safePrettyName)
+    }
+
     /**
-     * Reads a raw CSV file from the given GridFSDFile line by line, grabbing records, converting their fields into the types
+     * Reads a raw CSV or XLSX file from the given GridFSDFile line by line, grabbing records, converting their fields into the types
      * given in fieldTypePairs, and then storing them in a database on the given mongo instance. The database's name is
      * generated using the userName and prettyName metadata in the file. This method assumes that there is only one record
      * per line of the file, and that the file contains nothing but records and a list of field names on the first line.
@@ -184,69 +160,39 @@ class MongoImportHelperProcessor implements ImportHelperProcessor {
      * @param file The GridFSDBFile containing metadata that allows for finding of the database in which to convert records.
      * @param dateFormat The date format string to be used when attempting to convert any record to a Date.
      * @param fieldTypePairs A list of field names and what types they should be converted to.
+     * @param fileType The file type of the file being read
      */
-    private void processLoadAndConvertCSV(MongoClient mongo, GridFSDBFile file, String dateFormat, List<FieldTypePair> fieldTypePairs) {
-        int numCompleted = 0
-        SheetReader reader = sheetReaderFactory.getSheetReader("csv").initialize(file.getInputStream())
-        if(!reader) {
-            throw new BadSheetException("No records in this file to read!")
-        }
-        Map fieldsToTypes = fieldTypePairListToMap(fieldTypePairs)
-        Set<FieldTypePair> failedFields = [] as Set
-        DBCollection collection = mongo.getDB(getDatabaseName(file.get("userName"), file.get("prettyName"))).getCollection(ImportUtilities.MONGO_USERDATA_COLL_NAME)
-        List fieldNamesInOrder = reader.getSheetFieldNames()
-        reader.each { record ->
-            addRecord(collection, fieldNamesInOrder, record, fieldsToTypes, dateFormat).each { ftPair ->
-                failedFields << ftPair
-                fieldsToTypes.put(ftPair.name, FieldType.STRING) // If a field failed to convert, set its type to string to prevent exceptions being thrown for that field on future records.
-            }
-            if(numCompleted++ % UPDATE_FREQUENCY == 0) {
-                updateFile(file, [numCompleted: numCompleted])
-            }
-        }
-        updateFile(file, [numCompleted: numCompleted, failedFields: fieldTypePairListToStorageMap(failedFields as List)])
-        addMetadata(mongo, file)
-        reader.close()
-    }
-
-    /**
-     * Reads a raw XLSX file from the given GridFSDFile into a temporary file on disk, and then reads through it line by line,
-     * grabbing records, converting their fields into the types given in fieldTypePairs, and then storing them in a database
-     * on the given mongo instance. The database's name is generated using the userName and prettyName metadata in the file.
-     * This method assumes that there is only one record per line of the file, and that the file contains nothing but records
-     * and a list of field names on the first line.
-     * If any fields fail to convert for at least one record, these fields and the type they were attempting to be converted to are
-     * stored as metadata in the given file.
-     * @param mongo The mongo instance on which the database in which to convert records is located.
-     * @param file The GridFSDBFile containing metadata that allows for finding of the database in which to convert records.
-     * @param dateFormat The date format string to be used when attempting to convert any record to a Date.
-     * @param fieldTypePairs A list of field names and what types they should be converted to.
-     */
-    private void processLoadAndConvertExcel(MongoClient mongo, GridFSDBFile file, String dateFormat, List<FieldTypePair> fieldTypePairs) {
+    private void processLoadAndConvertFromFile(MongoClient mongo, GridFSDBFile file, String dateFormat, List<FieldTypePair> fieldTypePairs, String fileType) {
         SheetReader reader
         try {
-            reader = sheetReaderFactory.getSheetReader("xlsx").initialize(file.getInputStream())
+            reader = sheetReaderFactory.getSheetReader(fileType).initialize(file.getInputStream())
             if(!reader) {
                 throw new BadSheetException("No records in this file to read!")
             }
             int numCompleted = 0
-            Map fieldsToTypes = fieldTypePairListToMap(fieldTypePairs)
+            Map fieldsToTypes = fieldTypePairListToMap(fieldTypePairs, false)
             Set<FieldTypePair> failedFields = [] as Set
             DBCollection collection = mongo.getDB(getDatabaseName(file.get("userName"), file.get("prettyName"))).getCollection(ImportUtilities.MONGO_USERDATA_COLL_NAME)
             List fieldNamesInOrder = reader.getSheetFieldNames()
             reader.each { record ->
                 addRecord(collection, fieldNamesInOrder, record, fieldsToTypes, dateFormat).each { failedFTPair ->
                     failedFields << failedFTPair
-                    fieldsToTypes.put(failedFTPair.name, FieldType.STRING) // If a field failed to convert, set its type to string to avoid exceptions on future records.
+                    // If a field failed to convert, set its type to string to prevent exceptions being thrown for that field on future records.
+                    if(failedFTPair.type == FieldType.OBJECT) {
+                        failedFTPair.objectFTPairs.each { pair ->
+                            fieldsToTypes[failedFTPair.name][1].put(pair.name, FieldType.STRING)
+                        }
+                    } else {
+                        fieldsToTypes.put(failedFTPair.name, FieldType.STRING)
+                    }
                 }
                 if(numCompleted++ % UPDATE_FREQUENCY == 0) {
                     updateFile(file, [numCompleted: numCompleted])
                 }
             }
-            updateFile(file, [numCompleted: numCompleted, failedFields: fieldTypePairListToStorageMap(failedFields as List)])
+            updateFile(file, [numCompleted: numCompleted, failedFields: fieldTypePairListToMap(failedFields as List, true)])
             addMetadata(mongo, file)
-        }
-        finally {
+        } finally {
             reader?.close()
         }
     }
@@ -270,27 +216,95 @@ class MongoImportHelperProcessor implements ImportHelperProcessor {
         DBCursor cursor = collection.find()
         Set<FieldTypePair> failedFields = [] as Set
         cursor.each { record ->
+            DBObject origRecord = new BasicDBObject()
+            origRecord.put("_id", record.get("_id"))
             pairs.each { ftPair ->
-                String stringValue = record.get(ftPair.name) as String
-                if(!stringValue || (stringValue.length() == 4 && stringValue =~ /(?i)none|null(?-i)/) &&
-                    (ftPair.type == FieldType.INTEGER || ftPair.type == FieldType.LONG || ftPair.type == FieldType.DOUBLE || ftPair.type == FieldType.FLOAT)) {
-                    return // Don't add anything if the field is null, an empty string, or a "non-existent" value for numeric types.
-                }
-                Object objectValue = ImportUtilities.convertValueToType(stringValue, ftPair.type, dateFormat)
-                if(objectValue instanceof ConversionFailureResult) {
-                    failedFields.add(ftPair)
-                } else {
-                    record.put(ftPair.name, objectValue)
-                }
+                processFieldTypePair(ftPair, record, failedFields, dateFormat)
             }
             failedFields.each { ftPair ->
-                pairs.remove(ftPair) // If a field failed to convert, stop trying to convert it on future records.
+                // If a field failed to convert, stop trying to convert it on future records.
+                pairs.remove(ftPair)
             }
+            record.removeField("_id")
+            collection.update(origRecord, record)
             if(numCompleted++ % UPDATE_FREQUENCY == 0) {
                 updateFile(file, [numCompleted: numCompleted])
             }
         }
-        updateFile(file, [complete: true, numCompleted: numCompleted, failedFields: fieldTypePairListToStorageMap(failedFields as List)])
+        updateFile(file, [complete: true, numCompleted: numCompleted, failedFields: fieldTypePairListToMap(failedFields as List, true)])
+    }
+
+    /**
+     * Converts a record into the specified type in FieldTypePair, if able.
+     * @param ftPair The FieldTypePair to use to convert a record.
+     * @param record The DBObject of the record being converted.
+     * @param failedFields Contains the set of failed fields.
+     * @param dateFormat The date format string to be used when attempting to convert any record to a Date.
+     */
+    private void processFieldTypePair(FieldTypePair ftPair, DBObject record, Set<FieldTypePair> failedFields, String dateFormat) {
+        def recordValue = record.get(ftPair.name)
+        if(recordValue instanceof String) {
+            // Don't add anything if the field is null, an empty string, or a "non-existent" value for numeric types.
+            if(isNumericFieldEmpty(recordValue, ftPair.type)) {
+                return
+            }
+            Object convertedValue = ImportUtilities.convertValueToType(recordValue, ftPair.type, dateFormat)
+            if(convertedValue instanceof ConversionFailureResult) {
+                failedFields.add(ftPair)
+            } else if(ftPair.type == FieldType.OBJECT) {
+                /* Converting STRING to OBJECT and converting all fields in OBJECT to a guessed type */
+                FieldTypePair failed = convertStringToObject(ftPair, convertedValue, record, dateFormat)
+                if(failed) {
+                    failedFields.add(failed)
+                }
+            } else {
+                /* Converting STRING to another type that's not an OBJECT */
+                record.put(ftPair.name, convertedValue)
+            }
+        } else {
+            if(ftPair.type != FieldType.OBJECT) {
+                /* Converting OBJECT to other type */
+                Object convertedValue = ImportUtilities.convertValueToType(recordValue as String, ftPair.type, dateFormat)
+                if(convertedValue instanceof ConversionFailureResult) {
+                    failedFields.add(ftPair)
+                } else {
+                    record.put(ftPair.name, convertedValue)
+                }
+            } else {
+                /* Converting fields in an OBJECT to another type */
+                Map convertedFields = convertPairsFromFieldTypePairs(ftPair.objectFTPairs, recordValue, recordValue, false, dateFormat)
+                record.put(ftPair.name, convertedFields.record)
+                if(convertedFields.failedFields.size()) {
+                    failedFields.add([name: ftPair.name, type: ftPair.type, objectFTPairs: convertedFields.failedFields] as FieldTypePair)
+                }
+            }
+        }
+    }
+
+    /**
+     * Converts a field of type STRING to type OBJECT and converts all fields inside the object to a guessed type.
+     * @param ftPair The FieldTypePair object for the field being converted.
+     * @param convertedValue The object form of the field being converted.
+     * @param record DBObject of the field.
+     * @param dateFormat The date format string to be used when attempting to convert any record to a Date.
+     * @return If the field fails to convert, a FieldTypePair of the failed field is returned. Null otherwise.
+     */
+    private FieldTypePair convertStringToObject(FieldTypePair ftPair, Object convertedValue, DBObject record, String dateFormat) {
+        DBObject objectRecord = new BasicDBObject()
+        Map convertedFields = [:]
+        /* If the ftPair contains objectFTPairs, use it to convert the OBJECT's pairs to the type given in objectFTPairs.
+         * Otherwise, convert the STRING to an object and guess the type of the pairs in the OBJECT.
+         */
+        if(ftPair.objectFTPairs) {
+            convertedFields = convertPairsFromFieldTypePairs(ftPair.objectFTPairs, convertedValue, objectRecord, true, dateFormat)
+        } else {
+            convertedFields = convertPairsFromMap(convertedValue, objectRecord, [:], dateFormat)
+        }
+        record.put(ftPair.name, convertedFields.record)
+        if(convertedFields.failedFields.size()) {
+            return ([name: ftPair.name, type: ftPair.type, objectFTPairs: convertedFields.failedFields] as FieldTypePair)
+        }
+        return
     }
 
     /**
@@ -314,22 +328,121 @@ class MongoImportHelperProcessor implements ImportHelperProcessor {
         DBObject record = new BasicDBObject()
         for(int field = 0; field < namesInOrder.size() && field < valuesInOrder.size(); field++) {
             String stringValue = valuesInOrder[field]
-            FieldType type = namesToTypes.get(namesInOrder[field])
-            if(!stringValue || (stringValue.length() == 4 && stringValue =~ /(?i)none|null(?-i)/) &&
-                (ftPair.type == FieldType.INTEGER || ftPair.type == FieldType.LONG || ftPair.type == FieldType.DOUBLE || ftPair.type == FieldType.FLOAT)) {
-                continue // Don't add anything if the field is null, an empty string, or a "non-existent" value for numeric types.
-            }
-            Object objectValue = ImportUtilities.convertValueToType(stringValue, type, dateFormat)
-            if(objectValue instanceof ConversionFailureResult) {
-                record.put(namesInOrder[field], stringValue)
-                failedFields.add([name: namesInOrder[field], type: type] as FieldTypePair)
-            }
-            else {
-                record.put(namesInOrder[field], objectValue)
+            def type = namesToTypes.get(namesInOrder[field])
+            // Fields of type OBJECT contain a list, instead of just a type, in namesToTypes that contain the type and a map of fields to types for each
+            // value in the OBJECT, respectively.
+            if(type instanceof List) {
+                DBObject objectRecord = new BasicDBObject()
+                Object objectValue = ImportUtilities.convertValueToType(stringValue, type[0], dateFormat)
+                if(objectValue instanceof ConversionFailureResult) {
+                    record.put(namesInOrder[field], stringValue)
+                    failedFields.add([name: namesInOrder[field], type: type[0]] as FieldTypePair)
+                } else {
+                    Map convertedFields = convertPairsFromMap(objectValue, objectRecord, type[1], dateFormat)
+                    record.put(namesInOrder[field], convertedFields.record)
+                    if(convertedFields.failedFields.size()) {
+                        failedFields.add([name: namesInOrder[field], type: type[0], objectFTPairs: convertedFields.failedFields] as FieldTypePair)
+                    }
+                }
+            } else {
+                // Don't add anything if the field is null, an empty string, or a "non-existent" value for numeric types.
+                if(isNumericFieldEmpty(stringValue, type)) {
+                    continue
+                }
+                Object objectValue = ImportUtilities.convertValueToType(stringValue, type, dateFormat)
+                if(objectValue instanceof ConversionFailureResult) {
+                    record.put(namesInOrder[field], stringValue)
+                    failedFields.add([name: namesInOrder[field], type: type] as FieldTypePair)
+                } else {
+                    record.put(namesInOrder[field], objectValue)
+                }
             }
         }
         collection.insert(record)
         return failedFields
+    }
+
+    /**
+     * Converts values in an object to the types given in nameToTypes or a guessed type and puts them in the DB record provided
+     * @param values Map of field names to values to convert
+     * @param record Mongo DB object containing the record to add values to
+     * @param nameToTypes A map of field names to which type those fields should be converted to. This can be an empty map
+     * in order to use a guessed type.
+     * @param dateFormat A date formatting string to be used when attempting to convert a field into a Date. This can be null.
+     * @return Map with the keys 'record' (containing the DB object record that values were added to) and 'failedFields' (fields that
+     * failed to convert)
+     */
+    private Map convertPairsFromMap(Map values, DBObject record, Map nameToTypes, String dateFormat) {
+        def toReturn = [:]
+        toReturn.put('failedFields', [])
+
+        values.keySet().each { key ->
+            def stringValue = values[key] as String
+            def type
+
+            if(nameToTypes) {
+                type = nameToTypes[key]
+            } else {
+                def fieldAndValue = [:]
+                fieldAndValue.put(key, [stringValue])
+                List<FieldTypePair> typeGuess = ImportUtilities.getTypeGuesses(fieldAndValue)
+                type = typeGuess[0].type
+            }
+
+            // Don't add anything if the field is null, an empty string, or a "non-existent" value for numeric types.
+            if(isNumericFieldEmpty(stringValue, type)) {
+                return
+            }
+
+            Object keyValue = ImportUtilities.convertValueToType(stringValue, type, dateFormat)
+            if(keyValue instanceof ConversionFailureResult) {
+                record.put(key, stringValue)
+                toReturn.failedFields.push([name: key, type: type] as FieldTypePair)
+            } else {
+                record.put(key, keyValue)
+            }
+        }
+
+        toReturn.put("record", record)
+        return toReturn
+    }
+
+    /**
+     * Converts values in a list of FieldTypePairs to the types given in recordValues and puts them in the DB record provided
+     * @param ftPairs List of FieldTypePairs to convert
+     * @param recordValues Map of fields and their associated value
+     * @param record Mongo DB object containing the record to add values to
+     * @param addFailedToRecord Set to true if the string value of a pair should be added to the record if the field failed to convert
+     * @param dateFormat A date formatting string to be used when attempting to convert a field into a Date. This can be null.
+     * @return Map with the keys 'record' (containing the DB object record that values were added to) and 'failedFields' (fields that
+     * failed to convert)
+     */
+    private Map convertPairsFromFieldTypePairs(List<FieldTypePair> ftPairs, Object recordValues, DBObject record, Boolean addFailedToRecord, String dateFormat) {
+        def toReturn = [:]
+        toReturn.put('failedFields', [])
+
+        ftPairs.each { pair ->
+            def stringValue = recordValues.get(pair.name) as String
+
+            // Don't add anything if the field is null, an empty string, or a "non-existent" value for numeric types.
+            if(isNumericFieldEmpty(stringValue, pair.type)) {
+                return
+            }
+
+            Object convertedValue = ImportUtilities.convertValueToType(stringValue, pair.type, dateFormat)
+
+            if(convertedValue instanceof ConversionFailureResult) {
+                if(addFailedToRecord) {
+                    record.put(pair.name, stringValue)
+                }
+                toReturn.failedFields.push([name: pair.name, type: pair.type] as FieldTypePair)
+            } else {
+                record.put(pair.name, convertedValue)
+            }
+        }
+
+        toReturn.put("record", record)
+        return toReturn
     }
 
     /**
@@ -350,28 +463,23 @@ class MongoImportHelperProcessor implements ImportHelperProcessor {
     }
 
     /**
-     * Helper method that converts a list of FieldTypePairs to a map from name to type, to more easily access the type property.
+     * Helper method that converts a list of FieldTypePairs to a map from name to type, and converts type from a FieldType
+     * to a String if typeToString is true (used because mongo doesn't know how to deserialize FieldTypePairs for storage but
+     * does know how to deserialize maps).
      * @param ftPairs A list of FieldTypePairs to convert to a map.
+     * @param typeToString Set to true if the FieldTypePairs types should be converted to a String
      * @return A map whose keys are the names of the input FieldTypePairs and whose values are their corresponding types.
      */
-    private Map fieldTypePairListToMap(List ftPairs) {
+    private Map fieldTypePairListToMap(List ftPairs, Boolean typeToString) {
         Map fieldTypePairMap = [:]
         ftPairs.each { ftPair ->
-            fieldTypePairMap.put(ftPair.name, ftPair.type)
-        }
-        return fieldTypePairMap
-    }
-
-    /**
-     * Helper method that converts a list of FieldTypePairs to a map from name to type, and converts type from a FieldType to a string.
-     * Used because mongo doesn't know how to deserialize FieldTypePairs for storage but does know how to deserialize maps.
-     * @param ftPairs A list of FieldTypePairs to convert to a map.
-     * @return A map whose keys are the names of the input FieldTypePairs and whose values are their corresponding types.
-     */
-    private Map fieldTypePairListToStorageMap(List ftPairs) {
-        Map fieldTypePairMap = [:]
-        ftPairs.each { ftPair ->
-            fieldTypePairMap.put(ftPair.name, ftPair.type as String)
+            def type = (typeToString) ? ftPair.type as String : ftPair.type
+            if(ftPair.type == FieldType.OBJECT) {
+                def objFtPair = [type, fieldTypePairListToMap(ftPair.objectFTPairs, typeToString)]
+                fieldTypePairMap.put(ftPair.name, objFtPair)
+            } else {
+                fieldTypePairMap.put(ftPair.name, type)
+            }
         }
         return fieldTypePairMap
     }
@@ -404,15 +512,14 @@ class MongoImportHelperProcessor implements ImportHelperProcessor {
     }
 
     /**
-     * Helper method that gets the "ugly", more unique database name created from the given username and "pretty", human-readable
-     * database name. As part of this, removes any issue characters that would cause problems as part of a mongo database name.
-     * @param userName The username associated with the ugly database name to be created.
-     * @param prettyName The "pretty", human-readable database name associated with the ugly database name to be created.
-     * @return The "ugly", more unique database name generatd from the given username and "pretty" database name.
+     * Determines if a numeric (or date) value contains none, null, or is empty.
+     * @param value The value being processed.
+     * @param type The type of the value.
+     * @return True if the value is numeric (or a date) and contains none, null, or is empty. False otherwise.
      */
-    private String getDatabaseName(String userName, String prettyName) {
-        String safeUserName = userName.replaceAll(/^\$|[ \t\n\.]/, "_")
-        String safePrettyName = prettyName.replaceAll(/[ \t\n\.]/, "_")
-        return ImportUtilities.makeUglyName(safeUserName, safePrettyName)
+    private boolean isNumericFieldEmpty(String value, FieldType type) {
+        return (!value || (value.length() == 4 && value =~ /(?i)none|null(?-i)/) &&
+            (type == FieldType.INTEGER || type == FieldType.LONG || type == FieldType.DOUBLE
+                || type == FieldType.FLOAT  || type == FieldType.DATE))
     }
 }

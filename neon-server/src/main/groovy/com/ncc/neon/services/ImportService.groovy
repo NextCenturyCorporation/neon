@@ -44,12 +44,14 @@ class ImportService {
     // return 403 Forbidden messages rather than actually doing anything.
     @SuppressWarnings("GStringExpressionWithinString")
     @Value('\${importEnabled}')
-    String importPropertyValue
-
-    boolean importEnabled = (Boolean)importPropertyValue
+    String importEnabled
 
     @Autowired
     ImportHelperFactory importHelperFactory
+
+    static final Map IMPORT_DISABLED_ERROR_RESPONSE = [status: 403, message: "Import not enabled"]
+    static final Map EXISTING_DATABASE_ERROR_RESPONSE = [status: 406, message: "Username and database name combination already exist"]
+    static final Map NO_DATABASE_ERROR_RESPONSE = [status: 404, message: "No dataset exists with the given username and database name"]
 
     /**
      * Uploads a file, storing it wholesale in a data store, and triggers an asynchronous method to attempt to
@@ -71,13 +73,17 @@ class ImportService {
                                @PathParam("databaseType") String databaseType,
                                @FormDataParam("user") String user,
                                @FormDataParam("data") String prettyName,
-                               @FormDataParam("type") String fileType,
+                               @FormDataParam("fileType") String fileType,
                                @FormDataParam("file") InputStream dataInputStream) {
-        if(!importEnabled) {
-            return Response.status(403).build()
+        if(!isImportEnabled()) {
+            return Response.status(403).entity(JsonOutput.toJson(IMPORT_DISABLED_ERROR_RESPONSE)).build()
         }
         String userName = user ?: UUID.randomUUID().toString()
         ImportHelper helper = importHelperFactory.getImportHelper(databaseType)
+        if(helper.doesDatabaseExist(host, userName, prettyName)) {
+            def errorResponse = EXISTING_DATABASE_ERROR_RESPONSE
+            return Response.status(406).entity(JsonOutput.toJson(errorResponse)).build()
+        }
         Map jobID = helper.uploadFile(host, userName, prettyName, fileType, dataInputStream)
         return Response.ok().entity(JsonOutput.toJson(jobID)).build()
     }
@@ -97,8 +103,8 @@ class ImportService {
     public Response checkTypeGuessStatus(@PathParam("host") String host,
                                              @PathParam("databaseType") String databaseType,
                                              @PathParam("uuid") String jobUUID) {
-        if(!importEnabled) {
-            return Response.status(403).build()
+        if(!isImportEnabled()) {
+            return Response.status(403).entity(JsonOutput.toJson(IMPORT_DISABLED_ERROR_RESPONSE)).build()
         }
         ImportHelper helper = importHelperFactory.getImportHelper(databaseType)
         Map guesses = helper.checkTypeGuessStatus(host, jobUUID)
@@ -124,8 +130,8 @@ class ImportService {
                                          @PathParam("databaseType") String databaseType,
                                          @PathParam("uuid") String uuid,
                                          UserFieldDataBundle data) {
-        if(!importEnabled) {
-            return Response.status(403).build()
+        if(!isImportEnabled()) {
+            return Response.status(403).entity(JsonOutput.toJson(IMPORT_DISABLED_ERROR_RESPONSE)).build()
         }
         ImportHelper helper = importHelperFactory.getImportHelper(databaseType)
         Map jobID = helper.loadAndConvertFields(host, uuid, data)
@@ -146,8 +152,8 @@ class ImportService {
     public Response checkImportStatus(@PathParam("host") String host,
                                       @PathParam("databaseType") String databaseType,
                                       @PathParam("uuid") String uuid) {
-        if(!importEnabled) {
-            return Response.status(403).build()
+        if(!isImportEnabled()) {
+            return Response.status(403).entity(JsonOutput.toJson(IMPORT_DISABLED_ERROR_RESPONSE)).build()
         }
         ImportHelper helper = importHelperFactory.getImportHelper(databaseType)
         Map importStatus = helper.checkImportStatus(host, uuid)
@@ -170,11 +176,22 @@ class ImportService {
                               @PathParam("databaseType") String databaseType,
                               @QueryParam("user") String userName,
                               @QueryParam("data") String prettyName) {
-        if(!importEnabled) {
-            return Response.status(403).build()
+        if(!isImportEnabled()) {
+            return Response.status(403).entity(JsonOutput.toJson(IMPORT_DISABLED_ERROR_RESPONSE)).build()
         }
         ImportHelper helper = importHelperFactory.getImportHelper(databaseType)
-        Map success = helper.dropDataset(host, userName, prettyName)
-        return Response.ok().entity(JsonOutput.toJson(success)).build()
+        Map result = helper.dropDataset(host, userName, prettyName)
+        if(!result.success) {
+            return Response.status(404).entity(JsonOutput.toJson(NO_DATABASE_ERROR_RESPONSE)).build()
+        }
+        return Response.ok().entity(JsonOutput.toJson(result)).build()
+    }
+
+     /**
+     * Returns the boolean representation of the variable isEnabled
+     * @return True if import is enabled, false otherwise
+     */
+    private boolean isImportEnabled() {
+        return Boolean.parseBoolean(importEnabled)
     }
 }
