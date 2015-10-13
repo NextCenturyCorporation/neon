@@ -196,10 +196,10 @@ class ElasticSearchConversionStrategy {
 
     public static int getTotalLimit(Query query) {
         if(query.groupByClauses) {
-            return 0;
+            return 0
         }
 
-        return getLimit(query);
+        return getLimit(query)
     }
 
     public static int getLimit(Query query, Boolean supportsUnlimited = false) {
