@@ -95,11 +95,15 @@ class ElasticSearchQueryExecutor extends AbstractQueryExecutor {
         distinctValues = sortDistinct(query, distinctValues)
 
         int offset = ElasticSearchConversionStrategy.getOffset(query)
-        int limit = ElasticSearchConversionStrategy.getLimit(query)
+        int limit = ElasticSearchConversionStrategy.getLimit(query, true)
+
+        if(limit == 0) {
+            limit = distinctValues.size()
+        }
 
         int endIndex = ((limit - 1) + offset) < (distinctValues.size() - 1) ? ((limit - 1) + offset) : (distinctValues.size() - 1)
-        endIndex = (endIndex > offset ? endIndex: offset)
-        distinctValues = distinctValues[offset .. endIndex]
+        endIndex = (endIndex > offset ? endIndex : offset)
+        distinctValues = distinctValues[offset..endIndex]
 
         return distinctValues
     }
@@ -146,7 +150,7 @@ class ElasticSearchQueryExecutor extends AbstractQueryExecutor {
         return []
     }
 
-    List<ArrayCountPair> getArrayCounts(String databaseName, String tableName, String field, int limit = Integer.MAX_VALUE) {
+    List<ArrayCountPair> getArrayCounts(String databaseName, String tableName, String field, int limit = 0) {
         getClient()
         .search(ElasticSearchConversionStrategy.createSearchRequest(
             ElasticSearchConversionStrategy.createSearchSourceBuilder(
@@ -242,12 +246,17 @@ class ElasticSearchQueryExecutor extends AbstractQueryExecutor {
 
     private List<Map<String, Object>> limitBuckets(def buckets, Query query) {
         int offset = ElasticSearchConversionStrategy.getOffset(query)
-        int limit = ElasticSearchConversionStrategy.getLimit(query)
+        int limit = ElasticSearchConversionStrategy.getLimit(query, true)
+
+        if(limit == 0) {
+            limit = buckets.size()
+        }
 
         int endIndex = ((limit - 1) + offset) < (buckets.size() - 1) ? ((limit - 1) + offset) : (buckets.size() - 1)
-        endIndex = (endIndex > offset ? endIndex: offset)
-        def result = buckets[offset .. endIndex]
+        endIndex = (endIndex > offset ? endIndex : offset)
+        def result = buckets[offset..endIndex]
 
         return result
+
     }
 }

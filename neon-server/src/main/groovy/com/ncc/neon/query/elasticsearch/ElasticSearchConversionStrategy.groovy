@@ -187,15 +187,31 @@ class ElasticSearchConversionStrategy {
         new SearchSourceBuilder()
             .explain(false)
             .from(getOffset(params))
-            .size(getLimit(params))
+            .size(getTotalLimit(params))
     }
 
     public static int getOffset(Query query) {
         return (query?.offsetClause ? query.offsetClause.offset : 0) as int
     }
 
-    public static int getLimit(Query query) {
-        return (query?.limitClause ? query.limitClause.limit : (Integer.MAX_VALUE - getOffset(query))) as int
+    public static int getTotalLimit(Query query) {
+        if(query.groupByClauses) {
+            return 0;
+        }
+
+        return getLimit(query);
+    }
+
+    public static int getLimit(Query query, Boolean supportsUnlimited = false) {
+        if(query?.limitClause) {
+            return query.limitClause.limit as int
+        }
+
+        if(supportsUnlimited) {
+            return 0
+        }
+
+        return (Integer.MAX_VALUE - getOffset(query))
     }
 
     public static SearchRequest createSearchRequest(SearchSourceBuilder source, Query params) {
