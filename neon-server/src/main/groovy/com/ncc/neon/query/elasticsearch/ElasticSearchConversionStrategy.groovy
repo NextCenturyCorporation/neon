@@ -195,7 +195,7 @@ class ElasticSearchConversionStrategy {
     }
 
     public static int getTotalLimit(Query query) {
-        if(query.groupByClauses) {
+        if(query.groupByClauses || query.aggregates) {
             return 0
         }
 
