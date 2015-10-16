@@ -103,7 +103,7 @@ class ElasticSearchQueryExecutor extends AbstractQueryExecutor {
 
         int endIndex = ((limit - 1) + offset) < (distinctValues.size() - 1) ? ((limit - 1) + offset) : (distinctValues.size() - 1)
         endIndex = (endIndex > offset ? endIndex : offset)
-        distinctValues = distinctValues[offset..endIndex]
+        distinctValues = (offset >= distinctValues.size()) ? [] : distinctValues[offset..endIndex]
 
         return distinctValues
     }
@@ -254,7 +254,8 @@ class ElasticSearchQueryExecutor extends AbstractQueryExecutor {
 
         int endIndex = ((limit - 1) + offset) < (buckets.size() - 1) ? ((limit - 1) + offset) : (buckets.size() - 1)
         endIndex = (endIndex > offset ? endIndex : offset)
-        def result = buckets[offset..endIndex]
+
+        def result = (offset >= buckets.size()) ? [] : buckets[offset..endIndex]
 
         return result
 
