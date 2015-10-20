@@ -220,7 +220,7 @@ class ElasticSearchConversionStrategy {
 
     public static SearchRequest createSearchRequest(SearchSourceBuilder source, Query params) {
         new SearchRequest()
-            .searchType(SearchType.DFS_QUERY_THEN_FETCH)
+            .searchType((params?.aggregates) ? SearchType.COUNT : SearchType.DFS_QUERY_THEN_FETCH)
             .source(source)
             .indices(params?.filter?.databaseName ?: '_all')
     }
