@@ -51,6 +51,7 @@ import groovy.transform.Immutable
  */
 @Immutable
 class ElasticSearchConversionStrategy {
+    static final String TERM_PREFIX = "_term"
     static final String STATS_AGG_PREFIX = "_statsFor_"
     static final String[] DATE_OPERATIONS = ['year', 'month', 'dayOfMonth', 'dayOfWeek', 'hour', 'minute', 'second']
 
@@ -120,6 +121,9 @@ class ElasticSearchConversionStrategy {
                 def sc = findMatchingSortClause(query, ac)
                 if (sc) {
                     def sortOrder = sc.sortOrder == com.ncc.neon.query.clauses.SortOrder.ASCENDING
+                    bucketAggregations.each { bucketAgg ->
+                        bucketAgg.order(Terms.Order.aggregation(TERM_PREFIX, sortOrder))
+                    }
                     bucketAggregations.last().order(isCountAllAggregation(ac) ?
                             Terms.Order.count(sortOrder) :
                             Terms.Order.aggregation("${STATS_AGG_PREFIX}${ac.field}" as String,
