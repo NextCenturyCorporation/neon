@@ -58,6 +58,8 @@ class ElasticSearchQueryExecutor extends AbstractQueryExecutor {
 
     @Override
     QueryResult doExecute(Query query, QueryOptions options) {
+        long d1 = new Date().getTime()
+
         ElasticSearchConversionStrategy conversionStrategy = new ElasticSearchConversionStrategy(filterState: filterState, selectionState: selectionState)
         def request = conversionStrategy.convertQuery(query, options)
 
@@ -67,19 +69,26 @@ class ElasticSearchQueryExecutor extends AbstractQueryExecutor {
         def results = getClient().search(request).actionGet()
         def aggResults = results.aggregations
 
+        def returnVal
         if (aggregates && !groupByClauses) {
-            return new TabularQueryResult([
+            returnVal = new TabularQueryResult([
                 extractMetrics(aggregates, aggResults ? aggResults.asMap() : null, results.hits.totalHits)
             ])
         } else if (groupByClauses) {
             List<Map<String, Object>> buckets = extractBuckets(groupByClauses, aggResults.asList()[0], aggregates)
             buckets = limitBuckets(buckets, query)
-            return new TabularQueryResult(buckets)
+            returnVal = new TabularQueryResult(buckets)
         } else if(query.isDistinct) {
-            return new TabularQueryResult(extractDistinct(query, aggResults.asList()[0]))
+            returnVal = new TabularQueryResult(extractDistinct(query, aggResults.asList()[0]))
+        }
+        else {
+            returnVal = new TabularQueryResult(results.hits.collect { it.getSource() })
         }
 
-        new TabularQueryResult(results.hits.collect { it.getSource() })
+        long diffTime = new Date().getTime() - d1
+        LOGGER.debug(" Query took: " + diffTime + " ms ")
+
+        return returnVal
     }
 
     List<Map<String, Object>> extractDistinct(Query query, aggResult) {
