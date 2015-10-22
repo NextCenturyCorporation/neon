@@ -72,7 +72,7 @@ class ElasticSearchConversionStrategy {
 
     /*
      * Create and return an elastic search SourceBuilder that takes into account the current
-     * filter state and selection state.  It takes an input query, applies the current 
+     * filter state and selection state.  It takes an input query, applies the current
      * filter and selection state associated with this ConverstionStrategy to it and
      * returns a sourcebuilder seeded with the resultant query param.
      */
