@@ -59,15 +59,7 @@ class ElasticSearchConversionStrategy {
     private final SelectionState selectionState
 
     public SearchRequest convertQuery(Query query, QueryOptions options) {
-        def dataSet = new DataSet(databaseName: query.databaseName, tableName: query.tableName)
-        def whereClauses = collectWhereClauses(dataSet, query, options)
-
-
-        //Build the elasticsearch filters for the where clauses
-        def inners = whereClauses.collect(ElasticSearchConversionStrategy.&convertWhereClause) as FilterBuilder[]
-        def whereFilter = FilterBuilders.boolFilter().must(FilterBuilders.andFilter(inners))
-
-        def source = createSearchSourceBuilder(query).query(QueryBuilders.filteredQuery(null, whereFilter))
+        def source = createSourceBuilderWithState(query, options)
 
         if (query.fields && query.fields != SelectClause.ALL_FIELDS) {
             source.fetchSource(query.fields as String[])
@@ -76,6 +68,23 @@ class ElasticSearchConversionStrategy {
         convertAggregations(query, source)
 
         return buildRequest(query, source)
+    }
+
+    /*
+     * Create and return an elastic search SourceBuilder that takes into account the current
+     * filter state and selection state.  It takes an input query, applies the current 
+     * filter and selection state associated with this ConverstionStrategy to it and
+     * returns a sourcebuilder seeded with the resultant query param.
+     */
+    public SearchSourceBuilder createSourceBuilderWithState(Query query, QueryOptions options) {
+        def dataSet = new DataSet(databaseName: query.databaseName, tableName: query.tableName)
+        def whereClauses = collectWhereClauses(dataSet, query, options)
+
+        //Build the elasticsearch filters for the where clauses
+        def inners = whereClauses.collect(ElasticSearchConversionStrategy.&convertWhereClause) as FilterBuilder[]
+        def whereFilter = FilterBuilders.boolFilter().must(FilterBuilders.andFilter(inners))
+
+        return createSearchSourceBuilder(query).query(QueryBuilders.filteredQuery(null, whereFilter))
     }
 
     /*

@@ -31,6 +31,7 @@ import com.ncc.neon.query.result.QueryResult
 import com.ncc.neon.query.result.TabularQueryResult
 import org.elasticsearch.action.admin.cluster.state.ClusterStateRequest
 import org.elasticsearch.action.admin.indices.mapping.get.GetMappingsRequest
+import org.elasticsearch.action.search.SearchType
 import org.elasticsearch.client.Client
 import org.elasticsearch.common.collect.ImmutableOpenMap
 import org.elasticsearch.search.aggregations.AggregationBuilders
@@ -161,16 +162,18 @@ class ElasticSearchQueryExecutor extends AbstractQueryExecutor {
     }
 
     List<ArrayCountPair> getArrayCounts(String databaseName, String tableName, String field, int limit = 0) {
+        Query query = new Query(filter: new Filter(databaseName: databaseName, tableName: tableName),
+                    limitClause: new LimitClause(limit: 0))
+        ElasticSearchConversionStrategy conversionStrategy = new ElasticSearchConversionStrategy(filterState: filterState, selectionState: selectionState)
+
         getClient()
         .search(ElasticSearchConversionStrategy.createSearchRequest(
-            ElasticSearchConversionStrategy.createSearchSourceBuilder(
-                new Query(filter: new Filter(databaseName: databaseName, tableName: tableName),
-                    limitClause: new LimitClause(limit: 0))
-            )
-            .aggregation(AggregationBuilders.terms("arrayCount")
-                .field(field)
-                .size(limit)
-            ) , null)
+            conversionStrategy.createSourceBuilderWithState(query, QueryOptions.DEFAULT_OPTIONS)
+                .aggregation(AggregationBuilders.terms("arrayCount")
+                    .field(field)
+                    .size(limit)
+                ) , null)
+            .searchType(SearchType.COUNT)
         )
         .actionGet()
         .getAggregations()
