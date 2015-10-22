@@ -21,6 +21,7 @@ import com.ncc.neon.query.Query
 import com.ncc.neon.query.QueryOptions
 import com.ncc.neon.query.clauses.GroupByFieldClause
 import com.ncc.neon.query.clauses.GroupByFunctionClause
+import com.ncc.neon.query.clauses.LimitClause
 import com.ncc.neon.query.executor.AbstractQueryExecutor
 import com.ncc.neon.query.filter.Filter
 import com.ncc.neon.query.filter.FilterState
@@ -163,7 +164,8 @@ class ElasticSearchQueryExecutor extends AbstractQueryExecutor {
         getClient()
         .search(ElasticSearchConversionStrategy.createSearchRequest(
             ElasticSearchConversionStrategy.createSearchSourceBuilder(
-                new Query(filter: new Filter(databaseName: databaseName, tableName: tableName))
+                new Query(filter: new Filter(databaseName: databaseName, tableName: tableName),
+                    limitClause: new LimitClause(limit: 0))
             )
             .aggregation(AggregationBuilders.terms("arrayCount")
                 .field(field)
