@@ -136,7 +136,7 @@ neon.query.Connection.prototype.executeQueryService_ = function(query, successCa
  * Executes the specified export request and fires the callback when complete.
  * @method executeExport
  * @param {neon.query.Query} query the query to export data for
- * @param {Function} successCallback The callback to fire when the export request successfully completes. Takes 
+ * @param {Function} successCallback The callback to fire when the export request successfully completes. Takes
  * a JSON object with the export URL stored in it's data field as a parameter.
  * @param {Function} [errorCallback] The optional callback when an error occurs. This function takes the server's
  * response as a parameter.
@@ -303,6 +303,27 @@ neon.query.Connection.prototype.getFieldNames = function(databaseName, tableName
 neon.query.Connection.prototype.getTableNamesAndFieldNames = function(databaseName, successCallback, errorCallback) {
     return neon.util.ajaxUtils.doGet(
         neon.serviceUrl('queryservice', 'tablesandfields/' + encodeURIComponent(this.host_) + '/' + encodeURIComponent(this.databaseType_) + '/' + encodeURIComponent(databaseName)), {
+            success: successCallback,
+            error: errorCallback,
+            responseType: 'json'
+        }
+    );
+};
+
+/**
+ * Executes a query that returns the field types from table
+ * @method getFieldTypes
+ * @param {String} databaseName
+ * @param {String} tableName The table name whose fields are being returned
+ * @param {Function} successCallback The callback to call when the field types are successfully retrieved
+ * @param {Function} [errorCallback] The optional callback when an error occurs. This is a 3 parameter
+ * function that contains the xhr, a short error status and the full error message.
+ * @return {neon.util.AjaxRequest} The xhr request object
+ */
+neon.query.Connection.prototype.getFieldTypes = function(databaseName, tableName, successCallback, errorCallback) {
+    return neon.util.ajaxUtils.doGet(
+        neon.serviceUrl('queryservice', 'fields/types/' + encodeURIComponent(this.host_) + '/' + encodeURIComponent(this.databaseType_) +
+          '/' + encodeURIComponent(databaseName) + '/' + encodeURIComponent(tableName)), {
             success: successCallback,
             error: errorCallback,
             responseType: 'json'

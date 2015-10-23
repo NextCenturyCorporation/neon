@@ -93,6 +93,46 @@ class MongoQueryExecutor extends AbstractQueryExecutor {
         return (fieldNameSet as List) ?: []
     }
 
+    @Override
+    Map getFieldTypes(String databaseName, String tableName) {
+        def db = mongo.getDB(databaseName)
+        def collection = db.getCollection(tableName)
+        def resultSet = collection.find().limit(GET_FIELD_NAMES_LIMIT)
+        Map fieldTypesMap = [:]
+        resultSet.each { result ->
+            result?.keySet().each { field ->
+                def fieldObj = result.get(field)
+                if(fieldObj != "" && !fieldTypesMap[field]) {
+                    def type = fieldObj.getClass()
+                    // Convert types to make consistent with spark and elasticsearch
+                    if(fieldObj instanceof List) {
+                        type = "array"
+                    } else if(fieldObj instanceof String || fieldObj instanceof org.bson.types.ObjectId) {
+                        type = "string"
+                    } else if(fieldObj instanceof Date) {
+                        type = "date"
+                    } else if(fieldObj instanceof Float) {
+                        type = "float"
+                    } else if(fieldObj instanceof Double) {
+                        type = "double"
+                    } else if(fieldObj instanceof Long) {
+                        type = "long"
+                    } else if(fieldObj instanceof Integer) {
+                        type = "integer"
+                    } else if(fieldObj instanceof Boolean) {
+                        type = "boolean"
+                    } else if(fieldObj instanceof org.bson.types.Binary) {
+                        type = "binary"
+                    } else if(fieldObj instanceof Object) {
+                        type = "object"
+                    }
+                    fieldTypesMap.put(field, type)
+                }
+            }
+        }
+        return fieldTypesMap
+    }
+
     private AbstractMongoQueryWorker createMongoQueryWorker(Query query) {
         if (query.isDistinct) {
             LOGGER.trace("Using distinct mongo query worker")

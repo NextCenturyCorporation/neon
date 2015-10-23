@@ -63,6 +63,14 @@ public interface QueryExecutor {
     List<String> getFieldNames(String databaseName, String tableName)
 
     /**
+     * Gets the types of the fields in the specified dataset
+     * @param databaseName
+     * @param tableName
+     * @return Mapping of field name to field type
+     */
+    Map getFieldTypes(String databaseName, String tableName)
+
+    /**
      * Gets the count for distinct values in an array field
      * @param field the field of the table on which to perform the count
      * @param limit limit number of result pairs to return
