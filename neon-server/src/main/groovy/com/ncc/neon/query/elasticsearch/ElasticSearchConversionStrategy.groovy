@@ -232,6 +232,7 @@ class ElasticSearchConversionStrategy {
             .searchType((params?.aggregates) ? SearchType.COUNT : SearchType.DFS_QUERY_THEN_FETCH)
             .source(source)
             .indices(params?.filter?.databaseName ?: '_all')
+            .types(params?.filter?.tableName ?: '_all')
     }
 
     public static boolean isCountAllAggregation(clause) {

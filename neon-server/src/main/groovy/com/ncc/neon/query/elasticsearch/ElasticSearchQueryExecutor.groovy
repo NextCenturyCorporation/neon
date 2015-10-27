@@ -31,6 +31,7 @@ import com.ncc.neon.query.result.QueryResult
 import com.ncc.neon.query.result.TabularQueryResult
 import org.elasticsearch.action.admin.cluster.state.ClusterStateRequest
 import org.elasticsearch.action.admin.indices.mapping.get.GetMappingsRequest
+import org.elasticsearch.action.search.SearchRequest
 import org.elasticsearch.action.search.SearchType
 import org.elasticsearch.client.Client
 import org.elasticsearch.common.collect.ImmutableOpenMap
@@ -186,22 +187,23 @@ class ElasticSearchQueryExecutor extends AbstractQueryExecutor {
         Query query = new Query(filter: new Filter(databaseName: databaseName, tableName: tableName),
                     limitClause: new LimitClause(limit: 0))
         ElasticSearchConversionStrategy conversionStrategy = new ElasticSearchConversionStrategy(filterState: filterState, selectionState: selectionState)
+        SearchRequest searchRequest = ElasticSearchConversionStrategy.createSearchRequest(
+                conversionStrategy.createSourceBuilderWithState(query, QueryOptions.DEFAULT_OPTIONS)
+                        .aggregation(AggregationBuilders.terms("arrayCount")
+                        .field(field)
+                        .size(limit)
+                ) , query)
+                .searchType(SearchType.COUNT)
+        def results = getClient()
+            .search(searchRequest)
+            .actionGet()
 
-        getClient()
-        .search(ElasticSearchConversionStrategy.createSearchRequest(
-            conversionStrategy.createSourceBuilderWithState(query, QueryOptions.DEFAULT_OPTIONS)
-                .aggregation(AggregationBuilders.terms("arrayCount")
-                    .field(field)
-                    .size(limit)
-                ) , null)
-            .searchType(SearchType.COUNT)
-        )
-        .actionGet()
-        .getAggregations()
-        .asList()
-        .head()
-        .getBuckets()
-        .collect { new ArrayCountPair(key: it.key, count: it.docCount) }
+        def aggResults = results.aggregations
+        return aggResults
+            .asList()
+            .head()
+            .getBuckets()
+            .collect { new ArrayCountPair(key: it.key, count: it.docCount) }
     }
 
     private Client getClient() {
