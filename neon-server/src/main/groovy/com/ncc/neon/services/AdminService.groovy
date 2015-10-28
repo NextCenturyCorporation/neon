@@ -44,6 +44,7 @@ class AdminService {
     @Produces(MediaType.APPLICATION_JSON)
     @Path("mongo/clearquerycache")
     String clearMongoQueryCache() {
+        LOGGER.debug("Clearing the mongo query cache...")
         SimpleQueryCache.getSimpleQueryCacheInstance().clear()
         return true
     }
