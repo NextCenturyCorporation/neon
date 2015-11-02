@@ -24,6 +24,9 @@ neon.query.QueryGroup = function() {
     this.queries = [];
     this.ignoreFilters_ = false;
     this.selectionOnly_ = false;
+
+    // use this to ignore specific filters
+    this.ignoredFilterIds_ = [];
 };
 
 /**
@@ -38,12 +41,26 @@ neon.query.QueryGroup.prototype.addQuery = function(query) {
 };
 
 /**
- * Sets the query to ignore any filters that are currently applied
+ * Sets all queries to ignore any filters that are currently applied. This overrides any ignored filters set
+ * on queries in the query group.
  * @method ignoreFilters
- * @return {neon.query.QueryGroup} This query group object
+ * @param {...String | Array} [filterIds] An optional, variable number of filter ids to ignore OR an array of
+ * filter ids to ignore. If specified, only these filters will be ignored. Otherwise, all will be ignored.
+ * @return {neon.query.Query} This query group object
  */
-neon.query.QueryGroup.prototype.ignoreFilters = function() {
-    this.ignoreFilters_ = true;
+neon.query.QueryGroup.prototype.ignoreFilters = function(filterIds) {
+    var filters;
+    if(arguments.length === 1 && $.isArray(filterIds)) {
+        filters = filterIds;
+    } else {
+        filters = neon.util.arrayUtils.argumentsToArray(arguments);
+    }
+
+    if(filters.length > 0) {
+        this.ignoredFilterIds_ = filters;
+    } else {
+        this.ignoreFilters_ = true;
+    }
     return this;
 };
 
