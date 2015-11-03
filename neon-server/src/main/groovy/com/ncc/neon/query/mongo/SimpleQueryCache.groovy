@@ -90,6 +90,10 @@ public class SimpleQueryCache {
         }
     }
 
+    void clear() {
+        cache.clear()
+    }
+
     QueryResult get(MongoQuery mongoQuery) {
         if (!cache) {
             return null
