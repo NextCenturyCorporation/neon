@@ -50,7 +50,7 @@ class QueryServiceTest {
     @Test
     void "execute query group"() {
         QueryGroup queryGroup = new QueryGroup(queries: [new Query()])
-        QueryResult result = queryService.executeQueryGroup(HOST, DATABASE_TYPE, false, false, queryGroup)
+        QueryResult result = queryService.executeQueryGroup(HOST, DATABASE_TYPE, false, false, [] as Set, queryGroup)
         assert result.data == [["key1": "val1"], ["key2": 2]]
     }
 }
