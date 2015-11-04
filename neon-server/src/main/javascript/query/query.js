@@ -369,7 +369,7 @@ neon.query.Query.prototype.transform = function(transformObj) {
 /**
  * Sets the query to ignore any filters that are currently applied
  * @method ignoreFilters
- * @param {...String | Array} [filterIds] An optional, variable number of filter ids to ignore OR ab array of
+ * @param {...String | Array} [filterIds] An optional, variable number of filter ids to ignore OR an array of
  * filter ids to ignore. If specified, only these filters will be ignored. Otherwise, all will be ignored.
  * @return {neon.query.Query} This query object
  */

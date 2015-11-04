@@ -24,7 +24,7 @@ import org.codehaus.jackson.annotate.JsonIgnoreProperties
  * A group of queries that can be executed and results aggregated to be returned
  * to a client as if it was a single query
  */
-@JsonIgnoreProperties(value = ['ignoreFilters_', 'selectionOnly_'])
+@JsonIgnoreProperties(value = ['ignoreFilters_', 'selectionOnly_', 'ignoredFilterIds_'])
 class QueryGroup {
 
     List<Query> queries = []
