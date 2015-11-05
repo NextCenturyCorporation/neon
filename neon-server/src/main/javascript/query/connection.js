@@ -310,27 +310,6 @@ neon.query.Connection.prototype.getTableNamesAndFieldNames = function(databaseNa
     );
 };
 
-/**
- * Executes a query that returns the field types from table
- * @method getFieldTypes
- * @param {String} databaseName
- * @param {String} tableName The table name whose fields are being returned
- * @param {Function} successCallback The callback to call when the field types are successfully retrieved
- * @param {Function} [errorCallback] The optional callback when an error occurs. This is a 3 parameter
- * function that contains the xhr, a short error status and the full error message.
- * @return {neon.util.AjaxRequest} The xhr request object
- */
-neon.query.Connection.prototype.getFieldTypes = function(databaseName, tableName, successCallback, errorCallback) {
-    return neon.util.ajaxUtils.doGet(
-        neon.serviceUrl('queryservice', 'fields/types/' + encodeURIComponent(this.host_) + '/' + encodeURIComponent(this.databaseType_) +
-          '/' + encodeURIComponent(databaseName) + '/' + encodeURIComponent(tableName)), {
-            success: successCallback,
-            error: errorCallback,
-            responseType: 'json'
-        }
-    );
-};
-
 neon.query.Connection.prototype.executeArrayCountQuery = function(databaseName, tableName, field, limit, successCallback, errorCallback) {
     return neon.util.ajaxUtils.doGet(neon.serviceUrl(
         'queryservice/arraycounts', encodeURIComponent(this.host_) + '/' + encodeURIComponent(this.databaseType_) + '/' + encodeURIComponent(databaseName) + '/' + encodeURIComponent(tableName),

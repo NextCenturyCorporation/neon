@@ -760,6 +760,20 @@ abstract class AbstractQueryExecutorIntegrationTest {
     }
 
     @Test
+    void "test array count with non-array field"(){
+        String db = DATABASE_NAME
+        String tableName = TABLE_NAME
+        String field = "state"
+        int limit = 50
+
+        List<ArrayCountPair> result = queryExecutor.getArrayCounts(db, tableName, field, limit)
+        assert result.size == 3
+        assertEntry(result[0], "VA", 4)
+        assertEntry(result[1], "DC", 3)
+        assertEntry(result[2], "MD", 1)
+    }
+
+    @Test
     void "test array count limiting"(){
         String db = DATABASE_NAME
         String tableName = TABLE_NAME

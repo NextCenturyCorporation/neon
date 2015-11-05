@@ -142,27 +142,6 @@ class QueryService {
     }
 
     /**
-     * Get all the columns for tabular datasets from the supplied connection.
-     * @param host The host the database is running on
-     * @param databaseType the type of database
-     * @param databaseName The database containing the data
-     * @param tableName The table containing the data
-     * @return The result of the query
-     */
-    @GET
-    @Produces(MediaType.APPLICATION_JSON)
-    @Path("fields/types/{host}/{databaseType}/{databaseName}/{tableName}")
-    Map getFieldTypes(
-            @PathParam("host") String host,
-            @PathParam("databaseType") String databaseType,
-            @PathParam("databaseName") String databaseName,
-            @PathParam("tableName") String tableName) {
-
-        QueryExecutor queryExecutor = getExecutor(host, databaseType)
-        return queryExecutor.getFieldTypes(databaseName, tableName)
-    }
-
-    /**
      * Gets metadata associated with the columns of the table
      * @param databaseName The database containing the data
      * @param tableName The table containing the data

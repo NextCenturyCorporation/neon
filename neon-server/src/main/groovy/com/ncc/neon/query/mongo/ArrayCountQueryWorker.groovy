@@ -38,13 +38,15 @@ class ArrayCountQueryWorker extends AbstractMongoQueryWorker {
         return this
     }
 
-    MongoQuery createArrayCountQuery(MongoQuery mongoQuery, String field, int limit, FilterState filterState, SelectionState selectionState) {
+    MongoQuery createArrayCountQuery(MongoQuery mongoQuery, String field, int limit, FilterState filterState, SelectionState selectionState, boolean isFieldArray) {
         addMatchQuery(mongoQuery, filterState, selectionState)
 
         DBObject project = new BasicDBObject('$project', new BasicDBObject(field, 1))
         mongoQuery.query.aggregates << project
-        DBObject unwind = new BasicDBObject('$unwind', '$' + field)
-        mongoQuery.query.aggregates << unwind
+        if(isFieldArray) {
+            DBObject unwind = new BasicDBObject('$unwind', '$' + field)
+            mongoQuery.query.aggregates << unwind
+        }
 
         addGroupFields(mongoQuery, field)
         addSort(mongoQuery)
