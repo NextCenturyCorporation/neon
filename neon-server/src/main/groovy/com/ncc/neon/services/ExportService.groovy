@@ -305,7 +305,7 @@ class ExportService {
             toReturn = result.data
         }
         else if(request instanceof ExportArrayCountRequest) {
-            List<ArrayCountPair> results = queryService.getArrayCounts(host, databaseType, request.database, request.table, request.field, request.limit)
+            List<ArrayCountPair> results = queryService.getArrayCounts(host, databaseType, request.database, request.table, request.field, request.limit, request?.whereClause)
             results.each { result ->
                 Map obj = [:]
                 obj.put("key", result.key)

@@ -22,6 +22,7 @@ import com.ncc.neon.query.QueryOptions
 import com.ncc.neon.query.clauses.GroupByFieldClause
 import com.ncc.neon.query.clauses.GroupByFunctionClause
 import com.ncc.neon.query.clauses.LimitClause
+import com.ncc.neon.query.clauses.WhereClause
 import com.ncc.neon.query.executor.AbstractQueryExecutor
 import com.ncc.neon.query.filter.Filter
 import com.ncc.neon.query.filter.FilterState
@@ -183,12 +184,12 @@ class ElasticSearchQueryExecutor extends AbstractQueryExecutor {
         return [:]
     }
 
-    List<ArrayCountPair> getArrayCounts(String databaseName, String tableName, String field, int limit = 0) {
+    List<ArrayCountPair> getArrayCounts(String databaseName, String tableName, String field, int limit = 0, WhereClause whereClause = null) {
         Query query = new Query(filter: new Filter(databaseName: databaseName, tableName: tableName),
                     limitClause: new LimitClause(limit: 0))
         ElasticSearchConversionStrategy conversionStrategy = new ElasticSearchConversionStrategy(filterState: filterState, selectionState: selectionState)
         SearchRequest searchRequest = ElasticSearchConversionStrategy.createSearchRequest(
-                conversionStrategy.createSourceBuilderWithState(query, QueryOptions.DEFAULT_OPTIONS)
+                conversionStrategy.createSourceBuilderWithState(query, QueryOptions.DEFAULT_OPTIONS, whereClause)
                         .aggregation(AggregationBuilders.terms("arrayCount")
                         .field(field)
                         .size(limit)

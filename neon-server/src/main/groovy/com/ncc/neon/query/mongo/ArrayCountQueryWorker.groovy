@@ -19,6 +19,7 @@ import com.mongodb.BasicDBObject
 import com.mongodb.DB
 import com.mongodb.DBObject
 import com.mongodb.MongoClient
+import com.ncc.neon.query.clauses.WhereClause
 import com.ncc.neon.query.filter.DataSet
 import com.ncc.neon.query.filter.FilterState
 import com.ncc.neon.query.filter.SelectionState
@@ -38,8 +39,8 @@ class ArrayCountQueryWorker extends AbstractMongoQueryWorker {
         return this
     }
 
-    MongoQuery createArrayCountQuery(MongoQuery mongoQuery, String field, int limit, FilterState filterState, SelectionState selectionState) {
-        addMatchQuery(mongoQuery, filterState, selectionState)
+    MongoQuery createArrayCountQuery(MongoQuery mongoQuery, String field, int limit, FilterState filterState, SelectionState selectionState, WhereClause whereClause) {
+        addMatchQuery(mongoQuery, filterState, selectionState, whereClause)
 
         DBObject project = new BasicDBObject('$project', new BasicDBObject(field, 1))
         mongoQuery.query.aggregates << project
@@ -70,8 +71,8 @@ class ArrayCountQueryWorker extends AbstractMongoQueryWorker {
         return new ListQueryResult(arrayCountList)
     }
 
-    private void addMatchQuery(MongoQuery mongoQuery, FilterState filterState, SelectionState selectionState) {
-        DBObject matchQuery = mergeWithNeonFilters(new BasicDBObject(), mongoQuery.query.getDatabaseName(), mongoQuery.query.getTableName(), filterState, selectionState)
+    private void addMatchQuery(MongoQuery mongoQuery, FilterState filterState, SelectionState selectionState, WhereClause whereClause) {
+        DBObject matchQuery = mergeWithNeonFilters(new BasicDBObject(), mongoQuery.query.getDatabaseName(), mongoQuery.query.getTableName(), filterState, selectionState, whereClause)
 
         if(!((BasicDBObject)matchQuery).isEmpty()) {
             DBObject match = new BasicDBObject('$match',matchQuery)
@@ -106,10 +107,10 @@ class ArrayCountQueryWorker extends AbstractMongoQueryWorker {
         return arrayCountList
     }
 
-    private DBObject mergeWithNeonFilters(DBObject query, String databaseName, String collectionName, FilterState filterState, SelectionState selectionState) {
+    private DBObject mergeWithNeonFilters(DBObject query, String databaseName, String collectionName, FilterState filterState, SelectionState selectionState, WhereClause whereClause) {
         // hook into some methods here that will use neon's filters/selection since this query can't yet be executed through neon
         DataSet dataSet = new DataSet(databaseName: databaseName, tableName: collectionName)
-        List neonFiltersAndSelection = []
+        List neonFiltersAndSelection = whereClause ? [whereClause] : []
 
         neonFiltersAndSelection.addAll(MongoConversionStrategy.createWhereClausesForFilters(dataSet, filterState))
 
