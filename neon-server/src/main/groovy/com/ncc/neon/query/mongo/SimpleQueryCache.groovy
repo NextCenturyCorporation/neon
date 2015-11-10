@@ -90,22 +90,39 @@ public class SimpleQueryCache {
         }
     }
 
+    /**
+     * Clears the current query cache.
+     */
     void clear() {
         cache.clear()
+    }
+
+    /**
+     * Returns the current query cache.
+     * @return The map of cached query strings to query result objects.
+     */
+    Map<String, QueryResult> getCache() {
+        return cache.getMatching("com.ncc.neon.*")
     }
 
     QueryResult get(MongoQuery mongoQuery) {
         if (!cache) {
             return null
         }
+
         String queryString = mongoQuery.toString()
         QueryResult result = cache.get(queryString)
+
         if (result == null) {
             keyMiss++
         } else {
             keyHit++
         }
-        showSummaryStatistics()
+
+        if(SHOW_STATISTICS && (keyMiss + keyHit) % 20 != 0) {
+            LOGGER.error(generateSummaryStatistics())
+        }
+
         return result
     }
 
@@ -132,18 +149,13 @@ public class SimpleQueryCache {
     /**
      * Try to figure out what the queries are, what they were doing, how often they hit versus miss
      */
-    void showSummaryStatistics() {
-        if (!SHOW_STATISTICS) {
-            return
-        }
-        if ((keyMiss + keyHit) % 20 != 0) {
-            return
-        }
-        LOGGER.error(" Cache hits / misses: " + keyHit + " " + keyMiss + " (" + (100 * keyHit / (keyHit + keyMiss)) + "%)")
-
+    String generateSummaryStatistics() {
+        def calc = keyHit + keyMiss > 0 ? 100 * keyHit / (keyHit + keyMiss) : 100
+        def text = "Cache hits / misses:  " + keyHit + " " + keyMiss + " (" + calc + "%)"
         def keys = CompositeCacheManager.getInstance().getCache(cacheName).getMemoryCache().getKeySet()
-        for (String key : keys) {
-            LOGGER.error(" Key:  " + key)
+        for(String key : keys) {
+            text += "\n  Key:  " + key
         }
+        return text
     }
 }

@@ -48,4 +48,28 @@ class AdminService {
         SimpleQueryCache.getSimpleQueryCacheInstance().clear()
         return true
     }
+
+    /**
+     * Gets the mongo query cache.
+     * @return The map of cached query strings to query result objects
+     */
+    @GET
+    @Produces(MediaType.APPLICATION_JSON)
+    @Path("mongo/getquerycache")
+    String displayMongoQueryCache() {
+        LOGGER.debug("Getting the mongo query cache...")
+        return SimpleQueryCache.getSimpleQueryCacheInstance().getCache()
+    }
+
+    /**
+     * Gets the statistics for the mongo query cache.
+     * @return The list of cached stringified queries and their results
+     */
+    @GET
+    @Produces(MediaType.APPLICATION_JSON)
+    @Path("mongo/getquerycachestats")
+    String displayMongoQueryCacheStatistics() {
+        LOGGER.debug("Getting the mongo query cache statistics...")
+        return SimpleQueryCache.getSimpleQueryCacheInstance().generateSummaryStatistics()
+    }
 }
