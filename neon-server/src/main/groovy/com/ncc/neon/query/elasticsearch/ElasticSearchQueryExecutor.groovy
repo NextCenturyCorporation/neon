@@ -151,9 +151,11 @@ class ElasticSearchQueryExecutor extends AbstractQueryExecutor {
             if(dbMappings) {
                 def tableMappings = dbMappings.get(tableName)
                 if(tableMappings) {
-                    def fields = tableMappings.getSourceAsMap().get('properties').collect { it.key }
+                    def fields = []
+                    fields.addAll(getFieldsInObject(tableMappings.getSourceAsMap(), null))
+
                     if (fields) {
-                        fields.push("_id")
+                        fields.add("_id")
                         return fields
                     }
                 }
@@ -275,5 +277,25 @@ class ElasticSearchQueryExecutor extends AbstractQueryExecutor {
 
         return result
 
+    }
+
+    private List<String> getFieldsInObject(Map fields, String parentFieldName) {
+        def fieldNames = []
+        fields.get('properties').each { field ->
+            def type = field.getValue().containsKey('type') ? field.getValue().get('type') : 'object'
+
+            String fieldName = field.getKey()
+            if(parentFieldName) {
+                fieldName = parentFieldName + "." + field.getKey()
+            }
+
+            if(type == 'object') {
+                fieldNames.addAll(getFieldsInObject(field.getValue(), fieldName))
+            } else {
+                fieldNames.add(fieldName)
+            }
+        }
+
+        return fieldNames
     }
 }

@@ -18,6 +18,7 @@ package com.ncc.neon.query.mongo
 
 import com.mongodb.DB
 import com.mongodb.MongoClient
+import com.mongodb.BasicDBObject
 import com.ncc.neon.connect.ConnectionManager
 import com.ncc.neon.query.executor.AbstractQueryExecutor
 import com.ncc.neon.query.Query
@@ -88,9 +89,26 @@ class MongoQueryExecutor extends AbstractQueryExecutor {
         def resultSet = collection.find().limit(GET_FIELD_NAMES_LIMIT)
         Set<String> fieldNameSet = [] as Set
         resultSet.each { result ->
-            fieldNameSet.addAll(result?.keySet())
+            fieldNameSet.addAll(getFieldsInObject(result, null))
         }
         return (fieldNameSet as List) ?: []
+    }
+
+    private Set<String> getFieldsInObject(BasicDBObject fieldObj, String field) {
+        Set<String> fieldNameSet = [] as Set
+        fieldObj?.keySet().each { subField ->
+            def subFieldObj = fieldObj.get(subField)
+            String fieldName = subField
+            if(field) {
+                fieldName = field + "." + subField
+            }
+            if(subFieldObj instanceof BasicDBObject) {
+                fieldNameSet.addAll(getFieldsInObject(subFieldObj, fieldName))
+            } else {
+                fieldNameSet.add(fieldName)
+            }
+        }
+        return fieldNameSet
     }
 
     private AbstractMongoQueryWorker createMongoQueryWorker(Query query) {
@@ -123,13 +141,24 @@ class MongoQueryExecutor extends AbstractQueryExecutor {
         def fieldTypeArray = false
         while(resultSet.hasNext()) {
             def result = resultSet.next()
-            def fieldObj = result?.get(fieldName)
+            def fieldObj = getFieldInResult(fieldName, result)
             if(fieldObj != "" && fieldObj != null) {
                 fieldTypeArray = fieldObj instanceof List
                 break
             }
         }
         return fieldTypeArray
+    }
+
+    private Object getFieldInResult(String fieldName, BasicDBObject result) {
+        def fieldNameArray = fieldName.split(/\./)
+        def fieldObj = result
+        fieldNameArray.each { field ->
+            if(fieldObj) {
+                fieldObj = fieldObj.get(field)
+            }
+        }
+        return fieldObj
     }
 
     List<ArrayCountPair> getArrayCounts(String databaseName, String tableName, String field, int limit) {
