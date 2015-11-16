@@ -35,7 +35,7 @@ class SortOrderDeserializerTest {
 
     @Test
     void "deserialize descending sort order"() {
-        def parser = createJsonParser(-1)
+        def parser = createJsonParser("-1")
         def sortOrder = deserializer.deserialize(parser, null)
         assert sortOrder == SortOrder.DESCENDING
 
@@ -43,14 +43,14 @@ class SortOrderDeserializerTest {
 
     @Test
     void "deserialize ascending sort order"() {
-        def parser = createJsonParser(1)
+        def parser = createJsonParser("1")
         def sortOrder = deserializer.deserialize(parser, null)
         assert sortOrder == SortOrder.ASCENDING
 
     }
     private static def createJsonParser(direction) {
         def parserStub = new StubFor(JsonParser)
-        parserStub.demand.getValueAsInt { direction }
+        parserStub.demand.getText { direction }
         return parserStub.proxyInstance()
     }
 
