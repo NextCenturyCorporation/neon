@@ -18,6 +18,7 @@ package com.ncc.neon.query.sparksql
 import com.ncc.neon.connect.ConnectionManager
 import com.ncc.neon.connect.JdbcClient
 import com.ncc.neon.query.*
+import com.ncc.neon.query.clauses.WhereClause
 import com.ncc.neon.query.executor.AbstractQueryExecutor
 import com.ncc.neon.query.filter.FilterState
 import com.ncc.neon.query.filter.SelectionState
@@ -147,7 +148,7 @@ class SparkSQLQueryExecutor extends AbstractQueryExecutor {
         }
     }
 
-    List<ArrayCountPair> getArrayCounts(String databaseName, String tableName, String field, int limit = 40) {
+    List<ArrayCountPair> getArrayCounts(String databaseName, String tableName, String field, int limit = 40, WhereClause whereClause = null) {
         String select = "SELECT key, count(1) as count FROM " + databaseName + "." + tableName + " LATERAL VIEW explode(" + field + ") tmptable AS key"
         String groupBy = " GROUP BY key"
         String orderBy = " ORDER BY count DESC"
@@ -155,7 +156,7 @@ class SparkSQLQueryExecutor extends AbstractQueryExecutor {
 
         return runAndRelease { client ->
             SparkSQLConversionStrategy conversionStrategy = new SparkSQLConversionStrategy(filterState: filterState, selectionState: selectionState)
-            String sparkSQLQuery = conversionStrategy.mergeQuery(databaseName, tableName, select, groupBy, orderBy, sort)
+            String sparkSQLQuery = conversionStrategy.mergeQuery(databaseName, tableName, select, groupBy, orderBy, sort, whereClause)
             int offset = 0
             List<ArrayCountPair> resultList = client.executeQuery(sparkSQLQuery, offset)
             return resultList

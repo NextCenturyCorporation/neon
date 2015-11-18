@@ -16,6 +16,7 @@
 
 package com.ncc.neon.query.export
 
+import com.ncc.neon.query.clauses.WhereClause
 import groovy.transform.ToString
 
 /**
@@ -31,4 +32,5 @@ class ExportArrayCountRequest implements ExportRequest {
 	int limit
 	String name
 	List<ExportField> fields
+    WhereClause whereClause
 }

@@ -24,6 +24,7 @@ import com.ncc.neon.query.clauses.GroupByFunctionClause
 import com.ncc.neon.query.clauses.OrWhereClause
 import com.ncc.neon.query.clauses.SelectClause
 import com.ncc.neon.query.clauses.SingularWhereClause
+import com.ncc.neon.query.clauses.WhereClause
 import com.ncc.neon.query.filter.DataSet
 import com.ncc.neon.query.filter.FilterState
 import com.ncc.neon.query.filter.SelectionState
@@ -76,9 +77,9 @@ class ElasticSearchConversionStrategy {
      * filter and selection state associated with this ConverstionStrategy to it and
      * returns a sourcebuilder seeded with the resultant query param.
      */
-    public SearchSourceBuilder createSourceBuilderWithState(Query query, QueryOptions options) {
+    public SearchSourceBuilder createSourceBuilderWithState(Query query, QueryOptions options, WhereClause whereClause = null) {
         def dataSet = new DataSet(databaseName: query.databaseName, tableName: query.tableName)
-        def whereClauses = collectWhereClauses(dataSet, query, options)
+        def whereClauses = collectWhereClauses(dataSet, query, options, whereClause)
 
         //Build the elasticsearch filters for the where clauses
         def inners = whereClauses.collect(ElasticSearchConversionStrategy.&convertWhereClause) as FilterBuilder[]
@@ -169,8 +170,8 @@ class ElasticSearchConversionStrategy {
         request
     }
 
-    private collectWhereClauses(DataSet dataSet, Query query, QueryOptions options) {
-        def whereClauses = []
+    private collectWhereClauses(DataSet dataSet, Query query, QueryOptions options, WhereClause whereClause) {
+        def whereClauses = whereClause ? [whereClause] : []
         if (query.filter?.whereClause) {
             whereClauses << query.filter.whereClause
         }

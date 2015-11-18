@@ -106,27 +106,27 @@ neon.query.Connection.prototype.executeQueryGroup = function(queryGroup, success
     return this.executeQueryService_(queryGroup, successCallback, errorCallback, 'querygroup');
 };
 
-
 /**
  * Executes a query that returns a sorted list of key, count pairs for an array field in the database.
- * @method executeArrayCountQuery
- * @param {String} databaseName
- * @param {String} tableName The table name whose field will be counted
- * @param {String} field The field containing an array to count on
- * @param {Integer} limit The number of pairs to return; defaults to 50 if not set
+ * @param databaseName The name of the database
+ * @param tableName The name of the collection or table
+ * @param fieldName The name of the array field to count
+ * @param limit The number of pairs to return (default:  50)
+ * @param whereClause The where clause to apply to the array counts query, or null to apply no where clause
  * @param {Function} successCallback The callback to call when the list of key,count pairs is returned
  * @param {Function} [errorCallback] The optional callback when an error occurs. This is a 3 parameter
  * function that contains the xhr, a short error status and the full error message.
  * @return {neon.util.AjaxRequest} The xhr request object
  */
-neon.query.Connection.prototype.executeArrayCountQuery = function(databaseName, tableName, field, limit, successCallback, errorCallback) {
-    return neon.util.ajaxUtils.doGet(neon.serviceUrl(
-        'queryservice/arraycounts', encodeURIComponent(this.host_) + '/' + encodeURIComponent(this.databaseType_) + '/' + encodeURIComponent(databaseName) + '/' + encodeURIComponent(tableName),
-        'field=' + field + (limit ? '&limit=' + limit : '')), {
+neon.query.Connection.prototype.executeArrayCountQuery = function(databaseName, tableName, fieldName, limit, whereClause, successCallback, errorCallback) {
+    var serviceName = encodeURIComponent(this.host_) + '/' + encodeURIComponent(this.databaseType_) + '/' + encodeURIComponent(databaseName) + '/' + encodeURIComponent(tableName) + '/' + encodeURIComponent(fieldName);
+    var serviceUrl = neon.serviceUrl('queryservice/arraycounts', serviceName, (limit ? 'limit=' + limit : ''));
+    var options = {
         success: successCallback,
         error: errorCallback,
         responseType: 'json'
-    });
+    };
+    return neon.util.ajaxUtils.doPostJSON(whereClause, serviceUrl, options);
 };
 
 neon.query.Connection.prototype.executeQueryService_ = function(query, successCallback, errorCallback, serviceName) {

@@ -752,7 +752,7 @@ abstract class AbstractQueryExecutorIntegrationTest {
         String field = "tags"
         int limit = 50
 
-        List<ArrayCountPair> result = queryExecutor.getArrayCounts(db, tableName, field, limit)
+        List<ArrayCountPair> result = queryExecutor.getArrayCounts(db, tableName, field, limit, null)
         assert result.size == 3
         assertEntry(result[0], "tag2", 8)
         assertEntry(result[1], "tag3", 2)
@@ -766,7 +766,7 @@ abstract class AbstractQueryExecutorIntegrationTest {
         String field = "tags"
         int limit = 2
 
-        List<ArrayCountPair> result = queryExecutor.getArrayCounts(db, tableName, field, limit)
+        List<ArrayCountPair> result = queryExecutor.getArrayCounts(db, tableName, field, limit, null)
         assert result.size == 2
         assertEntry(result[0], "tag2", 8)
         assertEntry(result[1], "tag3", 2)

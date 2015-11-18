@@ -88,7 +88,7 @@ class ExportServiceTest {
             executeQuery: { host, databaseType, ignoreFilters, selectionOnly, ignoredFilteredIds, query ->
                 return new TabularQueryResult(TABULAR_QUERY_RESULT)
             },
-            getArrayCounts: { host, databaseType, database, table, field, limit ->
+            getArrayCounts: { host, databaseType, database, table, field, limit, whereClause ->
                 return [
                     new ArrayCountPair(
                         key: "Jones",

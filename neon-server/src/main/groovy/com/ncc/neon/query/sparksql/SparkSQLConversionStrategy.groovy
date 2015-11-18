@@ -47,13 +47,13 @@ class SparkSQLConversionStrategy {
 
     }
 
-    String mergeQuery(String databaseName, String tableName, String select, String groupBy, String orderBy, String limit) {
+    String mergeQuery(String databaseName, String tableName, String select, String groupBy, String orderBy, String limit, WhereClause whereClause = null) {
         StringBuilder joinedQuery = new StringBuilder()
 
         joinedQuery << select
 
         Query query = new Query(filter: new Filter(databaseName: databaseName, tableName: tableName))
-        applyWhereStatement(joinedQuery, query, new QueryOptions())
+        applyWhereStatement(joinedQuery, query, new QueryOptions(), whereClause)
 
         joinedQuery << groupBy << orderBy << limit
     }
@@ -99,8 +99,8 @@ class SparkSQLConversionStrategy {
         return "${fieldFunction.operation}(${escapeFieldName(fieldFunction.field)}) as ${fieldFunction.name}"
     }
 
-    private void applyWhereStatement(StringBuilder builder, Query query, QueryOptions queryOptions) {
-        List whereClauses = collectWhereClauses(query, queryOptions)
+    private void applyWhereStatement(StringBuilder builder, Query query, QueryOptions queryOptions, WhereClause whereClause = null) {
+        List whereClauses = collectWhereClauses(query, queryOptions, whereClause)
 
         SparkSQLWhereClause clause = createWhereClauseParams(whereClauses)
         if (clause) {
@@ -108,8 +108,8 @@ class SparkSQLConversionStrategy {
         }
     }
 
-    private List collectWhereClauses(Query query, QueryOptions options) {
-        def whereClauses = []
+    private List collectWhereClauses(Query query, QueryOptions options, WhereClause whereClause) {
+        def whereClauses = whereClause ? [whereClause] : []
 
         if (query.filter.whereClause) {
             whereClauses << query.filter.whereClause
