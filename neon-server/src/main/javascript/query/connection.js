@@ -48,6 +48,13 @@ neon.query.Connection.MONGO = 'mongo';
 neon.query.Connection.SPARK = 'sparksql';
 
 /**
+ * Indicates the database type is elasticsearch
+ * @property ELASTICSEARCH
+ * @type {String}
+ */
+neon.query.Connection.ELASTICSEARCH = 'elasticsearch';
+
+/**
  * Specifies what database type and host the queries will be executed against and publishes a CONNECT_TO_HOST event.
  * @method connect
  * @param {String} databaseType What type of database is being connected to. The constants in this class specify the
@@ -108,11 +115,12 @@ neon.query.Connection.prototype.executeQueryGroup = function(queryGroup, success
 
 /**
  * Executes a query that returns a sorted list of key, count pairs for an array field in the database.
- * @param databaseName The name of the database
- * @param tableName The name of the collection or table
- * @param fieldName The name of the array field to count
- * @param limit The number of pairs to return (default:  50)
- * @param whereClause The where clause to apply to the array counts query, or null to apply no where clause
+ * @method executeArrayCountQuery
+ * @param {String} databaseName The name of the database
+ * @param {String} tableName The name of the collection or table
+ * @param {String} fieldName The name of the array field to count
+ * @param {Number} limit The number of pairs to return (default:  50)
+ * @param {Object} whereClause The where clause to apply to the array counts query, or null to apply no where clause
  * @param {Function} successCallback The callback to call when the list of key,count pairs is returned
  * @param {Function} [errorCallback] The optional callback when an error occurs. This is a 3 parameter
  * function that contains the xhr, a short error status and the full error message.

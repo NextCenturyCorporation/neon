@@ -210,7 +210,6 @@ neon.query.Query.prototype.withFields = function(fields) {
 
 /**
  * Sets the *where* clause of the query to determine how to select the data
- * @method where
  * The arguments can be either<br>
  * 3 arguments as follows:
  *  <ul>
@@ -225,6 +224,7 @@ neon.query.Query.prototype.withFields = function(fields) {
  *     where('someProperty','=',5)
  *
  *     where(neon.Query.and(where('someProperty','=',5), where('someOtherProperty','<',10)))
+ * @method where
  * @return {neon.query.Query} This query object
  */
 neon.query.Query.prototype.where = function() {
@@ -399,6 +399,16 @@ neon.query.Query.prototype.selectionOnly = function() {
     return this;
 };
 
+neon.query.Query.prototype.geoIntersection = function(locationField, points, geometryType) {
+    this.filter.geoIntersection(locationField, points, geometryType);
+    return this;
+};
+
+neon.query.Query.prototype.geoWithin = function(locationField, points) {
+    this.filter.geoWithin(locationField, points);
+    return this;
+};
+
 /**
  * Adds a query clause to specify that query results must be within the specified distance from
  * the center point. This is used instead of a *where* query clause (or in conjuction with where
@@ -416,7 +426,13 @@ neon.query.Query.prototype.withinDistance = function(locationField, center, dist
 };
 
 /**
- * Creates a simple *where* clause for the query
+ * Utility methods for working with Queries
+ * @class neon.query
+ * @static
+ */
+
+/**
+ * Creates a simple *where* clause for use with filters or queries
  * @method where
  * @param {String} fieldName The field name to group on
  * @param {String} op The operation to perform
@@ -473,16 +489,6 @@ neon.query.or = function(clauses) {
  */
 neon.query.withinDistance = function(locationField, center, distance, distanceUnit) {
     return new neon.query.WithinDistanceClause(locationField, center, distance, distanceUnit);
-};
-
-neon.query.Query.prototype.geoIntersection = function(locationField, points, geometryType) {
-    this.filter.geoIntersection(locationField, points, geometryType);
-    return this;
-};
-
-neon.query.Query.prototype.geoWithin = function(locationField, points) {
-    this.filter.geoWithin(locationField, points);
-    return this;
 };
 
 /**
