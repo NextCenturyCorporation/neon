@@ -258,9 +258,15 @@ neon.query.Query.prototype.groupBy = function(fields) {
     }
 
     list.forEach(function(field) {
-        // if the user provided a string, convert that to the groupBy representation of a single field, otherwise,
-        // they provided a groupBy function so just use that
-        var clause = ((typeof field === 'string') ? new neon.query.GroupBySingleFieldClause(field) : field);
+        var clause = field;
+
+        // if the user provided a string or object with a columnName and prettyName, convert that to the groupBy
+        // representation of a single field, otherwise, they provided a groupBy function so just use that
+        if(typeof field === 'string') {
+            clause = new neon.query.GroupBySingleFieldClause(field, field);
+        } else if(typeof field === 'object' && !(field instanceof neon.query.GroupByFunctionClause)) {
+            clause = new neon.query.GroupBySingleFieldClause(field.columnName, field.prettyName);
+        }
         me.groupByClauses.push(clause);
     });
     return this;
@@ -525,9 +531,10 @@ neon.query.GroupByFunctionClause = function(operation, field, name) {
 neon.query.GroupByFunctionClause.prototype = new neon.query.FieldFunction();
 
 // These are not meant to be instantiated directly but rather by helper methods
-neon.query.GroupBySingleFieldClause = function(field) {
+neon.query.GroupBySingleFieldClause = function(field, prettyField) {
     this.type = 'single';
     this.field = field;
+    this.prettyField = ((prettyField.indexOf(".") >= 0) ? prettyField.replace(/\./g, "->") : prettyField);
 };
 
 neon.query.BooleanClause = function(type, whereClauses) {

@@ -28,5 +28,6 @@ import groovy.transform.ToString
 class GroupByFieldClause implements GroupByClause {
 
     def field
+    def prettyField
 
 }

@@ -109,6 +109,20 @@ abstract class AbstractQueryExecutorIntegrationTest {
         return list
     }
 
+    protected static def getNestedObjects(data, parentFieldName) {
+        def list = []
+        data.keySet().each { key ->
+            def keyVal = data.get(key)
+            def name = (parentFieldName) ? parentFieldName + "." + key : key
+            if(keyVal instanceof Map) {
+                list.addAll(getNestedObjects(keyVal, name))
+            } else {
+                list.add(name)
+            }
+        }
+        return list
+    }
+
     @After
     void after() {
         queryExecutor.filterState.clearAllFilters()
@@ -118,7 +132,7 @@ abstract class AbstractQueryExecutorIntegrationTest {
     @Test
     void "field names"() {
         def fieldNames = queryExecutor.getFieldNames(DATABASE_NAME, TABLE_NAME)
-        def expected = getAllData()[0].keySet()
+        def expected = getNestedObjects(getAllData()[0], null)
         AssertUtils.assertEqualCollections(expected, fieldNames)
     }
 
@@ -163,8 +177,8 @@ abstract class AbstractQueryExecutorIntegrationTest {
 
     @Test
     void "group by and sort"() {
-        def groupByStateClause = new GroupByFieldClause(field: 'state')
-        def groupByCityClause = new GroupByFieldClause(field: 'city')
+        def groupByStateClause = new GroupByFieldClause(field: 'state', prettyField: 'state')
+        def groupByCityClause = new GroupByFieldClause(field: 'city', prettyField: 'city')
         def sortByStateClause = new SortClause(fieldName: 'state', sortOrder: SortOrder.ASCENDING)
         def sortByCityClause = new SortClause(fieldName: 'city', sortOrder: SortOrder.DESCENDING)
         def salaryAggregateClause = new AggregateClause(name: 'salary_sum', operation: 'sum', field: 'salary')
@@ -178,7 +192,7 @@ abstract class AbstractQueryExecutorIntegrationTest {
 
     @Test
     void "group by average"() {
-        def groupByStateClause = new GroupByFieldClause(field: 'state')
+        def groupByStateClause = new GroupByFieldClause(field: 'state', prettyField: 'state')
         def sortByStateClause = new SortClause(fieldName: 'state', sortOrder: SortOrder.ASCENDING)
         def salaryAverageClause = new AggregateClause(name: 'salary_avg', operation: 'avg', field: 'salary')
         def expected = readJson('groupByStateAsc_avgSalary.json')
@@ -191,7 +205,7 @@ abstract class AbstractQueryExecutorIntegrationTest {
 
     @Test
     void "group by min"() {
-        def groupByStateClause = new GroupByFieldClause(field: 'state')
+        def groupByStateClause = new GroupByFieldClause(field: 'state', prettyField: 'state')
         def sortByStateClause = new SortClause(fieldName: 'state', sortOrder: SortOrder.ASCENDING)
         def salaryMinClause = new AggregateClause(name: 'salary_min', operation: 'min', field: 'salary')
         def expected = readJson('groupByStateAsc_minSalary.json')
@@ -204,7 +218,7 @@ abstract class AbstractQueryExecutorIntegrationTest {
 
     @Test
     void "group by max"() {
-        def groupByStateClause = new GroupByFieldClause(field: 'state')
+        def groupByStateClause = new GroupByFieldClause(field: 'state', prettyField: 'state')
         def sortByStateClause = new SortClause(fieldName: 'state', sortOrder: SortOrder.ASCENDING)
         def salaryMaxClause = new AggregateClause(name: 'salary_max', operation: 'max', field: 'salary')
         def expected = readJson('groupByStateAsc_maxSalary.json')
@@ -247,7 +261,7 @@ abstract class AbstractQueryExecutorIntegrationTest {
 
     @Test
     void "group by count"() {
-        def groupByStateClause = new GroupByFieldClause(field: 'state')
+        def groupByStateClause = new GroupByFieldClause(field: 'state', prettyField: 'state')
         def sortByStateClause = new SortClause(fieldName: 'state', sortOrder: SortOrder.ASCENDING)
         def countClause = new AggregateClause(name: 'counter', operation: 'count', field: '*')
         def expected = readJson('groupByStateAsc_count.json')
@@ -261,7 +275,7 @@ abstract class AbstractQueryExecutorIntegrationTest {
 
     @Test
     void "group by count with limit"() {
-        def groupByStateClause = new GroupByFieldClause(field: 'state')
+        def groupByStateClause = new GroupByFieldClause(field: 'state', prettyField: 'state')
         def sortByStateClause = new SortClause(fieldName: 'state', sortOrder: SortOrder.ASCENDING)
         def limitClause = new LimitClause(limit: 2)
         def countClause = new AggregateClause(name: 'counter', operation: 'count', field: '*')
@@ -276,7 +290,7 @@ abstract class AbstractQueryExecutorIntegrationTest {
 
     @Test
     void "group by count with offset"() {
-        def groupByStateClause = new GroupByFieldClause(field: 'state')
+        def groupByStateClause = new GroupByFieldClause(field: 'state', prettyField: 'state')
         def sortByStateClause = new SortClause(fieldName: 'state', sortOrder: SortOrder.ASCENDING)
         def offsetClause = new OffsetClause(offset: 1)
         def countClause = new AggregateClause(name: 'counter', operation: 'count', field: '*')
@@ -757,6 +771,20 @@ abstract class AbstractQueryExecutorIntegrationTest {
         assertEntry(result[0], "tag2", 8)
         assertEntry(result[1], "tag3", 2)
         assertEntry(result[2], "tag1", 1)
+    }
+
+    @Test
+    void "test array count with non-array field"(){
+        String db = DATABASE_NAME
+        String tableName = TABLE_NAME
+        String field = "state"
+        int limit = 50
+
+        List<ArrayCountPair> result = queryExecutor.getArrayCounts(db, tableName, field, limit)
+        assert result.size == 3
+        assertEntry(result[0], "VA", 4)
+        assertEntry(result[1], "DC", 3)
+        assertEntry(result[2], "MD", 1)
     }
 
     @Test
