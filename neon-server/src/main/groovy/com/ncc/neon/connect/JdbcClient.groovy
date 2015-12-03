@@ -197,6 +197,7 @@ class JdbcClient implements Closeable {
         boolean isFieldArray = false
         ResultSet rs = connection.metaData.getColumns(null, databaseName, tableName, null)
         while (rs.next()) {
+            // column 4 is the column name
             if(rs.getString(4) == fieldName) {
                 def type = rs.getString("TYPE_NAME").toLowerCase()
                 if(type.startsWith("array")) {

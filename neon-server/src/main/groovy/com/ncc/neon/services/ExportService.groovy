@@ -182,10 +182,7 @@ class ExportService {
         result.each { record ->
             queryNames.each { field ->
                 String s = null
-                def fieldValue = record[field]
-                if(!fieldValue) {
-                    fieldValue = getFieldInRecord(field, record)
-                }
+                def fieldValue = record[field] ? record[field] : getFieldInRecord(field, record)
                 if(fieldValue instanceof String) {
                     s = fieldValue.replaceAll("\"", "\"\"")
                 }
@@ -254,10 +251,7 @@ class ExportService {
             cellNum = 0
             queryNames.each { field ->
                 Cell cell = row.createCell(cellNum)
-                def fieldValue = record[field]
-                if(!fieldValue) {
-                    fieldValue = getFieldInRecord(field, record)
-                }
+                def fieldValue = record[field] ? record[field] : getFieldInRecord(field, record)
                 cell.setCellValue("${fieldValue}")
                 cellNum++
             }
@@ -336,7 +330,7 @@ class ExportService {
         def fieldObj = result
         fieldNameArray.each { field ->
             if(fieldObj) {
-                fieldObj = fieldObj.get(field)
+                fieldObj = fieldObj instanceof Map ? fieldObj.get(field) : null
             }
         }
         return fieldObj
