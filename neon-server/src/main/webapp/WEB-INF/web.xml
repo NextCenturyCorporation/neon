@@ -61,4 +61,6 @@
         <servlet-name>jersey-servlet</servlet-name>
         <url-pattern>/services/*</url-pattern>
     </servlet-mapping>
+
+    <welcome-file>index.html</welcome-file>
 </web-app>

@@ -106,6 +106,29 @@ neon.query.Connection.prototype.executeQueryGroup = function(queryGroup, success
     return this.executeQueryService_(queryGroup, successCallback, errorCallback, 'querygroup');
 };
 
+
+/**
+ * Executes a query that returns a sorted list of key, count pairs for an array field in the database.
+ * @method executeArrayCountQuery
+ * @param {String} databaseName
+ * @param {String} tableName The table name whose field will be counted
+ * @param {String} field The field containing an array to count on
+ * @param {Integer} limit The number of pairs to return; defaults to 50 if not set
+ * @param {Function} successCallback The callback to call when the list of key,count pairs is returned
+ * @param {Function} [errorCallback] The optional callback when an error occurs. This is a 3 parameter
+ * function that contains the xhr, a short error status and the full error message.
+ * @return {neon.util.AjaxRequest} The xhr request object
+ */
+neon.query.Connection.prototype.executeArrayCountQuery = function(databaseName, tableName, field, limit, successCallback, errorCallback) {
+    return neon.util.ajaxUtils.doGet(neon.serviceUrl(
+        'queryservice/arraycounts', encodeURIComponent(this.host_) + '/' + encodeURIComponent(this.databaseType_) + '/' + encodeURIComponent(databaseName) + '/' + encodeURIComponent(tableName),
+        'field=' + field + (limit ? '&limit=' + limit : '')), {
+        success: successCallback,
+        error: errorCallback,
+        responseType: 'json'
+    });
+};
+
 neon.query.Connection.prototype.executeQueryService_ = function(query, successCallback, errorCallback, serviceName) {
     var opts = [];
     if(query.ignoreFilters_) {
