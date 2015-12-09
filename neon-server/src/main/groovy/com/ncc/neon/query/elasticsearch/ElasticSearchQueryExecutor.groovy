@@ -140,6 +140,19 @@ class ElasticSearchQueryExecutor extends AbstractQueryExecutor {
     @Override
     List<String> showTables(String dbName) {
         LOGGER.debug("Executing showTables for index " + dbName + " to get type mappings")
+        // Elastic search allows wildcards in index names.  If dbName contains a wildcard, find all matches.
+        if (dbName?.contains('*')) {
+            def match = dbName.replaceAll(/\*/, '.*')
+            List<String> tables = []
+            def mappings = getMappings()
+            mappings.keysIt().each {
+                if (it.matches(match)) {
+                    tables.addAll(mappings.get(it).collect{ table -> table.key })
+                }
+            }
+            return tables.unique()
+        }
+        // Fall through case is to return the exact match.
         getMappings().get(dbName).collect { it.key }
     }
 
@@ -148,18 +161,26 @@ class ElasticSearchQueryExecutor extends AbstractQueryExecutor {
         if(tableName) {
             LOGGER.debug("Executing getFieldNames for index " + databaseName + " type " + tableName)
 
-            def dbMappings = getMappings().get(databaseName)
-            if(dbMappings) {
-                def tableMappings = dbMappings.get(tableName)
-                if(tableMappings) {
-                    def fields = []
-                    fields.addAll(getFieldsInObject(tableMappings.getSourceAsMap(), null))
+            def dbMatch = databaseName.replaceAll(/\*/, '.*')
+            def tableMatch = tableName.replaceAll(/\*/, '.*')
 
-                    if (fields) {
-                        fields.add("_id")
-                        return fields
+            def fields = []
+            def mappings = getMappings()
+            mappings.keysIt().each { dbKey ->
+                if (dbKey.matches(dbMatch)) {
+                    def dbMappings = mappings.get(dbKey)
+                    dbMappings.keysIt().each { tableKey ->
+                        if (tableKey.matches(tableMatch)) {
+                            def tableMappings = dbMappings.get(tableKey)
+                            fields.addAll(getFieldsInObject(tableMappings.getSourceAsMap(), null))
+                        }
                     }
                 }
+            }
+
+            if (fields) {
+                fields.add("_id")
+                return fields.unique()
             }
         }
         return []
