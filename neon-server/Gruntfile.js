@@ -57,7 +57,7 @@ module.exports = function(grunt) {
     grunt.initConfig({
         // Metadata.
         pkg: grunt.file.readJSON('package.json'),
-        banner: '/*!  <%= pkg.title || pkg.name %> | Copyright 2013 <%= pkg.author %> | https://raw.githubusercontent.com/NextCenturyCorporation/neon/master/LICENSE.txt */' + grunt.util.linefeed + grunt.util.linefeed,
+        banner: '/*!  <%= pkg.title || pkg.name %> | Copyright 2015 <%= pkg.author %> | https://raw.githubusercontent.com/NextCenturyCorporation/neon/master/LICENSE.txt */' + grunt.util.linefeed + grunt.util.linefeed,
 
         // Task configuration.
         uglify: {
@@ -86,6 +86,11 @@ module.exports = function(grunt) {
                 src: [lib('lodash'), lib('uuid'), lib('postal'), lib('jquery'), lib('log4javascript'), 'build/dependencies/**/*.js', nodepMinOutputFile],
                 dest: outputFile
             }
+        },
+
+        watch: {
+            files: ['src/main/javascript/**/*.js', 'src/main/js-lib/**/*.js'],
+            tasks: ['concat']
         },
 
         jshint: {
