@@ -340,3 +340,39 @@ neon.query.Connection.prototype.getTableNamesAndFieldNames = function(databaseNa
         }
     );
 };
+
+/**
+ * Requests and returns the translation cache.
+ * @method getTranslationCache
+ * @param {Function} successCallback
+ * @param {Function} errorCallback
+ * @return {neon.util.AjaxRequest} The xhr request object
+ */
+neon.query.Connection.prototype.getTranslationCache = function(successCallback, errorCallback) {
+    return neon.util.ajaxUtils.doGet(
+        neon.serviceUrl("translationservice", "getcache"), {
+            success: successCallback,
+            error: errorCallback,
+            responseType: "json"
+        }
+    );
+};
+
+/**
+ * Requests to save the given translation cache.
+ * @method setTranslationCache
+ * @param {Object} cache
+ * @param {Function} successCallback
+ * @param {Function} errorCallback
+ * @return {neon.util.AjaxRequest} The xhr request object
+ */
+neon.query.Connection.prototype.setTranslationCache = function(cache, successCallback, errorCallback) {
+    return neon.util.ajaxUtils.doPostJSON(
+        cache,
+        neon.serviceUrl("translationservice", "setcache"), {
+            success: successCallback,
+            error: errorCallback,
+            responseType: "json"
+        }
+    );
+};
