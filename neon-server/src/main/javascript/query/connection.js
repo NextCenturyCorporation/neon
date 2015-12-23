@@ -376,3 +376,122 @@ neon.query.Connection.prototype.setTranslationCache = function(cache, successCal
         }
     );
 };
+
+/**
+ * Requests to save the state with the given parameters.
+ * @method saveState
+ * @param {Object} stateParams
+ * @param {Array} stateParams.dashboard
+ * @param {Object} stateParams.dataset
+ * @param {String} [stateParams.stateName]
+ * @param {Function} successCallback
+ * @param {Function} errorCallback
+ * @return {neon.util.AjaxRequest} The xhr request object
+ */
+neon.query.Connection.prototype.saveState = function(stateParams, successCallback, errorCallback) {
+    var opts = "";
+
+    if(stateParams.stateName) {
+        opts = "stateName=" + stateParams.stateName;
+        delete stateParams.stateName;
+    }
+
+    return neon.util.ajaxUtils.doPostJSON(
+        stateParams,
+        neon.serviceUrl("stateservice", "savestate", opts), {
+            success: successCallback,
+            error: errorCallback,
+            responseType: "json"
+        }
+    );
+};
+
+/**
+ * Requests to load the state with the given name, or dashboard and/or filter state IDs.
+ * @method loadState
+ * @param {Object} stateParams
+ * @param {String} stateParams.dashboardStateId
+ * @param {String} stateParams.filterStateId
+ * @param {String} stateParams.stateName
+ * @param {Function} successCallback
+ * @param {Function} errorCallback
+ * @return {neon.util.AjaxRequest} The xhr request object
+ */
+neon.query.Connection.prototype.loadState = function(stateParams, successCallback, errorCallback) {
+    var opts = [];
+    if(stateParams.stateName) {
+        opts.push("stateName=" + stateParams.stateName);
+    } else {
+        if(stateParams.dashboardStateId) {
+            opts.push("dashboardStateId=" + stateParams.dashboardStateId);
+        }
+        if(stateParams.filterStateId) {
+            opts.push("filterStateId=" + stateParams.filterStateId);
+        }
+    }
+    return neon.util.ajaxUtils.doGet(
+        neon.serviceUrl("stateservice", "loadstate", opts.join('&')), {
+            success: successCallback,
+            error: errorCallback,
+            responseType: "json"
+        }
+    );
+};
+
+/**
+ * Requests to delete the states with the given name.
+ * @method deleteState
+ * @param {String} stateName
+ * @param {Function} successCallback
+ * @param {Function} errorCallback
+ * @return {neon.util.AjaxRequest} The xhr request object
+ */
+neon.query.Connection.prototype.deleteState = function(stateName, successCallback, errorCallback) {
+    return neon.util.ajaxUtils.doDelete(
+        neon.serviceUrl("stateservice", "deletestate/" + stateName), {
+            success: successCallback,
+            error: errorCallback,
+            responseType: "json"
+        }
+    );
+};
+
+/**
+ * Requests to retrieve all the states names.
+ * @method getAllStates
+ * @param {Function} successCallback
+ * @param {Function} errorCallback
+ * @return {neon.util.AjaxRequest} The xhr request object
+ */
+neon.query.Connection.prototype.getAllStates = function(successCallback, errorCallback) {
+    return neon.util.ajaxUtils.doGet(
+        neon.serviceUrl("stateservice", "allstatesnames"), {
+            success: successCallback,
+            error: errorCallback,
+            responseType: "json"
+        }
+    );
+};
+
+/**
+ * Requests to retrieve the state name for the given state IDs.
+ * @method getStateName
+ * @param {Object} stateParams
+ * @param {String} stateParams.dashboardStateId
+ * @param {String} stateParams.filterStateId
+ * @param {Function} successCallback
+ * @param {Function} errorCallback
+ * @return {neon.util.AjaxRequest} The xhr request object
+ */
+neon.query.Connection.prototype.getStateName = function(stateParams, successCallback, errorCallback) {
+    var opts = [];
+    opts.push("dashboardStateId=" + stateParams.dashboardStateId);
+    opts.push("filterStateId=" + stateParams.filterStateId);
+    return neon.util.ajaxUtils.doGet(
+        neon.serviceUrl("stateservice", "statename", opts.join('&')), {
+            success: successCallback,
+            error: errorCallback,
+            responseType: "json"
+        }
+    );
+};
