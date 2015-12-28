@@ -16,9 +16,9 @@
 
 package com.ncc.neon.query.jackson
 import com.ncc.neon.util.DateUtils
-import org.codehaus.jackson.JsonGenerator
-import org.codehaus.jackson.map.JsonSerializer
-import org.codehaus.jackson.map.SerializerProvider
+import com.fasterxml.jackson.core.JsonGenerator
+import com.fasterxml.jackson.databind.JsonSerializer
+import com.fasterxml.jackson.databind.SerializerProvider
 
 
 class DateSerializer extends JsonSerializer<Date> {

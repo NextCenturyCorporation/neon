@@ -16,8 +16,8 @@
 
 package com.ncc.neon.query.export
 
-import org.codehaus.jackson.annotate.JsonSubTypes
-import org.codehaus.jackson.annotate.JsonTypeInfo
+import com.fasterxml.jackson.annotation.JsonSubTypes
+import com.fasterxml.jackson.annotation.JsonTypeInfo
 
 /**
  * Marker interface just to give context that implementors are ExportRequests.

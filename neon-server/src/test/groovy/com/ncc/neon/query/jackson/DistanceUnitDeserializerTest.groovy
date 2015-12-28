@@ -18,7 +18,7 @@ package com.ncc.neon.query.jackson
 
 import com.ncc.neon.query.clauses.DistanceUnit
 import groovy.mock.interceptor.StubFor
-import org.codehaus.jackson.JsonParser
+import com.fasterxml.jackson.core.JsonParser
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith

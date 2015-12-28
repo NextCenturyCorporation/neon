@@ -16,7 +16,7 @@
 
 package com.ncc.neon.query
 
-import org.codehaus.jackson.annotate.JsonIgnoreProperties
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 
 
 

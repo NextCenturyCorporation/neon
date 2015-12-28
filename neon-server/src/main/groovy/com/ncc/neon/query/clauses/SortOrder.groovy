@@ -17,7 +17,7 @@
 package com.ncc.neon.query.clauses
 
 import com.ncc.neon.query.jackson.SortOrderDeserializer
-import org.codehaus.jackson.map.annotate.JsonDeserialize
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize
 
 
 

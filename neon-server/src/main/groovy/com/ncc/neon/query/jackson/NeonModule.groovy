@@ -16,8 +16,8 @@
 
 package com.ncc.neon.query.jackson
 import org.bson.types.ObjectId
-import org.codehaus.jackson.Version
-import org.codehaus.jackson.map.module.SimpleModule
+import com.fasterxml.jackson.core.Version
+import com.fasterxml.jackson.databind.module.SimpleModule
 
 
 class NeonModule extends SimpleModule{

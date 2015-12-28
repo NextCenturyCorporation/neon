@@ -16,18 +16,29 @@
 
 package com.ncc.neon.services
 
-import com.sun.jersey.spi.container.ContainerRequest
-import com.sun.jersey.spi.container.ContainerResponse
-import com.sun.jersey.spi.container.ContainerResponseFilter
-
-import javax.ws.rs.core.Response
-
-
+import javax.ws.rs.container.ContainerRequestContext
+import javax.ws.rs.container.ContainerResponseContext
+import javax.ws.rs.container.ContainerResponseFilter
 
 /**
  * Enables Cross Origin Resource Sharing (CORS)
  */
 
+class CorsFilter implements ContainerResponseFilter {
+    @Override
+    void filter(ContainerRequestContext requestContext, ContainerResponseContext responseContext) {
+        responseContext.getHeaders().add("Access-Control-Allow-Origin", "*")
+        responseContext.getHeaders().add("Access-Control-Allow-Methods", "GET, POST, OPTIONS")
+
+        String reqHead = requestContext.getHeaders.getFirst("Access-Control-Request-Headers")
+
+        if(reqHead != null) {
+            responseContext.getHeaders.add("Access-Control-Allow-Headers", reqHead)
+        }
+    }
+}
+
+/* Old
 class CorsFilter implements ContainerResponseFilter{
 
     @Override
@@ -46,3 +57,4 @@ class CorsFilter implements ContainerResponseFilter{
         return response
     }
 }
+*/

@@ -17,12 +17,12 @@
 package com.ncc.neon.query.jackson
 
 import com.ncc.neon.util.DateUtils
-import org.codehaus.jackson.JsonParser
-import org.codehaus.jackson.JsonProcessingException
-import org.codehaus.jackson.JsonToken
-import org.codehaus.jackson.map.DeserializationContext
-import org.codehaus.jackson.map.JsonDeserializer
-import org.codehaus.jackson.map.deser.std.UntypedObjectDeserializer
+import com.fasterxml.jackson.core.JsonParser
+import com.fasterxml.jackson.core.JsonProcessingException
+import com.fasterxml.jackson.core.JsonToken
+import com.fasterxml.jackson.databind.DeserializationContext
+import com.fasterxml.jackson.databind.JsonDeserializer
+import com.fasterxml.jackson.databind.deser.std.UntypedObjectDeserializer
 
 
 /**

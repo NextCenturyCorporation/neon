@@ -16,7 +16,7 @@
 
 package com.ncc.neon.userimport.types
 
-import org.codehaus.jackson.map.annotate.JsonDeserialize
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize
 
 /**
  * Enumeration for the different possible types to which the fields of database records can be converted.

@@ -23,7 +23,7 @@ import com.ncc.neon.query.result.TabularQueryResult
 import com.ncc.neon.query.mongo.MongoQueryResult
 import com.ncc.neon.util.DateUtils
 import org.bson.types.ObjectId
-import org.codehaus.jackson.map.ObjectMapper
+import com.fasterxml.jackson.databind.ObjectMapper
 import org.junit.Test
 
 
