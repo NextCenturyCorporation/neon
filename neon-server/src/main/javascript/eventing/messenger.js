@@ -49,6 +49,7 @@ neon.eventing.eventBus_ = neon.eventing.createEventBus_();
 
 neon.eventing.Messenger = function() {
     this.id_ = uuid.v4();
+    this.channels = [];
 };
 
 /**
@@ -72,6 +73,9 @@ neon.eventing.Messenger.prototype.publish = function(channel, message) {
  */
 neon.eventing.Messenger.prototype.subscribe = function(channel, callback) {
     neon.eventing.eventBus_.subscribe(channel, callback, this.id_);
+    if(this.channels.indexOf(channel) < 0) {
+        this.channels.push(channel);
+    }
 };
 
 /**
@@ -81,6 +85,22 @@ neon.eventing.Messenger.prototype.subscribe = function(channel, callback) {
  */
 neon.eventing.Messenger.prototype.unsubscribe = function(channel) {
     neon.eventing.eventBus_.unsubscribe(channel, this.id_);
+    var index = this.channels.indexOf(channel);
+    if(index >= 0) {
+        this.channels.splice(index, 1);
+    }
+};
+
+/**
+ * Unsubscribes this messenger from all its channels, including events
+ * @method unsubscribeAll
+ */
+neon.eventing.Messenger.prototype.unsubscribeAll = function() {
+    var me = this;
+    var allChannels = me.channels.slice();
+    _.each(allChannels, function(channel) {
+        me.unsubscribe(channel);
+    });
 };
 
 /**
