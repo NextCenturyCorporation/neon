@@ -18,7 +18,7 @@ import org.apache.tools.ant.filters.ReplaceTokens
 import org.gradle.api.plugins.jetty.internal.Monitor
 
 apply plugin: 'scala'
-apply plugin: 'jetty'
+apply plugin: 'org.akhikhl.gretty' // Replacement for default jetty plugin
 
 def performanceTestSourceDir = 'src/performanceTest/scala'
 def performanceTestPort = 11402

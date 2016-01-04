@@ -31,12 +31,6 @@ import javax.ws.rs.core.Response
 
 import groovy.json.JsonOutput
 
-// All of the below are imported for the "testSse" method at the bottom.
-import org.glassfish.jersey.media.sse.EventOutput
-import org.glassfish.jersey.media.sse.OutboundEvent
-import org.glassfish.jersey.media.sse.OutboundEvent.Builder
-import org.glassfish.jersey.media.sse.SseFeature
-
 /**
  * Service for importing a file's contents into a database.
  */
@@ -200,32 +194,4 @@ class ImportService {
     private boolean isImportEnabled() {
         return Boolean.parseBoolean(importEnabled)
     }
-
-
-
-    // START TEST CODE: PLEASE IGNORE
-    @GET
-    @Produces(SseFeature.SERVER_SENT_EVENTS)
-    @Path("test")
-    public EventOutput testSse() {
-        final EventOutput OUTPUT = new EventOutput()
-        new Thread() {
-            public void run() {
-                try {
-                    for(int x = 0; x < 5; x++) {
-                        OUTPUT.write(new OutboundEvent.Builder().data(String, "Testing" + x).build())
-                        Thread.sleep(500)
-                    }
-                    OUTPUT.close()
-                }
-                catch (final InterruptedException | IOException e) {
-                    Exception ex = new Exception()
-                    ex.setStackTrace(e.getStackTrace())
-                    throw ex
-                }
-            }
-        }.start()
-        return OUTPUT
-    }
-    // END TEST CODE: PLEASE IGNORE
 }

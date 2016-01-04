@@ -31,10 +31,13 @@ buildscript {
         flatDir {
             dirs 'gradle/plugins'
         }
+
     }
     dependencies {
         classpath ":antlr4-plugin:$antlrPluginVersion"
         classpath "org.hidetake:gradle-ssh-plugin:$sshPluginVersion"
+
+        classpath "org.akhikhl.gretty:gretty:$grettyVersion"
     }
 }
 
@@ -52,8 +55,9 @@ project.ext {
     testDataInputFileTree = fileTree('src/test-data').include('*.json')
 }
 
+apply plugin: 'org.akhikhl.gretty' // Why is this causing gradle to say "Cannot add task 'jettyRun' because it already exists" /even when applying jetty plugin is commented out and jettyRun method is deleted/?
 
-apply plugin: 'jetty'
+//apply plugin: 'jetty'
 apply plugin: 'war'
 
 // these files need to be applied in order since there are dependencies between them
@@ -76,12 +80,6 @@ configurations {
 }
 
 dependencies {
-    //compile "com.sun.jersey:jersey-servlet:$jerseyVersion"
-    //compile "com.sun.jersey:jersey-core:$jerseyVersion"
-    //compile "com.sun.jersey:jersey-client:$jerseyVersion"
-    //compile "com.sun.jersey:jersey-server:$jerseyVersion"
-    //compile "com.sun.jersey:jersey-json:$jerseyVersion"
-    //compile "com.sun.jersey.contribs:jersey-spring:$jerseyVersion"
     compile "org.springframework:spring-web:$springVersion"
     compile "org.slf4j:slf4j-api:$slf4jVersion"
     compile "org.slf4j:jcl-over-slf4j:$slf4jVersion"
@@ -97,7 +95,6 @@ dependencies {
     compile "org.apache.poi:poi-ooxml-schemas:$poiVersion"
     compile "org.apache.poi:ooxml-schemas:$ooxmlSchemasVersion"
 
-    //compile "com.sun.jersey.contribs:jersey-multipart:$jerseyVersion"
     compile "com.monitorjbl:xlsx-streamer:$xlsxStreamerVersion"
 
     compile "org.glassfish.jersey.containers:jersey-container-servlet:$jerseySseVersion"
@@ -109,7 +106,8 @@ dependencies {
     compile "org.glassfish.jersey.media:jersey-media-multipart:$jerseySseVersion"
     compile "org.glassfish.jersey.media:jersey-media-sse:$jerseySseVersion"
     compile "com.fasterxml.jackson.jaxrs:jackson-jaxrs-providers:$jacksonProvidersVersion" //Should automatically handle JSON/XML/etc stuff.
-    compile "com.fasterxml.jackson.core:jackson-databind:$jacksonProvidersVersion" // No need to include jakcson-core or jackson-annotations, because this includes them as dependencies.
+    compile "com.fasterxml.jackson.core:jackson-databind:$jacksonProvidersVersion" // No need to include jackson-core or jackson-annotations, because this includes them as dependencies.
+    compile "org.apache.commons:commons-math3:$apacheMathVersion" // Apache math module, for handling online aggregation's statistics stuff.
 
     compile "commons-io:commons-io:$commonsIoVersion"
     compile("org.codehaus.groovy.modules.http-builder:http-builder:$httpBuilderVersion") {
@@ -137,63 +135,78 @@ war {
     }
 }
 
-jettyRun {
-    dependsOn concatjs, watch, 'setVersion'
-    reload = 'automatic'
-    scanIntervalSeconds = 10
-    httpPort = 8080
-
-    webAppConfig = new JettyPluginWebAppContext()
-    webAppConfig.baseResource = jettyRun.class.classLoader.loadClass('org.mortbay.resource.ResourceCollection').newInstance(
-            [
-                    file(webAppDirName).toString(),
-
-                    // add the concatenated javascript so the widgets can access it by neon.js
-                    buildDir.absolutePath,
-
-                    // this lets us get to the examples directory using the /examples path, but unfortunately it also
-                    // adds all of our base directories. this isn't really a problem just more clutter than is needed
-                    rootDir.absolutePath
-            ] as String[])
-
-    doFirst {
-        System.setProperty("log.dir", "${project.buildDir}/jettyRunLogs")
-    }
+gretty {
+    // dependsOn concatjs, watch, 'setVersion' // TODO - This doesn't work because gretty isn't a task, and gretty tasks like appRun are only aded at runtim.e
+    servletContainer = 'jetty9' // May need to use jetty 8 instead, depending on what version of Java we're using.
+    extraResourceBases file(webAppDirName).toString(), buildDir.absolutePath as String, rootDir.absolutePath as String
+    logDir = "${project.buildDir}/jettyRunLogs"
+    println file(webAppDirName).toString()
+    println buildDir.absolutePath as String
+    println rootDir.absolutePath as String
 }
 
-[jettyRun, jettyStop]*.stopPort = 8081;
-[jettyRun, jettyStop]*.stopKey = 'neon-jetty';
+//jettyRun {
+//    dependsOn concatjs, watch, 'setVersion'
+//    reload = 'automatic'
+//    scanIntervalSeconds = 10
+//    httpPort = 8080
+//
+//    webAppConfig = new JettyPluginWebAppContext()
+//    webAppConfig.baseResource = jettyRun.class.classLoader.loadClass('org.mortbay.resource.ResourceCollection').newInstance(
+//            [
+//                    file(webAppDirName).toString(),
+//
+//                    // add the concatenated javascript so the widgets can access it by neon.js
+//                    buildDir.absolutePath,
+//
+//                    // this lets us get to the examples directory using the /examples path, but unfortunately it also
+//                    // adds all of our base directories. this isn't really a problem just more clutter than is needed
+//                    rootDir.absolutePath
+//            ] as String[])
+//
+//    doFirst {
+//        System.setProperty("log.dir", "${project.buildDir}/jettyRunLogs")
+//    }
+//}
 
-[jettyRun, jettyRunWar, transformTestWebService, acceptanceTestWar, performanceTestWar]*.with {
-    /**
-     * THIS IS A WORKAROUND FOR JETTY LOCKING STATIC HTML FILES ON WINDOWS
-     *
-     * When developing on Windows Jetty locks any static HTML files and resources, preventing on-the-fly
-     * editing for quick development turn-around.  The work around for this is to override the
-     * default setting for useFileMappedBuffer in jetty's webdefault.xml file.  Here we've extracted
-     * the Jetty 6.1.25 webdefault.xml and simply set useFileMappedBuffer to false.
-     *
-     * References:
-     * http://issues.gradle.org/browse/GRADLE-727
-     * http://stackoverflow.com/questions/11032342/gradle-jetty-plugin-locking-files
-     */
-    webDefaultXml = file("${projectDir}/webdefault.xml")
-}
+//[jettyRun, jettyStop]*.stopPort = 8081;         // Probably get rid of or
+//[jettyRun, jettyStop]*.stopKey = 'neon-jetty';  // comment out both of these?
 
-[jettyRun, jettyRunWar, transformTestWebService, acceptanceTestWar, performanceTestWar]*.doLast {
-    /**
-     * THIS IS A WORKAROUND! THE CURRENT VERSION OF THIS TASK DOESN'T START A WATCHER IN DAEMON MODE
-     *
-     * If starting the monitor fails, it may be because the jetty task was updated to fix this issue
-     * When that happens, we shouldn't need the custom task any more
-     *
-     * http://issues.gradle.org/browse/GRADLE-2263
-     */
-    if (getStopPort() != null && getStopPort() > 0 && getStopKey() != null) {
-        Monitor monitor = new Monitor(getStopPort(), getStopKey(), server.getProxiedObject());
-        monitor.start();
-    }
-}
+
+// This below \/ sounds like it would be unnecessary for gretty, from: http://www.btday.com/gradle-jetty-plugin-locking-files/
+
+/*
+ *[jettyRun, jettyRunWar, transformTestWebService, acceptanceTestWar, performanceTestWar]*.with {
+ *    
+ *     * THIS IS A WORKAROUND FOR JETTY LOCKING STATIC HTML FILES ON WINDOWS
+ *     *
+ *     * When developing on Windows Jetty locks any static HTML files and resources, preventing on-the-fly
+ *     * editing for quick development turn-around.  The work around for this is to override the
+ *     * default setting for useFileMappedBuffer in jetty's webdefault.xml file.  Here we've extracted
+ *     * the Jetty 6.1.25 webdefault.xml and simply set useFileMappedBuffer to false.
+ *     *
+ *     * References:
+ *     * http://issues.gradle.org/browse/GRADLE-727
+ *     * http://stackoverflow.com/questions/11032342/gradle-jetty-plugin-locking-files
+ *     
+ *    webDefaultXml = file("${projectDir}/webdefault.xml")
+ *}
+ *
+ *[jettyRun, jettyRunWar, transformTestWebService, acceptanceTestWar, performanceTestWar]*.doLast {
+ *    
+ *     * THIS IS A WORKAROUND! THE CURRENT VERSION OF THIS TASK DOESN'T START A WATCHER IN DAEMON MODE
+ *     *
+ *     * If starting the monitor fails, it may be because the jetty task was updated to fix this issue
+ *     * When that happens, we shouldn't need the custom task any more
+ *     *
+ *     * http://issues.gradle.org/browse/GRADLE-2263
+ *    
+ *    if (getStopPort() != null && getStopPort() > 0 && getStopKey() != null) {
+ *        Monitor monitor = new Monitor(getStopPort(), getStopKey(), server.getProxiedObject());
+ *        monitor.start();
+ *    }
+ *}
+ */
 
 test {
     description = "Runs the neon unit tests"

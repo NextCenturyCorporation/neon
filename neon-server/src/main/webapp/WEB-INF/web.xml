@@ -3,7 +3,7 @@
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://java.sun.com/xml/ns/javaee
           http://java.sun.com/xml/ns/javaee/web-app_3_0.xsd"
-         version="3.0">
+         version="3.0"> // TODO - This is I think accurate.
 
     <context-param>
         <param-name>contextConfigLocation</param-name>
@@ -61,6 +61,7 @@
             <param-value>org.glassfish.jersey.media.multipart.MultiPartFeature;org.glassfish.jersey.media.sse.SseFeature</param-value>
         </init-param>
         <load-on-startup>1</load-on-startup>
+        <async-supported>true</async-supported>
     </servlet>
 
     <servlet-mapping>

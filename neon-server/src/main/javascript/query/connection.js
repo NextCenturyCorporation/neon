@@ -163,6 +163,60 @@ neon.query.Connection.prototype.executeQueryService_ = function(query, successCa
     );
 };
 
+
+
+
+
+
+
+
+
+// Methods immediately below this are stupid placeholders and need to be changed. 
+
+neon.query.Connection.prototype.executeSseQuery = function(query, successCallback, errorCallback) {
+    return this.executeSseQueryService_(query, successCallback, errorCallback, 'query');
+};
+
+neon.query.Connection.prototype.executeSseQueryGroup = function(queryGroup, successCallback, errorCallback) {
+    return this.executeSseQueryService_(queryGroup, successCallback, errorCallback, 'querygroup');
+};
+
+neon.query.Connection.prototype.executeSseQueryService_ = function(query, successCallback, errorCallback, serviceName) {
+    var opts = [];
+    if(query.ignoreFilters_) {
+        opts.push("ignoreFilters=true");
+    } else if(query.ignoredFilterIds_) {
+        var filterIds = [];
+        query.ignoredFilterIds_.forEach(function(id) {
+            filterIds.push("ignoredFilterIds=" + encodeURIComponent(id));
+        });
+        if(filterIds.length) {
+            opts.push(filterIds.join("&"));
+        }
+    }
+    if(query.selectionOnly_) {
+        opts.push("selectionOnly=true");
+    }
+    return neon.util.ajaxUtils.doPostJSON(
+        query,
+        neon.serviceUrl('ssequeryservice', serviceName + '/' + encodeURIComponent(this.host_) + '/' + encodeURIComponent(this.databaseType_), opts.join('&')),
+        {
+            success: successCallback,
+            error: errorCallback
+        }
+    );
+};
+
+
+
+
+
+
+
+
+
+
+
 /**
  * Executes the specified export request and fires the callback when complete.
  * @method executeExport

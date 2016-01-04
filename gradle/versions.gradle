@@ -23,7 +23,9 @@ project.ext {
     jerseyVersion = "1.15"
     
     jerseySseVersion = "2.22.1"
+    grettyVersion = "1.2.4"
     jacksonProvidersVersion = "2.6.4"
+    apacheMathVersion = "3.5"
 
     slf4jVersion = "1.7.2"
     antlrVersion = "4.2"

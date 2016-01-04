@@ -38,7 +38,7 @@ class CorsFilter implements ContainerResponseFilter {
     }
 }
 
-/* Old
+/* Old, from jersey v1.X
 class CorsFilter implements ContainerResponseFilter{
 
     @Override
