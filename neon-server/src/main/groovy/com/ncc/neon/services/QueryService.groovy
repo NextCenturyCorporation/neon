@@ -188,6 +188,58 @@ class QueryService {
     }
 
     /**
+     * Get all the column's types for tabular datasets from the supplied connection.
+     * @param host The host the database is running on
+     * @param databaseType the type of database
+     * @param databaseName The database containing the data
+     * @param tableName The table containing the data
+     * @return The field names and their types.
+     */
+    @GET
+    @Produces(MediaType.APPLICATION_JSON)
+    @Path("fields/types/{host}/{databaseType}/{databaseName}/{tableName}")
+    Map getFieldTypes(
+            @PathParam("host") String host,
+            @PathParam("databaseType") String databaseType,
+            @PathParam("databaseName") String databaseName,
+            @PathParam("tableName") String tableName) {
+
+        QueryExecutor queryExecutor = getExecutor(host, databaseType)
+        return queryExecutor.getFieldTypes(databaseName, tableName)
+    }
+
+    /**
+     * Get all the column's types for tabular datasets from the supplied connection.
+     * @param host The host the databases are running on
+     * @param databaseType the type of database
+     * @param databaseToTableNames A mapping of database names to a list of table names to get field
+     * types for.
+     * @return Field names and their types for each database/table pair.
+     */
+    @POST
+    @Produces(MediaType.APPLICATION_JSON)
+    @Path("fields/types/{host}/{databaseType}")
+    Map getFieldTypesForGroup(
+            @PathParam("host") String host,
+            @PathParam("databaseType") String databaseType,
+            Map<String, List<String>> databaseToTableNames) {
+
+        Map fieldTypes = [:]
+        QueryExecutor queryExecutor = getExecutor(host, databaseType)
+
+        databaseToTableNames.keySet().each { databaseName ->
+            if(!fieldTypes[databaseName]) {
+                fieldTypes[databaseName] = [:]
+            }
+            databaseToTableNames[databaseName].each { tableName ->
+                fieldTypes[databaseName][tableName] = queryExecutor.getFieldTypes(databaseName, tableName)
+            }
+        }
+
+        return fieldTypes
+    }
+
+    /**
      * Gets a sorted list of key, count pairs for an array field in the database
      * @param host The host on which the database is running
      * @param databaseType The type of the database

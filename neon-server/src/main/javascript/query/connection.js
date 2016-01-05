@@ -255,7 +255,7 @@ neon.query.Connection.prototype.executeCheckImportProgress = function(uuid, succ
  * @param {String} user The username associated with the database to drop.
  * @param {String} data The database name associated with the database to drop.
  * @param {Function} successCallback The function to call when the request successfully completes. This function takes the server's response as a parameter.
- * @param {Function} errorCallback The funtion to cakk when an error occrus. This function takes the server's response as a parameter.
+ * @param {Function} errorCallback The function to call when an error occurs. This function takes the server's response as a parameter.
  * @param {String} [host] The host to upload a file to when you don't want to upload to the default.
  * @param {String} [databaseType] The type of database to upload a file to when you don't want the default.
  */
@@ -274,12 +274,14 @@ neon.query.Connection.prototype.executeRemoveDataset = function(user, data, succ
  * Gets a list of database names
  * @method getDatabaseNames
  * @param {Function} successCallback The callback that contains the database names in an array.
+ * @param {Function} errorCallback The function to call when an error occurs. This function takes the server's response as a parameter.
  * @return {neon.util.AjaxRequest} The xhr request object
  */
-neon.query.Connection.prototype.getDatabaseNames = function(successCallback) {
+neon.query.Connection.prototype.getDatabaseNames = function(successCallback, errorCallback) {
     return neon.util.ajaxUtils.doGet(
         neon.serviceUrl('queryservice', 'databasenames/' + encodeURIComponent(this.host_) + '/' + encodeURIComponent(this.databaseType_)), {
             success: successCallback,
+            error: errorCallback,
             responseType: 'json'
         }
     );
@@ -492,6 +494,48 @@ neon.query.Connection.prototype.getStateName = function(stateParams, successCall
             success: successCallback,
             error: errorCallback,
             responseType: "json"
+        }
+    );
+};
+
+/**
+ * Requests for field types from the table
+ * @method getFieldTypes
+ * @param {String} databaseName
+ * @param {String} tableName The table name whose fields are being returned
+ * @param {Function} successCallback The callback to call when the field types are successfully retrieved
+ * @param {Function} [errorCallback] The optional callback when an error occurs. This is a 3 parameter
+ * function that contains the xhr, a short error status and the full error message.
+ * @return {neon.util.AjaxRequest} The xhr request object
+ */
+neon.query.Connection.prototype.getFieldTypes = function(databaseName, tableName, successCallback, errorCallback) {
+    return neon.util.ajaxUtils.doGet(
+        neon.serviceUrl('queryservice', 'fields/types/' + encodeURIComponent(this.host_) + '/' + encodeURIComponent(this.databaseType_) +
+          '/' + encodeURIComponent(databaseName) + '/' + encodeURIComponent(tableName)), {
+            success: successCallback,
+            error: errorCallback,
+            responseType: 'json'
+        }
+    );
+};
+
+/**
+ * Requests for field types from the tables
+ * @method getFieldTypesForGroup
+ * @param {Object} databaseToTableNames A mapping of database names to a list of table names to get field
+ * types for.
+ * @param {Function} successCallback The callback to call when the field types are successfully retrieved
+ * @param {Function} [errorCallback] The optional callback when an error occurs. This is a 3 parameter
+ * function that contains the xhr, a short error status and the full error message.
+ * @return {neon.util.AjaxRequest} The xhr request object
+ */
+neon.query.Connection.prototype.getFieldTypesForGroup = function(databaseToTableNames, successCallback, errorCallback) {
+    return neon.util.ajaxUtils.doPostJSON(
+        databaseToTableNames,
+        neon.serviceUrl('queryservice', 'fields/types/' + encodeURIComponent(this.host_) + '/' + encodeURIComponent(this.databaseType_)), {
+            success: successCallback,
+            error: errorCallback,
+            responseType: 'json'
         }
     );
 };

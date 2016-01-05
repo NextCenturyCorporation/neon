@@ -115,6 +115,17 @@ class SparkSQLQueryExecutor extends AbstractQueryExecutor {
         }
     }
 
+    @Override
+    Map getFieldTypes(String databaseName, String tableName) {
+        try {
+            return runAndRelease { client -> client.getTypes(databaseName, tableName) }
+        }
+        catch (SQLException ex) {
+            LOGGER.error("Columns cannot be found ", ex)
+            return [:]
+        }
+    }
+
     private JdbcClient getJdbcClient() {
         return connectionManager.connection.jdbcClient
     }
