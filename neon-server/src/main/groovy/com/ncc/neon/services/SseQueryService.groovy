@@ -19,19 +19,22 @@ package com.ncc.neon.services
 import com.ncc.neon.query.*
 import com.ncc.neon.query.clauses.*
 import com.ncc.neon.query.result.QueryResult
-import com.ncc.neon.sse.SseQueryData
 import com.ncc.neon.sse.RecordCounter
 import com.ncc.neon.sse.RecordCounterFactory
+import com.ncc.neon.sse.SinglePointStats
+import com.ncc.neon.sse.SseQueryData
 
 import groovy.json.JsonOutput
+
+import java.util.concurrent.ConcurrentHashMap
+import javax.ws.rs.*
+
+import javax.ws.rs.core.MediaType
 
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
 
-import javax.ws.rs.*
-import javax.ws.rs.core.MediaType
-
-import java.util.concurrent.ConcurrentHashMap
+import org.apache.commons.math3.distribution.NormalDistribution
 
 import org.glassfish.jersey.media.sse.EventOutput
 import org.glassfish.jersey.media.sse.OutboundEvent
@@ -48,9 +51,10 @@ class SseQueryService {
     @Autowired
     RecordCounterFactory recordCounterFactory
 
-    private final int MAX_ITERATION_TIME = 10000 // Maximum time a single iteration of the aggregation should be allowed to take, in milliseconds.
+    private final int MAX_ITERATION_TIME = 1000 // Maximum time a single iteration of the aggregation should be allowed to take, in milliseconds.
+    private final int INITIAL_RECORDS_PER_ITERATION = 10000
     private final String RANDOM_FIELD_NAME= 'random'
-    private static final Map CURRENTLY_RUNNING_QUERIES_DATA = new ConcurrentHashMap<String, SseQueryData>()
+    private static final Map CURRENTLY_RUNNING_QUERIES_DATA = new ConcurrentHashMap<String, List<SseQueryData>>()
 
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
@@ -62,44 +66,44 @@ class SseQueryService {
                              @DefaultValue("false") @QueryParam("selectionOnly") boolean selectionOnly,
                              @QueryParam("ignoredFilterIds") Set<String> ignoredFilterIds,
                              Query query) {
-        SseQueryData queryData = initDataWithCollectionValues(host, databaseType, query.filter.databaseName, query.filter.tableName)
+        SseQueryData queryData = initDataWithCollectionValues(host, databaseType, query.getDatabaseName(), query.getTableName())
         queryData.host = host
         queryData.databaseType = databaseType
         queryData.ignoreFilters = ignoreFilters
         queryData.selectionOnly = selectionOnly
         queryData.ignoredFilterIds = ignoredFilterIds
         queryData.query = query
+        queryData.zp = 1.6500000000000012
+        // queryData.zp = getZp(query.confidence)
         String uuid = UUID.randomUUID().toString()
-        CURRENTLY_RUNNING_QUERIES_DATA.put(uuid, queryData)
+        CURRENTLY_RUNNING_QUERIES_DATA.put(uuid, [queryData])
         return threadOnlineQuery(uuid, queryData)
     }
 
-// TODO - figure out how to do the statistics stuff, preferably generically. Look into how groupbyclauses work?
     private EventOutput threadOnlineQuery(String uuid, SseQueryData queryData) {
         final EventOutput OUTPUT = new EventOutput()
-        new Thread() {
-            public void run() {
-                try {
-                    // First, return the uuid of the query so it can be cancelled.
-                    OUTPUT.write(new OutboundEvent.Builder().data(String, uuid).build())
-
-                    while(!queryData.complete) {
-                        // If a query is not active and also not complete, it was cancelled. Remove it from the list of running queries.
-                        if(!queryData.active) {
-                            CURRENTLY_RUNNING_QUERIES_DATA.remove
-                        }
-                        QueryResult result = runSingleQueryIteration(queryData)
-                        updateResults(result, queryData)
-                        OUTPUT.write(new OutboundEvent.Builder().data(String, JsonOutput.toJson(queryData.results)).build())
+        Thread.start {
+            try {
+                // First, return the uuid of the query so it can be cancelled.
+                OUTPUT.write(new OutboundEvent.Builder().data(String, uuid).build())
+                while(!queryData.complete) {
+                    // If a query is not active and also not complete, it was cancelled. Remove it from the list of running queries and quit.
+                    if(!queryData.active) {
+                        CURRENTLY_RUNNING_QUERIES_DATA.remove(uuid)
+                        return
                     }
-                    OUTPUT.close()
-                }
-                catch(final InterruptedException | IOException e) {
-                    Exception ex = new Exception().setStackTrace(e.getStackTrace())
-                    throw ex
+                    QueryResult result = runSingleQueryIteration(queryData)
+                    updateResults(result, queryData)
+                    OUTPUT.write(new OutboundEvent.Builder().data(String, JsonOutput.toJson(result)).build())
                 }
             }
-        }.start()
+            catch(final InterruptedException | IOException e) {
+                throw new Exception().setStackTrace(e.getStackTrace()) // TODO - this code does nothing useful. Either come up with something better or remove the catch block.
+            }
+            finally {
+                OUTPUT.close()
+            }
+        }
         return OUTPUT
     }
 
@@ -111,26 +115,98 @@ class SseQueryService {
      */
     private QueryResult runSingleQueryIteration(SseQueryData queryData) {
         //long startTime = System.currentTimeMillis()
-        queryData.randMin += queryData.randStep
-        queryData.randMax += queryData.randStep
         applyRandomFilter(query, queryData.randMin, queryData.randMax)
         QueryResult result = queryService.executeQuery(queryData.host, queryData.databaseType, queryData.ignoreFilters, queryData.selectionOnly, queryData.ignoredFilterIds, queryData.query)
         //long endTime = System.currentTimeMillis()
         //long elapsedTime = endTime - startTime
         //queryData.randStep *= (MAX_ITERATION_TIME / elapsedTime)
+        queryData.randMin += queryData.randStep
+        queryData.randMax += queryData.randStep
         return result
     }
 
-    private void updateResults(QueryResult result, SseQueryData queryData) {
-        // Adds results of one iteration of a query to the overall results for that query.
-        result.each { point ->
-            String strId = JsonOutput.toJson(point._id)
-
-
+    @POST
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(SseFeature.SERVER_SENT_EVENTS)
+    @Path("querygroup/{host}/{databaseType}")
+    EventOutput executeOnlineQueryGroup(@PathParam("host") String host,
+                             @PathParam("databaseType") String databaseType,
+                             @DefaultValue("false") @QueryParam("ignoreFilters") boolean ignoreFilters,
+                             @DefaultValue("false") @QueryParam("selectionOnly") boolean selectionOnly,
+                             @QueryParam("ignoredFilterIds") Set<String> ignoredFilterIds,
+                             QueryGroup queryGroup) {
+        List<SseQueryData> queryList = []
+        queryGroup.each { query ->
+            SseQueryData queryData = initDataWithCollectionValues(host, databaseType, query.getDatabaseName(), query.getTableName())
+            queryData.host = host
+            queryData.databaseType = databaseType
+            queryData.ignoreFilters = ignoreFilters
+            queryData.selectionOnly = selectionOnly
+            queryData.ignoredFilterIds = ignoredFilterIds
+            queryData.query = query
+            queryData.zp = 1.6500000000000012
+            // queryData.zp = getZp(query.confidence)
+            queryList << queryData
         }
+        String uuid = UUID.randomUUID().toString()
+        CURRENTLY_RUNNING_QUERIES_DATA.put(uuid, queryList)
+    }
 
-        
-        // TODO what does it even mean when a query has multiple aggregates clauses? How does that work and how should it be handled?
+    /**
+     * Adds the results from one iteration of a query to the overall statistical results for that query, and
+     * alters the results object from that iteration to include the statistical results instead of just
+     * the results from that iteration.
+     * 
+     * TODO - what does it even mean when a query has multiple aggregates clauses? How does that work and how should it be handled?
+     * 
+     * @param result The results from a single iteration of a query.
+     * @param The query that returned the given results object.
+     */
+    private void updateResults(QueryResult result, SseQueryData queryData) {
+        // Just so we don't have to preface every use of results with "queryData.".
+        Map results = queryData.runningResults
+
+        // Adds the number of records traversed this iteration to the number of records traversed overall.
+        queryData.traversed += results.sum { point -> point.count }
+
+        // Adds results of one iteration of a query to the overall results for that query. Currently assumes returned field is named "count".
+        result.each { point ->
+            String id = makeId(point, queryData.query)
+            if(!point.count) { // Skip anything that doesn't have a "count" field.
+                continue
+            }
+            if(results.id) {
+                results.id.totalMean = results.id.totalMean + point.count
+                results.id.totalVar = results.id.totalVar + (point.count * point.count)
+                double var = results.id.totalVar / queryData.traversed
+                results.id.error = Math.sqrt(queryData.zp * var / queryData.traversed)
+            }
+            else {
+                results.id = [totalMean: point.count, totalVar: point.count * point.count, error: Math.sqrt(point.count * point.count * queryData.zp / queryData.traversed)] as SinglePointStats
+            }
+            point.mean = results.id.totalMean * (queryData.count / queryData.traversed)   
+            point.error = results.id.error * (queryData.count / queryData.traversed)
+        }
+    }
+
+    /**
+     * Creates a unique ID for a single item in a QueryResult by aggregating every name and
+     * value in its query's groupByClauses in a string.
+     * @param singleResult The QueryResult item to create an ID for.
+     * @param query The query from which to pull groupByClauses values from.
+     * @return A string of the form {"clause1Name":"clause1Value","clause2Name":"clause2Value",etc}
+     */
+    private String makeId(Map singleResult, Query query) {
+        List idPieces = []
+        query.groupByClauses.each { clause ->
+            if(clause instanceof GroupByFieldClause) {
+                idPieces << '"' + clause.field + '":"' + singleResult[clause.field] + '"'
+            }
+            else if(clause instanceof GroupByFunctionClause) {
+                idPieces << '"' + clause.name + '":"' + singleResult[clause.name] + '"'
+            }
+        }
+        return '{' + idPieces.join(',') + '}'
     }
 
     /**
@@ -145,15 +221,28 @@ class SseQueryService {
      *                             count: number of records in collection,
      *                             randStep: initial step value for random field,
      *                             randMin: initial lower bound for random field,
-     *                             randMax: initial upper bound for random field]
+     *                             randMax: initial upper bound for random field
+     *                             traversed: 0]
+     * coerced to a com.ncc.neon.sse.SseQueryData object.
      */
     private SseQueryData initDataWithCollectionValues(String host, String databaseType, String databaseName, String tableName) {
         RecordCounter counter = recordCounterFactory.getRecordCounter(databaseType)
         long recordCount = counter.getCount(host, databaseName, tableName)
-        double initialIterations = recordCount / 1000
+        double initialIterations = recordCount / INITIAL_RECORDS_PER_ITERATION
         double randStep = 1.0 / initialIterations
-        SseQueryData queryData = [active: true, complete: false, count: recordCount, randStep: randStep, randMin: 0.0, randMax: 0.0 + randStep] as SseQueryData
+        SseQueryData queryData = [active: true, complete: false, count: recordCount, randStep: randStep, randMin: 0.0, randMax: 0.0 + randStep, traversed: 0] as SseQueryData
         return queryData
+    }
+
+    private double getZp(double confidence) {
+        NormalDistribution norm = new NormalDistribution(0, 1)
+        double requiredVal = (confidence + 1) / 2
+        for(double x = 0; x < 10; x += 0.01) {
+            if(norm.cumulativeProbability(x) > requiredVal) {
+                return norm.cumulativeProbability(x)
+            }
+        }
+        return 10
     }
 
     /**
@@ -192,28 +281,31 @@ class SseQueryService {
         }
     }
 
+    /**
+     * Simple testing method, just used to make sure server-sent events are working. Returns an EventOutput and
+     * uses a new thread to send updates to that EventOutput every two seconds for ten seconds before closing it.
+     * @return An EventOutput which will send updates.
+     */
     @GET
     @Produces(SseFeature.SERVER_SENT_EVENTS)
     @Path("test")
-    public EventOutput testSse() {
+    EventOutput testSse() {
         final EventOutput OUTPUT = new EventOutput()
-        new Thread() {
-            public void run() {
-                try {
-                    for(int x = 0; x < 5; x++) {
-                        Map m = [key: "value " + x]
-                        OUTPUT.write(new OutboundEvent.Builder().data(String, JsonOutput.toJson(m)).build())
-                        Thread.sleep(2000)
-                    }
-                    OUTPUT.close()
+        Thread.start {
+            try {
+                for(int x = 0; x < 5; x++) {
+                    Map m = [key: "value " + x]
+                    OUTPUT.write(new OutboundEvent.Builder().data(String, JsonOutput.toJson(m)).build())
+                    Thread.sleep(2000)
                 }
-                catch (final InterruptedException | IOException e) {
-                    Exception ex = new Exception()
-                    ex.setStackTrace(e.getStackTrace())
-                    throw ex
-                }
+                OUTPUT.close()
             }
-        }.start()
+            catch (final InterruptedException | IOException e) {
+                Exception ex = new Exception()
+                ex.setStackTrace(e.getStackTrace())
+                throw ex
+            }
+        }
         return OUTPUT
     }
 }
