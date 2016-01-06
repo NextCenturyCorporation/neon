@@ -10,8 +10,8 @@ import javax.annotation.Resource
 class RecordCounterFactory {
 
     @Resource
-    private MongoRecordCounter nomgoRecordCounter
-    
+    private MongoRecordCounter mongoRecordCounter
+
     RecordCounter getRecordCounter(String databaseType) {
         switch (databaseType as DataSources) {
             case DataSources.mongo:

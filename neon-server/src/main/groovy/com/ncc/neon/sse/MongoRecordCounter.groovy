@@ -27,13 +27,13 @@ import com.mongodb.DBCollection
  */
 @Component
 class MongoRecordCounter implements RecordCounter {
-    
+
     @Override
     long getCount(String host, String databaseName, String tableName) {
         long count
         MongoClient mongo = new MongoClient(host)
         try {
-            DB db = mongo.getDatabase(databaseName)
+            DB db = mongo.getDB(databaseName)
             DBCollection collection = db.getCollection(tableName)
             count = collection.getCount()
         }
