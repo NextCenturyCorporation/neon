@@ -31,6 +31,7 @@ import java.util.concurrent.ConcurrentHashMap
 import javax.ws.rs.*
 
 import javax.ws.rs.core.MediaType
+import javax.ws.rs.core.Response
 
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
@@ -59,6 +60,65 @@ class SseQueryService {
 
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    @Path("query/{host}/{databaseType}")
+    Response storeQueryData(@PathParam("host") String host,
+                            @PathParam("databaseType") String databaseType,
+                            @DefaultValue("false") @QueryParam("ignoreFilters") boolean ignoreFilters,
+                            @DefaultValue("false") @QueryParam("selectionOnly") boolean selectionOnly,
+                            @QueryParam("ignoredFilterIds") Set<String> ignoredFilterIds,
+                            Query query) {
+        SseQueryData queryData = initDataWithCollectionValues(host, databaseType, query.getDatabaseName(), query.getTableName())
+        queryData.with {
+            (host, databaseType, ignoreFilters, selectionOnly, ignoredFilterIds, query, zp) = [host,
+                databaseType,
+                ignoreFilters,
+                selectionOnly,
+                ignoredFilterIds,
+                query,
+                1.6500000000000012 /*query.confidence*/]
+        }
+        Map response = [uuid: addToRunningQueries([queryData])]
+        return Response.ok().entity(JsonOutput.toJson(response)).build()
+    }
+
+    @POST
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    @Path("querygroup/{host}/{databaseType}")
+    Response storeQueryGroupData(@PathParam("host") String host,
+                                 @PathParam("databaseType") String databaseType,
+                                 @DefaultValue("false") @QueryParam("ignoreFilters") boolean ignoreFilters,
+                                 @DefaultValue("false") @QueryParam("selectionOnly") boolean selectionOnly,
+                                 @QueryParam("ignoredFilterIds") Set<String> ignoredFilterIds,
+                                 QueryGroup query) {
+        List queryList = []
+        queryGroup.queries.each { query ->
+            SseQueryData queryData = initDataWithCollectionValues(host, databaseType, query.filter.databaseName, query.filter.tableName)
+            queryData.with {
+                (host, databaseType, ignoreFilters, selectionOnly, ignoredFilterIds, query, zp) = [host,
+                    databaseType,
+                    ignoreFilters,
+                    selectionOnly,
+                    ignoredFilterIds,
+                    query,
+                    1.6500000000000012 /*query.confidence*/]
+            }
+            queryList << queryData
+        }
+        Map response = [uuid: addToRunningQueries(queryList)]
+        return Response.ok().entity(JsonOutput.toJson(response)).build()
+    }
+
+    @GET
+    @Produces(SseFeature.SERVER_SENT_EVENTS)
+    @Path("getupdates/{uuid}")
+    EventOutput executeByUuid(@PathParam("uuid") String uuid) {
+        return threadOnlineQueryOrGroup(uuid)
+    }
+
+/*    @POST
+    @Consumes(MediaType.APPLICATION_JSON)
     @Produces(SseFeature.SERVER_SENT_EVENTS)
     @Path("query/{host}/{databaseType}")
     EventOutput executeOnlineQuery(@PathParam("host") String host,
@@ -75,7 +135,8 @@ class SseQueryService {
                 selectionOnly,
                 ignoredFilterIds,
                 query,
-                1.6500000000000012 /*query.confidence*/]
+                1.6500000000000012 // query.confidence
+                ]
         }
         String uuid = addToRunningQueries([queryData])
         return threadOnlineQueryOrGroup(uuid)
@@ -101,13 +162,14 @@ class SseQueryService {
                     selectionOnly,
                     ignoredFilterIds,
                     query,
-                    1.6500000000000012 /*query.confidence*/]
+                    1.6500000000000012 //query.confidence
+                    ]
             }
             queryList << queryData
         }
         String uuid = addToRunningQueries(queryList)
         return threadOnlineQueryOrGroup(uuid)
-    }
+    } */
 
     private EventOutput threadOnlineQueryOrGroup(String uuid) {
         final EventOutput OUTPUT = new EventOutput()
@@ -311,8 +373,8 @@ class SseQueryService {
      */
     @GET
     @Produces(SseFeature.SERVER_SENT_EVENTS)
-    @Path("test")
-    EventOutput testSse(@QueryParam("name") String name) {
+    @Path("test/{name}")
+    EventOutput testSse(@PathParam("name") String name) {
         final EventOutput OUTPUT = new EventOutput()
         Thread.start {
             try {
