@@ -163,25 +163,28 @@ neon.query.Connection.prototype.executeQueryService_ = function(query, successCa
     );
 };
 
-
-
-
-
-
-
-
-
-// Methods immediately below this are stupid placeholders and need to be changed. 
-
-neon.query.Connection.prototype.executeSseQuery = function(query, successCallback, errorCallback) {
-    return this.executeSseQueryService_(query, successCallback, errorCallback, 'query');
+neon.query.Connection.prototype.executeSseQuery = function(query, initialReturnCallback, messageCallback, errorCallback) {
+    return this.executeSseQueryService_(query, messageCallback, errorCallback, 'query');
 };
 
-neon.query.Connection.prototype.executeSseQueryGroup = function(queryGroup, successCallback, errorCallback) {
-    return this.executeSseQueryService_(queryGroup, successCallback, errorCallback, 'querygroup');
+neon.query.Connection.prototype.executeSseQueryGroup = function(queryGroup, initialReturnCallback, messageCallback, errorCallback) {
+    return this.executeSseQueryService_(queryGroup, messageCallback, errorCallback, 'querygroup');
 };
 
-neon.query.Connection.prototype.executeSseQueryService_ = function(query, successCallback, errorCallback, serviceName) {
+/**
+ * Executes a query to the SseQueryService. The initial response from the server sends a UUID string to the the initialResponseCallback, which
+ * can be used later to cancel the running query. Whenever a message comes from the server, fires the given message callback or error callback,
+ * as appropriate.
+ * @method executeSseQueryService_
+ * @param {Object} query A neon.query.Query or neon.query.QueryGroup, to be sent to the server.
+ * @param {Function} initialReturnCallback The function to be called when the UUID is returned from the server. Takes a string as an argument.
+ * @param {Function} messageCallback The function to be called whenever a message is returned from the server. Takes an Object or Array as a parameter,
+ *      with an Object meaning more data has arrived and an array meaning the query or querygroup is finished running.
+ * @param {Function} errorCallback The function to be called whenever the server returns an error. May not be too useful right now, as SSE errors
+ *      don't seem to be very well-defined yet.
+ * @param {String} serviceName The name of the service to be called - "query" or "querygroup".
+ */
+neon.query.Connection.prototype.executeSseQueryService_ = function(query, initialReturnCallback, messageCallback, errorCallback, serviceName) {
     var opts = [];
     if(query.ignoreFilters_) {
         opts.push("ignoreFilters=true");
@@ -197,25 +200,26 @@ neon.query.Connection.prototype.executeSseQueryService_ = function(query, succes
     if(query.selectionOnly_) {
         opts.push("selectionOnly=true");
     }
-    return neon.util.ajaxUtils.doPostJSON(
+    neon.util.ajaxUtils.doPostJSON(
         query,
         neon.serviceUrl('ssequeryservice', serviceName + '/' + encodeURIComponent(this.host_) + '/' + encodeURIComponent(this.databaseType_), opts.join('&')),
         {
-            success: successCallback,
+            success: function(response) {
+                initialReturnCallback(response.uuid);
+                var source = new EventSource("/neon/services/ssequeryservice/getupdates/" + response.uuid);
+                source.onerror = errorCallback;
+                source.onmessage = function(e) {
+                    var evt = JSON.parse(e);
+                    messageCallback(evt);
+                    if(evt instanceof Array) {
+                        source.close()
+                    }
+                }
+            },
             error: errorCallback
         }
     );
 };
-
-
-
-
-
-
-
-
-
-
 
 /**
  * Executes the specified export request and fires the callback when complete.

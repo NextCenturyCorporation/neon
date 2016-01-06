@@ -91,7 +91,7 @@ class SseQueryService {
                                  @DefaultValue("false") @QueryParam("ignoreFilters") boolean ignoreFilters,
                                  @DefaultValue("false") @QueryParam("selectionOnly") boolean selectionOnly,
                                  @QueryParam("ignoredFilterIds") Set<String> ignoredFilterIds,
-                                 QueryGroup query) {
+                                 QueryGroup queryGroup) {
         List queryList = []
         queryGroup.queries.each { query ->
             SseQueryData queryData = initDataWithCollectionValues(host, databaseType, query.filter.databaseName, query.filter.tableName)
@@ -182,15 +182,15 @@ class SseQueryService {
                 boolean allComplete = false
                 while(!allComplete) {
                     // If a query or group is not present in the map, it was cancelled.
-                    if(!CURRENTLY_RUNNING_QUERIES_DATA.uuid) { // IF this is kept as-is, I don't think that SseQueryData needs an "active" field.
-                        allComplete = true
-                        continue
+                    if(!CURRENTLY_RUNNING_QUERIES_DATA.uuid) { // TODO - If this is kept as-is, I don't think that SseQueryData needs an "active" field.
+                        return
                     }
                     QueryResult result = runSingleIteration(queries)
                     OUTPUT.write(new OutboundEvent.Builder().data(String, JsonOutput.toJson(result)).build())
                     allComplete = true
                     queries.each { query -> allComplete = allComplete && query.complete }
                 }
+                OUTPUT.write(new OutboundEvent.Builder().data(String, JsonOutput.toJson([complete: true])).build())
             }
             catch(final InterruptedException | IOException e) {
                 throw new Exception().setStackTrace(e.getStackTrace()) // TODO - this code does nothing useful. Either come up with something better or remove the catch block.
