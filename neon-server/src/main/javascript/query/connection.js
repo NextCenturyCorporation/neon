@@ -164,11 +164,11 @@ neon.query.Connection.prototype.executeQueryService_ = function(query, successCa
 };
 
 neon.query.Connection.prototype.executeSseQuery = function(query, initialReturnCallback, messageCallback, errorCallback) {
-    return this.executeSseQueryService_(query, messageCallback, errorCallback, 'query');
+    return this.executeSseQueryService_(query, initialReturnCallback, messageCallback, errorCallback, 'query');
 };
 
 neon.query.Connection.prototype.executeSseQueryGroup = function(queryGroup, initialReturnCallback, messageCallback, errorCallback) {
-    return this.executeSseQueryService_(queryGroup, messageCallback, errorCallback, 'querygroup');
+    return this.executeSseQueryService_(queryGroup, initialReturnCallback, messageCallback, errorCallback, 'querygroup');
 };
 
 /**

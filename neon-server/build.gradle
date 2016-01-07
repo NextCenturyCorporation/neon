@@ -143,6 +143,12 @@ gretty {
     println file(webAppDirName).toString()
     println buildDir.absolutePath as String
     println rootDir.absolutePath as String
+    scanInterval = 0
+}
+
+project.afterEvaluate {
+    tasks.appRun.dependsOn build
+    tasks.jettyRun.dependsOn build
 }
 
 //jettyRun {

@@ -87,6 +87,6 @@
         "log4javascript": true,
         "postal": true,
         "uuid": true,
-	"EventSource": false
+        "EventSource": false
     }
 }
