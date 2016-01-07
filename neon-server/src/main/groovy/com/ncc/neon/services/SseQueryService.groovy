@@ -43,6 +43,11 @@ import org.glassfish.jersey.media.sse.OutboundEvent
 import org.glassfish.jersey.media.sse.OutboundEvent.Builder
 import org.glassfish.jersey.media.sse.SseFeature
 
+
+import java.util.logging.Logger
+
+
+
 @Component
 @Path("/ssequeryservice")
 class SseQueryService {
@@ -68,16 +73,8 @@ class SseQueryService {
                             @DefaultValue("false") @QueryParam("selectionOnly") boolean selectionOnly,
                             @QueryParam("ignoredFilterIds") Set<String> ignoredFilterIds,
                             Query query) {
-        SseQueryData queryData = initDataWithCollectionValues(host, databaseType, query.getDatabaseName(), query.getTableName())
-        queryData.with {
-            (host, databaseType, ignoreFilters, selectionOnly, ignoredFilterIds, query, zp) = [host,
-                databaseType,
-                ignoreFilters,
-                selectionOnly,
-                ignoredFilterIds,
-                query,
-                1.6500000000000012 /*query.confidence*/]
-        }
+        SseQueryData queryData = initDataWithCollectionValues(host, databaseType, query.filter.databaseName, query.filter.tableName,
+                                                                  ignoreFilters, selectionOnly, ignoredFilterIds, query)
         Map response = [uuid: addToRunningQueries([queryData])]
         return Response.ok().entity(JsonOutput.toJson(response)).build()
     }
@@ -93,17 +90,10 @@ class SseQueryService {
                                  @QueryParam("ignoredFilterIds") Set<String> ignoredFilterIds,
                                  QueryGroup queryGroup) {
         List queryList = []
-        queryGroup.queries.each { query ->
-            SseQueryData queryData = initDataWithCollectionValues(host, databaseType, query.filter.databaseName, query.filter.tableName)
-            queryData.with {
-                (host, databaseType, ignoreFilters, selectionOnly, ignoredFilterIds, query, zp) = [host,
-                    databaseType,
-                    ignoreFilters,
-                    selectionOnly,
-                    ignoredFilterIds,
-                    query,
-                    1.6500000000000012 /*query.confidence*/]
-            }
+        for(int x = 0; x < queryGroup.queries.size(); x++) {
+            Query query = queryGroup.queries.get(x)
+            SseQueryData queryData = initDataWithCollectionValues(host, databaseType, query.filter.databaseName, query.filter.tableName,
+                                                                  ignoreFilters, selectionOnly, ignoredFilterIds, query)
             queryList << queryData
         }
         Map response = [uuid: addToRunningQueries(queryList)]
@@ -171,24 +161,30 @@ class SseQueryService {
         return threadOnlineQueryOrGroup(uuid)
     } */
 
+    /**
+     * Creates a new thread to run a query or group of queries, given the UUID associated with that query or group of queries.
+     * Returns an SSE event output, through which updates as to the progress of the query or group will be sent.
+     * @param uuid The UUID associated with the query or group of queries to be run, used to find the query or group in the map of stored queries.
+     * @return An SSE event stream that will be used to pass updates to the client.
+     */
     private EventOutput threadOnlineQueryOrGroup(String uuid) {
         final EventOutput OUTPUT = new EventOutput()
         Thread.start {
             try {
-                // First, return the uuid of the query or query group so it can be cancelled.
-                OUTPUT.write(new OutboundEvent.Builder().data(String, JsonOutput.toJson([uuid: uuid])).build())
-
-                List<SseQueryData> queries = CURRENTLY_RUNNING_QUERIES_DATA.uuid
+                OUTPUT.write(new OutboundEvent.Builder().data(String, JsonOutput.toJson(CURRENTLY_RUNNING_QUERIES_DATA[uuid])).build())
+                List<SseQueryData> queries = CURRENTLY_RUNNING_QUERIES_DATA[uuid]
                 boolean allComplete = false
                 while(!allComplete) {
-                    // If a query or group is not present in the map, it was cancelled.
-                    if(!CURRENTLY_RUNNING_QUERIES_DATA.uuid) { // TODO - If this is kept as-is, I don't think that SseQueryData needs an "active" field.
+                    if(!CURRENTLY_RUNNING_QUERIES_DATA[uuid]) { // TODO - If this is kept as-is, I don't think that SseQueryData needs an "active" field.
+                        OUTPUT.write(new OutboundEvent.Builder().data(String, JsonOutput.toJson([complete: false])).build()) // False indicates the query was cancelled, not finished.
                         return
                     }
                     QueryResult result = runSingleIteration(queries)
                     OUTPUT.write(new OutboundEvent.Builder().data(String, JsonOutput.toJson(result)).build())
                     allComplete = true
-                    queries.each { query -> allComplete = allComplete && query.complete }
+                    for(SseQueryData queryData : queries) {
+                        allComplete = allComplete && queryData.complete
+                    }
                 }
                 OUTPUT.write(new OutboundEvent.Builder().data(String, JsonOutput.toJson([complete: true])).build())
             }
@@ -203,14 +199,16 @@ class SseQueryService {
     }
 
     /**
-     * Runs a single iteration of a query or group of queries, recording the time it takes and accordingly
-     * adjusting how large a segment of records should be looked through next time. (adjustment of record segments is currently commented out)
+     * Runs a single iteration of a query or group of queries, recording the time it takes and accordingly adjusting
+     * how large a segment of records should be looked through next time. Before returning results, edits them to include
+     * statistical data.
      * @param queryData An SseQueryData object containing all of the reuired data about the query to execute.
      * @return The result of this iteration of the query.
      */
-    private QueryResult runSingleIteration(List queries) {
+    private QueryResult runSingleIteration(List<SseQueryData> queries) {
         TabularQueryResult finalResult = new TabularQueryResult()
-        queries.each { queryData ->
+        for(int x = 0; x < queries.size(); x++) {
+            SseQueryData queryData = queries.get(x)
                 //long startTime = System.currentTimeMillis()
             applyRandomFilter(queryData.query, queryData.randMin, queryData.randMax)
             QueryResult result = queryService.executeQuery(queryData.host, queryData.databaseType, queryData.ignoreFilters, queryData.selectionOnly, queryData.ignoredFilterIds, queryData.query)
@@ -235,18 +233,20 @@ class SseQueryService {
      *
      * TODO - what does it even mean when a query has multiple aggregates clauses? How does that work and how should it be handled?
      *
+     * TODO also - This needs some re-vamping in the future - on very large data sets it's possible that keeping a running sum of square of results would overflow or something.
+     *
      * @param result The results from a single iteration of a query.
      * @param The query that returned the given results object.
      */
     private void updateResults(QueryResult result, SseQueryData queryData) {
-        // Just so we don't have to preface every use of results with "queryData.".
         Map results = queryData.runningResults
 
         // Adds the number of records traversed this iteration to the number of records traversed overall.
-        queryData.traversed += results.sum { point -> point?.count }
+        queryData.traversed += result.sum { point -> point?.count }
 
         // Adds results of one iteration of a query to the overall results for that query. Currently assumes returned field is named "count".
-        result.each { point ->
+        for(int x = 0; x < result.data.size(); x++) {
+            def point = result.get(x)
             String id = makeId(point, queryData.query)
             if(!point.count) { // Skip any record that doesn't have a "count" field.
                 return
@@ -267,10 +267,10 @@ class SseQueryService {
 
     private String addToRunningQueries(List queryData) {
         String uuid  = UUID.randomUUID().toString()
-        while(CURRENTLY_RUNNING_QUERIES_DATA.uuid) { // If the uuid is already in use, make a new one.
+        while(CURRENTLY_RUNNING_QUERIES_DATA[uuid]) { // If the uuid is already in use, make a new one.
             uuid = UUID.randomUUID().toString()
         }
-        CURRENTLY_RUNNING_QUERIES_DATA.put(uuid, [queryData])
+        CURRENTLY_RUNNING_QUERIES_DATA.put(uuid, queryData)
         return uuid
     }
 
@@ -283,7 +283,8 @@ class SseQueryService {
      */
     private String makeId(Map singleResult, Query query) {
         List idPieces = []
-        query.groupByClauses.each { clause ->
+        for(int x = 0; x < query.groupByClauses.size(); x ++) {
+            GroupByClause clause = query.groupByClauses.get(x)
             if(clause instanceof GroupByFieldClause) {
                 idPieces << '"' + clause.field + '":"' + singleResult[clause.field] + '"'
             }
@@ -301,22 +302,50 @@ class SseQueryService {
      * @param databaseType The type of database on which the collection is stored (converted to a <code>com.ncc.neon.connect.Datasources</code>).
      * @param databaseName The name of the database storing the collection to get values for.
      * @param tableName The name of the collection to get values for.
+     * @param ignoreFilters Whether or not to ignore filters.
+     * @param selectionOnly Whether or not to only return for ma selection.
+     * @param ignoredFilterIds The IDs of the filters to ignore.
+     * @param query The query this data is associated with.
      * @return A map, of the form [active: true,
      *                             complete: false,
      *                             count: number of records in collection,
      *                             randStep: initial step value for random field,
      *                             randMin: initial lower bound for random field,
      *                             randMax: initial upper bound for random field
-     *                             traversed: 0]
+     *                             traversed: 0,
+     *                             host: host parameter,
+     *                             databaseType: databaseType parameter,
+     *                             ignoreFilters: ignoreFilters parameter,
+     *                             selectionOnly: selectionOnly parameter,
+     *                             ignoredFilterIds: ignoredFilterIds parameter,
+     *                             query: query parameter]
      * coerced to a com.ncc.neon.sse.SseQueryData object.
      */
-    private SseQueryData initDataWithCollectionValues(String host, String databaseType, String databaseName, String tableName) {
+    private SseQueryData initDataWithCollectionValues(String host,
+                                                      String databaseType,
+                                                      String databaseName,
+                                                      String tableName,
+                                                      boolean ignoreFilters,
+                                                      boolean selectionOnly,
+                                                      Set ignoredFilterIds,
+                                                      Query query) {
         RecordCounter counter = recordCounterFactory.getRecordCounter(databaseType)
         long recordCount = counter.getCount(host, databaseName, tableName)
-        double initialIterations = recordCount / INITIAL_RECORDS_PER_ITERATION
+        double initialIterations = recordCount / (INITIAL_RECORDS_PER_ITERATION as double)
         double randStep = 1.0 / initialIterations
-        SseQueryData queryData = [active: true, complete: false, count: recordCount, randStep: randStep, randMin: 0.0, randMax: 0.0 + randStep, traversed: 0] as SseQueryData
-        return queryData
+        return [active: true,
+                complete: false,
+                count: recordCount,
+                randStep: randStep,
+                randMin: 0.0,
+                randMax: 0.0 + randStep,
+                traversed: 0,
+                host: host,
+                databaseType: databaseType,
+                ignoreFilters: ignoreFilters,
+                selectionOnly: selectionOnly,
+                ignoredFilterIds: ignoredFilterIds,
+                query: query] as SseQueryData
     }
 
     private double getZp(double confidence) {
@@ -347,7 +376,8 @@ class SseQueryService {
         }
         else {
             boolean minClause = false, maxClause = false
-            currentClause.whereClauses.each { clause ->
+            for(int x = 0; x < currentClause.whereClauses.size(); x++) {
+                WhereClause clause = currentClause.whereClauses.get(x)
                 if(clause instanceof SingularWhereClause && clause.lhs == RANDOM_FIELD_NAME && clause.operator == ">") {
                     clause.rhs = "$randMin"
                     minClause = true
@@ -358,10 +388,10 @@ class SseQueryService {
                 }
             }
             if(!minClause) {
-                currentClause.whereClauses << [lhs: RANDOM_FIELD_NAME, operator: ">", rhs: "$randMin"] as SingularWhereClause
+                currentClause.whereClauses << ([lhs: RANDOM_FIELD_NAME, operator: ">", rhs: "$randMin"] as SingularWhereClause)
             }
             if(!maxClause) {
-                currentClause.whereClauses << [lhs: RANDOM_FIELD_NAME, operator: "<=", rhs: "$randMax"] as SingularWhereClause
+                currentClause.whereClauses << ([lhs: RANDOM_FIELD_NAME, operator: "<=", rhs: "$randMax"] as SingularWhereClause)
             }
         }
     }
