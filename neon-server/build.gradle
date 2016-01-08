@@ -35,6 +35,7 @@ buildscript {
     dependencies {
         classpath ":antlr4-plugin:$antlrPluginVersion"
         classpath "org.hidetake:gradle-ssh-plugin:$sshPluginVersion"
+        classpath "org.apache.derby:derby:$derbyVersion"
     }
 }
 
@@ -96,7 +97,7 @@ dependencies {
     compile "org.apache.poi:poi-ooxml:$poiVersion"
     compile "org.apache.poi:poi-ooxml-schemas:$poiVersion"
     compile "org.apache.poi:ooxml-schemas:$ooxmlSchemasVersion"
-    compile "org.apache.derby:derby:10.12.1.1"
+    compile "org.apache.derby:derby:$derbyVersion"
 
     compile "com.sun.jersey.contribs:jersey-multipart:$jerseyVersion"
     compile "com.monitorjbl:xlsx-streamer:$xlsxStreamerVersion"

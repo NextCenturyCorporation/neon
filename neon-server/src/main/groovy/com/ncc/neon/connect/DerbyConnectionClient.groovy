@@ -18,19 +18,20 @@ package com.ncc.neon.connect
 
 import java.sql.*
 
-
-
 /**
  * Holds a connection to derby
  */
 
+@SuppressWarnings("ClassForName")
 class DerbyConnectionClient implements ConnectionClient{
 
     private Connection connection
     private final String dbName="savedStates"
     private final String connectionURL = "jdbc:derby:" + dbName + ";create=true"
+    private final String driver = "org.apache.derby.jdbc.EmbeddedDriver"
 
     public DerbyConnectionClient(){
+        Class.forName(driver).newInstance()
         connection = DriverManager.getConnection(connectionURL)
     }
 

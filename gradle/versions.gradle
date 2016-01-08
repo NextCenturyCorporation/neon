@@ -50,5 +50,6 @@ project.ext {
     mongodbVersion="3.0.2"
     xlsxStreamerVersion="0.2.7"
     openCsvVersion="2.3"
+    derbyVersion="10.12.1.1"
 }
 
