@@ -14,6 +14,8 @@ Apache v2.0 (apache-2.0.txt)
   -- org.codenarc:CodeNarc:0.19
 - cglib
   -- cglib:cglib:2.2.2
+- Derby
+  -- org.apache.derby:derby:10.12.1.1
 - Gradle (see http://www.gradle.org/license)
 - Gradle SSH Plugin
   -- org.hidetake:gradle-ssh-plugin:0.2.0

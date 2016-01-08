@@ -24,5 +24,5 @@ package com.ncc.neon.connect
 
 @SuppressWarnings('FieldName')
 enum DataSources{
-    mongo, sparksql, elasticsearch
+    mongo, sparksql, elasticsearch, derby
 }

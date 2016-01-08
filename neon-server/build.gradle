@@ -96,6 +96,7 @@ dependencies {
     compile "org.apache.poi:poi-ooxml:$poiVersion"
     compile "org.apache.poi:poi-ooxml-schemas:$poiVersion"
     compile "org.apache.poi:ooxml-schemas:$ooxmlSchemasVersion"
+    compile "org.apache.derby:derby:10.12.1.1"
 
     compile "com.sun.jersey.contribs:jersey-multipart:$jerseyVersion"
     compile "com.monitorjbl:xlsx-streamer:$xlsxStreamerVersion"
@@ -112,7 +113,6 @@ dependencies {
     providedCompile "javax.servlet:javax.servlet-api:$javaxServletVersion"
 
     runtime "cglib:cglib:$cglibVersion"
-    runtime "org.apache.derby:derby:10.12.1.1"
 
     testCompile "junit:junit:$junitVersion"
     testCompile "commons-collections:commons-collections:$commonsCollectionsVersion"
