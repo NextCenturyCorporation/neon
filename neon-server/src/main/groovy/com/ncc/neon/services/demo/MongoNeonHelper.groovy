@@ -19,7 +19,7 @@ package com.ncc.neon.services.demo
 import com.mongodb.BasicDBObject
 import com.mongodb.DBObject
 import com.ncc.neon.query.filter.DataSet
-import com.ncc.neon.query.filter.FilterState
+import com.ncc.neon.query.filter.GlobalFilterState
 import com.ncc.neon.query.filter.SelectionState
 import com.ncc.neon.query.mongo.MongoConversionStrategy
 import org.springframework.beans.factory.annotation.Autowired
@@ -29,7 +29,7 @@ import org.springframework.stereotype.Component
 class MongoNeonHelper {
 
     @Autowired
-    FilterState filterState
+    GlobalFilterState filterState
 
     @Autowired
     SelectionState selectionState

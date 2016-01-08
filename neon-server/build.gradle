@@ -143,8 +143,8 @@ gretty {
 }
 
 project.afterEvaluate {
-   tasks.appRun.dependsOn build
-   tasks.jettyRun.dependsOn build
+   tasks.appRun.dependsOn concatjs, watch, 'setVersion'
+   tasks.jettyRun.dependsOn concatjs, watch, 'setVersion'
 }
 
 test {

@@ -37,7 +37,7 @@ import javax.ws.rs.core.MediaType
 class FilterService {
 
     @Autowired
-    FilterState filterState
+    GlobalFilterState filterState
 
     /**
      * Creates and returns an empty filter containing only the given database and table names

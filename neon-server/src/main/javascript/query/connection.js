@@ -209,9 +209,9 @@ neon.query.Connection.prototype.executeSseQueryService_ = function(query, initia
                 var source = new EventSource("/neon/services/ssequeryservice/getupdates/" + response.uuid);
                 source.onerror = errorCallback;
                 source.onmessage = function(e) {
-                    var evt = JSON.parse(e);
-                    messageCallback(evt);
-                    if(evt instanceof Array) {
+                    var queryResults = JSON.parse(e.data);
+                    messageCallback(queryResults);
+                    if(e.lastEventId === "done") {
                         source.close();
                     }
                 };

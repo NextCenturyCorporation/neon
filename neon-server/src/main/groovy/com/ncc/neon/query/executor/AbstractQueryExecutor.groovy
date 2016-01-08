@@ -22,18 +22,19 @@ import com.ncc.neon.query.QueryOptions
 import com.ncc.neon.query.result.QueryResult
 import com.ncc.neon.query.result.TabularQueryResult
 import com.ncc.neon.query.filter.DataSet
+import com.ncc.neon.query.filter.FilterState
 import com.ncc.neon.query.filter.SelectionState
 import com.ncc.neon.query.result.Transform
 import com.ncc.neon.query.result.Transformer
 import com.ncc.neon.query.result.TransformerNotFoundException
 import com.ncc.neon.query.result.TransformerRegistry
 import org.springframework.beans.factory.annotation.Autowired
+
 /**
  * Abstract implementation of a QueryExecutor that provides some default functionality useful
  * to all executors
  */
 abstract class AbstractQueryExecutor implements QueryExecutor {
-
 
     @Autowired
     private SelectionState selectionState
@@ -42,23 +43,23 @@ abstract class AbstractQueryExecutor implements QueryExecutor {
     TransformerRegistry transformRegistry
 
     @Override
-    QueryResult execute(Query query, QueryOptions options) {
+    QueryResult execute(Query query, QueryOptions options, FilterState filterState) {
         // cutoff queries where there is no selection but selectionOnly was specified. otherwise the WHERE clause
         // created by the query executors to get the selected data will be empty the request for selectionOnly is
         // effectively ignored
         if (isEmptySelection(query, options)) {
             return TabularQueryResult.EMPTY
         }
-        QueryResult result = doExecute(query, options)
+        QueryResult result = doExecute(query, options, filterState)
         return transform(query.transforms, result)
     }
 
     @Override
-    QueryResult execute(QueryGroup queryGroup, QueryOptions options) {
+    QueryResult execute(QueryGroup queryGroup, QueryOptions options, FilterState filterState) {
         TabularQueryResult queryResult = new TabularQueryResult()
         queryGroup.queries.each {
             if (!isEmptySelection(it, options)) {
-                def result = doExecute(it, options)
+                def result = doExecute(it, options, filterState)
                 queryResult.data.addAll(result.data)
             }
         }
@@ -80,7 +81,7 @@ abstract class AbstractQueryExecutor implements QueryExecutor {
                 !selectionState.getFiltersForDataset(new DataSet(databaseName: query.databaseName, tableName: query.tableName))
     }
 
-    protected abstract QueryResult doExecute(Query query, QueryOptions options)
+    protected abstract QueryResult doExecute(Query query, QueryOptions options, FilterState filterState)
 
     /**
      * Transforms the query if a transform is provided. If not, the original query result is return unchanged.

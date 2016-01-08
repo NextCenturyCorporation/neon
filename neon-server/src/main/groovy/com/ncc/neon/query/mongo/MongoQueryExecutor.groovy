@@ -29,8 +29,10 @@ import com.ncc.neon.query.filter.FilterState
 import com.ncc.neon.query.filter.SelectionState
 import com.ncc.neon.query.result.QueryResult
 import com.ncc.neon.query.result.ArrayCountPair
+
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
+
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
 
@@ -45,16 +47,13 @@ class MongoQueryExecutor extends AbstractQueryExecutor {
     private static final GET_FIELD_NAMES_LIMIT = 1000
 
     @Autowired
-    private FilterState filterState
-
-    @Autowired
     private SelectionState selectionState
 
     @Autowired
     private ConnectionManager connectionManager
 
     @Override
-    QueryResult doExecute(Query query, QueryOptions options) {
+    QueryResult doExecute(Query query, QueryOptions options, FilterState filterState) {
         AbstractMongoQueryWorker worker = createMongoQueryWorker(query)
         MongoConversionStrategy mongoConversionStrategy = new MongoConversionStrategy(filterState: filterState, selectionState: selectionState)
         MongoQuery mongoQuery = mongoConversionStrategy.convertQuery(query, options)
@@ -162,7 +161,7 @@ class MongoQueryExecutor extends AbstractQueryExecutor {
         return fieldObj
     }
 
-    List<ArrayCountPair> getArrayCounts(String databaseName, String tableName, String field, int limit, WhereClause whereClause = null) {
+    List<ArrayCountPair> getArrayCounts(String databaseName, String tableName, String field, int limit, FilterState filterState, WhereClause whereClause = null) {
         DB database = mongo.getDB(databaseName)
         ArrayCountQueryWorker worker = new ArrayCountQueryWorker(mongo).withDatabase(database)
         Query query = new Query(filter: new Filter(databaseName: databaseName, tableName: tableName))

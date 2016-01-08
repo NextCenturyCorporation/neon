@@ -15,6 +15,7 @@
  */
 
 package com.ncc.neon.query.sparksql
+
 import com.ncc.neon.connect.ConnectionManager
 import com.ncc.neon.connect.JdbcClient
 import com.ncc.neon.query.*
@@ -25,8 +26,10 @@ import com.ncc.neon.query.filter.SelectionState
 import com.ncc.neon.query.result.QueryResult
 import com.ncc.neon.query.result.ArrayCountPair
 import com.ncc.neon.query.result.TabularQueryResult
+
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
+
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
 
@@ -38,17 +41,13 @@ class SparkSQLQueryExecutor extends AbstractQueryExecutor {
     private static final Logger LOGGER = LoggerFactory.getLogger(SparkSQLQueryExecutor)
 
     @Autowired
-    private FilterState filterState
-
-    @Autowired
     private SelectionState selectionState
 
     @Autowired
     private ConnectionManager connectionManager
 
-
     @Override
-    QueryResult doExecute(Query query, QueryOptions options) {
+    QueryResult doExecute(Query query, QueryOptions options, FilterState filterState) {
         return runAndRelease { client ->
             SparkSQLConversionStrategy conversionStrategy = new SparkSQLConversionStrategy(filterState: filterState, selectionState: selectionState)
             String sparkSQLQuery = conversionStrategy.convertQuery(query, options)
@@ -147,7 +146,7 @@ class SparkSQLQueryExecutor extends AbstractQueryExecutor {
         }
     }
 
-    List<ArrayCountPair> getArrayCounts(String databaseName, String tableName, String field, int limit = 40, WhereClause whereClause = null) {
+    List<ArrayCountPair> getArrayCounts(String databaseName, String tableName, String field, int limit = 40, FilterState filterState, WhereClause whereClause = null) {
         boolean isFieldArray = isFieldArray(databaseName, tableName, field)
         String select
         String groupBy

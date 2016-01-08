@@ -20,11 +20,11 @@ import com.ncc.neon.connect.DataSources
 import com.ncc.neon.language.QueryParser
 import com.ncc.neon.query.Query
 import com.ncc.neon.query.executor.QueryExecutor
+import com.ncc.neon.query.filter.GlobalFilterState
 import com.ncc.neon.query.result.QueryResult
 import com.ncc.neon.query.result.TabularQueryResult
 import org.junit.Before
 import org.junit.Test
-
 
 class LanguageServiceTest {
 
@@ -36,7 +36,8 @@ class LanguageServiceTest {
     @Before
     void before() {
         languageService = new LanguageService()
-        QueryExecutor executor = [execute: { query, options -> new TabularQueryResult([["key1": "val1"], ["key2": 2]]) }] as QueryExecutor
+        QueryExecutor executor = [execute: { query, options, filterState -> new TabularQueryResult([["key1": "val1"], ["key2": 2]])}] as QueryExecutor
+        languageService.filterState = new GlobalFilterState()
         languageService.queryExecutorFactory = [getExecutor: { connection ->
             assert connection.host == HOST
             assert connection.dataSource == DataSources.valueOf(DATABASE_TYPE)

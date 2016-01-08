@@ -38,7 +38,7 @@ class FilterServiceTest {
 
     @Test
     void "add filter"() {
-        def filterStateMock = new MockFor(FilterState)
+        def filterStateMock = new MockFor(GlobalFilterState)
         filterStateMock.demand.addFilter { key -> assert key.is(filterKey)}
         def filterState = filterStateMock.proxyInstance()
         filterService.filterState = filterState
@@ -50,7 +50,7 @@ class FilterServiceTest {
 
     @Test
     void "remove filter"() {
-        def filterStateMock = new MockFor(FilterState)
+        def filterStateMock = new MockFor(GlobalFilterState)
         filterStateMock.demand.removeFilter { id -> assert id == ID; return filterKey }
         def filterState = filterStateMock.proxyInstance()
         filterService.filterState = filterState
@@ -62,7 +62,7 @@ class FilterServiceTest {
 
     @Test
     void "remove filter that does not exist"() {
-        def filterStateMock = new MockFor(FilterState)
+        def filterStateMock = new MockFor(GlobalFilterState)
         filterStateMock.demand.removeFilter { id -> null }
         def filterState = filterStateMock.proxyInstance()
         filterService.filterState = filterState
@@ -79,7 +79,7 @@ class FilterServiceTest {
 
     @Test
     void "replace filter"() {
-        def filterStateMock = new MockFor(FilterState)
+        def filterStateMock = new MockFor(GlobalFilterState)
         filterStateMock.demand.removeFilter { id -> assert id == ID }
         filterStateMock.demand.addFilter { key -> assert key.is(filterKey)}
         def filterState = filterStateMock.proxyInstance()

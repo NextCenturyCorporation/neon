@@ -22,14 +22,14 @@ import com.ncc.neon.connect.DataSources
 import com.ncc.neon.language.QueryParser
 import com.ncc.neon.query.Query
 import com.ncc.neon.query.QueryOptions
+import com.ncc.neon.query.filter.GlobalFilterState
 import com.ncc.neon.query.result.QueryResult
+
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
 
 import javax.ws.rs.*
 import javax.ws.rs.core.MediaType
-
-
 
 /**
  * Service for querying generic data stores using a SQL-like query language
@@ -48,6 +48,9 @@ class LanguageService {
     @Autowired
     ConnectionManager connectionManager
 
+    @Autowired
+    GlobalFilterState filterState
+
     /**
      * Executes a query using a TQL query.
      * @param host The host the database is running on
@@ -64,9 +67,6 @@ class LanguageService {
                              @FormParam("text") String text) {
         ConnectionInfo connection = new ConnectionInfo(dataSource: databaseType as DataSources, host: host)
         Query query = queryParser.parse(text)
-        return queryExecutorFactory.getExecutor(connection).execute(query, QueryOptions.DEFAULT_OPTIONS)
+        return queryExecutorFactory.getExecutor(connection).execute(query, QueryOptions.DEFAULT_OPTIONS, filterState)
     }
-
 }
-
-

@@ -16,8 +16,13 @@
 
 package com.ncc.neon.services
 
+import com.ncc.neon.connect.ConnectionInfo
+import com.ncc.neon.connect.DataSources
 import com.ncc.neon.query.*
 import com.ncc.neon.query.clauses.*
+import com.ncc.neon.query.executor.QueryExecutor
+import com.ncc.neon.query.filter.GlobalFilterState
+import com.ncc.neon.query.filter.CopiedFilterState
 import com.ncc.neon.query.result.QueryResult
 import com.ncc.neon.query.result.TabularQueryResult
 import com.ncc.neon.sse.RecordCounter
@@ -43,25 +48,28 @@ import org.glassfish.jersey.media.sse.OutboundEvent
 import org.glassfish.jersey.media.sse.OutboundEvent.Builder
 import org.glassfish.jersey.media.sse.SseFeature
 
-
-//import java.util.logging.Logger
-
-
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
 
 @Component
 @Path("/ssequeryservice")
 class SseQueryService {
 
     @Autowired
-    QueryService queryService
+    RecordCounterFactory recordCounterFactory
 
     @Autowired
-    RecordCounterFactory recordCounterFactory
+    GlobalFilterState filterState
+
+    @Autowired
+    QueryExecutorFactory queryExecutorFactory
 
     //private static final int MAX_ITERATION_TIME = 1000 // Maximum time a single iteration of the aggregation should be allowed to take, in milliseconds.
     private static final int INITIAL_RECORDS_PER_ITERATION = 10000
     private static final String RANDOM_FIELD_NAME= 'rand'
     private static final Map CURRENTLY_RUNNING_QUERIES_DATA = new ConcurrentHashMap<String, List<SseQueryData>>()
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(SseQueryService)
 
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
@@ -115,7 +123,8 @@ class SseQueryService {
      */
     private EventOutput threadOnlineQueryOrGroup(String uuid) {
         final EventOutput OUTPUT = new EventOutput()
-        int x = 0
+        CopiedFilterState copiedFilterState = new CopiedFilterState(filterState)
+        LOGGER.debug("Starting SSE Thread")
         Thread.start {
             try {
                 List<SseQueryData> queries = CURRENTLY_RUNNING_QUERIES_DATA[uuid]
@@ -125,14 +134,14 @@ class SseQueryService {
                         OUTPUT.write(new OutboundEvent.Builder().data(String, JsonOutput.toJson([complete: false])).build()) // False indicates the query was cancelled, not finished.
                         return
                     }
-                    QueryResult result = runSingleIteration(queries)
-                    OUTPUT.write(new OutboundEvent.Builder().data(String, ("Iteration ${x++} \n" as String) + JsonOutput.toJson(result)).build())
+                    QueryResult result = runSingleIteration(queries, copiedFilterState)
+                    OUTPUT.write(new OutboundEvent.Builder().data(String, JsonOutput.toJson(result)).id("update").build())
                     allComplete = true
                     for(SseQueryData queryData : queries) {
                         allComplete = allComplete && queryData.complete
                     }
                 }
-                OUTPUT.write(new OutboundEvent.Builder().data(String, JsonOutput.toJson([complete: true])).build())
+                OUTPUT.write(new OutboundEvent.Builder().data(String, JsonOutput.toJson([])).id("done").build())
             }
             catch(final InterruptedException | IOException e) {
                 throw new Exception().setStackTrace(e.getStackTrace()) // TODO - this code does nothing useful. Either come up with something better or remove the catch block.
@@ -151,13 +160,17 @@ class SseQueryService {
      * @param queryData An SseQueryData object containing all of the reuired data about the query to execute.
      * @return The result of this iteration of the query.
      */
-    private QueryResult runSingleIteration(List<SseQueryData> queries) {
+    private QueryResult runSingleIteration(List<SseQueryData> queries, CopiedFilterState copiedFilterState) {
         TabularQueryResult finalResult = new TabularQueryResult()
         for(int x = 0; x < queries.size(); x++) {
             SseQueryData queryData = queries.get(x)
                 //long startTime = System.currentTimeMillis()
             applyRandomFilter(queryData.query, queryData.randMin, queryData.randMax)
-            QueryResult result = queryService.executeQuery(queryData.host, queryData.databaseType, queryData.ignoreFilters, queryData.selectionOnly, queryData.ignoredFilterIds, queryData.query)
+
+            QueryOptions queryOptions = new QueryOptions(ignoreFilters: queryData.ignoreFilters, selectionOnly: queryData.selectionOnly, ignoredFilterIds: (queryData.ignoredFilterIds ?: ([] as Set)))
+            QueryExecutor queryExecutor = queryExecutorFactory.getExecutor(new ConnectionInfo(host: queryData.host, dataSource: queryData.databaseType as DataSources))
+            QueryResult result = queryExecutor.execute(queryData.query, queryOptions, copiedFilterState)
+
                 //long endTime = System.currentTimeMillis()
                 //long elapsedTime = endTime - startTime
             queryData.randMin += queryData.randStep
@@ -198,12 +211,12 @@ class SseQueryService {
             if(results[id]) {
                 results[id].totalMean = results[id].totalMean + point.count
                 results[id].totalVar = results[id].totalVar + (point.count * point.count)
-                double var = results[id].totalVar / queryData.traversed
+                double var = Math.max(0, results[id].totalVar) / queryData.traversed
                 results[id].error = Math.sqrt(queryData.zp * var / queryData.traversed)
             }
             else {
                 results[id] = [totalMean: point.count, totalVar: point.count * point.count] as SinglePointStats
-                results[id].error = Math.sqrt(results[id].totalVar * queryData.zp / queryData.traversed)
+                results[id].error = Math.sqrt(Math.max(0, results[id].totalVar) * queryData.zp / queryData.traversed)
             }
             point.mean = results[id].totalMean * (queryData.count / queryData.traversed)
             point.error = results[id].error * (queryData.count / queryData.traversed)

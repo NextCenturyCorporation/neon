@@ -21,6 +21,7 @@ import com.ncc.neon.query.Query
 import com.ncc.neon.query.QueryGroup
 import com.ncc.neon.query.QueryOptions
 import com.ncc.neon.query.clauses.WhereClause
+import com.ncc.neon.query.filter.FilterState
 import com.ncc.neon.query.result.QueryResult
 import com.ncc.neon.query.result.ArrayCountPair
 
@@ -32,17 +33,19 @@ public interface QueryExecutor {
      * Executes a query against a generic data source given the current filter and selection state.
      * @param query An object that represents the query we wish to execute
      * @param options Determines if we should include filters or selection in the query execution
+     * @param filterState The filter state
      * @return An object containing the results of the query
      */
-    QueryResult execute(Query query, QueryOptions options)
+    QueryResult execute(Query query, QueryOptions options, FilterState filterState)
 
     /**
      * Executes a group of queries against a generic data source given the current filter and selection state.
      * @param query A group of query objects
      * @param options Determines if we should include filters or selection in the query execution
+     * @param filterState The filter state
      * @return An object containing the results of the query
      */
-    QueryResult execute(QueryGroup queryGroup, QueryOptions options)
+    QueryResult execute(QueryGroup queryGroup, QueryOptions options, FilterState filterState)
 
     /**
      * @return Returns all the databases
@@ -67,7 +70,8 @@ public interface QueryExecutor {
      * Gets the count for distinct values in an array field
      * @param field the field of the table on which to perform the count
      * @param limit limit number of result pairs to return
+     * @param filterState The filter state
      * @param whereClause The where clause to apply to the array counts query, or null to apply no where clause
      */
-    List<ArrayCountPair> getArrayCounts(String databaseName, String tableName, String field, int limit, WhereClause whereClause)
+    List<ArrayCountPair> getArrayCounts(String databaseName, String tableName, String field, int limit, FilterState filterState, WhereClause whereClause)
 }

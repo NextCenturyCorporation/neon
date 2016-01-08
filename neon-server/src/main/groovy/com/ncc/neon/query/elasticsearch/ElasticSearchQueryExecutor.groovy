@@ -15,6 +15,7 @@
  */
 
 package com.ncc.neon.query.elasticsearch
+
 import com.ncc.neon.connect.ConnectionManager
 import com.ncc.neon.connect.NeonConnectionException
 import com.ncc.neon.query.Query
@@ -30,6 +31,7 @@ import com.ncc.neon.query.filter.SelectionState
 import com.ncc.neon.query.result.ArrayCountPair
 import com.ncc.neon.query.result.QueryResult
 import com.ncc.neon.query.result.TabularQueryResult
+
 import org.elasticsearch.action.admin.cluster.state.ClusterStateRequest
 import org.elasticsearch.action.admin.indices.mapping.get.GetMappingsRequest
 import org.elasticsearch.action.search.SearchRequest
@@ -38,6 +40,7 @@ import org.elasticsearch.client.Client
 import org.elasticsearch.common.collect.ImmutableOpenMap
 import org.elasticsearch.search.aggregations.AggregationBuilders
 import org.elasticsearch.search.aggregations.bucket.MultiBucketsAggregation
+
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
@@ -52,16 +55,13 @@ class ElasticSearchQueryExecutor extends AbstractQueryExecutor {
     private static final Logger LOGGER = LoggerFactory.getLogger(ElasticSearchQueryExecutor)
 
     @Autowired
-    private FilterState filterState
-
-    @Autowired
     private SelectionState selectionState
 
     @Autowired
     private ConnectionManager connectionManager
 
     @Override
-    QueryResult doExecute(Query query, QueryOptions options) {
+    QueryResult doExecute(Query query, QueryOptions options, FilterState filterState) {
         long d1 = new Date().getTime()
 
         ElasticSearchConversionStrategy conversionStrategy = new ElasticSearchConversionStrategy(filterState: filterState, selectionState: selectionState)
@@ -186,7 +186,7 @@ class ElasticSearchQueryExecutor extends AbstractQueryExecutor {
         return []
     }
 
-    List<ArrayCountPair> getArrayCounts(String databaseName, String tableName, String field, int limit = 0, WhereClause whereClause = null) {
+    List<ArrayCountPair> getArrayCounts(String databaseName, String tableName, String field, int limit = 0, FilterState filterState, WhereClause whereClause = null) {
         Query query = new Query(filter: new Filter(databaseName: databaseName, tableName: tableName),
                     limitClause: new LimitClause(limit: 0))
         ElasticSearchConversionStrategy conversionStrategy = new ElasticSearchConversionStrategy(filterState: filterState, selectionState: selectionState)

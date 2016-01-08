@@ -21,7 +21,7 @@ import com.ncc.neon.query.QueryOptions
 import com.ncc.neon.query.clauses.*
 import com.ncc.neon.query.filter.Filter
 import com.ncc.neon.query.filter.FilterKey
-import com.ncc.neon.query.filter.FilterState
+import com.ncc.neon.query.filter.GlobalFilterState
 import com.ncc.neon.query.filter.SelectionState
 import org.junit.Before
 import org.junit.Test
@@ -39,7 +39,7 @@ abstract class AbstractConversionTest {
     protected static final int LIMIT_AMOUNT = 5
     protected static final int SKIP_AMOUNT = 2
 
-    protected FilterState filterState
+    protected GlobalFilterState filterState
     protected SelectionState selectionState
     private Filter simpleFilter
     protected Query simpleQuery
@@ -48,7 +48,7 @@ abstract class AbstractConversionTest {
     void before() {
         simpleFilter = new Filter(databaseName: DATABASE_NAME, tableName: TABLE_NAME)
         simpleQuery = new Query(filter: simpleFilter)
-        filterState = new FilterState()
+        filterState = new GlobalFilterState()
         selectionState = new SelectionState()
     }
 

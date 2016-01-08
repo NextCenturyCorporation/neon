@@ -16,4 +16,14 @@
 
 package com.ncc.neon.query.filter
 
-interface FilterState {}
+class CopiedFilterState implements FilterState, Serializable {
+    // TODO Create a new serialVersionUID
+    private static final long serialVersionUID = 7307506929923060808L
+
+    @Delegate
+    FilterCache delegate = new FilterCache()
+
+    CopiedFilterState(FilterState filterState) {
+        delegate.cache = filterState.cache
+    }
+}

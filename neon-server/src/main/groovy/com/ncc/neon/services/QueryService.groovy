@@ -21,10 +21,12 @@ import com.ncc.neon.connect.ConnectionManager
 import com.ncc.neon.connect.DataSources
 import com.ncc.neon.metadata.model.ColumnMetadata
 import com.ncc.neon.query.*
-import com.ncc.neon.query.executor.QueryExecutor
 import com.ncc.neon.query.clauses.WhereClause
+import com.ncc.neon.query.executor.QueryExecutor
+import com.ncc.neon.query.filter.GlobalFilterState
 import com.ncc.neon.query.result.QueryResult
 import com.ncc.neon.query.result.ArrayCountPair
+
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
 
@@ -47,6 +49,9 @@ class QueryService {
 
     @Autowired
     ConnectionManager connectionManager
+
+    @Autowired
+    GlobalFilterState filterState
 
     /**
      * Executes a query against the supplied connection.
@@ -203,16 +208,15 @@ class QueryService {
     public List<ArrayCountPair> getArrayCounts(@PathParam("host") String host, @PathParam("databaseType") String databaseType, @PathParam("databaseName") String databaseName,
       @PathParam("tableName") String tableName, @PathParam("fieldName") String fieldName, @DefaultValue("50") @QueryParam("limit") int limit, WhereClause whereClause) {
         QueryExecutor queryExecutor = getExecutor(host, databaseType)
-        return queryExecutor.getArrayCounts(databaseName, tableName, fieldName, limit, whereClause)
+        return queryExecutor.getArrayCounts(databaseName, tableName, fieldName, limit, filterState, whereClause)
     }
 
     private QueryResult execute(String host, String databaseType, def query, QueryOptions options) {
         QueryExecutor queryExecutor = getExecutor(host, databaseType)
-        return queryExecutor.execute(query, options)
+        return queryExecutor.execute(query, options, filterState)
     }
 
     private QueryExecutor getExecutor(String host, String databaseType) {
         return queryExecutorFactory.getExecutor(new ConnectionInfo(host: host, dataSource: databaseType as DataSources))
     }
-
 }
