@@ -1,12 +1,13 @@
 package com.ncc.neon.sse
 
 class SinglePointStats {
-	// The total value of the "slice" this corresponds to across all iterations so far.
-	double totalMean
 
-	// The total value of the square of the "slice" this corresponds to across all iterations so far.
-	double totalVar
+    // The mean value (or expected value, E(X)) of the object this SinglePointStats object corresponds to.
+    double mean
 
-	// The error of the "slice" this corresponds to.
-	double error
+    // The variance (Var(X)) of the object this SinglePointStats object corresponds to.
+    double var
+
+    // The error of the object this SinglePointStats object corresponds to.
+    double error
 }

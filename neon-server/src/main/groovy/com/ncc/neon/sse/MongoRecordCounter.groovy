@@ -31,7 +31,9 @@ class MongoRecordCounter implements RecordCounter {
     @Override
     long getCount(String host, String databaseName, String tableName) {
         long count
-        MongoClient mongo = new MongoClient(host)
+        String[] url = host.split(':')
+        int port = (url.length == 2) ? Integer.parseInt(url[1]) : 27017
+        MongoClient mongo = new MongoClient(url[0], port)
         try {
             DB db = mongo.getDB(databaseName)
             DBCollection collection = db.getCollection(tableName)
