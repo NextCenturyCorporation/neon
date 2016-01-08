@@ -18,14 +18,13 @@ package com.ncc.neon.connect
 import org.springframework.context.annotation.Scope
 import org.springframework.context.annotation.ScopedProxyMode
 import org.springframework.stereotype.Component
-import org.springframework.web.context.WebApplicationContext
 
 
 /**
  * Holds the database connection being used for the current request
  */
 @Component
-@Scope(value = WebApplicationContext.SCOPE_REQUEST, proxyMode = ScopedProxyMode.TARGET_CLASS)
+@Scope(value = "thread-inherited", proxyMode = ScopedProxyMode.TARGET_CLASS)
 class CurrentRequestConnection implements Serializable{
 
     private static final long serialVersionUID = 3037767326123010753L

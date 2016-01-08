@@ -1,5 +1,5 @@
 /*
- * Copyright 2013 Next Century Corporation
+ * Copyright 2015 Next Century Corporation
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -14,21 +14,17 @@
  *
  */
 
-package com.ncc.neon.query.filter
-
-import org.springframework.context.annotation.Scope
-import org.springframework.context.annotation.ScopedProxyMode
-import org.springframework.stereotype.Component
-
+package com.ncc.neon.sse
 
 /**
- * Stores any filters applied to the datasets
+ * Counts the records in ElasticSearch collections.
  */
 @Component
-@Scope(value = "thread-inherited", proxyMode = ScopedProxyMode.TARGET_CLASS)
-class FilterState implements Serializable{
-    private static final long serialVersionUID = 7307506929923060807L
+import org.springframework.stereotype.Component
 
-    @Delegate
-    FilterCache delegate = new FilterCache()
+class ElasticSearchRecordCounter implements RecordCounter {
+	@Override
+	long getCount(String host, String databaseName, String tableName) {
+		return 10000L
+	}
 }

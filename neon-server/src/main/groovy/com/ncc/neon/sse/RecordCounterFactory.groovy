@@ -10,14 +10,19 @@ import javax.annotation.Resource
 class RecordCounterFactory {
 
     @Resource
-    private MongoRecordCounter mongoRecordCounter
+    private RecordCounter mongoRecordCounter
+
+    @Resource
+    private RecordCounter elasticSearchRecordCounter
 
     RecordCounter getRecordCounter(String databaseType) {
         switch (databaseType as DataSources) {
             case DataSources.mongo:
                 return mongoRecordCounter
+            case DataSources.elasticsearch:
+                return elasticSearchRecordCounter
             default:
-                throw new NeonConnectionException("Import of user-defined data is unsupported for database type ${databaseType}")
+                throw new NeonConnectionException("There is no RecordCounter currently implemented for database type ${databaseType}")
         }
     }
 }

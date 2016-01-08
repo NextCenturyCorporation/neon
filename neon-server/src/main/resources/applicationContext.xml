@@ -16,4 +16,13 @@
     <task:executor id="asyncExecutor" pool-size="4"/>
     <task:scheduler id="scheduledScheduler"/>
 
+    <bean class="org.springframework.beans.factory.config.CustomScopeConfigurer">
+      <property name="scopes">
+          <map>
+              <entry key="thread-inherited">
+                  <bean class="com.ncc.neon.util.SimpleInheritableThreadScope"/>
+              </entry>
+          </map>
+      </property>
+  </bean>
 </beans>

@@ -136,77 +136,16 @@ war {
 }
 
 gretty {
-    // dependsOn concatjs, watch, 'setVersion' // TODO - This doesn't work because gretty isn't a task, and gretty tasks like appRun are only aded at runtim.e
     servletContainer = 'jetty9' // May need to use jetty 8 instead, depending on what version of Java we're using.
     extraResourceBases file(webAppDirName).toString(), buildDir.absolutePath as String, rootDir.absolutePath as String
     logDir = "${project.buildDir}/jettyRunLogs"
-    println file(webAppDirName).toString()
-    println buildDir.absolutePath as String
-    println rootDir.absolutePath as String
+    scanInterval = 0
 }
 
-//jettyRun {
-//    dependsOn concatjs, watch, 'setVersion'
-//    reload = 'automatic'
-//    scanIntervalSeconds = 10
-//    httpPort = 8080
-//
-//    webAppConfig = new JettyPluginWebAppContext()
-//    webAppConfig.baseResource = jettyRun.class.classLoader.loadClass('org.mortbay.resource.ResourceCollection').newInstance(
-//            [
-//                    file(webAppDirName).toString(),
-//
-//                    // add the concatenated javascript so the widgets can access it by neon.js
-//                    buildDir.absolutePath,
-//
-//                    // this lets us get to the examples directory using the /examples path, but unfortunately it also
-//                    // adds all of our base directories. this isn't really a problem just more clutter than is needed
-//                    rootDir.absolutePath
-//            ] as String[])
-//
-//    doFirst {
-//        System.setProperty("log.dir", "${project.buildDir}/jettyRunLogs")
-//    }
-//}
-
-//[jettyRun, jettyStop]*.stopPort = 8081;         // Probably get rid of or
-//[jettyRun, jettyStop]*.stopKey = 'neon-jetty';  // comment out both of these?
-
-
-// This below \/ sounds like it would be unnecessary for gretty, from: http://www.btday.com/gradle-jetty-plugin-locking-files/
-
-/*
- *[jettyRun, jettyRunWar, transformTestWebService, acceptanceTestWar, performanceTestWar]*.with {
- *    
- *     * THIS IS A WORKAROUND FOR JETTY LOCKING STATIC HTML FILES ON WINDOWS
- *     *
- *     * When developing on Windows Jetty locks any static HTML files and resources, preventing on-the-fly
- *     * editing for quick development turn-around.  The work around for this is to override the
- *     * default setting for useFileMappedBuffer in jetty's webdefault.xml file.  Here we've extracted
- *     * the Jetty 6.1.25 webdefault.xml and simply set useFileMappedBuffer to false.
- *     *
- *     * References:
- *     * http://issues.gradle.org/browse/GRADLE-727
- *     * http://stackoverflow.com/questions/11032342/gradle-jetty-plugin-locking-files
- *     
- *    webDefaultXml = file("${projectDir}/webdefault.xml")
- *}
- *
- *[jettyRun, jettyRunWar, transformTestWebService, acceptanceTestWar, performanceTestWar]*.doLast {
- *    
- *     * THIS IS A WORKAROUND! THE CURRENT VERSION OF THIS TASK DOESN'T START A WATCHER IN DAEMON MODE
- *     *
- *     * If starting the monitor fails, it may be because the jetty task was updated to fix this issue
- *     * When that happens, we shouldn't need the custom task any more
- *     *
- *     * http://issues.gradle.org/browse/GRADLE-2263
- *    
- *    if (getStopPort() != null && getStopPort() > 0 && getStopKey() != null) {
- *        Monitor monitor = new Monitor(getStopPort(), getStopKey(), server.getProxiedObject());
- *        monitor.start();
- *    }
- *}
- */
+project.afterEvaluate {
+   tasks.appRun.dependsOn build
+   tasks.jettyRun.dependsOn build
+}
 
 test {
     description = "Runs the neon unit tests"

@@ -60,7 +60,7 @@ class SseQueryService {
 
     //private static final int MAX_ITERATION_TIME = 1000 // Maximum time a single iteration of the aggregation should be allowed to take, in milliseconds.
     private static final int INITIAL_RECORDS_PER_ITERATION = 10000
-    private static final String RANDOM_FIELD_NAME= 'random'
+    private static final String RANDOM_FIELD_NAME= 'rand'
     private static final Map CURRENTLY_RUNNING_QUERIES_DATA = new ConcurrentHashMap<String, List<SseQueryData>>()
 
     @POST
@@ -107,60 +107,6 @@ class SseQueryService {
         return threadOnlineQueryOrGroup(uuid)
     }
 
-/*    @POST
-    @Consumes(MediaType.APPLICATION_JSON)
-    @Produces(SseFeature.SERVER_SENT_EVENTS)
-    @Path("query/{host}/{databaseType}")
-    EventOutput executeOnlineQuery(@PathParam("host") String host,
-                             @PathParam("databaseType") String databaseType,
-                             @DefaultValue("false") @QueryParam("ignoreFilters") boolean ignoreFilters,
-                             @DefaultValue("false") @QueryParam("selectionOnly") boolean selectionOnly,
-                             @QueryParam("ignoredFilterIds") Set<String> ignoredFilterIds,
-                             Query query) {
-        SseQueryData queryData = initDataWithCollectionValues(host, databaseType, query.getDatabaseName(), query.getTableName())
-        queryData.with {
-            (host, databaseType, ignoreFilters, selectionOnly, ignoredFilterIds, query, zp) = [host,
-                databaseType,
-                ignoreFilters,
-                selectionOnly,
-                ignoredFilterIds,
-                query,
-                1.6500000000000012 // query.confidence
-                ]
-        }
-        String uuid = addToRunningQueries([queryData])
-        return threadOnlineQueryOrGroup(uuid)
-    }
-
-    @POST
-    @Consumes(MediaType.APPLICATION_JSON)
-    @Produces(SseFeature.SERVER_SENT_EVENTS)
-    @Path("querygroup/{host}/{databaseType}")
-    EventOutput executeOnlineQueryGroup(@PathParam("host") String host,
-                             @PathParam("databaseType") String databaseType,
-                             @DefaultValue("false") @QueryParam("ignoreFilters") boolean ignoreFilters,
-                             @DefaultValue("false") @QueryParam("selectionOnly") boolean selectionOnly,
-                             @QueryParam("ignoredFilterIds") Set<String> ignoredFilterIds,
-                             QueryGroup queryGroup) {
-        List queryList = []
-        queryGroup.queries.each { query ->
-            SseQueryData queryData = initDataWithCollectionValues(host, databaseType, query.filter.databaseName, query.filter.tableName)
-            queryData.with {
-                (host, databaseType, ignoreFilters, selectionOnly, ignoredFilterIds, query, zp) = [host,
-                    databaseType,
-                    ignoreFilters,
-                    selectionOnly,
-                    ignoredFilterIds,
-                    query,
-                    1.6500000000000012 //query.confidence
-                    ]
-            }
-            queryList << queryData
-        }
-        String uuid = addToRunningQueries(queryList)
-        return threadOnlineQueryOrGroup(uuid)
-    } */
-
     /**
      * Creates a new thread to run a query or group of queries, given the UUID associated with that query or group of queries.
      * Returns an SSE event output, through which updates as to the progress of the query or group will be sent.
@@ -169,9 +115,9 @@ class SseQueryService {
      */
     private EventOutput threadOnlineQueryOrGroup(String uuid) {
         final EventOutput OUTPUT = new EventOutput()
+        int x = 0
         Thread.start {
             try {
-                OUTPUT.write(new OutboundEvent.Builder().data(String, JsonOutput.toJson(CURRENTLY_RUNNING_QUERIES_DATA[uuid])).build())
                 List<SseQueryData> queries = CURRENTLY_RUNNING_QUERIES_DATA[uuid]
                 boolean allComplete = false
                 while(!allComplete) {
@@ -180,7 +126,7 @@ class SseQueryService {
                         return
                     }
                     QueryResult result = runSingleIteration(queries)
-                    OUTPUT.write(new OutboundEvent.Builder().data(String, JsonOutput.toJson(result)).build())
+                    OUTPUT.write(new OutboundEvent.Builder().data(String, ("Iteration ${x++} \n" as String) + JsonOutput.toJson(result)).build())
                     allComplete = true
                     for(SseQueryData queryData : queries) {
                         allComplete = allComplete && queryData.complete
@@ -216,7 +162,7 @@ class SseQueryService {
                 //long elapsedTime = endTime - startTime
             queryData.randMin += queryData.randStep
                 //queryData.randStep *= (MAX_ITERATION_TIME / elapsedTime)
-            queryData.randMax += queryData.randStep
+            queryData.randMax = (queryData.randMax + queryData.randStep > 1) ? 1 : queryData.randMax + queryData.randStep
             if(queryData.randMin > 1) {
                 queryData.complete = true
             }
@@ -241,12 +187,10 @@ class SseQueryService {
     private void updateResults(QueryResult result, SseQueryData queryData) {
         Map results = queryData.runningResults
 
-        // Adds the number of records traversed this iteration to the number of records traversed overall.
-        queryData.traversed += result.sum { point -> point?.count }
-
+        queryData.traversed = (queryData.randMin * queryData.count)
         // Adds results of one iteration of a query to the overall results for that query. Currently assumes returned field is named "count".
         for(int x = 0; x < result.data.size(); x++) {
-            def point = result.get(x)
+            Map point = result.data.get(x)
             String id = makeId(point, queryData.query)
             if(!point.count) { // Skip any record that doesn't have a "count" field.
                 return
@@ -258,7 +202,8 @@ class SseQueryService {
                 results[id].error = Math.sqrt(queryData.zp * var / queryData.traversed)
             }
             else {
-                results[id] = [totalMean: point.count, totalVar: point.count * point.count, error: Math.sqrt(point.count * point.count * queryData.zp / queryData.traversed)] as SinglePointStats
+                results[id] = [totalMean: point.count, totalVar: point.count * point.count] as SinglePointStats
+                results[id].error = Math.sqrt(results[id].totalVar * queryData.zp / queryData.traversed)
             }
             point.mean = results[id].totalMean * (queryData.count / queryData.traversed)
             point.error = results[id].error * (queryData.count / queryData.traversed)
@@ -337,15 +282,16 @@ class SseQueryService {
                 complete: false,
                 count: recordCount,
                 randStep: randStep,
-                randMin: 0.0,
-                randMax: 0.0 + randStep,
-                traversed: 0,
+                randMin: 0.0D,
+                randMax: 0.0D + randStep,
+                traversed: 0L,
                 host: host,
                 databaseType: databaseType,
                 ignoreFilters: ignoreFilters,
                 selectionOnly: selectionOnly,
                 ignoredFilterIds: ignoredFilterIds,
-                query: query] as SseQueryData
+                query: query,
+                zp: getZp(0.95)] as SseQueryData // TODO - currently z(p) is constant. Eventually we will want to pass in a confidence parameter and get z(p) from that.
     }
 
     private double getZp(double confidence) {
@@ -368,30 +314,30 @@ class SseQueryService {
     private void applyRandomFilter(Query query, double randMin, double randMax) { // TODO Would it be worth it to make this method store references to the random WhereClauses
         WhereClause currentClause = query.filter.whereClause                      // alongside query IDs for faster processing once they're created, once loop is iterating?
         if(!(currentClause instanceof AndWhereClause)) {
-            AndWhereClause newClause = new AndWhereClause()
+            AndWhereClause newClause = new AndWhereClause(whereClauses: [])
             newClause.whereClauses << currentClause
-            newClause.whereClauses << [lhs: RANDOM_FIELD_NAME, operator: ">", rhs: "$randMin"] as SingularWhereClause
-            newClause.whereClauses << [lhs: RANDOM_FIELD_NAME, operator: "<=", rhs: "$randMax"] as SingularWhereClause
+            newClause.whereClauses << ([lhs: RANDOM_FIELD_NAME, operator: '>=', rhs: randMin] as SingularWhereClause)
+            newClause.whereClauses << ([lhs: RANDOM_FIELD_NAME, operator: '<', rhs: randMax] as SingularWhereClause)
             query.filter.whereClause = newClause
         }
         else {
             boolean minClause = false, maxClause = false
             for(int x = 0; x < currentClause.whereClauses.size(); x++) {
                 WhereClause clause = currentClause.whereClauses.get(x)
-                if(clause instanceof SingularWhereClause && clause.lhs == RANDOM_FIELD_NAME && clause.operator == ">") {
-                    clause.rhs = "$randMin"
+                if(clause instanceof SingularWhereClause && clause.lhs == RANDOM_FIELD_NAME && clause.operator == '>=') {
+                    clause.rhs = randMin
                     minClause = true
                 }
-                else if(clause instanceof SingularWhereClause && clause.lhs == RANDOM_FIELD_NAME && clause.operator == "<=") {
-                    clause.rhs = "$randMax"
+                else if(clause instanceof SingularWhereClause && clause.lhs == RANDOM_FIELD_NAME && clause.operator == '<') {
+                    clause.rhs = randMax
                     maxClause = true
                 }
             }
             if(!minClause) {
-                currentClause.whereClauses << ([lhs: RANDOM_FIELD_NAME, operator: ">", rhs: "$randMin"] as SingularWhereClause)
+                currentClause.whereClauses << ([lhs: RANDOM_FIELD_NAME, operator: '>=', rhs: randMin] as SingularWhereClause)
             }
             if(!maxClause) {
-                currentClause.whereClauses << ([lhs: RANDOM_FIELD_NAME, operator: "<=", rhs: "$randMax"] as SingularWhereClause)
+                currentClause.whereClauses << ([lhs: RANDOM_FIELD_NAME, operator: '<', rhs: randMax] as SingularWhereClause)
             }
         }
     }
