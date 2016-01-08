@@ -60,6 +60,10 @@
             <param-name>jersey.config.server.provider.classnames</param-name>
             <param-value>org.glassfish.jersey.media.multipart.MultiPartFeature;org.glassfish.jersey.media.sse.SseFeature</param-value>
         </init-param>
+        <init-param>
+            <param-name>jersey.config.server.provider.packages</param-name>
+            <param-value>com.ncc.neon.query.jackson,com.fasterxml.jackson.jaxrs.json</param-value>
+        </init-param>
         <load-on-startup>1</load-on-startup>
         <async-supported>true</async-supported>
     </servlet>
