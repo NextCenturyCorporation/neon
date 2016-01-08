@@ -20,10 +20,7 @@ import com.ncc.neon.query.*
 import com.ncc.neon.query.clauses.*
 import com.ncc.neon.query.result.QueryResult
 import com.ncc.neon.query.result.TabularQueryResult
-import com.ncc.neon.sse.RecordCounter
-import com.ncc.neon.sse.RecordCounterFactory
-import com.ncc.neon.sse.SinglePointStats
-import com.ncc.neon.sse.SseQueryData
+import com.ncc.neon.sse.*
 
 import groovy.json.JsonOutput
 
@@ -42,11 +39,6 @@ import org.glassfish.jersey.media.sse.EventOutput
 import org.glassfish.jersey.media.sse.OutboundEvent
 import org.glassfish.jersey.media.sse.OutboundEvent.Builder
 import org.glassfish.jersey.media.sse.SseFeature
-
-
-//import java.util.logging.Logger
-
-
 
 @Component
 @Path("/ssequeryservice")
@@ -115,7 +107,6 @@ class SseQueryService {
      */
     private EventOutput threadOnlineQueryOrGroup(String uuid) {
         final EventOutput OUTPUT = new EventOutput()
-        int x = 0
         Thread.start {
             try {
                 List<SseQueryData> queries = CURRENTLY_RUNNING_QUERIES_DATA[uuid]
@@ -126,7 +117,7 @@ class SseQueryService {
                         return
                     }
                     QueryResult result = runSingleIteration(queries)
-                    OUTPUT.write(new OutboundEvent.Builder().data(String, ("Iteration ${x++} \n" as String) + JsonOutput.toJson(result)).build())
+                    OUTPUT.write(new OutboundEvent.Builder().data(String, JsonOutput.toJson(result)).build())
                     allComplete = true
                     for(SseQueryData queryData : queries) {
                         allComplete = allComplete && queryData.complete
@@ -158,6 +149,7 @@ class SseQueryService {
                 //long startTime = System.currentTimeMillis()
             applyRandomFilter(queryData.query, queryData.randMin, queryData.randMax)
             QueryResult result = queryService.executeQuery(queryData.host, queryData.databaseType, queryData.ignoreFilters, queryData.selectionOnly, queryData.ignoredFilterIds, queryData.query)
+            updateResults(result, queryData)
                 //long endTime = System.currentTimeMillis()
                 //long elapsedTime = endTime - startTime
             queryData.randMin += queryData.randStep
@@ -166,7 +158,6 @@ class SseQueryService {
             if(queryData.randMin > 1) {
                 queryData.complete = true
             }
-            updateResults(result, queryData)
             finalResult.data.addAll(result.data)
         }
         return finalResult
@@ -185,28 +176,21 @@ class SseQueryService {
      * @param The query that returned the given results object.
      */
     private void updateResults(QueryResult result, SseQueryData queryData) {
-        Map results = queryData.runningResults
-
-        queryData.traversed = (queryData.randMin * queryData.count)
-        // Adds results of one iteration of a query to the overall results for that query. Currently assumes returned field is named "count".
-        for(int x = 0; x < result.data.size(); x++) {
-            Map point = result.data.get(x)
-            String id = makeId(point, queryData.query)
-            if(!point.count) { // Skip any record that doesn't have a "count" field.
-                return
-            }
-            if(results[id]) {
-                results[id].totalMean = results[id].totalMean + point.count
-                results[id].totalVar = results[id].totalVar + (point.count * point.count)
-                double var = results[id].totalVar / queryData.traversed
-                results[id].error = Math.sqrt(queryData.zp * var / queryData.traversed)
-            }
-            else {
-                results[id] = [totalMean: point.count, totalVar: point.count * point.count] as SinglePointStats
-                results[id].error = Math.sqrt(results[id].totalVar * queryData.zp / queryData.traversed)
-            }
-            point.mean = results[id].totalMean * (queryData.count / queryData.traversed)
-            point.error = results[id].error * (queryData.count / queryData.traversed)
+        switch(queryData.query.aggregates[0].operation) {
+            case 'count':
+                AggregationOperations.count(result, queryData)
+                break
+            case 'sum':
+                AggregationOperations.sum(result, queryData)
+                break
+            case 'avg':
+                break
+            case 'min':
+                break
+            case 'max':
+                break
+            deault:
+                throw new UnsupportedOperationException("Don't know how to aggregate on operation ${queryData.query.aggregates[0].operation}.")
         }
     }
 
@@ -217,27 +201,6 @@ class SseQueryService {
         }
         CURRENTLY_RUNNING_QUERIES_DATA.put(uuid, queryData)
         return uuid
-    }
-
-    /**
-     * Creates a unique ID for a single item in a QueryResult by aggregating every name and
-     * value in its query's groupByClauses in a string.
-     * @param singleResult The QueryResult item to create an ID for.
-     * @param query The query from which to pull groupByClauses values from.
-     * @return A string of the form {"clause1Name":"clause1Value","clause2Name":"clause2Value",etc}
-     */
-    private String makeId(Map singleResult, Query query) {
-        List idPieces = []
-        for(int x = 0; x < query.groupByClauses.size(); x ++) {
-            GroupByClause clause = query.groupByClauses.get(x)
-            if(clause instanceof GroupByFieldClause) {
-                idPieces << '"' + clause.field + '":"' + singleResult[clause.field] + '"'
-            }
-            else if(clause instanceof GroupByFunctionClause) {
-                idPieces << '"' + clause.name + '":"' + singleResult[clause.name] + '"'
-            }
-        }
-        return '{' + idPieces.join(',') + '}'
     }
 
     /**
