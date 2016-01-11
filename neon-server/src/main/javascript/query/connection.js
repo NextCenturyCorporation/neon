@@ -171,6 +171,14 @@ neon.query.Connection.prototype.executeSseQueryGroup = function(queryGroup, init
     return this.executeSseQueryService_(queryGroup, initialReturnCallback, messageCallback, errorCallback, 'querygroup');
 };
 
+neon.query.Connection.prototype.cancelSseQuery = function(uuid, successCallback) {
+    neon.util.ajaxUtils.doGet(
+        neon.serviceUrl('ssequeryservice', 'cancel/' + uuid), {
+            success: successCallback
+        }
+    );
+};
+
 /**
  * Executes a query to the SseQueryService. The initial response from the server sends a UUID string to the the initialResponseCallback, which
  * can be used later to cancel the running query. Whenever a message comes from the server, fires the given message callback or error callback,
@@ -211,7 +219,7 @@ neon.query.Connection.prototype.executeSseQueryService_ = function(query, initia
                 source.onmessage = function(e) {
                     var queryResults = JSON.parse(e.data);
                     messageCallback(queryResults);
-                    if(e.lastEventId === "done") {
+                    if(e.lastEventId === "done" || e.lastEventId === "cancel") {
                         source.close();
                     }
                 };

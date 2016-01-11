@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 Next Century Corporation
+ * Copyright 2016 Next Century Corporation
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -62,7 +62,7 @@ class SseQueryService {
     QueryExecutorFactory queryExecutorFactory
 
     //private static final int MAX_ITERATION_TIME = 1000 // Maximum time a single iteration of the aggregation should be allowed to take, in milliseconds.
-    private static final int INITIAL_RECORDS_PER_ITERATION = 10000
+    private static final int INITIAL_RECORDS_PER_ITERATION = 100000
     private static final String RANDOM_FIELD_NAME= 'rand'
     private static final Map CURRENTLY_RUNNING_QUERIES_DATA = new ConcurrentHashMap<String, List<SseQueryData>>()
 
@@ -112,6 +112,14 @@ class SseQueryService {
         return threadOnlineQueryOrGroup(uuid)
     }
 
+    @GET
+    @Produces(MediaType.APPLICATION_JSON)
+    @Path("cancel/{uuid}")
+    EventOutput cancelUuid(@PathParam("uuid") String uuid) {
+        CURRENTLY_RUNNING_QUERIES_DATA.remove(uuid)
+        return Response.ok().build()
+    }
+
     /**
      * Creates a new thread to run a query or group of queries, given the UUID associated with that query or group of queries.
      * Returns an SSE event output, through which updates as to the progress of the query or group will be sent.
@@ -128,7 +136,7 @@ class SseQueryService {
                 boolean allComplete = false
                 while(!allComplete) {
                     if(!CURRENTLY_RUNNING_QUERIES_DATA[uuid]) { // TODO - If this is kept as-is, I don't think that SseQueryData needs an "active" field.
-                        OUTPUT.write(new OutboundEvent.Builder().data(String, JsonOutput.toJson([complete: false])).build()) // False indicates the query was cancelled, not finished.
+                        OUTPUT.write(new OutboundEvent.Builder().data(String, JsonOutput.toJson([])).id("cancel").build()) // False indicates the query was cancelled, not finished.
                         return
                     }
                     QueryResult result = runSingleIteration(queries, copiedFilterState)
