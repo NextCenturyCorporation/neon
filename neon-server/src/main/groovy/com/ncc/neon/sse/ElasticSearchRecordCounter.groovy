@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 Next Century Corporation
+ * Copyright 2016 Next Century Corporation
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,15 +16,29 @@
 
 package com.ncc.neon.sse
 
+import com.ncc.neon.connect.ConnectionManager
+
+import org.elasticsearch.action.search.SearchResponse
+import org.elasticsearch.client.Client
+
+import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.stereotype.Component
+
 /**
  * Counts the records in ElasticSearch collections.
  */
 @Component
-import org.springframework.stereotype.Component
-
 class ElasticSearchRecordCounter implements RecordCounter {
-	@Override
-	long getCount(String host, String databaseName, String tableName) {
-		return 10000L
-	}
+
+    @Autowired
+    private ConnectionManager connectionManager
+
+    @Override
+    long getCount(String host, String databaseName, String tableName) {
+        Client client = connectionManager.connection.client
+        SearchResponse result = client.prepareSearch().setIndices(databaseName).setTypes(tableName).setExplain(false).setSize(0).execute().actionGet()
+        long records = result.getHits().getTotalHits()
+        client.close()
+        return records
+    }
 }

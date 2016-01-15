@@ -16,8 +16,8 @@
 
 package com.ncc.neon.util
 
-import org.apache.commons.logging.Log
-import org.apache.commons.logging.LogFactory
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
 
 import org.springframework.beans.factory.ObjectFactory
 import org.springframework.beans.factory.config.Scope
@@ -45,7 +45,7 @@ import org.springframework.core.NamedThreadLocal
  */
 public class SimpleInheritableThreadScope implements Scope {
 
-	private static final Log LOGGER = LogFactory.getLog(SimpleInheritableThreadScope)
+	private static final Logger LOGGER = LoggerFactory.getLogger(SimpleInheritableThreadScope)
 
 	private static final ThreadLocal<Map<String, Object>> THREADSCOPE =
 			new NamedThreadLocal<Map<String, Object>>("SimpleThreadScope") {
@@ -72,11 +72,11 @@ public class SimpleInheritableThreadScope implements Scope {
 	}
 
 	public void registerDestructionCallback(String name, Runnable callback) {
-		LOGGER.warn("Registration of destruction callback {$name , $callback} not supported.")
+		LOGGER.debug("Registration of destruction callback {$name , $callback} not supported.")
 	}
 
 	public Object resolveContextualObject(String key) {
-		LOGGER.warn("This method is a stub. Contextual object $key not registered.")
+		LOGGER.debug("This method is a stub. Contextual object $key not registered.")
 		return null
 	}
 

@@ -1,7 +1,26 @@
+/*
+ * Copyright 2016 Next Century Corporation
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ */
+
 package com.ncc.neon.sse
 
 import com.ncc.neon.query.Query
 
+/**
+ * Stores a Neon query object, as well as a variety of information about it that is relevant to it and its current state.
+ */
 class SseQueryData {
 
     // Whether or not the query is still actively being processed.
@@ -36,8 +55,8 @@ class SseQueryData {
     // z(p) value associated with the desired confidence of this query.
     double zp
 
-    // Number of records that have been looked through so far for this query.
-    long traversed
+    // The name of the field in which the random value for the table to be searched is stored.
+    String randomField
 
     // Query this data is associated with.
     Query query
