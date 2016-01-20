@@ -129,7 +129,7 @@ class StateService {
                 states.put("filterStateId", filterId)
                 if(filterState.size()) {
                     filterService.clearFilters()
-                    editFilters(filterState).each { filter ->
+                    filterState.each { filter ->
                         filterService.replaceFilter(filter)
                     }
                 }
@@ -196,26 +196,5 @@ class StateService {
     @Produces(MediaType.APPLICATION_JSON)
     Map deleteState(@PathParam("stateName") String stateName){
         return derbyExecutor.deleteState(stateName)
-    }
-
-    /**
-     * Edits each filter's ID and filterName so it shows the filters belong to the dashboard now instead of
-     * a particular visualization.
-     * @param filters List of FilterKey objects
-     * @return The edited filters
-     * @method editFilters
-     * @private
-     */
-    private List<FilterKey> editFilters(List<FilterKey> filters) {
-        filters.each { filter ->
-            def index = filter.id.indexOf("-")
-            filter.id = "dashboard-" + (index >= 0 ? filter.id.substring(index + 1) : filter.id)
-
-            index = filter.filter.filterName.indexOf(" - ")
-            def colonIndex = filter.filter.filterName.indexOf(":")
-            if(index >= 0 && colonIndex >= 0) {
-                filter.filter.filterName = filter.filter.filterName.substring(index + 3)
-            }
-        }
     }
 }
