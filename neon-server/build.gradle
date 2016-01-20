@@ -33,7 +33,6 @@ buildscript {
         }
     }
     dependencies {
-        classpath ":antlr4-plugin:$antlrPluginVersion"
         classpath "org.hidetake:gradle-ssh-plugin:$sshPluginVersion"
     }
 }
@@ -65,7 +64,6 @@ apply from: "gradle/acceptanceTest.gradle"
 apply from: "gradle/performanceTest.gradle"
 
 apply from: "${rootDir}/gradle/groovy.gradle"
-apply from: "gradle/antlr.gradle"
 apply from: "${rootDir}/gradle/deploy.gradle"
 
 sourceCompatibility = 1.7
@@ -91,7 +89,6 @@ dependencies {
     compile "ch.qos.logback:logback-core:$logbackVersion"
     compile "ch.qos.logback:logback-classic:$logbackVersion"
     compile "com.google.guava:guava:$guavaVersion"
-    compile "org.antlr:antlr4:$antlrVersion"
     compile "org.apache.poi:poi:$poiVersion"
     compile "org.apache.poi:poi-ooxml:$poiVersion"
     compile "org.apache.poi:poi-ooxml-schemas:$poiVersion"
