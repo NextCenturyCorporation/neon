@@ -15,9 +15,6 @@
  */
 
 describe('neon.widget', function() {
-    var databaseName = "!@#$%^&*?/\\";
-    var encodedDatabaseName = "!%40%23%24%25%5E%26*%3F%2F%5C";
-    var encodedTableName = "%5C%2F%3F*%26%5E%25%24%23%40!";
     var encodedValue = "%23%40!%5C%2F%3F*%26%5E%25%24";
     var widgetService = '/services/widgetservice/';
     var server = 'http://localhost:8080/neon';
@@ -40,14 +37,6 @@ describe('neon.widget', function() {
 
         neon.widget.getSavedState(value);
         expect($.ajax.mostRecentCall.args[0].url).toEqual(server + widgetService + 'restorestate/' + encodedValue);
-    });
-
-    it("should encode qualifier appropriately in getWidgetInitializationData request url", function() {
-        spyOn($, "ajax");
-
-        neon.widget.getWidgetInitializationData(value);
-        expect($.ajax.mostRecentCall.args[0].url).toEqual(server + widgetService + 'widgetinitialization/' +
-            encodedValue);
     });
 
     it("should encode qualifier appropriately in saveState request url", function() {
