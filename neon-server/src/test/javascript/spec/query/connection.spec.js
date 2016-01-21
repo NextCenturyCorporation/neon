@@ -87,14 +87,6 @@ describe('neon.query.Connection', function() {
             neon.query.Connection.MONGO);
     });
 
-    it("should encode host, database, and tablename appropriately in getColumnMetadata request url", function() {
-        spyOn($, "ajax");
-
-        connection.getColumnMetadata(databaseName, tableName);
-        expect($.ajax.mostRecentCall.args[0].url).toEqual(server + queryService + 'columnmetadata/' +
-            encodedDatabaseName + '/' + encodedTableName);
-    });
-
     it("should encode host and database type appropriately in executeExport request url", function() {
         spyOn($, "ajax");
 

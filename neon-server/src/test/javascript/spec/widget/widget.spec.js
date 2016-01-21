@@ -42,14 +42,6 @@ describe('neon.widget', function() {
         expect($.ajax.mostRecentCall.args[0].url).toEqual(server + widgetService + 'restorestate/' + encodedValue);
     });
 
-    it("should encode qualifier appropriately in getWidgetDatasetMetadata request url", function() {
-        spyOn($, "ajax");
-
-        neon.widget.getWidgetDatasetMetadata(databaseName, tableName, value);
-        expect($.ajax.mostRecentCall.args[0].url).toEqual(server + widgetService + 'widgetdataset/' +
-            encodedDatabaseName + '/' + encodedTableName + '/' + encodedValue);
-    });
-
     it("should encode qualifier appropriately in getWidgetInitializationData request url", function() {
         spyOn($, "ajax");
 

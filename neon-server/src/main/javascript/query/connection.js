@@ -83,23 +83,6 @@ neon.query.Connection.prototype.executeQuery = function(query, successCallback, 
 };
 
 /**
- * Gets the metadata for each of the columns in the table
- * @method getColumnMetadata
- * @param {String} databaseName
- * @param {String} tableName The table whose metadata is being returned
- * @param {Function} successCallback
- * @return {neon.util.AjaxRequest}
- */
-neon.query.Connection.prototype.getColumnMetadata = function(databaseName, tableName, successCallback) {
-    return neon.util.ajaxUtils.doGet(
-        neon.serviceUrl('queryservice', 'columnmetadata/' + encodeURIComponent(databaseName) + '/' + encodeURIComponent(tableName)), {
-            success: successCallback,
-            responseType: 'json'
-        }
-    );
-};
-
-/**
  * Executes the specified query group (a series of queries whose results are aggregate),
  * and fires the callback when complete.
  * @method executeQueryGroup
