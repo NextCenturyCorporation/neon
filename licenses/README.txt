@@ -51,13 +51,6 @@ Apache v2.0 (apache-2.0.txt)
   -- org.apache.thrift:libfb303:0.9.0
   -- org.apache.thrift:libthrift:0.9.0
 
-BSD (bsd.txt)
-- antlr
-  -- org.antlr:antlr4:4.0
-  -- org.antlr:antlr-runtime:3.5
-  -- org.antlr:antlr4-runtime:4.0
-  -- org.antlr:ST4:4.0.7
-
 CDDL v1.1 (cddl-1.1.txt)
 - Jersey
   -- com.sun.jersey.contribs:jersey-spring:1.15
