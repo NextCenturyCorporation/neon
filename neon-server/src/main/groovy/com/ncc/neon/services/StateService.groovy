@@ -17,8 +17,8 @@
 package com.ncc.neon.services
 
 import com.ncc.neon.query.filter.FilterKey
-import com.ncc.neon.query.derby.DerbyExecutor
-import com.ncc.neon.query.derby.StateServiceException
+import com.ncc.neon.state.executor.DerbyExecutor
+import com.ncc.neon.state.exceptions.StateServiceException
 
 import org.springframework.stereotype.Component
 import org.springframework.beans.factory.annotation.Autowired

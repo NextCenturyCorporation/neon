@@ -16,7 +16,7 @@
 
 package com.ncc.neon.services
 
-import com.ncc.neon.query.derby.StateServiceException
+import com.ncc.neon.state.exceptions.StateServiceException
 
 import javax.ws.rs.core.Response
 import javax.ws.rs.ext.ExceptionMapper

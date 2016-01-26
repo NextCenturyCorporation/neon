@@ -14,11 +14,12 @@
  *
  */
 
-package com.ncc.neon.query.derby
+package com.ncc.neon.state.executor
 
 import com.ncc.neon.connect.ConnectionManager
 import com.ncc.neon.connect.ConnectionInfo
 import com.ncc.neon.connect.DataSources
+import com.ncc.neon.state.exceptions.StateServiceException
 import com.ncc.neon.query.filter.FilterKey
 import com.ncc.neon.query.jackson.NeonModule
 import com.ncc.neon.query.jackson.ObjectMapperProvider

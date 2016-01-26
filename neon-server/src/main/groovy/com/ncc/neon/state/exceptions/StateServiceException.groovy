@@ -14,7 +14,7 @@
  *
  */
 
-package com.ncc.neon.query.derby
+package com.ncc.neon.state.exceptions
 
 
 
