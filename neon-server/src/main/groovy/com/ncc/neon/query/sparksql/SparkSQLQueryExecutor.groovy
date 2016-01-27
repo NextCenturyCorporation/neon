@@ -115,17 +115,6 @@ class SparkSQLQueryExecutor extends AbstractQueryExecutor {
         }
     }
 
-    @Override
-    Map getFieldTypes(String databaseName, String tableName) {
-        try {
-            return runAndRelease { client -> client.getTypes(databaseName, tableName) }
-        }
-        catch (SQLException ex) {
-            LOGGER.error("Columns cannot be found ", ex)
-            return [:]
-        }
-    }
-
     private JdbcClient getJdbcClient() {
         return connectionManager.connection.jdbcClient
     }
@@ -148,9 +137,27 @@ class SparkSQLQueryExecutor extends AbstractQueryExecutor {
         }
     }
 
+    private boolean isFieldArray(String databaseName, String tableName, String fieldName) {
+        try {
+            return runAndRelease { client -> client.isTypeArray(databaseName, tableName, fieldName) }
+        }
+        catch (SQLException ex) {
+            LOGGER.error("Columns cannot be found ", ex)
+            return [:]
+        }
+    }
+
     List<ArrayCountPair> getArrayCounts(String databaseName, String tableName, String field, int limit = 40, WhereClause whereClause = null) {
-        String select = "SELECT key, count(1) as count FROM " + databaseName + "." + tableName + " LATERAL VIEW explode(" + field + ") tmptable AS key"
-        String groupBy = " GROUP BY key"
+        boolean isFieldArray = isFieldArray(databaseName, tableName, field)
+        String select
+        String groupBy
+        if(isFieldArray) {
+            select = "SELECT key, count(1) as count FROM " + databaseName + "." + tableName + " LATERAL VIEW explode(" + field + ") tmptable AS key"
+            groupBy = " GROUP BY key"
+        } else {
+            select = "SELECT " + field + " as key, count(1) as count FROM " + databaseName + "." + tableName
+            groupBy = " GROUP BY " + field
+        }
         String orderBy = " ORDER BY count DESC"
         String sort = " LIMIT " + limit
 

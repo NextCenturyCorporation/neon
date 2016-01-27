@@ -52,8 +52,8 @@ class MongoAggregationClauseBuilder {
         groupByClauses.each {
             def projField
             if (it instanceof GroupByFieldClause) {
-                idFields.put(it.field, '$' + it.field)
-                projField = it.field
+                idFields.put(it.prettyField, '$' + it.field)
+                projField = it.prettyField
             } else if (it instanceof GroupByFunctionClause) {
                 idFields.put(it.name, createFunctionDBObject(it.operation, it.field))
                 // when using a function to compute a field, the resulting field is projected, not the original field

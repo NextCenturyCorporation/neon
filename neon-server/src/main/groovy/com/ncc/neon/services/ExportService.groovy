@@ -182,10 +182,11 @@ class ExportService {
         result.each { record ->
             queryNames.each { field ->
                 String s = null
-                if(record[field] instanceof String) {
-                    s = record[field].replaceAll("\"", "\"\"")
+                def fieldValue = record[field] ? record[field] : getFieldInRecord(field, record)
+                if(fieldValue instanceof String) {
+                    s = fieldValue.replaceAll("\"", "\"\"")
                 }
-                output << "\"${s?:record[field]}\","
+                output << "\"${s?:fieldValue}\","
             }
             output << "\n"
         }
@@ -250,7 +251,8 @@ class ExportService {
             cellNum = 0
             queryNames.each { field ->
                 Cell cell = row.createCell(cellNum)
-                cell.setCellValue("${record[field]}")
+                def fieldValue = record[field] ? record[field] : getFieldInRecord(field, record)
+                cell.setCellValue("${fieldValue}")
                 cellNum++
             }
             rowNum++
@@ -314,6 +316,24 @@ class ExportService {
             }
         }
         return toReturn
+    }
+
+    /**
+     * Retrieves the field value from the given data. Any field within a field of the root should be specified using
+     * a dot (e.g. Retrieving value from subField1 in {field1: {subField1: value}} will be given as "field1.subField1")
+     * @param fieldName The field name of the value to retrieve
+     * @param result The data to retrieve the value from
+     * @return The value of fieldName
+     */
+    private Object getFieldInRecord(String fieldName, Map result) {
+        def fieldNameArray = fieldName.split(/\./)
+        def fieldObj = result
+        fieldNameArray.each { field ->
+            if(fieldObj) {
+                fieldObj = fieldObj instanceof Map ? fieldObj.get(field) : null
+            }
+        }
+        return fieldObj
     }
 
     /**

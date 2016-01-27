@@ -48,6 +48,13 @@ neon.query.Connection.MONGO = 'mongo';
 neon.query.Connection.SPARK = 'sparksql';
 
 /**
+ * Indicates the database type is elasticsearch
+ * @property ELASTICSEARCH
+ * @type {String}
+ */
+neon.query.Connection.ELASTICSEARCH = 'elasticsearch';
+
+/**
  * Specifies what database type and host the queries will be executed against and publishes a CONNECT_TO_HOST event.
  * @method connect
  * @param {String} databaseType What type of database is being connected to. The constants in this class specify the
@@ -108,11 +115,12 @@ neon.query.Connection.prototype.executeQueryGroup = function(queryGroup, success
 
 /**
  * Executes a query that returns a sorted list of key, count pairs for an array field in the database.
- * @param databaseName The name of the database
- * @param tableName The name of the collection or table
- * @param fieldName The name of the array field to count
- * @param limit The number of pairs to return (default:  50)
- * @param whereClause The where clause to apply to the array counts query, or null to apply no where clause
+ * @method executeArrayCountQuery
+ * @param {String} databaseName The name of the database
+ * @param {String} tableName The name of the collection or table
+ * @param {String} fieldName The name of the array field to count
+ * @param {Number} limit The number of pairs to return (default:  50)
+ * @param {Object} whereClause The where clause to apply to the array counts query, or null to apply no where clause
  * @param {Function} successCallback The callback to call when the list of key,count pairs is returned
  * @param {Function} [errorCallback] The optional callback when an error occurs. This is a 3 parameter
  * function that contains the xhr, a short error status and the full error message.
@@ -334,22 +342,37 @@ neon.query.Connection.prototype.getTableNamesAndFieldNames = function(databaseNa
 };
 
 /**
- * Executes a query that returns the field types from table
- * @method getFieldTypes
- * @param {String} databaseName
- * @param {String} tableName The table name whose fields are being returned
- * @param {Function} successCallback The callback to call when the field types are successfully retrieved
- * @param {Function} [errorCallback] The optional callback when an error occurs. This is a 3 parameter
- * function that contains the xhr, a short error status and the full error message.
+ * Requests and returns the translation cache.
+ * @method getTranslationCache
+ * @param {Function} successCallback
+ * @param {Function} errorCallback
  * @return {neon.util.AjaxRequest} The xhr request object
  */
-neon.query.Connection.prototype.getFieldTypes = function(databaseName, tableName, successCallback, errorCallback) {
+neon.query.Connection.prototype.getTranslationCache = function(successCallback, errorCallback) {
     return neon.util.ajaxUtils.doGet(
-        neon.serviceUrl('queryservice', 'fields/types/' + encodeURIComponent(this.host_) + '/' + encodeURIComponent(this.databaseType_) +
-          '/' + encodeURIComponent(databaseName) + '/' + encodeURIComponent(tableName)), {
+        neon.serviceUrl("translationservice", "getcache"), {
             success: successCallback,
             error: errorCallback,
-            responseType: 'json'
+            responseType: "json"
+        }
+    );
+};
+
+/**
+ * Requests to save the given translation cache.
+ * @method setTranslationCache
+ * @param {Object} cache
+ * @param {Function} successCallback
+ * @param {Function} errorCallback
+ * @return {neon.util.AjaxRequest} The xhr request object
+ */
+neon.query.Connection.prototype.setTranslationCache = function(cache, successCallback, errorCallback) {
+    return neon.util.ajaxUtils.doPostJSON(
+        cache,
+        neon.serviceUrl("translationservice", "setcache"), {
+            success: successCallback,
+            error: errorCallback,
+            responseType: "json"
         }
     );
 };
