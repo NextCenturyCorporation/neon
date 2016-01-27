@@ -25,6 +25,12 @@ describe('neon.query.Connection', function() {
 
     var connection;
 
+    // Define this here because we use it multiple times and JShint complains if we have brackets without 
+    // a new line
+    var testData = {
+        data: "testData"
+    };
+
     beforeEach(function() {
         connection = new neon.query.Connection();
         connection.connect(neon.query.Connection.MONGO, host);
@@ -87,18 +93,12 @@ describe('neon.query.Connection', function() {
             neon.query.Connection.MONGO);
     });
 
-    it("should encode host, database, and tablename appropriately in getColumnMetadata request url", function() {
-        spyOn($, "ajax");
-
-        connection.getColumnMetadata(databaseName, tableName);
-        expect($.ajax.mostRecentCall.args[0].url).toEqual(server + queryService + 'columnmetadata/' +
-            encodedDatabaseName + '/' + encodedTableName);
-    });
-
     it("should encode host and database type appropriately in executeExport request url", function() {
         spyOn($, "ajax");
 
-        connection.executeExport({data: "testData"}, null, null, "csv");
+        connection.executeExport({
+            data: "testData"
+        }, null, null, "csv");
         expect($.ajax.mostRecentCall.args[0].data).toEqual('{"data":"testData","fileType":"csv"}');
         expect($.ajax.mostRecentCall.args[0].url).toEqual(server + '/services/exportservice/export/' +
             encodedHost + '/' + neon.query.Connection.MONGO);
@@ -108,15 +108,15 @@ describe('neon.query.Connection', function() {
         spyOn(XMLHttpRequest.prototype, "open");
         spyOn(XMLHttpRequest.prototype, "send");
 
-        connection.executeUploadFile({data: "testData"});
+        connection.executeUploadFile(testData);
         expect(XMLHttpRequest.prototype.open).toHaveBeenCalledWith('POST', server + '/services/importservice/upload/' +
             encodedHost + '/' + neon.query.Connection.MONGO);
-        expect(XMLHttpRequest.prototype.send).toHaveBeenCalledWith({data: "testData"});
+        expect(XMLHttpRequest.prototype.send).toHaveBeenCalledWith(testData);
 
-        connection.executeUploadFile({data: "testData"}, null, null, "differentHost", "differentDatabaseType");
+        connection.executeUploadFile(testData, null, null, "differentHost", "differentDatabaseType");
         expect(XMLHttpRequest.prototype.open).toHaveBeenCalledWith('POST', server + '/services/importservice/upload/' +
             'differentHost/differentDatabaseType');
-        expect(XMLHttpRequest.prototype.send).toHaveBeenCalledWith({data: "testData"});
+        expect(XMLHttpRequest.prototype.send).toHaveBeenCalledWith(testData);
     });
 
     it("should encode host, database type, and uuid appropriately in executeCheckTypeGuesses request url", function() {
@@ -134,7 +134,7 @@ describe('neon.query.Connection', function() {
     it("should encode host, database type, and uuid appropriately in executeLoadFileIntoDB request url", function() {
         spyOn($, "ajax");
 
-        connection.executeLoadFileIntoDB({data: "testData"}, "1234");
+        connection.executeLoadFileIntoDB(testData, "1234");
         expect($.ajax.mostRecentCall.args[0].url).toEqual(server + '/services/importservice/convert/' +
             encodedHost + '/' + neon.query.Connection.MONGO + '/1234');
         expect($.ajax.mostRecentCall.args[0].data).toEqual('{"data":"testData"}');

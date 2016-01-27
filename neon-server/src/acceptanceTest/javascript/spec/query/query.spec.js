@@ -590,41 +590,6 @@ describe('query mapping', function() {
         });
     });
 
-    it('gets column metadata', function() {
-        var expected =
-            [{
-                columnName: "field1",
-                numeric: true,
-                logical: true,
-                temporal: true,
-                array: true,
-                object: true,
-                text: true,
-                heterogeneous: true,
-                nullable: true
-            },{
-                columnName: "field2",
-                numeric: false,
-                logical: false,
-                temporal: false,
-                array: false,
-                object: false,
-                text: false,
-                heterogeneous: false,
-                nullable: false
-            }];
-        var actual;
-        connection.getColumnMetadata('database1', 'table1', function(columnMetadata) {
-            actual = columnMetadata;
-        });
-        waitsFor(function() {
-            return 'undefined' !== typeof actual;
-        });
-        runs(function() {
-            expect(actual).toEqual(expected);
-        });
-    });
-
     it('query with transform added by transform loader', function() {
         var query = baseQuery();
         query.transform(new neon.query.Transform("Sample"));

@@ -16,14 +16,10 @@
 
 package com.ncc.neon.services
 
-import com.ncc.neon.metadata.model.WidgetInitializationMetadata
 import com.ncc.neon.state.WidgetState
 import com.ncc.neon.state.WidgetStates
 import org.junit.Before
 import org.junit.Test
-
-
-
 
 class WidgetServiceTest {
 
@@ -46,22 +42,4 @@ class WidgetServiceTest {
         assert service.restoreState("invalidState") == "{}"
     }
 
-    @Test
-    void "object is not found in metadata store"() {
-        def resolver = [getWidgetInitializationData: {
-            widgetName -> new WidgetInitializationMetadata(widgetName: widgetName)
-        }] as MetadataResolver
-        service.metadataResolver = resolver
-        assert !service.getWidgetInitialization("widget")
-    }
-
-    @Test
-    void "object is found in metadata store"() {
-        String data = "data"
-        def resolver = [getWidgetInitializationData: {
-            widgetName -> new WidgetInitializationMetadata(widgetName: widgetName, initDataJson: data)
-        }] as MetadataResolver
-        service.metadataResolver = resolver
-        assert service.getWidgetInitialization("widget") == data
-    }
 }
