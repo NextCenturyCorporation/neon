@@ -16,8 +16,9 @@
 
 /*global module:false*/
 module.exports = function(grunt) {
-    var outputFile = grunt.option('outfile-base') + '.js' || 'build/<%= pkg.name %>.js';
-    var nodepOutputFile = grunt.option('outfile-base') + '-nodeps.js' || 'build/<%= pkg.name %>-nodeps.js';
+    var outputFile = (grunt.option('outfile-base') || 'build/<%= pkg.name %>') + '.js';
+    var nodepOutputFile = (grunt.option('outfile-base') || 'build/<%= pkg.name %>') + '-nodeps.js';
+    var nodepMinOutputFile = (grunt.option('outfile-base') || 'build/<%= pkg.name %>') + '-nodeps.min.js';
 
     function src(file) {
         return 'src/main/javascript/' + file;
@@ -46,33 +47,52 @@ module.exports = function(grunt) {
     }
 
     // order dependent files, so exclude them from the concatenation. they will be included in the correct order
-    var concatExcludes = ['intro.js', 'util/loggerUtils.js', 'util/owfUtils.js', 'eventing/owf/owfEventBus.js'];
+    var neonDeps = ['intro.js', 'util/loggerUtils.js', 'util/owfUtils.js', 'eventing/owf/owfEventBus.js'];
+    var neonSrcs = [src('license-header.txt')].concat(neonDeps.map(function(file) {
+        return src(file);
+    })).concat(grunt.file.expand(src('**/*.js'), neonDeps.map(function(file) {
+        return '!' + src(file);
+    })));
 
     grunt.initConfig({
         // Metadata.
         pkg: grunt.file.readJSON('package.json'),
-        banner: '/*!  <%= pkg.title || pkg.name %> | Copyright 2013 <%= pkg.author %> | https://raw.githubusercontent.com/NextCenturyCorporation/neon/master/LICENSE.txt */' + grunt.util.linefeed + grunt.util.linefeed,
+        banner: '/*!  <%= pkg.title || pkg.name %> | Copyright 2015 <%= pkg.author %> | https://raw.githubusercontent.com/NextCenturyCorporation/neon/master/LICENSE.txt */' + grunt.util.linefeed + grunt.util.linefeed,
+
         // Task configuration.
+        uglify: {
+            options: {
+                banner: '<%= banner %>',
+                mangle: false
+            },
+            nodeps: {
+                files: [{
+                    src: neonSrcs,
+                    dest: nodepMinOutputFile
+                }]
+            }
+        },
+
         concat: {
             nodeps: {
                 options: {
                     banner: '<%= banner %>',
                     stripBanners: true
                 },
-                src: [].concat([src('license-header.txt'), src('intro.js'), src('util/loggerUtils.js'), src('util/owfUtils.js'), src('eventing/owf/owfEventBus.js')]).concat(grunt.file.expand(src('**/*.js'), concatExcludes.map(function(file) {
-                    return '!' + src(file);
-                }))),
+                src: neonSrcs,
                 dest: nodepOutputFile
             },
-            dist: {
-                src: [lib('lodash'), lib('uuid'), lib('postal'), lib('jquery'), lib('log4javascript'), 'build/dependencies/**/*.js', '<%= concat.nodeps.dest %>'],
+            neon: {
+                src: [lib('lodash'), lib('uuid'), lib('postal'), lib('jquery'), lib('log4javascript'), 'build/dependencies/**/*.js', nodepMinOutputFile],
                 dest: outputFile
             }
         },
+
         watch: {
             files: ['src/main/javascript/**/*.js', 'src/main/js-lib/**/*.js'],
             tasks: ['concat']
         },
+
         jshint: {
             options: {
                 jshintrc: '../.jshintrc',
@@ -85,7 +105,7 @@ module.exports = function(grunt) {
                 },
                 // check both the preconcat and concatenated files
                 files: {
-                    src: [].concat('<%= concat.nodeps.src %>').concat(['<%= concat.nodeps.dest %>'])
+                    src: [nodepOutputFile].concat(neonSrcs)
                 }
             },
             tests: {
@@ -97,6 +117,7 @@ module.exports = function(grunt) {
                 }
             }
         },
+
         jasmine: {
             unit: {
                 src: outputFile,
@@ -107,6 +128,7 @@ module.exports = function(grunt) {
                 options: createTestOptions('src/acceptanceTest/javascript/spec/**/*.spec.js')
             }
         },
+
         jscs: {
             options: {
                 config: ".jscsrc",
@@ -136,9 +158,10 @@ module.exports = function(grunt) {
     grunt.loadNpmTasks('grunt-contrib-concat');
     grunt.loadNpmTasks('grunt-contrib-jshint');
     grunt.loadNpmTasks('grunt-contrib-jasmine');
+    grunt.loadNpmTasks('grunt-contrib-uglify');
     grunt.loadNpmTasks('grunt-contrib-watch');
     grunt.loadNpmTasks('grunt-jscs');
 
     // hint after concatenation since the concatenated version is also hinted
-    grunt.registerTask('default', ['concat', 'jscs', 'jshint', 'jasmine:unit']);
+    grunt.registerTask('default', ['uglify', 'concat', 'jscs', 'jshint', 'jasmine:unit']);
 };

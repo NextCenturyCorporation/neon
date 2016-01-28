@@ -124,7 +124,7 @@ war {
 }
 
 jettyRun {
-    dependsOn concatjs, watch, 'setVersion'
+    dependsOn gruntjs, watch, 'setVersion'
     reload = 'automatic'
     scanIntervalSeconds = 10
     httpPort = 8080
