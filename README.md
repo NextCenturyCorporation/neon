@@ -52,7 +52,7 @@ To view the examples, copy the [neon-dir]/examples/*.html file to the [tomcat]/w
 to point to the appropriate port.  
 
 ## Next Steps
-1. Building your First Neon Application
+1. [Building your First Neon Application][7]
 2. Consult the [Neon Wiki][1] for more detailed requirements, build, and deployment notes
 3. Check out the [Neon-GTD][neon-gtd] project, a sample analysis dashboard built on Neon.  You can see a sample dashboard with earthquake data [here][neon-gtd-demo].
 4. Visit [http://neonframework.org][5] for the latest Neon news, downloads and API documents.
@@ -75,3 +75,4 @@ Copyright 2014 Next Century Corporation
 [4]: https://github.com/NextCenturyCorporation/neon/wiki/Developer-Quick-Start-Guide
 [5]: http://neonframework.org
 [6]: https://github.com/NextCenturyCorporation/neon-gtd/wiki/XDATA-Summer-Camp-2015-Neon-Dashboard-Documentation
+[7]: https://github.com/NextCenturyCorporation/neon/wiki/Building-your-First-Neon-Application
