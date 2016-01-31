@@ -25,7 +25,7 @@ describe('neon.query.Connection', function() {
 
     var connection;
 
-    // Define this here because we use it multiple times and JShint complains if we have brackets without 
+    // Define this here because we use it multiple times and JShint complains if we have brackets without
     // a new line
     var testData = {
         data: "testData"
