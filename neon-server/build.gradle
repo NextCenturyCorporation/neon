@@ -55,6 +55,7 @@ project.ext {
 
 apply plugin: 'jetty'
 apply plugin: 'war'
+apply plugin: 'signing'
 
 // these files need to be applied in order since there are dependencies between them
 apply from: "${rootDir}/gradle/sharedDependencies.gradle"
@@ -63,6 +64,7 @@ apply from: "${rootDir}/gradle/js.gradle"
 apply from: "gradle/integrationTest.gradle"
 apply from: "gradle/acceptanceTest.gradle"
 apply from: "gradle/performanceTest.gradle"
+apply from: "gradle/signing.gradle"
 
 apply from: "${rootDir}/gradle/groovy.gradle"
 apply from: "${rootDir}/gradle/deploy.gradle"
@@ -120,6 +122,10 @@ war {
     description = 'Creates a war file for the project'
     from(jsOutputFolder) {
         into 'js'
+    }
+    doLast { task ->
+        ant.checksum algorithm: "SHA-512", fileext: ".sha", file: task.archivePath
+        ant.checksum algorithm: "MD5", fileext: ".md5", file: task.archivePath
     }
 }
 
