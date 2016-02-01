@@ -31,3 +31,7 @@ sshKeyFile=/path/to/sshkeyfile
 # Optionally if you don't have an ssh key file you can put the password in here
 # password=sshpassword
 
+# Signing values.  Uncomment and set these to do OpenPGP signing of artifacts
+# signing.keyId=
+# signing.password=
+# signing.secretKeyRingFile=
