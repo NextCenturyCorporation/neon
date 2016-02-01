@@ -59,7 +59,10 @@ neon.query.Connection.ELASTICSEARCH = 'elasticsearch';
  * @method connect
  * @param {String} databaseType What type of database is being connected to. The constants in this class specify the
  * valid database types.
- * @param {String} host The host the database is running on
+ * @param {String} host The host the database is running on.  This can be an address (e.g., localhost) or an
+ * address:port pair (e.g., localhost:9300).  If no port is provided, the Neon server will assume the default port
+ * for the databaseType:  27017 for Mongo, 10000 for Spark via a Hive2 Thrift connection, and 9300 for an
+ * Elasticsearch transport client.
  */
 neon.query.Connection.prototype.connect = function(databaseType, host) {
     this.host_ = host;
