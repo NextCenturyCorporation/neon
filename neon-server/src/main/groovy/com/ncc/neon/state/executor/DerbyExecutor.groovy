@@ -25,6 +25,7 @@ import com.ncc.neon.query.jackson.NeonModule
 import com.ncc.neon.query.jackson.ObjectMapperProvider
 
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Component
 
 import org.codehaus.jackson.map.ObjectMapper
@@ -37,6 +38,10 @@ import java.sql.*
  */
 @Component
 class DerbyExecutor {
+
+    @SuppressWarnings("GStringExpressionWithinString")
+    @Value('\${savedStatesDatabaseName}')
+    String savedStatesDatabaseName
 
     @Autowired
     private ConnectionManager connectionManager
@@ -54,8 +59,6 @@ class DerbyExecutor {
                                               "(id varchar(36) not null constraint id_pk_ft primary key, " +
                                               "name varchar(128) unique, " +
                                               "filterstate long varchar)"
-
-
 
     /**
      * Saves the dashboard state to the database.
@@ -432,7 +435,7 @@ class DerbyExecutor {
     }
 
     private Connection getClient() {
-        connectionManager.currentRequest = new ConnectionInfo(dataSource: DataSources.derby)
+        connectionManager.currentRequest = new ConnectionInfo(dataSource: DataSources.derby, databaseName: savedStatesDatabaseName)
         return connectionManager.connection.connection
     }
 }

@@ -27,10 +27,13 @@ class ConnectionInfo implements Serializable {
 
     private static final long serialVersionUID = 9017739423385857826L
 
-    /** the type of database being connected to */
+    /** The type of database being connected to */
     DataSources dataSource
 
     /** The database host, and optionally :port */
     String host
+
+    /** The name of the database to create. Used for Derby. */
+    String databaseName
 
 }

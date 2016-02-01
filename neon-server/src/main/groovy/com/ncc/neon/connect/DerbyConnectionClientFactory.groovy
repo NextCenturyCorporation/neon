@@ -20,6 +20,6 @@ class DerbyConnectionClientFactory implements ConnectionClientFactory{
 
     @Override
     ConnectionClient createConnectionClient(ConnectionInfo info) {
-        return new DerbyConnectionClient()
+        return new DerbyConnectionClient(info)
     }
 }

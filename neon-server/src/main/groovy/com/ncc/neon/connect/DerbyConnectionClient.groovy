@@ -26,13 +26,11 @@ import java.sql.*
 class DerbyConnectionClient implements ConnectionClient{
 
     private Connection connection
-    private final String dbName="savedStates"
-    private final String connectionURL = "jdbc:derby:" + dbName + ";create=true"
     private final String driver = "org.apache.derby.jdbc.EmbeddedDriver"
 
-    public DerbyConnectionClient(){
+    public DerbyConnectionClient(ConnectionInfo info){
         Class.forName(driver).newInstance()
-        connection = DriverManager.getConnection(connectionURL)
+        connection = DriverManager.getConnection("jdbc:derby:" + info.databaseName + ";create=true")
     }
 
     Connection getDerby(){
