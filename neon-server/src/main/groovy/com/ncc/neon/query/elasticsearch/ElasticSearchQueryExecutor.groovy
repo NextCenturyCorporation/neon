@@ -51,6 +51,17 @@ class ElasticSearchQueryExecutor extends AbstractQueryExecutor {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ElasticSearchQueryExecutor)
 
+    /*
+    * A small class to hold the important information about an aggregation bucket between when the
+    * buckets are taken out of ElasticSearch's hierarchical arrangement and when everything can be
+    * extracted into the format that the Neon API uses.
+    */
+    private static class AggregationBucket {
+        public Map groupByKeys
+        public Map aggregatedValues
+        public def docCount
+    }
+
     @Autowired
     private FilterState filterState
 
@@ -79,7 +90,9 @@ class ElasticSearchQueryExecutor extends AbstractQueryExecutor {
                 extractMetrics(aggregates, aggResults ? aggResults.asMap() : null, results.hits.totalHits)
             ])
         } else if (groupByClauses) {
-            List<Map<String, Object>> buckets = extractBuckets(groupByClauses, aggResults.asList()[0], aggregates)
+            List<AggregationBucket> buckets = extractBuckets(groupByClauses, aggResults.asList()[0])
+            buckets = combineDuplicateBuckets(buckets)
+            buckets = extractMetricsFromBuckets(aggregates, buckets)
             buckets = limitBuckets(buckets, query)
             returnVal = new TabularQueryResult(buckets)
         } else if(query.isDistinct) {
@@ -233,6 +246,18 @@ class ElasticSearchQueryExecutor extends AbstractQueryExecutor {
         getClient().admin().indices().getMappings(new GetMappingsRequest()).actionGet().mappings
     }
 
+    private static List<AggregationBucket> combineDuplicateBuckets(List<AggregationBucket> buckets) {
+        return buckets
+    }
+
+    private static List<Map<String, Object>> extractMetricsFromBuckets(clauses, buckets) {
+        return buckets.collect({
+            def result = it.groupByKeys
+            result.putAll(extractMetrics(clauses, it.aggregatedValues, it.docCount))
+            result
+        })
+    }
+
     private static Map<String, Object> extractMetrics(clauses, results, totalCount) {
         def (countAllClause, metricClauses) = clauses.split {
             ElasticSearchConversionStrategy.isCountAllAggregation(it) || ElasticSearchConversionStrategy.isCountFieldAggregation(it)
@@ -263,17 +288,17 @@ class ElasticSearchQueryExecutor extends AbstractQueryExecutor {
      * and the nested aggregation. If there are no more clauses to process, then we've reached the bottom of the tree
      * we add any metric aggregations to the bucket and push it onto the result list.
      */
-    private static List<Map<String, Object>> extractBuckets(groupByClauses, value, metricAggs, Map accumulator = [:], List<Map<String, Object>> results = []) {
+    private static List<AggregationBucket> extractBuckets(groupByClauses, value, Map accumulator = [:], List<AggregationBucket> results = []) {
         value.buckets.each {
             def newAccumulator = [:]
             newAccumulator.putAll(accumulator)
-            extractBucket(groupByClauses, it, metricAggs, newAccumulator, results)
+            extractBucket(groupByClauses, it, newAccumulator, results)
         }
 
         return results
     }
 
-    private static void extractBucket(groupByClauses, value, metricAggs, Map accumulator, List<Map<String, Object>> results) {
+    private static void extractBucket(groupByClauses, value, Map accumulator, List<Map<String, Object>> results) {
         def currentClause = groupByClauses.head()
         switch (currentClause.getClass()) {
             case GroupByFieldClause:
@@ -290,13 +315,17 @@ class ElasticSearchQueryExecutor extends AbstractQueryExecutor {
         }
 
         if (groupByClauses.tail()) {
-            extractBuckets(groupByClauses.tail(), (MultiBucketsAggregation)value.getAggregations().asList().head(), metricAggs, accumulator, results)
+            extractBuckets(groupByClauses.tail(), (MultiBucketsAggregation)value.getAggregations().asList().head(), accumulator, results)
         } else {
+            def bucket = new AggregationBucket()
+            bucket.groupByKeys = accumulator
+            bucket.docCount = value.docCount
+
             def terminalAggs = value.getAggregations()
             if (terminalAggs) {
-                accumulator.putAll(extractMetrics(metricAggs, terminalAggs.asMap(), value.docCount))
+                bucket.aggregatedValues = terminalAggs.asMap()
             }
-            results.push(accumulator)
+            results.push(bucket)
         }
     }
 
