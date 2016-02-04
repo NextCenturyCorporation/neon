@@ -102,33 +102,41 @@ class MongoQueryExecutor extends AbstractQueryExecutor {
         def resultSet = collection.find().limit(GET_FIELD_NAMES_LIMIT)
         Map fieldTypesMap = [:]
         resultSet.each { result ->
-            result?.keySet().each { field ->
-                def fieldObj = result.get(field)
-                if(fieldObj != "" && !fieldTypesMap[field]) {
-                    def type = fieldObj.getClass()
-                    // Convert types to make consistent with spark and elasticsearch
-                    if(fieldObj instanceof List) {
-                        type = "array"
-                    } else if(fieldObj instanceof String || fieldObj instanceof org.bson.types.ObjectId) {
-                        type = "string"
-                    } else if(fieldObj instanceof Date) {
-                        type = "date"
-                    } else if(fieldObj instanceof Float) {
-                        type = "float"
-                    } else if(fieldObj instanceof Double) {
-                        type = "double"
-                    } else if(fieldObj instanceof Long) {
-                        type = "long"
-                    } else if(fieldObj instanceof Integer) {
-                        type = "integer"
-                    } else if(fieldObj instanceof Boolean) {
-                        type = "boolean"
-                    } else if(fieldObj instanceof org.bson.types.Binary) {
-                        type = "binary"
-                    } else if(fieldObj instanceof Object) {
-                        type = "object"
-                    }
-                    fieldTypesMap.put(field, type)
+            fieldTypesMap.putAll(getFieldTypeInObject(result, null))
+        }
+        return fieldTypesMap
+    }
+
+    private Map getFieldTypeInObject(BasicDBObject fieldObj, String field) {
+        Map fieldTypesMap = [:]
+        fieldObj?.keySet().each { subField ->
+            def subFieldObj = fieldObj.get(subField)
+            String fieldName = subField
+            if(field) {
+                fieldName = field + "." + subField
+            }
+            if(subFieldObj != "" && !fieldTypesMap[fieldName]) {
+                // Convert types to make consistent with spark and elasticsearch
+                if(subFieldObj instanceof List) {
+                    fieldTypesMap.put(fieldName, "array")
+                } else if(subFieldObj instanceof String || subFieldObj instanceof org.bson.types.ObjectId) {
+                    fieldTypesMap.put(fieldName, "string")
+                } else if(subFieldObj instanceof Date) {
+                    fieldTypesMap.put(fieldName, "date")
+                } else if(subFieldObj instanceof Float) {
+                    fieldTypesMap.put(fieldName, "float")
+                } else if(subFieldObj instanceof Double) {
+                    fieldTypesMap.put(fieldName, "double")
+                } else if(subFieldObj instanceof Long) {
+                    fieldTypesMap.put(fieldName, "long")
+                } else if(subFieldObj instanceof Integer) {
+                    fieldTypesMap.put(fieldName, "integer")
+                } else if(subFieldObj instanceof Boolean) {
+                    fieldTypesMap.put(fieldName, "boolean")
+                } else if(subFieldObj instanceof org.bson.types.Binary) {
+                    fieldTypesMap.put(fieldName, "binary")
+                } else if(subFieldObj instanceof Object) {
+                    fieldTypesMap.putAll(getFieldTypeInObject(subFieldObj, fieldName))
                 }
             }
         }

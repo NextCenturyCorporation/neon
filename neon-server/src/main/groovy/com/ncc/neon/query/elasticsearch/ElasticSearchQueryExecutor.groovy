@@ -195,12 +195,7 @@ class ElasticSearchQueryExecutor extends AbstractQueryExecutor {
            if(dbMappings) {
                def tableMappings = dbMappings.get(tableName)
                if(tableMappings) {
-                   def fieldsToTypes = [:]
-                   tableMappings.getSourceAsMap().get('properties').each { field ->
-                       def type = field.getValue().containsKey('type') ? field.getValue().get('type') : 'object'
-                       fieldsToTypes.put(field.getKey(), type)
-                   }
-                   return fieldsToTypes
+                   return getFieldTypesInObject(tableMappings.getSourceAsMap(), null)
                }
            }
        }
@@ -256,18 +251,18 @@ class ElasticSearchQueryExecutor extends AbstractQueryExecutor {
     }
 
     /*
-    * The aggregation results from ES will be a tree of aggregation -> buckets -> aggregation -> buckets -> etc
-    * we want to flatten it into a list of buckets where we have one item in the list for each leaf in the tree.
-    * Each item is an accumulation of all the buckets along the path to the leaf.
-    *
-    * We process an aggregation by getting the list of buckets and calling extract again for each of them.
-    * For each bucket we copy the current accumulator, since we're branching into more paths in the tree.
-    *
-    * We process a bucket by getting the current groupByClause and using it to get the value we're interested in
-    * from the bucket. Then if there are more groupByClauses, we recurse into extract using the rest of the clauses
-    * and the nested aggregation. If there are no more clauses to process, then we've reached the bottom of the tree
-    * we add any metric aggregations to the bucket and push it onto the result list.
-    */
+     * The aggregation results from ES will be a tree of aggregation -> buckets -> aggregation -> buckets -> etc
+     * we want to flatten it into a list of buckets where we have one item in the list for each leaf in the tree.
+     * Each item is an accumulation of all the buckets along the path to the leaf.
+     *
+     * We process an aggregation by getting the list of buckets and calling extract again for each of them.
+     * For each bucket we copy the current accumulator, since we're branching into more paths in the tree.
+     *
+     * We process a bucket by getting the current groupByClause and using it to get the value we're interested in
+     * from the bucket. Then if there are more groupByClauses, we recurse into extract using the rest of the clauses
+     * and the nested aggregation. If there are no more clauses to process, then we've reached the bottom of the tree
+     * we add any metric aggregations to the bucket and push it onto the result list.
+     */
     private static List<Map<String, Object>> extractBuckets(groupByClauses, value, metricAggs, Map accumulator = [:], List<Map<String, Object>> results = []) {
         value.buckets.each {
             def newAccumulator = [:]
@@ -319,7 +314,22 @@ class ElasticSearchQueryExecutor extends AbstractQueryExecutor {
         def result = (offset >= buckets.size()) ? [] : buckets[offset..endIndex]
 
         return result
+    }
 
+    private Map getFieldTypesInObject(Map fields, String parentFieldName) {
+        def fieldsToTypes = [:]
+        fields.get('properties').each { field ->
+            String fieldName = field.getKey()
+            if(parentFieldName) {
+                fieldName = parentFieldName + "." + field.getKey()
+            }
+            if(field.getValue().containsKey('type')) {
+                fieldsToTypes.put(fieldName, field.getValue().get('type'))
+            } else {
+                fieldsToTypes.putAll(getFieldTypesInObject(field.getValue(), fieldName))
+            }
+        }
+        return fieldsToTypes
     }
 
     private List<String> getFieldsInObject(Map fields, String parentFieldName) {
