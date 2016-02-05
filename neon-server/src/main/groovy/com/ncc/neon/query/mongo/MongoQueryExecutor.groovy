@@ -41,16 +41,16 @@ class MongoQueryExecutor extends AbstractQueryExecutor {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(MongoQueryExecutor)
 
-    private static final GET_FIELD_NAMES_LIMIT = 1000
+    protected static final GET_FIELD_NAMES_LIMIT = 1000
 
     @Autowired
-    private FilterState filterState
+    protected FilterState filterState
 
     @Autowired
-    private SelectionState selectionState
+    protected SelectionState selectionState
 
     @Autowired
-    private ConnectionManager connectionManager
+    protected ConnectionManager connectionManager
 
     @Override
     QueryResult doExecute(Query query, QueryOptions options) {
@@ -134,7 +134,7 @@ class MongoQueryExecutor extends AbstractQueryExecutor {
         return fieldTypesMap
     }
 
-    private AbstractMongoQueryWorker createMongoQueryWorker(Query query) {
+    protected AbstractMongoQueryWorker createMongoQueryWorker(Query query) {
         if (query.isDistinct) {
             LOGGER.trace("Using distinct mongo query worker")
             return new DistinctMongoQueryWorker(mongo)
@@ -153,7 +153,7 @@ class MongoQueryExecutor extends AbstractQueryExecutor {
         return new SimpleMongoQueryWorker(mongo)
     }
 
-    private MongoClient getMongo() {
+    protected MongoClient getMongo() {
         connectionManager.connection.mongo
     }
 

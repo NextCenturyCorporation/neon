@@ -88,7 +88,7 @@ abstract class AbstractQueryExecutor implements QueryExecutor {
      * @param queryResult
      * @return
      */
-    private QueryResult transform(Transform[] transforms, QueryResult queryResult) {
+    protected QueryResult transform(Transform[] transforms, QueryResult queryResult) {
         if(!transforms || transforms.length == 0){
             return queryResult
         }

@@ -5,6 +5,7 @@ import com.ncc.neon.connect.ConnectionManager
 import com.ncc.neon.connect.DataSources
 import com.ncc.neon.connect.NeonConnectionException
 import com.ncc.neon.query.executor.QueryExecutor
+import com.ncc.neon.query.mongo.MongoHeatmapExecutor
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
 
@@ -41,6 +42,12 @@ class QueryExecutorFactory {
     @Resource
     private QueryExecutor elasticSearchQueryExecutor
 
+    @Resource
+    private MongoHeatmapExecutor mongoHeatmapExecutor
+
+    @Resource
+    private QueryExecutor elasticSearchHeatmapExecutor
+
     @Autowired
     private ConnectionManager connectionManager
 
@@ -50,9 +57,18 @@ class QueryExecutorFactory {
      * @param connectionInfo
      * @return the appropriate query executor
      */
-    QueryExecutor getExecutor(ConnectionInfo connectionInfo) {
+    QueryExecutor getExecutor(ConnectionInfo connectionInfo, boolean heatmapQuery = false) {
         connectionManager.currentRequest = connectionInfo
         DataSources databaseType = connectionInfo.dataSource
+        if(heatmapQuery) {
+            switch (databaseType) {
+                case DataSources.mongo:
+                    return mongoHeatmapExecutor
+                case DataSources.elasticsearch:
+                    return elasticSearchHeatmapExecutor
+            }
+        }
+
         switch (databaseType) {
             case DataSources.mongo:
                 return mongoQueryExecutor
