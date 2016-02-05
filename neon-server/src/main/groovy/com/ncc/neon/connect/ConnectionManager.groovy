@@ -34,6 +34,8 @@ class ConnectionManager {
     ConnectionClientFactory mongoConnectionFactory = new MongoConnectionClientFactory()
     ConnectionClientFactory sparkSQLConnectionFactory = new JdbcConnectionClientFactory("org.apache.hive.jdbc.HiveDriver", "hive2")
     ConnectionClientFactory elasticSearchConnectionFactory = new ElasticSearchConnectionClientFactory()
+    DerbyConnectionClientFactory derbyConnectionFactory = new DerbyConnectionClientFactory()
+
 
     // note this current request connection is a unique object per request (the bean has a request scope annotation on it)
     @Autowired
@@ -80,6 +82,9 @@ class ConnectionManager {
         }
         if(connectionInfo.dataSource == DataSources.elasticsearch) {
             return elasticSearchConnectionFactory
+        }
+        if(connectionInfo.dataSource == DataSources.derby) {
+            return derbyConnectionFactory
         }
         throw new NeonConnectionException("Could not connect to data source of type ${connectionInfo.dataSource}")
     }

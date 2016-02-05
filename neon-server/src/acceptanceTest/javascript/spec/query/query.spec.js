@@ -60,7 +60,7 @@ describe('query mapping', function() {
 
     it('get field names', function() {
         var result = executeQueryAndWait(connection.getFieldNames, [databaseName, tableName]);
-        var expected = ['_id', 'firstname', 'lastname', 'city', 'state', 'salary', 'hiredate', 'location', 'tags'];
+        var expected = ['_id', 'firstname', 'lastname', 'city', 'state', 'salary', 'hiredate', 'location.coordinates', 'location.type', 'tags'];
         runs(function() {
             expect(result.get()).toBeArrayWithSameElements(expected);
         });
@@ -587,41 +587,6 @@ describe('query mapping', function() {
             runs(function() {
                 sendMessageAndWait(neon.eventing.Messenger.prototype.removeSelection, filterId);
             });
-        });
-    });
-
-    it('gets column metadata', function() {
-        var expected =
-            [{
-                columnName: "field1",
-                numeric: true,
-                logical: true,
-                temporal: true,
-                array: true,
-                object: true,
-                text: true,
-                heterogeneous: true,
-                nullable: true
-            },{
-                columnName: "field2",
-                numeric: false,
-                logical: false,
-                temporal: false,
-                array: false,
-                object: false,
-                text: false,
-                heterogeneous: false,
-                nullable: false
-            }];
-        var actual;
-        connection.getColumnMetadata('database1', 'table1', function(columnMetadata) {
-            actual = columnMetadata;
-        });
-        waitsFor(function() {
-            return 'undefined' !== typeof actual;
-        });
-        runs(function() {
-            expect(actual).toEqual(expected);
         });
     });
 

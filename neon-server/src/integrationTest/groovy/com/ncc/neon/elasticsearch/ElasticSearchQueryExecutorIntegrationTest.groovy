@@ -21,12 +21,14 @@ import com.ncc.neon.IntegrationTestContext
 import com.ncc.neon.connect.ConnectionInfo
 import com.ncc.neon.connect.DataSources
 import com.ncc.neon.query.elasticsearch.ElasticSearchQueryExecutor
+import com.ncc.neon.util.AssertUtils
 import org.joda.time.format.DateTimeFormat
 import org.joda.time.format.DateTimeFormatter
 import org.json.JSONArray
 import org.json.JSONObject
 import org.junit.Assume
 import org.junit.Before
+import org.junit.Test
 import org.junit.runner.RunWith
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.test.context.ContextConfiguration
@@ -87,5 +89,19 @@ class ElasticSearchQueryExecutorIntegrationTest extends AbstractQueryExecutorInt
             }
         }
         return map
+    }
+
+    @Test
+    void "field names with wildcards"() {
+        def fieldNames = queryExecutor.getFieldNames(DATABASE_NAME.substring(0, DATABASE_NAME.length() - 2) + '*',
+            TABLE_NAME.substring(0, TABLE_NAME.length() - 2) + '*')
+        def expected = getNestedObjects(getAllData()[0], null)
+        AssertUtils.assertEqualCollections(expected, fieldNames)
+    }
+
+    @Test
+    void "show tables with wildcard"(){
+        def tables = queryExecutor.showTables(DATABASE_NAME.substring(0, DATABASE_NAME.length() - 2) + '*')
+        assert tables.contains(TABLE_NAME)
     }
 }

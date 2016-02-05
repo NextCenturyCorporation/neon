@@ -63,7 +63,7 @@ public interface QueryExecutor {
      */
     List<String> getFieldNames(String databaseName, String tableName)
 
-    /**
+     /**
      * Gets the types of the fields in the specified dataset
      * @param databaseName
      * @param tableName

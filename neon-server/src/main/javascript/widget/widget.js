@@ -117,54 +117,9 @@ neon.widget = (function() {
         return queryString;
     }
 
-    /**
-     * Gets widget initialization metadata.
-     * @method getWidgetInitialization
-     * @param {String} widget an identifier of a widget, usually the widget name
-     * @param {Function} successCallback The callback that contains the saved data.
-     * @return {neon.util.AjaxRequest} The xhr request object
-     */
-    function getWidgetInitializationData(widget, successCallback) {
-        return neon.util.ajaxUtils.doGet(
-            neon.serviceUrl('widgetservice', 'widgetinitialization/' + encodeURIComponent(widget)), {
-                success: successCallback
-            }
-        );
-    }
-
-    /**
-     * Gets the metadata for each of the columns in the table
-     * @method getWidgetDatasetMetadata
-     * @param {String} databaseName The name of the database whose field metadata is being returned
-     * @param {String} tableName The name of the table whose field metadata is being returned
-     * @param {String} widgetName The name of the widget whose initialization data is being returned
-     * @param successCallback
-     * @return {neon.util.AjaxRequest}
-     */
-    function getWidgetDatasetMetadata(databaseName, tableName, widgetName, successCallback) {
-        return neon.util.ajaxUtils.doGet(
-            neon.serviceUrl('widgetservice', 'widgetdataset/' + encodeURIComponent(databaseName) + '/' + encodeURIComponent(tableName) + '/' + encodeURIComponent(widgetName)),
-            {
-                success: function(result) {
-                    // The result is an array in the format:
-                    // [{elementId: "name", value: "columnName"}, {elementId: "otherName", value: "column2"}]
-                    // Turn it into the more useful object:
-                    // {name: "columnName", otherName: "column2"}
-                    var mappings = {};
-                    for(var i = 0; i < result.length; ++i) {
-                        mappings[result[i].elementId] = result[i].value;
-                    }
-                    successCallback(mappings);
-                }
-            }
-        );
-    }
-
     return {
         saveState: saveState,
         getSavedState: getSavedState,
-        getInstanceId: getInstanceId,
-        getWidgetInitializationData: getWidgetInitializationData,
-        getWidgetDatasetMetadata: getWidgetDatasetMetadata
+        getInstanceId: getInstanceId
     };
 })();

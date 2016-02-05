@@ -1,5 +1,5 @@
 /*
- * Copyright 2013 Next Century Corporation
+ * Copyright 2016 Next Century Corporation
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,33 +15,35 @@
  */
 
 package com.ncc.neon.connect
-import com.mongodb.MongoClient
-import com.ncc.neon.config.MongoConfigParser
 
+import java.sql.*
 
 /**
- * Holds a connection to mongo
+ * Holds a connection to derby
  */
 
-class MongoConnectionClient implements ConnectionClient{
+@SuppressWarnings("ClassForName")
+class DerbyConnectionClient implements ConnectionClient{
 
-    private MongoClient mongo
+    private Connection connection
+    private final String driver = "org.apache.derby.jdbc.EmbeddedDriver"
 
-    public MongoConnectionClient(ConnectionInfo info){
-        mongo = new MongoClient(MongoConfigParser.createServerAddresses(info.host))
+    public DerbyConnectionClient(ConnectionInfo info){
+        Class.forName(driver).newInstance()
+        connection = DriverManager.getConnection("jdbc:derby:" + info.databaseName + ";create=true")
     }
 
-    MongoClient getMongo(){
-        return mongo
+    Connection getDerby(){
+        return connection
     }
 
     /**
-     * Close the connection to mongo.
+     * Close the connection to derby.
      */
     @Override
     void close(){
-        mongo?.close()
-        mongo = null
+        connection?.close()
+        connection = null
     }
 
 }

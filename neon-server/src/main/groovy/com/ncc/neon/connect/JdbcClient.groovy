@@ -193,10 +193,26 @@ class JdbcClient implements Closeable {
         return columns
     }
 
+    boolean isTypeArray(String databaseName, String tableName, String fieldName) {
+        boolean isFieldArray = false
+        ResultSet rs = connection.metaData.getColumns(null, databaseName, tableName, null)
+        while (rs.next()) {
+            // column 4 is the column name
+            if(rs.getString(4) == fieldName) {
+                def type = rs.getString("TYPE_NAME").toLowerCase()
+                if(type.startsWith("array")) {
+                    isFieldArray = true
+                }
+                break
+            }
+        }
+        return isFieldArray
+    }
+
     Map getTypes(String databaseName, String tableName) {
         def typeMapping = [:]
         ResultSet rs = connection.metaData.getColumns(null, databaseName, tableName, null)
-        while (rs.next()) {
+        while(rs.next()) {
             def type = rs.getString("TYPE_NAME").toLowerCase()
 
             // Convert certain types to make it consistent with mongo and elasticsearch

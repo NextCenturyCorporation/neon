@@ -33,8 +33,8 @@ buildscript {
         }
     }
     dependencies {
-        classpath ":antlr4-plugin:$antlrPluginVersion"
         classpath "org.hidetake:gradle-ssh-plugin:$sshPluginVersion"
+        classpath "org.apache.derby:derby:$derbyVersion"
     }
 }
 
@@ -55,6 +55,7 @@ project.ext {
 
 apply plugin: 'jetty'
 apply plugin: 'war'
+apply plugin: 'signing'
 
 // these files need to be applied in order since there are dependencies between them
 apply from: "${rootDir}/gradle/sharedDependencies.gradle"
@@ -63,9 +64,9 @@ apply from: "${rootDir}/gradle/js.gradle"
 apply from: "gradle/integrationTest.gradle"
 apply from: "gradle/acceptanceTest.gradle"
 apply from: "gradle/performanceTest.gradle"
+apply from: "gradle/signing.gradle"
 
 apply from: "${rootDir}/gradle/groovy.gradle"
-apply from: "gradle/antlr.gradle"
 apply from: "${rootDir}/gradle/deploy.gradle"
 
 sourceCompatibility = 1.7
@@ -91,11 +92,11 @@ dependencies {
     compile "ch.qos.logback:logback-core:$logbackVersion"
     compile "ch.qos.logback:logback-classic:$logbackVersion"
     compile "com.google.guava:guava:$guavaVersion"
-    compile "org.antlr:antlr4:$antlrVersion"
     compile "org.apache.poi:poi:$poiVersion"
     compile "org.apache.poi:poi-ooxml:$poiVersion"
     compile "org.apache.poi:poi-ooxml-schemas:$poiVersion"
     compile "org.apache.poi:ooxml-schemas:$ooxmlSchemasVersion"
+    compile "org.apache.derby:derby:$derbyVersion"
 
     compile "com.sun.jersey.contribs:jersey-multipart:$jerseyVersion"
     compile "com.monitorjbl:xlsx-streamer:$xlsxStreamerVersion"
@@ -106,8 +107,6 @@ dependencies {
         exclude module: 'groovy'
     }
     compile "commons-lang:commons-lang:$commonsLangVersion"
-    compile project(":metadata")
-
 
     providedCompile "javax.servlet:javax.servlet-api:$javaxServletVersion"
 
@@ -124,10 +123,14 @@ war {
     from(jsOutputFolder) {
         into 'js'
     }
+    doLast { task ->
+        ant.checksum algorithm: "SHA-512", fileext: ".sha", file: task.archivePath
+        ant.checksum algorithm: "MD5", fileext: ".md5", file: task.archivePath
+    }
 }
 
 jettyRun {
-    dependsOn concatjs, watch, 'setVersion'
+    dependsOn gruntjs, watch, 'setVersion'
     reload = 'automatic'
     scanIntervalSeconds = 10
     httpPort = 8080

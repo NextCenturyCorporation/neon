@@ -140,6 +140,19 @@ class ElasticSearchQueryExecutor extends AbstractQueryExecutor {
     @Override
     List<String> showTables(String dbName) {
         LOGGER.debug("Executing showTables for index " + dbName + " to get type mappings")
+        // Elastic search allows wildcards in index names.  If dbName contains a wildcard, find all matches.
+        if (dbName?.contains('*')) {
+            def match = dbName.replaceAll(/\*/, '.*')
+            List<String> tables = []
+            def mappings = getMappings()
+            mappings.keysIt().each {
+                if (it.matches(match)) {
+                    tables.addAll(mappings.get(it).collect{ table -> table.key })
+                }
+            }
+            return tables.unique()
+        }
+        // Fall through case is to return the exact match.
         getMappings().get(dbName).collect { it.key }
     }
 
@@ -148,41 +161,46 @@ class ElasticSearchQueryExecutor extends AbstractQueryExecutor {
         if(tableName) {
             LOGGER.debug("Executing getFieldNames for index " + databaseName + " type " + tableName)
 
-            def dbMappings = getMappings().get(databaseName)
-            if(dbMappings) {
-                def tableMappings = dbMappings.get(tableName)
-                if(tableMappings) {
-                    def fields = tableMappings.getSourceAsMap().get('properties').collect { it.key }
-                    if (fields) {
-                        fields.push("_id")
-                        return fields
+            def dbMatch = databaseName.replaceAll(/\*/, '.*')
+            def tableMatch = tableName.replaceAll(/\*/, '.*')
+
+            def fields = []
+            def mappings = getMappings()
+            mappings.keysIt().each { dbKey ->
+                if (dbKey.matches(dbMatch)) {
+                    def dbMappings = mappings.get(dbKey)
+                    dbMappings.keysIt().each { tableKey ->
+                        if (tableKey.matches(tableMatch)) {
+                            def tableMappings = dbMappings.get(tableKey)
+                            fields.addAll(getFieldsInObject(tableMappings.getSourceAsMap(), null))
+                        }
                     }
                 }
+            }
+
+            if (fields) {
+                fields.add("_id")
+                return fields.unique()
             }
         }
         return []
     }
 
     @Override
-    Map getFieldTypes(String databaseName, String tableName) {
-        if(tableName) {
-            LOGGER.debug("Executing getFieldTypes for index " + databaseName + " type " + tableName)
+   Map getFieldTypes(String databaseName, String tableName) {
+       if(tableName) {
+           LOGGER.debug("Executing getFieldTypes for index " + databaseName + " type " + tableName)
 
-            def dbMappings = getMappings().get(databaseName)
-            if(dbMappings) {
-                def tableMappings = dbMappings.get(tableName)
-                if(tableMappings) {
-                    def fieldsToTypes = [:]
-                    tableMappings.getSourceAsMap().get('properties').each { field ->
-                        def type = field.getValue().containsKey('type') ? field.getValue().get('type') : 'object'
-                        fieldsToTypes.put(field.getKey(), type)
-                    }
-                    return fieldsToTypes
-                }
-            }
-        }
-        return [:]
-    }
+           def dbMappings = getMappings().get(databaseName)
+           if(dbMappings) {
+               def tableMappings = dbMappings.get(tableName)
+               if(tableMappings) {
+                   return getFieldTypesInObject(tableMappings.getSourceAsMap(), null)
+               }
+           }
+       }
+       return [:]
+   }
 
     List<ArrayCountPair> getArrayCounts(String databaseName, String tableName, String field, int limit = 0, WhereClause whereClause = null) {
         Query query = new Query(filter: new Filter(databaseName: databaseName, tableName: tableName),
@@ -233,18 +251,18 @@ class ElasticSearchQueryExecutor extends AbstractQueryExecutor {
     }
 
     /*
-    * The aggregation results from ES will be a tree of aggregation -> buckets -> aggregation -> buckets -> etc
-    * we want to flatten it into a list of buckets where we have one item in the list for each leaf in the tree.
-    * Each item is an accumulation of all the buckets along the path to the leaf.
-    *
-    * We process an aggregation by getting the list of buckets and calling extract again for each of them.
-    * For each bucket we copy the current accumulator, since we're branching into more paths in the tree.
-    *
-    * We process a bucket by getting the current groupByClause and using it to get the value we're interested in
-    * from the bucket. Then if there are more groupByClauses, we recurse into extract using the rest of the clauses
-    * and the nested aggregation. If there are no more clauses to process, then we've reached the bottom of the tree
-    * we add any metric aggregations to the bucket and push it onto the result list.
-    */
+     * The aggregation results from ES will be a tree of aggregation -> buckets -> aggregation -> buckets -> etc
+     * we want to flatten it into a list of buckets where we have one item in the list for each leaf in the tree.
+     * Each item is an accumulation of all the buckets along the path to the leaf.
+     *
+     * We process an aggregation by getting the list of buckets and calling extract again for each of them.
+     * For each bucket we copy the current accumulator, since we're branching into more paths in the tree.
+     *
+     * We process a bucket by getting the current groupByClause and using it to get the value we're interested in
+     * from the bucket. Then if there are more groupByClauses, we recurse into extract using the rest of the clauses
+     * and the nested aggregation. If there are no more clauses to process, then we've reached the bottom of the tree
+     * we add any metric aggregations to the bucket and push it onto the result list.
+     */
     private static List<Map<String, Object>> extractBuckets(groupByClauses, value, metricAggs, Map accumulator = [:], List<Map<String, Object>> results = []) {
         value.buckets.each {
             def newAccumulator = [:]
@@ -296,6 +314,41 @@ class ElasticSearchQueryExecutor extends AbstractQueryExecutor {
         def result = (offset >= buckets.size()) ? [] : buckets[offset..endIndex]
 
         return result
+    }
 
+    private Map getFieldTypesInObject(Map fields, String parentFieldName) {
+        def fieldsToTypes = [:]
+        fields.get('properties').each { field ->
+            String fieldName = field.getKey()
+            if(parentFieldName) {
+                fieldName = parentFieldName + "." + field.getKey()
+            }
+            if(field.getValue().containsKey('type')) {
+                fieldsToTypes.put(fieldName, field.getValue().get('type'))
+            } else {
+                fieldsToTypes.putAll(getFieldTypesInObject(field.getValue(), fieldName))
+            }
+        }
+        return fieldsToTypes
+    }
+
+    private List<String> getFieldsInObject(Map fields, String parentFieldName) {
+        def fieldNames = []
+        fields.get('properties').each { field ->
+            def type = field.getValue().containsKey('type') ? field.getValue().get('type') : 'object'
+
+            String fieldName = field.getKey()
+            if(parentFieldName) {
+                fieldName = parentFieldName + "." + field.getKey()
+            }
+
+            if(type == 'object') {
+                fieldNames.addAll(getFieldsInObject(field.getValue(), fieldName))
+            } else {
+                fieldNames.add(fieldName)
+            }
+        }
+
+        return fieldNames
     }
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2013 Next Century Corporation
+ * Copyright 2016 Next Century Corporation
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -14,25 +14,12 @@
  *
  */
 
-package com.ncc.neon.language
+package com.ncc.neon.connect
 
-import org.junit.Test
+class DerbyConnectionClientFactory implements ConnectionClientFactory{
 
-
-
-class EscapeContentTextTest{
-
-    @Test
-    public void testEscapeContextText(){
-        String text = "(test)"
-        String result = QueryCreator.escapeContextText(text)
-        assert "test" == result
-    }
-
-    @Test
-    public void testEscapeContextTextWithoutParens(){
-        String text = "test"
-        String result = QueryCreator.escapeContextText(text)
-        assert text == result
+    @Override
+    ConnectionClient createConnectionClient(ConnectionInfo info) {
+        return new DerbyConnectionClient(info)
     }
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2014 Next Century Corporation
+ * Copyright 2016 Next Century Corporation
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,17 +13,11 @@
  * limitations under the License.
  *
  */
-package com.ncc.neon.metadata.store
 
-/**
- * Used in testing the ConfigWriter
- */
-class ConfigObject {
 
-    double v
-    float w
-    int x
-    String y
-    boolean z
+// If we have signature values, use them to sign the war
+signing { 
+    required { project.hasProperty('signing.password') && project.hasProperty('signing.keyId') } 
+    sign configurations.archives
+}         
 
-}

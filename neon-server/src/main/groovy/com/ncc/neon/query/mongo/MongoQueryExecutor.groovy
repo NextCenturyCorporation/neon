@@ -18,6 +18,7 @@ package com.ncc.neon.query.mongo
 
 import com.mongodb.DB
 import com.mongodb.MongoClient
+import com.mongodb.BasicDBObject
 import com.ncc.neon.connect.ConnectionManager
 import com.ncc.neon.query.Query
 import com.ncc.neon.query.QueryOptions
@@ -89,7 +90,7 @@ class MongoQueryExecutor extends AbstractQueryExecutor {
         def resultSet = collection.find().limit(GET_FIELD_NAMES_LIMIT)
         Set<String> fieldNameSet = [] as Set
         resultSet.each { result ->
-            fieldNameSet.addAll(result?.keySet())
+            fieldNameSet.addAll(getFieldsInObject(result, null))
         }
         return (fieldNameSet as List) ?: []
     }
@@ -101,37 +102,62 @@ class MongoQueryExecutor extends AbstractQueryExecutor {
         def resultSet = collection.find().limit(GET_FIELD_NAMES_LIMIT)
         Map fieldTypesMap = [:]
         resultSet.each { result ->
-            result?.keySet().each { field ->
-                def fieldObj = result.get(field)
-                if(fieldObj != "" && !fieldTypesMap[field]) {
-                    def type = fieldObj.getClass()
-                    // Convert types to make consistent with spark and elasticsearch
-                    if(fieldObj instanceof List) {
-                        type = "array"
-                    } else if(fieldObj instanceof String || fieldObj instanceof org.bson.types.ObjectId) {
-                        type = "string"
-                    } else if(fieldObj instanceof Date) {
-                        type = "date"
-                    } else if(fieldObj instanceof Float) {
-                        type = "float"
-                    } else if(fieldObj instanceof Double) {
-                        type = "double"
-                    } else if(fieldObj instanceof Long) {
-                        type = "long"
-                    } else if(fieldObj instanceof Integer) {
-                        type = "integer"
-                    } else if(fieldObj instanceof Boolean) {
-                        type = "boolean"
-                    } else if(fieldObj instanceof org.bson.types.Binary) {
-                        type = "binary"
-                    } else if(fieldObj instanceof Object) {
-                        type = "object"
-                    }
-                    fieldTypesMap.put(field, type)
+            fieldTypesMap.putAll(getFieldTypeInObject(result, null))
+        }
+        return fieldTypesMap
+    }
+
+    private Map getFieldTypeInObject(BasicDBObject fieldObj, String field) {
+        Map fieldTypesMap = [:]
+        fieldObj?.keySet().each { subField ->
+            def subFieldObj = fieldObj.get(subField)
+            String fieldName = subField
+            if(field) {
+                fieldName = field + "." + subField
+            }
+            if(subFieldObj != "" && !fieldTypesMap[fieldName]) {
+                // Convert types to make consistent with spark and elasticsearch
+                if(subFieldObj instanceof List) {
+                    fieldTypesMap.put(fieldName, "array")
+                } else if(subFieldObj instanceof String || subFieldObj instanceof org.bson.types.ObjectId) {
+                    fieldTypesMap.put(fieldName, "string")
+                } else if(subFieldObj instanceof Date) {
+                    fieldTypesMap.put(fieldName, "date")
+                } else if(subFieldObj instanceof Float) {
+                    fieldTypesMap.put(fieldName, "float")
+                } else if(subFieldObj instanceof Double) {
+                    fieldTypesMap.put(fieldName, "double")
+                } else if(subFieldObj instanceof Long) {
+                    fieldTypesMap.put(fieldName, "long")
+                } else if(subFieldObj instanceof Integer) {
+                    fieldTypesMap.put(fieldName, "integer")
+                } else if(subFieldObj instanceof Boolean) {
+                    fieldTypesMap.put(fieldName, "boolean")
+                } else if(subFieldObj instanceof org.bson.types.Binary) {
+                    fieldTypesMap.put(fieldName, "binary")
+                } else if(subFieldObj instanceof Object) {
+                    fieldTypesMap.putAll(getFieldTypeInObject(subFieldObj, fieldName))
                 }
             }
         }
         return fieldTypesMap
+    }
+
+    private Set<String> getFieldsInObject(BasicDBObject fieldObj, String field) {
+        Set<String> fieldNameSet = [] as Set
+        fieldObj?.keySet().each { subField ->
+            def subFieldObj = fieldObj.get(subField)
+            String fieldName = subField
+            if(field) {
+                fieldName = field + "." + subField
+            }
+            if(subFieldObj instanceof BasicDBObject) {
+                fieldNameSet.addAll(getFieldsInObject(subFieldObj, fieldName))
+            } else {
+                fieldNameSet.add(fieldName)
+            }
+        }
+        return fieldNameSet
     }
 
     protected AbstractMongoQueryWorker createMongoQueryWorker(Query query) {
@@ -157,11 +183,39 @@ class MongoQueryExecutor extends AbstractQueryExecutor {
         connectionManager.connection.mongo
     }
 
+    private boolean isFieldArray(String databaseName, String tableName, String fieldName) {
+        def db = mongo.getDB(databaseName)
+        def collection = db.getCollection(tableName)
+        def resultSet = collection.find().limit(GET_FIELD_NAMES_LIMIT)
+        def fieldTypeArray = false
+        while(resultSet.hasNext()) {
+            def result = resultSet.next()
+            def fieldObj = getFieldInResult(fieldName, result)
+            if(fieldObj != "" && fieldObj != null) {
+                fieldTypeArray = fieldObj instanceof List
+                break
+            }
+        }
+        return fieldTypeArray
+    }
+
+    private Object getFieldInResult(String fieldName, BasicDBObject result) {
+        def fieldNameArray = fieldName.split(/\./)
+        def fieldObj = result
+        fieldNameArray.each { field ->
+            if(fieldObj) {
+                fieldObj = fieldObj.get(field)
+            }
+        }
+        return fieldObj
+    }
+
     List<ArrayCountPair> getArrayCounts(String databaseName, String tableName, String field, int limit, WhereClause whereClause = null) {
         DB database = mongo.getDB(databaseName)
         ArrayCountQueryWorker worker = new ArrayCountQueryWorker(mongo).withDatabase(database)
         Query query = new Query(filter: new Filter(databaseName: databaseName, tableName: tableName))
-        MongoQuery mongoQuery = worker.createArrayCountQuery(new MongoQuery(query: query), field, limit, filterState, selectionState, whereClause)
+        boolean isFieldArray = isFieldArray(databaseName, tableName, field)
+        MongoQuery mongoQuery = worker.createArrayCountQuery(new MongoQuery(query: query), field, limit, filterState, selectionState, isFieldArray, whereClause)
         return getQueryResult(worker, mongoQuery).getData()
     }
 }

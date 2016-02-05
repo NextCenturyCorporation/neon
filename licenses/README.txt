@@ -14,6 +14,8 @@ Apache v2.0 (apache-2.0.txt)
   -- org.codenarc:CodeNarc:0.19
 - cglib
   -- cglib:cglib:2.2.2
+- Derby
+  -- org.apache.derby:derby:10.12.1.1
 - Gradle (see http://www.gradle.org/license)
 - Gradle SSH Plugin
   -- org.hidetake:gradle-ssh-plugin:0.2.0
@@ -48,13 +50,6 @@ Apache v2.0 (apache-2.0.txt)
 - Thrift (used by Hive)
   -- org.apache.thrift:libfb303:0.9.0
   -- org.apache.thrift:libthrift:0.9.0
-
-BSD (bsd.txt)
-- antlr
-  -- org.antlr:antlr4:4.0
-  -- org.antlr:antlr-runtime:3.5
-  -- org.antlr:antlr4-runtime:4.0
-  -- org.antlr:ST4:4.0.7
 
 CDDL v1.1 (cddl-1.1.txt)
 - Jersey

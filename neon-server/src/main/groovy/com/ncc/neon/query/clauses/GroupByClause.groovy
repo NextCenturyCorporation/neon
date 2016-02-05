@@ -29,7 +29,7 @@ import org.codehaus.jackson.annotate.JsonTypeInfo
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.PROPERTY, property = "type")
 @JsonSubTypes([
 @JsonSubTypes.Type(value = GroupByFieldClause, name = 'single'),
-@JsonSubTypes.Type(value =  GroupByFunctionClause, name =  'function')
+@JsonSubTypes.Type(value = GroupByFunctionClause, name =  'function')
 ])
 public interface GroupByClause {
 }

@@ -59,7 +59,10 @@ neon.query.Connection.ELASTICSEARCH = 'elasticsearch';
  * @method connect
  * @param {String} databaseType What type of database is being connected to. The constants in this class specify the
  * valid database types.
- * @param {String} host The host the database is running on
+ * @param {String} host The host the database is running on.  This can be an address (e.g., localhost) or an
+ * address:port pair (e.g., localhost:9300).  If no port is provided, the Neon server will assume the default port
+ * for the databaseType:  27017 for Mongo, 10000 for Spark via a Hive2 Thrift connection, and 9300 for an
+ * Elasticsearch transport client.
  */
 neon.query.Connection.prototype.connect = function(databaseType, host) {
     this.host_ = host;
@@ -80,23 +83,6 @@ neon.query.Connection.prototype.connect = function(databaseType, host) {
  */
 neon.query.Connection.prototype.executeQuery = function(query, successCallback, errorCallback) {
     return this.executeQueryService_(query, successCallback, errorCallback, 'query');
-};
-
-/**
- * Gets the metadata for each of the columns in the table
- * @method getColumnMetadata
- * @param {String} databaseName
- * @param {String} tableName The table whose metadata is being returned
- * @param {Function} successCallback
- * @return {neon.util.AjaxRequest}
- */
-neon.query.Connection.prototype.getColumnMetadata = function(databaseName, tableName, successCallback) {
-    return neon.util.ajaxUtils.doGet(
-        neon.serviceUrl('queryservice', 'columnmetadata/' + encodeURIComponent(databaseName) + '/' + encodeURIComponent(tableName)), {
-            success: successCallback,
-            responseType: 'json'
-        }
-    );
 };
 
 /**
@@ -255,7 +241,7 @@ neon.query.Connection.prototype.executeCheckImportProgress = function(uuid, succ
  * @param {String} user The username associated with the database to drop.
  * @param {String} data The database name associated with the database to drop.
  * @param {Function} successCallback The function to call when the request successfully completes. This function takes the server's response as a parameter.
- * @param {Function} errorCallback The funtion to cakk when an error occrus. This function takes the server's response as a parameter.
+ * @param {Function} errorCallback The function to call when an error occurs. This function takes the server's response as a parameter.
  * @param {String} [host] The host to upload a file to when you don't want to upload to the default.
  * @param {String} [databaseType] The type of database to upload a file to when you don't want the default.
  */
@@ -274,12 +260,14 @@ neon.query.Connection.prototype.executeRemoveDataset = function(user, data, succ
  * Gets a list of database names
  * @method getDatabaseNames
  * @param {Function} successCallback The callback that contains the database names in an array.
+ * @param {Function} errorCallback The function to call when an error occurs. This function takes the server's response as a parameter.
  * @return {neon.util.AjaxRequest} The xhr request object
  */
-neon.query.Connection.prototype.getDatabaseNames = function(successCallback) {
+neon.query.Connection.prototype.getDatabaseNames = function(successCallback, errorCallback) {
     return neon.util.ajaxUtils.doGet(
         neon.serviceUrl('queryservice', 'databasenames/' + encodeURIComponent(this.host_) + '/' + encodeURIComponent(this.databaseType_)), {
             success: successCallback,
+            error: errorCallback,
             responseType: 'json'
         }
     );
@@ -342,7 +330,162 @@ neon.query.Connection.prototype.getTableNamesAndFieldNames = function(databaseNa
 };
 
 /**
- * Executes a query that returns the field types from table
+ * Requests and returns the translation cache.
+ * @method getTranslationCache
+ * @param {Function} successCallback
+ * @param {Function} errorCallback
+ * @return {neon.util.AjaxRequest} The xhr request object
+ */
+neon.query.Connection.prototype.getTranslationCache = function(successCallback, errorCallback) {
+    return neon.util.ajaxUtils.doGet(
+        neon.serviceUrl("translationservice", "getcache"), {
+            success: successCallback,
+            error: errorCallback,
+            responseType: "json"
+        }
+    );
+};
+
+/**
+ * Requests to save the given translation cache.
+ * @method setTranslationCache
+ * @param {Object} cache
+ * @param {Function} successCallback
+ * @param {Function} errorCallback
+ * @return {neon.util.AjaxRequest} The xhr request object
+ */
+neon.query.Connection.prototype.setTranslationCache = function(cache, successCallback, errorCallback) {
+    return neon.util.ajaxUtils.doPostJSON(
+        cache,
+        neon.serviceUrl("translationservice", "setcache"), {
+            success: successCallback,
+            error: errorCallback,
+            responseType: "json"
+        }
+    );
+};
+
+/**
+ * Requests to save the state with the given parameters.
+ * @method saveState
+ * @param {Object} stateParams
+ * @param {Array} stateParams.dashboard
+ * @param {Object} stateParams.dataset
+ * @param {String} [stateParams.stateName]
+ * @param {Function} successCallback
+ * @param {Function} errorCallback
+ * @return {neon.util.AjaxRequest} The xhr request object
+ */
+neon.query.Connection.prototype.saveState = function(stateParams, successCallback, errorCallback) {
+    var opts = "";
+
+    if(stateParams.stateName) {
+        opts = "stateName=" + stateParams.stateName;
+        delete stateParams.stateName;
+    }
+
+    return neon.util.ajaxUtils.doPostJSON(
+        stateParams,
+        neon.serviceUrl("stateservice", "savestate", opts), {
+            success: successCallback,
+            error: errorCallback,
+            responseType: "json"
+        }
+    );
+};
+
+/**
+ * Requests to load the state with the given name, or dashboard and/or filter state IDs.
+ * @method loadState
+ * @param {Object} stateParams
+ * @param {String} stateParams.dashboardStateId
+ * @param {String} stateParams.filterStateId
+ * @param {String} stateParams.stateName
+ * @param {Function} successCallback
+ * @param {Function} errorCallback
+ * @return {neon.util.AjaxRequest} The xhr request object
+ */
+neon.query.Connection.prototype.loadState = function(stateParams, successCallback, errorCallback) {
+    var opts = [];
+    if(stateParams.stateName) {
+        opts.push("stateName=" + stateParams.stateName);
+    } else {
+        if(stateParams.dashboardStateId) {
+            opts.push("dashboardStateId=" + stateParams.dashboardStateId);
+        }
+        if(stateParams.filterStateId) {
+            opts.push("filterStateId=" + stateParams.filterStateId);
+        }
+    }
+    return neon.util.ajaxUtils.doGet(
+        neon.serviceUrl("stateservice", "loadstate", opts.join('&')), {
+            success: successCallback,
+            error: errorCallback,
+            responseType: "json"
+        }
+    );
+};
+
+/**
+ * Requests to delete the states with the given name.
+ * @method deleteState
+ * @param {String} stateName
+ * @param {Function} successCallback
+ * @param {Function} errorCallback
+ * @return {neon.util.AjaxRequest} The xhr request object
+ */
+neon.query.Connection.prototype.deleteState = function(stateName, successCallback, errorCallback) {
+    return neon.util.ajaxUtils.doDelete(
+        neon.serviceUrl("stateservice", "deletestate/" + stateName), {
+            success: successCallback,
+            error: errorCallback,
+            responseType: "json"
+        }
+    );
+};
+
+/**
+ * Requests to retrieve all the states names.
+ * @method getAllStates
+ * @param {Function} successCallback
+ * @param {Function} errorCallback
+ * @return {neon.util.AjaxRequest} The xhr request object
+ */
+neon.query.Connection.prototype.getAllStateNames = function(successCallback, errorCallback) {
+    return neon.util.ajaxUtils.doGet(
+        neon.serviceUrl("stateservice", "allstatesnames"), {
+            success: successCallback,
+            error: errorCallback,
+            responseType: "json"
+        }
+    );
+};
+
+/**
+ * Requests to retrieve the state name for the given state IDs.
+ * @method getStateName
+ * @param {Object} stateParams
+ * @param {String} stateParams.dashboardStateId
+ * @param {String} stateParams.filterStateId
+ * @param {Function} successCallback
+ * @param {Function} errorCallback
+ * @return {neon.util.AjaxRequest} The xhr request object
+ */
+neon.query.Connection.prototype.getStateName = function(stateParams, successCallback, errorCallback) {
+    var opts = [];
+    opts.push("dashboardStateId=" + stateParams.dashboardStateId);
+    opts.push("filterStateId=" + stateParams.filterStateId);
+    return neon.util.ajaxUtils.doGet(
+        neon.serviceUrl("stateservice", "statename", opts.join('&')), {
+            success: successCallback,
+            error: errorCallback,
+            responseType: "json"
+        }
+    );
+};
+
+/**
+ * Requests for field types from the table
  * @method getFieldTypes
  * @param {String} databaseName
  * @param {String} tableName The table name whose fields are being returned
@@ -355,6 +498,27 @@ neon.query.Connection.prototype.getFieldTypes = function(databaseName, tableName
     return neon.util.ajaxUtils.doGet(
         neon.serviceUrl('queryservice', 'fields/types/' + encodeURIComponent(this.host_) + '/' + encodeURIComponent(this.databaseType_) +
           '/' + encodeURIComponent(databaseName) + '/' + encodeURIComponent(tableName)), {
+            success: successCallback,
+            error: errorCallback,
+            responseType: 'json'
+        }
+    );
+};
+
+/**
+ * Requests for field types from the tables
+ * @method getFieldTypesForGroup
+ * @param {Object} databaseToTableNames A mapping of database names to a list of table names to get field
+ * types for.
+ * @param {Function} successCallback The callback to call when the field types are successfully retrieved
+ * @param {Function} [errorCallback] The optional callback when an error occurs. This is a 3 parameter
+ * function that contains the xhr, a short error status and the full error message.
+ * @return {neon.util.AjaxRequest} The xhr request object
+ */
+neon.query.Connection.prototype.getFieldTypesForGroup = function(databaseToTableNames, successCallback, errorCallback) {
+    return neon.util.ajaxUtils.doPostJSON(
+        databaseToTableNames,
+        neon.serviceUrl('queryservice', 'fields/types/' + encodeURIComponent(this.host_) + '/' + encodeURIComponent(this.databaseType_)), {
             success: successCallback,
             error: errorCallback,
             responseType: 'json'
