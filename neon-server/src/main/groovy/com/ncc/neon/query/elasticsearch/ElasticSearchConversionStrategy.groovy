@@ -38,6 +38,8 @@ import org.elasticsearch.index.query.QueryBuilders
 import org.elasticsearch.search.aggregations.AbstractAggregationBuilder
 import org.elasticsearch.search.aggregations.AggregationBuilder
 import org.elasticsearch.search.aggregations.AggregationBuilders
+import org.elasticsearch.search.aggregations.bucket.histogram.DateHistogramBuilder
+import org.elasticsearch.search.aggregations.bucket.histogram.DateHistogram.Interval
 import org.elasticsearch.search.aggregations.bucket.terms.Terms
 import org.elasticsearch.search.aggregations.bucket.terms.TermsBuilder
 import org.elasticsearch.search.builder.SearchSourceBuilder
@@ -132,16 +134,20 @@ class ElasticSearchConversionStrategy {
                 if (sc) {
                     def sortOrder = sc.sortOrder == com.ncc.neon.query.clauses.SortOrder.ASCENDING
                     bucketAggregations.each { bucketAgg ->
-                        bucketAgg.order(Terms.Order.aggregation(TERM_PREFIX, sortOrder))
+                                                if (!(bucketAgg instanceof DateHistogramBuilder)) {
+                            bucketAgg.order(Terms.Order.aggregation(TERM_PREFIX, sortOrder))
+                        }
                     }
-                    bucketAggregations.last().order(isCountAllAggregation(ac) ?
+                    def lastAgg = bucketAggregations.last()
+                                        if (!(lastAgg instanceof DateHistogramBuilder)) {
+                                                lastAgg.order(isCountAllAggregation(ac) ?
                             Terms.Order.count(sortOrder) :
                             Terms.Order.aggregation("${STATS_AGG_PREFIX}${ac.field}" as String,
                                     ac.operation as String, sortOrder)
-                    )
+                                                )
+                                        }
                 }
             }
-
             //on each aggregation, except the last - nest the next aggregation
             bucketAggregations.take(bucketAggregations.size() - 1)
                     .eachWithIndex { v, i -> v.subAggregation(bucketAggregations[i + 1]) }
@@ -328,23 +334,25 @@ class ElasticSearchConversionStrategy {
             if (clause.operation in DATE_OPERATIONS) {
 
                 def template = {
-                    def modifier = (it == 'MONTH' ? " + 1" : "")
-
-                    applySort(AggregationBuilders
-                        .terms(clause.name as String)
+                    def groupByClause = AggregationBuilders
+                        .dateHistogram(clause.name as String)
                         .field(clause.field as String)
-                        .script("def calendar = java.util.Calendar.getInstance(); calendar.setTime(new Date(doc['${clause.field}'].value)); calendar.get(java.util.Calendar.${it})" + modifier as String)
-                        .size(0))
+                        .interval(it.interval)
+                        .format(it.format)
+                                        if (clause.operation == 'dayOfWeek') {
+                                                groupByClause.postOffset("1d")
+                                        }
+                                        return groupByClause
                 }
 
                 switch (clause.operation) {
-                    case 'year': return template('YEAR')
-                    case 'month': return template('MONTH')
-                    case 'dayOfMonth': return template('DAY_OF_MONTH')
-                    case 'dayOfWeek': return template('DAY_OF_WEEK')
-                    case 'hour': return template('HOUR_OF_DAY')
-                    case 'minute': return template('MINUTE')
-                    case 'second': return template('SECOND')
+                    case 'year': return template(interval:Interval.YEAR, format:'yyyy')
+                    case 'month': return template(interval:Interval.MONTH, format:'M')
+                    case 'dayOfMonth': return template(interval:Interval.DAY, format:'d')
+                    case 'dayOfWeek': return template(interval:Interval.DAY, format:'e')
+                    case 'hour': return template(interval:Interval.HOUR, format:'H')
+                    case 'minute': return template(interval:Interval.MINUTE, format:'m')
+                    case 'second': return template(interval:Interval.SECOND, format:'s')
                 }
             }
         }
