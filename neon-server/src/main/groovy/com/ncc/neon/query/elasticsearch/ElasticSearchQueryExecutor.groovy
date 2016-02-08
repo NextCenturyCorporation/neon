@@ -60,9 +60,33 @@ class ElasticSearchQueryExecutor extends AbstractQueryExecutor {
     * extracted into the format that the Neon API uses.
     */
     private static class AggregationBucket {
-        public Map groupByKeys
-        public Map aggregatedValues
-        public def docCount
+        def getGroupByKeys() {
+            return groupByKeys
+        }
+
+        def setGroupByKeys(newGroupByKeys) {
+            groupByKeys = newGroupByKeys
+        }
+
+        def getAggregatedValues() {
+            return aggregatedValues
+        }
+
+        def setAggregatedValues(newValues) {
+            aggregatedValues = newValues
+        }
+
+        def getDocCount() {
+            return docCount
+        }
+
+        def setDocCount(newCount) {
+            docCount = newCount
+        }
+
+        private Map groupByKeys
+        private Map aggregatedValues = [:]
+        private def docCount
     }
 
     @Autowired
@@ -239,7 +263,7 @@ class ElasticSearchQueryExecutor extends AbstractQueryExecutor {
             .asList()
             .head()
             .getBuckets()
-            .collect { new ArrayCountPair(key: it.key, count: it.docCount) }
+            .collect { new ArrayCountPair(key: it.key, count: it.getDocCount()) }
     }
 
     private Client getClient() {
@@ -253,12 +277,12 @@ class ElasticSearchQueryExecutor extends AbstractQueryExecutor {
     private static List<AggregationBucket> combineDuplicateBuckets(List<AggregationBucket> buckets) {
         Map mappedBuckets = [:]
         // Iterate over all of the buckets, looking for any that have the same groupByKeys
-        buckets.each({
-            def existingBucket = mappedBuckets.get(it.groupByKeys)
+        buckets.each {
+            def existingBucket = mappedBuckets.get(it.getGroupByKeys())
             if (existingBucket) {
                 // If we've already found a bucket with these groupByKeys, then combine them
-                it.aggregatedValues.each({ key, value ->
-                    def existingAgg = existingBucket.aggregatedValues.get(key)
+                it.getAggregatedValues().each { key, value ->
+                    def existingAgg = existingBucket.getAggregatedValues().get(key)
                     if (existingAgg) {
                         def newAgg = new InternalStats(
                             existingAgg.getName(),
@@ -268,26 +292,26 @@ class ElasticSearchQueryExecutor extends AbstractQueryExecutor {
                             Math.max(existingAgg.getMax(), value.getMax()),
                             new ValueFormatter.Raw()
                         )
-                        existingBucket.aggregatedValues.put(key, newAgg)
+                        existingBucket.getAggregatedValues().put(key, newAgg)
                     } else {
                         existingBucket.put(key, value)
                     }
-                })
-                existingBucket.docCount += it.docCount
+                }
+                existingBucket.setDocCount(existingBucket.getDocCount() + it.getDocCount())
             } else {
                 // If there isn't already a bucket with these groupByKeys, then add it to the map
-                mappedBuckets.put(it.groupByKeys, it)
+                mappedBuckets.put(it.getGroupByKeys(), it)
             }
-        })
+        }
         return mappedBuckets.values().asList()
     }
 
     private static List<Map<String, Object>> extractMetricsFromBuckets(clauses, buckets) {
-        return buckets.collect({
-            def result = it.groupByKeys
-            result.putAll(extractMetrics(clauses, it.aggregatedValues, it.docCount))
+        return buckets.collect {
+            def result = it.getGroupByKeys()
+            result.putAll(extractMetrics(clauses, it.getAggregatedValues(), it.getDocCount()))
             result
-        })
+        }
     }
 
     private static Map<String, Object> extractMetrics(clauses, results, totalCount) {
@@ -311,9 +335,9 @@ class ElasticSearchQueryExecutor extends AbstractQueryExecutor {
         if (sortClauses) {
             buckets.sort { a, b ->
                 for (def sortClause: sortClauses) {
-                    def a_field = a[sortClause.fieldName]
-                    def b_field = b[sortClause.fieldName]
-                    def order = sortClause.getSortDirection() * (a_field <=> b_field)
+                    def aField = a[sortClause.fieldName]
+                    def bField = b[sortClause.fieldName]
+                    def order = sortClause.getSortDirection() * (aField <=> bField)
                     if (order != 0) {
                         return order
                     }
@@ -367,13 +391,12 @@ class ElasticSearchQueryExecutor extends AbstractQueryExecutor {
             extractBuckets(groupByClauses.tail(), (MultiBucketsAggregation)value.getAggregations().asList().head(), accumulator, results)
         } else {
             def bucket = new AggregationBucket()
-            bucket.groupByKeys = accumulator
-            bucket.docCount = value.docCount
-            bucket.aggregatedValues = [:]
+            bucket.setGroupByKeys(accumulator)
+            bucket.setDocCount(value.getDocCount())
 
             def terminalAggs = value.getAggregations()
             if (terminalAggs) {
-                bucket.aggregatedValues.putAll(terminalAggs.asMap())
+                bucket.getAggregatedValues().putAll(terminalAggs.asMap())
             }
             results.push(bucket)
         }
