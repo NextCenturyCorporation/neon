@@ -1,5 +1,6 @@
 package com.ncc.neon.query.mongo
 
+import com.mongodb.BasicDBList
 import com.mongodb.BasicDBObject
 import com.mongodb.DBObject
 import com.mongodb.MongoClient
@@ -25,7 +26,26 @@ class HeatmapMongoQueryWorker extends AbstractMongoQueryWorker {
 
     @Override
     QueryResult executeQuery(MongoQuery mongoQuery) {
-        def match = new BasicDBObject('$match', mongoQuery.whereClauseParams)
+        DBObject notNull = new BasicDBObject('$ne', null)
+        DBObject notEmptyString = new BasicDBObject('$ne', "")
+
+        DBObject latNotNull = new BasicDBObject(boundingBox.latField, notNull)
+        DBObject latNotEmptyString = new BasicDBObject(boundingBox.latField, notEmptyString)
+        DBObject lonNotNull = new BasicDBObject(boundingBox.lonField, notNull)
+        DBObject lonNotEmptyString = new BasicDBObject(boundingBox.latField, notEmptyString)
+
+        //FIXME in bounding box
+
+
+        DBObject andList = new BasicDBList()
+        andList.add(mongoQuery.whereClauseParams)
+        andList.add(latNotNull)
+        andList.add(latNotEmptyString)
+        andList.add(lonNotNull)
+        andList.add(lonNotEmptyString)
+        BasicDBObject whereAnd = new BasicDBObject('$and', andList)
+
+        def match = new BasicDBObject('$match', whereAnd)
         def additionalClauses = buildAggregations(boundingBox)
 
         if (mongoQuery.query.sortClauses) {
