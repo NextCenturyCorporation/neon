@@ -45,11 +45,6 @@ class MongoHeatmapExecutor extends MongoQueryExecutor{
         float boxLon = (lonRange / gridCount)
         float lonModifier = (boxLon / 2)
 
-        println("======")
-        println(boundingBox.latField)
-        println("======")
-
-
         DBObject lat = new BasicDBObject('$subtract', [("\$${boundingBox.latField}"), minLat])
         DBObject latDiv = new BasicDBObject('$divide', [lat, boxLat])
         DBObject modLat = new BasicDBObject('$mod', [latDiv, 1])

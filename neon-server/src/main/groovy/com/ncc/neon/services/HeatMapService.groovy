@@ -47,13 +47,7 @@ class HeatMapService {
         //create executor
         def executor = queryExecutorFactory.getExecutor(new ConnectionInfo(host: host, dataSource: databaseType as DataSources), true)
 
-        println(ignoreFilters)
-        println(minLat)
-        println(minLon)
-
         HeatmapBoundsQuery boundingBox = new HeatmapBoundsQuery([minLat: minLat, maxLat: maxLat, minLon: minLon, maxLon: maxLon, latField: latField, lonField: lonField])
-
-        println(boundingBox.minLat)
 
         executor.execute(query, new QueryOptions(ignoreFilters: ignoreFilters,
             selectionOnly: selectionOnly, ignoredFilterIds: (ignoredFilterIds ?: ([] as Set))), boundingBox)

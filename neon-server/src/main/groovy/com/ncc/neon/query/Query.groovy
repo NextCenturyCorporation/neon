@@ -29,7 +29,7 @@ import org.codehaus.jackson.annotate.JsonIgnoreProperties
  * The query is translated to a data source specific operation which returns the appropriate data.
  */
 @ToString(includeNames = true)
-@JsonIgnoreProperties(value = ['ignoreFilters', 'selectionOnly_', 'ignoredFilterIds_', 'minLat_', 'minLon', 'maxLat', 'maxLon', 'latField', 'lonField'])
+@JsonIgnoreProperties(value = ['ignoreFilters', 'selectionOnly_', 'ignoredFilterIds_'])
 class Query {
 
     Filter filter
