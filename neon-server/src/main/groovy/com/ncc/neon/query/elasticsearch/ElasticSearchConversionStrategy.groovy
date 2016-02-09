@@ -134,18 +134,20 @@ class ElasticSearchConversionStrategy {
                 if (sc) {
                     def sortOrder = sc.sortOrder == com.ncc.neon.query.clauses.SortOrder.ASCENDING
                     bucketAggregations.each { bucketAgg ->
-                                                if (!(bucketAgg instanceof DateHistogramBuilder)) {
+                        if (!(bucketAgg instanceof DateHistogramBuilder)) {
                             bucketAgg.order(Terms.Order.aggregation(TERM_PREFIX, sortOrder))
                         }
                     }
                     def lastAgg = bucketAggregations.last()
-                                        if (!(lastAgg instanceof DateHistogramBuilder)) {
-                                                lastAgg.order(isCountAllAggregation(ac) ?
-                            Terms.Order.count(sortOrder) :
-                            Terms.Order.aggregation("${STATS_AGG_PREFIX}${ac.field}" as String,
-                                    ac.operation as String, sortOrder)
-                                                )
-                                        }
+                    if (!(lastAgg instanceof DateHistogramBuilder)) {
+                        def aggOrder
+                        if (isCountAllAggregation(ac)) {
+                            aggOrder = Terms.Order.count(sortOrder)
+                        } else {
+                            aggOrder = Terms.Order.aggregation("${STATS_AGG_PREFIX}${ac.field}" as String, ac.operation as String, sortOrder)
+                        }
+                        lastAgg.order(aggOrder)
+                    }
                 }
             }
             //on each aggregation, except the last - nest the next aggregation
