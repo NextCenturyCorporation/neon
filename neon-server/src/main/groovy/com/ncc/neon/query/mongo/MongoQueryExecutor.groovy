@@ -20,6 +20,7 @@ import com.mongodb.DB
 import com.mongodb.MongoClient
 import com.mongodb.BasicDBObject
 import com.ncc.neon.connect.ConnectionManager
+import com.ncc.neon.connect.NeonConnectionException
 import com.ncc.neon.query.Query
 import com.ncc.neon.query.QueryOptions
 import com.ncc.neon.query.clauses.WhereClause
@@ -86,6 +87,9 @@ class MongoQueryExecutor extends AbstractQueryExecutor {
     @Override
     List<String> getFieldNames(String databaseName, String tableName) {
         def db = mongo.getDB(databaseName)
+        if(!db.collectionExists(tableName)) {
+            throw new NeonConnectionException("Table ${tableName} does not exist")
+        }
         def collection = db.getCollection(tableName)
         def resultSet = collection.find().limit(GET_FIELD_NAMES_LIMIT)
         Set<String> fieldNameSet = [] as Set
@@ -98,6 +102,9 @@ class MongoQueryExecutor extends AbstractQueryExecutor {
     @Override
     Map getFieldTypes(String databaseName, String tableName) {
         def db = mongo.getDB(databaseName)
+        if(!db.collectionExists(tableName)) {
+            throw new NeonConnectionException("Table ${tableName} does not exist")
+        }
         def collection = db.getCollection(tableName)
         def resultSet = collection.find().limit(GET_FIELD_NAMES_LIMIT)
         Map fieldTypesMap = [:]
@@ -185,6 +192,9 @@ class MongoQueryExecutor extends AbstractQueryExecutor {
 
     private boolean isFieldArray(String databaseName, String tableName, String fieldName) {
         def db = mongo.getDB(databaseName)
+        if(!db.collectionExists(tableName)) {
+            throw new NeonConnectionException("Table ${tableName} does not exist")
+        }
         def collection = db.getCollection(tableName)
         def resultSet = collection.find().limit(GET_FIELD_NAMES_LIMIT)
         def fieldTypeArray = false

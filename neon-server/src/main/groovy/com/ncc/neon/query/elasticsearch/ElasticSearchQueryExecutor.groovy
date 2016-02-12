@@ -33,6 +33,7 @@ import com.ncc.neon.query.result.QueryResult
 import com.ncc.neon.query.result.TabularQueryResult
 import org.elasticsearch.action.admin.cluster.state.ClusterStateRequest
 import org.elasticsearch.action.admin.indices.mapping.get.GetMappingsRequest
+import org.elasticsearch.action.admin.indices.exists.indices.IndicesExistsRequest
 import org.elasticsearch.action.search.SearchRequest
 import org.elasticsearch.action.search.SearchType
 import org.elasticsearch.client.Client
@@ -100,6 +101,7 @@ class ElasticSearchQueryExecutor extends AbstractQueryExecutor {
 
     @Override
     QueryResult doExecute(Query query, QueryOptions options) {
+        checkDatabaseAndTableExists(query.databaseName, query.tableName)
         long d1 = new Date().getTime()
 
         ElasticSearchConversionStrategy conversionStrategy = new ElasticSearchConversionStrategy(filterState: filterState, selectionState: selectionState)
@@ -193,6 +195,12 @@ class ElasticSearchQueryExecutor extends AbstractQueryExecutor {
             }
             return tables.unique()
         }
+
+        def dbExists = getClient().admin().indices().exists(new IndicesExistsRequest(dbName)).actionGet().isExists()
+        if(!dbExists) {
+            throw new NeonConnectionException("Database ${dbName} does not exist")
+        }
+
         // Fall through case is to return the exact match.
         getMappings().get(dbName).collect { it.key }
     }
@@ -201,6 +209,8 @@ class ElasticSearchQueryExecutor extends AbstractQueryExecutor {
     List<String> getFieldNames(String databaseName, String tableName) {
         if(tableName) {
             LOGGER.debug("Executing getFieldNames for index " + databaseName + " type " + tableName)
+
+            checkDatabaseAndTableExists(databaseName, tableName)
 
             def dbMatch = databaseName.replaceAll(/\*/, '.*')
             def tableMatch = tableName.replaceAll(/\*/, '.*')
@@ -228,22 +238,28 @@ class ElasticSearchQueryExecutor extends AbstractQueryExecutor {
     }
 
     @Override
-   Map getFieldTypes(String databaseName, String tableName) {
-       if(tableName) {
-           LOGGER.debug("Executing getFieldTypes for index " + databaseName + " type " + tableName)
+    Map getFieldTypes(String databaseName, String tableName) {
+        if(tableName) {
+            LOGGER.debug("Executing getFieldTypes for index " + databaseName + " type " + tableName)
 
-           def dbMappings = getMappings().get(databaseName)
-           if(dbMappings) {
-               def tableMappings = dbMappings.get(tableName)
-               if(tableMappings) {
-                   return getFieldTypesInObject(tableMappings.getSourceAsMap(), null)
-               }
-           }
-       }
-       return [:]
-   }
+            def dbExists = getClient().admin().indices().exists(new IndicesExistsRequest(databaseName)).actionGet().isExists()
+            if(!dbExists) {
+                throw new NeonConnectionException("Database ${databaseName} does not exist")
+            }
+
+            def dbMappings = getMappings().get(databaseName)
+            if(dbMappings) {
+                def tableMappings = dbMappings.get(tableName)
+                if(tableMappings) {
+                    return getFieldTypesInObject(tableMappings.getSourceAsMap(), null)
+                }
+            }
+        }
+        return [:]
+    }
 
     List<ArrayCountPair> getArrayCounts(String databaseName, String tableName, String field, int limit = 0, WhereClause whereClause = null) {
+        checkDatabaseAndTableExists(databaseName, tableName)
         Query query = new Query(filter: new Filter(databaseName: databaseName, tableName: tableName),
                     limitClause: new LimitClause(limit: 0))
         ElasticSearchConversionStrategy conversionStrategy = new ElasticSearchConversionStrategy(filterState: filterState, selectionState: selectionState)
@@ -452,5 +468,30 @@ class ElasticSearchQueryExecutor extends AbstractQueryExecutor {
         }
 
         return fieldNames
+    }
+
+    private void checkDatabaseAndTableExists(String databaseName, String tableName) {
+        def dbExists = getClient().admin().indices().exists(new IndicesExistsRequest(databaseName)).actionGet().isExists()
+
+        if(!dbExists) {
+            throw new NeonConnectionException("Database ${databaseName} does not exist")
+        }
+
+        def tableExists = false
+
+        getMappings().keysIt().each { dbKey ->
+            if (dbKey.matches(databaseName)) {
+                def dbMappings = mappings.get(dbKey)
+                dbMappings.keysIt().each { tableKey ->
+                    if (tableKey.matches(tableName)) {
+                        tableExists = true
+                    }
+                }
+            }
+        }
+
+        if(!tableExists) {
+            throw new NeonConnectionException("Table ${tableName} does not exist")
+        }
     }
 }
