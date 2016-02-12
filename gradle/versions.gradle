@@ -31,8 +31,6 @@ project.ext {
     commonsDaemonVersion = "1.0.5"
     javaxServletVersion = "3.0.1"
     cglibVersion = "2.2.2"
-    scalaLibraryVersion ="2.10.3"
-    gatlingVersion = "1.5.6"
     sshPluginVersion = "0.2.0"
     codeNarcVersion = "0.21"
     groovyVersion = "2.3.6"
