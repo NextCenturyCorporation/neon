@@ -87,9 +87,6 @@ class MongoQueryExecutor extends AbstractQueryExecutor {
     @Override
     List<String> getFieldNames(String databaseName, String tableName) {
         def db = mongo.getDB(databaseName)
-        if(!db.collectionExists(tableName)) {
-            throw new NeonConnectionException("Table ${tableName} does not exist")
-        }
         def collection = db.getCollection(tableName)
         def resultSet = collection.find().limit(GET_FIELD_NAMES_LIMIT)
         Set<String> fieldNameSet = [] as Set
