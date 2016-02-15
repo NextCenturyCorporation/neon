@@ -11,4 +11,6 @@ class HeatmapBoundsQuery {
 
     String latField
     String lonField
+
+    String locationField
 }

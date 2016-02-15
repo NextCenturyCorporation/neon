@@ -5,6 +5,11 @@ import com.ncc.neon.query.result.QueryResult
 import com.ncc.neon.query.result.TabularQueryResult
 import com.ncc.neon.query.Query
 import com.ncc.neon.query.QueryOptions
+import groovy.json.JsonOutput
+import org.elasticsearch.common.xcontent.XContentHelper
+import org.elasticsearch.common.xcontent.XContentParser
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
 
 /**
@@ -14,6 +19,8 @@ import org.springframework.stereotype.Component
 class ElasticSearchHeatmapExecutor extends ElasticSearchQueryExecutor{
     final int gridCount = 10
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(ElasticSearchHeatmapExecutor)
+
     QueryResult execute(Query query, QueryOptions options, HeatmapBoundsQuery boundingBox) {
         // cutoff queries where there is no selection but selectionOnly was specified. otherwise the WHERE clause
         // created by the query executors to get the selected data will be empty the request for selectionOnly is
@@ -22,24 +29,18 @@ class ElasticSearchHeatmapExecutor extends ElasticSearchQueryExecutor{
             return TabularQueryResult.EMPTY
         }
 
-        def aggregations  = buildAggregations(boundingBox)
-        QueryResult result = doExecute(query, options, aggregations)
+        QueryResult result = doExecute(query, options, boundingBox)
         return transform(query.transforms, result)
     }
 
-    def buildAggregations(HeatmapBoundsQuery boundingBox) {
-
-        return [
-                aggregation: group,
-                project: project
-        ]
-    }
-
-    QueryResult doExecute(Query query, QueryOptions options, def aggregations) {
+    QueryResult doExecute(Query query, QueryOptions options, HeatmapBoundsQuery boundingBox) {
         long d1 = new Date().getTime()
 
-        ElasticSearchConversionStrategy conversionStrategy = new ElasticSearchConversionStrategy(filterState: filterState, selectionState: selectionState)
-        def request = conversionStrategy.convertQuery(query, options)
+        ElasticSearchHeatmapConversionStrategy conversionStrategy = new ElasticSearchHeatmapConversionStrategy(filterState: filterState, selectionState: selectionState)
+
+        query.groupByClauses = []
+
+        def request = conversionStrategy.convertQuery(query, options, boundingBox)
 
         def aggregates = query.aggregates
         def groupByClauses = query.groupByClauses

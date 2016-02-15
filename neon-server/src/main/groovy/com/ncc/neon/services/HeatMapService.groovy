@@ -31,23 +31,25 @@ class HeatMapService {
     @Produces(MediaType.APPLICATION_JSON)
     @Path("query/{host}/{databaseType}")
     QueryResult queryData(@PathParam("host") String host,
-                          @PathParam("databaseType") String databaseType,
-                          @DefaultValue("false") @QueryParam("ignoreFilters") boolean ignoreFilters,
-                          @DefaultValue("false") @QueryParam("selectionOnly") boolean selectionOnly,
-                          @QueryParam("ignoredFilterIds") Set<String> ignoredFilterIds,
-                          @QueryParam("minLat") float minLat,
-                          @QueryParam("maxLat") float maxLat,
-                          @QueryParam("minLon") float minLon,
-                          @QueryParam("maxLon") float maxLon,
-                          @QueryParam("latField") String latField,
-                          @QueryParam("lonField") String lonField,
-                          Query query) {
+                        @PathParam("databaseType") String databaseType,
+                        @DefaultValue("false") @QueryParam("ignoreFilters") boolean ignoreFilters,
+                        @DefaultValue("false") @QueryParam("selectionOnly") boolean selectionOnly,
+                        @QueryParam("ignoredFilterIds") Set<String> ignoredFilterIds,
+                        @QueryParam("minLat") float minLat,
+                        @QueryParam("maxLat") float maxLat,
+                        @QueryParam("minLon") float minLon,
+                        @QueryParam("maxLon") float maxLon,
+                        @QueryParam("latField") String latField,
+                        @QueryParam("lonField") String lonField,
+                        @QueryParam("locationField") String locationField,
+
+                        Query query) {
         //modify query with bounding box where clause
 
         //create executor
         def executor = queryExecutorFactory.getExecutor(new ConnectionInfo(host: host, dataSource: databaseType as DataSources), true)
 
-        HeatmapBoundsQuery boundingBox = new HeatmapBoundsQuery([minLat: minLat, maxLat: maxLat, minLon: minLon, maxLon: maxLon, latField: latField, lonField: lonField])
+        HeatmapBoundsQuery boundingBox = new HeatmapBoundsQuery([minLat: minLat, maxLat: maxLat, minLon: minLon, maxLon: maxLon, latField: latField, lonField: lonField, locationField: locationField])
 
         executor.execute(query, new QueryOptions(ignoreFilters: ignoreFilters,
             selectionOnly: selectionOnly, ignoredFilterIds: (ignoredFilterIds ?: ([] as Set))), boundingBox)
