@@ -42,6 +42,7 @@ class HeatMapService {
                         @QueryParam("latField") String latField,
                         @QueryParam("lonField") String lonField,
                         @QueryParam("locationField") String locationField,
+                        @DefaultValue("8") @QueryParam("gridCount") int gridCount,
 
                         Query query) {
         //modify query with bounding box where clause
@@ -49,7 +50,16 @@ class HeatMapService {
         //create executor
         def executor = queryExecutorFactory.getExecutor(new ConnectionInfo(host: host, dataSource: databaseType as DataSources), true)
 
-        HeatmapBoundsQuery boundingBox = new HeatmapBoundsQuery([minLat: minLat, maxLat: maxLat, minLon: minLon, maxLon: maxLon, latField: latField, lonField: lonField, locationField: locationField])
+        HeatmapBoundsQuery boundingBox = new HeatmapBoundsQuery([
+                minLat: minLat,
+                maxLat: maxLat,
+                minLon: minLon,
+                maxLon: maxLon,
+                latField: latField,
+                lonField: lonField,
+                locationField: locationField,
+                gridCount: gridCount
+        ])
 
         executor.execute(query, new QueryOptions(ignoreFilters: ignoreFilters,
             selectionOnly: selectionOnly, ignoredFilterIds: (ignoredFilterIds ?: ([] as Set))), boundingBox)

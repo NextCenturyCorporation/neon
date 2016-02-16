@@ -13,4 +13,6 @@ class HeatmapBoundsQuery {
     String lonField
 
     String locationField
+
+    int gridCount
 }

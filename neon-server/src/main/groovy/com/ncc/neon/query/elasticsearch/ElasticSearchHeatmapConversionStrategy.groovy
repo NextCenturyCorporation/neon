@@ -94,7 +94,7 @@ class ElasticSearchHeatmapConversionStrategy {
      * inject heatmap aggregation and bounding box
      */
     private static injectHeatmapAggregation(SearchSourceBuilder source, HeatmapBoundsQuery boundingBox) {
-        def hashGrid = AggregationBuilders.geohashGrid('heatmap').field(boundingBox.locationField).precision(1)
+        def hashGrid = AggregationBuilders.geohashGrid('heatmap').field(boundingBox.locationField).precision(boundingBox.gridCount)
         def filter  = FilterBuilders.geoBoundingBoxFilter(boundingBox.locationField).bottomLeft(boundingBox.minLat, boundingBox.minLon).topRight(boundingBox.maxLat, boundingBox.maxLon)
         def bounds = AggregationBuilders.filter('bounds').filter(filter).subAggregation(hashGrid)
 

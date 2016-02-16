@@ -17,8 +17,6 @@ class HeatmapMongoQueryWorker extends AbstractMongoQueryWorker {
 
     protected HeatmapBoundsQuery boundingBox;
 
-    protected final int gridCount = 10
-
     HeatmapMongoQueryWorker(MongoClient mongo, HeatmapBoundsQuery boundingBox) {
         super(mongo)
         this.boundingBox = boundingBox
@@ -89,11 +87,11 @@ class HeatmapMongoQueryWorker extends AbstractMongoQueryWorker {
         float maxLat = boundingBox.maxLat
 
         float latRange = maxLat - minLat
-        float boxLat = (latRange / gridCount)
+        float boxLat = (latRange / boundingBox.gridCount)
         float latModifier = (boxLat / 2)
 
         float lonRange = maxLon - minLon
-        float boxLon = (lonRange / gridCount)
+        float boxLon = (lonRange / boundingBox.gridCount)
         float lonModifier = (boxLon / 2)
 
         DBObject lat = new BasicDBObject('$subtract', [('$' + boundingBox.latField), minLat])
