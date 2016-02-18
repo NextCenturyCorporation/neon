@@ -1,5 +1,6 @@
 package com.ncc.neon.query.elasticsearch
 
+import com.mongodb.util.JSON
 import com.ncc.neon.query.HeatmapBoundsQuery
 import com.ncc.neon.query.result.QueryResult
 import com.ncc.neon.query.result.TabularQueryResult
@@ -17,8 +18,6 @@ import org.springframework.stereotype.Component
  */
 @Component
 class ElasticSearchHeatmapExecutor extends ElasticSearchQueryExecutor{
-    final int gridCount = 10
-
     private static final Logger LOGGER = LoggerFactory.getLogger(ElasticSearchHeatmapExecutor)
 
     QueryResult execute(Query query, QueryOptions options, HeatmapBoundsQuery boundingBox) {
@@ -30,7 +29,7 @@ class ElasticSearchHeatmapExecutor extends ElasticSearchQueryExecutor{
         }
 
         QueryResult result = doExecute(query, options, boundingBox)
-        return transform(query.transforms, result)
+        return result
     }
 
     QueryResult doExecute(Query query, QueryOptions options, HeatmapBoundsQuery boundingBox) {
@@ -42,31 +41,43 @@ class ElasticSearchHeatmapExecutor extends ElasticSearchQueryExecutor{
 
         def request = conversionStrategy.convertQuery(query, options, boundingBox)
 
-        def aggregates = query.aggregates
-        def groupByClauses = query.groupByClauses
-
         def results = getClient().search(request).actionGet()
         def aggResults = results.aggregations
 
         def returnVal
-        if (aggregates && !groupByClauses) {
-            returnVal = new TabularQueryResult([
-                    extractMetrics(aggregates, aggResults ? aggResults.asMap() : null, results.hits.totalHits)
-            ])
-        } else if (groupByClauses) {
-            List<Map<String, Object>> buckets = extractBuckets(groupByClauses, aggResults.asList()[0], aggregates)
-            buckets = limitBuckets(buckets, query)
-            returnVal = new TabularQueryResult(buckets)
-        } else if(query.isDistinct) {
-            returnVal = new TabularQueryResult(extractDistinct(query, aggResults.asList()[0]))
-        }
-        else {
-            returnVal = new TabularQueryResult(results.hits.collect { it.getSource() })
-        }
+
+        List<Map<String, Object>> buckets = extractHeatmapBuckets(aggResults.asList()[0].aggregations[0])
+        returnVal = new TabularQueryResult(buckets)
 
         long diffTime = new Date().getTime() - d1
         LOGGER.debug(" Query took: " + diffTime + " ms ")
 
         return returnVal
+    }
+
+    private List<Map<String, Object>> extractHeatmapBuckets(def gridAggregation) {
+        List bucketList = gridAggregation.buckets;
+
+        List<Map<String, Object>> buckets = new ArrayList<Map<String, Object>>()
+
+        def maxCount = 0
+        bucketList.each {
+            if(it.docCount > maxCount) {
+                maxCount = it.docCount
+            }
+        }
+
+        bucketList.each {
+            def bucket = [:]
+            def point = [:]
+            point['lat'] = it.keyAsGeoPoint.lat
+            point['lon'] = it.keyAsGeoPoint.lon
+            bucket['point'] = point
+            bucket['count'] = it.docCount
+            bucket['percentage'] = (it.docCount / maxCount)
+            buckets.add(bucket)
+        }
+
+        return buckets
     }
 }
