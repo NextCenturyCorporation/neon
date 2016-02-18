@@ -74,7 +74,7 @@ class ElasticSearchHeatmapExecutor extends ElasticSearchQueryExecutor{
             point['lon'] = it.keyAsGeoPoint.lon
             bucket['point'] = point
             bucket['count'] = it.docCount
-            bucket['percentage'] = (it.docCount / maxCount)
+            bucket['percentage'] = maxCount > 0 ? (it.docCount / maxCount) : 0
             buckets.add(bucket)
         }
 

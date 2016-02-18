@@ -25,7 +25,7 @@ class MongoHeatmapExecutor extends MongoQueryExecutor{
         }
 
         QueryResult result = doExecute(query, options, boundingBox)
-        return transform(query.transforms, result)
+        return result
     }
 
     QueryResult doExecute(Query query, QueryOptions options, HeatmapBoundsQuery boundingBox) {
@@ -35,5 +35,4 @@ class MongoHeatmapExecutor extends MongoQueryExecutor{
 
         return getQueryResult(worker, mongoQuery)
     }
-
 }

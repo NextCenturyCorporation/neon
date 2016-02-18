@@ -6,6 +6,8 @@ import com.mongodb.DBObject
 import com.mongodb.MongoClient
 import com.ncc.neon.query.HeatmapBoundsQuery
 import com.ncc.neon.query.result.QueryResult
+import com.ncc.neon.query.result.TabularQueryResult
+import groovy.json.JsonOutput
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
@@ -45,7 +47,33 @@ class HeatmapMongoQueryWorker extends AbstractMongoQueryWorker {
         LOGGER.debug("Executing aggregate query: {} -- {}", match, additionalClauses)
         def results = getCollection(mongoQuery).aggregate(match, additionalClauses as DBObject[]).results()
 
-        return new MongoQueryResult(results)
+        results = extractHeatmapBuckets(results.collect { it.toMap() } as List)
+
+        return new TabularQueryResult(results)
+    }
+
+    private List<Map<String, Object>> extractHeatmapBuckets(List<Map<String, Object>> data) {
+        def maxCount = 0
+        data.each {
+            if(it.count > maxCount) {
+                maxCount = it.count
+            }
+        }
+
+        List<Map<String, Object>> results = new ArrayList<Map<String, Object>>()
+        data.each{
+            def bucket = [:]
+            def point = [:]
+            point['lat'] = it['_id'].lat
+            point['lon'] = it['_id'].lon
+            bucket['point'] = point
+            bucket['count'] = it.count
+            bucket['percentage'] = maxCount > 0 ? (it.count / maxCount) : 0
+
+            results.add(bucket)
+        }
+
+        return results
     }
 
     private DBObject buildDefinedClause() {
