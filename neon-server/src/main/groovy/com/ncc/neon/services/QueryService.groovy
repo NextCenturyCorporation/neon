@@ -67,8 +67,6 @@ class QueryService {
                              @QueryParam("ignoredFilterIds") Set<String> ignoredFilterIds,
                              Query query) {
 
-        println(JsonOutput.toJson(ignoreFilters))
-
         return execute(host, databaseType, query, new QueryOptions(ignoreFilters: ignoreFilters,
                 selectionOnly: selectionOnly, ignoredFilterIds: (ignoredFilterIds ?: ([] as Set))))
     }
