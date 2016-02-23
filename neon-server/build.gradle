@@ -64,7 +64,6 @@ apply from: "gradle/sparkSQLDependencies.gradle"
 apply from: "${rootDir}/gradle/js.gradle"
 apply from: "gradle/integrationTest.gradle"
 apply from: "gradle/acceptanceTest.gradle"
-apply from: "gradle/performanceTest.gradle"
 apply from: "gradle/signing.gradle"
 
 apply from: "${rootDir}/gradle/groovy.gradle"
@@ -158,7 +157,7 @@ jettyRun {
 [jettyRun, jettyStop]*.stopPort = 8081;
 [jettyRun, jettyStop]*.stopKey = 'neon-jetty';
 
-[jettyRun, jettyRunWar, transformTestWebService, acceptanceTestWar, performanceTestWar]*.with {
+[jettyRun, jettyRunWar, transformTestWebService, acceptanceTestWar]*.with {
     /**
      * THIS IS A WORKAROUND FOR JETTY LOCKING STATIC HTML FILES ON WINDOWS
      *
@@ -174,7 +173,7 @@ jettyRun {
     webDefaultXml = file("${projectDir}/webdefault.xml")
 }
 
-[jettyRun, jettyRunWar, transformTestWebService, acceptanceTestWar, performanceTestWar]*.doLast {
+[jettyRun, jettyRunWar, transformTestWebService, acceptanceTestWar]*.doLast {
     /**
      * THIS IS A WORKAROUND! THE CURRENT VERSION OF THIS TASK DOESN'T START A WATCHER IN DAEMON MODE
      *
