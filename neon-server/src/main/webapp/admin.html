@@ -2,13 +2,86 @@
 <html>
 <head>
     <title>Neon Administration</title>
+    <link rel="stylesheet" href="css/admin.css" />
 </head>
 <body>
     <h2>Neon Administration</h2>
-    <ul>
-        <li><a href="services/adminservice/mongo/clearquerycache">Clear Mongo Query Cache</a></li>
-        <li><a href="services/adminservice/mongo/getquerycache">Get Mongo Query Cache</a></li>
-        <li><a href="services/adminservice/mongo/getquerycachestats">Get Mongo Query Cache Statistics</a></li>
+    <h4>Mongo Cache</h4>
+    <ul class="list-group">
+        <li class="list-item">
+            <span class="list-item-name">Cache Queries:</span>
+            <ul class="list-group">
+                <li>
+                    <input type="radio" name="cacheQueries" value="on">On
+                </li>
+                <li>
+                    <input type="radio" name="cacheQueries" value="off">Off
+                </li>
+            </ul>
+            <button type="button" onclick="setCache()" style="margin-top:5px">Save</button>
+        </li>
+        <li class="list-item">
+            <span class="list-item-name">Limit:</span>
+            <input type="number" min="0" step="any" name="cacheLimit">
+            <button type="button" onclick="setCacheLimit()">Save</button>
+        </li>
+        <li class="list-item">
+            <span class="list-item-name">Time Limit:</span>
+            <input type="number" name="cacheTimeLimit">
+            <button type="button" onclick="setCacheTimeLimit()">Save</button>
+        </li>
+        <li class="list-item">
+            <input onclick="location.href='services/adminservice/mongo/getquerycache'" type="button" value="Show Cached Queries">
+            <input onclick="location.href='services/adminservice/mongo/getquerycachestats'" type="button" value="Show Cache Statistics">
+            <button onclick="clearCache()">Clear Cache</button>
+        </li>
     </ul>
+
+    <h4>System Information</h4>
+    <ul  class="list-group">
+        <li class="list-item">
+             <span class="list-item-name"> Operating System:</span>
+             <span class="osName"></span>
+            <ul>
+                <li>
+                    Version: <span class="osVersion"></span>
+                </li>
+                <li>
+                    Architecture: <span class="osArch"></span>
+                </li>
+            </ul>
+        </li>
+        <li class="list-item">
+            <span class="list-item-name">Java Version:</span>
+            <span class="javaVersion"></span>
+        </li>
+        <li class="list-item">
+            <span class="list-item-name">Free Memory:</span>
+            <span class="freeMemory"></span>
+        </li>
+        <li class="list-item">
+            <span class="list-item-name">Total Memory:</span>
+            <span class="totalMemory"></span>
+        </li>
+        <li class="list-item">
+            <span class="list-item-name">Max Memory:</span>
+            <span class="maxMemory"></span>
+        </li>
+        <li class="list-item">
+            <span class="list-item-name">Running Time:</span>
+            <span class="runningTime"></span>
+        </li>
+        <li class="list-item">
+            <span class="list-item-name">Total Active Sessions:</span>
+            <span class="activeSessions"></span>
+        </li>
+        <li class="list-item">
+            <input onclick="location.href='services/adminservice/mongo/getlogs'" type="button" value="Show Logs">
+        </li>
+    </ul>
+
+
+    <script src="js/neon.js"></script>
+    <script src="admin.js"></script>
 </body>
 </html>

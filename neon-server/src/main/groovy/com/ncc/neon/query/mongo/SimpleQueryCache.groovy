@@ -55,13 +55,15 @@ public class SimpleQueryCache {
     // ------------------------------------------------------------
     // time limit for queries, in sec.  If they are fast enough, do not put them in cache, so that
     // the most important queries can be saved.  Currently really high, so cache everything
-    static final double QUERY_TIME_LIMIT = 9999999.0
+    static double queryTimeLimit = 9999999.0
 
     // Make this true to turn on printing of statistics
     static final boolean SHOW_STATISTICS = false
 
     // How often to print; every X times a query is 'get'.
     static final int PRINTLIMIT = 20
+
+    static boolean usingCache = true
 
     // Counters for cache hits and misses
     int keyMiss = 0
@@ -106,7 +108,7 @@ public class SimpleQueryCache {
     }
 
     QueryResult get(MongoQuery mongoQuery) {
-        if (!cache) {
+        if (!cache || !usingCache) {
             return null
         }
 
@@ -127,7 +129,7 @@ public class SimpleQueryCache {
     }
 
     void put(MongoQuery mongoQuery, QueryResult result) {
-        if (!cache) {
+        if (!cache || !usingCache) {
             return
         }
         String queryString = mongoQuery.toString()
@@ -140,7 +142,7 @@ public class SimpleQueryCache {
     }
 
     void put(MongoQuery mongoQuery, QueryResult result, double queryTime) {
-        if (queryTime < QUERY_TIME_LIMIT) {
+        if (queryTime < queryTimeLimit) {
             return
         }
         put(mongoQuery, result)
@@ -157,5 +159,16 @@ public class SimpleQueryCache {
             text += "\n  Key:  " + key
         }
         return text
+    }
+
+    void setCacheLimit(int limit) {
+        def attrs = cache.getCacheAttributes()
+        attrs.setMaxObjects(limit)
+        cache.setCacheAttributes(attrs)
+    }
+
+    int getCacheLimit() {
+        def attrs = cache.getCacheAttributes()
+        return attrs.getMaxObjects()
     }
 }
