@@ -17,6 +17,7 @@
 package com.ncc.neon.query.elasticsearch
 import com.ncc.neon.connect.ConnectionManager
 import com.ncc.neon.connect.NeonConnectionException
+import com.ncc.neon.util.ResourceNotFoundException
 import com.ncc.neon.query.Query
 import com.ncc.neon.query.QueryOptions
 import com.ncc.neon.query.clauses.GroupByFieldClause
@@ -198,7 +199,7 @@ class ElasticSearchQueryExecutor extends AbstractQueryExecutor {
 
         def dbExists = getClient().admin().indices().exists(new IndicesExistsRequest(dbName)).actionGet().isExists()
         if(!dbExists) {
-            throw new NeonConnectionException("Database ${dbName} does not exist")
+            throw new ResourceNotFoundException("Database ${dbName} does not exist")
         }
 
         // Fall through case is to return the exact match.
@@ -209,6 +210,7 @@ class ElasticSearchQueryExecutor extends AbstractQueryExecutor {
     List<String> getFieldNames(String databaseName, String tableName) {
         if(tableName) {
             LOGGER.debug("Executing getFieldNames for index " + databaseName + " type " + tableName)
+            checkDatabaseAndTableExists(databaseName, tableName)
 
             def dbMatch = databaseName.replaceAll(/\*/, '.*')
             def tableMatch = tableName.replaceAll(/\*/, '.*')
@@ -239,11 +241,7 @@ class ElasticSearchQueryExecutor extends AbstractQueryExecutor {
     Map getFieldTypes(String databaseName, String tableName) {
         if(tableName) {
             LOGGER.debug("Executing getFieldTypes for index " + databaseName + " type " + tableName)
-
-            def dbExists = getClient().admin().indices().exists(new IndicesExistsRequest(databaseName)).actionGet().isExists()
-            if(!dbExists) {
-                throw new NeonConnectionException("Database ${databaseName} does not exist")
-            }
+            checkDatabaseAndTableExists(databaseName, tableName)
 
             def dbMappings = getMappings().get(databaseName)
             if(dbMappings) {
@@ -472,7 +470,7 @@ class ElasticSearchQueryExecutor extends AbstractQueryExecutor {
         def dbExists = getClient().admin().indices().exists(new IndicesExistsRequest(databaseName)).actionGet().isExists()
 
         if(!dbExists) {
-            throw new NeonConnectionException("Database ${databaseName} does not exist")
+            throw new ResourceNotFoundException("Database ${databaseName} does not exist")
         }
 
         def tableExists = false
@@ -489,7 +487,7 @@ class ElasticSearchQueryExecutor extends AbstractQueryExecutor {
         }
 
         if(!tableExists) {
-            throw new NeonConnectionException("Table ${tableName} does not exist")
+            throw new ResourceNotFoundException("Table ${tableName} does not exist")
         }
     }
 }

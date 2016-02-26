@@ -16,6 +16,7 @@
 
 package com.ncc.neon.services
 
+import javax.ws.rs.core.Context
 import javax.ws.rs.core.Response
 import javax.ws.rs.ext.ExceptionMapper
 import javax.ws.rs.ext.Provider
@@ -25,14 +26,32 @@ import org.slf4j.LoggerFactory
 @Provider
 class GenericExceptionMapper implements ExceptionMapper<Exception> {
 
+    @Context
+    javax.ws.rs.ext.Providers providers
+
     private static final Logger LOGGER = LoggerFactory.getLogger(GenericExceptionMapper)
 
     @Override
     public Response toResponse(Exception exception) {
         // Log any unhandled server exceptions and return an internal server error for them.
         LOGGER.error(exception.message, exception)
-        ExceptionMapperResponse response = new ExceptionMapperResponse("Unknown Error", exception)
-        return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(response).type("application/json").build()
+
+        return checkCausedBy(exception)
+    }
+
+    private checkCausedBy(Exception exception) {
+        // Since we don't recognize the exception that was thrown, see if we recognize an exception
+        // that caused it.
+        if (exception instanceof UnknownHostException) {
+            return providers.getExceptionMapper(UnknownHostException).toResponse(exception)
+        } else if (exception instanceof ConnectException) {
+            return providers.getExceptionMapper(ConnectException).toResponse(exception)
+        } else if (exception.getCause()) {
+            return checkCausedBy(exception.getCause())
+        } else {
+            ExceptionMapperResponse response = new ExceptionMapperResponse("Unknown Error", exception)
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(response).type("application/json").build()
+        }
     }
 
 }

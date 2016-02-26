@@ -21,6 +21,7 @@ import com.mongodb.MongoClient
 import com.mongodb.BasicDBObject
 import com.ncc.neon.connect.ConnectionManager
 import com.ncc.neon.connect.NeonConnectionException
+import com.ncc.neon.util.ResourceNotFoundException
 import com.ncc.neon.query.Query
 import com.ncc.neon.query.QueryOptions
 import com.ncc.neon.query.clauses.WhereClause
@@ -79,13 +80,17 @@ class MongoQueryExecutor extends AbstractQueryExecutor {
 
     @Override
     List<String> showTables(String dbName) {
-        DB database = mongo.getDB(dbName)
         LOGGER.debug("Executing getCollectionNames on database {}", dbName)
+        if (!mongo.databaseNames.contains(dbName)) {
+            throw new ResourceNotFoundException("Database ${dbName} does not exist")
+        }
+        DB database = mongo.getDB(dbName)
         database.getCollectionNames().collect { it }
     }
 
     @Override
     List<String> getFieldNames(String databaseName, String tableName) {
+        checkDatabaseAndTableExists(databaseName, tableName)
         def db = mongo.getDB(databaseName)
         def collection = db.getCollection(tableName)
         def resultSet = collection.find().limit(GET_FIELD_NAMES_LIMIT)
@@ -98,9 +103,10 @@ class MongoQueryExecutor extends AbstractQueryExecutor {
 
     @Override
     Map getFieldTypes(String databaseName, String tableName) {
+        checkDatabaseAndTableExists(databaseName, tableName)
         def db = mongo.getDB(databaseName)
         if(!db.collectionExists(tableName)) {
-            throw new NeonConnectionException("Table ${tableName} does not exist")
+            throw new ResourceNotFoundException("Table ${tableName} does not exist")
         }
         def collection = db.getCollection(tableName)
         def resultSet = collection.find().limit(GET_FIELD_NAMES_LIMIT)
@@ -188,9 +194,10 @@ class MongoQueryExecutor extends AbstractQueryExecutor {
     }
 
     private boolean isFieldArray(String databaseName, String tableName, String fieldName) {
+        checkDatabaseAndTableExists(databaseName, tableName)
         def db = mongo.getDB(databaseName)
         if(!db.collectionExists(tableName)) {
-            throw new NeonConnectionException("Table ${tableName} does not exist")
+            throw new ResourceNotFoundException("Table ${tableName} does not exist")
         }
         def collection = db.getCollection(tableName)
         def resultSet = collection.find().limit(GET_FIELD_NAMES_LIMIT)
@@ -218,11 +225,22 @@ class MongoQueryExecutor extends AbstractQueryExecutor {
     }
 
     List<ArrayCountPair> getArrayCounts(String databaseName, String tableName, String field, int limit, WhereClause whereClause = null) {
+        checkDatabaseAndTableExists(databaseName, tableName)
         DB database = mongo.getDB(databaseName)
         ArrayCountQueryWorker worker = new ArrayCountQueryWorker(mongo).withDatabase(database)
         Query query = new Query(filter: new Filter(databaseName: databaseName, tableName: tableName))
         boolean isFieldArray = isFieldArray(databaseName, tableName, field)
         MongoQuery mongoQuery = worker.createArrayCountQuery(new MongoQuery(query: query), field, limit, filterState, selectionState, isFieldArray, whereClause)
         return getQueryResult(worker, mongoQuery).getData()
+    }
+
+    private void checkDatabaseAndTableExists(String databaseName, String tableName) {
+        if (!mongo.databaseNames.contains(databaseName)) {
+            throw new ResourceNotFoundException("Database ${databaseName} does not exist")
+        }
+        def db = mongo.getDB(databaseName)
+        if(!db.collectionExists(tableName)) {
+            throw new ResourceNotFoundException("Table ${tableName} does not exist")
+        }
     }
 }
