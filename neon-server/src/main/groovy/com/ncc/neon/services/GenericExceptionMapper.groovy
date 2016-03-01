@@ -44,14 +44,15 @@ class GenericExceptionMapper implements ExceptionMapper<Exception> {
         // that caused it.
         if (exception instanceof UnknownHostException) {
             return providers.getExceptionMapper(UnknownHostException).toResponse(exception)
-        } else if (exception instanceof ConnectException) {
-            return providers.getExceptionMapper(ConnectException).toResponse(exception)
-        } else if (exception.getCause()) {
-            return checkCausedBy(exception.getCause())
-        } else {
-            ExceptionMapperResponse response = new ExceptionMapperResponse("Unknown Error", exception)
-            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(response).type("application/json").build()
         }
+        if (exception instanceof ConnectException) {
+            return providers.getExceptionMapper(ConnectException).toResponse(exception)
+        }
+        if (exception.getCause()) {
+            return checkCausedBy(exception.getCause())
+        }
+        ExceptionMapperResponse response = new ExceptionMapperResponse("Unknown Error", exception)
+        return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(response).type("application/json").build()
     }
 
 }

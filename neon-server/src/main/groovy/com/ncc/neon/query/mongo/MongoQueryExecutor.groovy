@@ -20,7 +20,6 @@ import com.mongodb.DB
 import com.mongodb.MongoClient
 import com.mongodb.BasicDBObject
 import com.ncc.neon.connect.ConnectionManager
-import com.ncc.neon.connect.NeonConnectionException
 import com.ncc.neon.util.ResourceNotFoundException
 import com.ncc.neon.query.Query
 import com.ncc.neon.query.QueryOptions

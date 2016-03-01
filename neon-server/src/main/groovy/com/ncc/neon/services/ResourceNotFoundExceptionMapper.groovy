@@ -28,7 +28,7 @@ import org.slf4j.LoggerFactory
 @Provider
 class ResourceNotFoundExceptionMapper implements ExceptionMapper<ResourceNotFoundException> {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(NeonConnectionExceptionMapper)
+    private static final Logger LOGGER = LoggerFactory.getLogger(ResourceNotFoundExceptionMapper)
 
     @Override
     public Response toResponse(ResourceNotFoundException exception) {
