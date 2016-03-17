@@ -24,6 +24,7 @@ import com.ncc.neon.query.executor.QueryExecutor
 import com.ncc.neon.query.clauses.WhereClause
 import com.ncc.neon.query.result.QueryResult
 import com.ncc.neon.query.result.ArrayCountPair
+import groovy.json.JsonOutput
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
 
@@ -65,6 +66,7 @@ class QueryService {
                              @DefaultValue("false") @QueryParam("selectionOnly") boolean selectionOnly,
                              @QueryParam("ignoredFilterIds") Set<String> ignoredFilterIds,
                              Query query) {
+
         return execute(host, databaseType, query, new QueryOptions(ignoreFilters: ignoreFilters,
                 selectionOnly: selectionOnly, ignoredFilterIds: (ignoredFilterIds ?: ([] as Set))))
     }

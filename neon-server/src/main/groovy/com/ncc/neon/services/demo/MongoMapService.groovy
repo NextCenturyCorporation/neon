@@ -73,15 +73,14 @@ public class MongoMapService {
 
         connectionManager.currentRequest = (new ConnectionInfo(dataSource: DataSources.mongo, host: host))
 
-        String[] bboxParts = bbox.split(",")
-        //xmin/ymin/xmax/ymax
+        String[] bboxParts = bbox.split(",") //bounding box //xmin/ymin/xmax/ymax
         float minLon = Float.parseFloat(bboxParts[0])
         float minLat = Float.parseFloat(bboxParts[1])
         float maxLon = Float.parseFloat(bboxParts[2])
         float maxLat = Float.parseFloat(bboxParts[3])
 
-        float pxPerDegreeLon = (float) (width / (maxLon - minLon))
-        float pxPerDegreeLat = (float) (height / (maxLat - minLat))
+        float pxPerDegreeLon = (float) (width / (maxLon - minLon)) //how to convert the lat to pixels for the image
+        float pxPerDegreeLat = (float) (height / (maxLat - minLat)) // not sure if this is still needed
 
 
         int dotRadius
@@ -92,22 +91,22 @@ public class MongoMapService {
             dotRadius = 16
         }
 
-        // TODO: This isn't well tested yet
-        // TODO: Assumes fields named location, latitude and longitude. We should be able to get latitude and longitude from location, and not have to store them separately
+        // TODO: Assumes fields named location, latitude and longitude.
         // TODO: Modify the query to add the x/y counts and use that for the point density
 
         DBObject box = new BasicDBObject('$box', [[minLon, minLat], [maxLon, maxLat]])
         DBObject geoWithin = new BasicDBObject('$geoWithin', box)
         DBObject matchQuery = new BasicDBObject('location', geoWithin)
         matchQuery = mongoNeonHelper.mergeWithNeonFilters(matchQuery, databaseName, collectionName)
+        DBObject match = new BasicDBObject('$match', matchQuery) //find where location within the bounding box
 
-        DBObject match = new BasicDBObject('$match', matchQuery)
+
 
         DBObject lon = new BasicDBObject('$subtract', ['$longitude', minLon])
         DBObject x = new BasicDBObject('$multiply', [pxPerDegreeLon, lon])
-
         DBObject lat = new BasicDBObject('$subtract', ['$latitude', minLat])
         DBObject y = new BasicDBObject('$multiply', [pxPerDegreeLat, lat])
+
 
         DBObject modX = new BasicDBObject('$mod', [x, 1])
         DBObject floorXPos = new BasicDBObject('$subtract', [x, modX])
