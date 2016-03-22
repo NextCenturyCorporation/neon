@@ -1,5 +1,5 @@
 /*
- * Copyright 2013 Next Century Corporation
+ * Copyright 2016 Next Century Corporation
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -152,18 +152,27 @@ class MongoQueryExecutor extends AbstractQueryExecutor {
         return fieldTypesMap
     }
 
-    private Set<String> getFieldsInObject(BasicDBObject fieldObj, String field) {
+    private Set<String> getFieldsInObject(BasicDBObject fieldObject, String fieldName) {
         Set<String> fieldNameSet = [] as Set
-        fieldObj?.keySet().each { subField ->
-            def subFieldObj = fieldObj.get(subField)
-            String fieldName = subField
-            if(field) {
-                fieldName = field + "." + subField
-            }
-            if(subFieldObj instanceof BasicDBObject) {
-                fieldNameSet.addAll(getFieldsInObject(subFieldObj, fieldName))
+        fieldObject?.keySet().each { subFieldName ->
+            def subFieldObject = fieldObject.get(subFieldName)
+            String nestedFieldName = (fieldName ? fieldName + "." : "") + subFieldName
+            if(subFieldObject instanceof BasicDBObject) {
+                fieldNameSet.addAll(getFieldsInObject(subFieldObject, nestedFieldName))
+            } else if(subFieldObject instanceof List) {
+                fieldNameSet.addAll(getFieldsInList(subFieldObject, nestedFieldName))
             } else {
-                fieldNameSet.add(fieldName)
+                fieldNameSet.add(nestedFieldName)
+            }
+        }
+        return fieldNameSet
+    }
+
+    private Set<String> getFieldsInList(List fieldList, String fieldName) {
+        Set<String> fieldNameSet = [fieldName] as Set
+        fieldList.each { subField ->
+            if(subField instanceof BasicDBObject) {
+                fieldNameSet.addAll(getFieldsInObject(subField, fieldName))
             }
         }
         return fieldNameSet
