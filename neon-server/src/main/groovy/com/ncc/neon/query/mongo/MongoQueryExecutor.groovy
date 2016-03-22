@@ -43,8 +43,6 @@ class MongoQueryExecutor extends AbstractQueryExecutor {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(MongoQueryExecutor)
 
-    private static final GET_FIELD_NAMES_LIMIT = 1000
-
     @Autowired
     private FilterState filterState
 
@@ -92,7 +90,7 @@ class MongoQueryExecutor extends AbstractQueryExecutor {
         checkDatabaseAndTableExists(databaseName, tableName)
         def db = mongo.getDB(databaseName)
         def collection = db.getCollection(tableName)
-        def resultSet = collection.find().limit(GET_FIELD_NAMES_LIMIT)
+        def resultSet = collection.find().limit(MongoUtils.GET_FIELD_NAMES_LIMIT)
         Set<String> fieldNameSet = [] as Set
         resultSet.each { result ->
             fieldNameSet.addAll(getFieldsInObject(result, null))
@@ -108,7 +106,7 @@ class MongoQueryExecutor extends AbstractQueryExecutor {
             throw new ResourceNotFoundException("Table ${tableName} does not exist")
         }
         def collection = db.getCollection(tableName)
-        def resultSet = collection.find().limit(GET_FIELD_NAMES_LIMIT)
+        def resultSet = collection.find().limit(MongoUtils.GET_FIELD_NAMES_LIMIT)
         Map fieldTypesMap = [:]
         resultSet.each { result ->
             fieldTypesMap.putAll(getFieldTypeInObject(result, null))
@@ -201,44 +199,16 @@ class MongoQueryExecutor extends AbstractQueryExecutor {
         connectionManager.connection.mongo
     }
 
-    private boolean isFieldArray(String databaseName, String tableName, String fieldName) {
-        checkDatabaseAndTableExists(databaseName, tableName)
-        def db = mongo.getDB(databaseName)
-        if(!db.collectionExists(tableName)) {
-            throw new ResourceNotFoundException("Table ${tableName} does not exist")
-        }
-        def collection = db.getCollection(tableName)
-        def resultSet = collection.find().limit(GET_FIELD_NAMES_LIMIT)
-        def fieldTypeArray = false
-        while(resultSet.hasNext()) {
-            def result = resultSet.next()
-            def fieldObj = getFieldInResult(fieldName, result)
-            if(fieldObj != "" && fieldObj != null) {
-                fieldTypeArray = fieldObj instanceof List
-                break
-            }
-        }
-        return fieldTypeArray
-    }
-
-    private Object getFieldInResult(String fieldName, BasicDBObject result) {
-        def fieldNameArray = fieldName.split(/\./)
-        def fieldObj = result
-        fieldNameArray.each { field ->
-            if(fieldObj) {
-                fieldObj = fieldObj.get(field)
-            }
-        }
-        return fieldObj
-    }
-
     List<ArrayCountPair> getArrayCounts(String databaseName, String tableName, String field, int limit, WhereClause whereClause = null) {
         checkDatabaseAndTableExists(databaseName, tableName)
         DB database = mongo.getDB(databaseName)
         ArrayCountQueryWorker worker = new ArrayCountQueryWorker(mongo).withDatabase(database)
         Query query = new Query(filter: new Filter(databaseName: databaseName, tableName: tableName))
-        boolean isFieldArray = isFieldArray(databaseName, tableName, field)
-        MongoQuery mongoQuery = worker.createArrayCountQuery(new MongoQuery(query: query), field, limit, filterState, selectionState, isFieldArray, whereClause)
+        if(!database.collectionExists(tableName)) {
+            throw new ResourceNotFoundException("Table ${tableName} does not exist")
+        }
+        boolean isArrayField = MongoUtils.isArrayField(database.getCollection(tableName), field)
+        MongoQuery mongoQuery = worker.createArrayCountQuery(new MongoQuery(query: query), field, limit, filterState, selectionState, isArrayField, whereClause)
         return getQueryResult(worker, mongoQuery).getData()
     }
 

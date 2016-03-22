@@ -1,5 +1,5 @@
 /*
- * Copyright 2013 Next Century Corporation
+ * Copyright 2016 Next Century Corporation
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,12 +13,14 @@
  * limitations under the License.
  *
  */
+
 package com.ncc.neon.query.mongo
 
 import com.mongodb.BasicDBObject
 import com.mongodb.DB
 import com.mongodb.DBObject
 import com.mongodb.MongoClient
+
 import com.ncc.neon.query.clauses.WhereClause
 import com.ncc.neon.query.filter.DataSet
 import com.ncc.neon.query.filter.FilterState
@@ -27,7 +29,13 @@ import com.ncc.neon.query.result.QueryResult
 import com.ncc.neon.query.result.ArrayCountPair
 import com.ncc.neon.query.result.ListQueryResult
 
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
+
 class ArrayCountQueryWorker extends AbstractMongoQueryWorker {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(ArrayCountQueryWorker)
+
     private DB database
 
     ArrayCountQueryWorker(MongoClient mongo) {
@@ -59,6 +67,7 @@ class ArrayCountQueryWorker extends AbstractMongoQueryWorker {
     @Override
     QueryResult executeQuery(MongoQuery mongoQuery) {
         Map<String, Integer> arrayCounts = [:]
+        LOGGER.debug("Executing array count mongo query: {}", mongoQuery.query.aggregates)
         Iterator<DBObject> results = database.getCollection(mongoQuery.query.getTableName()).aggregate(mongoQuery.query.aggregates[0],
                 mongoQuery.query.aggregates[1..mongoQuery.query.aggregates.size()-1].toArray(new DBObject[0])).results().iterator()
         while (results.hasNext()) {

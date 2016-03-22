@@ -1,5 +1,5 @@
 /*
- * Copyright 2013 Next Century Corporation
+ * Copyright 2016 Next Century Corporation
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -18,11 +18,12 @@ package com.ncc.neon.query.mongo
 
 import org.bson.types.ObjectId
 
-
 /**
  * Utility methods for working with mongodb data
  */
 class MongoUtils {
+
+    static final GET_FIELD_NAMES_LIMIT = 1000
 
     /**
      * Converts an oid object (typically created from a json mapping) to a mongo  {@link org.bson.types.ObjectId}.
@@ -47,4 +48,40 @@ class MongoUtils {
         return objectIds
     }
 
+    /**
+     * Returns whether the field with the given name is an array field using results from the given collection.
+     * @param collection
+     * @param fieldName
+     * @return
+     */
+    static boolean isArrayField(def collection, String fieldName) {
+        def results = collection.find().limit(GET_FIELD_NAMES_LIMIT)
+        def isArrayField = false
+        while(results.hasNext()) {
+            def result = results.next()
+            def fieldObject = getFieldInResult(fieldName, result)
+            if(fieldObject != "" && fieldObject != null) {
+                isArrayField = fieldObject instanceof List
+                break
+            }
+        }
+        return isArrayField
+    }
+
+    /**
+     * Returns the field object for the given field name in the given result (row).
+     * @param fieldName
+     * @param result
+     * @return
+     */
+    static Object getFieldInResult(String fieldName, def result) {
+        def fieldNameArray = fieldName.split(/\./)
+        def fieldObject = result
+        fieldNameArray.each { field ->
+            if(fieldObject) {
+                fieldObject = fieldObject.get(field)
+            }
+        }
+        return fieldObject
+    }
 }
