@@ -33,7 +33,7 @@ import org.codehaus.jackson.annotate.JsonIgnoreProperties
 class Query {
 
     Filter filter
-    boolean aggregatesArraysByElements = false
+    boolean aggregateArraysByElement = false
     boolean isDistinct = false
     List<String> fields = SelectClause.ALL_FIELDS
     List<AggregateClause> aggregates = []

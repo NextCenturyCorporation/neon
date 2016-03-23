@@ -76,7 +76,7 @@ class AggregateMongoQueryWorker extends AbstractMongoQueryWorker {
             if (groupByClause instanceof GroupByFieldClause) {
                 ids.put(groupByClause.prettyField, '$' + groupByClause.field)
                 projectionField = groupByClause.prettyField
-                if(mongoQuery.query.aggregatesArraysByElements) {
+                if(mongoQuery.query.aggregateArraysByElement) {
                     MongoUtils.getArrayFields(getCollection(mongoQuery), groupByClause.field).each {
                         if(!unwindFields.contains(it)) {
                             unwindFields << it
@@ -87,7 +87,7 @@ class AggregateMongoQueryWorker extends AbstractMongoQueryWorker {
                 ids.put(groupByClause.name, createFunctionDBObject(groupByClause.operation, groupByClause.field))
                 // when using a function to compute a field, the resulting field is projected, not the original field
                 projectionField = groupByClause.name
-                if(mongoQuery.query.aggregatesArraysByElements) {
+                if(mongoQuery.query.aggregateArraysByElement) {
                     MongoUtils.getArrayFields(getCollection(mongoQuery), groupByClause.field).each {
                         if(!unwindFields.contains(it)) {
                             unwindFields << it

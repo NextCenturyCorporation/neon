@@ -27,7 +27,7 @@
 neon.query.Query = function() {
     this.filter = new neon.query.Filter();
     this.fields = ['*'];
-    this.aggregatesArraysByElements = false;
+    this.aggregateArraysByElement = false;
     this.ignoreFilters_ = false;
     this.selectionOnly_ = false;
 
@@ -406,8 +406,8 @@ neon.query.Query.prototype.selectionOnly = function() {
     return this;
 };
 
-neon.query.Query.prototype.enableAggregatesArraysByElements = function() {
-    this.aggregatesArraysByElements = true;
+neon.query.Query.prototype.enableAggregateArraysByElement = function() {
+    this.aggregateArraysByElement = true;
     return this;
 };
 
