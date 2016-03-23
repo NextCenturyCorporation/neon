@@ -49,39 +49,25 @@ class MongoUtils {
     }
 
     /**
-     * Returns whether the field with the given name is an array field using results from the given collection.
+     * Returns the names of the fields from the given field name (or nested field name) that are array fields using results from the given collection.
      * @param collection
-     * @param fieldName
-     * @return
+     * @param name
+     * @return The set of array field names
      */
-    static boolean isArrayField(def collection, String fieldName) {
+    static Set<String> getArrayFields(def collection, String name) {
+        Map<String, Boolean> isArrayField = [:]
         def results = collection.find().limit(GET_FIELD_NAMES_LIMIT)
-        def isArrayField = false
         while(results.hasNext()) {
             def result = results.next()
-            def fieldObject = getFieldInResult(fieldName, result)
-            if(fieldObject != "" && fieldObject != null) {
-                isArrayField = fieldObject instanceof List
-                break
+            name.split(/\./).each { field ->
+                if(result) {
+                    result = result instanceof List ? result.get("0")?.get(field) : result.get(field)
+                    if(result && result instanceof List) {
+                        isArrayField[field] = true
+                    }
+                }
             }
         }
-        return isArrayField
-    }
-
-    /**
-     * Returns the field object for the given field name in the given result (row).
-     * @param fieldName
-     * @param result
-     * @return
-     */
-    static Object getFieldInResult(String fieldName, def result) {
-        def fieldNameArray = fieldName.split(/\./)
-        def fieldObject = result
-        fieldNameArray.each { field ->
-            if(fieldObject) {
-                fieldObject = fieldObject.get(field)
-            }
-        }
-        return fieldObject
+        return isArrayField.keySet()
     }
 }

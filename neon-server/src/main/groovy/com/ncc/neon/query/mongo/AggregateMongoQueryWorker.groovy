@@ -74,34 +74,38 @@ class AggregateMongoQueryWorker extends AbstractMongoQueryWorker {
     private void applyGroupByClauses(mongoQuery, unwindFieldsList, groupFields, projFields) {
         def idFields = new BasicDBObject()
         groupFields.put('_id', idFields)
-        mongoQuery.query.groupByClauses.each {
+        mongoQuery.query.groupByClauses.each { groupByClause ->
             def projField
-            if (it instanceof GroupByFieldClause) {
-                idFields.put(it.prettyField, '$' + it.field)
-                projField = it.prettyField
-                if(mongoQuery.query.aggregatesArraysByElements && MongoUtils.isArrayField(getCollection(mongoQuery), it.field)) {
-                    unwindFieldsList << it.field
+            if (groupByClause instanceof GroupByFieldClause) {
+                idFields.put(groupByClause.prettyField, '$' + groupByClause.field)
+                projField = groupByClause.prettyField
+                if(mongoQuery.query.aggregatesArraysByElements) {
+                    MongoUtils.getArrayFields(getCollection(mongoQuery), groupByClause.field).each {
+                        unwindFieldsList << it
+                    }
                 }
-            } else if (it instanceof GroupByFunctionClause) {
-                idFields.put(it.name, createFunctionDBObject(it.operation, it.field))
+            } else if (groupByClause instanceof GroupByFunctionClause) {
+                idFields.put(groupByClause.name, createFunctionDBObject(groupByClause.operation, groupByClause.field))
                 // when using a function to compute a field, the resulting field is projected, not the original field
-                projField = it.name
-                if(mongoQuery.query.aggregatesArraysByElements && MongoUtils.isArrayField(getCollection(mongoQuery), it.field)) {
-                    unwindFieldsList << it.field
+                projField = groupByClause.name
+                if(mongoQuery.query.aggregatesArraysByElements) {
+                    MongoUtils.getArrayFields(getCollection(mongoQuery), groupByClause.field).each {
+                        unwindFieldsList << it
+                    }
                 }
             } else {
                 // this shouldn't happen so make it an error
-                throw new Error("Unknown group by clause: type = ${it.class}, val = ${it}")
+                throw new Error("Unknown group by clause: type = ${groupByClause.class}, val = ${groupByClause}")
             }
             projFields.put(projField, '$_id.' + projField)
         }
     }
 
     private void applyAggregationClauses(aggregationClauses, groupFields, projFields) {
-        aggregationClauses.each {
-            groupFields.put(it.name, createFunctionDBObject(it.operation, it.field))
+        aggregationClauses.each { aggregationClause ->
+            groupFields.put(aggregationClause.name, createFunctionDBObject(aggregationClause.operation, aggregationClause.field))
             // ensure all of the fields from the aggregation operations are shown in the result
-            projFields.put(it.name, 1)
+            projFields.put(aggregationClause.name, 1)
         }
     }
 
@@ -150,9 +154,9 @@ class AggregateMongoQueryWorker extends AbstractMongoQueryWorker {
      */
     private BasicDBList renameNestedGroupByFields(results, groupByClauses) {
         def groupByMappings = [:]
-        groupByClauses.each {
-            if (it instanceof GroupByFieldClause && it.prettyField != it.field) {
-                groupByMappings.put(it.prettyField, it.field)
+        groupByClauses.each { groupByClause ->
+            if (groupByClause instanceof GroupByFieldClause && groupByClause.prettyField != groupByClause.field) {
+                groupByMappings.put(groupByClause.prettyField, groupByClause.field)
             }
         }
 

@@ -207,7 +207,7 @@ class MongoQueryExecutor extends AbstractQueryExecutor {
         if(!database.collectionExists(tableName)) {
             throw new ResourceNotFoundException("Table ${tableName} does not exist")
         }
-        boolean isArrayField = MongoUtils.isArrayField(database.getCollection(tableName), field)
+        boolean isArrayField = MongoUtils.getArrayFields(database.getCollection(tableName), field).size() > 0
         MongoQuery mongoQuery = worker.createArrayCountQuery(new MongoQuery(query: query), field, limit, filterState, selectionState, isArrayField, whereClause)
         return getQueryResult(worker, mongoQuery).getData()
     }
