@@ -40,7 +40,7 @@ class AggregateMongoQueryWorker extends AbstractMongoQueryWorker {
     @Override
     QueryResult executeQuery(MongoQuery mongoQuery) {
         def match = new BasicDBObject('$match', mongoQuery.whereClauseParams)
-        def additionalClauses = buildAggregateClauses(mongoQuery)
+        List additionalClauses = buildAggregateClauses(mongoQuery)
         if (mongoQuery.query.sortClauses) {
             additionalClauses << new BasicDBObject('$sort', createSortDBObject(mongoQuery.query.sortClauses))
         }
@@ -56,56 +56,57 @@ class AggregateMongoQueryWorker extends AbstractMongoQueryWorker {
         return new MongoQueryResult(results)
     }
 
-    private def buildAggregateClauses(mongoQuery) {
-        def unwindFieldsList = []
-        def groupFields = new BasicDBObject()
-        def projFields = new BasicDBObject()
+    private List buildAggregateClauses(mongoQuery) {
+        List<String> unwindFields = []
+        BasicDBObject groups = new BasicDBObject()
+        BasicDBObject projections = new BasicDBObject()
 
-        applyGroupByClauses(mongoQuery, unwindFieldsList, groupFields, projFields)
-        applyAggregationClauses(mongoQuery.query.aggregates, groupFields, projFields)
+        applyGroupByClauses(mongoQuery, unwindFields, groups, projections)
+        applyAggregationClauses(mongoQuery.query.aggregates, groups, projections)
 
-        def unwindList = unwindFieldsList.collect { new BasicDBObject('$unwind', '$' + it) }
-        def group = new BasicDBObject('$group', groupFields)
-        def proj = new BasicDBObject('$project', projFields)
-
-        return unwindList + [group, proj]
+        List<BasicDBObject> unwinds = unwindFields.collect { new BasicDBObject('$unwind', '$' + it) }
+        return unwinds + [new BasicDBObject('$group', groups), new BasicDBObject('$project', projections)]
     }
 
-    private void applyGroupByClauses(mongoQuery, unwindFieldsList, groupFields, projFields) {
-        def idFields = new BasicDBObject()
-        groupFields.put('_id', idFields)
+    private void applyGroupByClauses(mongoQuery, unwindFields, groups, projections) {
+        BasicDBObject ids = new BasicDBObject()
+        groups.put('_id', ids)
         mongoQuery.query.groupByClauses.each { groupByClause ->
-            def projField
+            String projectionField
             if (groupByClause instanceof GroupByFieldClause) {
-                idFields.put(groupByClause.prettyField, '$' + groupByClause.field)
-                projField = groupByClause.prettyField
+                ids.put(groupByClause.prettyField, '$' + groupByClause.field)
+                projectionField = groupByClause.prettyField
                 if(mongoQuery.query.aggregatesArraysByElements) {
                     MongoUtils.getArrayFields(getCollection(mongoQuery), groupByClause.field).each {
-                        unwindFieldsList << it
+                        if(!unwindFields.contains(it)) {
+                            unwindFields << it
+                        }
                     }
                 }
             } else if (groupByClause instanceof GroupByFunctionClause) {
-                idFields.put(groupByClause.name, createFunctionDBObject(groupByClause.operation, groupByClause.field))
+                ids.put(groupByClause.name, createFunctionDBObject(groupByClause.operation, groupByClause.field))
                 // when using a function to compute a field, the resulting field is projected, not the original field
-                projField = groupByClause.name
+                projectionField = groupByClause.name
                 if(mongoQuery.query.aggregatesArraysByElements) {
                     MongoUtils.getArrayFields(getCollection(mongoQuery), groupByClause.field).each {
-                        unwindFieldsList << it
+                        if(!unwindFields.contains(it)) {
+                            unwindFields << it
+                        }
                     }
                 }
             } else {
                 // this shouldn't happen so make it an error
                 throw new Error("Unknown group by clause: type = ${groupByClause.class}, val = ${groupByClause}")
             }
-            projFields.put(projField, '$_id.' + projField)
+            projections.put(projectionField, '$_id.' + projectionField)
         }
     }
 
-    private void applyAggregationClauses(aggregationClauses, groupFields, projFields) {
+    private void applyAggregationClauses(aggregationClauses, groups, projections) {
         aggregationClauses.each { aggregationClause ->
-            groupFields.put(aggregationClause.name, createFunctionDBObject(aggregationClause.operation, aggregationClause.field))
+            groups.put(aggregationClause.name, createFunctionDBObject(aggregationClause.operation, aggregationClause.field))
             // ensure all of the fields from the aggregation operations are shown in the result
-            projFields.put(aggregationClause.name, 1)
+            projections.put(aggregationClause.name, 1)
         }
     }
 
