@@ -1,0 +1,17 @@
+.list-group {
+    list-style-type: none;
+}
+
+.list-group .list-item {
+    margin-bottom: 15px;
+}
+
+.list-group .list-item .list-item-name {
+    text-decoration: underline;
+    margin-right: 10px;
+}
+
+input[type="number"] {
+    text-align: right;
+    width: 75px;
+}

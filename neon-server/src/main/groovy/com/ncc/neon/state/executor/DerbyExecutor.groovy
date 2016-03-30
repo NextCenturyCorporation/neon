@@ -43,6 +43,18 @@ class DerbyExecutor {
     @Value('\${savedStatesDatabaseName}')
     String savedStatesDatabaseName
 
+    @SuppressWarnings("GStringExpressionWithinString")
+    @Value('\${derbyClient}')
+    String derbyClient
+
+    @SuppressWarnings("GStringExpressionWithinString")
+    @Value('\${derbyClientHost}')
+    String derbyClientHost
+
+    @SuppressWarnings("GStringExpressionWithinString")
+    @Value('\${derbyClientPort}')
+    String derbyClientPort
+
     @Autowired
     private ConnectionManager connectionManager
 
@@ -435,7 +447,17 @@ class DerbyExecutor {
     }
 
     private Connection getClient() {
-        connectionManager.currentRequest = new ConnectionInfo(dataSource: DataSources.derby, databaseName: savedStatesDatabaseName)
+        def connInfo
+
+        if(Boolean.parseBoolean(derbyClient)) {
+            def host = derbyClientHost ?: "localhost"
+            def port = derbyClientPort ?: 1527
+            connInfo = new ConnectionInfo(dataSource: DataSources.derby, databaseName: savedStatesDatabaseName, host: (host + ":" + port))
+        } else {
+            connInfo = new ConnectionInfo(dataSource: DataSources.derby, databaseName: savedStatesDatabaseName)
+        }
+
+        connectionManager.currentRequest = connInfo
         return connectionManager.connection.connection
     }
 }

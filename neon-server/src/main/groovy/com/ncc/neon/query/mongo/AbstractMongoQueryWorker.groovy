@@ -42,6 +42,9 @@ abstract class AbstractMongoQueryWorker {
 
     protected DBCollection getCollection(MongoQuery mongoQuery) {
         def db = mongo.getDB(mongoQuery.query.databaseName)
+        if(!db.collectionExists(mongoQuery.query.tableName)) {
+            throw new NeonConnectionException("Table ${mongoQuery.query.tableName} does not exist")
+        }
         return db.getCollection(mongoQuery.query.tableName)
     }
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2013 Next Century Corporation
+ * Copyright 2016 Next Century Corporation
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -14,15 +14,18 @@
  *
  */
 
-defaultTasks 'clean', 'build'
+package com.ncc.neon.util
 
-allprojects {
-    version = "1.2.0-SNAPSHOT"
+
+
+class ResourceNotFoundException extends RuntimeException{
+
+    public ResourceNotFoundException(String message){
+        super(message)
+    }
+
+    public ResourceNotFoundException(String message, Throwable cause){
+        super(message, cause)
+    }
 }
 
-// Versions are shared across all builds
-apply from: 'gradle/versions.gradle'
-
-task wrapper(type: Wrapper) {
-    gradleVersion = '2.1'
-}

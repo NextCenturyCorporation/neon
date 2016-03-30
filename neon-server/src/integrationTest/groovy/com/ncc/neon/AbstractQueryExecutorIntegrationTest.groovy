@@ -136,11 +136,9 @@ abstract class AbstractQueryExecutorIntegrationTest {
         AssertUtils.assertEqualCollections(expected, fieldNames)
     }
 
-    @Test
-    void "field names without a table returns empty collection"() {
-        def names = queryExecutor.getFieldNames(DATABASE_NAME, "zsz")
-        assert names != null
-        assert !names.data
+    @Test(expected = RuntimeException)
+    void "field names without a table throws an exception"() {
+        queryExecutor.getFieldNames(DATABASE_NAME, "zsz")
     }
 
     @Test

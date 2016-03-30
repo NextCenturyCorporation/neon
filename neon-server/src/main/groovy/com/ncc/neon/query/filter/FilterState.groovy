@@ -17,6 +17,8 @@
 package com.ncc.neon.query.filter
 
 import org.springframework.context.annotation.Scope
+import javax.servlet.http.HttpSessionEvent
+import javax.servlet.http.HttpSessionListener
 import org.springframework.context.annotation.ScopedProxyMode
 import org.springframework.stereotype.Component
 import org.springframework.web.context.WebApplicationContext
@@ -27,9 +29,21 @@ import org.springframework.web.context.WebApplicationContext
  */
 @Component
 @Scope(value = WebApplicationContext.SCOPE_SESSION, proxyMode = ScopedProxyMode.TARGET_CLASS)
-class FilterState implements Serializable{
+class FilterState implements Serializable,HttpSessionListener{
     private static final long serialVersionUID = 7307506929923060807L
+
+    private static int activeSessions
 
     @Delegate
     FilterCache delegate = new FilterCache()
+
+    @Override
+    void sessionCreated(HttpSessionEvent event) {
+        activeSessions++
+    }
+
+    @Override
+    void sessionDestroyed(HttpSessionEvent event) {
+        activeSessions--
+    }
 }

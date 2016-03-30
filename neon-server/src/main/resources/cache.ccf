@@ -11,4 +11,4 @@ jcs.default.cacheattributes.MemoryCacheName=org.apache.commons.jcs.engine.memory
 # jcs.auxiliary.DC.attributes=org.apache.commons.jcs.auxiliary.disk.indexed.IndexedDiskCacheAttributes
 # jcs.auxiliary.DC.attributes.DiskPath=/tmp/jcsCache
 
-        
+

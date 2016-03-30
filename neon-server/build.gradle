@@ -35,6 +35,7 @@ buildscript {
     dependencies {
         classpath "org.hidetake:gradle-ssh-plugin:$sshPluginVersion"
         classpath "org.apache.derby:derby:$derbyVersion"
+        classpath "org.apache.derby:derbyclient:$derbyVersion"
     }
 }
 
@@ -63,7 +64,6 @@ apply from: "gradle/sparkSQLDependencies.gradle"
 apply from: "${rootDir}/gradle/js.gradle"
 apply from: "gradle/integrationTest.gradle"
 apply from: "gradle/acceptanceTest.gradle"
-apply from: "gradle/performanceTest.gradle"
 apply from: "gradle/signing.gradle"
 
 apply from: "${rootDir}/gradle/groovy.gradle"
@@ -97,6 +97,7 @@ dependencies {
     compile "org.apache.poi:poi-ooxml-schemas:$poiVersion"
     compile "org.apache.poi:ooxml-schemas:$ooxmlSchemasVersion"
     compile "org.apache.derby:derby:$derbyVersion"
+    compile "org.apache.derby:derbyclient:$derbyVersion"
 
     compile "com.sun.jersey.contribs:jersey-multipart:$jerseyVersion"
     compile "com.monitorjbl:xlsx-streamer:$xlsxStreamerVersion"
@@ -156,7 +157,7 @@ jettyRun {
 [jettyRun, jettyStop]*.stopPort = 8081;
 [jettyRun, jettyStop]*.stopKey = 'neon-jetty';
 
-[jettyRun, jettyRunWar, transformTestWebService, acceptanceTestWar, performanceTestWar]*.with {
+[jettyRun, jettyRunWar, transformTestWebService, acceptanceTestWar]*.with {
     /**
      * THIS IS A WORKAROUND FOR JETTY LOCKING STATIC HTML FILES ON WINDOWS
      *
@@ -172,7 +173,7 @@ jettyRun {
     webDefaultXml = file("${projectDir}/webdefault.xml")
 }
 
-[jettyRun, jettyRunWar, transformTestWebService, acceptanceTestWar, performanceTestWar]*.doLast {
+[jettyRun, jettyRunWar, transformTestWebService, acceptanceTestWar]*.doLast {
     /**
      * THIS IS A WORKAROUND! THE CURRENT VERSION OF THIS TASK DOESN'T START A WATCHER IN DAEMON MODE
      *

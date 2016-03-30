@@ -1,5 +1,5 @@
 /*
- * Copyright 2013 Next Century Corporation
+ * Copyright 2016 Next Century Corporation
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -18,11 +18,12 @@ package com.ncc.neon.query.mongo
 
 import org.bson.types.ObjectId
 
-
 /**
  * Utility methods for working with mongodb data
  */
 class MongoUtils {
+
+    static final GET_FIELD_NAMES_LIMIT = 1000
 
     /**
      * Converts an oid object (typically created from a json mapping) to a mongo  {@link org.bson.types.ObjectId}.
@@ -47,4 +48,26 @@ class MongoUtils {
         return objectIds
     }
 
+    /**
+     * Returns the names of the fields from the given field name (or nested field name) that are array fields using results from the given collection.
+     * @param collection
+     * @param name
+     * @return The set of array field names
+     */
+    static Set<String> getArrayFields(def collection, String name) {
+        Map<String, Boolean> isArrayField = [:]
+        def results = collection.find().limit(GET_FIELD_NAMES_LIMIT)
+        while(results.hasNext()) {
+            def result = results.next()
+            name.split(/\./).each { field ->
+                if(result) {
+                    result = result instanceof List ? result.get("0")?.get(field) : result.get(field)
+                    if(result && result instanceof List) {
+                        isArrayField[field] = true
+                    }
+                }
+            }
+        }
+        return isArrayField.keySet()
+    }
 }

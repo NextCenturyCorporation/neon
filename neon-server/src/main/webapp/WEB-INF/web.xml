@@ -35,6 +35,12 @@
         </listener-class>
     </listener>
 
+    <listener>
+        <listener-class>
+            com.ncc.neon.query.filter.FilterState
+        </listener-class>
+    </listener>
+
     <servlet>
         <servlet-name>jersey-servlet</servlet-name>
         <servlet-class>

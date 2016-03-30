@@ -69,27 +69,37 @@ neon.widget = (function() {
 
     /**
      * Gets a unique id for a widget for a particular session. Repeated calls to this method in a single session with the
-     * same parameters will result in the same id being returned. Note this method is executed synchronously.
+     * same parameters will result in the same id being returned.
      * @param {String} [qualifier] If a qualifier is specified, the id will be tied to that qualifier. This
      * allows multiple ids to be created for a single session. If a qualifier is not specified, the id returned
      * will be unique to the session.
      * If running within OWF, the OWF instanceId is appended to the identifier so the same widget can be reused in
      * multiple windows without conflict.
+     * @param {Function} successCallback The callback that contains the unique id string
      * @method getInstanceId
-     * @return {String} A unique identifier string
+     * @return {String} The xhr request object
      */
-    function getInstanceId(qualifier) {
-        var instanceId;
-        neon.util.ajaxUtils.doGet(
+    function getInstanceId(qualifier, successCallback) {
+        // If the first argument is a function, assume that is the callback and that the caller
+        // wants the session id
+        if (typeof qualifier === 'function') {
+            successCallback = qualifier;
+            qualifier = null;
+        }
+        return neon.util.ajaxUtils.doGet(
             neon.serviceUrl('widgetservice', 'instanceid', buildInstanceIdQueryString(qualifier)), {
-                // callers expect the id to return synchronously so set async to false
-                async: false,
-                success: function(id) {
-                    instanceId = id;
+                success: function(instanceId) {
+                    if(!instanceId) {
+                        return;
+                    }
+                    if(successCallback && typeof successCallback === 'function') {
+                        successCallback(instanceId);
+                    }
+                },
+                error: function() {
                 }
             }
         );
-        return instanceId;
     }
 
     /**

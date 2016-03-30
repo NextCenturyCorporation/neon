@@ -1,5 +1,5 @@
 /*
- * Copyright 2013 Next Century Corporation
+ * Copyright 2016 Next Century Corporation
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -33,6 +33,7 @@ import org.codehaus.jackson.annotate.JsonIgnoreProperties
 class Query {
 
     Filter filter
+    boolean aggregateArraysByElement = false
     boolean isDistinct = false
     List<String> fields = SelectClause.ALL_FIELDS
     List<AggregateClause> aggregates = []
