@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 Next Century Corporation
+ * Copyright 2016 Next Century Corporation
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -19,9 +19,6 @@ package com.ncc.neon.query.elasticsearch
 import com.ncc.neon.connect.NeonConnectionException
 import com.ncc.neon.query.HeatmapBoundsQuery
 import com.ncc.neon.query.clauses.AndWhereClause
-import com.ncc.neon.query.clauses.FieldFunction
-import com.ncc.neon.query.clauses.GroupByFieldClause
-import com.ncc.neon.query.clauses.GroupByFunctionClause
 import com.ncc.neon.query.clauses.OrWhereClause
 import com.ncc.neon.query.clauses.SelectClause
 import com.ncc.neon.query.clauses.SingularWhereClause
@@ -31,21 +28,14 @@ import com.ncc.neon.query.filter.FilterState
 import com.ncc.neon.query.filter.SelectionState
 import com.ncc.neon.query.Query
 import com.ncc.neon.query.QueryOptions
-import groovy.json.JsonOutput
+
 import org.elasticsearch.action.search.SearchType
 import org.elasticsearch.action.search.SearchRequest
 import org.elasticsearch.index.query.FilterBuilder
 import org.elasticsearch.index.query.FilterBuilders
 import org.elasticsearch.index.query.QueryBuilders
-import org.elasticsearch.search.aggregations.AbstractAggregationBuilder
-import org.elasticsearch.search.aggregations.AggregationBuilder
 import org.elasticsearch.search.aggregations.AggregationBuilders
-import org.elasticsearch.search.aggregations.bucket.terms.Terms
-import org.elasticsearch.search.aggregations.bucket.terms.TermsBuilder
 import org.elasticsearch.search.builder.SearchSourceBuilder
-import org.elasticsearch.search.sort.SortBuilder
-import org.elasticsearch.search.sort.SortBuilders
-import org.elasticsearch.search.sort.SortOrder
 
 import groovy.transform.Immutable
 
@@ -99,59 +89,6 @@ class ElasticSearchHeatmapConversionStrategy {
         def bounds = AggregationBuilders.filter('bounds').filter(filter).subAggregation(hashGrid)
 
         source.aggregation(bounds)
-    }
-
-    private static findMatchingSortClause(Query query, matchClause) {
-        query.sortClauses.find { sc ->
-            if (matchClause instanceof FieldFunction) {
-                return matchClause.name == sc.fieldName
-            }
-            if (matchClause instanceof GroupByFieldClause) {
-                return matchClause.field == sc.fieldName
-            }
-        }
-    }
-
-    private static convertMetricAggregations(Query query, SearchSourceBuilder source) {
-        def metricAggregations = getMetricAggregations(query)
-
-        if (query.groupByClauses) {
-            def bucketAggregations = query.groupByClauses.collect(ElasticSearchConversionStrategy.&convertGroupByClause.curry(query))
-
-            //apply metricAggregations and any associated sorting to the terminal group by clause
-            metricAggregations.each(bucketAggregations.last().&subAggregation)
-            query.aggregates.each { ac ->
-                def sc = findMatchingSortClause(query, ac)
-                if (sc) {
-                    def sortOrder = sc.sortOrder == com.ncc.neon.query.clauses.SortOrder.ASCENDING
-                    bucketAggregations.each { bucketAgg ->
-                        bucketAgg.order(Terms.Order.aggregation(TERM_PREFIX, sortOrder))
-                    }
-                    bucketAggregations.last().order(isCountAllAggregation(ac) ?
-                            Terms.Order.count(sortOrder) :
-                            Terms.Order.aggregation("${STATS_AGG_PREFIX}${ac.field}" as String,
-                                    ac.operation as String, sortOrder)
-                    )
-                }
-            }
-
-            //on each aggregation, except the last - nest the next aggregation
-            bucketAggregations.take(bucketAggregations.size() - 1)
-                    .eachWithIndex { v, i -> v.subAggregation(bucketAggregations[i + 1]) }
-            source.aggregation(bucketAggregations.head() as AbstractAggregationBuilder)
-        } else {
-            //if there are no groupByClauses, apply sort and metricAggregations directly to source
-            metricAggregations.each(source.&aggregation)
-            query.sortClauses.collect(ElasticSearchConversionStrategy.&convertSortClause).each(source.&sort)
-        }
-    }
-
-    private static getMetricAggregations(Query query) {
-        return query.aggregates
-                .findAll { !isCountAllAggregation(it) && !isCountFieldAggregation(it) }
-                .collect { it.field }
-                .unique()
-                .collect { AggregationBuilders.stats("${STATS_AGG_PREFIX}${it}").field(it as String) }
     }
 
     private static SearchRequest buildRequest(Query query, SearchSourceBuilder source) {
@@ -293,55 +230,5 @@ class ElasticSearchHeatmapConversionStrategy {
         }
 
         throw new NeonConnectionException("${clause.operator} is an invalid operator for a where clause")
-    }
-
-    private static SortBuilder convertSortClause(clause) {
-        def order = clause.sortOrder == com.ncc.neon.query.clauses.SortOrder.ASCENDING ?
-                SortOrder.ASC : SortOrder.DESC
-
-        SortBuilders.fieldSort(clause.fieldName as String).order(order)
-    }
-
-    @SuppressWarnings("MethodSize")
-    private static AggregationBuilder convertGroupByClause(Query query, clause) {
-        def applySort = { TermsBuilder tb ->
-            def sc = findMatchingSortClause(query, clause)
-            if (sc) {
-                def sortOrder = sc.sortOrder == com.ncc.neon.query.clauses.SortOrder.ASCENDING
-                tb.order(Terms.Order.term(sortOrder))
-            }
-            return tb
-        }
-
-        if (clause instanceof GroupByFieldClause) {
-            return applySort(AggregationBuilders.terms(clause.field as String).field(clause.field as String).size(0))
-        }
-
-        if (clause instanceof GroupByFunctionClause) {
-            if (clause.operation in DATE_OPERATIONS) {
-
-                def template = {
-                    def modifier = (it == 'MONTH' ? " + 1" : "")
-
-                    applySort(AggregationBuilders
-                            .terms(clause.name as String)
-                            .field(clause.field as String)
-                            .script("def calendar = java.util.Calendar.getInstance(); calendar.setTime(new Date(doc['${clause.field}'].value)); calendar.get(java.util.Calendar.${it})" + modifier as String)
-                            .size(0))
-                }
-
-                switch (clause.operation) {
-                    case 'year': return template('YEAR')
-                    case 'month': return template('MONTH')
-                    case 'dayOfMonth': return template('DAY_OF_MONTH')
-                    case 'dayOfWeek': return template('DAY_OF_WEEK')
-                    case 'hour': return template('HOUR_OF_DAY')
-                    case 'minute': return template('MINUTE')
-                    case 'second': return template('SECOND')
-                }
-            }
-        }
-
-        throw new NeonConnectionException("Unknown groupByClause: ${clause.getClass()}")
     }
 }

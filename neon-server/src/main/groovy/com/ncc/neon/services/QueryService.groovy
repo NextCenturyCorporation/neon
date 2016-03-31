@@ -1,5 +1,5 @@
 /*
- * Copyright 2013 Next Century Corporation
+ * Copyright 2016 Next Century Corporation
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -24,7 +24,7 @@ import com.ncc.neon.query.executor.QueryExecutor
 import com.ncc.neon.query.clauses.WhereClause
 import com.ncc.neon.query.result.QueryResult
 import com.ncc.neon.query.result.ArrayCountPair
-import groovy.json.JsonOutput
+
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
 
