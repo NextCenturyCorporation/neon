@@ -1,21 +1,32 @@
+/*
+ * Copyright 2016 Next Century Corporation
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ */
+
 package com.ncc.neon.query.elasticsearch
 
-import com.mongodb.util.JSON
 import com.ncc.neon.query.HeatmapBoundsQuery
 import com.ncc.neon.query.result.QueryResult
 import com.ncc.neon.query.result.TabularQueryResult
 import com.ncc.neon.query.Query
 import com.ncc.neon.query.QueryOptions
-import groovy.json.JsonOutput
-import org.elasticsearch.common.xcontent.XContentHelper
-import org.elasticsearch.common.xcontent.XContentParser
+
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
+
 import org.springframework.stereotype.Component
 
-/**
- * Created by jwilliams on 1/27/16.
- */
 @Component
 class ElasticSearchHeatmapExecutor extends ElasticSearchQueryExecutor{
     private static final Logger LOGGER = LoggerFactory.getLogger(ElasticSearchHeatmapExecutor)
@@ -56,9 +67,9 @@ class ElasticSearchHeatmapExecutor extends ElasticSearchQueryExecutor{
     }
 
     private List<Map<String, Object>> extractHeatmapBuckets(def gridAggregation) {
-        List bucketList = gridAggregation.buckets;
+        List bucketList = gridAggregation.buckets
 
-        List<Map<String, Object>> buckets = new ArrayList<Map<String, Object>>()
+        List<Map<String, Object>> buckets = []
 
         def maxCount = 0
         bucketList.each {
