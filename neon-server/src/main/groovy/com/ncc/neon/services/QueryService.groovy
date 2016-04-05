@@ -21,9 +21,8 @@ import com.ncc.neon.connect.ConnectionManager
 import com.ncc.neon.connect.DataSources
 import com.ncc.neon.query.*
 import com.ncc.neon.query.executor.QueryExecutor
-import com.ncc.neon.query.clauses.WhereClause
 import com.ncc.neon.query.result.QueryResult
-import com.ncc.neon.query.result.ArrayCountPair
+
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
 
@@ -217,25 +216,6 @@ class QueryService {
         }
 
         return fieldTypes
-    }
-
-    /**
-     * Gets a sorted list of key, count pairs for an array field in the database
-     * @param host The host on which the database is running
-     * @param databaseType The type of the database
-     * @param databaseName The name of the database
-     * @param tableName The name of the collection or table
-     * @param fieldName The name of the array field to count
-     * @param limit The number of pairs to return (default:  50)
-     * @param whereClause The where clause to apply to the array counts query, or null to apply no where clause
-     */
-    @POST
-    @Produces(MediaType.APPLICATION_JSON)
-    @Path("arraycounts/{host}/{databaseType}/{databaseName}/{tableName}/{fieldName}")
-    public List<ArrayCountPair> getArrayCounts(@PathParam("host") String host, @PathParam("databaseType") String databaseType, @PathParam("databaseName") String databaseName,
-      @PathParam("tableName") String tableName, @PathParam("fieldName") String fieldName, @DefaultValue("50") @QueryParam("limit") int limit, WhereClause whereClause) {
-        QueryExecutor queryExecutor = getExecutor(host, databaseType)
-        return queryExecutor.getArrayCounts(databaseName, tableName, fieldName, limit, whereClause)
     }
 
     private QueryResult execute(String host, String databaseType, def query, QueryOptions options) {
