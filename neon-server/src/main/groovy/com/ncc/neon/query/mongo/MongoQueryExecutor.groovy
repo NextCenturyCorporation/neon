@@ -19,19 +19,19 @@ package com.ncc.neon.query.mongo
 import com.mongodb.DB
 import com.mongodb.MongoClient
 import com.mongodb.BasicDBObject
+
 import com.ncc.neon.connect.ConnectionManager
 import com.ncc.neon.util.ResourceNotFoundException
 import com.ncc.neon.query.Query
 import com.ncc.neon.query.QueryOptions
-import com.ncc.neon.query.clauses.WhereClause
 import com.ncc.neon.query.executor.AbstractQueryExecutor
-import com.ncc.neon.query.filter.Filter
 import com.ncc.neon.query.filter.FilterState
 import com.ncc.neon.query.filter.SelectionState
 import com.ncc.neon.query.result.QueryResult
-import com.ncc.neon.query.result.ArrayCountPair
+
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
+
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
 
@@ -197,19 +197,6 @@ class MongoQueryExecutor extends AbstractQueryExecutor {
 
     protected MongoClient getMongo() {
         connectionManager.connection.mongo
-    }
-
-    List<ArrayCountPair> getArrayCounts(String databaseName, String tableName, String field, int limit, WhereClause whereClause = null) {
-        checkDatabaseAndTableExists(databaseName, tableName)
-        DB database = mongo.getDB(databaseName)
-        ArrayCountQueryWorker worker = new ArrayCountQueryWorker(mongo).withDatabase(database)
-        Query query = new Query(filter: new Filter(databaseName: databaseName, tableName: tableName))
-        if(!database.collectionExists(tableName)) {
-            throw new ResourceNotFoundException("Table ${tableName} does not exist")
-        }
-        boolean isArrayField = MongoUtils.getArrayFields(database.getCollection(tableName), field).size() > 0
-        MongoQuery mongoQuery = worker.createArrayCountQuery(new MongoQuery(query: query), field, limit, filterState, selectionState, isArrayField, whereClause)
-        return getQueryResult(worker, mongoQuery).getData()
     }
 
     private void checkDatabaseAndTableExists(String databaseName, String tableName) {

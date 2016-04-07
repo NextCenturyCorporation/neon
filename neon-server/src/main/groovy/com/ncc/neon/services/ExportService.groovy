@@ -19,9 +19,7 @@ package com.ncc.neon.services
 import com.ncc.neon.query.export.ExportBundle
 import com.ncc.neon.query.export.ExportRequest
 import com.ncc.neon.query.export.ExportQueryRequest
-import com.ncc.neon.query.export.ExportArrayCountRequest
 import com.ncc.neon.query.export.ExportField
-import com.ncc.neon.query.result.ArrayCountPair
 import com.ncc.neon.query.result.QueryResult
 import org.apache.commons.io.output.CloseShieldOutputStream
 import org.apache.poi.ss.usermodel.Cell
@@ -305,15 +303,6 @@ class ExportService {
         if(request instanceof ExportQueryRequest) {
             QueryResult result = queryService.executeQuery(host, databaseType, request.ignoreFilters, request.selectionOnly, request.ignoredFilterIds, request.query)
             toReturn = result.data
-        }
-        else if(request instanceof ExportArrayCountRequest) {
-            List<ArrayCountPair> results = queryService.getArrayCounts(host, databaseType, request.database, request.table, request.field, request.limit, request?.whereClause)
-            results.each { result ->
-                Map obj = [:]
-                obj.put("key", result.key)
-                obj.put("count", result.count)
-                toReturn.push(obj)
-            }
         }
         return toReturn
     }

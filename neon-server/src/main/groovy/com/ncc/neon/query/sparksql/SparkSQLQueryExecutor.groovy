@@ -1,5 +1,5 @@
 /*
- * Copyright 2013 Next Century Corporation
+ * Copyright 2016 Next Century Corporation
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -23,7 +23,6 @@ import com.ncc.neon.query.executor.AbstractQueryExecutor
 import com.ncc.neon.query.filter.FilterState
 import com.ncc.neon.query.filter.SelectionState
 import com.ncc.neon.query.result.QueryResult
-import com.ncc.neon.query.result.ArrayCountPair
 import com.ncc.neon.query.result.TabularQueryResult
 import com.ncc.neon.util.ResourceNotFoundException
 import org.slf4j.Logger
@@ -47,9 +46,13 @@ class SparkSQLQueryExecutor extends AbstractQueryExecutor {
     @Autowired
     private ConnectionManager connectionManager
 
-
     @Override
     QueryResult doExecute(Query query, QueryOptions options) {
+        // TODO Move the creation of the array counts queries into the conversion strategy or combine it with the creation of the default queries.
+        if(query.aggregateArraysByElement && query.groupByClauses[0]?.field) {
+            return getArrayCounts(query.databaseName, query.tableName, query.groupByClauses[0].field, query.limitClause.limit, query.filter?.whereClause)
+        }
+
         return runAndRelease { client ->
             SparkSQLConversionStrategy conversionStrategy = new SparkSQLConversionStrategy(filterState: filterState, selectionState: selectionState)
             String sparkSQLQuery = conversionStrategy.convertQuery(query, options)
@@ -57,7 +60,7 @@ class SparkSQLQueryExecutor extends AbstractQueryExecutor {
             int offset = query.offsetClause ? query.offsetClause.offset : 0
             List<Map> resultList = client.executeQuery(sparkSQLQuery, offset)
             fixHiveNames(query.aggregates, resultList)
-            return  new TabularQueryResult(resultList)
+            return new TabularQueryResult(resultList)
         }
     }
 
@@ -157,7 +160,7 @@ class SparkSQLQueryExecutor extends AbstractQueryExecutor {
         }
     }
 
-    private boolean isFieldArray(String databaseName, String tableName, String fieldName) {
+    private boolean isArrayField(String databaseName, String tableName, String fieldName) {
         try {
             return runAndRelease { client -> client.isTypeArray(databaseName, tableName, fieldName) }
         }
@@ -166,11 +169,11 @@ class SparkSQLQueryExecutor extends AbstractQueryExecutor {
         }
     }
 
-    List<ArrayCountPair> getArrayCounts(String databaseName, String tableName, String field, int limit = 40, WhereClause whereClause = null) {
-        boolean isFieldArray = isFieldArray(databaseName, tableName, field)
+    QueryResult getArrayCounts(String databaseName, String tableName, String field, int limit = 40, WhereClause whereClause = null) {
+        boolean isArrayField = isArrayField(databaseName, tableName, field)
         String select
         String groupBy
-        if(isFieldArray) {
+        if(isArrayField) {
             select = "SELECT key, count(1) as count FROM " + databaseName + "." + tableName + " LATERAL VIEW explode(" + field + ") tmptable AS key"
             groupBy = " GROUP BY key"
         } else {
@@ -183,9 +186,8 @@ class SparkSQLQueryExecutor extends AbstractQueryExecutor {
         return runAndRelease { client ->
             SparkSQLConversionStrategy conversionStrategy = new SparkSQLConversionStrategy(filterState: filterState, selectionState: selectionState)
             String sparkSQLQuery = conversionStrategy.mergeQuery(databaseName, tableName, select, groupBy, orderBy, sort, whereClause)
-            int offset = 0
-            List<ArrayCountPair> resultList = client.executeQuery(sparkSQLQuery, offset)
-            return resultList
+            List resultList = client.executeQuery(sparkSQLQuery, 0)
+            return new TabularQueryResult(resultList)
         }
     }
 }

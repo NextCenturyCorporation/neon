@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 Next Century Corporation
+ * Copyright 2016 Next Century Corporation
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -30,6 +30,7 @@ import com.ncc.neon.query.filter.FilterState
 import com.ncc.neon.query.filter.SelectionState
 import com.ncc.neon.query.Query
 import com.ncc.neon.query.QueryOptions
+
 import org.elasticsearch.action.search.SearchType
 import org.elasticsearch.action.search.SearchRequest
 import org.elasticsearch.index.query.FilterBuilder
@@ -83,9 +84,12 @@ class ElasticSearchConversionStrategy {
         def dataSet = new DataSet(databaseName: query.databaseName, tableName: query.tableName)
         def whereClauses = collectWhereClauses(dataSet, query, options, whereClause)
 
-        //Build the elasticsearch filters for the where clauses
+        // Build the elasticsearch filters for the where clauses
         def inners = whereClauses.collect(ElasticSearchConversionStrategy.&convertWhereClause) as FilterBuilder[]
-        def whereFilter = FilterBuilders.boolFilter().must(FilterBuilders.andFilter(inners))
+        // Check whether the where clause is a single AND or OR clause in which case we don't need to wrap it with another bool->must->and->filters
+        // This isn't required but makes the queries look cleaner and simpler.
+        boolean isCompoundClause = whereClauses.size() == 1 && (whereClauses[0] instanceof AndWhereClause || whereClauses[0] instanceof OrWhereClause)
+        def whereFilter = isCompoundClause ? inners[0] : FilterBuilders.boolFilter().must(FilterBuilders.andFilter(inners))
 
         return createSearchSourceBuilder(query).query(QueryBuilders.filteredQuery(null, whereFilter))
     }
