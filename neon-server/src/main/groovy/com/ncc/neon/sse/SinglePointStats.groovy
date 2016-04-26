@@ -1,6 +1,5 @@
 package com.ncc.neon.sse
 
-import com.ncc.neon.query.result.QueryResult
 import groovy.transform.ToString
 
 @ToString(includeNames = true)

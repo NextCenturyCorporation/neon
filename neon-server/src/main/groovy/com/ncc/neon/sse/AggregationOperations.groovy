@@ -29,7 +29,7 @@ class AggregationOperations {
     private static final Logger LOGGER = LoggerFactory.getLogger(AggregationOperations)
 
     // Defines the number of records that make one "iteration" for calculating mean, variance, and error.
-    private static final int ITER_SIZE = 1000
+    //private static final int ITER_SIZE = 1000
 
     /**
      * Takes the results from one iteration of a <code>count</code> aggregation and data about the query it was
@@ -48,6 +48,7 @@ class AggregationOperations {
      * @param sseQueryData The SseQueryData object containing information about the query that produced the results.
      * @return A list of the current estimated values for everything in the given SseQueryData's runningResults.
      */
+    @SuppressWarnings(['MethodSize'])
     static void count(SseQueryData sseQueryData) {
         Map<Object, SinglePointStats> runningResults = sseQueryData.runningResults
         String fieldName = sseQueryData.query.aggregates[0].name
@@ -94,7 +95,7 @@ class AggregationOperations {
             // Variance is E(est - mean)^2, but simplified it is E[est^2] - [E(est)]^2 = E(est^2)-mean^2
             // Note that this is not quite right when we have weighted (uneven) samples, but is close.  See
             // wikipedia article above
-            double estimate = countThisIteration / sseQueryData.randStep;
+            double estimate = countThisIteration / sseQueryData.randStep
             double estSquared = (estimate * estimate)
             sps.sumOfSquaredEstimate += estSquared
             double partA = (sps.sumOfSquaredEstimate / sseQueryData.iterationsToDate)

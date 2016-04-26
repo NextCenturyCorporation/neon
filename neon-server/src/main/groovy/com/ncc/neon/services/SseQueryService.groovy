@@ -68,7 +68,7 @@ class SseQueryService {
     QueryExecutorFactory queryExecutorFactory
 
     // Maximum time a single iteration of the aggregation should be allowed to take, in milliseconds.
-    private static final int DESIRED_ITERATION_TIME = 2000
+    //private static final int DESIRED_ITERATION_TIME = 2000
 
     // Number of records to be looked through on the first iteration.
     private static final int INITIAL_RECORDS_PER_ITERATION = 50000
@@ -195,8 +195,9 @@ class SseQueryService {
      *    the map of stored queries.
      * @return An SSE event stream that will be used to pass updates to the client.
      */
+    @SuppressWarnings(['MethodSize'])
     private EventOutput threadOnlineQueryOrGroup(List<SseQueryData> sseQueries) {
-        final EventOutput eventOutput = new EventOutput()
+        final EventOutput EVENTOUTPUT = new EventOutput()
         CopiedFilterState copiedFilterState = new CopiedFilterState(filterState)
 
         LOGGER.debug("Starting SSE Thread")
@@ -235,11 +236,11 @@ class SseQueryService {
                 LOGGER.warn("EventOutput had an error.\n$e")
             }
             finally {
-                eventOutput.close()
+                EVENTOUTPUT.close()
             }
         }
 
-        return eventOutput
+        return EVENTOUTPUT
     }
 
 
@@ -317,22 +318,25 @@ class SseQueryService {
      * @param duration
      * @return
      */
-    static def updateSteps(double min, double max, double step, double duration) {
+    static def updateSteps(double minimum, double maximum, double step) {
+        double min = minimum
+        double max = maximum
+        double nextStep = step
         min = max
 
         // Calculate how much to change the iteration time.  We don't want to change it too much
         // on any particular step, so limit to doubling.
         // def multiplier = (DESIRED_ITERATION_TIME / sseQueryData.duration)
         def multiplier = 1
-        step *= (multiplier > 2 ? 2 : multiplier)
+        nextStep *= (multiplier > 2 ? 2 : multiplier)
 
         // Make sure to calculate the last step is correct because it is used in scaling the results of the sample
-        if (max + step > 1) {
-            step = 1 - max
+        if (max + nextStep > 1) {
+            nextStep = 1 - max
         }
-        max += step
+        max += nextStep
 
-        [min, max, step]
+        [min, max, nextStep]
     }
 
     /**
@@ -483,16 +487,16 @@ class SseQueryService {
     @Produces(SseFeature.SERVER_SENT_EVENTS)
     @Path("test/{name}")
     EventOutput testSse(@PathParam("name") String name) {
-        final EventOutput eventOutput = new EventOutput()
+        final EventOutput EVENTOUTPUT = new EventOutput()
         Thread.start {
             try {
                 for (int x = 0; x < 5; x++) {
                     Map m = [key: "The value is ${x}, ${name}."]
-                    eventOutput.write(new OutboundEvent.Builder().data(String, JsonOutput.toJson(m)).build())
+                    EVENTOUTPUT.write(new OutboundEvent.Builder().data(String, JsonOutput.toJson(m)).build())
                     Thread.sleep(1000)
                 }
-                eventOutput.write(new OutboundEvent.Builder().data(String, "[\"complete\"]").build())
-                eventOutput.close()
+                EVENTOUTPUT.write(new OutboundEvent.Builder().data(String, "[\"complete\"]").build())
+                EVENTOUTPUT.close()
             }
             catch (final InterruptedException | IOException e) {
                 Exception ex = new Exception()
@@ -500,6 +504,6 @@ class SseQueryService {
                 throw ex
             }
         }
-        return eventOutput
+        return EVENTOUTPUT
     }
 }

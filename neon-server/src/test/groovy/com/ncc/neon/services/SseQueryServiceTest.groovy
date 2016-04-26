@@ -7,7 +7,6 @@ import com.ncc.neon.query.executor.QueryExecutor
 import com.ncc.neon.query.filter.Filter
 import com.ncc.neon.query.filter.GlobalFilterState
 import com.ncc.neon.query.result.TabularQueryResult
-import com.ncc.neon.sse.MongoRecordCounter
 import com.ncc.neon.sse.RecordCounter
 import com.ncc.neon.sse.RecordCounterFactory
 import groovy.json.JsonSlurper
@@ -59,15 +58,16 @@ public class SseQueryServiceTest {
     }
 
     @Test
-    public void testStoreQueryGroupData() throws Exception {
+    public void testStoreQueryGroupData() {
         SseQueryService sqs = new SseQueryService()
         sqs.queryExecutorFactory = queryService.queryExecutorFactory
         sqs.recordCounterFactory = recordCounterFactory
         sqs.filterState = filterState
 
-        def response = sqs.storeQueryData(HOST, DATABASE_TYPE, false, false, new HashSet(), simpleQuery)
+        def response = sqs.storeQueryData(HOST, DATABASE_TYPE, false, false, [] as Set, simpleQuery)
         def uuid = new JsonSlurper().parseText(response.entity).uuid
 
         EventOutput eo = sqs.executeByUuid(uuid)
+        assert eo != null
     }
 }
