@@ -24,6 +24,7 @@ import com.ncc.neon.query.executor.QueryExecutor
 import com.ncc.neon.query.filter.GlobalFilterState
 import com.ncc.neon.query.filter.CopiedFilterState
 import com.ncc.neon.query.result.QueryResult
+import com.ncc.neon.query.result.TabularQueryResult
 import com.ncc.neon.sse.AggregationOperations
 import com.ncc.neon.sse.RecordCounter
 import com.ncc.neon.sse.RecordCounterFactory
@@ -67,18 +68,20 @@ class SseQueryService {
     QueryExecutorFactory queryExecutorFactory
 
     // Maximum time a single iteration of the aggregation should be allowed to take, in milliseconds.
-    private static final int MAX_ITERATION_TIME = 1000
+    private static final int DESIRED_ITERATION_TIME = 2000
 
     // Number of records to be looked through on the first iteration.
-    private static final int INITIAL_RECORDS_PER_ITERATION = 10000
+    private static final int INITIAL_RECORDS_PER_ITERATION = 50000
 
-    // Name of the random value field in data sets. TODO this should eventually be passed in as a part of queries, rather than hard-coded like this.
-    private static final String RANDOM_FIELD_NAME= 'rand'
+    // Name of the random value field in data sets.
+    // TODO: should be passed in as a part of queries, rather than hard-coded
+    private static final String RANDOM_FIELD_NAME = 'rand'
 
     // Map of all currently stored queries and query groups, packaged into lists of SseQueryData objects.
     private static final Map CURRENTLY_RUNNING_QUERIES_DATA = new ConcurrentHashMap<String, List<SseQueryData>>()
 
-    // Map associating Json-string representations of queries and query groups with the UUIDs that are their keys in CURRENTLY_RUNNING_QUERIES_DATA
+    // Map associating Json-string representations of queries and query groups with the UUIDs that are their
+    // keys in CURRENTLY_RUNNING_QUERIES_DATA
     private static final Map QUERIES_TO_UUIDS = new ConcurrentHashMap<String, String>()
 
     // Logger, for logging.
@@ -105,8 +108,9 @@ class SseQueryService {
                             @DefaultValue("false") @QueryParam("selectionOnly") boolean selectionOnly,
                             @QueryParam("ignoredFilterIds") Set<String> ignoredFilterIds,
                             Query query) {
+
         SseQueryData queryData = initDataWithCollectionValues(host, databaseType, query.filter.databaseName, query.filter.tableName,
-                                                                  ignoreFilters, selectionOnly, ignoredFilterIds, query)
+                ignoreFilters, selectionOnly, ignoredFilterIds, query)
         Map response = [uuid: addToRunningQueries([queryData])]
         return Response.ok().entity(JsonOutput.toJson(response)).build()
     }
@@ -132,11 +136,12 @@ class SseQueryService {
                                  @DefaultValue("false") @QueryParam("selectionOnly") boolean selectionOnly,
                                  @QueryParam("ignoredFilterIds") Set<String> ignoredFilterIds,
                                  QueryGroup queryGroup) {
+
         List queryList = []
-        for(int x = 0; x < queryGroup.queries.size(); x++) {
+        for (int x = 0; x < queryGroup.queries.size(); x++) {
             Query query = queryGroup.queries.get(x)
             SseQueryData queryData = initDataWithCollectionValues(host, databaseType, query.filter.databaseName, query.filter.tableName,
-                                                                  ignoreFilters, selectionOnly, ignoredFilterIds, query)
+                    ignoreFilters, selectionOnly, ignoredFilterIds, query)
             queryList << queryData
         }
         Map response = [uuid: addToRunningQueries(queryList)]
@@ -155,8 +160,9 @@ class SseQueryService {
     @Path("getupdates/{uuid}")
     EventOutput executeByUuid(@PathParam("uuid") String uuid) {
         List<SseQueryData> queries = CURRENTLY_RUNNING_QUERIES_DATA[uuid]
-        if(queries) {
-            for(int x = 0; x < queries.size(); x++) {
+        LOGGER.debug("In execute by uuid # of queries. " + queries?.size() + ".  Uuid " + uuid)
+        if (queries) {
+            for (int x = 0; x < queries.size(); x++) {
                 queries.get(x).active = true
             }
         }
@@ -173,8 +179,8 @@ class SseQueryService {
     @Path("cancel/{uuid}")
     Response cancelUuid(@PathParam("uuid") String uuid) {
         List<SseQueryData> queries = CURRENTLY_RUNNING_QUERIES_DATA[uuid]
-        if(queries) {
-            for(int x = 0; x < queries.size(); x++) {
+        if (queries) {
+            for (int x = 0; x < queries.size(); x++) {
                 queries.get(x).active = false
             }
         }
@@ -182,138 +188,181 @@ class SseQueryService {
     }
 
     /**
-     * Creates a new thread to run a query or group of queries, given the UUID associated with that query or group of queries.
-     * Returns an SSE event output, through which updates as to the progress of the query or group will be sent.
-     * @param uuid The UUID associated with the query or group of queries to be run, used to find the query or group in the map of stored queries.
+     * Creates a new thread to run a query or group of queries, given the UUID associated with that query or group of
+     * queries. Returns an SSE event output, through which updates as to the progress of the query or group will be sent.
+     *
+     * @param uuid The UUID associated with the query or group of queries to be run, used to find the query or group in
+     *    the map of stored queries.
      * @return An SSE event stream that will be used to pass updates to the client.
      */
-    private EventOutput threadOnlineQueryOrGroup(List<SseQueryData> queries) {
-        final EventOutput OUTPUT = new EventOutput()
+    private EventOutput threadOnlineQueryOrGroup(List<SseQueryData> sseQueries) {
+        final EventOutput eventOutput = new EventOutput()
         CopiedFilterState copiedFilterState = new CopiedFilterState(filterState)
+
         LOGGER.debug("Starting SSE Thread")
         Thread.start {
             try {
-                def (boolean allComplete, boolean allActive) = checkActiveAndComplete(queries)
-                while(!allComplete) {
-                    if(!allActive || queries == null) {
-                        OUTPUT.write(new OutboundEvent.Builder().data(String, JsonOutput.toJson([])).id("cancel").build())
+
+                while (true) {
+
+                    // See if they are all completed.  If so, send last values, and done
+                    if (sseQueries.every { it.complete == true }) {
+                        LOGGER.debug("Sending done ")
+                        eventOutput.write(new Builder().data(String, JsonOutput.toJson([])).id("done").build())
                         return
                     }
-                    Map result = runSingleIteration(queries, copiedFilterState)
-                    OUTPUT.write(new OutboundEvent.Builder().data(String, JsonOutput.toJson(result)).id("update").build())
-                    (allComplete, allActive) = checkActiveAndComplete(queries)
+
+                    // If none of the queries are active, return
+                    if (!sseQueries.any { it.active == true }) {
+                        return
+                    }
+
+                    for (SseQueryData sseQueryData : sseQueries) {
+                        if (sseQueryData.active && !sseQueryData.complete) {
+                            runQueryWithRandFilter(sseQueryData, copiedFilterState)
+                            updateSseQueryWithResults(sseQueryData)
+                            updateSseQueryRandStep(sseQueryData)
+                        }
+                    }
+
+                    QueryResult combinedResults = combineResults(sseQueries)
+                    String jsonOutput = JsonOutput.toJson(combinedResults)
+                    LOGGER.debug("Sending json " + jsonOutput)
+                    eventOutput.write(new Builder().data(String, jsonOutput).id("update").build())
                 }
-                OUTPUT.write(new OutboundEvent.Builder().data(String, JsonOutput.toJson([])).id("done").build()) // Should format/send final results here for if someone requests an already-done query.
             }
-            catch(final InterruptedException | IOException e) {
+            catch (final InterruptedException | IOException e) {
                 LOGGER.warn("EventOutput had an error.\n$e")
             }
             finally {
-                OUTPUT.close()
+                eventOutput.close()
             }
         }
-        return OUTPUT
+
+        return eventOutput
     }
 
-    /**
-     * Checks a list of queries to determine whether or not they are all active and whether or not they are all complete.
-     * @param queries The list of queries to check for activity and completion.
-     * @return A list containing two boolean values, one that says whether or not all the given queries
-     *      are complete and another that says whether or not all the queries are active.
-     */
-    private List checkActiveAndComplete(List<SseQueryData> queries) {
-        boolean completed = true
-        boolean active = true
-        for(SseQueryData queryData : queries) { // Will set allComplete or allActive ot false if at least one query has complete or active value == false
-            completed = completed && queryData.complete
-            active = active && queryData.active
-        }
-        return [completed, active]
-    }
 
-    /**
-     * Runs a single iteration of a query or group of queries, recording the time it takes and accordingly adjusting
-     * how large a segment of records should be looked through on the next iteration. Before returning results, edits them to include
-     * statistical data.
-     * @param queryData An SseQueryData object containing all of the reuired data about the query to execute.
-     * @return The estimated results, taking into account every iteration of the query up to the current one.
-     */
-    private Map runSingleIteration(List<SseQueryData> queries, CopiedFilterState copiedFilterState) {
-        Map finalResult = [data: []]
+    def runQueryWithRandFilter(SseQueryData sseQueryData, CopiedFilterState copiedFilterState) {
         long startTime = System.currentTimeMillis()
-        for(int x = 0; x < queries.size(); x++) {
-            SseQueryData queryData = queries.get(x)
-            applyRandomFilter(queryData.query, queryData.randMin, queryData.randMax)
-            QueryOptions queryOptions = new QueryOptions(ignoreFilters: queryData.ignoreFilters, selectionOnly: queryData.selectionOnly, ignoredFilterIds: (queryData.ignoredFilterIds ?: ([] as Set)))
-            QueryExecutor queryExecutor = queryExecutorFactory.getExecutor(new ConnectionInfo(host: queryData.host, dataSource: queryData.databaseType as DataSources))
-            QueryResult result = queryExecutor.execute(queryData.query, queryOptions, copiedFilterState)
-            List oneQueryResult = updateResults(result, queryData)
-            queryData.randMin += queryData.randStep
-            if(queryData.randMin > 1) {
-                queryData.complete = true
-                queryData.active = false
-            }
-            finalResult.data.addAll(oneQueryResult)
-        }
+        LOGGER.debug("starting query ")
+        Query query = sseQueryData.query
+        applyRandomFilter(query, sseQueryData.randMin, sseQueryData.randMax)
+        QueryOptions queryOptions = new QueryOptions(
+                ignoreFilters: sseQueryData.ignoreFilters,
+                selectionOnly: sseQueryData.selectionOnly,
+                ignoredFilterIds: (sseQueryData.ignoredFilterIds ?: ([] as Set)))
+        QueryExecutor queryExecutor = queryExecutorFactory.getExecutor(new ConnectionInfo(host: sseQueryData.host,
+                dataSource: sseQueryData.databaseType as DataSources))
+        sseQueryData.queryResult = queryExecutor.execute(query, queryOptions, copiedFilterState)
         long endTime = System.currentTimeMillis()
-        long elapsedTime = endTime - startTime
-        for(int x = 0; x < queries.size(); x++) {
-            SseQueryData queryData = queries.get(x)
-            queryData.randStep *= (MAX_ITERATION_TIME / elapsedTime)
-            queryData.randMax = (queryData.randMax + queryData.randStep > 1) ? 1 : queryData.randMax + queryData.randStep
+        sseQueryData.duration = endTime - startTime
+    }
+
+    def updateSseQueryWithResults(SseQueryData sseQueryData) {
+        switch (sseQueryData.query.aggregates[0].operation) {
+            case 'count':
+                AggregationOperations.count(sseQueryData)
+                break
+            case 'sum':
+                AggregationOperations.sum(sseQueryData)
+                break
+            case 'avg':
+            case 'min':
+            case 'max':
+            default:
+                throw new UnsupportedOperationException("Don't know how to aggregate on operation " +
+                        sseQueryData.query.aggregates[0].operation)
+        }
+    }
+
+    /**
+     * Combine the results of all the queries associated with this connection, and put them into a
+     * single query result.  The calling widget will need to dis-associate the results
+     */
+    QueryResult combineResults(List<SseQueryData> sseQueries) {
+        TabularQueryResult finalResult = new TabularQueryResult()
+        for (SseQueryData sseQueryData : sseQueries) {
+            finalResult.data.addAll(sseQueryData.queryResult.data)
         }
         return finalResult
     }
 
     /**
-     * Adds the results from one iteration of a query to the overall statistical results for that query, and
-     * alters the results object from that iteration to include the statistical results instead of just
-     * the results from that iteration.
+     * Given a query data object, update the internal rand steps, recalculating step size to make the result
+     * come back in a reasonable amount of time. If we have reached 1, then we are done
      *
-     * TODO - what does it even mean when a query has multiple aggregates clauses? How does that work and how should it be handled?
-     *
-     * @param result The results from a single iteration of a query.
-     * @param The query that returned the given results object.
+     * @param sseQueryData
+     * @return
      */
-    private List updateResults(QueryResult result, SseQueryData queryData) {
-        switch(queryData.query.aggregates[0].operation) {
-            case 'count':
-                return AggregationOperations.count(result, queryData)
-            case 'sum':
-                return AggregationOperations.sum(result, queryData)
-            case 'avg':
-            case 'min':
-            case 'max':
-            deault:
-                throw new UnsupportedOperationException("Don't know how to aggregate on operation ${queryData.query.aggregates[0].operation}.")
+    static def updateSseQueryRandStep(SseQueryData sseQueryData) {
+
+        def (min, max, step) = updateSteps(sseQueryData.randMin, sseQueryData.randMax, sseQueryData.randStep,
+                sseQueryData.duration)
+        sseQueryData.randMin = min
+        sseQueryData.randMax = max
+        sseQueryData.randStep = step
+
+        if (sseQueryData.randMin >= 1) {
+            sseQueryData.complete = true
+            sseQueryData.active = false
         }
     }
 
     /**
-     * Adds a query or query group to the list of queries and query groups. Does this by turning the query or query group into a string and checking for it
-     * in a map of strings to UUIDs. If it is not found, generates a random UUID, maps the string to it in the string-to-uuid map, and maps it to the query
+     * Calculate the new step size, ensuring that it does not over step one
+     * @param min
+     * @param max
+     * @param step
+     * @param duration
+     * @return
+     */
+    static def updateSteps(double min, double max, double step, double duration) {
+        min = max
+
+        // Calculate how much to change the iteration time.  We don't want to change it too much
+        // on any particular step, so limit to doubling.
+        // def multiplier = (DESIRED_ITERATION_TIME / sseQueryData.duration)
+        def multiplier = 1
+        step *= (multiplier > 2 ? 2 : multiplier)
+
+        // Make sure to calculate the last step is correct because it is used in scaling the results of the sample
+        if (max + step > 1) {
+            step = 1 - max
+        }
+        max += step
+
+        [min, max, step]
+    }
+
+    /**
+     * Adds a query or query group to the list of queries and query groups. Does this by turning the query or
+     * query group into a string and checking for it in a map of strings to UUIDs. If it is not found, generates
+     * a random UUID, maps the string to it in the string-to-uuid map, and maps it to the query
      * or query group in a second map. If it is found, simply returns the UUID already associated with it.
      *
-     * This allows the returning of a UUID through which the query or query group can be called (because UUIDs are fixed-length, and simply returning the query
-     * string itself as an identifier may not work for large queries due to the limitations of GET used to trigger the query's activation) while also allowing
-     * for the easy finding of queries/query groups by string--useful for checking if a query has already been added to the second map.
+     * This allows the returning of a UUID through which the query or query group can be called (because UUIDs
+     * are fixed-length, and simply returning the query string itself as an identifier may not work for large
+     * queries due to the limitations of GET used to trigger the query's activation) while also allowing for the
+     * easy finding of queries/query groups by string--useful for checking if a query has already been added to the
+     * second map.
+     *
      * @param queryData A list of SseQueryData objects contaoining information about a query or group of queries.
      * @return The string form of a UUID that is linked to the query or guery group that was passed in.
      */
-    private String addToRunningQueries(List queryData) {
+    private static String addToRunningQueries(List queryData) {
         String uuid
         String queryString = ''
-        for(int x = 0; x < queryData.size(); x++) {
+        for (int x = 0; x < queryData.size(); x++) {
             queryString += JsonOutput.toJson(queryData.get(x).query)
         }
-        if(!QUERIES_TO_UUIDS[queryString]) {
-            uuid = UUID.randomUUID().toString()
-            QUERIES_TO_UUIDS.put(queryString, uuid)
-            CURRENTLY_RUNNING_QUERIES_DATA.put(uuid, queryData)
-        }
-        else {
-            uuid = QUERIES_TO_UUIDS[queryString]
-        }
+        // if (!QUERIES_TO_UUIDS[queryString]) {
+        uuid = UUID.randomUUID().toString()
+        QUERIES_TO_UUIDS.put(queryString, uuid)
+        CURRENTLY_RUNNING_QUERIES_DATA.put(uuid, queryData)
+        //} else {
+        //    uuid = QUERIES_TO_UUIDS[queryString]
+        //}
         return uuid
     }
 
@@ -355,29 +404,34 @@ class SseQueryService {
         long recordCount = counter.getCount(host, databaseName, tableName)
         double initialIterations = recordCount / (INITIAL_RECORDS_PER_ITERATION as double)
         double randStep = 1.0 / initialIterations
-        return [active: true,
-                complete: false,
-                count: recordCount,
-                randStep: randStep,
-                randMin: 0.0D,
-                randMax: 0.0D + randStep,
-                host: host,
-                databaseType: databaseType,
-                ignoreFilters: ignoreFilters,
-                selectionOnly: selectionOnly,
+        LOGGER.debug("total count: " + recordCount)
+        LOGGER.debug("init iters: " + initialIterations)
+        LOGGER.debug(" randStep " + randStep)
+        return [active          : true,
+                complete        : false,
+                totalRecordCount: recordCount,
+                randStep        : randStep,
+                randMin         : 0.0D,
+                randMax         : 0.0D + randStep,
+                host            : host,
+                databaseType    : databaseType,
+                ignoreFilters   : ignoreFilters,
+                selectionOnly   : selectionOnly,
                 ignoredFilterIds: ignoredFilterIds,
-                query: query,
-                zp: getZp(0.95)] as SseQueryData // TODO - Eventually we will want to pass in a confidence parameter and get z(p) from that.
+                query           : query,
+                grandTotal      : 0,
+                zp              : getZp(0.95)] as SseQueryData
+        // TODO - Eventually we will want to pass in a confidence parameter and get z(p) from that.
     }
 
     /**
      * Gets the z(p) value that corresponds to a given requested confidence value.
      */
-    private double getZp(double confidence) {
+    private static double getZp(double confidence) {
         NormalDistribution norm = new NormalDistribution(0, 1)
         double requiredVal = (confidence + 1) / 2
-        for(double x = 0; x < 10; x += 0.01) {
-            if(norm.cumulativeProbability(x) > requiredVal) {
+        for (double x = 0; x < 10; x += 0.01) {
+            if (norm.cumulativeProbability(x) > requiredVal) {
                 return x
             }
         }
@@ -391,31 +445,30 @@ class SseQueryService {
      * @param randMax the maximum random value tofind (inclusive).
      */
     private void applyRandomFilter(Query query, double randMin, double randMax) {
+        LOGGER.debug("Setting range to " + randMin + " to " + randMax)
         WhereClause currentClause = query.filter.whereClause
-        if(!(currentClause instanceof AndWhereClause)) {
+        if (!(currentClause instanceof AndWhereClause)) {
             AndWhereClause newClause = new AndWhereClause(whereClauses: [])
             newClause.whereClauses << currentClause
             newClause.whereClauses << ([lhs: RANDOM_FIELD_NAME, operator: '>=', rhs: randMin] as SingularWhereClause)
             newClause.whereClauses << ([lhs: RANDOM_FIELD_NAME, operator: '<', rhs: randMax] as SingularWhereClause)
             query.filter.whereClause = newClause
-        }
-        else {
+        } else {
             boolean minClause = false, maxClause = false
-            for(int x = 0; x < currentClause.whereClauses.size(); x++) {
+            for (int x = 0; x < currentClause.whereClauses.size(); x++) {
                 WhereClause clause = currentClause.whereClauses.get(x)
-                if(clause instanceof SingularWhereClause && clause.lhs == RANDOM_FIELD_NAME && clause.operator == '>=') {
+                if (clause instanceof SingularWhereClause && clause.lhs == RANDOM_FIELD_NAME && clause.operator == '>=') {
                     clause.rhs = randMin
                     minClause = true
-                }
-                else if(clause instanceof SingularWhereClause && clause.lhs == RANDOM_FIELD_NAME && clause.operator == '<') {
+                } else if (clause instanceof SingularWhereClause && clause.lhs == RANDOM_FIELD_NAME && clause.operator == '<') {
                     clause.rhs = randMax
                     maxClause = true
                 }
             }
-            if(!minClause) {
+            if (!minClause) {
                 currentClause.whereClauses << ([lhs: RANDOM_FIELD_NAME, operator: '>=', rhs: randMin] as SingularWhereClause)
             }
-            if(!maxClause) {
+            if (!maxClause) {
                 currentClause.whereClauses << ([lhs: RANDOM_FIELD_NAME, operator: '<', rhs: randMax] as SingularWhereClause)
             }
         }
@@ -430,16 +483,16 @@ class SseQueryService {
     @Produces(SseFeature.SERVER_SENT_EVENTS)
     @Path("test/{name}")
     EventOutput testSse(@PathParam("name") String name) {
-        final EventOutput OUTPUT = new EventOutput()
+        final EventOutput eventOutput = new EventOutput()
         Thread.start {
             try {
-                for(int x = 0; x < 5; x++) {
+                for (int x = 0; x < 5; x++) {
                     Map m = [key: "The value is ${x}, ${name}."]
-                    OUTPUT.write(new OutboundEvent.Builder().data(String, JsonOutput.toJson(m)).build())
+                    eventOutput.write(new OutboundEvent.Builder().data(String, JsonOutput.toJson(m)).build())
                     Thread.sleep(1000)
                 }
-                OUTPUT.write(new OutboundEvent.Builder().data(String, "[\"complete\"]").build())
-                OUTPUT.close()
+                eventOutput.write(new OutboundEvent.Builder().data(String, "[\"complete\"]").build())
+                eventOutput.close()
             }
             catch (final InterruptedException | IOException e) {
                 Exception ex = new Exception()
@@ -447,6 +500,6 @@ class SseQueryService {
                 throw ex
             }
         }
-        return OUTPUT
+        return eventOutput
     }
 }
