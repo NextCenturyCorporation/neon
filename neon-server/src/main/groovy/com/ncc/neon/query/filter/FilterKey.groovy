@@ -18,11 +18,13 @@ package com.ncc.neon.query.filter
 
 import groovy.transform.Canonical
 
+import org.codehaus.jackson.annotate.JsonIgnoreProperties
 
 /**
  * Stores a filter with its id
  */
 @Canonical
+@JsonIgnoreProperties(ignoreUnknown = true)
 class FilterKey implements Serializable {
 
     private static final long serialVersionUID = -5783657018410727352L

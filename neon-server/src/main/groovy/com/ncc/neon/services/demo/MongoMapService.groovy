@@ -56,7 +56,6 @@ public class MongoMapService {
 
     // Note these params are all in CAPS because openlayers puts its params in caps and this keeps them consistent
 
-    // TODO: Can probably remove the ExplicitCall error
     @SuppressWarnings("MethodSize")
     @GET
     @Path("tile")

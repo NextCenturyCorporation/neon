@@ -18,12 +18,14 @@ package com.ncc.neon.query.elasticsearch
 
 import com.ncc.neon.connect.ConnectionManager
 import com.ncc.neon.connect.NeonConnectionException
+import com.ncc.neon.util.ResourceNotFoundException
 import com.ncc.neon.query.Query
 import com.ncc.neon.query.QueryOptions
 import com.ncc.neon.query.clauses.GroupByFieldClause
 import com.ncc.neon.query.clauses.GroupByFunctionClause
 import com.ncc.neon.query.clauses.LimitClause
 import com.ncc.neon.query.clauses.WhereClause
+import com.ncc.neon.query.clauses.SortClause
 import com.ncc.neon.query.executor.AbstractQueryExecutor
 import com.ncc.neon.query.filter.Filter
 import com.ncc.neon.query.filter.FilterState
@@ -34,12 +36,15 @@ import com.ncc.neon.query.result.TabularQueryResult
 
 import org.elasticsearch.action.admin.cluster.state.ClusterStateRequest
 import org.elasticsearch.action.admin.indices.mapping.get.GetMappingsRequest
+import org.elasticsearch.action.admin.indices.exists.indices.IndicesExistsRequest
 import org.elasticsearch.action.search.SearchRequest
 import org.elasticsearch.action.search.SearchType
 import org.elasticsearch.client.Client
 import org.elasticsearch.common.collect.ImmutableOpenMap
 import org.elasticsearch.search.aggregations.AggregationBuilders
 import org.elasticsearch.search.aggregations.bucket.MultiBucketsAggregation
+import org.elasticsearch.search.aggregations.metrics.stats.InternalStats
+import org.elasticsearch.search.aggregations.support.format.ValueFormatter
 
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -54,6 +59,44 @@ class ElasticSearchQueryExecutor extends AbstractQueryExecutor {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ElasticSearchQueryExecutor)
 
+    /*
+    * A small class to hold the important information about an aggregation bucket between when the
+    * buckets are taken out of ElasticSearch's hierarchical arrangement and when everything can be
+    * extracted into the format that the Neon API uses.
+    */
+    private static class AggregationBucket {
+        def getGroupByKeys() {
+            return groupByKeys
+        }
+
+        def setGroupByKeys(newGroupByKeys) {
+            groupByKeys = newGroupByKeys
+        }
+
+        def getAggregatedValues() {
+            return aggregatedValues
+        }
+
+        def setAggregatedValues(newValues) {
+            aggregatedValues = newValues
+        }
+
+        def getDocCount() {
+            return docCount
+        }
+
+        def setDocCount(newCount) {
+            docCount = newCount
+        }
+
+        private Map groupByKeys
+        private Map aggregatedValues = [:]
+        private def docCount
+    }
+
+    @Autowired
+    private FilterState filterState
+
     @Autowired
     private SelectionState selectionState
 
@@ -62,6 +105,7 @@ class ElasticSearchQueryExecutor extends AbstractQueryExecutor {
 
     @Override
     QueryResult doExecute(Query query, QueryOptions options, FilterState filterState) {
+        checkDatabaseAndTableExists(query.databaseName, query.tableName)
         long d1 = new Date().getTime()
 
         ElasticSearchConversionStrategy conversionStrategy = new ElasticSearchConversionStrategy(filterState: filterState, selectionState: selectionState)
@@ -79,7 +123,10 @@ class ElasticSearchQueryExecutor extends AbstractQueryExecutor {
                 extractMetrics(aggregates, aggResults ? aggResults.asMap() : null, results.hits.totalHits)
             ])
         } else if (groupByClauses) {
-            List<Map<String, Object>> buckets = extractBuckets(groupByClauses, aggResults.asList()[0], aggregates)
+            def buckets = extractBuckets(groupByClauses, aggResults.asList()[0])
+            buckets = combineDuplicateBuckets(buckets)
+            buckets = extractMetricsFromBuckets(aggregates, buckets)
+            buckets = sortBuckets(query.sortClauses, buckets)
             buckets = limitBuckets(buckets, query)
             returnVal = new TabularQueryResult(buckets)
         } else if(query.isDistinct) {
@@ -152,6 +199,12 @@ class ElasticSearchQueryExecutor extends AbstractQueryExecutor {
             }
             return tables.unique()
         }
+
+        def dbExists = getClient().admin().indices().exists(new IndicesExistsRequest(dbName)).actionGet().isExists()
+        if(!dbExists) {
+            throw new ResourceNotFoundException("Database ${dbName} does not exist")
+        }
+
         // Fall through case is to return the exact match.
         getMappings().get(dbName).collect { it.key }
     }
@@ -160,6 +213,7 @@ class ElasticSearchQueryExecutor extends AbstractQueryExecutor {
     List<String> getFieldNames(String databaseName, String tableName) {
         if(tableName) {
             LOGGER.debug("Executing getFieldNames for index " + databaseName + " type " + tableName)
+            checkDatabaseAndTableExists(databaseName, tableName)
 
             def dbMatch = databaseName.replaceAll(/\*/, '.*')
             def tableMatch = tableName.replaceAll(/\*/, '.*')
@@ -186,7 +240,25 @@ class ElasticSearchQueryExecutor extends AbstractQueryExecutor {
         return []
     }
 
+    @Override
+    Map getFieldTypes(String databaseName, String tableName) {
+        if(tableName) {
+            LOGGER.debug("Executing getFieldTypes for index " + databaseName + " type " + tableName)
+            checkDatabaseAndTableExists(databaseName, tableName)
+
+            def dbMappings = getMappings().get(databaseName)
+            if(dbMappings) {
+                def tableMappings = dbMappings.get(tableName)
+                if(tableMappings) {
+                    return getFieldTypesInObject(tableMappings.getSourceAsMap(), null)
+                }
+            }
+        }
+        return [:]
+    }
+
     List<ArrayCountPair> getArrayCounts(String databaseName, String tableName, String field, int limit = 0, FilterState filterState, WhereClause whereClause = null) {
+        checkDatabaseAndTableExists(databaseName, tableName)
         Query query = new Query(filter: new Filter(databaseName: databaseName, tableName: tableName),
                     limitClause: new LimitClause(limit: 0))
         ElasticSearchConversionStrategy conversionStrategy = new ElasticSearchConversionStrategy(filterState: filterState, selectionState: selectionState)
@@ -206,7 +278,7 @@ class ElasticSearchQueryExecutor extends AbstractQueryExecutor {
             .asList()
             .head()
             .getBuckets()
-            .collect { new ArrayCountPair(key: it.key, count: it.docCount) }
+            .collect { new ArrayCountPair(key: it.key, count: it.getDocCount()) }
     }
 
     private Client getClient() {
@@ -215,6 +287,46 @@ class ElasticSearchQueryExecutor extends AbstractQueryExecutor {
 
     private ImmutableOpenMap getMappings() {
         getClient().admin().indices().getMappings(new GetMappingsRequest()).actionGet().mappings
+    }
+
+    private static List<AggregationBucket> combineDuplicateBuckets(List<AggregationBucket> buckets) {
+        Map mappedBuckets = [:]
+        // Iterate over all of the buckets, looking for any that have the same groupByKeys
+        buckets.each {
+            def existingBucket = mappedBuckets.get(it.getGroupByKeys())
+            if (existingBucket) {
+                // If we've already found a bucket with these groupByKeys, then combine them
+                it.getAggregatedValues().each { key, value ->
+                    def existingAgg = existingBucket.getAggregatedValues().get(key)
+                    if (existingAgg) {
+                        def newAgg = new InternalStats(
+                            existingAgg.getName(),
+                            existingAgg.getCount() + value.getCount(),
+                            existingAgg.getSum() + value.getSum(),
+                            Math.min(existingAgg.getMin(), value.getMin()),
+                            Math.max(existingAgg.getMax(), value.getMax()),
+                            new ValueFormatter.Raw()
+                        )
+                        existingBucket.getAggregatedValues().put(key, newAgg)
+                    } else {
+                        existingBucket.put(key, value)
+                    }
+                }
+                existingBucket.setDocCount(existingBucket.getDocCount() + it.getDocCount())
+            } else {
+                // If there isn't already a bucket with these groupByKeys, then add it to the map
+                mappedBuckets.put(it.getGroupByKeys(), it)
+            }
+        }
+        return mappedBuckets.values().asList()
+    }
+
+    private static List<Map<String, Object>> extractMetricsFromBuckets(clauses, buckets) {
+        return buckets.collect {
+            def result = it.getGroupByKeys()
+            result.putAll(extractMetrics(clauses, it.getAggregatedValues(), it.getDocCount()))
+            result
+        }
     }
 
     private static Map<String, Object> extractMetrics(clauses, results, totalCount) {
@@ -234,30 +346,47 @@ class ElasticSearchQueryExecutor extends AbstractQueryExecutor {
         metrics
     }
 
+    private static List<Map<String, Object>> sortBuckets(List<SortClause> sortClauses, List<Map<String, Object>> buckets) {
+        if (sortClauses) {
+            buckets.sort { a, b ->
+                for (def sortClause: sortClauses) {
+                    def aField = a[sortClause.fieldName]
+                    def bField = b[sortClause.fieldName]
+                    def order = sortClause.getSortDirection() * (aField <=> bField)
+                    if (order != 0) {
+                        return order
+                    }
+                }
+                return 0
+            }
+        }
+        return buckets
+    }
+
     /*
-    * The aggregation results from ES will be a tree of aggregation -> buckets -> aggregation -> buckets -> etc
-    * we want to flatten it into a list of buckets where we have one item in the list for each leaf in the tree.
-    * Each item is an accumulation of all the buckets along the path to the leaf.
-    *
-    * We process an aggregation by getting the list of buckets and calling extract again for each of them.
-    * For each bucket we copy the current accumulator, since we're branching into more paths in the tree.
-    *
-    * We process a bucket by getting the current groupByClause and using it to get the value we're interested in
-    * from the bucket. Then if there are more groupByClauses, we recurse into extract using the rest of the clauses
-    * and the nested aggregation. If there are no more clauses to process, then we've reached the bottom of the tree
-    * we add any metric aggregations to the bucket and push it onto the result list.
-    */
-    private static List<Map<String, Object>> extractBuckets(groupByClauses, value, metricAggs, Map accumulator = [:], List<Map<String, Object>> results = []) {
+     * The aggregation results from ES will be a tree of aggregation -> buckets -> aggregation -> buckets -> etc
+     * we want to flatten it into a list of buckets where we have one item in the list for each leaf in the tree.
+     * Each item is an accumulation of all the buckets along the path to the leaf.
+     *
+     * We process an aggregation by getting the list of buckets and calling extract again for each of them.
+     * For each bucket we copy the current accumulator, since we're branching into more paths in the tree.
+     *
+     * We process a bucket by getting the current groupByClause and using it to get the value we're interested in
+     * from the bucket. Then if there are more groupByClauses, we recurse into extract using the rest of the clauses
+     * and the nested aggregation. If there are no more clauses to process, then we've reached the bottom of the tree
+     * we add any metric aggregations to the bucket and push it onto the result list.
+     */
+    private static List<AggregationBucket> extractBuckets(groupByClauses, value, Map accumulator = [:], List<AggregationBucket> results = []) {
         value.buckets.each {
             def newAccumulator = [:]
             newAccumulator.putAll(accumulator)
-            extractBucket(groupByClauses, it, metricAggs, newAccumulator, results)
+            extractBucket(groupByClauses, it, newAccumulator, results)
         }
 
         return results
     }
 
-    private static void extractBucket(groupByClauses, value, metricAggs, Map accumulator, List<Map<String, Object>> results) {
+    private static void extractBucket(groupByClauses, value, Map accumulator, List<Map<String, Object>> results) {
         def currentClause = groupByClauses.head()
         switch (currentClause.getClass()) {
             case GroupByFieldClause:
@@ -274,13 +403,17 @@ class ElasticSearchQueryExecutor extends AbstractQueryExecutor {
         }
 
         if (groupByClauses.tail()) {
-            extractBuckets(groupByClauses.tail(), (MultiBucketsAggregation)value.getAggregations().asList().head(), metricAggs, accumulator, results)
+            extractBuckets(groupByClauses.tail(), (MultiBucketsAggregation)value.getAggregations().asList().head(), accumulator, results)
         } else {
+            def bucket = new AggregationBucket()
+            bucket.setGroupByKeys(accumulator)
+            bucket.setDocCount(value.getDocCount())
+
             def terminalAggs = value.getAggregations()
             if (terminalAggs) {
-                accumulator.putAll(extractMetrics(metricAggs, terminalAggs.asMap(), value.docCount))
+                bucket.getAggregatedValues().putAll(terminalAggs.asMap())
             }
-            results.push(accumulator)
+            results.push(bucket)
         }
     }
 
@@ -298,7 +431,22 @@ class ElasticSearchQueryExecutor extends AbstractQueryExecutor {
         def result = (offset >= buckets.size()) ? [] : buckets[offset..endIndex]
 
         return result
+    }
 
+    private Map getFieldTypesInObject(Map fields, String parentFieldName) {
+        def fieldsToTypes = [:]
+        fields.get('properties').each { field ->
+            String fieldName = field.getKey()
+            if(parentFieldName) {
+                fieldName = parentFieldName + "." + field.getKey()
+            }
+            if(field.getValue().containsKey('type')) {
+                fieldsToTypes.put(fieldName, field.getValue().get('type'))
+            } else {
+                fieldsToTypes.putAll(getFieldTypesInObject(field.getValue(), fieldName))
+            }
+        }
+        return fieldsToTypes
     }
 
     private List<String> getFieldsInObject(Map fields, String parentFieldName) {
@@ -319,5 +467,30 @@ class ElasticSearchQueryExecutor extends AbstractQueryExecutor {
         }
 
         return fieldNames
+    }
+
+    private void checkDatabaseAndTableExists(String databaseName, String tableName) {
+        def dbExists = getClient().admin().indices().exists(new IndicesExistsRequest(databaseName)).actionGet().isExists()
+
+        if(!dbExists) {
+            throw new ResourceNotFoundException("Database ${databaseName} does not exist")
+        }
+
+        def tableExists = false
+
+        getMappings().keysIt().each { dbKey ->
+            if (dbKey.matches(databaseName)) {
+                def dbMappings = mappings.get(dbKey)
+                dbMappings.keysIt().each { tableKey ->
+                    if (tableKey.matches(tableName)) {
+                        tableExists = true
+                    }
+                }
+            }
+        }
+
+        if(!tableExists) {
+            throw new ResourceNotFoundException("Table ${tableName} does not exist")
+        }
     }
 }

@@ -13,22 +13,13 @@
  * limitations under the License.
  *
  */
-package com.ncc.neon.userimport.readers
 
-import com.ncc.neon.userimport.exceptions.UnsupportedFiletypeException
+package com.ncc.neon.connect
 
-import org.springframework.stereotype.Component
+class DerbyConnectionClientFactory implements ConnectionClientFactory{
 
-@Component
-class SheetReaderFactory {
-	SheetReader getSheetReader(String type) {
-		switch(type) {
-			case "csv":
-				return new CSVSheetReader()
-			case "xlsx":
-				return new ExcelSheetReader()
-			default:
-				throw new UnsupportedFiletypeException("Import of that type of file is not supported.")
-		}
-	}
+    @Override
+    ConnectionClient createConnectionClient(ConnectionInfo info) {
+        return new DerbyConnectionClient(info)
+    }
 }

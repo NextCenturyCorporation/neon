@@ -38,7 +38,6 @@ classes/
 .settings
 .classpath
 target/
-metadata/bin
 neon-server/bin
 
 *.*~
@@ -49,3 +48,6 @@ neon-server/bin
 
 #gtd symlink
 examples/neon-gtd
+
+# link to examples
+examples/app

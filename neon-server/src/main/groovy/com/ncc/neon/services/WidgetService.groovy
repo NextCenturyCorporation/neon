@@ -15,7 +15,6 @@
  */
 
 package com.ncc.neon.services
-import com.ncc.neon.metadata.model.WidgetAndDatasetMetadata
 import com.ncc.neon.state.StateIdGenerator
 import com.ncc.neon.state.WidgetState
 import com.ncc.neon.state.WidgetStates
@@ -34,9 +33,6 @@ class WidgetService {
 
     @Autowired
     WidgetStates widgetStates
-
-    @Autowired
-    MetadataResolver metadataResolver
 
     @Autowired
     StateIdGenerator stateIdGenerator
@@ -66,35 +62,6 @@ class WidgetService {
             return widgetState.state
         }
         return "{}"
-    }
-
-    /**
-     * Gets any initialization data associated with a particular widget
-     * @param widgetId An identifier for the widget, typically a widget's name
-     * @return json containing information about the widget's state, or null if nothing is found.
-     */
-    @GET
-    @Produces(MediaType.APPLICATION_JSON)
-    @Path("widgetinitialization/{widgetId}")
-    String getWidgetInitialization(@PathParam("widgetId") String widgetId) {
-        def data = metadataResolver.getWidgetInitializationData(widgetId)
-        return data.initDataJson
-    }
-
-    /**
-     * Gets any information that defines how fields on a widget map to fields in the dataset
-     * @param databaseName
-     * @param tableName
-     * @param widgetId
-     * @return
-     */
-    @GET
-    @Produces(MediaType.APPLICATION_JSON)
-    @Path("widgetdataset/{databaseName}/{tableName}/{widgetId}/")
-    List<WidgetAndDatasetMetadata> getWidgetDatasetData(@PathParam("databaseName") String databaseName,
-                                                      @PathParam("tableName") String tableName,
-                                                      @PathParam("widgetId") String widgetId) {
-        return metadataResolver.getWidgetDatasetData(databaseName, tableName, widgetId)
     }
 
     /**

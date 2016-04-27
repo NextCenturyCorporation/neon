@@ -14,6 +14,8 @@ Apache v2.0 (apache-2.0.txt)
   -- org.codenarc:CodeNarc:0.19
 - cglib
   -- cglib:cglib:2.2.2
+- Derby
+  -- org.apache.derby:derby:10.12.1.1
 - Gradle (see http://www.gradle.org/license)
 - Gradle SSH Plugin
   -- org.hidetake:gradle-ssh-plugin:0.2.0
@@ -49,13 +51,6 @@ Apache v2.0 (apache-2.0.txt)
   -- org.apache.thrift:libfb303:0.9.0
   -- org.apache.thrift:libthrift:0.9.0
 
-BSD (bsd.txt)
-- antlr
-  -- org.antlr:antlr4:4.0
-  -- org.antlr:antlr-runtime:3.5
-  -- org.antlr:antlr4-runtime:4.0
-  -- org.antlr:ST4:4.0.7
-
 CDDL v1.1 (cddl-1.1.txt)
 - Jersey
   -- com.sun.jersey.contribs:jersey-spring:1.15
@@ -77,15 +72,6 @@ Eclipse Public License (EPL v1.0, epl-1.0.txt)
 - Logback
   -- ch.qos.logback:logback-classic:1.0.13
   -- ch.qos.logback:logback-core:1.0.13
-
-École Polytechnique Fédérale de Lausanne (EPFL) License (epfl.txt)
-- Scala
-  -- org.scala-lang:scala-library:2.10.3
-
-Gatling / Highchart License (gatling.txt)
-- Gatling
-  -- com.excilys.ebi.gatling.highcharts:gatling-charts-highcharts:1.5.3
-  -- com.excilys.ebi.gatling:gatling-app:1.5.3
 
 JLine (jline.txt)
 - jline (used by Hive/Shark)

@@ -58,53 +58,27 @@ describe('widgets', function() {
         });
     });
 
-    it('gets widget initialization data', function() {
-        var expected = {
-            key1: "value1"
-        };
-        var actual = executeAndWait(neon.widget.getWidgetInitializationData, 'widget1');
-        runs(function() {
-            expect(actual.get()).toEqual(expected);
-        });
-    });
-
-    it('get empty initialization data if none exists', function() {
-        var empty = executeAndWait(neon.widget.getWidgetInitializationData, 'invalidWidget');
-        runs(function() {
-            expect(empty.get()).toBe('');
-        });
-    });
-
-    it('gets widget dataset data', function() {
-        var expected = {
-            aSelector: "someValue"
-        };
-        var actual = executeAndWait(neon.widget.getWidgetDatasetMetadata, ['database1', 'table1', 'widget1']);
-        runs(function() {
-            expect(actual.get()).toEqual(expected);
-        });
-    });
-
-    it('gets empty widget dataset data if none exists', function() {
-        var empty = executeAndWait(neon.widget.getWidgetDatasetMetadata, ['invalidDatabase', 'invalidWidget', 'invalidWidget']);
-        runs(function() {
-            expect(empty.get()).toEqual({});
-        });
-    });
-
     it('gets a unique instance id', function() {
         // instanceId1a and 1b should be the same
-        var instanceId1a = neon.widget.getInstanceId('qualifier1');
-        var instanceId1b = neon.widget.getInstanceId('qualifier1');
-        var instanceId2 = neon.widget.getInstanceId('qualifier2');
-        // these are synchronous methods so they will block
-        var globalInstanceId1a = neon.widget.getInstanceId();
-        var globalInstanceId1b = neon.widget.getInstanceId();
-
-        expect(instanceId1a).toEqual(instanceId1b);
-        expect(instanceId1a).not.toEqual(instanceId2);
-        expect(instanceId1a).not.toEqual(globalInstanceId1a);
-        expect(instanceId2).not.toEqual(globalInstanceId1a);
-        expect(globalInstanceId1a).toEqual(globalInstanceId1b);
+        var instanceId1a = executeAndWait(neon.widget.getInstanceId, 'qualifier1');
+        runs(function() {
+            var instanceId1b = executeAndWait(neon.widget.getInstanceId, 'qualifier1');
+            runs(function() {
+                var instanceId2 = executeAndWait(neon.widget.getInstanceId, 'qualifier2');
+                runs(function() {
+                    var globalInstanceId1a = executeAndWait(neon.widget.getInstanceId);
+                    runs(function() {
+                        var globalInstanceId1b = executeAndWait(neon.widget.getInstanceId);
+                        runs(function() {
+                            expect(instanceId1a.get()).toEqual(instanceId1b.get());
+                            expect(instanceId1a.get()).not.toEqual(instanceId2.get());
+                            expect(instanceId1a.get()).not.toEqual(globalInstanceId1a.get());
+                            expect(instanceId2.get()).not.toEqual(globalInstanceId1a.get());
+                            expect(globalInstanceId1a.get()).toEqual(globalInstanceId1b.get());
+                        });
+                    });
+                });
+            });
+        });
     });
 });

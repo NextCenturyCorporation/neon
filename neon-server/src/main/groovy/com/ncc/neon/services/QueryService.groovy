@@ -19,7 +19,6 @@ package com.ncc.neon.services
 import com.ncc.neon.connect.ConnectionInfo
 import com.ncc.neon.connect.ConnectionManager
 import com.ncc.neon.connect.DataSources
-import com.ncc.neon.metadata.model.ColumnMetadata
 import com.ncc.neon.query.*
 import com.ncc.neon.query.clauses.WhereClause
 import com.ncc.neon.query.executor.QueryExecutor
@@ -43,9 +42,6 @@ class QueryService {
 
     @Autowired
     QueryExecutorFactory queryExecutorFactory
-
-    @Autowired
-    MetadataResolver metadataResolver
 
     @Autowired
     ConnectionManager connectionManager
@@ -148,22 +144,6 @@ class QueryService {
     }
 
     /**
-     * Gets metadata associated with the columns of the table
-     * @param databaseName The database containing the data
-     * @param tableName The table containing the data
-     * @return The list of metadata associated with the columns
-     */
-    @GET
-    @Produces(MediaType.APPLICATION_JSON)
-    @Path("columnmetadata/{databaseName}/{tableName}")
-    List<ColumnMetadata> getColumnMetadata(
-            @PathParam("databaseName") String databaseName,
-            @PathParam("tableName") String tableName
-    ) {
-        return metadataResolver.retrieve(databaseName, tableName, [] as Set)
-    }
-
-    /**
      * Gets a list of all the databases for the database type/host pair.
      * @param host The host the database is running on
      * @param databaseType the type of database
@@ -190,6 +170,58 @@ class QueryService {
     List<String> getTableNames(@PathParam("host") String host, @PathParam("databaseType") String databaseType, @PathParam("database") String database) {
         QueryExecutor queryExecutor = getExecutor(host, databaseType)
         return queryExecutor.showTables(database)
+    }
+
+    /**
+     * Get all the column's types for tabular datasets from the supplied connection.
+     * @param host The host the database is running on
+     * @param databaseType the type of database
+     * @param databaseName The database containing the data
+     * @param tableName The table containing the data
+     * @return The field names and their types.
+     */
+    @GET
+    @Produces(MediaType.APPLICATION_JSON)
+    @Path("fields/types/{host}/{databaseType}/{databaseName}/{tableName}")
+    Map getFieldTypes(
+            @PathParam("host") String host,
+            @PathParam("databaseType") String databaseType,
+            @PathParam("databaseName") String databaseName,
+            @PathParam("tableName") String tableName) {
+
+        QueryExecutor queryExecutor = getExecutor(host, databaseType)
+        return queryExecutor.getFieldTypes(databaseName, tableName)
+    }
+
+    /**
+     * Get all the column's types for tabular datasets from the supplied connection.
+     * @param host The host the databases are running on
+     * @param databaseType the type of database
+     * @param databaseToTableNames A mapping of database names to a list of table names to get field
+     * types for.
+     * @return Field names and their types for each database/table pair.
+     */
+    @POST
+    @Produces(MediaType.APPLICATION_JSON)
+    @Path("fields/types/{host}/{databaseType}")
+    Map getFieldTypesForGroup(
+            @PathParam("host") String host,
+            @PathParam("databaseType") String databaseType,
+            Map<String, List<String>> databaseToTableNames) {
+
+        Map fieldTypes = [:]
+        QueryExecutor queryExecutor = getExecutor(host, databaseType)
+
+        databaseToTableNames.keySet().each { databaseName ->
+            if(!fieldTypes[databaseName]) {
+                fieldTypes[databaseName] = [:]
+            }
+            databaseToTableNames[databaseName].each { tableName ->
+                fieldTypes[databaseName][tableName] = queryExecutor.getFieldTypes(databaseName, tableName)
+            }
+        }
+
+        return fieldTypes
     }
 
     /**

@@ -13,22 +13,18 @@
  * limitations under the License.
  *
  */
-package com.ncc.neon.userimport.readers
 
-import com.ncc.neon.userimport.exceptions.UnsupportedFiletypeException
+package com.ncc.neon.state.exceptions
 
-import org.springframework.stereotype.Component
 
-@Component
-class SheetReaderFactory {
-	SheetReader getSheetReader(String type) {
-		switch(type) {
-			case "csv":
-				return new CSVSheetReader()
-			case "xlsx":
-				return new ExcelSheetReader()
-			default:
-				throw new UnsupportedFiletypeException("Import of that type of file is not supported.")
-		}
-	}
+
+/**
+ * Thrown when parsing a text query into a Query object fails.
+ */
+
+class StateServiceException extends RuntimeException{
+
+    StateServiceException(String message){
+        super(message)
+    }
 }

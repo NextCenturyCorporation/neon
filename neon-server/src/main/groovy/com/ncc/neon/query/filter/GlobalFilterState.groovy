@@ -26,9 +26,21 @@ import org.springframework.web.context.WebApplicationContext
  */
 @Component
 @Scope(value = WebApplicationContext.SCOPE_SESSION, proxyMode = ScopedProxyMode.TARGET_CLASS)
-class GlobalFilterState implements FilterState, Serializable {
+class GlobalFilterState implements FilterState, Serializable, HttpSessionListener{
     private static final long serialVersionUID = 7307506929923060807L
+
+    private static int activeSessions
 
     @Delegate
     FilterCache delegate = new FilterCache()
+
+    @Override
+    void sessionCreated(HttpSessionEvent event) {
+        activeSessions++
+    }
+
+    @Override
+    void sessionDestroyed(HttpSessionEvent event) {
+        activeSessions--
+    }
 }

@@ -26,6 +26,7 @@ import com.ncc.neon.query.filter.SelectionState
 import com.ncc.neon.query.result.QueryResult
 import com.ncc.neon.query.result.ArrayCountPair
 import com.ncc.neon.query.result.TabularQueryResult
+import com.ncc.neon.util.ResourceNotFoundException
 
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -95,10 +96,15 @@ class SparkSQLQueryExecutor extends AbstractQueryExecutor {
     @Override
     List<String> showTables(String dbName) {
         LOGGER.debug("Executing SHOW TABLES IN {}", dbName)
-        return runAndRelease { client ->
-            client.executeQuery("SHOW TABLES IN " + dbName).collect { Map<String, String> map ->
-                map.get("result")
+        try {
+            return runAndRelease { client ->
+                client.executeQuery("SHOW TABLES IN " + dbName).collect { Map<String, String> map ->
+                    map.get("result")
+                }
             }
+        }
+        catch (SQLException ex) {
+            throw new ResourceNotFoundException("Table cannot be found", ex)
         }
     }
 
@@ -106,11 +112,25 @@ class SparkSQLQueryExecutor extends AbstractQueryExecutor {
     List<String> getFieldNames(String databaseName, String tableName) {
         try {
             def columns = runAndRelease { client -> client.getColumnNames(databaseName, tableName) }
+            if (columns.size() == 0) {
+                // For consistency with other connectors that throw exceptions when the table does
+                // not exist
+                throw new ResourceNotFoundException("Columns cannot be found")
+            }
             return columns
         }
         catch (SQLException ex) {
-            LOGGER.error("Columns cannot be found ", ex)
-            return []
+            throw new ResourceNotFoundException("Columns cannot be found", ex)
+        }
+    }
+
+    @Override
+    Map getFieldTypes(String databaseName, String tableName) {
+        try {
+            return runAndRelease { client -> client.getTypes(databaseName, tableName) }
+        }
+        catch (SQLException ex) {
+            throw new ResourceNotFoundException("Columns cannot be found", ex)
         }
     }
 
@@ -141,8 +161,7 @@ class SparkSQLQueryExecutor extends AbstractQueryExecutor {
             return runAndRelease { client -> client.isTypeArray(databaseName, tableName, fieldName) }
         }
         catch (SQLException ex) {
-            LOGGER.error("Columns cannot be found ", ex)
-            return [:]
+            throw new ResourceNotFoundException("Columns cannot be found", ex)
         }
     }
 

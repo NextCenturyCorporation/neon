@@ -1,9 +1,13 @@
 
 # Gradle will run more smoothly with these arguments
 org.gradle.jvmargs=-Xmx1024m -XX:MaxPermSize=256m
+
 # Gradle debug arguments.  This is useful for debugging purposes as "gradle jettyRun" will come up
 # in debug mode.  IDE debuggers (e.g., Eclipse) can attach to the port to debug the server side processes.
 # org.gradle.jvmargs=-Xmx1024m -XX:MaxPermSize=256m -Xdebug -agentlib:jdwp=transport=dt_socket,server=y,address=8000,suspend=n
+
+# Run gradle in daemon mode, which reduces the bootstrapping process and leverage cache. Do not use in 
+# integration servers and build server. 
 org.gradle.daemon=true
 
 # Path to a tomcat or other application server.
@@ -27,3 +31,7 @@ sshKeyFile=/path/to/sshkeyfile
 # Optionally if you don't have an ssh key file you can put the password in here
 # password=sshpassword
 
+# Signing values.  Uncomment and set these to do OpenPGP signing of artifacts
+# signing.keyId=
+# signing.password=
+# signing.secretKeyRingFile=
