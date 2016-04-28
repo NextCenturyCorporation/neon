@@ -424,14 +424,15 @@ class ElasticSearchQueryExecutor extends AbstractQueryExecutor {
             def type = field.getValue().containsKey('type') ? field.getValue().get('type') : 'object'
 
             String fieldName = field.getKey()
+
             if(parentFieldName) {
                 fieldName = parentFieldName + "." + field.getKey()
             }
 
+            fieldNames.add(fieldName)
+
             if(type == 'object') {
                 fieldNames.addAll(getFieldsInObject(field.getValue(), fieldName))
-            } else {
-                fieldNames.add(fieldName)
             }
         }
 
