@@ -209,7 +209,7 @@ class SseQueryService {
                     // See if they are all completed.  If so, send last values, and done
                     if (sseQueries.every { it.complete == true }) {
                         LOGGER.debug("Sending done ")
-                        eventOutput.write(new Builder().data(String, JsonOutput.toJson([])).id("done").build())
+                        EVENTOUTPUT.write(new Builder().data(String, JsonOutput.toJson([])).id("done").build())
                         return
                     }
 
@@ -229,7 +229,7 @@ class SseQueryService {
                     QueryResult combinedResults = combineResults(sseQueries)
                     String jsonOutput = JsonOutput.toJson(combinedResults)
                     LOGGER.debug("Sending json " + jsonOutput)
-                    eventOutput.write(new Builder().data(String, jsonOutput).id("update").build())
+                    EVENTOUTPUT.write(new Builder().data(String, jsonOutput).id("update").build())
                 }
             }
             catch (final InterruptedException | IOException e) {
@@ -298,8 +298,7 @@ class SseQueryService {
      */
     static def updateSseQueryRandStep(SseQueryData sseQueryData) {
 
-        def (min, max, step) = updateSteps(sseQueryData.randMin, sseQueryData.randMax, sseQueryData.randStep,
-                sseQueryData.duration)
+        def (min, max, step) = updateSteps(sseQueryData.randMin, sseQueryData.randMax, sseQueryData.randStep)
         sseQueryData.randMin = min
         sseQueryData.randMax = max
         sseQueryData.randStep = step

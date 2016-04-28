@@ -26,7 +26,7 @@ import com.ncc.neon.query.clauses.SelectClause
 import com.ncc.neon.query.clauses.SingularWhereClause
 import com.ncc.neon.query.clauses.WhereClause
 import com.ncc.neon.query.filter.DataSet
-import com.ncc.neon.query.filter.FilterState
+import com.ncc.neon.query.filter.GlobalFilterState
 import com.ncc.neon.query.filter.SelectionState
 import com.ncc.neon.query.Query
 import com.ncc.neon.query.QueryOptions
@@ -58,7 +58,7 @@ class ElasticSearchConversionStrategy {
     static final String STATS_AGG_PREFIX = "_statsFor_"
     static final String[] DATE_OPERATIONS = ['year', 'month', 'dayOfMonth', 'dayOfWeek', 'hour', 'minute', 'second']
 
-    private final FilterState filterState
+    private final GlobalFilterState filterState
     private final SelectionState selectionState
 
     public SearchRequest convertQuery(Query query, QueryOptions options) {

@@ -16,6 +16,8 @@
 
 package com.ncc.neon.query.filter
 
+import javax.servlet.http.HttpSessionEvent
+import javax.servlet.http.HttpSessionListener
 import org.springframework.context.annotation.Scope
 import org.springframework.context.annotation.ScopedProxyMode
 import org.springframework.stereotype.Component

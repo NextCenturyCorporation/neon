@@ -95,9 +95,6 @@ class ElasticSearchQueryExecutor extends AbstractQueryExecutor {
     }
 
     @Autowired
-    private FilterState filterState
-
-    @Autowired
     private SelectionState selectionState
 
     @Autowired

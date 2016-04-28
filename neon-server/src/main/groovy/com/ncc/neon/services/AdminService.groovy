@@ -17,7 +17,7 @@
 package com.ncc.neon.services
 
 import com.ncc.neon.query.mongo.SimpleQueryCache
-import com.ncc.neon.query.filter.FilterState
+import com.ncc.neon.query.filter.GlobalFilterState
 
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -178,6 +178,6 @@ class AdminService {
     @Path("mongo/getsessions")
     int displaySessions() {
         LOGGER.debug("Getting number of active sessions...")
-        return FilterState.activeSessions
+        return GlobalFilterState.activeSessions
     }
 }

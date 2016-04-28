@@ -26,6 +26,7 @@ import com.ncc.neon.query.filter.DataSet
 import com.ncc.neon.query.filter.Filter
 import com.ncc.neon.query.filter.FilterKey
 import com.ncc.neon.query.filter.FilterState
+//import com.ncc.neon.query.filter.GlobalFilterState
 import com.ncc.neon.query.filter.SelectionState
 import groovy.transform.Immutable
 

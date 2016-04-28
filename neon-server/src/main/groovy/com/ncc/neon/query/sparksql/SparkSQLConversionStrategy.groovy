@@ -21,7 +21,7 @@ import com.ncc.neon.query.clauses.*
 import com.ncc.neon.query.filter.DataSet
 import com.ncc.neon.query.filter.Filter
 import com.ncc.neon.query.filter.FilterKey
-import com.ncc.neon.query.filter.FilterState
+import com.ncc.neon.query.filter.GlobalFilterState
 import com.ncc.neon.query.filter.SelectionState
 import groovy.transform.Immutable
 
@@ -33,7 +33,7 @@ import groovy.transform.Immutable
 @Immutable
 class SparkSQLConversionStrategy {
 
-    private final FilterState filterState
+    private final GlobalFilterState filterState
     private final SelectionState selectionState
 
     String convertQuery(Query query, QueryOptions queryOptions) {

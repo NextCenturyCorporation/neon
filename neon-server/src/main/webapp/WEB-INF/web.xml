@@ -37,7 +37,7 @@
 
     <listener>
         <listener-class>
-            com.ncc.neon.query.filter.FilterState
+            com.ncc.neon.query.filter.GlobalFilterState
         </listener-class>
     </listener>
 
