@@ -293,7 +293,7 @@ class ElasticSearchConversionStrategy {
         }
 
         if (clause.operator in ['=', '!=']) {
-            def hasValue = clause.rhs || clause.rhs == ''
+            def hasValue = clause.rhs || clause.rhs == '' || clause.rhs == false
 
             def filter = hasValue ?
                 FilterBuilders.termFilter(clause.lhs as String, clause.rhs as String) :
