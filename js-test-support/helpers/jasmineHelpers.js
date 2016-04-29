@@ -16,7 +16,7 @@
 
 var neontest = neontest || {};
 neontest.matchers = {};
-neontest.matchers.matcher = new jasmine.Matchers();
+//neontest.matchers.matcher = new jasmine.Matchers();
 
 /**
  * Executes the asynchronous function synchronously and returns the result of the call
@@ -56,55 +56,68 @@ neontest.executeAndWait = function(target, asyncFunction, args) {
  * @param expectedArray
  * @returns {boolean}
  */
-neontest.matchers.toBeEqualArray = function(expectedArray) {
-    var err = '';
+neontest.matchers.toBeEqualArray =  function(util, customEqualityTesters) {
+    return {
+        compare: function(actual, expectedArray) {
+            var err = '';
+            var result = {
+                pass: false
+            };
 
-    this.message = function() {
-        return err;
-    };
-
-    if(!(this.actual instanceof Array)) {
-        err = 'Actual value not an array, received a ' + this.actual.constructor.name + ' instead';
-        return false;
-    }
-
-    if(!(expectedArray instanceof Array)) {
-        err = 'Test configuration error. Expected value not an array, received a ' + expectedArray.constructor.name + ' instead';
-        return false;
-    }
-
-    if(expectedArray.length !== this.actual.length) {
-        err = 'Expected array of length ' + expectedArray.length + ', but was ' + this.actual.length;
-        return false;
-    }
-
-    var matchError = false;
-    this.actual.forEach(function(element, index, actual) {
-        if(!lodash.isEqual(actual[index], expectedArray[index])) {
-            if(err) {
-                err += '\r\n';
+            if(!(actual instanceof Array)) {
+                result.message = 'Actual value not an array, received a ' +
+                    ((actual && actual.constructor) ? actual.constructor.name : typeof actual) + ' instead';
+                return result;
             }
-            err += 'Element ' + index + ' does not match, expected ' + JSON.stringify(expectedArray[index]) + ', but was ' + JSON.stringify(actual[index]);
-            matchError = true;
+
+            if(!(expectedArray instanceof Array)) {
+                result.message = 'Test configuration error. Expected value not an array, received a ' + expectedArray.constructor.name + ' instead';
+                return result;
+            }
+
+            if(expectedArray.length !== actual.length) {
+                result.message = 'Expected array of length ' + expectedArray.length + ', but was ' + actual.length;
+                return result;
+            }
+
+            var matchError = false;
+            actual.forEach(function(element, index, actual) {
+                if(!lodash.isEqual(actual[index], expectedArray[index])) {
+                    if(err) {
+                        err += '\r\n';
+                    }
+                    result.message += 'Element ' + index + ' does not match, expected ' + JSON.stringify(expectedArray[index]) + ', but was ' + JSON.stringify(actual[index]);
+                    matchError = true;
+                }
+            });
+
+            if(matchError) {
+                return result;
+            }
+
+            result.pass = true;
+            return result;
         }
-    });
-
-    if(matchError) {
-        return false;
-    }
-
-    return true;
+    };
 };
 
-neontest.matchers.toBeInstanceOf = function(expectedType) {
-    var actual = this.actual;
-    this.message = function() {
-        // constructor.name is not defined in all browsers
-        var typeName = (Function.prototype.name !== undefined) ? actual.constructor.name : actual.constructor;
-        return 'expected ' + actual + ' to be of type ' + expectedType + ', but was ' + typeName;
-    };
+neontest.matchers.toBeInstanceOf = function(util, customEqualityTesters) {
+    return {
+        compare: function(actual, expectedType) {
+            var result = {
+                pass: false
+            };
 
-    return actual instanceof expectedType;
+            result.pass = util.equals(actual, jasmine.any(expectedType), customEqualityTesters);
+            if (!result.pass) {
+                // constructor.name is not defined in all browsers.
+                var typeName = (Function.prototype.name !== undefined) ? actual.constructor.name : actual.constructor;
+                result.message = 'Expected ' + actual + ' to be instance of ' + expectedType +
+                                    ', but was ' + typeName;
+            }
+            return result;
+        }
+    };
 };
 
 /**
@@ -115,18 +128,22 @@ neontest.matchers.toBeInstanceOf = function(expectedType) {
  * @methods
  * @returns {boolean}
  */
-neontest.matchers.toBeArrayWithSameElements = function(expectedArray) {
-    var actual = this.actual;
-    this.message = function() {
-        return 'expected: ' + expectedArray + ', actual: ' + actual;
+neontest.matchers.toBeArrayWithSameElements = function(util, customEqualityTesters) {
+    return {
+        compare: function(actual, expectedArray) {
+            var actual = this.actual;
+            this.message = function() {
+                return 'expected: ' + expectedArray + ', actual: ' + actual;
+            };
+
+            return expectedArray.length === actual.length && lodash.difference(expectedArray, actual).length === 0;
+        }
     };
-
-    return expectedArray.length === actual.length && lodash.difference(expectedArray, actual).length === 0;
 };
 
-jasmine.Spy.prototype.wasInvoked = function() {
-    return this.callCount > 0;
-};
+//jasmine.Spy.prototype.wasInvoked = function() {
+//    return this.callCount > 0;
+//};
 
 // this adds the matchers globally for all tests
 beforeEach(function() {
@@ -136,5 +153,5 @@ beforeEach(function() {
         toBeArrayWithSameElements: neontest.matchers.toBeArrayWithSameElements
     };
 
-    this.addMatchers(matchers);
+    jasmine.addMatchers(matchers);
 });
