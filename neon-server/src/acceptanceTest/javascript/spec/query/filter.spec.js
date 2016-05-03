@@ -29,122 +29,81 @@ describe('neon.query.Filter', function() {
     var connection = new neon.query.Connection();
     var messenger = new neon.eventing.Messenger();
 
-    var executeCallAndWait = function(functionObj, asyncFunction, params) {
-        return neontest.executeAndWait(functionObj, asyncFunction, params);
+    var executeCallAndWait = function(name, functionObj, asyncFunction, params, test) {
+        return neontest.executeAndWait(name, functionObj, asyncFunction, params, test);
     };
 
-    beforeEach(function() {
+    beforeEach(function(done) {
         connection.connect(neon.query.Connection.MONGO, host);
         var filterClearComplete = false;
 
-        runs(function() {
-            messenger.clearFiltersSilently(function() {
-                filterClearComplete = true;
-            });
-        });
-
-        waitsFor(function() {
-            return filterClearComplete;
+        messenger.clearFiltersSilently(function() {
+            filterClearComplete = true;
+            done();
         });
     });
 
-    function assertAsyncResults(functionObj, asyncFunction, params, expectedData) {
-        var result = executeCallAndWait(functionObj, asyncFunction, params);
-        runs(function() {
-            expect(result.get()).toEqual(expectedData);
+    function assertAsyncResults(name, functionObj, asyncFunction, params, expectedData, test) {
+        executeCallAndWait(name, functionObj, asyncFunction, params, function(result) {
+            expect(result).toEqual(expectedData);
         });
     }
 
-    var addFilters = function(callback) {
+    var addFilters = function(done) {
         var filter = new neon.query.Filter().selectFrom("db1", "t1").name("filter").where("a", "=", 1);
         var filter2 = new neon.query.Filter().selectFrom("db1", "t2").name("filter2").where("b", "=", 2);
         var filter3 = new neon.query.Filter().selectFrom("db2", "t1").name("filter3").where("c", "=", 3);
         var filter4 = new neon.query.Filter().selectFrom("db2", "t3").name("filter4").where("d", "=", 4);
 
-        neontest.executeAndWait(messenger, messenger.addFilter, [uuid(), filter]);
-        runs(function() {
-            neontest.executeAndWait(messenger, messenger.addFilter, [uuid(), filter2]);
-            runs(function() {
-                neontest.executeAndWait(messenger, messenger.addFilter, [uuid(), filter3]);
-                runs(function() {
-                    neontest.executeAndWait(messenger, messenger.addFilter, [uuid(), filter4]);
-                    runs(function() {
-                        callback();
+        messenger.addFilter(uuid(), filter, function() {
+            messenger.addFilter(uuid(), filter2, function() {
+                messenger.addFilter(uuid(), filter3, function() {
+                    messenger.addFilter(uuid(), filter4, function() {
+                        done();
                     });
                 });
             });
         });
     };
 
-    describe("getFilterState", function() {
-        it('should return all filters for table * and database *', function() {
-            runs(function() {
-                addFilters(function() {
-                    var result = executeCallAndWait(this, neon.query.Filter.getFilterState, ["*", "*"]);
-                    runs(function() {
-                        result = result.get();
-                        expect(result.length).toBe(4);
-                    });
-                });
-            });
+    describe("getFilterState when filters exist", function() {
+        beforeEach(function(done) {
+            addFilters(done);
         });
 
-        it('should return filters for all tables for table * and database', function() {
-            runs(function() {
-                addFilters(function() {
-                    var result = executeCallAndWait(this, neon.query.Filter.getFilterState, [databaseName, "*"]);
-                    runs(function() {
-                        result = result.get();
-                        expect(result.length).toBe(2);
-                        expect(result[0].filter.databaseName).toBe(databaseName);
-                        expect(result[1].filter.databaseName).toBe(databaseName);
-                    });
-                });
-            });
+        executeCallAndWait('should return all filters for table * and database *', this, neon.query.Filter.getFilterState, ["*", "*"], function(result) {
+            expect(result.length).toBe(4);
         });
 
-        it('should return filters for all databases for table and database *', function() {
-            runs(function() {
-                addFilters(function() {
-                    var result = executeCallAndWait(this, neon.query.Filter.getFilterState, ["*", tableName]);
-                    runs(function() {
-                        result = result.get();
-                        expect(result.length).toBe(2);
-                        expect(result[0].filter.tableName).toBe(tableName);
-                        expect(result[0].filter.tableName).toBe(tableName);
-                    });
-                });
-            });
+        executeCallAndWait('should return filters for all tables for table * and database', this, neon.query.Filter.getFilterState,
+            [databaseName, "*"] ,function(result) {
+            expect(result.length).toBe(2);
+            expect(result[0].filter.databaseName).toBe(databaseName);
+            expect(result[1].filter.databaseName).toBe(databaseName);
         });
 
-        it('should return filters for database and table', function() {
-            runs(function() {
-                addFilters(function() {
-                    var result = executeCallAndWait(this, neon.query.Filter.getFilterState, [databaseName, tableName]);
-                    runs(function() {
-                        result = result.get();
-                        expect(result.length).toBe(1);
-                        expect(result[0].filter.databaseName).toBe(databaseName);
-                        expect(result[0].filter.tableName).toBe(tableName);
-                    });
-                });
-            });
+        executeCallAndWait('should return filters for all databases for table and database *', this,
+            neon.query.Filter.getFilterState, ["*", tableName], function(result) {
+            expect(result.length).toBe(2);
+            expect(result[0].filter.tableName).toBe(tableName);
+            expect(result[0].filter.tableName).toBe(tableName);
         });
 
-        it('should return empty array if no filters exist for table and database', function() {
-            assertAsyncResults(this, neon.query.Filter.getFilterState, [databaseName, tableName], []);
+        executeCallAndWait('should return filters for database and table', this,
+            neon.query.Filter.getFilterState, [databaseName, tableName],function(result) {
+            expect(result.length).toBe(1);
+            expect(result[0].filter.databaseName).toBe(databaseName);
+            expect(result[0].filter.tableName).toBe(tableName);
         });
+    });
 
-        it('should return empty array if no filters exist for table * and database', function() {
-            assertAsyncResults(this, neon.query.Filter.getFilterState, [databaseName, "*"], []);
-        });
+    describe("getFilterState when no filters exist", function() {
+        assertAsyncResults('should return empty array if no filters exist for table and database', this, neon.query.Filter.getFilterState, [databaseName, tableName], []);
 
-        it('should return empty array if no filters exist for table and database *', function() {
-            assertAsyncResults(this, neon.query.Filter.getFilterState, ["*", tableName], []);
-        });
+        assertAsyncResults('should return empty array if no filters exist for table * and database', this, neon.query.Filter.getFilterState, [databaseName, "*"], []);
 
-        it('should return empty array if no filters exist for table * and database *', function() {
-            assertAsyncResults(this, neon.query.Filter.getFilterState, ["*", "*"], []);
-        });
+        assertAsyncResults('should return empty array if no filters exist for table and database *', this, neon.query.Filter.getFilterState, ["*", tableName], []);
+
+        assertAsyncResults('should return empty array if no filters exist for table * and database *', this, neon.query.Filter.getFilterState, ["*", "*"], []);
     });
 });

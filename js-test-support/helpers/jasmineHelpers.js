@@ -16,7 +16,6 @@
 
 var neontest = neontest || {};
 neontest.matchers = {};
-//neontest.matchers.matcher = new jasmine.Matchers();
 
 /**
  * Executes the asynchronous function synchronously and returns the result of the call
@@ -26,28 +25,29 @@ neontest.matchers = {};
  * @param {Object} A future whose "get" method will return the value of the async function when it is completed.
  * Typically this will be used inside of a jasmine "runs" block.
   */
-neontest.executeAndWait = function(target, asyncFunction, args) {
-    var done = false;
-    var argsArray = [];
-    var result;
-    if(args) {
-        argsArray = argsArray.concat(args);
-    }
+neontest.executeAndWait = function(name, target, asyncFunction, args, testFunc) {
+    describe('', function() {
+        var result;
 
-    // push the success callback to store the current result
-    argsArray.push(function(res) {
-        result = res;
-        done = true;
+        beforeEach(function(done){
+            var argsArray = [];
+
+            if(args) {
+                argsArray = argsArray.concat(args);
+            }
+            // push the success callback to store the current result
+            var successOrFailHandler = function(res) {
+                result = res;
+                done();
+            };
+            argsArray.push(successOrFailHandler);
+            argsArray.push(successOrFailHandler);
+            asyncFunction.apply(target, argsArray);
+        });
+        it(name, function() {
+            testFunc(result);
+        });
     });
-    asyncFunction.apply(target, argsArray);
-    waitsFor(function() {
-        return done;
-    });
-    return {
-        get: function() {
-            return result;
-        }
-    };
 };
 
 /**
@@ -113,12 +113,13 @@ neontest.matchers.toBeInstanceOf = function(util, customEqualityTesters) {
                 // constructor.name is not defined in all browsers.
                 var typeName = (Function.prototype.name !== undefined) ? actual.constructor.name : actual.constructor;
                 result.message = 'Expected ' + actual + ' to be instance of ' + expectedType +
-                                    ', but was ' + typeName;
+                    ', but was ' + typeName;
             }
             return result;
         }
     };
 };
+
 
 /**
  *
@@ -131,19 +132,16 @@ neontest.matchers.toBeInstanceOf = function(util, customEqualityTesters) {
 neontest.matchers.toBeArrayWithSameElements = function(util, customEqualityTesters) {
     return {
         compare: function(actual, expectedArray) {
-            var actual = this.actual;
-            this.message = function() {
-                return 'expected: ' + expectedArray + ', actual: ' + actual;
+            var result = {
+                pass: false
             };
+            result.message = 'expected: ' + expectedArray + ', actual: ' + actual;
+            result.pass = (expectedArray.length === actual.length && lodash.difference(expectedArray, actual).length === 0);
 
-            return expectedArray.length === actual.length && lodash.difference(expectedArray, actual).length === 0;
+            return result;
         }
     };
 };
-
-//jasmine.Spy.prototype.wasInvoked = function() {
-//    return this.callCount > 0;
-//};
 
 // this adds the matchers globally for all tests
 beforeEach(function() {

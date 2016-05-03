@@ -21,6 +21,7 @@
 /*global neontest*/
 /*global host*/
 /*global getJSONFixture*/
+/*global neon */
 
 describe('query mapping', function() {
     // aliases for easier test writing
@@ -31,6 +32,9 @@ describe('query mapping', function() {
     var databaseName = 'acceptanceTest';
     var tableName = 'records';
     var allData;
+    var query;
+    var expected;
+    var expectedData;
 
     var dcStateFilter = baseFilter().where('state', '=', 'DC');
 
@@ -41,38 +45,47 @@ describe('query mapping', function() {
     var filterId = "filterA";
 
     // helpers to run async tests against the correct objects
-    var executeQueryAndWait = function(asyncFunction, query) {
-        return neontest.executeAndWait(connection, asyncFunction, query);
+    var executeQueryAndWait = function(name, asyncFunction, query, test) {
+        return neontest.executeAndWait(name, connection, asyncFunction, query, test);
     };
 
-    var sendMessageAndWait = function(asyncFunction, args) {
-        return neontest.executeAndWait(messenger, asyncFunction, args);
+    var sendMessageAndWait = function(name, asyncFunction, args, test) {
+        return neontest.executeAndWait(name, messenger, asyncFunction, args, test);
     };
 
     beforeEach(function() {
         // host is generated dynamically during the build and included in the acceptance test helper file
         connection.connect(neon.query.Connection.MONGO, host);
-
         if(!allData) {
             allData = getJSONFixture('data.json');
         }
     });
 
-    it('get field names', function() {
-        var result = executeQueryAndWait(connection.getFieldNames, [databaseName, tableName]);
+    describe('get Field names', function() {
+        var result = '';
         var expected = ['_id', 'firstname', 'lastname', 'city', 'state', 'salary', 'hiredate', 'location.coordinates', 'location.type', 'tags'];
-        runs(function() {
-            expect(result.get()).toBeArrayWithSameElements(expected);
+        beforeEach(function(done) {
+            connection.getFieldNames(databaseName, tableName, function(res) {
+                result = res;
+                done();
+            }, function(err) {
+                result = err;
+                done();
+            });
+        });
+
+        it('get field names', function() {
+            expect(result).toBeArrayWithSameElements(expected);
         });
     });
 
-    it('query all data', function() {
-        assertQueryResults(baseQuery(), allData);
-    });
+    describe('queries', function() {
+        allData = getJSONFixture('data.json');
+        assertQueryResults('query all data', baseQuery(), allData);
 
-    it('select subset of fields from result', function() {
         var fields = ['firstname', 'lastname'];
-        var expected = [];
+        expected = [];
+        allData = getJSONFixture('data.json');
         allData.forEach(function(row) {
             var expectedRow = {};
             // the _id field is always included from mongo
@@ -85,157 +98,126 @@ describe('query mapping', function() {
             });
             expected.push(expectedRow);
         });
-        assertQueryResults(baseQuery().withFields(fields[0], fields[1]), expected);
-    });
+        assertQueryResults('select subset of fields from result', baseQuery().withFields(fields[0], fields[1]), expected);
 
-    it('select derived field', function() {
-        var expectedData = getJSONFixture('groupByMonth.json');
+        expectedData = getJSONFixture('groupByMonth.json');
         var groupByMonthClause = new neon.query.GroupByFunctionClause(neon.query.MONTH, 'hiredate', 'hire_month');
         // aggregate fields are automatically included in the select even though withFields is specified
-        var query = baseQuery().groupBy(groupByMonthClause).aggregate(neon.query.SUM, 'salary', 'salary_sum').sortBy('hire_month', neon.query.ASCENDING).withFields('hire_month');
-        assertQueryResults(query, expectedData);
-    });
+        query = baseQuery().groupBy(groupByMonthClause).aggregate(neon.query.SUM, 'salary', 'salary_sum').sortBy('hire_month', neon.query.ASCENDING).withFields('hire_month');
+        assertQueryResults('select derived field', query, expectedData);
 
-    it('query WHERE', function() {
         var whereStateClause = or(where('state', '=', 'VA'), where('state', '=', 'DC'));
         var salaryAndStateClause = and(where('salary', '>=', 100000), whereStateClause);
-        var query = baseQuery().where(salaryAndStateClause);
-        assertQueryResults(query, rows(0, 2, 4));
-    });
+        query = baseQuery().where(salaryAndStateClause);
+        assertQueryResults('query WHERE compound clause', query, rows(0, 2, 4));
 
-    it('query WHERE field is null or missing', function() {
         var whereLastNameNullClause = where('lastname', '=', null);
-        var query = baseQuery().where(whereLastNameNullClause);
-        var expectedData = getJSONFixture('null_or_missing.json');
-        assertQueryResults(query, expectedData);
-    });
+        query = baseQuery().where(whereLastNameNullClause);
+        expectedData = getJSONFixture('null_or_missing.json');
+        assertQueryResults('query WHERE', query, expectedData);
 
-    it('query WHERE field is not null and not missing', function() {
         var whereLastNameNotNullClause = where('lastname', '!=', null);
-        var query = baseQuery().where(whereLastNameNotNullClause);
-        var expectedData = getJSONFixture('not_null_and_not_missing.json');
-        assertQueryResults(query, expectedData);
-    });
+        query = baseQuery().where(whereLastNameNotNullClause);
+        expectedData = getJSONFixture('not_null_and_not_missing.json');
+        assertQueryResults('query WHERE field is not null and not missing', query, expectedData);
 
-    it('group by and sort', function() {
-        var query = baseQuery()
+        query = baseQuery()
             .groupBy('state', 'city')
             .sortBy('state', neon.query.ASCENDING, 'city', neon.query.DESCENDING)
             .aggregate(neon.query.SUM, 'salary', 'salary_sum');
-        var expectedData = getJSONFixture('groupByStateAsc_cityDesc_aggregateSalary.json');
-        assertQueryResults(query, expectedData);
-    });
+        expectedData = getJSONFixture('groupByStateAsc_cityDesc_aggregateSalary.json');
+        assertQueryResults('group by and sort', query, expectedData);
 
-    it('group by average', function() {
-        var query = baseQuery()
+        query = baseQuery()
             .groupBy('state')
             .sortBy('state', neon.query.ASCENDING)
             .aggregate(neon.query.AVG, 'salary', 'salary_avg');
-        var expectedData = getJSONFixture('groupByStateAsc_avgSalary.json');
-        assertQueryResults(query, expectedData);
-    });
+        expectedData = getJSONFixture('groupByStateAsc_avgSalary.json');
+        assertQueryResults('group by average', query, expectedData);
 
-    it('group by max', function() {
-        var query = baseQuery()
+        query = baseQuery()
             .groupBy('state')
             .sortBy('state', neon.query.ASCENDING)
             .aggregate(neon.query.MAX, 'salary', 'salary_max');
-        var expectedData = getJSONFixture('groupByStateAsc_maxSalary.json');
-        assertQueryResults(query, expectedData);
-    });
+        expectedData = getJSONFixture('groupByStateAsc_maxSalary.json');
+        assertQueryResults('group by max', query, expectedData);
 
-    it('group by with generated aggregate field name', function() {
-        var query = baseQuery()
+        query = baseQuery()
             .groupBy('state')
             .sortBy('state', neon.query.ASCENDING)
             .aggregate(neon.query.MAX, 'salary');
-        var expectedData = getJSONFixture('groupByStateAsc_maxSalary_generated_field_name.json');
-        assertQueryResults(query, expectedData);
-    });
+        expectedData = getJSONFixture('groupByStateAsc_maxSalary_generated_field_name.json');
+        assertQueryResults('group by with generated aggregate field name', query, expectedData);
 
-    it('group by min', function() {
-        var query = baseQuery()
+        query = baseQuery()
             .groupBy('state')
             .sortBy('state', neon.query.ASCENDING)
             .aggregate(neon.query.MIN, 'salary', 'salary_min');
-        var expectedData = getJSONFixture('groupByStateAsc_minSalary.json');
-        assertQueryResults(query, expectedData);
-    });
+        expectedData = getJSONFixture('groupByStateAsc_minSalary.json');
+        assertQueryResults('group by min', query, expectedData);
 
-    it('group by count', function() {
-        var query = baseQuery()
+        query = baseQuery()
             .groupBy('state')
             .sortBy('state', neon.query.ASCENDING)
             .aggregate(neon.query.COUNT, '*', 'counter');
-        var expectedData = getJSONFixture('groupByStateAsc_count.json');
-        assertQueryResults(query, expectedData);
-    });
+        expectedData = getJSONFixture('groupByStateAsc_count.json');
+        assertQueryResults('group by count', query, expectedData);
 
-    it('count all fields', function() {
-        var query = baseQuery()
+        query = baseQuery()
             .aggregate(neon.query.COUNT, '*', 'counter');
-        var expectedData = getJSONFixture('count.json');
-        assertQueryResults(query, expectedData);
-    });
+        expectedData = getJSONFixture('count.json');
+        assertQueryResults('count all fields', query, expectedData);
 
-    it('count all fields with different name', function() {
-        var query = baseQuery()
+        query = baseQuery()
             .aggregate(neon.query.COUNT, '*', 'test');
-        var expectedData = getJSONFixture('count.json');
+        expectedData = getJSONFixture('count.json');
         expectedData[0].test = expectedData[0].counter;
         delete expectedData[0].counter;
+        assertQueryResults('count all fields with different name', query, expectedData);
 
-        assertQueryResults(query, expectedData);
-    });
-
-    it('count all fields', function() {
-        var query = baseQuery()
+        query = baseQuery()
             .aggregate(neon.query.COUNT, '*', 'counter');
-        var expectedData = getJSONFixture('count.json');
-        assertQueryResults(query, expectedData);
-    });
+        expectedData = getJSONFixture('count.json');
+        assertQueryResults('count all fields', query, expectedData);
 
-    it('count field with missing value', function() {
         // lastname has one record with no data, so count should return 1 less value
-        var query = baseQuery()
+        query = baseQuery()
             .aggregate(neon.query.COUNT, 'lastname', 'counter');
-        var expectedData = getJSONFixture('count_missing_field.json');
-        assertQueryResults(query, expectedData);
+        expectedData = getJSONFixture('count_missing_field.json');
+        assertQueryResults('count field with missing value', query, expectedData);
+
+        query = baseQuery().distinct().withFields('state').limit(2).sortBy('state', neon.query.ASCENDING);
+        expectedData = getJSONFixture('distinct_limit.json');
+        assertQueryResults('distinct fields', query, expectedData);
     });
 
-    it('distinct fields', function() {
-        var query = baseQuery().distinct().withFields('state').limit(2).sortBy('state', neon.query.ASCENDING);
-        var expectedData = getJSONFixture('distinct_limit.json');
-        assertQueryResults(query, expectedData);
-    });
 
-    it('apply and remove filter', function() {
-        sendMessageAndWait(neon.eventing.Messenger.prototype.addFilter, [filterId, dcStateFilter]);
-        runs(function() {
-            var expectedData = rows(1, 2, 5);
-            assertQueryResults(baseQuery(), expectedData);
-
-            // verify that if the query is supposed to include the filtered data, all data is returned
-            runs(function() {
-                assertQueryResults(baseQuery().ignoreFilters(), allData);
-                runs(function() {
-                    // apply another filter and make sure both are applied
-                    var salaryFilter = baseFilter().where('salary', '>', 85000);
-                    sendMessageAndWait(neon.eventing.Messenger.prototype.addFilter, [filterId, salaryFilter]);
-                    runs(function() {
-                        expectedData = rows(2, 5);
-                        assertQueryResults(baseQuery(), expectedData);
-                        runs(function() {
-                            // remove the filter key and re-execute the query
-                            sendMessageAndWait(neon.eventing.Messenger.prototype.removeFilter, filterId);
-                            runs(function() {
-                                assertQueryResults(baseQuery(), allData);
-                            });
-                        });
-                    });
-                });
-            });
+    describe('apply and remove filter', function() {
+        allData = getJSONFixture('data.json');
+        sendMessageAndWait('create filter', neon.eventing.Messenger.prototype.addFilter, [filterId, dcStateFilter], function(results) {
+            expect(true).toBe(true);
         });
+        expectedData = rows(1, 2, 5);
+        assertQueryResults('verify filtered data', baseQuery(), expectedData);
+
+        // verify that if the query is supposed to include the filtered data, all data is returned
+        assertQueryResults('verify ignore filters', baseQuery().ignoreFilters(), allData);
+
+        // apply another filter and make sure both are applied
+        var salaryFilter = baseFilter().where('salary', '>', 85000);
+        sendMessageAndWait('set multiple filters', neon.eventing.Messenger.prototype.addFilter, [filterId, salaryFilter], function(results) {
+            expect(true).toBe(true);
+        });
+
+        expectedData = rows(2, 5);
+        assertQueryResults('verify multiple filters applied', baseQuery(), expectedData);
+
+        // remove the filter key and re-execute the query
+        sendMessageAndWait('removing filters', neon.eventing.Messenger.prototype.removeFilter, filterId, function(result) {
+            expect(true).toBe(true);
+        });
+
+        assertQueryResults('verify filters removed', baseQuery(), allData);
     });
 
     it('ignore specific filters', function() {
@@ -608,8 +590,8 @@ describe('query mapping', function() {
      * @param query
      * @param expectedData
      */
-    function assertQueryResults(query, expectedData) {
-        doAssertQueryResults(connection.executeQuery, query, expectedData);
+    function assertQueryResults(name, query, expectedData) {
+        doAssertQueryResults(name, connection.executeQuery, query, expectedData);
     }
 
     /**
@@ -621,8 +603,8 @@ describe('query mapping', function() {
         doAssertQueryResults(connection.executeQueryGroup, query, expectedData);
     }
 
-    function doAssertQueryResults(queryMethod, query, expectedData) {
-        assertAsyncQueryResults(queryMethod, query, expectedData);
+    function doAssertQueryResults(name, queryMethod, query, expectedData) {
+        assertAsyncQueryResults(name, queryMethod, query, expectedData);
     }
 
     /**
@@ -632,10 +614,9 @@ describe('query mapping', function() {
      * @param query The query to pass to the function
      * @param expectedData The data expected to be returned from the function
      */
-    function assertAsyncQueryResults(asyncFunction, query, expectedData) {
-        var result = executeQueryAndWait(asyncFunction, query);
-        runs(function() {
-            expect(result.get().data).toEqual(expectedData);
+    function assertAsyncQueryResults(name, asyncFunction, query, expectedData) {
+        executeQueryAndWait(name, asyncFunction, query, function(result) {
+            expect(result.data).toEqual(expectedData);
         });
     }
 
