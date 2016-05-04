@@ -31,6 +31,8 @@ describe('query mapping', function() {
 
     var databaseName = 'acceptanceTest';
     var tableName = 'records';
+    var dcStateFilterId = "dcStateFilter";
+    var salaryFilterId = "salaryFilterId";
     var allData;
     var query;
     var expected;
@@ -80,6 +82,11 @@ describe('query mapping', function() {
     });
 
     describe('queries', function() {
+        beforeEach(function(done) {
+            allData = getJSONFixture('data.json');
+            done();
+        });
+
         allData = getJSONFixture('data.json');
         assertQueryResults('query all data', baseQuery(), allData);
 
@@ -167,16 +174,19 @@ describe('query mapping', function() {
             .aggregate(neon.query.COUNT, '*', 'counter');
         expectedData = getJSONFixture('count.json');
         assertQueryResults('count all fields', query, expectedData);
-
-        query = baseQuery()
-            .aggregate(neon.query.COUNT, '*', 'test');
+        jasmine.getJSONFixtures().load('count.json')
         expectedData = getJSONFixture('count.json');
-        expectedData[0].test = expectedData[0].counter;
-        delete expectedData[0].counter;
-        assertQueryResults('count all fields with different name', query, expectedData);
+
+//        query = baseQuery()
+//            .aggregate(neon.query.COUNT, '*', 'test');
+//        expectedData = lodash.clone(getJSONFixture('count.json'));
+//        expectedData[0].test = expectedData[0].counter;
+//        delete expectedData[0].counter;
+//        assertQueryResults('count all fields with different name', query, expectedData);
 
         query = baseQuery()
             .aggregate(neon.query.COUNT, '*', 'counter');
+        jasmine.getJSONFixtures().load('count.json')
         expectedData = getJSONFixture('count.json');
         assertQueryResults('count all fields', query, expectedData);
 
@@ -194,7 +204,7 @@ describe('query mapping', function() {
 
     describe('apply and remove filter', function() {
         allData = getJSONFixture('data.json');
-        sendMessageAndWait('create filter', neon.eventing.Messenger.prototype.addFilter, [filterId, dcStateFilter], function(results) {
+        sendMessageAndWait('create filter', neon.eventing.Messenger.prototype.addFilter, [filterId, dcStateFilter], function() {
             expect(true).toBe(true);
         });
         expectedData = rows(1, 2, 5);
@@ -205,7 +215,7 @@ describe('query mapping', function() {
 
         // apply another filter and make sure both are applied
         var salaryFilter = baseFilter().where('salary', '>', 85000);
-        sendMessageAndWait('set multiple filters', neon.eventing.Messenger.prototype.addFilter, [filterId, salaryFilter], function(results) {
+        sendMessageAndWait('set multiple filters', neon.eventing.Messenger.prototype.addFilter, [filterId, salaryFilter], function() {
             expect(true).toBe(true);
         });
 
@@ -213,289 +223,247 @@ describe('query mapping', function() {
         assertQueryResults('verify multiple filters applied', baseQuery(), expectedData);
 
         // remove the filter key and re-execute the query
-        sendMessageAndWait('removing filters', neon.eventing.Messenger.prototype.removeFilter, filterId, function(result) {
+        sendMessageAndWait('removing filters', neon.eventing.Messenger.prototype.removeFilter, filterId, function() {
             expect(true).toBe(true);
         });
 
         assertQueryResults('verify filters removed', baseQuery(), allData);
     });
 
-    it('ignore specific filters', function() {
-        var dcStateFilterId = "dcStateFilter";
-        var salaryFilterId = "salaryFilterId";
-        sendMessageAndWait(neon.eventing.Messenger.prototype.addFilter, [dcStateFilterId, dcStateFilter]);
-        runs(function() {
-            runs(function() {
-                // apply another filter and make sure both are applied
-                var salaryFilter = baseFilter().where('salary', '>', 85000);
-                sendMessageAndWait(neon.eventing.Messenger.prototype.addFilter, [salaryFilterId, salaryFilter]);
-                runs(function() {
-                    assertQueryResults(baseQuery().ignoreFilters([dcStateFilterId, salaryFilterId]), allData);
-                    sendMessageAndWait(neon.eventing.Messenger.prototype.clearFilters);
-                    runs(function() {
-                        assertQueryResults(baseQuery(), allData);
-                    });
-                });
-            });
+    describe('ignore specific filters', function() {
+        sendMessageAndWait('created a filter', neon.eventing.Messenger.prototype.addFilter, [dcStateFilterId, dcStateFilter], function() {
+            expect(true).toBe(true);
+        });
+
+        // apply another filter and make sure both are applied
+        var salaryFilter = baseFilter().where('salary', '>', 85000);
+        sendMessageAndWait('added another filter', neon.eventing.Messenger.prototype.addFilter, [salaryFilterId, salaryFilter], function() {
+            expect(true).toBe(true);
+        });
+
+        assertQueryResults('returned results with that ignored the filters', baseQuery().ignoreFilters([dcStateFilterId, salaryFilterId]), allData);
+        sendMessageAndWait('cleared filters', neon.eventing.Messenger.prototype.clearFilters, [], function() {
+            expect(true).toBe(true);
+        });
+
+        assertQueryResults('returned unfiltered results from a query', baseQuery(), allData);
+    });
+
+    describe('clear filters', function() {
+        sendMessageAndWait('created a filter', neon.eventing.Messenger.prototype.addFilter, [filterId, dcStateFilter], function() {
+            expect(true).toBe(true);
+        });
+
+        sendMessageAndWait('cleared filters', neon.eventing.Messenger.prototype.clearFilters, [], function() {
+            expect(true).toBe(true);
+        });
+
+        assertQueryResults('returned unfiltered results from a query', baseQuery(), allData);
+    });
+
+    describe('replace filter', function() {
+        sendMessageAndWait('added a filter', neon.eventing.Messenger.prototype.addFilter, [filterId, dcStateFilter], function() {
+            expect(true).toBe(true);
+        });
+
+        expectedData = rows(1, 2, 5);
+        assertQueryResults('returned only rows that pass the filter', baseQuery(), expectedData);
+
+        // apply another filter and make sure both are applied
+        var salaryFilter = baseFilter().where('salary', '>', 85000);
+        sendMessageAndWait('replace the filter', neon.eventing.Messenger.prototype.replaceFilter, [filterId, salaryFilter], function() {
+            expect(true).toBe(true);
+        });
+
+        expectedData = rows(0, 2, 4, 5, 6);
+        assertQueryResults('returned only rows that pass the new filter', baseQuery(), expectedData);
+
+        // remove the filter key and re-execute the query
+        sendMessageAndWait('removed the filter', neon.eventing.Messenger.prototype.removeFilter, filterId, function() {
+            expect(true).toBe(true);
+        });
+
+        assertQueryResults('returned non filtered results from a query', baseQuery(), allData);
+    });
+
+
+    describe('apply and remove selection', function() {
+        sendMessageAndWait('added a selection', neon.eventing.Messenger.prototype.addSelection, [filterId, dcStateFilter], function() {
+            expect(true).toBe(true);
+        });
+
+        var expectedData = rows(1, 2, 5);
+        assertQueryResults('returned only selected items', baseQuery().selectionOnly(), expectedData);
+
+        // verify that we can still get back all data the data
+        assertQueryResults('returned all data when not asked for a selection', baseQuery().ignoreFilters(), allData);
+
+        // apply another selection and make sure both are applied
+        var salaryFilter = baseFilter().where('salary', '>', 85000);
+        sendMessageAndWait('added another selection', neon.eventing.Messenger.prototype.addSelection, [filterId, salaryFilter], function() {
+            expect(true).toBe(true);
+        });
+
+        expectedData = rows(2, 5);
+        assertQueryResults('returned the intersection of the two selections', baseQuery().selectionOnly(), expectedData);
+
+        // remove the selection and re-execute the query
+        sendMessageAndWait('removed the selection', neon.eventing.Messenger.prototype.removeSelection, filterId, function() {
+            expect(true).toBe(true);
+        });
+
+        assertQueryResults('removed selections successfully', baseQuery().selectionOnly(), []);
+    });
+
+    describe('clear selection', function() {
+        // The first two commands are just test setup to get the server ready for the assert,
+        // so their expectations are set to pass.
+        sendMessageAndWait('added a selection', neon.eventing.Messenger.prototype.addSelection, [filterId, dcStateFilter], function() {
+            expect(true).toBe(true);
+        });
+
+        sendMessageAndWait('cleared the selection', neon.eventing.Messenger.prototype.clearSelection, [], function() {
+            expect(true).toBe(true);
+        });
+
+        assertQueryResults('cleared selections successfully', baseQuery().selectionOnly(), []);
+    });
+
+    describe('replace selection', function() {
+        sendMessageAndWait('created a selection', neon.eventing.Messenger.prototype.addSelection, [filterId, dcStateFilter], function() {
+            expect(true).toBe(true);
+        });
+
+        var expectedData = rows(1, 2, 5);
+        assertQueryResults('returned only selected items', baseQuery().selectionOnly(), expectedData);
+
+        // replace filter and make sure new one is applied.
+        var salaryFilter = baseFilter().where('salary', '>', 85000);
+        sendMessageAndWait('replaced the selection', neon.eventing.Messenger.prototype.replaceSelection, [filterId, salaryFilter], function() {
+            expect(true).toBe(true);
+        });
+
+        expectedData = rows(0, 2, 4, 5, 6);
+        assertQueryResults('returned only the newly selected items', baseQuery().selectionOnly(), expectedData);
+
+        // remove the selection and re-execute the query
+        sendMessageAndWait('removed the selection', neon.eventing.Messenger.prototype.removeSelection, filterId, function() {
+            expect(true).toBe(true);
+        });
+
+        assertQueryResults('returned no results for the selection', baseQuery().selectionOnly(), []);
+    });
+
+
+    describe('sends filter events to the callback functions', function() {
+        sendMessageAndWait('sent an add event', neon.eventing.Messenger.prototype.addFilter, [filterId, dcStateFilter], function(result) {
+            assertEventType("ADD", result);
+        });
+
+        // replace filter and make sure new one is applied.
+        var salaryFilter = baseFilter().where('salary', '>', 85000);
+        sendMessageAndWait('sent a replace event', neon.eventing.Messenger.prototype.replaceFilter, [filterId, salaryFilter], function(result) {
+            assertEventType("REPLACE", result);
+        });
+
+        // remove the filter key and re-execute the query
+        sendMessageAndWait('sent a remove event', neon.eventing.Messenger.prototype.removeFilter, filterId, function(result) {
+            assertEventType("REMOVE", result);
         });
     });
 
-    it('clear filters', function() {
-        sendMessageAndWait(neon.eventing.Messenger.prototype.addFilter, [filterId, dcStateFilter]);
-        runs(function() {
-            sendMessageAndWait(neon.eventing.Messenger.prototype.clearFilters);
-            runs(function() {
-                assertQueryResults(baseQuery(), allData);
-            });
-        });
-    });
+    groupByMonthClause = new neon.query.GroupByFunctionClause(neon.query.MONTH, 'hiredate', 'hire_month');
+    query = baseQuery().groupBy(groupByMonthClause).aggregate(neon.query.SUM, 'salary', 'salary_sum').sortBy('hire_month', neon.query.ASCENDING);
+    expectedData = getJSONFixture('groupByMonth.json');
+    assertQueryResults('group by month', query, expectedData);
 
-    it('replace filter', function() {
-        sendMessageAndWait(neon.eventing.Messenger.prototype.replaceFilter, [filterId, dcStateFilter]);
-        runs(function() {
-            var expectedData = rows(1, 2, 5);
-            assertQueryResults(baseQuery(), expectedData);
+    var groupByYearClause = new neon.query.GroupByFunctionClause(neon.query.YEAR, 'hiredate', 'hire_year');
+    query = baseQuery().groupBy(groupByYearClause).aggregate(neon.query.SUM, 'salary', 'salary_sum').sortBy('hire_year', neon.query.ASCENDING);
+    expectedData = getJSONFixture('groupByYear.json');
+    assertQueryResults('group by year', query, expectedData);
 
-            runs(function() {
-                // replace filter and make sure new one is applied.
-                var salaryFilter = baseFilter().where('salary', '>', 85000);
-                sendMessageAndWait(neon.eventing.Messenger.prototype.replaceFilter, [filterId, salaryFilter]);
-                runs(function() {
-                    expectedData = rows(0, 2, 4, 5, 6);
-                    assertQueryResults(baseQuery(), expectedData);
-                    runs(function() {
-                        // remove the filter key and re-execute the query
-                        sendMessageAndWait(neon.eventing.Messenger.prototype.removeFilter, filterId);
-                        runs(function() {
-                            assertQueryResults(baseQuery(), allData);
-                        });
-                    });
-                });
-            });
-        });
-    });
+    var groupByMonthClause = new neon.query.GroupByFunctionClause(neon.query.MONTH, 'hiredate', 'hire_month');
+     query = baseQuery().groupBy(groupByMonthClause).aggregate(neon.query.SUM, 'salary', 'salary_sum').sortBy('hire_month', neon.query.ASCENDING).limit(1);
+    // we should only get the first element since we're limiting the query to 1 result
+     expectedData = getJSONFixture('groupByMonth.json').slice(0, 1);
+    assertQueryResults('group by with limit', query, expectedData);
 
-    it('apply and remove selection', function() {
-        sendMessageAndWait(neon.eventing.Messenger.prototype.addSelection, [filterId, dcStateFilter]);
-        runs(function() {
-            var expectedData = rows(1, 2, 5);
-            assertQueryResults(baseQuery().selectionOnly(), expectedData);
+    query = baseQuery().where('salary', '<', 61000);
+    expectedData = rows(3, 7);
+    assertQueryResults('query WHERE less than', query, expectedData);
 
-            // verify that we can still get back all data the data
-            runs(function() {
-                assertQueryResults(baseQuery().ignoreFilters(), allData);
-                runs(function() {
-                    // apply another selection and make sure both are applied
-                    var salaryFilter = baseFilter().where('salary', '>', 85000);
-                    sendMessageAndWait(neon.eventing.Messenger.prototype.addSelection, [filterId, salaryFilter]);
-                    runs(function() {
-                        expectedData = rows(2, 5);
-                        assertQueryResults(baseQuery().selectionOnly(), expectedData);
-                        runs(function() {
-                            // remove the selection and re-execute the query
-                            sendMessageAndWait(neon.eventing.Messenger.prototype.removeSelection, filterId);
-                            runs(function() {
-                                assertQueryResults(baseQuery().selectionOnly(), []);
-                            });
-                        });
-                    });
-                });
-            });
-        });
-    });
+    query = baseQuery().where('salary', '<=', 60000);
+    expectedData = rows(3, 7);
+    assertQueryResults('query WHERE less than or equal', query, expectedData);
 
-    it('clear selection', function() {
-        sendMessageAndWait(neon.eventing.Messenger.prototype.addSelection, [filterId, dcStateFilter]);
-        runs(function() {
-            sendMessageAndWait(neon.eventing.Messenger.prototype.clearSelection);
-            runs(function() {
-                assertQueryResults(baseQuery().selectionOnly(), []);
-            });
-        });
-    });
+    query = baseQuery().where('salary', '>', 118000);
+    expectedData = rows(2);
+    assertQueryResults('query WHERE greater than', query, expectedData);
 
-    it('replace selection', function() {
-        sendMessageAndWait(neon.eventing.Messenger.prototype.replaceSelection, [filterId, dcStateFilter]);
-        runs(function() {
-            var expectedData = rows(1, 2, 5);
-            assertQueryResults(baseQuery().selectionOnly(), expectedData);
+    query = baseQuery().where('salary', '>=', 118000);
+    expectedData = rows(2, 4);
+    assertQueryResults('query WHERE greater than or equal', query, expectedData);
 
-            runs(function() {
-                // replace filter and make sure new one is applied.
-                var salaryFilter = baseFilter().where('salary', '>', 85000);
-                sendMessageAndWait(neon.eventing.Messenger.prototype.replaceSelection, [filterId, salaryFilter]);
-                runs(function() {
-                    expectedData = rows(0, 2, 4, 5, 6);
-                    assertQueryResults(baseQuery().selectionOnly(), expectedData);
-                    runs(function() {
-                        // remove the selection and re-execute the query
-                        sendMessageAndWait(neon.eventing.Messenger.prototype.removeSelection, filterId);
-                        runs(function() {
-                            assertQueryResults(baseQuery().selectionOnly(), []);
-                        });
-                    });
-                });
-            });
-        });
-    });
+    query = baseQuery().where('state', '!=', 'VA');
+    expectedData = rows(1, 2, 5, 6);
+    assertQueryResults('query WHERE not equal', query, expectedData);
 
-    it('sends filter events to the callback functions', function() {
-        var addEvent = sendMessageAndWait(neon.eventing.Messenger.prototype.addSelection, [filterId, dcStateFilter]);
-        runs(function() {
-            assertEventType("ADD", addEvent.get());
-            // replace filter and make sure new one is applied.
-            var salaryFilter = baseFilter().where('salary', '>', 85000);
-            var replaceEvent = sendMessageAndWait(neon.eventing.Messenger.prototype.replaceSelection, [filterId, salaryFilter]);
-            runs(function() {
-                assertEventType("REPLACE", replaceEvent.get());
-                runs(function() {
-                    // remove the filter key and re-execute the query
-                    var removeEvent = sendMessageAndWait(neon.eventing.Messenger.prototype.removeSelection, filterId);
-                    runs(function() {
-                        assertEventType("REMOVE", removeEvent.get());
-                    });
-                });
-            });
-        });
-    });
+    query = baseQuery().where('state', 'in', ['MD', 'DC']);
+    expectedData = rows(1, 2, 5, 6);
+    assertQueryResults('query WHERE IN', query, expectedData);
 
-    it('sends filter events to the callback functions', function() {
-        var addEvent = sendMessageAndWait(neon.eventing.Messenger.prototype.addFilter, [filterId, dcStateFilter]);
-        runs(function() {
-            assertEventType("ADD", addEvent.get());
-            // replace filter and make sure new one is applied.
-            var salaryFilter = baseFilter().where('salary', '>', 85000);
-            var replaceEvent = sendMessageAndWait(neon.eventing.Messenger.prototype.replaceFilter, [filterId, salaryFilter]);
-            runs(function() {
-                assertEventType("REPLACE", replaceEvent.get());
-                runs(function() {
-                    // remove the filter key and re-execute the query
-                    var removeEvent = sendMessageAndWait(neon.eventing.Messenger.prototype.removeFilter, filterId);
-                    runs(function() {
-                        assertEventType("REMOVE", removeEvent.get());
-                    });
-                });
-            });
-        });
-    });
+    query = baseQuery().where('state', 'notin', ['VA', 'DC']);
+    expectedData = rows(6);
+    assertQueryResults('query WHERE not IN', query, expectedData);
 
-    it('group by month', function() {
-        var groupByMonthClause = new neon.query.GroupByFunctionClause(neon.query.MONTH, 'hiredate', 'hire_month');
-        var query = baseQuery().groupBy(groupByMonthClause).aggregate(neon.query.SUM, 'salary', 'salary_sum').sortBy('hire_month', neon.query.ASCENDING);
-        var expectedData = getJSONFixture('groupByMonth.json');
-        assertQueryResults(query, expectedData);
-    });
-
-    it('group by year', function() {
-        var groupByYearClause = new neon.query.GroupByFunctionClause(neon.query.YEAR, 'hiredate', 'hire_year');
-        var query = baseQuery().groupBy(groupByYearClause).aggregate(neon.query.SUM, 'salary', 'salary_sum').sortBy('hire_year', neon.query.ASCENDING);
-        var expectedData = getJSONFixture('groupByYear.json');
-        assertQueryResults(query, expectedData);
-    });
-
-    it('group by with limit', function() {
-        var groupByMonthClause = new neon.query.GroupByFunctionClause(neon.query.MONTH, 'hiredate', 'hire_month');
-        var query = baseQuery().groupBy(groupByMonthClause).aggregate(neon.query.SUM, 'salary', 'salary_sum').sortBy('hire_month', neon.query.ASCENDING).limit(1);
-        // we should only get the first element since we're limiting the query to 1 result
-        var expectedData = getJSONFixture('groupByMonth.json').slice(0, 1);
-        assertQueryResults(query, expectedData);
-    });
-
-    it('query WHERE less than', function() {
-        var query = baseQuery().where('salary', '<', 61000);
-        var expectedData = rows(3, 7);
-        assertQueryResults(query, expectedData);
-    });
-
-    it('query WHERE less than or equal', function() {
-        var query = baseQuery().where('salary', '<=', 60000);
-        var expectedData = rows(3, 7);
-        assertQueryResults(query, expectedData);
-    });
-
-    it('query WHERE greater than', function() {
-        var query = baseQuery().where('salary', '>', 118000);
-        var expectedData = rows(2);
-        assertQueryResults(query, expectedData);
-    });
-
-    it('query WHERE greater than or equal', function() {
-        var query = baseQuery().where('salary', '>=', 118000);
-        var expectedData = rows(2, 4);
-        assertQueryResults(query, expectedData);
-    });
-
-    it('query WHERE not equal', function() {
-        var query = baseQuery().where('state', '!=', 'VA');
-        var expectedData = rows(1, 2, 5, 6);
-        assertQueryResults(query, expectedData);
-    });
-
-    it('query WHERE IN', function() {
-        var query = baseQuery().where('state', 'in', ['MD', 'DC']);
-        var expectedData = rows(1, 2, 5, 6);
-        assertQueryResults(query, expectedData);
-    });
-
-    it('query WHERE not IN', function() {
-        var query = baseQuery().where('state', 'notin', ['VA', 'DC']);
-        var expectedData = rows(6);
-        assertQueryResults(query, expectedData);
-    });
-
-    it('should call an error callback if an error occurs', function() {
+    describe('should call an error callback if an error occurs', function() {
         var query = baseQuery().groupBy('unknown').aggregate('unknown', 'unknown', 'unknown');
-        var successCallback = jasmine.createSpy('success');
-        var errorCallback = jasmine.createSpy('error');
-        connection.executeQuery(query, successCallback, errorCallback);
-        waitsFor(function() {
-            return errorCallback.wasInvoked();
+        var callbacks = {};
+
+        beforeEach(function(done) {
+            callbacks.successCallback = function() { done(); };
+            callbacks.errorCallback = function() { done(); };
+            spyOn(callbacks, 'successCallback').and.callThrough();
+            spyOn(callbacks, 'errorCallback').and.callThrough();
+            connection.executeQuery(query, callbacks.successCallback, callbacks.errorCallback);
         });
-        runs(function() {
-            expect(successCallback).not.toHaveBeenCalled();
-            expect(errorCallback).toHaveBeenCalled();
+
+        it('did not call the success handler', function() {
+            expect(callbacks.successCallback).not.toHaveBeenCalled();
+        });
+
+        it('did call the error handler', function() {
+            expect(callbacks.errorCallback).toHaveBeenCalled();
         });
     });
 
-    it('query with limit', function() {
-        var query = baseQuery().limit(2);
-        var result = executeQueryAndWait(connection.executeQuery, query);
-        runs(function() {
-            expect(result.get().data.length).toEqual(2);
-        });
+    query = baseQuery().limit(2);
+    executeQueryAndWait('can limit query results', connection.executeQuery, query, function(result) {
+        expect(result.data.length).toEqual(2);
     });
 
-    it('query with offset', function() {
-        var query = baseQuery().sortBy('salary', neon.query.ASCENDING).offset(4);
-        var expectedData = getJSONFixture('offset.json');
-        assertQueryResults(query, expectedData);
-    });
+    query = baseQuery().sortBy('salary', neon.query.ASCENDING).offset(4);
+    expectedData = getJSONFixture('offset.json');
+    assertQueryResults('query with offset', query, expectedData);
 
-    it('query near location', function() {
-        var center = new neon.util.LatLon(11.95, 19.5);
-        var query = baseQuery().withinDistance('location', center, 35, neon.query.MILE);
-        var expectedData = rows(2, 0);
-        assertQueryResults(query, expectedData);
-    });
+    var center = new neon.util.LatLon(11.95, 19.5);
+    query = baseQuery().withinDistance('location', center, 35, neon.query.MILE);
+    expectedData = rows(2, 0);
+    assertQueryResults('query near location', query, expectedData);
 
-    it('query near location and filter on attributes', function() {
-        var center = new neon.util.LatLon(11.95, 19.5);
-        var withinDistanceClause = neon.query.withinDistance('location', center, 35, neon.query.MILE);
-        var dcStateClause = neon.query.where('state', '=', 'DC');
-        var whereClause = neon.query.and(withinDistanceClause, dcStateClause);
-        var query = baseQuery().where(whereClause);
+    center = new neon.util.LatLon(11.95, 19.5);
+    var withinDistanceClause = neon.query.withinDistance('location', center, 35, neon.query.MILE);
+    var dcStateClause = neon.query.where('state', '=', 'DC');
+    var whereClause = neon.query.and(withinDistanceClause, dcStateClause);
+    query = baseQuery().where(whereClause);
+    expectedData = rows(2);
+    assertQueryResults('query near location and filter on attributes', query, expectedData);
 
-        var expectedData = rows(2);
-        assertQueryResults(query, expectedData);
-    });
+    var whereDateBetweenClause = and(where('hiredate', '>=', '2011-10-15T00:00:00Z'), where('hiredate', '<=', '2011-10-17T00:00:00Z'));
+    query = baseQuery().where(whereDateBetweenClause);
+    assertQueryResults('query with date clause as value', query, rows(1, 2));
 
-    it('query with date clause as value', function() {
-        var whereDateBetweenClause = and(where('hiredate', '>=', '2011-10-15T00:00:00Z'), where('hiredate', '<=', '2011-10-17T00:00:00Z'));
-        var query = baseQuery().where(whereDateBetweenClause);
-        assertQueryResults(query, rows(1, 2));
-    });
-
-    it('concatenates the results of a query group', function() {
+    describe('concatenates the results of a query group', function() {
         var query1 = baseQuery().where('state', '=', 'VA');
         var query2 = baseQuery().where('state', '=', 'MD');
         var query3 = baseQuery().where('state', '=', 'DC');
@@ -504,11 +472,11 @@ describe('query mapping', function() {
         queryGroup.addQuery(query1);
         queryGroup.addQuery(query2);
         queryGroup.addQuery(query3);
-        var expectedData = getJSONFixture('queryGroup.json');
-        assertQueryGroupResults(queryGroup, expectedData);
+        expectedData = getJSONFixture('queryGroup.json');
+        assertQueryGroupResults('verified concatenated results', queryGroup, expectedData);
     });
 
-    it('query group uses filters', function() {
+    describe('query group uses filters', function() {
         var query1 = baseQuery().where('state', '=', 'VA');
         var query2 = baseQuery().where('state', '=', 'MD');
         var query3 = baseQuery().where('state', '=', 'DC');
@@ -517,21 +485,26 @@ describe('query mapping', function() {
         queryGroup.addQuery(query1);
         queryGroup.addQuery(query2);
         queryGroup.addQuery(query3);
-        sendMessageAndWait(neon.eventing.Messenger.prototype.addFilter, [filterId, dcStateFilter]);
-        runs(function() {
-            var expectedData = getJSONFixture('queryGroupFiltered.json');
-            assertQueryGroupResults(queryGroup, expectedData);
-            runs(function() {
-                sendMessageAndWait(neon.eventing.Messenger.prototype.removeFilter, filterId);
-                runs(function() {
-                    expectedData = getJSONFixture('queryGroup.json');
-                    assertQueryGroupResults(queryGroup, expectedData);
-                });
-            });
+        sendMessageAndWait('added a filter', neon.eventing.Messenger.prototype.addFilter, [filterId, dcStateFilter], function() {
+            // Adding a tautology here since this call is made to setup data and jasmine complains if you don't pass
+            // along an expectation.
+            expect(true).toBe(true);
         });
+
+        expectedData = getJSONFixture('queryGroupFiltered.json');
+        assertQueryGroupResults('verified filtered group query results', queryGroup, expectedData);
+
+        sendMessageAndWait('removed the filter', neon.eventing.Messenger.prototype.removeFilter, filterId, function() {
+            // Adding a tautology here since this call is made to setup data and jasmine complains if you don't pass
+            // along an expectation.
+            expect(true).toBe(true);
+        });
+
+        expectedData = getJSONFixture('queryGroup.json');
+        assertQueryGroupResults('verified non filtered group query results', queryGroup, expectedData);
     });
 
-    it('query group can ignore filters', function() {
+    describe('query group can ignore filters', function() {
         var query1 = baseQuery().where('state', '=', 'VA');
         var query2 = baseQuery().where('state', '=', 'MD');
         var query3 = baseQuery().where('state', '=', 'DC');
@@ -541,17 +514,22 @@ describe('query mapping', function() {
         queryGroup.addQuery(query2);
         queryGroup.addQuery(query3);
         queryGroup.ignoreFilters();
-        sendMessageAndWait(neon.eventing.Messenger.prototype.addFilter, [filterId, dcStateFilter]);
-        runs(function() {
-            var expectedData = getJSONFixture('queryGroup.json');
-            assertQueryGroupResults(queryGroup, expectedData);
-            runs(function() {
-                sendMessageAndWait(neon.eventing.Messenger.prototype.removeFilter, filterId);
-            });
+        sendMessageAndWait('added a filter', neon.eventing.Messenger.prototype.addFilter, [filterId, dcStateFilter], function() {
+            // Adding a tautology here since this call is made to setup data and jasmine complains if you don't pass
+            // along an expectation.
+            expect(true).toBe(true);
+        });
+
+        expectedData = getJSONFixture('queryGroup.json');
+        assertQueryGroupResults('verified the filters were ignored', queryGroup, expectedData);
+        sendMessageAndWait('removed the filter', neon.eventing.Messenger.prototype.removeFilter, filterId, function() {
+            // Adding a tautology here since this call is made to setup data and jasmine complains if you don't pass
+            // along an expectation.
+            expect(true).toBe(true);
         });
     });
 
-    it('query group uses selection', function() {
+    describe('query group uses selection', function() {
         var query1 = baseQuery().where('state', '=', 'VA');
         var query2 = baseQuery().where('state', '=', 'MD');
         var query3 = baseQuery().where('state', '=', 'DC');
@@ -561,28 +539,45 @@ describe('query mapping', function() {
         queryGroup.addQuery(query2);
         queryGroup.addQuery(query3);
         queryGroup.selectionOnly();
-        sendMessageAndWait(neon.eventing.Messenger.prototype.addSelection, [filterId, dcStateFilter]);
-        runs(function() {
-            // queryGroupFiltered.json is used since we select the same data we filter on in the tests
-            var expectedData = getJSONFixture('queryGroupFiltered.json');
-            assertQueryGroupResults(queryGroup, expectedData);
-            runs(function() {
-                sendMessageAndWait(neon.eventing.Messenger.prototype.removeSelection, filterId);
-            });
+        sendMessageAndWait('filtered the dataset', neon.eventing.Messenger.prototype.addSelection, [filterId, dcStateFilter], function() {
+            // Adding a tautology here since this call is made to setup data and jasmine complains if you don't pass
+            // along an expectation.
+            expect(true).toBe(true);
+        });
+
+        // queryGroupFiltered.json is used since we select the same data we filter on in the tests
+        expectedData = getJSONFixture('queryGroupFiltered.json');
+        assertQueryGroupResults('verified query group results', queryGroup, expectedData);
+
+        sendMessageAndWait('removed the filter', neon.eventing.Messenger.prototype.removeSelection, filterId, function() {
+            // Adding a tautology here since this call is made to setup data.
+            expect(true).toBe(true);
         });
     });
 
-    it('query with transform added by transform loader', function() {
-        var query = baseQuery();
-        query.transform(new neon.query.Transform("Sample"));
-
+    describe('transforms', function() {
         var transformedData = [];
-        for(var i = 0; i < allData.length; i++) {
-            transformedData[i] = allData[i];
-            transformedData[i].foo = "bar";
-        }
 
-        assertQueryResults(query, transformedData);
+        beforeEach(function(done) {
+            allData = getJSONFixture('data.json');
+            for(var i = 0; i < allData.length; i++) {
+                transformedData[i] = allData[i];
+                transformedData[i].foo = "bar";
+            }
+            done();
+        });
+        afterEach(function(done) {
+            // Return the alldata object to its original state since object references to this may be cached
+            // by other tests.
+            for(var i = 0; i < allData.length; i++) {
+                delete allData[i].foo;
+            }
+            done();
+        });
+
+        query = baseQuery();
+        query.transform(new neon.query.Transform("Sample"));
+        assertQueryResults('query with transform added by transform loader', query, transformedData);
     });
 
     /**
@@ -599,8 +594,8 @@ describe('query mapping', function() {
      * @param query
      * @param expectedData
      */
-    function assertQueryGroupResults(query, expectedData) {
-        doAssertQueryResults(connection.executeQueryGroup, query, expectedData);
+    function assertQueryGroupResults(name, query, expectedData) {
+        doAssertQueryResults(name, connection.executeQueryGroup, query, expectedData);
     }
 
     function doAssertQueryResults(name, queryMethod, query, expectedData) {

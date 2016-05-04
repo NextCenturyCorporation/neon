@@ -36,12 +36,16 @@ neontest.executeAndWait = function(name, target, asyncFunction, args, testFunc) 
                 argsArray = argsArray.concat(args);
             }
             // push the success callback to store the current result
-            var successOrFailHandler = function(res) {
+            var successHandler = function(res) {
                 result = res;
                 done();
             };
-            argsArray.push(successOrFailHandler);
-            argsArray.push(successOrFailHandler);
+            var failHandler = function(res) {
+                result = res;
+                done();
+            };
+            argsArray.push(successHandler);
+            argsArray.push(failHandler);
             asyncFunction.apply(target, argsArray);
         });
         it(name, function() {

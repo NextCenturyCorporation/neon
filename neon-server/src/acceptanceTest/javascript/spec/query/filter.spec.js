@@ -43,7 +43,7 @@ describe('neon.query.Filter', function() {
         });
     });
 
-    function assertAsyncResults(name, functionObj, asyncFunction, params, expectedData, test) {
+    function assertAsyncResults(name, functionObj, asyncFunction, params, expectedData) {
         executeCallAndWait(name, functionObj, asyncFunction, params, function(result) {
             expect(result).toEqual(expectedData);
         });
