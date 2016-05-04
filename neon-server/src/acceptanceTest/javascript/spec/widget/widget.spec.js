@@ -28,12 +28,10 @@ describe('widgets', function() {
         var state1 = {
             s1: "val1"
         };
-        var restoredState1;
         var instanceId2 = "id2";
         var state2 = {
             s2: "val2"
         };
-        var restoredState2;
 
         executeAndWait('saved state 1', neon.widget.saveState, [instanceId1, state1], function() {
             expect(true).toBe(true);
