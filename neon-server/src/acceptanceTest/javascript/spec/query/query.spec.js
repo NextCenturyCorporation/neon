@@ -174,7 +174,7 @@ describe('query mapping', function() {
             .aggregate(neon.query.COUNT, '*', 'counter');
         expectedData = getJSONFixture('count.json');
         assertQueryResults('count all fields', query, expectedData);
-        jasmine.getJSONFixtures().load('count.json')
+        jasmine.getJSONFixtures().load('count.json');
         expectedData = getJSONFixture('count.json');
 
 //        query = baseQuery()
@@ -186,7 +186,7 @@ describe('query mapping', function() {
 
         query = baseQuery()
             .aggregate(neon.query.COUNT, '*', 'counter');
-        jasmine.getJSONFixtures().load('count.json')
+        jasmine.getJSONFixtures().load('count.json');
         expectedData = getJSONFixture('count.json');
         assertQueryResults('count all fields', query, expectedData);
 

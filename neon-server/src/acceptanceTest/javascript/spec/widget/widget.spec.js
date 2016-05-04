@@ -35,11 +35,11 @@ describe('widgets', function() {
         };
         var restoredState2;
 
-        executeAndWait('saved state 1', neon.widget.saveState, [instanceId1, state1], function(result) {
+        executeAndWait('saved state 1', neon.widget.saveState, [instanceId1, state1], function() {
             expect(true).toBe(true);
         });
 
-        executeAndWait('saved state 2', neon.widget.saveState, [instanceId2, state2], function(result) {
+        executeAndWait('saved state 2', neon.widget.saveState, [instanceId2, state2], function() {
             expect(true).toBe(true);
         });
 
