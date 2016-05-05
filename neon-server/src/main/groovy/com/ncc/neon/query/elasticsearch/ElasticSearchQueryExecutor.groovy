@@ -210,8 +210,6 @@ class ElasticSearchQueryExecutor extends AbstractQueryExecutor {
     List<String> getFieldNames(String databaseName, String tableName) {
         if(tableName) {
             LOGGER.debug("Executing getFieldNames for index " + databaseName + " type " + tableName)
-            checkDatabaseAndTableExists(databaseName, tableName)
-
             def dbMatch = databaseName.replaceAll(/\*/, '.*')
             def tableMatch = tableName.replaceAll(/\*/, '.*')
 
