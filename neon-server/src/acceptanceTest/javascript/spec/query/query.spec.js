@@ -22,6 +22,7 @@
 /*global host*/
 /*global getJSONFixture*/
 /*global neon */
+/*global lodash */
 
 describe('query mapping', function() {
     // aliases for easier test writing
@@ -170,29 +171,8 @@ describe('query mapping', function() {
         expectedData = getJSONFixture('groupByStateAsc_count.json');
         assertQueryResults('group by count', query, expectedData);
 
-        query = baseQuery()
-            .aggregate(neon.query.COUNT, '*', 'counter');
-        expectedData = getJSONFixture('count.json');
-        assertQueryResults('count all fields', query, expectedData);
-        jasmine.getJSONFixtures().load('count.json');
-        expectedData = getJSONFixture('count.json');
-
-//        query = baseQuery()
-//            .aggregate(neon.query.COUNT, '*', 'test');
-//        expectedData = lodash.clone(getJSONFixture('count.json'));
-//        expectedData[0].test = expectedData[0].counter;
-//        delete expectedData[0].counter;
-//        assertQueryResults('count all fields with different name', query, expectedData);
-
-        query = baseQuery()
-            .aggregate(neon.query.COUNT, '*', 'counter');
-        jasmine.getJSONFixtures().load('count.json');
-        expectedData = getJSONFixture('count.json');
-        assertQueryResults('count all fields', query, expectedData);
-
         // lastname has one record with no data, so count should return 1 less value
-        query = baseQuery()
-            .aggregate(neon.query.COUNT, 'lastname', 'counter');
+        query = baseQuery().aggregate(neon.query.COUNT, 'lastname', 'counter');
         expectedData = getJSONFixture('count_missing_field.json');
         assertQueryResults('count field with missing value', query, expectedData);
 
@@ -201,6 +181,23 @@ describe('query mapping', function() {
         assertQueryResults('distinct fields', query, expectedData);
     });
 
+    describe('counting', function() {
+        var counterResults = getJSONFixture('count.json');
+        var testResults = [lodash.clone(counterResults[0])];
+
+        query = baseQuery().aggregate(neon.query.COUNT, '*', 'counter');
+        expectedData = jasmine.getJSONFixtures().load('count.json');
+        assertQueryResults('count all fields', query, counterResults);
+
+        query = baseQuery().aggregate(neon.query.COUNT, '*', 'test');
+        testResults[0].test = testResults[0].counter;
+        delete testResults[0].counter;
+        assertQueryResults('count all fields with different name', query, testResults);
+
+        expectedData = jasmine.getJSONFixtures().load('count.json');
+        query = baseQuery().aggregate(neon.query.COUNT, '*', 'counter');
+        assertQueryResults('count all fields', query, counterResults);
+    });
 
     describe('apply and remove filter', function() {
         allData = getJSONFixture('data.json');
@@ -286,7 +283,6 @@ describe('query mapping', function() {
         assertQueryResults('returned non filtered results from a query', baseQuery(), allData);
     });
 
-
     describe('apply and remove selection', function() {
         sendMessageAndWait('added a selection', neon.eventing.Messenger.prototype.addSelection, [filterId, dcStateFilter], function() {
             expect(true).toBe(true);
@@ -354,7 +350,6 @@ describe('query mapping', function() {
         assertQueryResults('returned no results for the selection', baseQuery().selectionOnly(), []);
     });
 
-
     describe('sends filter events to the callback functions', function() {
         sendMessageAndWait('sent an add event', neon.eventing.Messenger.prototype.addFilter, [filterId, dcStateFilter], function(result) {
             assertEventType("ADD", result);
@@ -383,9 +378,9 @@ describe('query mapping', function() {
     assertQueryResults('group by year', query, expectedData);
 
     var groupByMonthClause = new neon.query.GroupByFunctionClause(neon.query.MONTH, 'hiredate', 'hire_month');
-     query = baseQuery().groupBy(groupByMonthClause).aggregate(neon.query.SUM, 'salary', 'salary_sum').sortBy('hire_month', neon.query.ASCENDING).limit(1);
+    query = baseQuery().groupBy(groupByMonthClause).aggregate(neon.query.SUM, 'salary', 'salary_sum').sortBy('hire_month', neon.query.ASCENDING).limit(1);
     // we should only get the first element since we're limiting the query to 1 result
-     expectedData = getJSONFixture('groupByMonth.json').slice(0, 1);
+    expectedData = getJSONFixture('groupByMonth.json').slice(0, 1);
     assertQueryResults('group by with limit', query, expectedData);
 
     query = baseQuery().where('salary', '<', 61000);
@@ -421,8 +416,12 @@ describe('query mapping', function() {
         var callbacks = {};
 
         beforeEach(function(done) {
-            callbacks.successCallback = function() { done(); };
-            callbacks.errorCallback = function() { done(); };
+            callbacks.successCallback = function() {
+                done();
+            };
+            callbacks.errorCallback = function() {
+                done();
+            };
             spyOn(callbacks, 'successCallback').and.callThrough();
             spyOn(callbacks, 'errorCallback').and.callThrough();
             connection.executeQuery(query, callbacks.successCallback, callbacks.errorCallback);
