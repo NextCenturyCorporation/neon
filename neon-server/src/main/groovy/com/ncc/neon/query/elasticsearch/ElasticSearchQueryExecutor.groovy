@@ -226,7 +226,7 @@ class ElasticSearchQueryExecutor extends AbstractQueryExecutor {
                     }
                 }
             }
-git 
+
             if (fields) {
                 fields.add("_id")
                 return fields.unique()
