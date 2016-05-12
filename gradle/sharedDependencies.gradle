@@ -30,7 +30,7 @@ dependencies {
     compile "com.mchange:c3p0:$c3p0Version"
     compile "org.codehaus.jackson:jackson-core-asl:$jacksonVersion" // TODO - is this still needed since the upgrade to com.fasterxml in neon-server's build.gradle, or can we just move that swap here?
 
-    compile ("org.elasticsearch:elasticsearch:1.7.0") {
+    compile ("org.elasticsearch:elasticsearch:1.7.2") {
         exclude module: 'asm'
     }
 

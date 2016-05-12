@@ -2,14 +2,19 @@
   "name": "@name@",
   "version" : "@version@",
   "author": "Next Century Corporation",
+  "description": "Neon is an open-source framework used to develop custom data analysis applications. It is designed to help integrate your visualizations with your data. The Neon framework can incorporate a variety of data analysis and visualization widgets in a common webtop environment to allow analysts to explore complex data sets.",
+  "repository": "https://github.com/NextCenturyCorporation/neon",
+  "readme": "https://github.com/NextCenturyCorporation/neon/blob/master/README.md",
+  "license": "Apache-2.0",
   "devDependencies": {
+    "grunt": ">0.4.0",
     "grunt-cli": "0.1.13",
-    "grunt-contrib-jshint": "0.11.2",
-    "grunt-contrib-concat": "0.5.1",
-    "grunt-contrib-jasmine": "0.5.1",
-    "grunt-contrib-watch": "0.6.1",
-    "grunt-contrib-uglify": "0.11.0",
-    "grunt-jscs": "1.8.0",
-    "yuidocjs": "0.7.0"
+    "grunt-contrib-jshint": "1.0.0",
+    "grunt-contrib-concat": "1.0.1",
+    "grunt-contrib-jasmine": "1.0.3",
+    "grunt-contrib-watch": "1.0.0",
+    "grunt-contrib-uglify": "1.0.1",
+    "grunt-jscs": "2.8.0",
+    "yuidocjs": "0.10.1"
   }
 }

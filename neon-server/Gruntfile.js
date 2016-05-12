@@ -16,10 +16,6 @@
 
 /*global module:false*/
 module.exports = function(grunt) {
-    var outputFile = (grunt.option('outfile-base') || 'build/<%= pkg.name %>') + '.js';
-    var nodepOutputFile = (grunt.option('outfile-base') || 'build/<%= pkg.name %>') + '-nodeps.js';
-    var nodepMinOutputFile = (grunt.option('outfile-base') || 'build/<%= pkg.name %>') + '-nodeps.min.js';
-
     function src(file) {
         return 'src/main/javascript/' + file;
     }
@@ -32,7 +28,9 @@ module.exports = function(grunt) {
         return {
             specs: specs,
             timeout: 60000,
-            vendor: '../js-test-support/lib/**/*.js',
+            vendor: [
+                'src/main/js-lib/jquery/jquery*.js',
+                '../js-test-support/lib/**/*.js'],
             helpers: [
                 '../js-test-support/helpers/**/*.js',
                 'src/js-test-support/mockNamespaces.js',
@@ -58,6 +56,9 @@ module.exports = function(grunt) {
         // Metadata.
         pkg: grunt.file.readJSON('package.json'),
         banner: '/*!  <%= pkg.title || pkg.name %> | Copyright 2015 <%= pkg.author %> | https://raw.githubusercontent.com/NextCenturyCorporation/neon/master/LICENSE.txt */' + grunt.util.linefeed + grunt.util.linefeed,
+        outputFile: (grunt.option('outfile-base') || 'build/js/' + '<%= pkg.name %>') + '.js',
+        nodepOutputFile: (grunt.option('outfile-base') || 'build/js/' + '<%= pkg.name %>') + '-nodeps.js',
+        nodepMinOutputFile: (grunt.option('outfile-base') || 'build/js/' + '<%= pkg.name %>') + '-nodeps.min.js',
 
         // Task configuration.
         uglify: {
@@ -68,7 +69,7 @@ module.exports = function(grunt) {
             nodeps: {
                 files: [{
                     src: neonSrcs,
-                    dest: nodepMinOutputFile
+                    dest: '<%= nodepMinOutputFile %>'
                 }]
             }
         },
@@ -80,11 +81,11 @@ module.exports = function(grunt) {
                     stripBanners: true
                 },
                 src: neonSrcs,
-                dest: nodepOutputFile
+                dest: '<%= nodepOutputFile %>'
             },
             neon: {
-                src: [lib('lodash'), lib('uuid'), lib('postal'), lib('jquery'), lib('log4javascript'), 'build/dependencies/**/*.js', nodepMinOutputFile],
-                dest: outputFile
+                src: [lib('lodash'), lib('uuid'), lib('postal'), lib('jquery'), lib('log4javascript'), 'build/dependencies/**/*.js', '<%= nodepOutputFile %>'],
+                dest: '<%= outputFile %>'
             }
         },
 
@@ -105,7 +106,7 @@ module.exports = function(grunt) {
                 },
                 // check both the preconcat and concatenated files
                 files: {
-                    src: [nodepOutputFile].concat(neonSrcs)
+                    src: ['<%= nodepOutputFile %>'].concat(neonSrcs)
                 }
             },
             tests: {
@@ -120,11 +121,11 @@ module.exports = function(grunt) {
 
         jasmine: {
             unit: {
-                src: outputFile,
+                src: '<%= outputFile %>',
                 options: createTestOptions('src/test/javascript/spec/**/*.spec.js')
             },
             acceptance: {
-                src: outputFile,
+                src: '<%= outputFile %>',
                 options: createTestOptions('src/acceptanceTest/javascript/spec/**/*.spec.js')
             }
         },

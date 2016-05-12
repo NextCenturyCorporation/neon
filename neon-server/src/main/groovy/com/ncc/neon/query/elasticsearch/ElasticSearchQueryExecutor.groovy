@@ -208,10 +208,8 @@ class ElasticSearchQueryExecutor extends AbstractQueryExecutor {
 
     @Override
     List<String> getFieldNames(String databaseName, String tableName) {
-        if(tableName) {
+        if(databaseName && tableName) {
             LOGGER.debug("Executing getFieldNames for index " + databaseName + " type " + tableName)
-            checkDatabaseAndTableExists(databaseName, tableName)
-
             def dbMatch = databaseName.replaceAll(/\*/, '.*')
             def tableMatch = tableName.replaceAll(/\*/, '.*')
 
@@ -234,7 +232,7 @@ class ElasticSearchQueryExecutor extends AbstractQueryExecutor {
                 return fields.unique()
             }
         }
-        return []
+        throw new ResourceNotFoundException("Fields for Database ${databaseName} and Table ${tableName} do not exist")
     }
 
     @Override
@@ -452,14 +450,15 @@ class ElasticSearchQueryExecutor extends AbstractQueryExecutor {
             def type = field.getValue().containsKey('type') ? field.getValue().get('type') : 'object'
 
             String fieldName = field.getKey()
+
             if(parentFieldName) {
                 fieldName = parentFieldName + "." + field.getKey()
             }
 
+            fieldNames.add(fieldName)
+
             if(type == 'object') {
                 fieldNames.addAll(getFieldsInObject(field.getValue(), fieldName))
-            } else {
-                fieldNames.add(fieldName)
             }
         }
 

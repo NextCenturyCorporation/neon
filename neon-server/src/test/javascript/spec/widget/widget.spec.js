@@ -29,25 +29,25 @@ describe('neon.widget', function() {
         spyOn($, "ajax");
 
         neon.widget.getInstanceId(value);
-        expect($.ajax.mostRecentCall.args[0].url).toEqual(server + widgetService + 'instanceid?qualifier=' + encodedValue);
+        expect($.ajax.calls.mostRecent().args[0].url).toEqual(server + widgetService + 'instanceid?qualifier=' + encodedValue);
     });
 
     it("should encode qualifier appropriately in getSavedState request url", function() {
         spyOn($, "ajax");
 
         neon.widget.getSavedState(value);
-        expect($.ajax.mostRecentCall.args[0].url).toEqual(server + widgetService + 'restorestate/' + encodedValue);
+        expect($.ajax.calls.mostRecent().args[0].url).toEqual(server + widgetService + 'restorestate/' + encodedValue);
     });
 
     it("should encode qualifier appropriately in saveState request url", function() {
         spyOn($, "ajax");
 
         neon.widget.saveState(tableName, value);
-        expect($.ajax.mostRecentCall.args[0].url).toEqual(server + widgetService + 'savestate');
+        expect($.ajax.calls.mostRecent().args[0].url).toEqual(server + widgetService + 'savestate');
 
         // data values are passed along in json via POST and not url encoded.  The value will be wrapped in an object
         // twice.
-        expect($.ajax.mostRecentCall.args[0].data.indexOf(tableName)).toBeGreaterThan(-1);
-        expect($.ajax.mostRecentCall.args[0].data.indexOf(JSON.stringify(JSON.stringify(value)))).toBeGreaterThan(-1);
+        expect($.ajax.calls.mostRecent().args[0].data.indexOf(tableName)).toBeGreaterThan(-1);
+        expect($.ajax.calls.mostRecent().args[0].data.indexOf(JSON.stringify(JSON.stringify(value)))).toBeGreaterThan(-1);
     });
 });

@@ -45,8 +45,8 @@ describe('messaging using the standard neon event bus', function() {
         eventBus.unsubscribe(subscriber1, 'messengerId1');
         eventBus.publish(channel, 'cMessage', 'messengerId2');
 
-        expect(callback1.callCount).toEqual(2);
-        expect(callback2.callCount).toEqual(1);
+        expect(callback1).toHaveBeenCalledTimes(2);
+        expect(callback2).toHaveBeenCalledTimes(1);
     });
 
     it('can unsubscribe all individual subscribers from a channel', function() {
@@ -63,7 +63,7 @@ describe('messaging using the standard neon event bus', function() {
         eventBus.publish(channel, 'bMessage', 'messengerId2');
         eventBus.publish(channel, 'cMessage', 'messengerId2');
 
-        expect(callback1.callCount).toEqual(1);
-        expect(callback2.callCount).toEqual(1);
+        expect(callback1).toHaveBeenCalledTimes(1);
+        expect(callback2).toHaveBeenCalledTimes(1);
     });
 });
