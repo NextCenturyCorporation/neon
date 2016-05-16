@@ -63,16 +63,16 @@ class SparkSQLQueryExecutorIntegrationTest extends AbstractQueryExecutorIntegrat
         return "spark-json/"
     }
 
-    protected def jsonObjectToMap(jsonObject) {
+    protected def jsonObjectToMap(def jsonObject, def parseDates) {
         def map = [:]
         jsonObject.keys().each { key ->
             def value = jsonObject.get(key)
-            if (key =~ AbstractQueryExecutorIntegrationTest.DATE_FIELD_REGEX) {
+            if (parseDates && key =~ AbstractQueryExecutorIntegrationTest.DATE_FIELD_REGEX) {
                 map[key] = DateUtils.parseDate(value)
             } else if (value instanceof JSONArray) {
                 map[key] = jsonArrayToList(value)
             } else if (value instanceof JSONObject) {
-                map[key] = jsonObjectToMap(value)
+                map[key] = jsonObjectToMap(value, parseDates)
             } else {
                 map[key] = value
             }

@@ -113,8 +113,8 @@ class ElasticSearchQueryExecutor extends AbstractQueryExecutor {
 
         def results = getClient().search(request).actionGet()
         def aggResults = results.aggregations
-
         def returnVal
+
         if (aggregates && !groupByClauses) {
             returnVal = new TabularQueryResult([
                 extractMetrics(aggregates, aggResults ? aggResults.asMap() : null, results.hits.totalHits)
@@ -209,7 +209,6 @@ class ElasticSearchQueryExecutor extends AbstractQueryExecutor {
     @Override
     List<String> getFieldNames(String databaseName, String tableName) {
         if(databaseName && tableName) {
-            LOGGER.debug("Executing getFieldNames for index " + databaseName + " type " + tableName)
             def dbMatch = databaseName.replaceAll(/\*/, '.*')
             def tableMatch = tableName.replaceAll(/\*/, '.*')
 
@@ -465,27 +464,33 @@ class ElasticSearchQueryExecutor extends AbstractQueryExecutor {
         return fieldNames
     }
 
+    /**
+     *  Note: This method is not an appropriate check for queries against index mappings as they
+     *  allow both the databaseName and tableName to be wildcarded.  This method allows only
+     *  the databaseName to be wildcarded to match the behavior of index searches.
+     */
     private void checkDatabaseAndTableExists(String databaseName, String tableName) {
-        def dbExists = getClient().admin().indices().exists(new IndicesExistsRequest(databaseName)).actionGet().isExists()
+        def dbMatch = databaseName.replaceAll(/\*/, '.*')
+        def tableMatch = tableName
+        def mappings = getMappings()
 
-        if(!dbExists) {
+        def dbMatches = mappings.keysIt().findAll { dbKey ->
+            dbKey.matches(dbMatch)
+        }
+
+        if (!dbMatches) {
             throw new ResourceNotFoundException("Database ${databaseName} does not exist")
         }
 
-        def tableExists = false
-
-        getMappings().keysIt().each { dbKey ->
-            if (dbKey.matches(databaseName)) {
-                def dbMappings = mappings.get(dbKey)
-                dbMappings.keysIt().each { tableKey ->
-                    if (tableKey.matches(tableName)) {
-                        tableExists = true
-                    }
-                }
+        def dbWithTable = dbMatches.find { dbKey ->
+            def dbMappings = mappings.get(dbKey)
+            def tableMatches = dbMappings.keysIt().find { tableKey ->
+                tableKey.matches(tableMatch)
             }
+            tableMatches != null
         }
 
-        if(!tableExists) {
+        if (!dbWithTable) {
             throw new ResourceNotFoundException("Table ${tableName} does not exist")
         }
     }

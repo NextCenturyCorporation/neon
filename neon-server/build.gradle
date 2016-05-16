@@ -226,7 +226,10 @@ task generateSparkSQLJson {
     inputs.files { testDataInputFileTree }
     outputs.dir { outputDir }
     doLast {
-        new SparkSQLJSONGenerator().generateJson(testDataDir, outputDir)
+        // Use all files from testDataDir except types.json as that output is not based on data contents.
+        // Instead it passes data types which are specific to each database and defined in the
+        // test-data/<dbtype>-json/types.json files.
+        new SparkSQLJSONGenerator().generateJson(testDataDir, outputDir, ~/(?!types).*\.json/)
     }
 }
 
@@ -249,11 +252,16 @@ task generateSparkSQLCSV {
 task generateElasticSearchJson {
     description = "Generates json files with that are used for validating elasticsearch test results"
     def outputDir = "${testDataDir}/elasticsearch-json"
+    logging.captureStandardOutput LogLevel.INFO
     inputs.files { testDataInputFileTree }
     outputs.dir { outputDir }
     doLast {
-        new ElasticSearchJSONGenerator().generateJson(testDataDir, outputDir)
+        // Use all files from testDataDir except types.json as that output is not based on data contents.
+        // Instead it passes data types which are specific to each database and defined in the
+        // test-data/<dbtype>-json/types.json files.
+        new ElasticSearchJSONGenerator().generateJson(testDataDir, outputDir, ~/(?!types).*\.json/)
     }
+    // /^(?!types)\.json/
 }
 
 task generateElasticSearchCSV {
