@@ -236,19 +236,25 @@ class ElasticSearchQueryExecutor extends AbstractQueryExecutor {
 
     @Override
     Map getFieldTypes(String databaseName, String tableName) {
-        if(tableName) {
-            LOGGER.debug("Executing getFieldTypes for index " + databaseName + " type " + tableName)
-            checkDatabaseAndTableExists(databaseName, tableName)
-
-            def dbMappings = getMappings().get(databaseName)
-            if(dbMappings) {
-                def tableMappings = dbMappings.get(tableName)
-                if(tableMappings) {
-                    return getFieldTypesInObject(tableMappings.getSourceAsMap(), null)
+        def fieldTypes = [:]
+        if(databaseName && tableName) {
+            def dbMatch = databaseName.replaceAll(/\*/, '.*')
+            def tableMatch = tableName.replaceAll(/\*/, '.*')
+            def mappings = getMappings()
+            mappings.keysIt().each { dbKey ->
+                if (dbKey.matches(dbMatch)) {
+                    def dbMappings = mappings.get(dbKey)
+                    dbMappings.keysIt().each { tableKey ->
+                        if (tableKey.matches(tableMatch)) {
+                            def tableMappings = dbMappings.get(tableKey)
+                            fieldTypes.putAll(getFieldTypesInObject(tableMappings.getSourceAsMap(), null))
+                        }
+                    }
                 }
             }
         }
-        return [:]
+
+        return fieldTypes
     }
 
     List<ArrayCountPair> getArrayCounts(String databaseName, String tableName, String field, int limit = 0, WhereClause whereClause = null) {
