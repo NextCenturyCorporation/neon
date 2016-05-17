@@ -118,9 +118,8 @@ class ElasticSearchQueryExecutorIntegrationTest extends AbstractQueryExecutorInt
 
     @Test
     void "field types with wildcards"() {
-        def fieldNames = queryExecutor.getFieldNames(DATABASE_NAME.substring(0, DATABASE_NAME.length() - 2) + '*',
+        def fieldTypes = queryExecutor.getFieldTypes(DATABASE_NAME.substring(0, DATABASE_NAME.length() - 2) + '*',
             TABLE_NAME.substring(0, TABLE_NAME.length() - 2) + '*')
-        def fieldTypes = queryExecutor.getFieldTypes(DATABASE_NAME, TABLE_NAME)
         def expected = getAllTypes()
 
         //AssertUtils.assertEqualCollections(expected, fieldTypes)
