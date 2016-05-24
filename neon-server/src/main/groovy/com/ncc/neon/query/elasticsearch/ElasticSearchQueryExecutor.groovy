@@ -130,7 +130,7 @@ class ElasticSearchQueryExecutor extends AbstractQueryExecutor {
             returnVal = new TabularQueryResult(extractDistinct(query, aggResults.asList()[0]))
         }
         else {
-            returnVal = new TabularQueryResult(results.hits.collect { it.getSource() })
+            returnVal = new TabularQueryResult(extractHits(results.hits))
         }
 
         long diffTime = new Date().getTime() - d1
@@ -173,6 +173,15 @@ class ElasticSearchQueryExecutor extends AbstractQueryExecutor {
         }
 
         return values
+    }
+
+    private List<Map<String, Object>> extractHits(hits) {
+        return hits.collect {
+            def record = it.getSource()
+            // Add the ElasticSearch id, since it isn't included in the "source" document
+            record["_id"] =  it.getId()
+            return record
+        }
     }
 
     @Override
