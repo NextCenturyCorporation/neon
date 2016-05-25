@@ -127,9 +127,9 @@ describe('messenger', function() {
             id: "selectionChanged"
         });
 
-        expect(callback1.callCount).toEqual(1);
-        expect(callback2.callCount).toEqual(1);
-        expect(callback3.callCount).toEqual(1);
+        expect(callback1).toHaveBeenCalledTimes(1);
+        expect(callback2).toHaveBeenCalledTimes(1);
+        expect(callback3).toHaveBeenCalledTimes(1);
     });
 
     it('unsubscribes from all Neon event type on removeEvents()', function() {
@@ -156,9 +156,9 @@ describe('messenger', function() {
             id: "selectionChanged"
         });
 
-        expect(callback1.callCount).toEqual(0);
-        expect(callback2.callCount).toEqual(0);
-        expect(callback3.callCount).toEqual(0);
+        expect(callback1).not.toHaveBeenCalled();
+        expect(callback2).not.toHaveBeenCalled();
+        expect(callback3).not.toHaveBeenCalled();
     });
 
     it('should be notified when a message is published to the selection changed channel', function() {

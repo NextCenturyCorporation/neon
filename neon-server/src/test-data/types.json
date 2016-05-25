@@ -1,0 +1,14 @@
+[
+    {
+        "_id": "string",
+        "firstname": "string",
+        "lastname": "string",
+        "city": "string",
+        "state": "string",
+        "salary": "integer",
+        "hiredate": "date",
+        "location.type": "string",
+        "location.coordinates": "array",
+        "tags": "array"
+    }
+]

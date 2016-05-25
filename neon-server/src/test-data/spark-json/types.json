@@ -1,0 +1,10 @@
+[{
+    "_id": "string",
+    "city": "string",
+    "firstname": "string",
+    "hiredate": "date",
+    "lastname": "string",
+    "salary": "integer",
+    "state": "string",
+    "tags": "array"
+}]

@@ -17,68 +17,90 @@
 
 describe('widgets', function() {
     // helper to execute async functions
-    var executeAndWait = function(asyncFunction, args) {
+    var executeAndWait = function(name, asyncFunction, args, test) {
         // the target is null since there is no "this" context for these functions (they are "static")
-        return neontest.executeAndWait(null, asyncFunction, args);
+        return neontest.executeAndWait(name, null, asyncFunction, args, test);
     };
 
-    it('save and restore states', function() {
+    describe('save and restore states', function() {
         // simulate state from two different widgets with different ids
         var instanceId1 = "id1";
         var state1 = {
             s1: "val1"
         };
-        var restoredState1;
         var instanceId2 = "id2";
         var state2 = {
             s2: "val2"
         };
-        var restoredState2;
 
-        executeAndWait(neon.widget.saveState, [instanceId1, state1]);
-        runs(function() {
-            executeAndWait(neon.widget.saveState, [instanceId2, state2]);
-            runs(function() {
-                restoredState1 = executeAndWait(neon.widget.getSavedState, instanceId1);
-                runs(function() {
-                    restoredState2 = executeAndWait(neon.widget.getSavedState, instanceId2);
-                    runs(function() {
-                        expect(restoredState1.get()).toEqual(state1);
-                        expect(restoredState2.get()).toEqual(state2);
-                    });
-                });
-            });
+        executeAndWait('saved state 1', neon.widget.saveState, [instanceId1, state1], function() {
+            expect(true).toBe(true);
+        });
+
+        executeAndWait('saved state 2', neon.widget.saveState, [instanceId2, state2], function() {
+            expect(true).toBe(true);
+        });
+
+        executeAndWait('restored state 1', neon.widget.getSavedState, instanceId1, function(result) {
+            expect(result).toEqual(state1);
+        });
+
+        executeAndWait('restored state 2', neon.widget.getSavedState, instanceId2, function(result) {
+            expect(result).toEqual(state2);
         });
     });
 
-    it('get an empty state if none exists', function() {
-        var empty = executeAndWait(neon.widget.getSavedState, 'invalidWidgetId');
-        runs(function() {
-            expect(empty.get()).toEqual({});
+    describe('get an empty state if none exists', function() {
+        executeAndWait('returned an empty state', neon.widget.getSavedState, 'invalidWidgetId', function(result) {
+            expect(result).toEqual({});
         });
     });
 
-    it('gets a unique instance id', function() {
+    describe('gets a unique instance id', function() {
         // instanceId1a and 1b should be the same
-        var instanceId1a = executeAndWait(neon.widget.getInstanceId, 'qualifier1');
-        runs(function() {
-            var instanceId1b = executeAndWait(neon.widget.getInstanceId, 'qualifier1');
-            runs(function() {
-                var instanceId2 = executeAndWait(neon.widget.getInstanceId, 'qualifier2');
-                runs(function() {
-                    var globalInstanceId1a = executeAndWait(neon.widget.getInstanceId);
-                    runs(function() {
-                        var globalInstanceId1b = executeAndWait(neon.widget.getInstanceId);
-                        runs(function() {
-                            expect(instanceId1a.get()).toEqual(instanceId1b.get());
-                            expect(instanceId1a.get()).not.toEqual(instanceId2.get());
-                            expect(instanceId1a.get()).not.toEqual(globalInstanceId1a.get());
-                            expect(instanceId2.get()).not.toEqual(globalInstanceId1a.get());
-                            expect(globalInstanceId1a.get()).toEqual(globalInstanceId1b.get());
-                        });
-                    });
-                });
-            });
+        var instanceId1a;
+        var instanceId1b;
+        var instanceId2;
+        var globalInstanceId1a;
+        var globalInstanceId1b;
+
+        executeAndWait('fetched a UUID with one qualifier', neon.widget.getInstanceId, 'qualifier1', function(result) {
+            instanceId1a = result;
+            expect(instanceId1a.length).toBeGreaterThan(0);
+        });
+
+        executeAndWait('fetched a UUID with the same qualifier', neon.widget.getInstanceId, 'qualifier1', function(result) {
+            instanceId1b = result;
+            expect(instanceId1b.length).toBeGreaterThan(0);
+        });
+
+        executeAndWait('fetched a UUID for a different qualifier', neon.widget.getInstanceId, 'qualifier2', function(result) {
+            instanceId2 = result;
+            expect(instanceId2.length).toBeGreaterThan(0);
+        });
+
+        executeAndWait('fetched a global UUID', neon.widget.getInstanceId, [], function(result) {
+            globalInstanceId1a = result;
+            expect(globalInstanceId1a.length).toBeGreaterThan(0);
+        });
+
+        executeAndWait('fetched a second global UUID', neon.widget.getInstanceId, [], function(result) {
+            globalInstanceId1b = result;
+            expect(globalInstanceId1b.length).toBeGreaterThan(0);
+        });
+
+        it('returned the same UUIDs given the same qualifier', function() {
+            expect(instanceId1a).toEqual(instanceId1b);
+        });
+
+        it('returned different UUIDs given different qualifiers', function() {
+            expect(instanceId1a).not.toEqual(instanceId2);
+        });
+
+        it('returned a global UUID repeatedly and that ID was not one of the qualified UUIDs', function() {
+            expect(instanceId1a).not.toEqual(globalInstanceId1a);
+            expect(instanceId2).not.toEqual(globalInstanceId1a);
+            expect(globalInstanceId1a).toEqual(globalInstanceId1b);
         });
     });
 });

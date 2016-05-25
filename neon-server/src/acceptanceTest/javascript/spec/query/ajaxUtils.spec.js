@@ -25,18 +25,21 @@
 neon.SERVER_URL = neonServerUrl;
 
 describe('ajax utils', function() {
-    it('aborts ajax request', function() {
-        var statusText = "";
-        // transformServiceUrl is generated dynamically during the build and included in the acceptance test helper file
-        var request = neon.util.ajaxUtils.doGet(transformServiceUrl + '/neon/timeouttest', {
-            // we should get an error with an "abort" status
+    var statusText = "";
+    // transformServiceUrl is generated dynamically during the build and included in the acceptance test helper file
+    var request;
+
+    beforeEach(function(done) {
+        request = neon.util.ajaxUtils.doGet(transformServiceUrl + '/neon/timeouttest', {
             error: function(xhr) {
                 statusText = xhr.statusText;
+                done();
             }
         });
         request.abort();
-        waitsFor(function() {
-            return statusText === 'abort';
-        });
+    });
+
+    it('aborts ajax request', function() {
+        expect(statusText).toEqual('abort');
     });
 });
