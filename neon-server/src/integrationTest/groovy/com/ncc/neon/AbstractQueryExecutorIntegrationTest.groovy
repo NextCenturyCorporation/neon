@@ -52,6 +52,12 @@ abstract class AbstractQueryExecutorIntegrationTest {
     /** all of the data in the test file. lazy initialized because subclasses modify the input directory. Use the getter to access it */
     private def allData
 
+    /** the name of the file that contains all of the types used for the test */
+    static final ALL_TYPES_FILENAME = 'types.json'
+
+    /** all of the types in the test file. lazy initialized because subclasses modify the input directory. Use the getter to access it */
+    private def allTypes
+
     /** a filter that just includes all of the data (no WHERE clause) */
     static final ALL_DATA_FILTER = new Filter(databaseName: DATABASE_NAME, tableName: TABLE_NAME)
 
@@ -80,6 +86,12 @@ abstract class AbstractQueryExecutorIntegrationTest {
         return val
     }
 
+    protected def getAllTypes() {
+        if (!allTypes) {
+            allTypes = readJson(ALL_TYPES_FILENAME, false)
+        }
+        return allTypes
+    }
 
     protected def getAllData() {
         if (!allData) {
@@ -89,17 +101,17 @@ abstract class AbstractQueryExecutorIntegrationTest {
     }
 
     @SuppressWarnings('CoupledTestCase') // this method incorrectly throws this codenarc error
-    protected def readJson(def fileName) {
+    protected def readJson(def fileName, parseDates = true) {
         def jsonArray = new JSONArray(AbstractQueryExecutorIntegrationTest.getResourceAsStream("/${resultsJsonFolder}${fileName}").text)
         def data = []
         jsonArray.length().times { index ->
             def row = jsonArray.get(index)
-            data << jsonObjectToMap(row)
+            data << jsonObjectToMap(row, parseDates)
         }
         return data
     }
 
-    protected abstract def jsonObjectToMap(jsonObject)
+    protected abstract def jsonObjectToMap(jsonObject, parseDates)
 
     protected static def jsonArrayToList(jsonArray) {
         def list = []
@@ -140,6 +152,15 @@ abstract class AbstractQueryExecutorIntegrationTest {
     @Test(expected = RuntimeException)
     void "field names without a table throws an exception"() {
         queryExecutor.getFieldNames(DATABASE_NAME, "zsz")
+    }
+
+    @Test
+    void "field types"() {
+        def fieldTypes = queryExecutor.getFieldTypes(DATABASE_NAME, TABLE_NAME)
+        def expected = getAllTypes()
+
+        //AssertUtils.assertEqualCollections(expected, fieldTypes)
+        compareRowUnordered(expected, fieldTypes, "Returned values, ${fieldTypes}, did not match expected values, ${expected}")
     }
 
     @Test

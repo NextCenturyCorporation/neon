@@ -1,9 +1,11 @@
 # generated files
 neon-server/src/test-data/mongo-json/
-neon-server/src/test-data/spark-json/
+neon-server/src/test-data/spark-json/*.*
+!neon-server/src/test-data/spark-json/types.json
 neon-server/src/test-data/spark-csv/
 neon-server/src/test-data/elasticsearch-csv/
-neon-server/src/test-data/elasticsearch-json/
+neon-server/src/test-data/elasticsearch-json/*.*
+!neon-server/src/test-data/elasticsearch-json/types.json
 package.json
 examples/angular-demo/app/R/NeonAngularDemo.Rcheck
 examples/angular-demo/app/R/NeonAngularDemo_*.tar.gz

@@ -82,7 +82,7 @@ neon.widget = (function() {
     function getInstanceId(qualifier, successCallback) {
         // If the first argument is a function, assume that is the callback and that the caller
         // wants the session id
-        if (typeof qualifier === 'function') {
+        if(typeof qualifier === 'function') {
             successCallback = qualifier;
             qualifier = null;
         }

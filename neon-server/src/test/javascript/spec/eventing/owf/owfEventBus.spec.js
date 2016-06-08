@@ -51,7 +51,7 @@ describe('messaging using the OWF event bus', function() {
         eventBus.unsubscribe(subscriber);
         eventBus.publish(channel, 'cMessage');
 
-        expect(callback1.callCount).toEqual(2);
-        expect(callback2.callCount).toEqual(1);
+        expect(callback1).toHaveBeenCalledTimes(2);
+        expect(callback2).toHaveBeenCalledTimes(1);
     });
 });

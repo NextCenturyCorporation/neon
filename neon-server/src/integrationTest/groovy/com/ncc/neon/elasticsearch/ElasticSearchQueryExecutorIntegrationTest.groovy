@@ -20,7 +20,10 @@ import com.ncc.neon.AbstractQueryExecutorIntegrationTest
 import com.ncc.neon.IntegrationTestContext
 import com.ncc.neon.connect.ConnectionInfo
 import com.ncc.neon.connect.DataSources
+import com.ncc.neon.query.Query
+import com.ncc.neon.query.QueryOptions
 import com.ncc.neon.query.elasticsearch.ElasticSearchQueryExecutor
+import com.ncc.neon.query.filter.Filter
 import com.ncc.neon.util.AssertUtils
 import org.joda.time.format.DateTimeFormat
 import org.joda.time.format.DateTimeFormatter
@@ -62,7 +65,6 @@ class ElasticSearchQueryExecutorIntegrationTest extends AbstractQueryExecutorInt
         this.elasticSearchQueryExecutor.connectionManager.currentRequest = new ConnectionInfo(host: HOST_STRING, dataSource: DataSources.elasticsearch)
     }
 
-
     protected ElasticSearchQueryExecutor getQueryExecutor(){
         elasticSearchQueryExecutor
     }
@@ -73,22 +75,31 @@ class ElasticSearchQueryExecutorIntegrationTest extends AbstractQueryExecutorInt
     }
 
     @Override
-    protected def jsonObjectToMap(jsonObject) {
+    protected def jsonObjectToMap(def jsonObject, def parseDates) {
         def map = [:]
         jsonObject.keys().each { key ->
             def value = jsonObject.get(key)
-            if (key =~ AbstractQueryExecutorIntegrationTest.DATE_FIELD_REGEX) {
+            if (parseDates && key =~ AbstractQueryExecutorIntegrationTest.DATE_FIELD_REGEX) {
                 DateTimeFormatter formatIn = DateTimeFormat.forPattern("yyyy-MM-dd'T'HH:mm:ss'Z'")
                 map[key] = formatIn.withZoneUTC().parseDateTime(value).toString()
             } else if (value instanceof JSONArray) {
                 map[key] = jsonArrayToList(value)
             } else if (value instanceof JSONObject) {
-                map[key] = jsonObjectToMap(value)
+                map[key] = jsonObjectToMap(value, parseDates)
             } else {
                 map[key] = value
             }
         }
         return map
+    }
+
+    @Test
+    void "query with index wildcards"() {
+        def wildcardFilter = new Filter(databaseName: DATABASE_NAME.substring(0, DATABASE_NAME.length() - 2) + '*',
+            tableName: TABLE_NAME)
+        def query = new Query(filter: wildcardFilter)
+        def result = queryExecutor.execute(query, QueryOptions.DEFAULT_OPTIONS)
+        assertUnorderedQueryResult(getAllData(), result)
     }
 
     @Test
@@ -103,5 +114,15 @@ class ElasticSearchQueryExecutorIntegrationTest extends AbstractQueryExecutorInt
     void "show tables with wildcard"(){
         def tables = queryExecutor.showTables(DATABASE_NAME.substring(0, DATABASE_NAME.length() - 2) + '*')
         assert tables.contains(TABLE_NAME)
+    }
+
+    @Test
+    void "field types with wildcards"() {
+        def fieldTypes = queryExecutor.getFieldTypes(DATABASE_NAME.substring(0, DATABASE_NAME.length() - 2) + '*',
+            TABLE_NAME.substring(0, TABLE_NAME.length() - 2) + '*')
+        def expected = getAllTypes()
+
+        //AssertUtils.assertEqualCollections(expected, fieldTypes)
+        compareRowUnordered(expected, fieldTypes, "Returned values, ${fieldTypes}, did not match expected values, ${expected}")
     }
 }

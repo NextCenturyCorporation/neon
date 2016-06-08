@@ -1,0 +1,9 @@
+[{
+    "city": "string",
+    "firstname": "string",
+    "hiredate": "date",
+    "lastname": "string",
+    "salary": "long",
+    "state": "string",
+    "tags": "string"
+}]
