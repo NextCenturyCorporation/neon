@@ -71,7 +71,7 @@ Website: [http://neonframework.org][5]
 Copyright 2014 Next Century Corporation
 
 [neon-gtd-demo]: http://demo.neonframework.org/neon-gtd/app/#
-[neon]: https://github.com/NextCenturyCorportation/neon-gtd
+[neon]: https://github.com/NextCenturyCorportation/neon
 [neon-gtd]: https://github.com/NextCenturyCorporation/neon-gtd
 [neon-gtd-guide]: https://github.com/NextCenturyCorporation/neon-gtd/wiki/Neon-GTD-User-Guide
 
