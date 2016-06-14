@@ -61,7 +61,6 @@ to point to the appropriate port.
 
 Neon and Neon-GTD are made available by [Next Century][10] under the [Apache 2 Open Source License][8]. You may freely download, use, and modify, in whole or in part, the source code or release packages. Any restrictions or attribution requirements are spelled out in the license file. Neon and Neon-GTD attribution information can be found in the LICENSE.TXT file and licenses folder in each of the [Neon Git Repository][neon] and [Neon-GTD Git Repository][neon-gtd]. For more information about the Apache license, please visit the [The Apache Software Foundation’s License FAQ][9].
 
-
 ## Additional Information
 
 Email: neon-support@nextcentury.com
@@ -71,7 +70,7 @@ Website: [http://neonframework.org][5]
 Copyright 2014 Next Century Corporation
 
 [neon-gtd-demo]: http://demo.neonframework.org/neon-gtd/app/#
-[neon]: https://github.com/NextCenturyCorportation/neon
+[neon]: https://github.com/NextCenturyCorporation/neon
 [neon-gtd]: https://github.com/NextCenturyCorporation/neon-gtd
 [neon-gtd-guide]: https://github.com/NextCenturyCorporation/neon-gtd/wiki/Neon-GTD-User-Guide
 
