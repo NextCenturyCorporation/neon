@@ -208,7 +208,7 @@ class MongoImportHelperProcessorTest {
 
     @Test
     void "process type guesses"() {
-        createFile("name,age,address\nJoe,23,[city: 'Baltimore']\nJanice,null,[city: 'Rockville']", "csv")
+        createFile("name,age,address\nJoe,23,\"{\"\"city\"\": \"\"Baltimore\"\"}\"\nJanice,null,\"{\"\"city\"\": \"\"Rockville\"\"}\"", "csv")
         mongoImportHelperProcessor.processTypeGuesses(HOST, UUID)
         GridFSDBFile dbFile = getDBFile()
         assert dbFile.get("programGuesses") == FT_PAIRS_MAP1
@@ -230,7 +230,7 @@ class MongoImportHelperProcessorTest {
 
     @Test
     void "process load and convert"() {
-        createFile("name,age,address\nJoe,23,\"[city: 'Baltimore', zip: 12345]\"\nJanice,42,\"[city: 'Rockville', zip: 54321]\"", "csv")
+        createFile("name,age,address\nJoe,23,\"{\"\"city\"\": \"\"Baltimore\"\", \"\"zip\"\": 12345}\"\nJanice,42,\"{\"\"city\"\": \"\"Rockville\"\", \"\"zip\"\": 54321}\"", "csv")
         mongoImportHelperProcessor.processLoadAndConvert(HOST, UUID, null, FT_PAIRS_LIST1)
         GridFSDBFile dbFile = getDBFile()
         DBObject record = getRecord()
@@ -246,7 +246,7 @@ class MongoImportHelperProcessorTest {
 
     @Test
     void "process load and convert with failed fields"() {
-        createFile("name,age,address\nJoe,none,\"[city: 'Baltimore', zip: 12345]\"\nJanice,42,\"[city: 'Rockville', zip: 54321]\"", "csv")
+        createFile("name,age,address\nJoe,none,\"{\"\"city\"\": \"\"Baltimore\"\", \"\"zip\"\": 12345}\"\nJanice,42,\"{\"\"city\"\": \"\"Rockville\"\", \"\"zip\"\": 54321}\"", "csv")
         mongoImportHelperProcessor.processLoadAndConvert(HOST, UUID, null, FT_PAIRS_LIST2)
         GridFSDBFile dbFile = getDBFile()
         DBObject record = getRecord()
@@ -262,7 +262,7 @@ class MongoImportHelperProcessorTest {
 
     @Test
     void "process load and convert on existing file"() {
-        createFile("name,age,address\nJoe,23,\"[city: 'Baltimore', zip: 12345]\"\nJanice,42,\"[city: 'Rockville']\"", "csv")
+        createFile("name,age,address\nJoe,23,\"{\"\"city\"\": \"\"Baltimore\"\", \"\"zip\"\": 12345}\"\nJanice,42,\"{\"\"city\"\": \"\"Rockville\"\"}\"", "csv")
         mongoImportHelperProcessor.processLoadAndConvert(HOST, UUID, null, FT_PAIRS_LIST2)
         mongoImportHelperProcessor.processLoadAndConvert(HOST, UUID, null, FT_PAIRS_LIST2_FAILED_FIELDS)
         GridFSDBFile dbFile = getDBFile()
@@ -276,7 +276,7 @@ class MongoImportHelperProcessorTest {
 
     @Test
     void "process load and convert on existing file with failed fields"() {
-        createFile("name,age,address\nJoe,23,\"[city: 'Baltimore', zip: 'null']\"\nJanice,42,\"[city: 'Rockville', zip: 54321]\"", "csv")
+        createFile("name,age,address\nJoe,23,\"{\"\"city\"\": \"\"Baltimore\"\", \"\"zip\"\": null}\"\nJanice,42,\"{\"\"city\"\": \"\"Rockville\"\", \"\"zip\"\": 54321}\"", "csv")
         mongoImportHelperProcessor.processLoadAndConvert(HOST, UUID, null, FT_PAIRS_LIST3)
         mongoImportHelperProcessor.processLoadAndConvert(HOST, UUID, null, FT_PAIRS_LIST3_FAILED_FIELDS)
         GridFSDBFile dbFile = getDBFile()

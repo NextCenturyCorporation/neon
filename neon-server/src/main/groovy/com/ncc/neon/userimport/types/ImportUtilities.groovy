@@ -16,6 +16,10 @@
 
 package com.ncc.neon.userimport.types
 
+import groovy.json.JsonException
+import groovy.json.JsonSlurper
+import groovy.json.internal.Exceptions
+
 import java.text.ParseException
 
 import org.apache.commons.lang.time.DateUtils
@@ -81,6 +85,7 @@ class ImportUtilities {
     static List getTypeGuesses(Map fieldsAndValues) {
         List fields = fieldsAndValues.keySet() as List
         List fieldsAndTypes = []
+
         fields.each { field ->
             FieldTypePair pair = null
             List valuesOfField = fieldsAndValues.get(field)
@@ -202,19 +207,21 @@ class ImportUtilities {
      */
     static boolean isListObjects(List list) {
         try {
+            JsonSlurper slurper = new JsonSlurper();
             def areObjects = true
             list.each { value ->
                 if(value.equalsIgnoreCase("none") || value.equalsIgnoreCase("null") || value.equalsIgnoreCase("")) {
                     return
                 }
-                def val = ImportUtilities.removeQuotations(value)
-                if(Eval.me(val) instanceof Map || Eval.me(val) instanceof List) {
+                def val = slurper.parseText(ImportUtilities.removeQuotations(value))
+                if (val instanceof Object) {
                     return
                 }
+
                 areObjects = false
             }
             return areObjects
-        } catch(MissingPropertyException | MissingMethodException | MultipleCompilationErrorsException e) {
+        } catch(MissingPropertyException | MissingMethodException | MultipleCompilationErrorsException | JsonException | Exceptions.JsonInternalException e) {
             return false
         }
     }
@@ -250,7 +257,7 @@ class ImportUtilities {
                     return value.toString()
             }
         }
-        catch(NumberFormatException | IllegalArgumentException | ParseException | NoSuchMethodException | MissingPropertyException e) {
+        catch(JsonException | NumberFormatException | IllegalArgumentException | ParseException | NoSuchMethodException | MissingPropertyException e) {
             return new ConversionFailureResult([value: value, type: type])
         }
     }
@@ -262,16 +269,25 @@ class ImportUtilities {
      */
     static Object convertValueToObject(String value) {
         Map convertedValue = [:]
-        def val = Eval.me(ImportUtilities.removeQuotations(value))
-        if(val instanceof Map) {
-            val.keySet().each { key ->
-                List fieldAndType = ImportUtilities.getTypeGuesses([key: [val[key] as String]])
-                Object objectValue = ImportUtilities.convertValueToType(val[key] as String, fieldAndType[0].type)
-                convertedValue.put(key, objectValue)
+        JsonSlurper slurper = new JsonSlurper()
+       // def val = Eval.me(ImportUtilities.removeQuotations(value))
+        try {
+            def val = slurper.parseText(ImportUtilities.removeQuotations(value));
+
+            if(val instanceof Map) {
+                val.keySet().each { key ->
+                    List fieldAndType = ImportUtilities.getTypeGuesses([key: [val[key] as String]])
+                    Object objectValue = ImportUtilities.convertValueToType(val[key] as String, fieldAndType[0].type)
+                    convertedValue.put(key, objectValue)
+                }
+            } else {
+                throw new NoSuchMethodException()
             }
-        } else {
+        }
+        catch(Exception e) {
             throw new NoSuchMethodException()
         }
+
         return convertedValue
     }
 
@@ -282,13 +298,15 @@ class ImportUtilities {
      * @return Mapping of field names to all the values in the object the field name contains
      */
     static Map retrieveObjectFieldsAndValues(String values) {
-        def vals = Eval.me(values)
+        JsonSlurper slurper = new JsonSlurper();
+        def stripped = ImportUtilities.removeQuotations(values);
+        def vals = slurper.parseText(ImportUtilities.removeQuotations(values));
         Map pairs = [:]
 
         vals.each { it ->
             def obj
             if(it instanceof String) {
-                obj = Eval.me(it)
+                obj = slurper.parseText(it);
             } else {
                 obj = it
             }
@@ -318,7 +336,9 @@ class ImportUtilities {
     }
 
     /**
-     * Strips extra quotations that are on the beginning and the end of a string
+     * Strips extra quotations that are on the beginning and the end of a string and convert
+     * any internally escaped double quotations.  Common CSV rules requires that a " inside of a
+     * quoted string appear as "".
      * @param value The string to strip
      * @return If there are quotations on the beginning and end of value, it returns the value
      * with those quotations removed. Otherwise, value is returned with no change
@@ -326,7 +346,8 @@ class ImportUtilities {
     static String removeQuotations(String value) {
         if((value.substring(0, 1) == '"' && value.substring(value.length() - 1) == '"') ||
             (value.substring(0, 1) == '\'' && value.substring(value.length() - 1) == '\'')) {
-            return value.substring(1, value.length() - 1)
+            def retVal = value.substring(1, value.length() - 1).replaceAll(/""/, '"')
+            return retVal
         }
 
         return value

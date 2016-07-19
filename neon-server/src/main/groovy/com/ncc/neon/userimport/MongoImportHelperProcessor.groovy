@@ -108,7 +108,8 @@ class MongoImportHelperProcessor implements ImportHelperProcessor {
                     }
                 }
             }
-            updateFile(file, [programGuesses: fieldTypePairListToMap(ImportUtilities.getTypeGuesses(fieldsAndValues), true)])
+            def updates = fieldTypePairListToMap(ImportUtilities.getTypeGuesses(fieldsAndValues), true)
+            updateFile(file, [programGuesses: updates])
         } finally {
             reader?.close()
         }
