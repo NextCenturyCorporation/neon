@@ -281,7 +281,7 @@ class ImportUtilities {
     static Object convertValueToObject(String value) {
         Map convertedValue = [:]
         JsonSlurper slurper = new JsonSlurper()
-       // def val = Eval.me(ImportUtilities.removeQuotations(value))
+
         try {
             def val = slurper.parseText(ImportUtilities.removeQuotations(value))
 
@@ -310,7 +310,7 @@ class ImportUtilities {
      */
     static Map retrieveObjectFieldsAndValues(String values) {
         JsonSlurper slurper = new JsonSlurper()
-        //def stripped = ImportUtilities.removeQuotations(values);
+
         def vals = slurper.parseText(ImportUtilities.removeQuotations(values))
         Map pairs = [:]
 
