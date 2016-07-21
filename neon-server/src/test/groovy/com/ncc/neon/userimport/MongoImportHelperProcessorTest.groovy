@@ -36,7 +36,7 @@ import com.ncc.neon.userimport.readers.SheetReaderFactory
 
 import com.ncc.neon.userimport.exceptions.UnsupportedFiletypeException
 import com.ncc.neon.userimport.exceptions.BadSheetException
-
+import org.codehaus.groovy.runtime.NullObject
 import org.junit.Before
 import org.junit.After
 import org.junit.Test
@@ -208,7 +208,8 @@ class MongoImportHelperProcessorTest {
 
     @Test
     void "process type guesses"() {
-        createFile("name,age,address\nJoe,23,\"{\"\"city\"\": \"\"Baltimore\"\"}\"\nJanice,null,\"{\"\"city\"\": \"\"Rockville\"\"}\"", "csv")
+        createFile("name,age,address\nJoe,23," +
+            "\nJanice,null,\"{\"\"city\"\": \"\"Rockville\"\"}\"", "csv")
         mongoImportHelperProcessor.processTypeGuesses(HOST, UUID)
         GridFSDBFile dbFile = getDBFile()
         assert dbFile.get("programGuesses") == FT_PAIRS_MAP1
@@ -287,7 +288,7 @@ class MongoImportHelperProcessorTest {
         assert record.age.getClass() ==  String
         assert record.address.getClass() ==  BasicDBObject
         assert record.address.city.getClass() ==  String
-        assert record.address.zip.getClass() ==  Integer
+        assert record.address.zip.getClass() ==  NullObject
         assert dbFile.get("failedFields") == FT_PAIRS_MAP3
 
         mongoImportHelperProcessor.processLoadAndConvert(HOST, UUID, null, FT_PAIRS_LIST3_FAILED_FIELDS2)
@@ -299,7 +300,7 @@ class MongoImportHelperProcessorTest {
         assert record.age.getClass() ==  Integer
         assert record.address.getClass() ==  BasicDBObject
         assert record.address.city.getClass() ==  String
-        assert record.address.zip.getClass() ==  Integer
+        assert record.address.zip.getClass() ==  NullObject
         assert !dbFile.get("failedFields")
     }
 

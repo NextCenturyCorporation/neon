@@ -94,7 +94,15 @@ class ImportUtilities {
             pair = (!pair && ImportUtilities.isListDoubles(valuesOfField)) ? new FieldTypePair(name: field, type: FieldType.DOUBLE) : pair
             pair = (!pair && ImportUtilities.isListFloats(valuesOfField)) ? new FieldTypePair(name: field, type: FieldType.FLOAT) : pair
             pair = (!pair && ImportUtilities.isListDates(valuesOfField)) ? new FieldTypePair(name: field, type: FieldType.DATE) : pair
-            pair = (!pair && ImportUtilities.isListObjects(valuesOfField)) ? new FieldTypePair(name: field, type: FieldType.OBJECT, objectFTPairs: ImportUtilities.getTypeGuesses(ImportUtilities.retrieveObjectFieldsAndValues(valuesOfField as String))) : pair
+
+            // Use Json notation to check for objects
+            String obj = "["
+            valuesOfField.each { it ->
+                obj += (it != null) ? ImportUtilities.removeQuotations(it) + ',' : ''
+            }
+            obj = obj.substring(0, obj.length() - 1) + ']'
+
+            pair = (!pair && ImportUtilities.isListObjects(valuesOfField)) ? new FieldTypePair(name: field, type: FieldType.OBJECT, objectFTPairs: ImportUtilities.getTypeGuesses(ImportUtilities.retrieveObjectFieldsAndValues(obj))) : pair
             pair = (!pair) ? new FieldTypePair(name: field, type: FieldType.STRING) : pair
             fieldsAndTypes.add(pair)
         }
@@ -109,7 +117,7 @@ class ImportUtilities {
     static boolean isListIntegers(List list) {
         try {
             list.each { value ->
-                if(value.equalsIgnoreCase("none") || value.equalsIgnoreCase("null") || value.equalsIgnoreCase("")) {
+                if(value == null || value.equalsIgnoreCase("none") || value.equalsIgnoreCase("null") || value.equalsIgnoreCase("")) {
                     return
                 }
                 Integer.parseInt(value)
@@ -129,7 +137,7 @@ class ImportUtilities {
     static boolean isListLongs(List list) {
         try {
             list.each { value ->
-                if(value.equalsIgnoreCase("none") || value.equalsIgnoreCase("null") || value.equalsIgnoreCase("")) {
+                if(value == null || value.equalsIgnoreCase("none") || value.equalsIgnoreCase("null") || value.equalsIgnoreCase("")) {
                     return
                 }
                 Long.parseLong(value)
@@ -149,7 +157,7 @@ class ImportUtilities {
     static boolean isListDoubles(List list) {
         try {
             list.each { value ->
-                if(value.equalsIgnoreCase("none") || value.equalsIgnoreCase("null") || value.equalsIgnoreCase("")) {
+                if(value == null || value.equalsIgnoreCase("none") || value.equalsIgnoreCase("null") || value.equalsIgnoreCase("")) {
                     return
                 }
                 Double.parseDouble(value)
@@ -169,7 +177,7 @@ class ImportUtilities {
     static boolean isListFloats(List list) {
         try {
             list.each { value ->
-                if(value.equalsIgnoreCase("none") || value.equalsIgnoreCase("null") || value.equalsIgnoreCase("")) {
+                if(value == null || value.equalsIgnoreCase("none") || value.equalsIgnoreCase("null") || value.equalsIgnoreCase("")) {
                     return
                 }
                 Float.parseFloat(value)
@@ -189,7 +197,7 @@ class ImportUtilities {
     static boolean isListDates(List list) {
         try {
             list.each { value ->
-                if(value.equalsIgnoreCase("none") || value.equalsIgnoreCase("null") || value.equalsIgnoreCase("")) {
+                if(value == null || value.equalsIgnoreCase("none") || value.equalsIgnoreCase("null") || value.equalsIgnoreCase("")) {
                     return
                 }
                 DateUtils.parseDate(value, DATE_PATTERNS)
@@ -210,11 +218,11 @@ class ImportUtilities {
             JsonSlurper slurper = new JsonSlurper();
             def areObjects = true
             list.each { value ->
-                if(value.equalsIgnoreCase("none") || value.equalsIgnoreCase("null") || value.equalsIgnoreCase("")) {
+                if(value == null || value.equalsIgnoreCase("none") || value.equalsIgnoreCase("null") || value.equalsIgnoreCase("")) {
                     return
                 }
                 def val = slurper.parseText(ImportUtilities.removeQuotations(value))
-                if (val instanceof Object) {
+                if (val instanceof Map || val instanceof List) {
                     return
                 }
 
@@ -239,6 +247,9 @@ class ImportUtilities {
      */
     static Object convertValueToType(String value, FieldType type, String[] datePatterns = null) {
         try {
+            if (value == null) {
+                return "null";
+            }
             switch(type) {
                 case FieldType.INTEGER:
                     return Integer.parseInt(value)
@@ -299,7 +310,7 @@ class ImportUtilities {
      */
     static Map retrieveObjectFieldsAndValues(String values) {
         JsonSlurper slurper = new JsonSlurper();
-        def stripped = ImportUtilities.removeQuotations(values);
+        //def stripped = ImportUtilities.removeQuotations(values);
         def vals = slurper.parseText(ImportUtilities.removeQuotations(values));
         Map pairs = [:]
 
@@ -325,6 +336,14 @@ class ImportUtilities {
         return pairs
     }
 
+    static Map retrieveObjectFieldsAndValues(List values) {
+        Map pairs = [:]
+        values.each { it ->
+            pairs << retrieveObjectFieldsAndValues(it as String)
+        }
+        return pairs
+    }
+
     /**
      * Takes a username and "pretty" human-readable name and uses them to generate an "ugly", more unique name.
      * @param userName The username to use in making the ugly name.
@@ -344,8 +363,8 @@ class ImportUtilities {
      * with those quotations removed. Otherwise, value is returned with no change
      */
     static String removeQuotations(String value) {
-        if((value.substring(0, 1) == '"' && value.substring(value.length() - 1) == '"') ||
-            (value.substring(0, 1) == '\'' && value.substring(value.length() - 1) == '\'')) {
+        if((value != null) && ((value.substring(0, 1) == '"' && value.substring(value.length() - 1) == '"') ||
+            (value.substring(0, 1) == '\'' && value.substring(value.length() - 1) == '\''))) {
             def retVal = value.substring(1, value.length() - 1).replaceAll(/""/, '"')
             return retVal
         }
