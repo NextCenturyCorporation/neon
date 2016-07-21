@@ -52,12 +52,12 @@ class ExportServiceTest {
 
     private static final String HOST = "aHost"
     private static final String DATABASE_TYPE = DataSources.mongo.toString()
-    private static final String RESULT_CSV_STRING1 = '"_id","""first"" name","last name","age","location",\n"5137b623a9f279d831b6fb86","""Bill""","Jones","null","[type:Point, coordinates:[20.0, 12.0]]",\n"5137b623a9f279d831b6fb8c","","Bowles","36","[type:Point, coordinates:[11.0, -23.0]]",\n'
-    private static final String RESULT_CSV_STRING2 = '"_id","firstname","lastname","location","age",\n"5137b623a9f279d831b6fb86","""Bill""","Jones","[type:Point, coordinates:[20.0, 12.0]]","null",\n"5137b623a9f279d831b6fb8c","","Bowles","[type:Point, coordinates:[11.0, -23.0]]","36",\n'
+    private static final String RESULT_CSV_STRING1 = '"_id","""first"" name","last name","age","location",\n"5137b623a9f279d831b6fb86","""Bill""","Jones","null","{""type"":""Point"",""coordinates"":[20.0,12.0]}",\n"5137b623a9f279d831b6fb8c","","Bowles","36","{""type"":""Point"",""coordinates"":[11.0,-23.0]}",\n'
+    private static final String RESULT_CSV_STRING2 = '"_id","firstname","lastname","location","age",\n"5137b623a9f279d831b6fb86","""Bill""","Jones","{""type"":""Point"",""coordinates"":[20.0,12.0]}","null",\n"5137b623a9f279d831b6fb8c","","Bowles","{""type"":""Point"",""coordinates"":[11.0,-23.0]}","36",\n'
     private static final String RESULT_CSV_STRING3 = '"key","count",\n"Jones","1",\n"Bowles","1",\n'
     private static final String RESULT_EXCEL_STRING1 = 'Key, Count, \nJones, 1, \nBowles, 1, \n\n'
     private static final String RESULT_EXCEL_STRING2 = 'key, count, \nJones, 1, \nBowles, 1, \n\n'
-    private static final String RESULT_EXCEL_STRING3 = 'Key, Count, \nJones, 1, \nBowles, 1, \n\n_id, firstname, lastname, location, age, \n5137b623a9f279d831b6fb86, "Bill", Jones, [type:Point, coordinates:[20.0, 12.0]], null, \n5137b623a9f279d831b6fb8c, , Bowles, [type:Point, coordinates:[11.0, -23.0]], 36, \n\n'
+    private static final String RESULT_EXCEL_STRING3 = 'Key, Count, \nJones, 1, \nBowles, 1, \n\n_id, firstname, lastname, location, age, \n5137b623a9f279d831b6fb86, "Bill", Jones, {"type":"Point","coordinates":[20.0,12.0]}, null, \n5137b623a9f279d831b6fb8c, , Bowles, {"type":"Point","coordinates":[11.0,-23.0]}, 36, \n\n'
     private static final String RESULT_EXCEL_STRING4 = 'Ke, Sum, \nnull, null, \nnull, null, \n\nKey, Sum, Count, \nJones, null, 1, \nBowles, null, 1, \n\n'
     private static final List TABULAR_QUERY_RESULT = [
         [
@@ -138,7 +138,7 @@ class ExportServiceTest {
         ByteArrayOutputStream out = new ByteArrayOutputStream()
         response.getEntity().write(out)
         ZipInputStream zipIn = new ZipInputStream(new ByteArrayInputStream(out.toByteArray()))
-        byte[] buffer = new byte[235]
+        byte[] buffer = new byte[255]
         ZipEntry entry = zipIn.getNextEntry()
         assert entry.getName() == "test-export-1.csv"
         zipIn.read(buffer)
@@ -163,7 +163,7 @@ class ExportServiceTest {
         ByteArrayOutputStream out = new ByteArrayOutputStream()
         response.getEntity().write(out)
         ZipInputStream zipIn = new ZipInputStream(new ByteArrayInputStream(out.toByteArray()))
-        byte[] buffer = new byte[229]
+        byte[] buffer = new byte[249]
         ZipEntry entry = zipIn.getNextEntry()
         assert entry.getName() == "test-export-1.csv"
         zipIn.read(buffer)
@@ -203,7 +203,7 @@ class ExportServiceTest {
         response.getEntity().write(out)
         ZipInputStream zipIn = new ZipInputStream(new ByteArrayInputStream(out.toByteArray()))
 
-        byte[] buffer1 = new byte[235]
+        byte[] buffer1 = new byte[255]
         ZipEntry entry = zipIn.getNextEntry()
         assert entry.getName() == "test-export-1.csv"
         zipIn.read(buffer1)
@@ -330,7 +330,7 @@ class ExportServiceTest {
         ByteArrayOutputStream out = new ByteArrayOutputStream()
         response.getEntity().write(out)
         ZipInputStream zipIn = new ZipInputStream(new ByteArrayInputStream(out.toByteArray()))
-        byte[] buffer = new byte[235]
+        byte[] buffer = new byte[255]
         ZipEntry entry = zipIn.getNextEntry()
         // Should default to csv file if unknown file type
         assert entry.getName() == "test-export-1.csv"

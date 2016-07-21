@@ -215,7 +215,7 @@ class ImportUtilities {
      */
     static boolean isListObjects(List list) {
         try {
-            JsonSlurper slurper = new JsonSlurper();
+            JsonSlurper slurper = new JsonSlurper()
             def areObjects = true
             list.each { value ->
                 if(value == null || value.equalsIgnoreCase("none") || value.equalsIgnoreCase("null") || value.equalsIgnoreCase("")) {
@@ -248,7 +248,7 @@ class ImportUtilities {
     static Object convertValueToType(String value, FieldType type, String[] datePatterns = null) {
         try {
             if (value == null) {
-                return "null";
+                return "null"
             }
             switch(type) {
                 case FieldType.INTEGER:
@@ -283,7 +283,7 @@ class ImportUtilities {
         JsonSlurper slurper = new JsonSlurper()
        // def val = Eval.me(ImportUtilities.removeQuotations(value))
         try {
-            def val = slurper.parseText(ImportUtilities.removeQuotations(value));
+            def val = slurper.parseText(ImportUtilities.removeQuotations(value))
 
             if(val instanceof Map) {
                 val.keySet().each { key ->
@@ -295,7 +295,7 @@ class ImportUtilities {
                 throw new NoSuchMethodException()
             }
         }
-        catch(Exception e) {
+        catch(MissingMethodException e) {
             throw new NoSuchMethodException()
         }
 
@@ -309,15 +309,15 @@ class ImportUtilities {
      * @return Mapping of field names to all the values in the object the field name contains
      */
     static Map retrieveObjectFieldsAndValues(String values) {
-        JsonSlurper slurper = new JsonSlurper();
+        JsonSlurper slurper = new JsonSlurper()
         //def stripped = ImportUtilities.removeQuotations(values);
-        def vals = slurper.parseText(ImportUtilities.removeQuotations(values));
+        def vals = slurper.parseText(ImportUtilities.removeQuotations(values))
         Map pairs = [:]
 
         vals.each { it ->
             def obj
             if(it instanceof String) {
-                obj = slurper.parseText(it);
+                obj = slurper.parseText(it)
             } else {
                 obj = it
             }
