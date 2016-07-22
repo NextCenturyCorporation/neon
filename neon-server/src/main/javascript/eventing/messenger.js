@@ -110,7 +110,7 @@ neon.eventing.Messenger.prototype.unsubscribeAll = function() {
  * <ul>
  *     <li>selectionChanged - function to execute when the selection has changed</li>
  *     <li>filtersChanged - function to execute when the filters have been changed</li>
- *     <li>activeDatasetChanged - function to execute when the active dataset has changed</li>
+ *     <li>connectToHost - function to execute when the Connection.connect() has been called on a host.</li>
  * </ul>
  * @method events
  */
