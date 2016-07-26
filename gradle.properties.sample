@@ -19,6 +19,12 @@ neonServer=/my/tomcat/path/apache-tomcat-7.0.39
 # Spark SQL configuration. Uncomment the following and specify the appropriate hosts to enable Spark SQL tests
 #hdfs.url=hdfs://localhost:8020
 #sparksql.host=localhost:10000
+# Elasticsearch host configuration for Elasticsearch tests
+#elasticsearch.host=localhost:9200
+
+# Uncomment the line below to build Neon with Elasticsearch 1.x support instead of 2.x support. Note
+# that the same property needs to be ucommented in buildSrc/gradle.properties
+#useElasticsearch1=true
 
 # Change the port for acceptance tests
 acceptanceTest.port=10102
