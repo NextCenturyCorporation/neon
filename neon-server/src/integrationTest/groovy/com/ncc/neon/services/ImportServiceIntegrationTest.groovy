@@ -25,6 +25,7 @@ import org.json.JSONObject
 
 import org.junit.Assume
 import org.junit.Before
+import org.junit.BeforeClass
 import org.junit.Test
 import org.junit.After
 
@@ -161,10 +162,14 @@ class ImportServiceIntegrationTest {
         this.importHelperFactory = importHelperFactory
     }
 
-    @Before
-    void before() {
+    @BeforeClass
+    static void beforeClass() {
         // Establish the connection, or skip the tests if no host was specified
         Assume.assumeTrue(HOST != null && HOST != "")
+    }
+
+    @Before
+    void before() {
         importService = new ImportService()
         importService.importEnabled = "true"
         importService.importHelperFactory = this.importHelperFactory
