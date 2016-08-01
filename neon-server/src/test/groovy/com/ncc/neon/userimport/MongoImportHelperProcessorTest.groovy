@@ -38,6 +38,7 @@ import com.ncc.neon.userimport.exceptions.UnsupportedFiletypeException
 import com.ncc.neon.userimport.exceptions.BadSheetException
 
 import org.junit.Before
+import org.junit.BeforeClass
 import org.junit.After
 import org.junit.Test
 import org.junit.Assume
@@ -159,9 +160,13 @@ class MongoImportHelperProcessorTest {
         )
     ]
 
+    @BeforeClass
+    static void beforeClass() {
+        Assume.assumeTrue(HOST != null && HOST != "")
+    }
+
     @Before
     void before() {
-        Assume.assumeTrue(HOST != null && HOST != "")
         mongoImportHelperProcessor = new MongoImportHelperProcessor()
         mongoImportHelperProcessor.sheetReaderFactory = [
             getSheetReader: { type ->
