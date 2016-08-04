@@ -24,5 +24,10 @@
     "grunt-jscs": "2.8.0",
     "grunt-umd": "2.3.6",
     "yuidocjs": "0.10.1"
-  }
+  },
+  "directories": {
+    "dist": "build",
+    "dist/lib": "build/war"
+  },
+  "main": "neon"
 }

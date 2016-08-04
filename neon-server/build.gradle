@@ -347,3 +347,19 @@ def writeVersionStringToPropertiesFile(versionString) {
     def versionfile = new File("${projectDir}/src/main/resources/version.properties")
     versionfile.text = 'build.version=' + versionString + "\n"
 }
+
+task buildNpmDist() {
+    delete('dist')
+    copy {
+        from 'build'
+        into 'dist'
+        include 'js/*.js'
+        include 'resources/**/*.*'
+    }
+    copy {
+        from 'build/libs'
+        into 'dist/war'
+        include '*.war'
+    }
+
+}
