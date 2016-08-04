@@ -22,7 +22,7 @@ describe('messenger', function() {
 
     afterEach(function() {
         neon.util.owfUtils.isRunningInOWF = isRunningInOWF;
-        postal.utils.reset();
+        postal.reset();
     });
 
     it('uses the OWF event bus when in OWF', function() {

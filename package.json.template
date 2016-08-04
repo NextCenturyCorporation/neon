@@ -6,6 +6,13 @@
   "repository": "https://github.com/NextCenturyCorporation/neon",
   "readme": "https://github.com/NextCenturyCorporation/neon/blob/master/README.md",
   "license": "Apache-2.0",
+  "dependencies": {
+    "jquery": "3.1.0",
+    "lodash": "4.14.1",
+    "log4javascript": "1.4.15",
+    "postal": "2.0.4",
+    "node-uuid": "1.4.7"
+  },
   "devDependencies": {
     "grunt": ">0.4.0",
     "grunt-cli": "0.1.13",
@@ -15,6 +22,7 @@
     "grunt-contrib-watch": "1.0.0",
     "grunt-contrib-uglify": "1.0.1",
     "grunt-jscs": "2.8.0",
+    "grunt-umd": "2.3.6",
     "yuidocjs": "0.10.1"
   }
 }

@@ -29,7 +29,7 @@ module.exports = function(grunt) {
             specs: specs,
             timeout: 60000,
             vendor: [
-                'src/main/js-lib/jquery/jquery*.js',
+                'node_modules/jquery/dist/jquery*.js',
                 '../js-test-support/lib/**/*.js'],
             helpers: [
                 '../js-test-support/helpers/**/*.js',
@@ -68,7 +68,7 @@ module.exports = function(grunt) {
             },
             nodeps: {
                 files: [{
-                    src: neonSrcs,
+                    src: '<%= nodepOutputFile %>',
                     dest: '<%= nodepMinOutputFile %>'
                 }]
             }
@@ -84,7 +84,15 @@ module.exports = function(grunt) {
                 dest: '<%= nodepOutputFile %>'
             },
             neon: {
-                src: [lib('lodash'), lib('uuid'), lib('postal'), lib('jquery'), lib('log4javascript'), 'build/dependencies/**/*.js', '<%= nodepOutputFile %>'],
+                src: [
+                    'node_modules/lodash/lodash.min.js',
+                    'node_modules/node-uuid/uuid.js',
+                    'node_modules/postal/lib/postal.min.js',
+                    'node_modules/jquery/dist/jquery.min.js',
+                    'node_modules/log4javascript/log4javascript.js',
+                    'build/dependencies/**/*.js',
+                    '<%= nodepOutputFile %>'
+                ],
                 dest: '<%= outputFile %>'
             }
         },
@@ -153,6 +161,17 @@ module.exports = function(grunt) {
                     src: ['src/acceptanceTest/javascript/spec/**/*.spec.js', 'src/test/javascript/spec/**/*.spec.js']
                 }
             }
+        },
+        umd: {
+            all: {
+                options: {
+                    src: 'build/js/neon-nodeps.js',
+                    dest: 'build/js/neon-nodeps.js',
+                    objectToExport: 'neon', // optional, internal object that will be exported
+                    amdModuleId: 'neon', // optional, if missing the AMD module will be anonymous
+                    globalAlias: 'neon' // optional, changes the name of the global variable
+                }
+            }
         }
     });
 
@@ -162,7 +181,8 @@ module.exports = function(grunt) {
     grunt.loadNpmTasks('grunt-contrib-uglify');
     grunt.loadNpmTasks('grunt-contrib-watch');
     grunt.loadNpmTasks('grunt-jscs');
+    grunt.loadNpmTasks('grunt-umd');
 
     // hint after concatenation since the concatenated version is also hinted
-    grunt.registerTask('default', ['uglify', 'concat', 'jscs', 'jshint', 'jasmine:unit']);
+    grunt.registerTask('default', ['concat', 'umd:all', 'uglify', 'jscs', 'jshint', 'jasmine:unit']);
 };
