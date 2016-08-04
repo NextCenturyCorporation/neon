@@ -41,7 +41,6 @@ class ProductionAppContext {
      */
     private Path getTransformsPath() {
         def pathString = this.getClass().getResource("/transforms").getPath()
-        println "pathString is: $pathString"
 
         // Clean any leading slashes on windows paths with drive letters.
         if (System.getProperty("os.name").contains("indow")) {
