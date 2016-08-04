@@ -20,17 +20,14 @@ module.exports = function(grunt) {
         return 'src/main/javascript/' + file;
     }
 
-    function lib(dir) {
-        return 'src/main/js-lib/' + dir + '/**/*.js';
-    }
-
     function createTestOptions(specs) {
         return {
             specs: specs,
             timeout: 60000,
             vendor: [
-                'node_modules/jquery/dist/jquery*.js',
-                '../js-test-support/lib/**/*.js'],
+                'node_modules/lodash/lodash.js',
+                'node_modules/jquery/dist/jquery.js',
+                '../js-test-support/lib/jasmine-jquery/*.js'],
             helpers: [
                 '../js-test-support/helpers/**/*.js',
                 'src/js-test-support/mockNamespaces.js',
