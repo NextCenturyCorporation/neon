@@ -108,6 +108,7 @@ class MongoImportHelperTest {
 
     @AfterClass
     static void after() {
+        Assume.assumeTrue(HOST != null && HOST != "")
         MongoClient mongo = new MongoClient(HOST)
         String dbName = USERNAME + ImportUtilities.SEPARATOR + PRETTY_NAME
         List<String> dbs = mongo.getDatabaseNames()

@@ -17,11 +17,9 @@
 package com.ncc.neon.query.elasticsearch
 
 import com.ncc.neon.connect.NeonConnectionException
-import com.ncc.neon.query.clauses.AndWhereClause
 import com.ncc.neon.query.clauses.FieldFunction
 import com.ncc.neon.query.clauses.GroupByFieldClause
 import com.ncc.neon.query.clauses.GroupByFunctionClause
-import com.ncc.neon.query.clauses.OrWhereClause
 import com.ncc.neon.query.clauses.SelectClause
 import com.ncc.neon.query.clauses.SingularWhereClause
 import com.ncc.neon.query.clauses.WhereClause
@@ -32,14 +30,11 @@ import com.ncc.neon.query.Query
 import com.ncc.neon.query.QueryOptions
 import org.elasticsearch.action.search.SearchType
 import org.elasticsearch.action.search.SearchRequest
-import org.elasticsearch.index.query.FilterBuilder
-import org.elasticsearch.index.query.FilterBuilders
 import org.elasticsearch.index.query.QueryBuilders
 import org.elasticsearch.search.aggregations.AbstractAggregationBuilder
 import org.elasticsearch.search.aggregations.AggregationBuilder
 import org.elasticsearch.search.aggregations.AggregationBuilders
 import org.elasticsearch.search.aggregations.bucket.histogram.DateHistogramBuilder
-import org.elasticsearch.search.aggregations.bucket.histogram.DateHistogram.Interval
 import org.elasticsearch.search.aggregations.bucket.terms.Terms
 import org.elasticsearch.search.aggregations.bucket.terms.TermsBuilder
 import org.elasticsearch.search.builder.SearchSourceBuilder
@@ -83,9 +78,7 @@ class ElasticSearchConversionStrategy {
         def dataSet = new DataSet(databaseName: query.databaseName, tableName: query.tableName)
         def whereClauses = collectWhereClauses(dataSet, query, options, whereClause)
 
-        //Build the elasticsearch filters for the where clauses
-        def inners = whereClauses.collect(ElasticSearchConversionStrategy.&convertWhereClause) as FilterBuilder[]
-        def whereFilter = FilterBuilders.boolFilter().must(FilterBuilders.andFilter(inners))
+        def whereFilter = ElasticSearchConversionStrategyHelper.convertWhereClauses(whereClauses)
 
         return createSearchSourceBuilder(query).query(QueryBuilders.filteredQuery(null, whereFilter))
     }
@@ -233,7 +226,7 @@ class ElasticSearchConversionStrategy {
             return 0
         }
 
-        return (Integer.MAX_VALUE - getOffset(query))
+        return Math.max(ElasticSearchConversionStrategyHelper.RESULT_LIMIT - getOffset(query), 0)
     }
 
     public static SearchRequest createSearchRequest(SearchSourceBuilder source, Query params) {
@@ -256,58 +249,6 @@ class ElasticSearchConversionStrategy {
         filterCache.getFilterKeysForDataset(dataSet)
             .findAll { !(it.id in ignoredFilterIds) && it.filter.whereClause }
             .collect { it.filter.whereClause }
-    }
-
-    public static FilterBuilder convertWhereClause(clause) {
-        switch (clause.getClass()) {
-            case AndWhereClause:
-                return convertBooleanWhereClause(clause, FilterBuilders.&andFilter)
-            case OrWhereClause:
-                return convertBooleanWhereClause(clause, FilterBuilders.&orFilter)
-            case SingularWhereClause:
-                return convertSingularWhereClause(clause)
-            default:
-                throw new NeonConnectionException("Unknown where clause: ${clause.getClass()}")
-        }
-    }
-
-    private static FilterBuilder convertBooleanWhereClause(clause, Closure<FilterBuilder> combiner) {
-        def inners = clause.whereClauses.collect(ElasticSearchConversionStrategy.&convertWhereClause)
-        FilterBuilders.boolFilter().must(combiner(inners as FilterBuilder[]))
-    }
-
-    @SuppressWarnings("MethodSize")
-    private static FilterBuilder convertSingularWhereClause(clause) {
-        if (clause.operator in ['<', '>', '<=', '>=']) {
-            return { switch (clause.operator) {
-                    case '<': return it.&lt
-                    case '>': return it.&gt
-                    case '<=': return it.&lte
-                    case '>=': return it.&gte
-            }}.call(FilterBuilders.rangeFilter(clause.lhs as String))(clause.rhs as String)
-        }
-
-        if (clause.operator in ['contains', 'not contains', 'notcontains']) {
-            def regexFilter = FilterBuilders.regexpFilter(clause.lhs as String, ".*${clause.rhs}.*" as String)
-            return clause.operator == 'contains' ? regexFilter : FilterBuilders.notFilter(regexFilter)
-        }
-
-        if (clause.operator in ['=', '!=']) {
-            def hasValue = clause.rhs || clause.rhs == '' || clause.rhs == false
-
-            def filter = hasValue ?
-                FilterBuilders.termFilter(clause.lhs as String, clause.rhs as String) :
-                FilterBuilders.existsFilter(clause.lhs as String)
-
-            return (clause.operator == '!=') == !hasValue ? filter : FilterBuilders.notFilter(filter)
-        }
-
-        if (clause.operator in ["in", "notin"]) {
-            def filter = FilterBuilders.termsFilter(clause.lhs as String, clause.rhs as String[])
-            return (clause.operator == "in") ? filter : FilterBuilders.notFilter(filter)
-        }
-
-        throw new NeonConnectionException("${clause.operator} is an invalid operator for a where clause")
     }
 
     private static SortBuilder convertSortClause(clause) {
@@ -342,19 +283,19 @@ class ElasticSearchConversionStrategy {
                         .interval(it.interval)
                         .format(it.format)
                                         if (clause.operation == 'dayOfWeek') {
-                                                groupByClause.postOffset("1d")
+                                                groupByClause.offset("1d")
                                         }
                                         return groupByClause
                 }
 
                 switch (clause.operation) {
-                    case 'year': return template(interval:Interval.YEAR, format:'yyyy')
-                    case 'month': return template(interval:Interval.MONTH, format:'M')
-                    case 'dayOfMonth': return template(interval:Interval.DAY, format:'d')
-                    case 'dayOfWeek': return template(interval:Interval.DAY, format:'e')
-                    case 'hour': return template(interval:Interval.HOUR, format:'H')
-                    case 'minute': return template(interval:Interval.MINUTE, format:'m')
-                    case 'second': return template(interval:Interval.SECOND, format:'s')
+                    case 'year': return template(interval:ElasticSearchConversionStrategyHelper.YEAR, format:'yyyy')
+                    case 'month': return template(interval:ElasticSearchConversionStrategyHelper.MONTH, format:'M')
+                    case 'dayOfMonth': return template(interval:ElasticSearchConversionStrategyHelper.DAY, format:'d')
+                    case 'dayOfWeek': return template(interval:ElasticSearchConversionStrategyHelper.DAY, format:'e')
+                    case 'hour': return template(interval:ElasticSearchConversionStrategyHelper.HOUR, format:'H')
+                    case 'minute': return template(interval:ElasticSearchConversionStrategyHelper.MINUTE, format:'m')
+                    case 'second': return template(interval:ElasticSearchConversionStrategyHelper.SECOND, format:'s')
                 }
             }
         }
