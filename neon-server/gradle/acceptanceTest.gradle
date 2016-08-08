@@ -64,14 +64,6 @@ task generateAcceptanceTestHelpers {
     }
 }
 
-processAcceptanceTestResources {
-    from(sourceSets.acceptanceTest.resources.srcDirs) {
-        filter(ReplaceTokens, tokens: [
-                "mongo.host": getMongoHost()
-        ])
-    }
-}
-
 def getAcceptanceTestPort() {
     return project.hasProperty("acceptanceTest.port") ? getProperty("acceptanceTest.port").toInteger() : 10002
 }

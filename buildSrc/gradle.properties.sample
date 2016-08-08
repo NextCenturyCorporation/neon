@@ -1,0 +1,4 @@
+# Uncomment the line below to build Neon with Elasticsearch 1.x support instead of 2.x support. Note
+# that the same property needs to be ucommented in the root gradle.properties
+#useElasticsearch1=true
+
