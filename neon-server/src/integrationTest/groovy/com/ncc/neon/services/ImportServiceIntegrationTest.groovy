@@ -314,7 +314,7 @@ class ImportServiceIntegrationTest {
 
     @Test
     void "load and convert fields from csv file"() {
-        String uuid = uploadFile("csv", new StringBufferInputStream("name,age,address\nJoe,23,\"[city: 'Baltimore', zip: 12345]\"\nJanice,46,\"[city: 'Annapolis', zip: 54321]\""))
+        String uuid = uploadFile("csv", new StringBufferInputStream("name,age,address\nJoe,23,\"{\"\"city\"\":\"\"Baltimore\"\",\"\"zip\"\": 12345}\"\nJanice,46,\"{\"\"city\"\": \"\"Annapolis\"\",\"\"zip\"\":54321}\""))
         JSONObject entity = importExcelFile(uuid, FT_PAIRS_LIST1)
 
         assert entity.getInt("numCompleted") == 2
@@ -330,7 +330,7 @@ class ImportServiceIntegrationTest {
 
     @Test
     void "load and convert fields when failed from csv file"() {
-        String uuid = uploadFile("csv", new StringBufferInputStream("name,age,address\nJoe,23,\"[city: 'Baltimore', zip: 12345]\"\nJanice,46,\"[city: 'Annapolis', zip: 54321]\""))
+        String uuid = uploadFile("csv", new StringBufferInputStream("name,age,address\nJoe,23,\"{\"\"city\"\":\"\"Baltimore\"\",\"\"zip\"\":12345}\"\nJanice,46,\"{\"\"city\"\": \"\"Annapolis\"\", \"\"zip\"\": 54321}\""))
         JSONObject entity = importExcelFile(uuid, FT_PAIRS_LIST2)
 
         assert entity.getInt("numCompleted") == 2
