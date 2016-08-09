@@ -16,6 +16,10 @@
 
 package com.ncc.neon.userimport.types
 
+import groovy.json.JsonException
+import groovy.json.JsonSlurper
+import groovy.json.internal.Exceptions
+
 import java.text.ParseException
 
 import org.apache.commons.lang.time.DateUtils
@@ -81,6 +85,7 @@ class ImportUtilities {
     static List getTypeGuesses(Map fieldsAndValues) {
         List fields = fieldsAndValues.keySet() as List
         List fieldsAndTypes = []
+
         fields.each { field ->
             FieldTypePair pair = null
             List valuesOfField = fieldsAndValues.get(field)
@@ -89,7 +94,15 @@ class ImportUtilities {
             pair = (!pair && ImportUtilities.isListDoubles(valuesOfField)) ? new FieldTypePair(name: field, type: FieldType.DOUBLE) : pair
             pair = (!pair && ImportUtilities.isListFloats(valuesOfField)) ? new FieldTypePair(name: field, type: FieldType.FLOAT) : pair
             pair = (!pair && ImportUtilities.isListDates(valuesOfField)) ? new FieldTypePair(name: field, type: FieldType.DATE) : pair
-            pair = (!pair && ImportUtilities.isListObjects(valuesOfField)) ? new FieldTypePair(name: field, type: FieldType.OBJECT, objectFTPairs: ImportUtilities.getTypeGuesses(ImportUtilities.retrieveObjectFieldsAndValues(valuesOfField as String))) : pair
+
+            // Use Json notation to check for objects
+            String obj = "["
+            valuesOfField.each { it ->
+                obj += (it != null) ? ImportUtilities.removeQuotations(it) + ',' : ''
+            }
+            obj = obj.substring(0, obj.length() - 1) + ']'
+
+            pair = (!pair && ImportUtilities.isListObjects(valuesOfField)) ? new FieldTypePair(name: field, type: FieldType.OBJECT, objectFTPairs: ImportUtilities.getTypeGuesses(ImportUtilities.retrieveObjectFieldsAndValues(obj))) : pair
             pair = (!pair) ? new FieldTypePair(name: field, type: FieldType.STRING) : pair
             fieldsAndTypes.add(pair)
         }
@@ -104,7 +117,7 @@ class ImportUtilities {
     static boolean isListIntegers(List list) {
         try {
             list.each { value ->
-                if(value.equalsIgnoreCase("none") || value.equalsIgnoreCase("null") || value.equalsIgnoreCase("")) {
+                if(value == null || value.equalsIgnoreCase("none") || value.equalsIgnoreCase("null") || value.equalsIgnoreCase("")) {
                     return
                 }
                 Integer.parseInt(value)
@@ -124,7 +137,7 @@ class ImportUtilities {
     static boolean isListLongs(List list) {
         try {
             list.each { value ->
-                if(value.equalsIgnoreCase("none") || value.equalsIgnoreCase("null") || value.equalsIgnoreCase("")) {
+                if(value == null || value.equalsIgnoreCase("none") || value.equalsIgnoreCase("null") || value.equalsIgnoreCase("")) {
                     return
                 }
                 Long.parseLong(value)
@@ -144,7 +157,7 @@ class ImportUtilities {
     static boolean isListDoubles(List list) {
         try {
             list.each { value ->
-                if(value.equalsIgnoreCase("none") || value.equalsIgnoreCase("null") || value.equalsIgnoreCase("")) {
+                if(value == null || value.equalsIgnoreCase("none") || value.equalsIgnoreCase("null") || value.equalsIgnoreCase("")) {
                     return
                 }
                 Double.parseDouble(value)
@@ -164,7 +177,7 @@ class ImportUtilities {
     static boolean isListFloats(List list) {
         try {
             list.each { value ->
-                if(value.equalsIgnoreCase("none") || value.equalsIgnoreCase("null") || value.equalsIgnoreCase("")) {
+                if(value == null || value.equalsIgnoreCase("none") || value.equalsIgnoreCase("null") || value.equalsIgnoreCase("")) {
                     return
                 }
                 Float.parseFloat(value)
@@ -184,7 +197,7 @@ class ImportUtilities {
     static boolean isListDates(List list) {
         try {
             list.each { value ->
-                if(value.equalsIgnoreCase("none") || value.equalsIgnoreCase("null") || value.equalsIgnoreCase("")) {
+                if(value == null || value.equalsIgnoreCase("none") || value.equalsIgnoreCase("null") || value.equalsIgnoreCase("")) {
                     return
                 }
                 DateUtils.parseDate(value, DATE_PATTERNS)
@@ -202,19 +215,21 @@ class ImportUtilities {
      */
     static boolean isListObjects(List list) {
         try {
+            JsonSlurper slurper = new JsonSlurper()
             def areObjects = true
             list.each { value ->
-                if(value.equalsIgnoreCase("none") || value.equalsIgnoreCase("null") || value.equalsIgnoreCase("")) {
+                if(value == null || value.equalsIgnoreCase("none") || value.equalsIgnoreCase("null") || value.equalsIgnoreCase("")) {
                     return
                 }
-                def val = ImportUtilities.removeQuotations(value)
-                if(Eval.me(val) instanceof Map || Eval.me(val) instanceof List) {
+                def val = slurper.parseText(ImportUtilities.removeQuotations(value))
+                if (val instanceof Map || val instanceof List) {
                     return
                 }
+
                 areObjects = false
             }
             return areObjects
-        } catch(MissingPropertyException | MissingMethodException | MultipleCompilationErrorsException e) {
+        } catch(MissingPropertyException | MissingMethodException | MultipleCompilationErrorsException | JsonException | Exceptions.JsonInternalException e) {
             return false
         }
     }
@@ -232,6 +247,9 @@ class ImportUtilities {
      */
     static Object convertValueToType(String value, FieldType type, String[] datePatterns = null) {
         try {
+            if (value == null) {
+                return "null"
+            }
             switch(type) {
                 case FieldType.INTEGER:
                     return Integer.parseInt(value)
@@ -250,7 +268,7 @@ class ImportUtilities {
                     return value.toString()
             }
         }
-        catch(NumberFormatException | IllegalArgumentException | ParseException | NoSuchMethodException | MissingPropertyException e) {
+        catch(JsonException | NumberFormatException | IllegalArgumentException | ParseException | NoSuchMethodException | MissingPropertyException e) {
             return new ConversionFailureResult([value: value, type: type])
         }
     }
@@ -262,16 +280,25 @@ class ImportUtilities {
      */
     static Object convertValueToObject(String value) {
         Map convertedValue = [:]
-        def val = Eval.me(ImportUtilities.removeQuotations(value))
-        if(val instanceof Map) {
-            val.keySet().each { key ->
-                List fieldAndType = ImportUtilities.getTypeGuesses([key: [val[key] as String]])
-                Object objectValue = ImportUtilities.convertValueToType(val[key] as String, fieldAndType[0].type)
-                convertedValue.put(key, objectValue)
+        JsonSlurper slurper = new JsonSlurper()
+
+        try {
+            def val = slurper.parseText(ImportUtilities.removeQuotations(value))
+
+            if(val instanceof Map) {
+                val.keySet().each { key ->
+                    List fieldAndType = ImportUtilities.getTypeGuesses([key: [val[key] as String]])
+                    Object objectValue = ImportUtilities.convertValueToType(val[key] as String, fieldAndType[0].type)
+                    convertedValue.put(key, objectValue)
+                }
+            } else {
+                throw new NoSuchMethodException()
             }
-        } else {
+        }
+        catch(MissingMethodException e) {
             throw new NoSuchMethodException()
         }
+
         return convertedValue
     }
 
@@ -282,13 +309,15 @@ class ImportUtilities {
      * @return Mapping of field names to all the values in the object the field name contains
      */
     static Map retrieveObjectFieldsAndValues(String values) {
-        def vals = Eval.me(values)
+        JsonSlurper slurper = new JsonSlurper()
+
+        def vals = slurper.parseText(ImportUtilities.removeQuotations(values))
         Map pairs = [:]
 
         vals.each { it ->
             def obj
             if(it instanceof String) {
-                obj = Eval.me(it)
+                obj = slurper.parseText(it)
             } else {
                 obj = it
             }
@@ -307,6 +336,14 @@ class ImportUtilities {
         return pairs
     }
 
+    static Map retrieveObjectFieldsAndValues(List values) {
+        Map pairs = [:]
+        values.each { it ->
+            pairs << retrieveObjectFieldsAndValues(it as String)
+        }
+        return pairs
+    }
+
     /**
      * Takes a username and "pretty" human-readable name and uses them to generate an "ugly", more unique name.
      * @param userName The username to use in making the ugly name.
@@ -318,15 +355,18 @@ class ImportUtilities {
     }
 
     /**
-     * Strips extra quotations that are on the beginning and the end of a string
+     * Strips extra quotations that are on the beginning and the end of a string and convert
+     * any internally escaped double quotations.  Common CSV rules requires that a " inside of a
+     * quoted string appear as "".
      * @param value The string to strip
      * @return If there are quotations on the beginning and end of value, it returns the value
      * with those quotations removed. Otherwise, value is returned with no change
      */
     static String removeQuotations(String value) {
-        if((value.substring(0, 1) == '"' && value.substring(value.length() - 1) == '"') ||
-            (value.substring(0, 1) == '\'' && value.substring(value.length() - 1) == '\'')) {
-            return value.substring(1, value.length() - 1)
+        if((value != null) && ((value.substring(0, 1) == '"' && value.substring(value.length() - 1) == '"') ||
+            (value.substring(0, 1) == '\'' && value.substring(value.length() - 1) == '\''))) {
+            def retVal = value.substring(1, value.length() - 1).replaceAll(/""/, '"')
+            return retVal
         }
 
         return value

@@ -19,10 +19,8 @@ package com.ncc.neon.data
 import org.elasticsearch.action.admin.indices.delete.DeleteIndexRequest
 import org.elasticsearch.action.admin.indices.delete.DeleteIndexResponse
 import org.elasticsearch.client.transport.TransportClient
-import org.elasticsearch.common.settings.ImmutableSettings
-import org.elasticsearch.common.settings.Settings
 import org.elasticsearch.common.transport.InetSocketTransportAddress
-import org.elasticsearch.indices.IndexMissingException
+import org.elasticsearch.ElasticsearchException
 import org.gradle.api.DefaultTask
 import org.gradle.api.tasks.TaskAction
 
@@ -38,13 +36,8 @@ class ElasticSearchDataDeleter extends DefaultTask{
         String hostName = connectionUrl[0]
         int port = connectionUrl.length == 2 ? Integer.parseInt(connectionUrl[1]) : 9300
 
-        TransportClient client = connectViaTransport(hostName, port)
+        TransportClient client = ElasticSearchTransportConnector.connectViaTransport(hostName, port)
         deleteIndex(client)
-    }
-
-    private TransportClient connectViaTransport(String host, int port) {
-        Settings settings = ImmutableSettings.settingsBuilder().put("client.transport.ignore_cluster_name", true).put("client.transport.sniff", true).build();
-        return new TransportClient(settings).addTransportAddress(new InetSocketTransportAddress(host, port));
     }
 
     /**
@@ -61,9 +54,20 @@ class ElasticSearchDataDeleter extends DefaultTask{
                 println("Index " + tableName + " deleted")
             }
         }
-        catch (IndexMissingException missing) {
-            // Do nothing here.  this just means that the index did not exist when we tried to delete it
-            println("Index already deleted")
+        catch (ElasticsearchException e) {
+            // Depending on whether we're connecting to Elasticsearch 1 or 2, the exception has
+            // different names. Rather than doing a bunch of conditional compilation stuff for this
+            // case, just do an ugly name check
+            def exceptionClass = e.getClass().getName()
+            if (exceptionClass == "org.elasticsearch.index.IndexNotFoundException" || exceptionClass == "org.elasticsearch.indices.IndexMissingException") {
+                // Do nothing here.  this just means that the index did not exist when we tried to delete it
+                println("Index already deleted")
+            } else
+            {
+                // The exception was apparently not about the index already being deleted, so let it
+                // continue to unwind the stack
+                throw e
+            }
         }
     }
 }

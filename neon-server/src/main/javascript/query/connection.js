@@ -446,7 +446,7 @@ neon.query.Connection.prototype.deleteState = function(stateName, successCallbac
 
 /**
  * Requests to retrieve all the states names.
- * @method getAllStates
+ * @method getAllStateNames
  * @param {Function} successCallback
  * @param {Function} errorCallback
  * @return {neon.util.AjaxRequest} The xhr request object

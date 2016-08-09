@@ -25,6 +25,7 @@ import org.json.JSONObject
 
 import org.junit.Assume
 import org.junit.Before
+import org.junit.BeforeClass
 import org.junit.Test
 import org.junit.After
 
@@ -161,10 +162,14 @@ class ImportServiceIntegrationTest {
         this.importHelperFactory = importHelperFactory
     }
 
-    @Before
-    void before() {
+    @BeforeClass
+    static void beforeClass() {
         // Establish the connection, or skip the tests if no host was specified
         Assume.assumeTrue(HOST != null && HOST != "")
+    }
+
+    @Before
+    void before() {
         importService = new ImportService()
         importService.importEnabled = "true"
         importService.importHelperFactory = this.importHelperFactory
@@ -309,7 +314,7 @@ class ImportServiceIntegrationTest {
 
     @Test
     void "load and convert fields from csv file"() {
-        String uuid = uploadFile("csv", new StringBufferInputStream("name,age,address\nJoe,23,\"[city: 'Baltimore', zip: 12345]\"\nJanice,46,\"[city: 'Annapolis', zip: 54321]\""))
+        String uuid = uploadFile("csv", new StringBufferInputStream("name,age,address\nJoe,23,\"{\"\"city\"\":\"\"Baltimore\"\",\"\"zip\"\": 12345}\"\nJanice,46,\"{\"\"city\"\": \"\"Annapolis\"\",\"\"zip\"\":54321}\""))
         JSONObject entity = importExcelFile(uuid, FT_PAIRS_LIST1)
 
         assert entity.getInt("numCompleted") == 2
@@ -325,7 +330,7 @@ class ImportServiceIntegrationTest {
 
     @Test
     void "load and convert fields when failed from csv file"() {
-        String uuid = uploadFile("csv", new StringBufferInputStream("name,age,address\nJoe,23,\"[city: 'Baltimore', zip: 12345]\"\nJanice,46,\"[city: 'Annapolis', zip: 54321]\""))
+        String uuid = uploadFile("csv", new StringBufferInputStream("name,age,address\nJoe,23,\"{\"\"city\"\":\"\"Baltimore\"\",\"\"zip\"\":12345}\"\nJanice,46,\"{\"\"city\"\": \"\"Annapolis\"\", \"\"zip\"\": 54321}\""))
         JSONObject entity = importExcelFile(uuid, FT_PAIRS_LIST2)
 
         assert entity.getInt("numCompleted") == 2

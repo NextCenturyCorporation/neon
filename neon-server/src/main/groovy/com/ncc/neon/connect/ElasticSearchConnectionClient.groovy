@@ -17,10 +17,6 @@
 package com.ncc.neon.connect
 
 import org.elasticsearch.client.Client
-import org.elasticsearch.common.settings.ImmutableSettings
-import org.elasticsearch.common.settings.Settings
-import org.elasticsearch.common.transport.InetSocketTransportAddress
-import org.elasticsearch.client.transport.TransportClient
 
 /**
  * Holds a connection to elasticsearch
@@ -32,12 +28,7 @@ class ElasticSearchConnectionClient implements ConnectionClient{
         String[] connectionUrl = info.host.split(':', 2)
         String host = connectionUrl[0]
         int port = connectionUrl.length == 2 ? Integer.parseInt(connectionUrl[1]) : 9300
-        connectViaTransport(host, port)
-    }
-
-    private void connectViaTransport(String host, int port) {
-        Settings settings = ImmutableSettings.settingsBuilder().put("client.transport.ignore_cluster_name", true).put("client.transport.sniff", true).build()
-        client = new TransportClient(settings).addTransportAddress(new InetSocketTransportAddress(host, port))
+        client = ElasticSearchTransportConnector.connectViaTransport(host, port)
     }
 
     /**

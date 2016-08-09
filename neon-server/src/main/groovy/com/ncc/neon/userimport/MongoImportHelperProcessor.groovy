@@ -104,11 +104,12 @@ class MongoImportHelperProcessor implements ImportHelperProcessor {
                 List record = reader.next()
                 for(int field = 0; field < fields.size() && field < record.size(); field++) {
                     if(record[field]) {
-                        fieldsAndValues[(fields[field])] << record[field]
+                        fieldsAndValues[(fields[field])] << ImportUtilities.removeQuotations(record[field])
                     }
                 }
             }
-            updateFile(file, [programGuesses: fieldTypePairListToMap(ImportUtilities.getTypeGuesses(fieldsAndValues), true)])
+            def updates = fieldTypePairListToMap(ImportUtilities.getTypeGuesses(fieldsAndValues), true)
+            updateFile(file, [programGuesses: updates])
         } finally {
             reader?.close()
         }
