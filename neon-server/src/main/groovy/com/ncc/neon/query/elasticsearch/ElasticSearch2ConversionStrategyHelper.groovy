@@ -98,4 +98,8 @@ class ElasticSearchConversionStrategyHelper {
         throw new NeonConnectionException("${clause.operator} is an invalid operator for a where clause")
     }
 
+    public static createHeatmapAggregation(boundingBox) {
+        // TODO
+        return null
+    }
 }
