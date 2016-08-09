@@ -64,6 +64,7 @@ class QueryService {
                              @DefaultValue("false") @QueryParam("selectionOnly") boolean selectionOnly,
                              @QueryParam("ignoredFilterIds") Set<String> ignoredFilterIds,
                              Query query) {
+
         return execute(host, databaseType, query, new QueryOptions(ignoreFilters: ignoreFilters, selectionOnly: selectionOnly,
                 ignoredFilterIds: (ignoredFilterIds ?: ([] as Set))))
     }

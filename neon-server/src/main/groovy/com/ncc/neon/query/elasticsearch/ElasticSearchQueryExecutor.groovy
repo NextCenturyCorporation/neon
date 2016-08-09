@@ -89,13 +89,13 @@ class ElasticSearchQueryExecutor extends AbstractQueryExecutor {
     }
 
     @Autowired
-    private FilterState filterState
+    protected FilterState filterState
 
     @Autowired
-    private SelectionState selectionState
+    protected SelectionState selectionState
 
     @Autowired
-    private ConnectionManager connectionManager
+    protected ConnectionManager connectionManager
 
     @Override
     QueryResult doExecute(Query query, QueryOptions options) {
@@ -253,7 +253,7 @@ class ElasticSearchQueryExecutor extends AbstractQueryExecutor {
         return fieldTypes
     }
 
-    private Client getClient() {
+    protected Client getClient() {
         return connectionManager.connection.client
     }
 
@@ -389,7 +389,7 @@ class ElasticSearchQueryExecutor extends AbstractQueryExecutor {
         }
     }
 
-    private List<Map<String, Object>> limitBuckets(def buckets, Query query) {
+    protected List<Map<String, Object>> limitBuckets(def buckets, Query query) {
         int offset = ElasticSearchConversionStrategy.getOffset(query)
         int limit = ElasticSearchConversionStrategy.getLimit(query, true)
 
