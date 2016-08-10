@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 Next Century Corporation
+ * Copyright 2016 Next Century Corporation
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,6 +15,7 @@
  */
 
 package com.ncc.neon.query.elasticsearch
+
 import com.ncc.neon.connect.ConnectionManager
 import com.ncc.neon.connect.NeonConnectionException
 import com.ncc.neon.util.ResourceNotFoundException
@@ -22,27 +23,23 @@ import com.ncc.neon.query.Query
 import com.ncc.neon.query.QueryOptions
 import com.ncc.neon.query.clauses.GroupByFieldClause
 import com.ncc.neon.query.clauses.GroupByFunctionClause
-import com.ncc.neon.query.clauses.LimitClause
-import com.ncc.neon.query.clauses.WhereClause
 import com.ncc.neon.query.clauses.SortClause
 import com.ncc.neon.query.executor.AbstractQueryExecutor
-import com.ncc.neon.query.filter.Filter
 import com.ncc.neon.query.filter.FilterState
 import com.ncc.neon.query.filter.SelectionState
-import com.ncc.neon.query.result.ArrayCountPair
 import com.ncc.neon.query.result.QueryResult
 import com.ncc.neon.query.result.TabularQueryResult
+
 import org.elasticsearch.action.admin.cluster.state.ClusterStateRequest
 import org.elasticsearch.action.admin.indices.mapping.get.GetMappingsRequest
 import org.elasticsearch.action.admin.indices.exists.indices.IndicesExistsRequest
 import org.elasticsearch.action.search.SearchRequest
-import org.elasticsearch.action.search.SearchType
 import org.elasticsearch.client.Client
 import org.elasticsearch.common.collect.ImmutableOpenMap
-import org.elasticsearch.search.aggregations.AggregationBuilders
 import org.elasticsearch.search.aggregations.bucket.MultiBucketsAggregation
 import org.elasticsearch.search.aggregations.metrics.stats.InternalStats
 import org.elasticsearch.search.aggregations.support.format.ValueFormatter
+
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
@@ -92,13 +89,13 @@ class ElasticSearchQueryExecutor extends AbstractQueryExecutor {
     }
 
     @Autowired
-    private FilterState filterState
+    protected FilterState filterState
 
     @Autowired
-    private SelectionState selectionState
+    protected SelectionState selectionState
 
     @Autowired
-    private ConnectionManager connectionManager
+    protected ConnectionManager connectionManager
 
     @Override
     QueryResult doExecute(Query query, QueryOptions options) {
@@ -106,7 +103,7 @@ class ElasticSearchQueryExecutor extends AbstractQueryExecutor {
         long d1 = new Date().getTime()
 
         ElasticSearchConversionStrategy conversionStrategy = new ElasticSearchConversionStrategy(filterState: filterState, selectionState: selectionState)
-        def request = conversionStrategy.convertQuery(query, options)
+        SearchRequest request = conversionStrategy.convertQuery(query, options)
 
         def aggregates = query.aggregates
         def groupByClauses = query.groupByClauses
@@ -115,11 +112,11 @@ class ElasticSearchQueryExecutor extends AbstractQueryExecutor {
         def aggResults = results.aggregations
         def returnVal
 
-        if (aggregates && !groupByClauses) {
+        if(aggregates && !groupByClauses) {
             returnVal = new TabularQueryResult([
                 extractMetrics(aggregates, aggResults ? aggResults.asMap() : null, results.hits.totalHits)
             ])
-        } else if (groupByClauses) {
+        } else if(groupByClauses) {
             def buckets = extractBuckets(groupByClauses, aggResults.asList()[0])
             buckets = combineDuplicateBuckets(buckets)
             buckets = extractMetricsFromBuckets(aggregates, buckets)
@@ -128,9 +125,8 @@ class ElasticSearchQueryExecutor extends AbstractQueryExecutor {
             returnVal = new TabularQueryResult(buckets)
         } else if(query.isDistinct) {
             returnVal = new TabularQueryResult(extractDistinct(query, aggResults.asList()[0]))
-        }
-        else {
-            returnVal = new TabularQueryResult(extractHits(results.hits))
+        } else {
+            returnVal = new TabularQueryResult(results.hits.collect { it.getSource() })
         }
 
         long diffTime = new Date().getTime() - d1
@@ -173,15 +169,6 @@ class ElasticSearchQueryExecutor extends AbstractQueryExecutor {
         }
 
         return values
-    }
-
-    private List<Map<String, Object>> extractHits(hits) {
-        return hits.collect {
-            def record = it.getSource()
-            // Add the ElasticSearch id, since it isn't included in the "source" document
-            record["_id"] =  it.getId()
-            return record
-        }
     }
 
     @Override
@@ -266,31 +253,7 @@ class ElasticSearchQueryExecutor extends AbstractQueryExecutor {
         return fieldTypes
     }
 
-    List<ArrayCountPair> getArrayCounts(String databaseName, String tableName, String field, int limit = 0, WhereClause whereClause = null) {
-        checkDatabaseAndTableExists(databaseName, tableName)
-        Query query = new Query(filter: new Filter(databaseName: databaseName, tableName: tableName),
-                    limitClause: new LimitClause(limit: 0))
-        ElasticSearchConversionStrategy conversionStrategy = new ElasticSearchConversionStrategy(filterState: filterState, selectionState: selectionState)
-        SearchRequest searchRequest = ElasticSearchConversionStrategy.createSearchRequest(
-                conversionStrategy.createSourceBuilderWithState(query, QueryOptions.DEFAULT_OPTIONS, whereClause)
-                        .aggregation(AggregationBuilders.terms("arrayCount")
-                        .field(field)
-                        .size(limit)
-                ) , query)
-                .searchType(SearchType.COUNT)
-        def results = getClient()
-            .search(searchRequest)
-            .actionGet()
-
-        def aggResults = results.aggregations
-        return aggResults
-            .asList()
-            .head()
-            .getBuckets()
-            .collect { new ArrayCountPair(key: it.key, count: it.getDocCount()) }
-    }
-
-    private Client getClient() {
+    protected Client getClient() {
         return connectionManager.connection.client
     }
 
@@ -447,7 +410,7 @@ class ElasticSearchQueryExecutor extends AbstractQueryExecutor {
         }
     }
 
-    private List<Map<String, Object>> limitBuckets(def buckets, Query query) {
+    protected List<Map<String, Object>> limitBuckets(def buckets, Query query) {
         int offset = ElasticSearchConversionStrategy.getOffset(query)
         int limit = ElasticSearchConversionStrategy.getLimit(query, true)
 

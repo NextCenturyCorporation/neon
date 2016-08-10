@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 Next Century Corporation
+ * Copyright 2016 Next Century Corporation
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -14,23 +14,18 @@
  *
  */
 
-package com.ncc.neon.query.export
+package com.ncc.neon.query
 
-import com.ncc.neon.query.clauses.WhereClause
-import groovy.transform.ToString
+class HeatmapBoundsQuery {
+    float minLat
+    float maxLat
+    float minLon
+    float maxLon
 
-/**
- * An ExportRequest which contains fields necessary to call QueryService's executeArrayCountQuery method and pull data from the result.
- */
+    String latField
+    String lonField
 
-@ToString(includeNames = true)
-class ExportArrayCountRequest implements ExportRequest {
+    String locationField
 
-	String database
-	String table
-	String field
-	int limit
-	String name
-	List<ExportField> fields
-    WhereClause whereClause
+    int gridCount
 }

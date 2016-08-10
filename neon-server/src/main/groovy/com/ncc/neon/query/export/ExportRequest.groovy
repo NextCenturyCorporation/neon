@@ -26,8 +26,7 @@ import org.codehaus.jackson.annotate.JsonTypeInfo
 
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.PROPERTY, property = "type")
 @JsonSubTypes([
-    @JsonSubTypes.Type(value = ExportQueryRequest, name = 'query'),
-    @JsonSubTypes.Type(value = ExportArrayCountRequest, name =  'arraycount')
+    @JsonSubTypes.Type(value = ExportQueryRequest, name = 'query')
 ])
 public interface ExportRequest {
 }

@@ -23,6 +23,7 @@
     "grunt-contrib-uglify": "1.0.1",
     "grunt-jscs": "2.8.0",
     "grunt-umd": "2.3.6",
+    "phantomjs-prebuilt": "2.1.10",
     "yuidocjs": "0.10.1"
   },
   "directories": {
