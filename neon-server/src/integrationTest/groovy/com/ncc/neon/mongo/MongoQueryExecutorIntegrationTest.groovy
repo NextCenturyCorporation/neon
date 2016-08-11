@@ -43,6 +43,8 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.test.context.ContextConfiguration
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner
 
+import javax.annotation.Resource
+
 /**
  * Integration test that verifies the neon server properly translates mongo queries.
  * These tests parallel the acceptance tests in the javascript client query acceptance tests
@@ -53,6 +55,7 @@ class MongoQueryExecutorIntegrationTest extends AbstractQueryExecutorIntegration
 
     private static final String HOST_STRING = System.getProperty("mongo.host")
 
+    @Resource(name="mongoQueryExecutor")
     private MongoQueryExecutor mongoQueryExecutor
 
     @SuppressWarnings('JUnitPublicNonTestMethod')

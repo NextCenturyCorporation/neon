@@ -16,7 +16,6 @@
 
 package com.ncc.neon.query.elasticsearch
 
-import com.ncc.neon.connect.NeonConnectionException
 import com.ncc.neon.query.HeatmapBoundsQuery
 import com.ncc.neon.query.clauses.SelectClause
 import com.ncc.neon.query.clauses.SingularWhereClause

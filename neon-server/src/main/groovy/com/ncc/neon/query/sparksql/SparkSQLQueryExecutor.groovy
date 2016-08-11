@@ -32,7 +32,7 @@ import org.springframework.stereotype.Component
 
 import java.sql.SQLException
 
-@Component
+@Component("sparkSQLQueryExecutor")
 class SparkSQLQueryExecutor extends AbstractQueryExecutor {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SparkSQLQueryExecutor)

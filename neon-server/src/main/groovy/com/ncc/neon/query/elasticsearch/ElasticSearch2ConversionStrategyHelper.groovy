@@ -17,11 +17,13 @@
 package com.ncc.neon.query.elasticsearch
 
 import com.ncc.neon.connect.NeonConnectionException
+import com.ncc.neon.query.HeatmapBoundsQuery
 import com.ncc.neon.query.clauses.AndWhereClause
 import com.ncc.neon.query.clauses.OrWhereClause
 import com.ncc.neon.query.clauses.SingularWhereClause
 import org.elasticsearch.index.query.QueryBuilder
 import org.elasticsearch.index.query.QueryBuilders
+import org.elasticsearch.search.aggregations.AggregationBuilders
 import org.elasticsearch.search.aggregations.bucket.histogram.DateHistogramInterval
 
 /**
@@ -98,8 +100,10 @@ class ElasticSearchConversionStrategyHelper {
         throw new NeonConnectionException("${clause.operator} is an invalid operator for a where clause")
     }
 
-    public static createHeatmapAggregation(boundingBox) {
-        // TODO
-        return null
+    public static createHeatmapAggregation(HeatmapBoundsQuery boundingBox) {
+        def hashGrid = AggregationBuilders.geohashGrid('heatmap').field(boundingBox.locationField).precision(boundingBox.gridCount)
+        def filter  = QueryBuilders.geoBoundingBoxFilter(boundingBox.locationField).bottomLeft(boundingBox.minLat, boundingBox.minLon).topRight(boundingBox.maxLat, boundingBox.maxLon)
+        def bounds = AggregationBuilders.filter('bounds').filter(filter).subAggregation(hashGrid)
+        return bounds
     }
 }
