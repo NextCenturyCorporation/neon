@@ -34,6 +34,7 @@ import org.elasticsearch.action.admin.cluster.state.ClusterStateRequest
 import org.elasticsearch.action.admin.indices.mapping.get.GetMappingsRequest
 import org.elasticsearch.action.admin.indices.exists.indices.IndicesExistsRequest
 import org.elasticsearch.action.search.SearchRequest
+import org.elasticsearch.action.search.SearchResponse
 import org.elasticsearch.action.search.SearchScrollRequest
 import org.elasticsearch.client.Client
 import org.elasticsearch.common.collect.ImmutableOpenMap
@@ -111,7 +112,7 @@ class ElasticSearchQueryExecutor extends AbstractQueryExecutor {
         def aggregates = query.aggregates
         def groupByClauses = query.groupByClauses
 
-        def results = getClient().search(request).actionGet()
+        SearchResponse results = getClient().search(request).actionGet()
         def aggResults = results.aggregations
         def returnVal
 
@@ -129,7 +130,7 @@ class ElasticSearchQueryExecutor extends AbstractQueryExecutor {
         } else if(query.isDistinct) {
             returnVal = new TabularQueryResult(extractDistinct(query, aggResults.asList()[0]))
         } else if (results.getScrollId()) {
-            returnVal = collectScrolledResults(results)
+            returnVal = collectScrolledResults(query, results)
         } else {
             returnVal = new TabularQueryResult(extractHits(results.hits))
         }
@@ -140,12 +141,12 @@ class ElasticSearchQueryExecutor extends AbstractQueryExecutor {
         return returnVal
     }
 
-    private QueryResult collectScrolledResults(firstResults) {
+    private QueryResult collectScrolledResults(Query query, SearchResponse firstResults) {
         def hits = []
         def results = firstResults
         hits.addAll(extractHits(results.hits))
         // Keep scrolling until we either get all of the results or we reach the requested limit
-        if (results.hits.hits.size() > 0 && hits.size() < results.hits.getTotalHits()) {
+        if (results.hits.hits.size() > 0 && hits.size() < results.hits.getTotalHits() && hits.size() < query.limitClause.limit) {
             results = getClient().searchScroll(new SearchScrollRequest(results.getScrollId())).actionGet()
             hits.addAll(extractHits(results.hits))
         }

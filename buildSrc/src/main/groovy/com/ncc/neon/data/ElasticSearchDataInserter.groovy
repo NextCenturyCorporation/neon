@@ -49,9 +49,9 @@ class ElasticSearchDataInserter extends DefaultTask{
 
     String[] header
 
-    // The cut off for scrolling in Elasticsearch is 10,000 so add an extra 10% to make sure we can
+    // The cut off for scrolling in Elasticsearch is 10,000 so add twice that much so that we can
     // fetch beyond the limit
-    static final int NUMBER_OF_SCROLL_RECORDS = 11000
+    static final int NUMBER_OF_SCROLL_RECORDS = 20000
 
     @TaskAction
     void run() {
