@@ -42,6 +42,7 @@ import org.elasticsearch.search.builder.SearchSourceBuilder
 import org.elasticsearch.search.sort.SortBuilder
 import org.elasticsearch.search.sort.SortBuilders
 import org.elasticsearch.search.sort.SortOrder
+import org.elasticsearch.common.unit.TimeValue
 
 import groovy.transform.Immutable
 
@@ -231,11 +232,15 @@ class ElasticSearchConversionStrategy {
     }
 
     public static SearchRequest createSearchRequest(SearchSourceBuilder source, Query params) {
-        new SearchRequest()
-            .searchType((params?.aggregates) ? SearchType.COUNT : SearchType.DFS_QUERY_THEN_FETCH)
+        SearchRequest req = new SearchRequest()
+        req.searchType((params?.aggregates) ? SearchType.COUNT : SearchType.DFS_QUERY_THEN_FETCH)
             .source(source)
             .indices(params?.filter?.databaseName ?: '_all')
             .types(params?.filter?.tableName ?: '_all')
+        if (req.searchType == SearchType.DFS_QUERY_THEN_FETCH && params.limitClause && params.limitClause.limit > 10000) {
+            req = req.scroll(TimeValue.timeValueMinutes(1))
+        }
+        return req
     }
 
     public static boolean isCountAllAggregation(clause) {

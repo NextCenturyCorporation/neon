@@ -25,6 +25,7 @@ import com.ncc.neon.query.QueryOptions
 import com.ncc.neon.query.elasticsearch.ElasticSearchQueryExecutor
 import com.ncc.neon.query.filter.Filter
 import com.ncc.neon.util.AssertUtils
+import com.ncc.neon.query.clauses.LimitClause
 import org.joda.time.format.DateTimeFormat
 import org.joda.time.format.DateTimeFormatter
 import org.json.JSONArray
@@ -124,5 +125,16 @@ class ElasticSearchQueryExecutorIntegrationTest extends AbstractQueryExecutorInt
 
         //AssertUtils.assertEqualCollections(expected, fieldTypes)
         compareRowUnordered(expected, fieldTypes, "Returned values, ${fieldTypes}, did not match expected values, ${expected}")
+    }
+
+    @Test
+    void "query uses scroll"() {
+        def result = queryExecutor.execute(
+            new Query(
+                filter: new Filter(databaseName: DATABASE_NAME, tableName: "many-records"),
+                limitClause: new LimitClause(limit: 15000)
+            ),
+            QueryOptions.DEFAULT_OPTIONS)
+        assert result.data.size() == 11000
     }
 }

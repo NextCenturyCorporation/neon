@@ -28,7 +28,6 @@ class ElasticSearchDataDeleter extends DefaultTask{
     // default value. build will override this
     String host = "elastic:10000"
     String databaseName = "integration-test"
-    String tableName = "records"
 
     @TaskAction
     void run(){
@@ -49,9 +48,9 @@ class ElasticSearchDataDeleter extends DefaultTask{
             final DeleteIndexRequest deleteIndexRequest = new DeleteIndexRequest(databaseName)
             final DeleteIndexResponse deleteIndexResponse = client.admin().indices().delete(deleteIndexRequest).actionGet()
             if (!deleteIndexResponse.acknowledged) {
-                println("Index " + tableName + " not deleted")
+                println("Index " + databaseName + " not deleted")
             } else {
-                println("Index " + tableName + " deleted")
+                println("Index " + databaseName + " deleted")
             }
         }
         catch (ElasticsearchException e) {

@@ -90,7 +90,6 @@ class ElasticSearchConvertQueryTest extends AbstractConversionTest {
     }
 
     @Override
-    @SuppressWarnings("Println")
     protected void assertQueryWithDistinctClause(query) {
         XContentParser parser = XContentHelper.createParser(query.source())
         def map = parser.map()
