@@ -37,38 +37,28 @@ class GeoGridTransformer implements Transformer {
      */
 	@Override
 	QueryResult convert(QueryResult queryResult, def params) {
-		String aggField = params.aggregationField
-		Map<String, Object>[][] buckets = new Map<String, Object>[params.numTilesHorizontal][params.numTilesVertical]
-		for(int x = 0; x < params.numTilesHorizontal; x++) {
-			for(int y = 0; y < params.numTilesVertical; y++) {
-				buckets[x][y] = [
-					left: params.minLon + (x / params.numTilesHorizontal) * Math.abs(params.maxLon - params.minLon),
-					right: params.minLon + ((x + 1) / params.numTilesHorizontal) * Math.abs(params.maxLon - params.minLon),
-					top: params.maxLat - (y / params.numTilesVertical) * Math.abs(params.maxLat - params.minLat),
-					bottom: params.maxLat - ((y + 1) / params.numTilesVertical) * Math.abs(params.maxLat - params.minLat),
-					data: []
-				]
-			}
-		}
-		double boxWidth = Math.abs(params.maxLon - params.minLon) / params.numTilesHorizontal
-		double boxHeight = Math.abs(params.maxLat - params.minLat) / params.numTilesVertical
+		int numHorizTiles = Math.round(params.numTilesHorizontal)
+		int numVertTiles = Math.round(params.numTilesVertical)
+		Map<String, Object>[][] buckets = makeBuckets(params.minLat, params.maxLat, params.minLon, params.maxLon, numHorizTiles, numVertTiles)
+		double boxWidth = Math.abs(params.maxLon - params.minLon) / numHorizTiles
+		double boxHeight = Math.abs(params.maxLat - params.minLat) / numVertTiles
 		queryResult.getData().each { point ->
 			int horizBox = ((point[params.lonField] - params.minLon) / boxWidth) as int
 			int vertBox = ((params.maxLat - point[params.latField]) / boxHeight) as int
-			if(horizBox >= params.numTilesHorizontal || horizBox < 0 || vertBox >= params.numTilesVertical || vertBox < 0) {
+			if(horizBox >= numHorizTiles || horizBox < 0 || vertBox >= numVertTiles || vertBox < 0) {
 				return
 			}
-			def addTo = buckets[horizBox][vertBox].data.find { it[aggField] == point[aggField] }
+			def addTo = buckets[horizBox][vertBox].data.find { it[params.aggregationField] == point[params.aggregationField] }
 			if(addTo) {
 				addTo.count += 1
 			}
 			else {
-				buckets[horizBox][vertBox].data << [count: 1, (aggField): point[aggField]]
+				buckets[horizBox][vertBox].data << [count: 1, (params.aggregationField): point[params.aggregationField]]
 			}
 		}
 		List<Map<String, Object>> newData = []
-		for(int x = 0; x < params.numTilesHorizontal; x++) {
-			for(int y = 0; y < params.numTilesVertical; y++) {
+		for(int x = 0; x < numHorizTiles; x++) {
+			for(int y = 0; y < numVertTiles; y++) {
 				newData << buckets[x][y]
 			}
 		}
@@ -78,5 +68,21 @@ class GeoGridTransformer implements Transformer {
 	@Override
 	String getName() {
 		return GeoGridTransformer.name
+	}
+
+	private Map<String, Object>[][] makeBuckets(double minLat, double maxLat, double minLon, double maxLon, double numHorizTiles, double numVertTiles) {
+		Map<String, Object>[][] buckets = new Map<String, Object>[numHorizTiles][numVertTiles]
+		for(int x = 0; x < numHorizTiles; x++) {
+			for(int y = 0; y < numVertTiles; y++) {
+				buckets[x][y] = [
+					left: minLon + (x / numHorizTiles) * Math.abs(maxLon - minLon),
+					right: minLon + ((x + 1) / numHorizTiles) * Math.abs(maxLon - minLon),
+					top: maxLat - (y / numVertTiles) * Math.abs(maxLat - minLat),
+					bottom: maxLat - ((y + 1) / numVertTiles) * Math.abs(maxLat - minLat),
+					data: []
+				]
+			}
+		}
+		return buckets
 	}
 }
