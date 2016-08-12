@@ -25,6 +25,7 @@ import com.ncc.neon.query.QueryOptions
 import com.ncc.neon.query.elasticsearch.ElasticSearchQueryExecutor
 import com.ncc.neon.query.filter.Filter
 import com.ncc.neon.util.AssertUtils
+import com.ncc.neon.query.clauses.LimitClause
 import org.joda.time.format.DateTimeFormat
 import org.joda.time.format.DateTimeFormatter
 import org.json.JSONArray
@@ -45,6 +46,7 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner
 @ContextConfiguration(classes = IntegrationTestContext)
 class ElasticSearchQueryExecutorIntegrationTest extends AbstractQueryExecutorIntegrationTest{
     private static final String HOST_STRING = System.getProperty("elasticsearch.host")
+    private static final int NUMBER_OF_SCROLL_RECORDS = 20000
 
     private ElasticSearchQueryExecutor elasticSearchQueryExecutor
 
@@ -124,5 +126,30 @@ class ElasticSearchQueryExecutorIntegrationTest extends AbstractQueryExecutorInt
 
         //AssertUtils.assertEqualCollections(expected, fieldTypes)
         compareRowUnordered(expected, fieldTypes, "Returned values, ${fieldTypes}, did not match expected values, ${expected}")
+    }
+
+    @Test
+    void "query uses scroll to get all the data"() {
+        def result = queryExecutor.execute(
+            new Query(
+                filter: new Filter(databaseName: DATABASE_NAME, tableName: "many-records"),
+                // Ask for more records than are there
+                limitClause: new LimitClause(limit: NUMBER_OF_SCROLL_RECORDS + 10000)
+            ),
+            QueryOptions.DEFAULT_OPTIONS)
+        assert result.data.size() == NUMBER_OF_SCROLL_RECORDS
+    }
+
+    @Test
+    void "query uses scroll to get less than all the data"() {
+        final int MANY_RECORDS = 15000
+        def result = queryExecutor.execute(
+            new Query(
+                filter: new Filter(databaseName: DATABASE_NAME, tableName: "many-records"),
+                // Ask for more records than are there
+                limitClause: new LimitClause(limit: MANY_RECORDS)
+            ),
+            QueryOptions.DEFAULT_OPTIONS)
+        assert result.data.size() == MANY_RECORDS
     }
 }
