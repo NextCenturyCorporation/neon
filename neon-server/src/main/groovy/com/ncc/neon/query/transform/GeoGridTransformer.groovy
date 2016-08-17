@@ -39,21 +39,23 @@ class GeoGridTransformer implements Transformer {
 	QueryResult convert(QueryResult queryResult, def params) {
 		int numHorizTiles = Math.round(params.numTilesHorizontal)
 		int numVertTiles = Math.round(params.numTilesVertical)
-		Map<String, Object>[][] buckets = makeBuckets(params.minLat, params.maxLat, params.minLon, params.maxLon, numHorizTiles, numVertTiles)
 		double boxWidth = Math.abs(params.maxLon - params.minLon) / numHorizTiles
 		double boxHeight = Math.abs(params.maxLat - params.minLat) / numVertTiles
+		Map<String, Object>[][] buckets = makeBuckets(params.minLat, params.maxLat, params.minLon, params.maxLon, numHorizTiles, numVertTiles)
+
 		queryResult.getData().each { point ->
-			int horizBox = ((point[params.lonField] - params.minLon) / boxWidth) as int
-			int vertBox = ((params.maxLat - point[params.latField]) / boxHeight) as int
+			def pointAgg = getFieldValue(point, params.aggregationField)
+			int horizBox = (((getFieldValue(point, params.lonField) as int) - params.minLon) / boxWidth) as int
+			int vertBox = ((params.maxLat - (getFieldValue(point, params.latField) as int)) / boxHeight) as int
 			if(horizBox >= numHorizTiles || horizBox < 0 || vertBox >= numVertTiles || vertBox < 0) {
 				return
 			}
-			def addTo = buckets[horizBox][vertBox].data.find { it[params.aggregationField] == point[params.aggregationField] }
+			def addTo = buckets[horizBox][vertBox].data.find { getFieldValue(it, params.aggregationField) == pointAgg }
 			if(addTo) {
 				addTo.count += 1
 			}
 			else {
-				buckets[horizBox][vertBox].data << [count: 1, (params.aggregationField): point[params.aggregationField]]
+				buckets[horizBox][vertBox].data << [count: 1, (params.aggregationField): pointAgg]
 			}
 		}
 		List<Map<String, Object>> newData = []
@@ -84,5 +86,17 @@ class GeoGridTransformer implements Transformer {
 			}
 		}
 		return buckets
+	}
+
+	private def getFieldValue(def point, String fieldName) {
+		if(point[fieldName] != null) {
+			return point[fieldName]
+		}
+		List pieces = fieldName.split('\\.')
+		def currentObject = point
+		while(pieces.size() > 0 && currentObject != null) {
+			currentObject = currentObject[pieces.remove(0)]
+		}
+		return currentObject
 	}
 }
