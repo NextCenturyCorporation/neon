@@ -166,7 +166,18 @@ module.exports = function(grunt) {
                     dest: 'build/js/neon-nodeps.js',
                     objectToExport: 'neon', // optional, internal object that will be exported
                     amdModuleId: 'neon', // optional, if missing the AMD module will be anonymous
-                    globalAlias: 'neon' // optional, changes the name of the global variable
+                    globalAlias: 'neon', // optional, changes the name of the global variable
+                    deps: {
+                        default: [
+                            'log4javascript',
+                            'postal',
+                            {
+                                lodash: '_'
+                            }, {
+                                jquery: '$'
+                            }
+                        ]
+                    }
                 }
             }
         }
@@ -181,5 +192,5 @@ module.exports = function(grunt) {
     grunt.loadNpmTasks('grunt-umd');
 
     // hint after concatenation since the concatenated version is also hinted
-    grunt.registerTask('default', ['concat', 'umd:all', 'uglify', 'jscs', 'jshint', 'jasmine:unit']);
+    grunt.registerTask('default', ['concat', 'uglify', 'jscs', 'jshint', 'jasmine:unit', 'umd:all']);
 };

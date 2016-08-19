@@ -1,5 +1,5 @@
 {
-  "name": "@name@",
+  "name": "neon-framework",
   "version" : "@version@",
   "author": "Next Century Corporation",
   "description": "Neon is an open-source framework used to develop custom data analysis applications. It is designed to help integrate your visualizations with your data. The Neon framework can incorporate a variety of data analysis and visualization widgets in a common webtop environment to allow analysts to explore complex data sets.",
@@ -25,10 +25,6 @@
     "grunt-umd": "2.3.6",
     "phantomjs-prebuilt": "2.1.10",
     "yuidocjs": "0.10.1"
-  },
-  "directories": {
-    "dist": "build",
-    "dist/lib": "build/war"
   },
   "main": "neon"
 }
