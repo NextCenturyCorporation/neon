@@ -42,6 +42,7 @@ project.ext {
             fileTree(rootProject.file("js-test-support")).include("**/*.js")
 
     npmExecutable = Os.isFamily(Os.FAMILY_WINDOWS) ? "npm.cmd" : "npm"
+    typingsExecutable = Os.isFamily(Os.FAMILY_WINDOWS) ? "npm.cmd" : "typings"
     yuidocExecutable = Os.isFamily(Os.FAMILY_WINDOWS) ? "yuidoc.cmd" : "yuidoc"
 }
 
@@ -89,6 +90,20 @@ task createPackageJson(type: Copy) {
     ])
 }
 
+task createTypingsJson(type: Copy) {
+    description = 'Creates a typings.json file used by typings from a template that is shared by all projects'
+    inputs.file "${rootDir}/typings.json.template"
+    outputs.file "${projectDir}/typings.json"
+    from rootDir
+    into projectDir
+    include "typings.json.template"
+    rename "typings.json.template", "typings.json"
+    filter(ReplaceTokens, tokens: [
+            "name": project.name,
+            "version": project.version
+    ])
+}
+
 task installGruntDeps(type: Exec) {
     description  'Installs javascript dependencies using npm'
     inputs.file createPackageJson.outputs.files
@@ -96,6 +111,12 @@ task installGruntDeps(type: Exec) {
     commandLine npmExecutable, "install"
 }
 
+task installTypings(type: Exec) {
+    description  'Installs typescript typings using npm'
+    inputs.file createTypingsJson.outputs.files
+    outputs.dir "${projectDir}/typings"
+    commandLine typingsExecutable, "install"
+}
 
 task jsDocs {
     description = 'Creates the javascript API documentation.'
@@ -166,5 +187,5 @@ project.tasks.withType(GruntTask) { task ->
         task.executable = "${projectDir}/node_modules/.bin/${GruntTask.GRUNT_EXECUTABLE}"
     }
 
-    task.dependsOn 'installGruntDeps'
+    task.dependsOn([installGruntDeps, installTypings])
 }

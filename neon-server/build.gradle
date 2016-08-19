@@ -353,7 +353,10 @@ task buildNpmDist() {
     copy {
         from 'build/js'
         into 'dist'
-        include '*.js'
+        include 'neon-nodeps*.js'
+        rename { String fileName ->
+            fileName.replace('-nodeps', '')
+        }
     }
     copy {
         from 'build/resources'

@@ -1,0 +1,5 @@
+{
+    "name": "neon-framework",
+    "version": "@version@",
+    "main": "index.d.ts"
+}
