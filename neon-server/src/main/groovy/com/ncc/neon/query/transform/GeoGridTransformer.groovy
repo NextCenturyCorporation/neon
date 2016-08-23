@@ -45,17 +45,18 @@ class GeoGridTransformer implements Transformer {
 
 		queryResult.getData().each { point ->
 			def pointAgg = getFieldValue(point, params.aggregationField)
-			int horizBox = (((getFieldValue(point, params.lonField) as double) - params.minLon) / boxWidth) as int
-			int vertBox = ((params.maxLat - (getFieldValue(point, params.latField) as double)) / boxHeight) as int
-			if(horizBox >= numHorizTiles || horizBox < 0 || vertBox >= numVertTiles || vertBox < 0) {
-				return
-			}
-			def addTo = buckets[horizBox][vertBox].data.find { getFieldValue(it, params.aggregationField) == pointAgg }
-			if(addTo) {
-				addTo.count += 1
-			}
-			else {
-				buckets[horizBox][vertBox].data << [count: 1, (params.aggregationField): pointAgg]
+			Set boxes = determineBoxes(point[params.latField], point[params.lonField], params.maxLat, params.minLon, boxWidth, boxHeight)
+			boxes.each { box ->
+				if(box.horizBox < 0 || box.horizBox >= numHorizTiles || box.vertBox < 0 || box.vertBox >= numVertTiles) {
+					return
+				}
+				def addTo = buckets[box.horizBox][box.vertBox].data.find { getFieldValue(it, params.aggregationField) == pointAgg }
+				if(addTo) {
+					addTo.count += 1
+				}
+				else {
+					buckets[box.horizBox][box.vertBox].data << [count: 1, (params.aggregationField): pointAgg]
+				}
 			}
 		}
 		List<Map<String, Object>> newData = []
@@ -98,5 +99,30 @@ class GeoGridTransformer implements Transformer {
 			currentObject = currentObject[pieces.remove(0)]
 		}
 		return currentObject
+	}
+
+	private Set determineBoxes(def latValue, def lonValue, double maxLat, double minLon, double boxWidth, double boxHeight) {
+		if(latValue instanceof Number || latValue instanceof String) {
+			return [
+				[
+					horizBox: (((lonValue as double) - minLon) / boxWidth) as int,
+					vertBox: ((maxLat - (latValue as double)) / boxHeight) as int
+				]
+			]
+		}
+		// If latValue and lonValue aren't numbers or strings, assume they're lists of some description.
+		if(!latValue || !lonValue) {
+			return []
+		}
+		// Zip latValue and lonValue into something of the form [[lat1, lon1]. [lat2, lon2], etc], and then
+		// transform each [latX, lonX] pair into a map of the form [horizBox: ___, vertBox: ___]
+		List latLonPairs = GroovyCollections.transpose([latValue, lonValue])
+		latLonPairs = latLonPairs.collect {
+			[
+				horizBox: (((it[1] as double) - minLon) / boxWidth) as int,
+				vertBox: ((maxLat - (it[0] as double)) / boxHeight) as int
+			]
+		}
+		return latLonPairs as Set // Convert to Set to remove duplicate boxes
 	}
 }
