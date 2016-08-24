@@ -170,11 +170,12 @@ module.exports = function(grunt) {
                     deps: {
                         default: [
                             'log4javascript',
-                            'postal',
-                            {
+                            'postal', {
                                 lodash: '_'
                             }, {
                                 jquery: '$'
+                            }, {
+                                'node-uuid': 'uuid'
                             }
                         ]
                     }

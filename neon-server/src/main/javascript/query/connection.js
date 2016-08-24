@@ -159,10 +159,10 @@ neon.query.Connection.prototype.executeQueryService_ = function(query, successCa
  * response as a parameter.
  * @return {neon.util.AjaxRequest} The xhr request object
  */
-neon.query.Connection.prototype.executeExport = function(data, successCallback, errorCallback, fileType) {
-    data.fileType = fileType;
+neon.query.Connection.prototype.executeExport = function(query, successCallback, errorCallback, fileType) {
+    query.fileType = fileType;
     return neon.util.ajaxUtils.doPostJSON(
-        data,
+        query,
         neon.serviceUrl('exportservice', 'export/' + encodeURIComponent(this.host_) + '/' + encodeURIComponent(this.databaseType_), ''),
         {
             success: successCallback,
