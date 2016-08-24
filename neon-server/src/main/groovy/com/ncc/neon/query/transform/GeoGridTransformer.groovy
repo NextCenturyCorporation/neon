@@ -45,7 +45,7 @@ class GeoGridTransformer implements Transformer {
 
 		queryResult.getData().each { point ->
 			def pointAgg = getFieldValue(point, params.aggregationField)
-			Set boxes = determineBoxes(point[params.latField], point[params.lonField], params.maxLat, params.minLon, boxWidth, boxHeight)
+			Set boxes = determineBoxes(getFieldValue(point, params.latField), getFieldValue(point, params.lonField), params.maxLat, params.minLon, boxWidth, boxHeight)
 			boxes.each { box ->
 				if(box.horizBox < 0 || box.horizBox >= numHorizTiles || box.vertBox < 0 || box.vertBox >= numVertTiles) {
 					return

@@ -20,20 +20,13 @@ import com.ncc.neon.connect.ConnectionInfo
 import com.ncc.neon.connect.ConnectionManager
 import com.ncc.neon.connect.DataSources
 import com.ncc.neon.query.*
-import com.ncc.neon.query.clauses.AggregateClause
-import com.ncc.neon.query.clauses.AndWhereClause
-import com.ncc.neon.query.clauses.BooleanWhereClause
-import com.ncc.neon.query.clauses.SingularWhereClause
-import com.ncc.neon.query.clauses.WhereClause
 import com.ncc.neon.query.executor.QueryExecutor
-import com.ncc.neon.query.filter.Filter
 import com.ncc.neon.query.filter.FilterState
 import com.ncc.neon.query.result.QueryResult
 
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
 
-import java.security.SecureRandom
 import javax.ws.rs.*
 import javax.ws.rs.core.MediaType
 
@@ -230,86 +223,10 @@ class QueryService {
     }
 
     private QueryResult execute(String host, String databaseType, def query, QueryOptions options) {
-        QueryExecutor queryExecutor = getExecutor(host, databaseType)
-        modifyQueryForRandomSampling(host, databaseType, query, options)
-        return queryExecutor.execute(query, options)
+        return getExecutor(host, databaseType).execute(query, options)
     }
 
     private QueryExecutor getExecutor(String host, String databaseType) {
         return queryExecutorFactory.getExecutor(new ConnectionInfo(host: host, dataSource: databaseType as DataSources))
-    }
-
-    /**
-     * Modifies a query group to get grab random results, given a WhereClause of the form {lhs: "_RANDOM_FIELD", operation: "=", rhs: field_name}
-     * and a LimitClause constraining the number of results returned.
-     *
-     * @param host The name of the host the database is on. Used to query for the number of records in the target tables.
-     * @param databaseType The type of database being used. Used to query for the number of records in the target tables.
-     * @param group the QueryGroup to modify for random sampling.
-     * @param options The options passed in with the query group. Used to query for the number of records in the target tables.
-     */
-    private void modifyQueryForRandomSampling(String host, String databaseType, QueryGroup group, QueryOptions options) {
-        group.queries.each {
-            modifyQueryForRandomSampling(host, databaseType, it, options)
-        }
-    }
-
-    /**
-     * Modifies a query to get grab random results, given a WhereClause of the form {lhs: "_RANDOM_FIELD", operation: "=", rhs: field_name}
-     * and a LimitClause constraining the number of results returned.
-     *
-     * @param host The name of the host the database is on. Used to query for the number of records in the target table.
-     * @param databaseType The type of database being used. Used to query for the number of records in the target table.
-     * @param query the Query to modify for random sampling.
-     * @param options The options passed in with the query. Used to query for the number of records in the target table.
-     */
-    private void modifyQueryForRandomSampling(String host, String databaseType, Query query, QueryOptions options) {
-        WhereClause randomClause = findAndReturnRandomClause(query.filter)
-        if(!query.limitClause || !randomClause) {
-            if(randomClause) {
-                query.filter.whereClause?.whereClauses.remove(randomClause) || (query.filter.whereClause = null) == null
-            }
-            return
-        }
-
-        // Execute query to calculate total number of documents in target data set.
-        Query countQuery = new Query()
-        countQuery.filter = new Filter(databaseName: query.filter.databaseName, tableName:query.filter.tableName, filterName: query.filter.filterName)
-        countQuery.aggregates = [new AggregateClause(operation: 'count', field: '*', name: 'count')]
-        long count = getExecutor(host, databaseType).execute(countQuery, options).getData()[0].count
-        // Use count results and limit clause to decide what percentage of documents we want, and random values to decide where we want them from.
-        // Go to (range) in either direction rather than (range * 0.5) to give a buffer in case of non-uniform randomness.
-        double range = (query.limitClause.limit as double) / (count as double)
-        double centerValue = SecureRandom.getInstance('SHA1PRNG').nextDouble()
-        double topValue = (centerValue + range > 1) ? 1 : centerValue + range
-        double bottomValue = (centerValue - range < 0) ? 0 : centerValue - range
-        // Add random field bounds to WhereClause of original query's filter.
-        WhereClause newClause = new AndWhereClause(whereClauses: [])
-        if(query.filter.whereClause != null) {
-            newClause.whereClauses += query.filter.whereClause
-        }
-
-        newClause.whereClauses << ([lhs: randomClause.rhs, operator: '>=', rhs: bottomValue] as SingularWhereClause)
-        newClause.whereClauses << ([lhs: randomClause.rhs, operator: '<', rhs: topValue] as SingularWhereClause)
-        query.filter.whereClause = newClause
-    }
-
-    /**
-     * Finds the WhereClause used to specify the name of the field storing random values, if there is one, and removes it from the list of WhereClauses.
-     *
-     * @param filter A Filter object containing WhereClauses.
-     * @return The WhereClause containing random sampling information, if there is one.
-     */
-    private WhereClause findAndReturnRandomClause(Filter filter) {
-        WhereClause randomClause = null
-        if(filter?.whereClause instanceof BooleanWhereClause) {
-            randomClause = filter.whereClause.whereClauses.find { it.lhs == "_RANDOM_FIELD" }
-            filter.whereClause.whereClauses -=randomClause
-        }
-        else if(filter?.whereClause?.lhs == "_RANDOM_FIELD") {
-            randomClause = filter.whereClause
-            filter.whereClause = null
-        }
-        return randomClause
     }
 }
