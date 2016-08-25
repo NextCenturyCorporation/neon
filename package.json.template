@@ -26,5 +26,6 @@
     "phantomjs-prebuilt": "2.1.10",
     "yuidocjs": "0.10.1"
   },
-  "main": "neon"
+  "main": "neon",
+  "typings": "./neon.d.ts"
 }
