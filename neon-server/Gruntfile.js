@@ -168,15 +168,22 @@ module.exports = function(grunt) {
                     amdModuleId: 'neon', // optional, if missing the AMD module will be anonymous
                     globalAlias: 'neon', // optional, changes the name of the global variable
                     deps: {
-                        default: [
+                        'default': [
                             'log4javascript',
                             'postal', {
-                                lodash: '_'
+                                lodash: '_',
                             }, {
-                                jquery: '$'
+                                'jquery': '$',
                             }, {
                                 'node-uuid': 'uuid'
                             }
+                        ],
+                        global: [
+                            'log4javascript',
+                            'postal',
+                            '_',
+                            '$',
+                            'uuid'
                         ]
                     }
                 }
