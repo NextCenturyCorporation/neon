@@ -175,7 +175,7 @@ module.exports = function(grunt) {
                             }, {
                                 jquery: '$'
                             }, {
-                                uuid: 'uuid'
+                                'node-uuid': 'uuid'
                             }
                         ],
                         global: [
