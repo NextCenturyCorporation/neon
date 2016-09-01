@@ -42,7 +42,6 @@ project.ext {
             fileTree(rootProject.file("js-test-support")).include("**/*.js")
 
     npmExecutable = Os.isFamily(Os.FAMILY_WINDOWS) ? "npm.cmd" : "npm"
-    typingsExecutable = Os.isFamily(Os.FAMILY_WINDOWS) ? "npm.cmd" : "typings"
     yuidocExecutable = Os.isFamily(Os.FAMILY_WINDOWS) ? "yuidoc.cmd" : "yuidoc"
 }
 
@@ -54,7 +53,6 @@ task gruntjs(type: GruntTask) {
 task concatjs(type: GruntTask) {
     description = 'runs the grunt javascript concatenation task'
     gruntArgs "concat", "--outfile-base=${jsOutputFileBase}"
-
 }
 
 task watch(type: com.ncc.common.GruntTask) {
@@ -109,13 +107,6 @@ task installGruntDeps(type: Exec) {
     inputs.file createPackageJson.outputs.files
     outputs.dir "${projectDir}/node_modules"
     commandLine npmExecutable, "install"
-}
-
-task installTypings(type: Exec) {
-    description  'Installs typescript typings using npm'
-    inputs.file createTypingsJson.outputs.files
-    outputs.dir "${projectDir}/typings"
-    commandLine typingsExecutable, "install"
 }
 
 task jsDocs {
@@ -187,5 +178,5 @@ project.tasks.withType(GruntTask) { task ->
         task.executable = "${projectDir}/node_modules/.bin/${GruntTask.GRUNT_EXECUTABLE}"
     }
 
-    task.dependsOn([installGruntDeps, installTypings])
+    task.dependsOn([installGruntDeps])
 }
