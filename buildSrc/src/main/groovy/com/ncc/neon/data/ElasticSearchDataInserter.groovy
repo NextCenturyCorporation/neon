@@ -29,7 +29,7 @@ import org.elasticsearch.action.bulk.BulkResponse
 import org.elasticsearch.action.index.IndexRequestBuilder
 import org.elasticsearch.client.IndicesAdminClient
 import org.elasticsearch.client.transport.TransportClient
-import org.elasticsearch.common.settings.ImmutableSettings
+import org.elasticsearch.common.settings.Settings
 import org.elasticsearch.common.settings.Settings
 import org.elasticsearch.common.transport.InetSocketTransportAddress
 import org.elasticsearch.common.xcontent.XContentBuilder
@@ -45,8 +45,13 @@ class ElasticSearchDataInserter extends DefaultTask{
 
     String databaseName = "integration-test"
     String tableName = "records"
+    String scrollTableName = "many-records"
 
     String[] header
+
+    // The cut off for scrolling in Elasticsearch is 10,000 so add twice that much so that we can
+    // fetch beyond the limit
+    static final int NUMBER_OF_SCROLL_RECORDS = 20000
 
     @TaskAction
     void run() {
@@ -54,15 +59,11 @@ class ElasticSearchDataInserter extends DefaultTask{
         String hostName = connectionUrl[0]
         int port = connectionUrl.length == 2 ? Integer.parseInt(connectionUrl[1]) : 9300
 
-        TransportClient client = connectViaTransport(hostName, port)
+        TransportClient client = ElasticSearchTransportConnector.connectViaTransport(hostName, port)
 
         createIndex(client);
         processCSV(client);
-    }
-
-    private TransportClient connectViaTransport(String host, int port) {
-        Settings settings = ImmutableSettings.settingsBuilder().put("client.transport.ignore_cluster_name", true).put("client.transport.sniff", true).build();
-        return new TransportClient(settings).addTransportAddress(new InetSocketTransportAddress(host, port));
+        generateScrollRecords(client)
     }
 
     private void createIndex(TransportClient client) {
@@ -77,6 +78,11 @@ class ElasticSearchDataInserter extends DefaultTask{
             if (!created.acknowledged) throw new RuntimeException("Could not create index!");
         }
 
+        createCsvMapping(client)
+        createScrollMapping(client)
+    }
+
+    private void createCsvMapping(TransportClient client) {
         client.admin().indices()
             .preparePutMapping(databaseName)
             .setType(tableName)
@@ -84,7 +90,6 @@ class ElasticSearchDataInserter extends DefaultTask{
             .startObject()
             .startObject(tableName)
             .startObject("properties")
-            .startObject("_id").field("type", "string").field("index", "not_analyzed").endObject()
             .startObject("firstname").field("type", "string").field("index", "not_analyzed").endObject()
             .startObject("lastname").field("type", "string").field("index", "not_analyzed").endObject()
             .startObject("city").field("type", "string").field("index", "not_analyzed").endObject()
@@ -138,7 +143,9 @@ class ElasticSearchDataInserter extends DefaultTask{
         if (bulkResponse.hasFailures()) {
             println(" Bulk failures: ")
             bulkResponse.each { it ->
-                println("\tfailure: " + JsonOutput.toJson(it))
+                if (it.isFailed()) {
+                    println("\tfailure: " + it.getFailureMessage())
+                }
             }
         }
     }
@@ -158,7 +165,6 @@ class ElasticSearchDataInserter extends DefaultTask{
                     builder.field(header[ii], tags)
                 } else if (header[ii] == "_id") {
                     id = line[ii]
-                    builder.field(header[ii], line[ii])
                 } else if (header[ii] == "hiredate") {
                     DateTimeFormatter formatIn = DateTimeFormat.forPattern("yyyy-MM-dd HH:mm:ss")
                     builder.field(header[ii], formatIn.withZoneUTC().parseDateTime(line[ii]).toDate())
@@ -171,5 +177,37 @@ class ElasticSearchDataInserter extends DefaultTask{
 
         IndexRequestBuilder indexRequest = client.prepareIndex(databaseName, tableName, id).setSource(builder)
         return indexRequest
+    }
+
+    private void createScrollMapping(TransportClient client) {
+        client.admin().indices()
+            .preparePutMapping(databaseName)
+            .setType(scrollTableName)
+            .setSource(XContentFactory.jsonBuilder().prettyPrint()
+            .startObject()
+            .startObject(scrollTableName)
+            .startObject("properties")
+            .startObject("value").field("type", "string").field("index", "not_analyzed").endObject()
+            .endObject()
+            .endObject()
+            .endObject())
+            .execute().actionGet()
+    }
+
+    private void generateScrollRecords(TransportClient client) {
+        BulkRequestBuilder bulkRequest = client.prepareBulk()
+        for (int i = 0; i < NUMBER_OF_SCROLL_RECORDS; ++i) {
+            IndexRequestBuilder indexRequest = client.prepareIndex(databaseName, scrollTableName).setSource("value", i)
+            bulkRequest.add(indexRequest)
+        }
+        BulkResponse bulkResponse = bulkRequest.execute().actionGet()
+        if (bulkResponse.hasFailures()) {
+            println(" Bulk failures: ")
+            bulkResponse.each { it ->
+                if (it.isFailed()) {
+                    println("\tfailure: " + it.getFailureMessage())
+                }
+            }
+        }
     }
 }

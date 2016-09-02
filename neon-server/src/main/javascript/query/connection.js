@@ -159,10 +159,10 @@ neon.query.Connection.prototype.executeQueryService_ = function(query, successCa
  * response as a parameter.
  * @return {neon.util.AjaxRequest} The xhr request object
  */
-neon.query.Connection.prototype.executeExport = function(data, successCallback, errorCallback, fileType) {
-    data.fileType = fileType;
+neon.query.Connection.prototype.executeExport = function(query, successCallback, errorCallback, fileType) {
+    query.fileType = fileType;
     return neon.util.ajaxUtils.doPostJSON(
-        data,
+        query,
         neon.serviceUrl('exportservice', 'export/' + encodeURIComponent(this.host_) + '/' + encodeURIComponent(this.databaseType_), ''),
         {
             success: successCallback,
@@ -205,6 +205,7 @@ neon.query.Connection.prototype.executeCheckTypeGuesses = function(uuid, success
  * Initiates the process of importing records from a file into a database and converting them from strings to more appropriate types, and fires the callback when complete.
  * @method executeLoadFileIntoDB
  * @param {Object} data An object that contains a date formatting string and a list of objects that contain field names and type names to go with them.
+ * @param {string} uuid The job ID to associate with the data to be parsed and converted.
  * @param {Function} successCallback The function to call when the request successfully completes. This function takes the server's response as a parameter.
  * @param {Function} errorCallback The function to call when an error occurs. This function takes the server's response as a parameter.
  * @param {String} [host] The host to upload a file to when you don't want to upload to the default.
@@ -446,7 +447,7 @@ neon.query.Connection.prototype.deleteState = function(stateName, successCallbac
 
 /**
  * Requests to retrieve all the states names.
- * @method getAllStates
+ * @method getAllStateNames
  * @param {Function} successCallback
  * @param {Function} errorCallback
  * @return {neon.util.AjaxRequest} The xhr request object

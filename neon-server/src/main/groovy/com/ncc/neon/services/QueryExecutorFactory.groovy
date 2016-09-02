@@ -4,9 +4,7 @@ import com.ncc.neon.connect.ConnectionInfo
 import com.ncc.neon.connect.ConnectionManager
 import com.ncc.neon.connect.DataSources
 import com.ncc.neon.connect.NeonConnectionException
-import com.ncc.neon.query.elasticsearch.ElasticSearchHeatmapExecutor
 import com.ncc.neon.query.executor.QueryExecutor
-import com.ncc.neon.query.mongo.MongoHeatmapExecutor
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
 
@@ -34,20 +32,20 @@ import javax.annotation.Resource
 @Component
 class QueryExecutorFactory {
 
-    @Resource
+    @Resource(name="mongoQueryExecutor")
     private QueryExecutor mongoQueryExecutor
 
-    @Resource
+    @Resource(name="sparkSQLQueryExecutor")
     private QueryExecutor sparkSQLQueryExecutor
 
-    @Resource
+    @Resource(name="elasticSearchQueryExecutor")
     private QueryExecutor elasticSearchQueryExecutor
 
-    @Resource
-    private MongoHeatmapExecutor mongoHeatmapExecutor
+    @Resource(name="mongoHeatmapExecutor")
+    private QueryExecutor mongoHeatmapExecutor
 
-    @Resource
-    private ElasticSearchHeatmapExecutor elasticSearchHeatmapExecutor
+    @Resource(name="elasticSearchHeatmapExecutor")
+    private QueryExecutor elasticSearchHeatmapExecutor
 
     @Autowired
     private ConnectionManager connectionManager

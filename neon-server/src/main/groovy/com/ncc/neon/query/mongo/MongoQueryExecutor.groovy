@@ -33,12 +33,14 @@ import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.context.annotation.Primary
 import org.springframework.stereotype.Component
 
 /**
  * Executes queries against a mongo data store
  */
-@Component
+@Primary
+@Component("mongoQueryExecutor")
 class MongoQueryExecutor extends AbstractQueryExecutor {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(MongoQueryExecutor)

@@ -183,6 +183,9 @@ class ExportService {
                 def fieldValue = record[field] ? record[field] : getFieldInRecord(field, record)
                 if(fieldValue instanceof String) {
                     s = fieldValue.replaceAll("\"", "\"\"")
+                } else if(fieldValue instanceof Map) {
+                    s = JsonOutput.toJson(fieldValue)
+                    s = s.replaceAll("\"", "\"\"")
                 }
                 output << "\"${s?:fieldValue}\","
             }
@@ -250,6 +253,10 @@ class ExportService {
             queryNames.each { field ->
                 Cell cell = row.createCell(cellNum)
                 def fieldValue = record[field] ? record[field] : getFieldInRecord(field, record)
+
+                if(fieldValue instanceof Map || fieldValue instanceof List) {
+                    fieldValue = JsonOutput.toJson(fieldValue)
+                }
                 cell.setCellValue("${fieldValue}")
                 cellNum++
             }

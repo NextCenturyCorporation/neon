@@ -90,7 +90,6 @@ class ElasticSearchConvertQueryTest extends AbstractConversionTest {
     }
 
     @Override
-    @SuppressWarnings("Println")
     protected void assertQueryWithDistinctClause(query) {
         XContentParser parser = XContentHelper.createParser(query.source())
         def map = parser.map()
@@ -144,7 +143,12 @@ class ElasticSearchConvertQueryTest extends AbstractConversionTest {
         XContentParser parser = XContentHelper.createParser(query.source())
         def map = parser.map()
 
-        def whereNullClause = [not: [filter: [exists: [field: FIELD_NAME]]]]
+        def whereNullClause
+        if (isElasticSearch1()) {
+            whereNullClause = [not: [filter: [exists: [field: FIELD_NAME]]]]
+        } else if (isElasticSearch2()) {
+            whereNullClause = [not: [query: [exists: [field: FIELD_NAME]]]]
+        }
 
         assert map.query.filtered.filter.bool.must.and.filters.contains(whereNullClause)
     }
@@ -164,10 +168,14 @@ class ElasticSearchConvertQueryTest extends AbstractConversionTest {
         XContentParser parser = XContentHelper.createParser(query.source())
         def map = parser.map()
 
-        def containsClause = [regexp: [:]]
-        containsClause.regexp[FIELD_NAME] = '.*foo.*'
+        if (isElasticSearch1()) {
+            def containsClause = [regexp: [:]]
+            containsClause.regexp[FIELD_NAME] = '.*foo.*'
 
-        assert map.query.filtered.filter.bool.must.and.filters.contains(containsClause)
+            assert map.query.filtered.filter.bool.must.and.filters.contains(containsClause)
+        } else if (isElasticSearch2()) {
+            assert map.query.filtered.filter.bool.must.and.filters.regexp[FIELD_NAME].value.contains('.*foo.*')
+        }
     }
 
     @Override
@@ -175,10 +183,14 @@ class ElasticSearchConvertQueryTest extends AbstractConversionTest {
         XContentParser parser = XContentHelper.createParser(query.source())
         def map = parser.map()
 
-        def containsClause = [not: [filter: [regexp: [:]]]]
-        containsClause.not.filter.regexp[FIELD_NAME] = '.*foo.*'
+        if (isElasticSearch1()) {
+            def containsClause = [not: [filter: [regexp: [:]]]]
+            containsClause.not.filter.regexp[FIELD_NAME] = '.*foo.*'
 
-        assert map.query.filtered.filter.bool.must.and.filters.contains(containsClause)
+            assert map.query.filtered.filter.bool.must.and.filters.contains(containsClause)
+        } else if (isElasticSearch2()) {
+            assert map.query.filtered.filter.bool.must.and.filters.not.query.regexp[FIELD_NAME].value.contains('.*foo.*')
+        }
     }
 
     @Override
@@ -197,5 +209,13 @@ class ElasticSearchConvertQueryTest extends AbstractConversionTest {
 
         assert map._source.includes.contains(FIELD_NAME)
         assert map._source.includes.contains(FIELD_NAME_2)
+    }
+
+    private static boolean isElasticSearch2() {
+        return org.elasticsearch.Version.CURRENT.major == 2
+    }
+
+    private static boolean isElasticSearch1() {
+        return org.elasticsearch.Version.CURRENT.major == 1
     }
 }

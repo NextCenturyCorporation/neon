@@ -347,3 +347,51 @@ def writeVersionStringToPropertiesFile(versionString) {
     def versionfile = new File("${projectDir}/src/main/resources/version.properties")
     versionfile.text = 'build.version=' + versionString + "\n"
 }
+
+task buildNpmDist() {
+    delete('dist')
+    copy {
+        from 'build/js'
+        into 'dist'
+        include 'neon-nodeps*.js'
+        rename { String fileName ->
+            fileName.replace('-nodeps', '')
+        }
+    }
+    copy {
+        from 'build/resources'
+        into 'dist/resources'
+        include '**/*.*'
+    }
+    copy {
+        from 'build/libs'
+        into 'dist/war'
+        include '*.war'
+    }
+    copy {
+        from '.'
+        into 'dist'
+        include 'package.json'
+        include 'typings.json'
+        include 'neon.d.ts'
+    }
+}
+
+if (project.hasProperty("useElasticsearch1") && project.getProperty("useElasticsearch1") == "true") {
+    sourceSets {
+        main {
+            groovy {
+                exclude '**/ElasticSearch2*.groovy'
+            }
+        }
+    }
+} else {
+    sourceSets {
+        main {
+            groovy {
+                exclude '**/ElasticSearch1*.groovy'
+            }
+        }
+    }
+}
+

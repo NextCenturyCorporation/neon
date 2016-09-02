@@ -16,7 +16,7 @@
 
 describe('messaging using the standard neon event bus', function() {
     afterEach(function() {
-        postal.utils.reset();
+        postal.reset();
     });
 
     it('publish/subscribe message', function() {

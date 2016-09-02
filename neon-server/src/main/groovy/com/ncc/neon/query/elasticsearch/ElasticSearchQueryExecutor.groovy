@@ -34,6 +34,8 @@ import org.elasticsearch.action.admin.cluster.state.ClusterStateRequest
 import org.elasticsearch.action.admin.indices.mapping.get.GetMappingsRequest
 import org.elasticsearch.action.admin.indices.exists.indices.IndicesExistsRequest
 import org.elasticsearch.action.search.SearchRequest
+import org.elasticsearch.action.search.SearchResponse
+import org.elasticsearch.action.search.SearchScrollRequest
 import org.elasticsearch.client.Client
 import org.elasticsearch.common.collect.ImmutableOpenMap
 import org.elasticsearch.search.aggregations.bucket.MultiBucketsAggregation
@@ -44,9 +46,11 @@ import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.context.annotation.Primary
 import org.springframework.stereotype.Component
 
-@Component
+@Primary
+@Component("elasticSearchQueryExecutor")
 class ElasticSearchQueryExecutor extends AbstractQueryExecutor {
 
     static final String STATS_AGG_PREFIX = "_statsFor_"
@@ -108,9 +112,10 @@ class ElasticSearchQueryExecutor extends AbstractQueryExecutor {
         def aggregates = query.aggregates
         def groupByClauses = query.groupByClauses
 
-        def results = getClient().search(request).actionGet()
+        SearchResponse results = getClient().search(request).actionGet()
         def aggResults = results.aggregations
         def returnVal
+
         if(aggregates && !groupByClauses) {
             returnVal = new TabularQueryResult([
                 extractMetrics(aggregates, aggResults ? aggResults.asMap() : null, results.hits.totalHits)
@@ -124,8 +129,9 @@ class ElasticSearchQueryExecutor extends AbstractQueryExecutor {
             returnVal = new TabularQueryResult(buckets)
         } else if(query.isDistinct) {
             returnVal = new TabularQueryResult(extractDistinct(query, aggResults.asList()[0]))
-        }
-        else {
+        } else if (results.getScrollId()) {
+            returnVal = collectScrolledResults(query, results)
+        } else {
             returnVal = new TabularQueryResult(extractHits(results.hits))
         }
 
@@ -133,6 +139,18 @@ class ElasticSearchQueryExecutor extends AbstractQueryExecutor {
         LOGGER.debug(" Query took: " + diffTime + " ms ")
 
         return returnVal
+    }
+
+    private QueryResult collectScrolledResults(Query query, SearchResponse firstResults) {
+        def hits = []
+        def results = firstResults
+        hits.addAll(extractHits(results.hits))
+        // Keep scrolling until we either get all of the results or we reach the requested limit
+        if (results.hits.hits.size() > 0 && hits.size() < results.hits.getTotalHits() && hits.size() < query.limitClause.limit) {
+            results = getClient().searchScroll(new SearchScrollRequest(results.getScrollId())).actionGet()
+            hits.addAll(extractHits(results.hits))
+        }
+        return new TabularQueryResult(hits)
     }
 
     List<Map<String, Object>> extractDistinct(Query query, aggResult) {
@@ -262,7 +280,7 @@ class ElasticSearchQueryExecutor extends AbstractQueryExecutor {
         return fieldTypes
     }
 
-    private Client getClient() {
+    protected Client getClient() {
         return connectionManager.connection.client
     }
 
@@ -274,32 +292,44 @@ class ElasticSearchQueryExecutor extends AbstractQueryExecutor {
         Map mappedBuckets = [:]
         // Iterate over all of the buckets, looking for any that have the same groupByKeys
         buckets.each {
-            def existingBucket = mappedBuckets.get(it.getGroupByKeys())
-            if (existingBucket) {
-                // If we've already found a bucket with these groupByKeys, then combine them
-                it.getAggregatedValues().each { key, value ->
-                    def existingAgg = existingBucket.getAggregatedValues().get(key)
-                    if (existingAgg) {
-                        def newAgg = new InternalStats(
-                            existingAgg.getName(),
-                            existingAgg.getCount() + value.getCount(),
-                            existingAgg.getSum() + value.getSum(),
-                            Math.min(existingAgg.getMin(), value.getMin()),
-                            Math.max(existingAgg.getMax(), value.getMax()),
-                            new ValueFormatter.Raw()
-                        )
-                        existingBucket.getAggregatedValues().put(key, newAgg)
-                    } else {
-                        existingBucket.put(key, value)
+            // Only process a bucket if there are documents in it, since we're using a histogram to
+            // replicate group-by functionality.
+            if (it.getDocCount() > 0) {
+                def existingBucket = mappedBuckets.get(it.getGroupByKeys())
+                if (existingBucket) {
+                    // If we've already found a bucket with these groupByKeys, then combine them
+                    it.getAggregatedValues().each { key, value ->
+                        def existingAgg = existingBucket.getAggregatedValues().get(key)
+                        if (existingAgg) {
+                            def newAgg = createInternalStats(
+                                existingAgg.getName(),
+                                existingAgg.getCount() + value.getCount(),
+                                existingAgg.getSum() + value.getSum(),
+                                Math.min(existingAgg.getMin(), value.getMin()),
+                                Math.max(existingAgg.getMax(), value.getMax()),
+                                new ValueFormatter.Raw()
+                            )
+                            existingBucket.getAggregatedValues().put(key, newAgg)
+                        } else {
+                            existingBucket.put(key, value)
+                        }
                     }
+                    existingBucket.setDocCount(existingBucket.getDocCount() + it.getDocCount())
+                } else {
+                    // If there isn't already a bucket with these groupByKeys, then add it to the map
+                    mappedBuckets.put(it.getGroupByKeys(), it)
                 }
-                existingBucket.setDocCount(existingBucket.getDocCount() + it.getDocCount())
-            } else {
-                // If there isn't already a bucket with these groupByKeys, then add it to the map
-                mappedBuckets.put(it.getGroupByKeys(), it)
             }
         }
         return mappedBuckets.values().asList()
+    }
+
+    private static createInternalStats(name, count, sum, min, max, formatter){
+        if (org.elasticsearch.Version.CURRENT.major == 1) {
+            return new InternalStats(name, count, sum, min, max, formatter)
+        } else if (org.elasticsearch.Version.CURRENT.major == 2) {
+            return new InternalStats(name, count, sum, min, max, formatter, [], [:])
+        }
     }
 
     private static List<Map<String, Object>> extractMetricsFromBuckets(clauses, buckets) {
@@ -374,10 +404,19 @@ class ElasticSearchQueryExecutor extends AbstractQueryExecutor {
                 accumulator.put(currentClause.field, value.key)
                 break
             case GroupByFunctionClause:
+                def key
+                if (org.elasticsearch.Version.CURRENT.major == 1) {
+                    key = value.key
+                } else if (org.elasticsearch.Version.CURRENT.major == 2) {
+                    // If the group by field is a function of a date (e.g., group by month), then the
+                    // key field will still be just a date, but getKeyAsString() will return the value
+                    // returned by the function (e.g., the month).
+                    key = value.getKeyAsString()
+                }
                 def isDateClause = (currentClause.operation in ElasticSearchConversionStrategy.DATE_OPERATIONS
-                        && value.key.isNumber())
+                        && key.isNumber())
 
-                accumulator.put(groupByClauses.head().name, isDateClause ? value.key.toFloat() : value.key)
+                accumulator.put(groupByClauses.head().name, isDateClause ? key.toFloat() : key)
                 break
             default:
                 throw new NeonConnectionException("Bad implementation - ${currentClause.getClass()} is not a valid groupByClause")

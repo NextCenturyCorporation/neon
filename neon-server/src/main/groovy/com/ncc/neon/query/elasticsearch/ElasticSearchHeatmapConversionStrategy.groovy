@@ -16,10 +16,7 @@
 
 package com.ncc.neon.query.elasticsearch
 
-import com.ncc.neon.connect.NeonConnectionException
 import com.ncc.neon.query.HeatmapBoundsQuery
-import com.ncc.neon.query.clauses.AndWhereClause
-import com.ncc.neon.query.clauses.OrWhereClause
 import com.ncc.neon.query.clauses.SelectClause
 import com.ncc.neon.query.clauses.SingularWhereClause
 import com.ncc.neon.query.clauses.WhereClause
@@ -31,10 +28,7 @@ import com.ncc.neon.query.QueryOptions
 
 import org.elasticsearch.action.search.SearchType
 import org.elasticsearch.action.search.SearchRequest
-import org.elasticsearch.index.query.FilterBuilder
-import org.elasticsearch.index.query.FilterBuilders
 import org.elasticsearch.index.query.QueryBuilders
-import org.elasticsearch.search.aggregations.AggregationBuilders
 import org.elasticsearch.search.builder.SearchSourceBuilder
 
 import groovy.transform.Immutable
@@ -73,9 +67,7 @@ class ElasticSearchHeatmapConversionStrategy {
         def dataSet = new DataSet(databaseName: query.databaseName, tableName: query.tableName)
         def whereClauses = collectWhereClauses(dataSet, query, options, whereClause)
 
-        //Build the elasticsearch filters for the where clauses
-        def inners = whereClauses.collect(ElasticSearchConversionStrategy.&convertWhereClause) as FilterBuilder[]
-        def whereFilter = FilterBuilders.boolFilter().must(FilterBuilders.andFilter(inners))
+        def whereFilter = ElasticSearchConversionStrategyHelper.convertWhereClauses(whereClauses)
 
         return createSearchSourceBuilder(query).query(QueryBuilders.filteredQuery(null, whereFilter))
     }
@@ -84,11 +76,10 @@ class ElasticSearchHeatmapConversionStrategy {
      * inject heatmap aggregation and bounding box
      */
     private static injectHeatmapAggregation(SearchSourceBuilder source, HeatmapBoundsQuery boundingBox) {
-        def hashGrid = AggregationBuilders.geohashGrid('heatmap').field(boundingBox.locationField).precision(boundingBox.gridCount)
-        def filter  = FilterBuilders.geoBoundingBoxFilter(boundingBox.locationField).bottomLeft(boundingBox.minLat, boundingBox.minLon).topRight(boundingBox.maxLat, boundingBox.maxLon)
-        def bounds = AggregationBuilders.filter('bounds').filter(filter).subAggregation(hashGrid)
-
-        source.aggregation(bounds)
+        def bounds = ElasticSearchConversionStrategyHelper.createHeatmapAggregation(boundingBox)
+        if(bounds) {
+            source.aggregation(bounds)
+        }
     }
 
     private static SearchRequest buildRequest(Query query, SearchSourceBuilder source) {
@@ -178,57 +169,5 @@ class ElasticSearchHeatmapConversionStrategy {
         filterCache.getFilterKeysForDataset(dataSet)
                 .findAll { !(it.id in ignoredFilterIds) && it.filter.whereClause }
                 .collect { it.filter.whereClause }
-    }
-
-    public static FilterBuilder convertWhereClause(clause) {
-        switch (clause.getClass()) {
-            case AndWhereClause:
-                return convertBooleanWhereClause(clause, FilterBuilders.&andFilter)
-            case OrWhereClause:
-                return convertBooleanWhereClause(clause, FilterBuilders.&orFilter)
-            case SingularWhereClause:
-                return convertSingularWhereClause(clause)
-            default:
-                throw new NeonConnectionException("Unknown where clause: ${clause.getClass()}")
-        }
-    }
-
-    private static FilterBuilder convertBooleanWhereClause(clause, Closure<FilterBuilder> combiner) {
-        def inners = clause.whereClauses.collect(ElasticSearchConversionStrategy.&convertWhereClause)
-        FilterBuilders.boolFilter().must(combiner(inners as FilterBuilder[]))
-    }
-
-    @SuppressWarnings("MethodSize")
-    private static FilterBuilder convertSingularWhereClause(clause) {
-        if (clause.operator in ['<', '>', '<=', '>=']) {
-            return { switch (clause.operator) {
-                case '<': return it.&lt
-                case '>': return it.&gt
-                case '<=': return it.&lte
-                case '>=': return it.&gte
-            }}.call(FilterBuilders.rangeFilter(clause.lhs as String))(clause.rhs as String)
-        }
-
-        if (clause.operator in ['contains', 'not contains', 'notcontains']) {
-            def regexFilter = FilterBuilders.regexpFilter(clause.lhs as String, ".*${clause.rhs}.*" as String)
-            return clause.operator == 'contains' ? regexFilter : FilterBuilders.notFilter(regexFilter)
-        }
-
-        if (clause.operator in ['=', '!=']) {
-            def hasValue = clause.rhs || clause.rhs == ''
-
-            def filter = hasValue ?
-                    FilterBuilders.termFilter(clause.lhs as String, clause.rhs as String) :
-                    FilterBuilders.existsFilter(clause.lhs as String)
-
-            return (clause.operator == '!=') == !hasValue ? filter : FilterBuilders.notFilter(filter)
-        }
-
-        if (clause.operator in ["in", "notin"]) {
-            def filter = FilterBuilders.termsFilter(clause.lhs as String, clause.rhs as String[])
-            return (clause.operator == "in") ? filter : FilterBuilders.notFilter(filter)
-        }
-
-        throw new NeonConnectionException("${clause.operator} is an invalid operator for a where clause")
     }
 }

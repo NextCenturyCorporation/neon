@@ -37,7 +37,7 @@ class ImportUtilitiesTest {
             listDoubles: ["1.2324", "2.123", "3.41324"],
             listFloats: [1F as String, 2F as String],
             listDates: ["2000-01-13T12:24:02.000Z", "2000-01-13 12:24:02.020", "2000-01-13T12:24:02Z", "2000-01-13 12:24:02"],
-            listObjects: ["[age: 12, name: 'Joe']"],
+            listObjects: ["{\"age\": 12, \"name\": \"Joe\"}"],
             listOther: ["true", "2awa"]
         ]
         importUtilities.getTypeGuesses(fieldsAndValues).each { ftPair ->
@@ -123,8 +123,8 @@ class ImportUtilitiesTest {
 
     @Test
     void "is list objects"() {
-        assert importUtilities.isListObjects(["[age: 12, name: 'Joe']", "[12, 13, 14]"])
-        assert importUtilities.isListObjects(["[age: 12, name: 'Joe']", "null", "none", ""])
+        assert importUtilities.isListObjects(["{\"age\": 12, \"name\": \"Joe\"}", "[12, 13, 14]"])
+        assert importUtilities.isListObjects(["{\"age\": 12, \"name\": \"Joe\"}", "null", "none", ""])
         assert !importUtilities.isListObjects(["1", "1.0", "2000-01-13T12:24:02.000Z"])
         assert importUtilities.isListObjects([])
     }
@@ -138,21 +138,21 @@ class ImportUtilitiesTest {
         assert importUtilities.convertValueToType("2000-01-13T12:24:02.000Z", FieldType.DATE) == new Date("Thu Jan 13 12:24:02 EST 2000")
         assert importUtilities.convertValueToType("2000-01-13 12:24", FieldType.DATE) instanceof ConversionFailureResult
         assert importUtilities.convertValueToType("2000-01-13 12:24", FieldType.DATE, "yyyy-MM-dd HH:mm") == new Date("Thu Jan 13 12:24:00 EST 2000")
-        assert importUtilities.convertValueToType("[age: 12, name: 'Joe']", FieldType.OBJECT) == [age: 12, name: 'Joe']
-        assert importUtilities.convertValueToType("[age: 12, name: 'Joe']", FieldType.STRING) == "[age: 12, name: 'Joe']"
+        assert importUtilities.convertValueToType("{\"age\": 12, \"name\": \"Joe\"}", FieldType.OBJECT) == [age: 12, name: "Joe"]
+        assert importUtilities.convertValueToType("{\"age\": 12, \"name\": \"Joe\"}", FieldType.STRING) == "{\"age\": 12, \"name\": \"Joe\"}"
         assert importUtilities.convertValueToType("true", FieldType.STRING) == "true"
     }
 
     @Test(expected=NoSuchMethodException)
     void "convert value to object"() {
-        assert importUtilities.convertValueToObject("[age: 12, name: 'Joe']") == [age: 12, name: 'Joe']
+        assert importUtilities.convertValueToObject("{\"age\": 12, \"name\": \"Joe\"}") == [age: 12, name: "Joe"]
         // Throws NoSuchMethodException exception
         importUtilities.convertValueToObject("12")
     }
 
     @Test
     void "retrieve object fields and values"() {
-        assert importUtilities.retrieveObjectFieldsAndValues("[[age: 12, name: 'Joe'], [age: 22, name: 'Bob']]") == [age: ["12", "22"], name: ["Joe", "Bob"]]
+        assert importUtilities.retrieveObjectFieldsAndValues("[{\"age\": 12, \"name\": \"Joe\"}, {\"age\": 22, \"name\": \"Bob\"}]") == [age: ["12", "22"], name: ["Joe", "Bob"]]
     }
 
     @Test

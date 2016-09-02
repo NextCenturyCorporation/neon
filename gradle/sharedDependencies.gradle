@@ -30,9 +30,16 @@ dependencies {
     compile "com.mchange:c3p0:$c3p0Version"
     compile "org.codehaus.jackson:jackson-core-asl:$jacksonVersion"
 
-    compile ("org.elasticsearch:elasticsearch:1.7.2") {
-        exclude module: 'asm'
+    if (project.hasProperty("useElasticsearch1") && project.getProperty("useElasticsearch1") == "true") {
+        compile ("org.elasticsearch:elasticsearch:1.7.2") {
+            exclude module: 'asm'
+        }
+    } else {
+        compile ("org.elasticsearch:elasticsearch:2.3.4") {
+            exclude module: 'asm'
+        }
     }
 
     compile 'com.opencsv:opencsv:3.5'
 }
+

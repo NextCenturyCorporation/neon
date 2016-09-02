@@ -21,13 +21,12 @@ import com.ncc.neon.query.Query
 import com.ncc.neon.query.QueryOptions
 import com.ncc.neon.query.result.QueryResult
 import com.ncc.neon.query.result.TabularQueryResult
-
 import org.springframework.stereotype.Component
 
 /**
  * Executes heatmap queries against a mongo data store
  */
-@Component
+@Component("mongoHeatmapExecutor")
 class MongoHeatmapExecutor extends MongoQueryExecutor{
     QueryResult execute(Query query, QueryOptions options, HeatmapBoundsQuery boundingBox) {
         // cutoff queries where there is no selection but selectionOnly was specified. otherwise the WHERE clause
