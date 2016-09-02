@@ -374,6 +374,22 @@ neon.query.Query.prototype.transform = function(transformObj) {
 };
 
 /**
+ * Sets the query's ID.
+ * @method withId
+ * @param {String} id The ID value to give the query.
+ * @return {neon.query.Query} This query object.
+ */
+neon.query.Query.prototype.withId = function(id) {
+    if(typeof id === 'string' || id instanceof String) { // Double check to account for weirdness in javascript typing.
+        this.id = id;
+        return this;
+    }
+    else {
+        throw 'Query ID must be a String.';
+    }
+};
+
+/**
  * Sets the query to ignore any filters that are currently applied
  * @method ignoreFilters
  * @param {...String | Array} [filterIds] An optional, variable number of filter ids to ignore OR an array of

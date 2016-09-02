@@ -19,8 +19,10 @@ package com.ncc.neon.query.executor
 import com.ncc.neon.query.Query
 import com.ncc.neon.query.QueryGroup
 import com.ncc.neon.query.QueryOptions
+import com.ncc.neon.query.exception.NoQueryIdException
 import com.ncc.neon.query.result.QueryResult
 import com.ncc.neon.query.result.TabularQueryResult
+import com.ncc.neon.query.result.GroupQueryResult
 import com.ncc.neon.query.filter.DataSet
 import com.ncc.neon.query.filter.SelectionState
 import com.ncc.neon.query.result.Transform
@@ -55,11 +57,18 @@ abstract class AbstractQueryExecutor implements QueryExecutor {
 
     @Override
     QueryResult execute(QueryGroup queryGroup, QueryOptions options) {
-        TabularQueryResult queryResult = new TabularQueryResult()
+        if(queryGroup.queries.size() == 1) {
+            return execute(queryGroup.queries[0], options)
+        }
+        GroupQueryResult queryResult = new GroupQueryResult()
+        if(queryGroup.queries.find { !it.id }) {
+            throw new NoQueryIdException("One or more queries in the given query group did not have an ID field.")
+        }
         queryGroup.queries.each {
             if (!isEmptySelection(it, options)) {
                 def result = doExecute(it, options)
-                queryResult.data.addAll(result.data)
+                result = transform(it.transforms, result)
+                queryResult.data[it.id] = result.data
             }
         }
         return queryResult

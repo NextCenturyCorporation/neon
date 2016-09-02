@@ -39,19 +39,19 @@ class AggregateMongoQueryWorker extends AbstractMongoQueryWorker {
 
     @Override
     QueryResult executeQuery(MongoQuery mongoQuery) {
-        def match = new BasicDBObject('$match', mongoQuery.whereClauseParams)
-        List additionalClauses = buildAggregateClauses(mongoQuery)
+        List clauses = [new BasicDBObject('$match', mongoQuery.whereClauseParams)] as List<DBObject> // Initialize list with 'match' alerady added.
+        clauses += buildAggregateClauses(mongoQuery)
         if (mongoQuery.query.sortClauses) {
-            additionalClauses << new BasicDBObject('$sort', createSortDBObject(mongoQuery.query.sortClauses))
+            clauses << new BasicDBObject('$sort', createSortDBObject(mongoQuery.query.sortClauses))
         }
         if (mongoQuery.query.offsetClause) {
-            additionalClauses << new BasicDBObject('$skip', mongoQuery.query.offsetClause.offset)
+            clauses << new BasicDBObject('$skip', mongoQuery.query.offsetClause.offset)
         }
         if (mongoQuery.query.limitClause) {
-            additionalClauses << new BasicDBObject('$limit', mongoQuery.query.limitClause.limit)
+            clauses << new BasicDBObject('$limit', mongoQuery.query.limitClause.limit)
         }
-        LOGGER.debug("Executing aggregate mongo query: {}", [match] + additionalClauses)
-        def results = getCollection(mongoQuery).aggregate(match, additionalClauses as DBObject[]).results()
+        LOGGER.debug("Executing aggregate mongo query: {}", clauses)
+        def results = getCollection(mongoQuery).aggregate(clauses).results()
         results = renameNestedGroupByFields(results, mongoQuery.query.groupByClauses)
         return new MongoQueryResult(results)
     }
@@ -162,7 +162,7 @@ class AggregateMongoQueryWorker extends AbstractMongoQueryWorker {
         }
 
         if(!groupByMappings) {
-            return results
+            return results.asList() as BasicDBList
         }
 
         def convertedResults = [] as BasicDBList

@@ -15,6 +15,9 @@
  */
 
 package com.ncc.neon.config
+
+import com.google.common.reflect.ClassPath
+//import com.ncc.neon.query.transform.GeoAggregationTransformer
 import com.ncc.neon.query.result.Transformer
 import com.ncc.neon.query.result.TransformerRegistry
 import org.springframework.context.annotation.Bean
@@ -51,6 +54,9 @@ class ProductionAppContext {
     TransformerRegistry transformerRegistry() {
         TransformerRegistry registry = new TransformerRegistry()
         List<Transformer> registeredTransformers = []
+        ClassPath.from(ProductionAppContext.getClassLoader()).getTopLevelClasses("com.ncc.neon.query.transform").each {
+            registeredTransformers << ProductionAppContext.getClassLoader().loadClass(it.getName()).newInstance()
+        }
 
         def path = getTransformsPath()
         registeredTransformers.each { Transformer transformer ->

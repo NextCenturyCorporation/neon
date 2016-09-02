@@ -35,7 +35,7 @@ project.ext {
     codeNarcVersion = "0.21"
     groovyVersion = "2.3.6"
     jsonVersion = "20090211"
-    mongoDriverVersion = "2.13.1"
+    mongoDriverVersion = "3.2.2"
     jodaTimeVersion = "2.1"
     c3p0Version = "0.9.5"
     jacksonVersion = "1.9.13"

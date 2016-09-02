@@ -21,6 +21,7 @@ import com.ncc.neon.connect.ConnectionManager
 import com.ncc.neon.connect.DataSources
 import com.ncc.neon.query.*
 import com.ncc.neon.query.executor.QueryExecutor
+import com.ncc.neon.query.filter.FilterState
 import com.ncc.neon.query.result.QueryResult
 
 import org.springframework.beans.factory.annotation.Autowired
@@ -39,6 +40,9 @@ class QueryService {
 
     @Autowired
     QueryExecutorFactory queryExecutorFactory
+
+    @Autowired
+    FilterState filterState
 
     @Autowired
     ConnectionManager connectionManager
@@ -219,12 +223,10 @@ class QueryService {
     }
 
     private QueryResult execute(String host, String databaseType, def query, QueryOptions options) {
-        QueryExecutor queryExecutor = getExecutor(host, databaseType)
-        return queryExecutor.execute(query, options)
+        return getExecutor(host, databaseType).execute(query, options)
     }
 
     private QueryExecutor getExecutor(String host, String databaseType) {
         return queryExecutorFactory.getExecutor(new ConnectionInfo(host: host, dataSource: databaseType as DataSources))
     }
-
 }
