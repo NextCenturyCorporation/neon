@@ -19,7 +19,6 @@ package com.ncc.neon.query.executor
 import com.ncc.neon.query.Query
 import com.ncc.neon.query.QueryGroup
 import com.ncc.neon.query.QueryOptions
-import com.ncc.neon.query.exception.NoQueryIdException
 import com.ncc.neon.query.result.QueryResult
 import com.ncc.neon.query.result.TabularQueryResult
 import com.ncc.neon.query.result.GroupQueryResult
