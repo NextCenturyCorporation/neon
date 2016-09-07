@@ -8,13 +8,19 @@ configurations {
     compile.exclude module: 'hive-exec'
 }
 
+configurations.all {
+    exclude group: 'org.jboss.netty', module: 'netty'
+}
+
 // dependencies required for the spark sql libraries
 dependencies {
-
     runtime ("org.apache.hadoop:hadoop-common:$hadoopVersion") {
         transitive = false
     }
+
     // Hive 0.12.0 libraries are needed to talk with Spark 1.1
     runtime "org.apache.hive:hive-jdbc:$hiveVersion"
     runtime "org.apache.hive:hive-common:$hiveVersion"
 }
+
+
