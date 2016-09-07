@@ -32,7 +32,6 @@ import org.codehaus.jackson.annotate.JsonIgnoreProperties
 @JsonIgnoreProperties(value = ['ignoreFilters_', 'selectionOnly_', 'ignoredFilterIds_'])
 class Query {
 
-    String id
     Filter filter
     boolean aggregateArraysByElement = false
     boolean isDistinct = false

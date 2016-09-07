@@ -23,13 +23,13 @@ package com.ncc.neon.query.result
 
 class GroupQueryResult implements QueryResult {
 
-	final Map<String, List<Map<String, Object>>> data
+	final List<List<Map<String, Object>>> data
 
 	public GroupQueryResult() {
-		this([:])
+		this([])
 	}
 
-	public GroupQueryResult(Map<String, List<Map<String, Object>>> table) {
+	public GroupQueryResult(List<List<Map<String, Object>>> table) {
 		this.data = table
 	}
 }

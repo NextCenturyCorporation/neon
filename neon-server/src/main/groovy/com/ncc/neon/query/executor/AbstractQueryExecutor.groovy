@@ -57,18 +57,17 @@ abstract class AbstractQueryExecutor implements QueryExecutor {
 
     @Override
     QueryResult execute(QueryGroup queryGroup, QueryOptions options) {
-        if(queryGroup.queries.size() == 1) {
-            return execute(queryGroup.queries[0], options)
-        }
         GroupQueryResult queryResult = new GroupQueryResult()
-        if(queryGroup.queries.find { !it.id }) {
-            throw new NoQueryIdException("One or more queries in the given query group did not have an ID field.")
-        }
-        queryGroup.queries.each {
-            if (!isEmptySelection(it, options)) {
-                def result = doExecute(it, options)
-                result = transform(it.transforms, result)
-                queryResult.data[it.id] = result.data
+        Query query
+        for(int x = 0; x < queryGroup.queries.size(); x++) {
+            query = queryGroup.queries[x]
+            if(!isEmptySelection(query, options)) {
+                def result = doExecute(query, options)
+                result = transform(query.transforms, result)
+                queryResult.data << result.data
+            }
+            else {
+                queryResult.data << [data: TabularQueryResult.EMPTY.data]
             }
         }
         return queryResult
