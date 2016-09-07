@@ -17,6 +17,7 @@
 package com.ncc.neon.query.mongo
 
 import com.mongodb.MongoClient
+import com.mongodb.BasicDBObject
 import com.ncc.neon.query.result.QueryResult
 import com.ncc.neon.query.result.TabularQueryResult
 import com.ncc.neon.query.clauses.SelectClause
@@ -45,6 +46,41 @@ class DistinctMongoQueryWorker extends AbstractMongoQueryWorker {
         if (mongoQuery.query.fields.size() > 1 || mongoQuery.query.fields == SelectClause.ALL_FIELDS) {
             throw new UnsupportedOperationException("mongo only supports distinct clauses on a single field")
         }
+
+        if (mongoQuery.query.aggregates && mongoQuery.query.aggregates.size() == 1 &&
+                mongoQuery.query.aggregates[0].operation == "count" &&
+                mongoQuery.query.aggregates[0].field == mongoQuery.query.fields[0]
+            ) {
+            // If the query requests the distinct values of a field, and then also requests an
+            // aggregate count of that field, then what is wanted is the total number of
+            // distinct values for that field. This is useful when the client only wants the
+            // total number of fields and doesn't want to wait for the full list to be
+            // transferred over the network
+            return executeDistinctCountQuery(mongoQuery)
+        }
+        return executeDistinctQuery(mongoQuery)
+    }
+
+    private TabularQueryResult executeDistinctCountQuery(MongoQuery mongoQuery) {
+        def aggregate = mongoQuery.query.aggregates[0]
+        def group = new BasicDBObject()
+        group.put('_id', '$' + mongoQuery.query.fields[0])
+        def countAll = new BasicDBObject()
+        countAll.put('_id', 'all')
+        countAll.put(aggregate.name, new BasicDBObject(
+            '$sum',
+            1
+        ))
+        def distinctCount = getCollection(mongoQuery).aggregate(
+            new BasicDBObject('$match', mongoQuery.whereClauseParams),
+            new BasicDBObject('$group', group),
+            new BasicDBObject('$group', countAll)
+        ).results()
+        def distinctRows = distinctCount.collect {[(aggregate.name) : it[aggregate.name] ]}
+        return new TabularQueryResult(distinctRows)
+    }
+
+    private TabularQueryResult executeDistinctQuery(MongoQuery mongoQuery) {
         def field = mongoQuery.query.fields[0]
         LOGGER.debug("Executing distinct query: {}", mongoQuery)
         def distinct = getCollection(mongoQuery).distinct(field, mongoQuery.whereClauseParams)
