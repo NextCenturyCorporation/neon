@@ -15,6 +15,7 @@
  */
 
 package com.ncc.neon.mongo
+import com.ncc.neon.query.clauses.AggregateClause
 import com.ncc.neon.AbstractQueryExecutorIntegrationTest
 import com.ncc.neon.IntegrationTestContext
 import com.ncc.neon.connect.ConnectionInfo
@@ -212,6 +213,15 @@ class MongoQueryExecutorIntegrationTest extends AbstractQueryExecutorIntegration
     void "exception thrown rather than trying to create an empty database"() {
         def query = new Query(filter: new Filter(databaseName: "nonexistentdb", tableName: "nonexistentable"))
         queryExecutor.execute(query, QueryOptions.DEFAULT_OPTIONS)
+    }
+
+    @Test
+    void "count of distinct"() {
+        //def expected = readJson('distinct.json')
+        def countClause = new AggregateClause(name: 'count_distinct', operation: 'count', field: 'state')
+        def query = new Query(filter: ALL_DATA_FILTER, fields: ['state'], isDistinct: true, aggregates: [countClause])
+        def result = queryExecutor.execute(query, QueryOptions.DEFAULT_OPTIONS)
+        assertUnorderedQueryResult([['count_distinct': 3]], result)
     }
 
 }
