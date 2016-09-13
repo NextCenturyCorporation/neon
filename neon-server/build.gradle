@@ -369,11 +369,15 @@ task buildNpmDist() {
         include '*.war'
     }
     copy {
-        from '.'
+        from './'
         into 'dist'
         include 'package.json'
         include 'typings.json'
-        include 'neon.d.ts'
+    }
+    copy {
+        from 'src/typings'
+        into 'dist'
+        include 'index.d.ts'
     }
 }
 

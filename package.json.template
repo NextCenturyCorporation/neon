@@ -11,7 +11,7 @@
     "lodash": "4.14.1",
     "log4javascript": "1.4.15",
     "postal": "2.0.4",
-    "uuid": "github:defunctzombie/node-uuid"
+    "node-uuid": "1.4.7"
   },
   "devDependencies": {
     "grunt": ">0.4.0",
@@ -28,8 +28,5 @@
     "yuidocjs": "0.10.1"
   },
   "main": "neon",
-  "scripts": {
-    "postinstall": "typings install"
-  },
-  "typings": "./neon.d.ts"
+  "typings": "index.d.ts"
 }
