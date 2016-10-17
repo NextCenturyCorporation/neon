@@ -2,8 +2,16 @@
   "name": "neon-framework",
   "version" : "@version@",
   "author": "Next Century Corporation",
-  "description": "Neon is an open-source framework used to develop custom data analysis applications. It is designed to help integrate your visualizations with your data. The Neon framework can incorporate a variety of data analysis and visualization widgets in a common webtop environment to allow analysts to explore complex data sets.",
-  "repository": "https://github.com/NextCenturyCorporation/neon",
+  "description": "Neon is an open-source framework used to develop custom data analysis applications. It is designed to help integrate your visualizations with your data.",
+  "homepage": "http://www.neonframework.org",
+  "bugs": {
+    "url": "https://https://github.com/NextCenturyCorporation/neon/issues",
+    "email": "neon-support@nextcentury.com"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/NextCenturyCorporation/neon"
+  },
   "readme": "https://github.com/NextCenturyCorporation/neon/blob/master/README.md",
   "license": "Apache-2.0",
   "dependencies": {

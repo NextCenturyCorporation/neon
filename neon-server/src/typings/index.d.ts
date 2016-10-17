@@ -15,27 +15,27 @@ declare namespace neon {
             fail(cb: (resp: any) => void): this;
         }
 
-        export interface ajaxUtils {
-            doDelete(url: string, opts: any): neon.util.AjaxRequest;
-            doGet(url: string, opts: any): neon.util.AjaxRequest;
-            doPost(url: string, opts: any): neon.util.AjaxRequest;
-            doPostBinary(
+        export namespace ajaxUtils {
+            export function doDelete(url: string, opts: any): neon.util.AjaxRequest;
+            export function doGet(url: string, opts: any): neon.util.AjaxRequest;
+            export function doPost(url: string, opts: any): neon.util.AjaxRequest;
+            export function doPostBinary(
                 binary: Blob, 
                 url: string,
                 successCallback: (resp: any) => any,
                 errorCallback: (resp: any) => any
             ): neon.util.AjaxRequest;
-            doPostJSON(object: any, url: string, opts: any): neon.util.AjaxRequest;
-            setStartStopCallbacks(requestStart: (resp: any) => any, requestEnd: (resp: any) => any);
-            useDefaultstartStopCallbacks();
+            export function doPostJSON(object: any, url: string, opts: any): neon.util.AjaxRequest;
+            export function setStartStopCallbacks(requestStart: (resp: any) => any, requestEnd: (resp: any) => any);
+            export function useDefaultstartStopCallbacks();
         }
 
-        export interface arrayUtils {
-            argumentsToArray(args: any[]): any[];
+        export namespace arrayUtils {
+            export function argumentsToArray(args: any[]): any[];
         }
 
-        export interface infoUtils {
-            getNeonVersion(successCallback: (resp: any) => any): neon.util.AjaxRequest;
+        export namespace infoUtils {
+            export function getNeonVersion(successCallback: (resp: any) => any): neon.util.AjaxRequest;
         }
 
         export class LatLon {
@@ -44,15 +44,15 @@ declare namespace neon {
             validateArgs(latDeg: number, lonDeg: number);
         }
 
-        export interface loggerUtils {
-            getGlobalLogger(): log4javascript.Logger;
-            getLogger(name: string): log4javascript.Logger;
-            useBrowserConsoleAppender(logger: log4javascript.Logger);
-            usePopupAppender(logger: log4javascript.Logger);
+        export namespace loggerUtils {
+            export function getGlobalLogger(): log4javascript.Logger;
+            export function getLogger(name: string): log4javascript.Logger;
+            export function useBrowserConsoleAppender(logger: log4javascript.Logger);
+            export function usePopupAppender(logger: log4javascript.Logger);
         }
 
-        export interface owfUtils {
-            isRunningInOWF(): boolean;
+        export namespace owfUtils {
+            export function isRunningInOWF(): boolean;
         }
     }
 
@@ -103,15 +103,6 @@ declare namespace neon {
             replaceSelection(id: string, filter: neon.query.Filter, successCallback: (resp: any) => any, errorCallback: (resp: any) => any): neon.util.AjaxRequest;
             createFilterKey_(id: string, filter: neon.query.Filter): {id: string, filter: neon.query.Filter};
             createChannelCallback_(channelName: string, successCallback: (resp: any) => any): (resp: any) => any;
-        }
-    }
-
-    export namespace foo {
-        export enum SortOrder { ASCENDING, DESCENDING }
-        export class Transform {
-            constructor(name: string);
-
-            params(params: any): this;
         }
     }
 
@@ -267,10 +258,10 @@ declare namespace neon {
             ): neon.util.AjaxRequest;
 
             executeExport(
-                query: Query,
+                queries: any,
                 successCallback: (resp: any) => void,
                 errorCallback: (resp: any) => void,
-                fileType: string
+                fileType: number
             ): neon.util.AjaxRequest;
 
             executeUpdateFile(
@@ -477,7 +468,6 @@ declare namespace neon {
         export function or(...clauses: WherePredicate[]): BooleanClause;
         export function where(fieldName: string, op: string, value: string|number|Date): WherePredicate;
     }
-   
 
     namespace widget {
         export function getInstanceId(qualifier: string, successCallback: (resp: any) => any): neon.util.AjaxRequest;
