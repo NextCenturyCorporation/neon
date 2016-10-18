@@ -164,7 +164,7 @@ public class MongoMapService {
             DBObject id = (DBObject) row.get("_id")
             int count = ((Number) row.get("count")).intValue()
             // assume 0 as a min count
-            float pct = (float) count / (float) maxCount
+            float pct = (float) (count / (float) maxCount)
             float alpha = pct * (1.0f - minAlpha) + minAlpha
             if ( alpha > 1.0f ) {
                 alpha = 1.0f
