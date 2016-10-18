@@ -66,7 +66,7 @@ declare namespace neon {
 
         export namespace owf {
             export class OWFEventBus implements EventBusInterface {
-                subscriptions_: Object[];
+                subscriptions_: any[];
 
                 constructor();
                 publish(channel: string, message: any);
