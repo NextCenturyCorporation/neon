@@ -16,26 +16,70 @@
 
 package com.ncc.neon.services
 
+import org.springframework.stereotype.Component
+
+import javax.ws.rs.GET
+import javax.ws.rs.POST
+import javax.ws.rs.DELETE
+import javax.ws.rs.Path
+import javax.ws.rs.Consumes
+import javax.ws.rs.Produces
+import javax.ws.rs.PathParam
+import javax.ws.rs.core.MediaType
+
 /**
  * Service for loading and saving properties that are stored in a database. The database may be one
  * of the databases used for Neon queries, or it could be a Derby database.
  */
 
+@Component
+@Path("/propertyservice")
 class PropertyService {
-    private Map<String, String> properties = new HashMap<String, String>()
+    private final def properties = [:]
 
-    public String getProperty(String key) {
-        return properties.get(key)
+    /**
+     * Get the value for a property
+     * @param key the property key to look up
+     * @return a map, where 'key' is the argument that was passed in, and 'value' is the value of
+     * the property, or null if the property does not exist
+     */
+    @GET
+    @Path("{key}")
+    @Produces(MediaType.APPLICATION_JSON)
+    public Map getProperty(@PathParam("key") String key) {
+        def value = properties.get(key)
+        return [key: key, value: value]
     }
 
-    public void setProperty(String key, String value) {
+    /**
+     * Set a property's value
+     * @param key the property to set
+     * @param value the new value of property
+     */
+    @POST
+    @Path("{key}")
+    @Consumes(MediaType.TEXT_PLAIN)
+    public void setProperty(@PathParam("key") String key, String value) {
         properties.put(key, value)
     }
 
-    public void remove(String key) {
+    /**
+     * Remove a property. This will succeed whether the key already existed or not.
+     * @param key the name of the property to remove
+     */
+    @DELETE
+    @Path("{key}")
+    public void remove(@PathParam("key") String key) {
         properties.remove(key)
     }
 
+    /**
+     * Get all of the property keys
+     * @return a set of all property keys that have values
+     */
+    @GET
+    @Path("*")
+    @Produces(MediaType.APPLICATION_JSON)
     public Set<String> propertyNames() {
         return properties.keySet()
     }

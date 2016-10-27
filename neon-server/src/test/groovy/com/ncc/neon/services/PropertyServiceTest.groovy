@@ -18,9 +18,6 @@ package com.ncc.neon.services
 import org.junit.Before
 import org.junit.Test
 
-import com.ncc.neon.query.filter.FilterKey
-import com.ncc.neon.state.executor.DerbyExecutor
-
 class PropertyServiceTest {
 
     private PropertyService propertyService
@@ -32,46 +29,46 @@ class PropertyServiceTest {
 
     @Test
     void "get empty list of property names"() {
-        assert propertyService.propertyNames() == new HashSet()
+        assert propertyService.propertyNames().asList() == []
     }
 
     @Test
     void "get property that doesn't exist"() {
-        assert propertyService.getProperty("not there") == null
+        assert propertyService.getProperty("not there") == [key: "not there", value: null]
     }
 
     @Test
     void "set property"() {
-        final String keyName = "The key"
-        final String value = "Some value"
-        propertyService.setProperty(keyName, value)
-        assert propertyService.propertyNames() == new HashSet([keyName])
-        assert propertyService.getProperty(keyName) == value
+        final String KEY_NAME = "The key"
+        final String VALUE = "Some value"
+        propertyService.setProperty(KEY_NAME, VALUE)
+        assert propertyService.propertyNames() == new HashSet([KEY_NAME])
+        assert propertyService.getProperty(KEY_NAME) == [key: KEY_NAME, value: VALUE]
     }
 
     @Test
     void "set multiple properties"() {
-        final String key1 = "first key"
-        final String key2 = "Second"
-        final String value1 = "simple"
-        final String value2 = "A little longer & more complicated?"
-        propertyService.setProperty(key1, value1)
-        propertyService.setProperty(key2, value2)
-        assert propertyService.propertyNames() == new HashSet([key1, key2])
-        assert propertyService.getProperty(key1) == value1
-        assert propertyService.getProperty(key2) == value2
+        final String KEY_1 = "first key"
+        final String KEY_2 = "Second"
+        final String VALUE_1 = "simple"
+        final String VALUE_2 = "A 'little' longer\n & more complicated?"
+        propertyService.setProperty(KEY_1, VALUE_1)
+        propertyService.setProperty(KEY_2, VALUE_2)
+        assert propertyService.propertyNames() == new HashSet([KEY_1, KEY_2])
+        assert propertyService.getProperty(KEY_1) == [key: KEY_1, value: VALUE_1]
+        assert propertyService.getProperty(KEY_2) == [key: KEY_2, value: VALUE_2]
     }
 
     @Test
     void "remove property"() {
-        final String key1 = "first key"
-        final String key2 = "Second"
-        final String value1 = "simple"
-        final String value2 = "A little longer & more complicated?"
-        propertyService.setProperty(key1, value1)
-        propertyService.setProperty(key2, value2)
-        propertyService.remove(key1)
-        assert propertyService.propertyNames() == new HashSet([key2])
-        assert propertyService.getProperty(key1) == null
+        final String KEY_1 = "first key"
+        final String KEY_2 = "Second"
+        final String VALUE_1 = "simple"
+        final String VALUE_2 = "A 'little' longer\n & more complicated?"
+        propertyService.setProperty(KEY_1, VALUE_1)
+        propertyService.setProperty(KEY_2, VALUE_2)
+        propertyService.remove(KEY_1)
+        assert propertyService.propertyNames() == new HashSet([KEY_2])
+        assert propertyService.getProperty(KEY_1) == [key: KEY_1, value: null]
     }
 }
