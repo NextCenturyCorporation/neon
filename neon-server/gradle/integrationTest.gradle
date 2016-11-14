@@ -66,6 +66,8 @@ task integrationTest(type: Test) {
     props["hdfs.url"] = getHdfsUrl()
     props["elasticsearch.host"] = getElasticSearchHost()
 
+    // Testing specific settings
+    props["derby.memoryOnly"] = "true"
     props['integration.test'] = true
     systemProperties props
 }
