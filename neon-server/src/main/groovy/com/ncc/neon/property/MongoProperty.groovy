@@ -16,13 +16,8 @@
 
 package com.ncc.neon.property
 
-import com.ncc.neon.connect.ConnectionManager
-import com.ncc.neon.connect.ConnectionInfo
-import com.ncc.neon.connect.DataSources
-
 import org.springframework.stereotype.Component
 import org.springframework.beans.factory.annotation.Value
-import org.springframework.beans.factory.annotation.Autowired
 
 import com.mongodb.MongoClient
 import com.mongodb.DB
@@ -44,9 +39,6 @@ class MongoProperty implements PropertyInterface {
 
     private final String propertiesCollectionName = "properties"
 
-    @Autowired
-    private ConnectionManager connectionManager
-
     public Map getProperty(String key) {
         MongoClient mongo = getClient()
         DB database = mongo.getDB(propertiesDatabaseName)
@@ -62,6 +54,7 @@ class MongoProperty implements PropertyInterface {
             toReturn.put("value", obj.get("value"))
         }
 
+        mongo.close()
         return toReturn
     }
 
@@ -82,6 +75,7 @@ class MongoProperty implements PropertyInterface {
         } else {
             collection.insert(doc)
         }
+        mongo.close()
     }
 
     public void remove(String key) {
@@ -92,6 +86,7 @@ class MongoProperty implements PropertyInterface {
         BasicDBObject query = new BasicDBObject()
         query.put("_id", key)
         collection.remove(query)
+        mongo.close()
     }
 
     public Set<String> propertyNames() {
@@ -104,6 +99,7 @@ class MongoProperty implements PropertyInterface {
             DBObject obj = allResults.next()
             toReturn.add(obj.get("_id"))
         }
+        mongo.close()
         return toReturn
     }
 
@@ -112,13 +108,10 @@ class MongoProperty implements PropertyInterface {
         DB database = mongo.getDB(propertiesDatabaseName)
         DBCollection collection = database.getCollection(propertiesCollectionName)
         collection.remove(new BasicDBObject())
+        mongo.close()
     }
 
     private MongoClient getClient() {
-        connectionManager.currentRequest = new ConnectionInfo(
-            dataSource: DataSources.mongo,
-            host: mongoHost ?: "localhost"
-        )
-        return connectionManager.connection.mongo
+        return new MongoClient(mongoHost ?: "localhost")
     }
 }

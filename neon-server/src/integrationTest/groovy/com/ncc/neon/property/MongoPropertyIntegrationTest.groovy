@@ -43,7 +43,7 @@ class MongoPropertyIntegrationTest {
     @Before
     void before() {
         mongoProperty.propertiesDatabaseName = "properties"
-        mongoProperty.mongoHost = "localhost"
+        mongoProperty.mongoHost = System.getProperty("mongo.host") ?: "localhost"
         mongoProperty.removeAll()
     }
 

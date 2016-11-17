@@ -43,8 +43,10 @@ class ElasticSearchPropertyIntegrationTest {
     @Before
     void before() {
         elasticSearchProperty.propertiesDatabaseName = "properties"
-        elasticSearchProperty.elasticSearchHost = "localhost"
-        elasticSearchProperty.elasticSearchPort = "9300"
+        String elasticsearchHost = System.getProperty("elasticsearch.host")
+        elasticSearchProperty.elasticSearchHost = elasticsearchHost.split(":")[0] ?: "localhost"
+        elasticSearchProperty.elasticSearchPort = elasticsearchHost.split(":").length > 1 ?
+            elasticsearchHost.split(":")[1] : "9300"
         elasticSearchProperty.removeAll()
     }
 
