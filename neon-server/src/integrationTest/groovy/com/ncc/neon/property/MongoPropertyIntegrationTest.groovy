@@ -19,6 +19,7 @@ import com.ncc.neon.IntegrationTestContext
 
 import org.junit.Test
 import org.junit.Before
+import org.junit.Assume
 import org.junit.runner.RunWith
 
 import org.springframework.beans.factory.annotation.Autowired
@@ -31,6 +32,8 @@ import javax.annotation.Resource
 @ContextConfiguration(classes = IntegrationTestContext)
 class MongoPropertyIntegrationTest {
 
+    private static final String HOST_STRING = System.getProperty("mongo.host")
+
     @Resource(name="mongoProperty")
     private MongoProperty mongoProperty
 
@@ -42,8 +45,10 @@ class MongoPropertyIntegrationTest {
 
     @Before
     void before() {
+        // Establish the connection, or skip the tests if no host was specified
+        Assume.assumeTrue(HOST_STRING != null && HOST_STRING != "")
         mongoProperty.propertiesDatabaseName = "properties"
-        mongoProperty.mongoHost = System.getProperty("mongo.host") ?: "localhost"
+        mongoProperty.mongoHost = HOST_STRING
         mongoProperty.removeAll()
     }
 

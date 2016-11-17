@@ -19,6 +19,7 @@ import com.ncc.neon.IntegrationTestContext
 
 import org.junit.Test
 import org.junit.Before
+import org.junit.Assume
 import org.junit.runner.RunWith
 
 import org.springframework.beans.factory.annotation.Autowired
@@ -31,6 +32,8 @@ import javax.annotation.Resource
 @ContextConfiguration(classes = IntegrationTestContext)
 class ElasticSearchPropertyIntegrationTest {
 
+    private static final String HOST_STRING = System.getProperty("elasticsearch.host")
+
     @Resource(name="elasticSearchProperty")
     private ElasticSearchProperty elasticSearchProperty
 
@@ -42,11 +45,12 @@ class ElasticSearchPropertyIntegrationTest {
 
     @Before
     void before() {
+        // Establish the connection, or skip the tests if no host was specified
+        Assume.assumeTrue(HOST_STRING != null && HOST_STRING != "")
         elasticSearchProperty.propertiesDatabaseName = "properties"
-        String elasticsearchHost = System.getProperty("elasticsearch.host")
-        elasticSearchProperty.elasticSearchHost = elasticsearchHost.split(":")[0] ?: "localhost"
-        elasticSearchProperty.elasticSearchPort = elasticsearchHost.split(":").length > 1 ?
-            elasticsearchHost.split(":")[1] : "9300"
+        elasticSearchProperty.elasticSearchHost = HOST_STRING.split(":")[0]
+        elasticSearchProperty.elasticSearchPort = HOST_STRING.split(":").length > 1 ?
+            HOST_STRING.split(":")[1] : "9300"
         elasticSearchProperty.removeAll()
     }
 
