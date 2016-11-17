@@ -29,7 +29,7 @@ import org.apache.derby.shared.common.error.DerbySQLIntegrityConstraintViolation
 
 import java.sql.*
 
-@Component
+@Component("derby")
 class DerbyProperty implements PropertyInterface {
 
     @SuppressWarnings("GStringExpressionWithinString")

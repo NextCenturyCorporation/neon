@@ -16,10 +16,11 @@
 
 package com.ncc.neon.services
 
-import com.ncc.neon.property.DerbyProperty
+import com.ncc.neon.property.PropertyInterface
 
 import org.springframework.stereotype.Component
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.beans.factory.annotation.Qualifier
 
 import javax.ws.rs.GET
 import javax.ws.rs.POST
@@ -39,7 +40,8 @@ import javax.ws.rs.core.MediaType
 @Path("/propertyservice")
 class PropertyService {
     @Autowired
-    private final DerbyProperty derbyProperty
+    @Qualifier("propertiesDatabase")
+    private final PropertyInterface propertyInterface
 
     /**
      * Get the value for a property
@@ -51,7 +53,7 @@ class PropertyService {
     @Path("{key}")
     @Produces(MediaType.APPLICATION_JSON)
     public Map getProperty(@PathParam("key") String key) {
-        return derbyProperty.getProperty(key)
+        return propertyInterface.getProperty(key)
     }
 
     /**
@@ -63,7 +65,7 @@ class PropertyService {
     @Path("{key}")
     @Consumes(MediaType.TEXT_PLAIN)
     public void setProperty(@PathParam("key") String key, String value) {
-        derbyProperty.setProperty(key, value)
+        propertyInterface.setProperty(key, value)
     }
 
     /**
@@ -73,7 +75,7 @@ class PropertyService {
     @DELETE
     @Path("{key}")
     public void remove(@PathParam("key") String key) {
-        derbyProperty.remove(key)
+        propertyInterface.remove(key)
     }
 
     /**
@@ -84,6 +86,6 @@ class PropertyService {
     @Path("*")
     @Produces(MediaType.APPLICATION_JSON)
     public Set<String> propertyNames() {
-        return derbyProperty.propertyNames()
+        return propertyInterface.propertyNames()
     }
 }
