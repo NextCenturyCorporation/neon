@@ -80,7 +80,7 @@ class ElasticSearchProperty implements PropertyInterface {
         client.prepareIndex(propertiesDatabaseName, propertiesTypeName, key)
             .setSource(json)
             .get()
-        
+
         client.admin().indices().flush(new FlushRequest(propertiesDatabaseName)).actionGet()
     }
 
