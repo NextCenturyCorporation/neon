@@ -68,6 +68,80 @@ neon.widget = (function() {
     }
 
     /**
+     * Gets the list of property keys
+     * @method getPropertyKeys
+     * @param {Function} successCallback The callback that contains the array of key names
+     * @param {Function} errorCallback The optional callback when an error occurs. This is a 3 parameter function that contains the xhr, a short error status and the full error message.
+     * @return {neon.util.AjaxRequest} The xhr request object
+     */
+    function getPropertyKeys(successCallback, errorCallback) {
+        return neon.util.ajaxUtils.doGet(
+            neon.serviceUrl('propertyservice', '*'), {
+                success: successCallback,
+                error: errorCallback,
+                responseType: 'json'
+            }
+        );
+    }
+
+    /**
+     * Gets a property
+     * @method getProperty
+     * @param {String} the property key to look up
+     * @param {Function} successCallback The callback which takes the property as its argument, in an object of the form {key: "...", value: "..."}. If the property doesn't exist, the value field will be null
+     * @param {Function} errorCallback The optional callback when an error occurs. This is a 3 parameter function that contains the xhr, a short error status and the full error message.
+     * @return {neon.util.AjaxRequest} The xhr request object
+     */
+    function getProperty(key, successCallback, errorCallback) {
+        return neon.util.ajaxUtils.doGet(
+            neon.serviceUrl('propertyservice', key), {
+                success: successCallback,
+                error: errorCallback,
+                responseType: 'json'
+            }
+        );
+    }
+
+    /**
+     * Remove a property
+     * @method removeProperty
+     * @param {String} the property key to remove
+     * @param {Function} successCallback The callback
+     * @param {Function} errorCallback The optional callback when an error occurs. This is a 3 parameter function that contains the xhr, a short error status and the full error message.
+     * @return {neon.util.AjaxRequest} The xhr request object
+     */
+    function removeProperty(key, successCallback, errorCallback) {
+        return neon.util.ajaxUtils.doDelete(
+            neon.serviceUrl('propertyservice', key), {
+                success: successCallback,
+                error: errorCallback,
+                responseType: 'json'
+            }
+        );
+    }
+
+    /**
+     * Sets a property
+     * @method setProperty
+     * @param {String} the property key to set
+     * @param {String} the new value for the property
+     * @param {Function} successCallback The callback
+     * @param {Function} errorCallback The optional callback when an error occurs. This is a 3 parameter function that contains the xhr, a short error status and the full error message.
+     * @return {neon.util.AjaxRequest} The xhr request object
+     */
+    function setProperty(key, value, successCallback, errorCallback) {
+        return neon.util.ajaxUtils.doPost(
+            neon.serviceUrl('propertyservice', key), {
+                data: value,
+                contentType: 'text/plain',
+                success: successCallback,
+                error: errorCallback,
+                responseType: 'json'
+            }
+        );
+    }
+
+    /**
      * Gets a unique id for a widget for a particular session. Repeated calls to this method in a single session with the
      * same parameters will result in the same id being returned.
      * @param {String} [qualifier] If a qualifier is specified, the id will be tied to that qualifier. This
@@ -130,6 +204,10 @@ neon.widget = (function() {
     return {
         saveState: saveState,
         getSavedState: getSavedState,
+        getPropertyKeys: getPropertyKeys,
+        getProperty: getProperty,
+        setProperty: setProperty,
+        removeProperty: removeProperty,
         getInstanceId: getInstanceId
     };
 })();

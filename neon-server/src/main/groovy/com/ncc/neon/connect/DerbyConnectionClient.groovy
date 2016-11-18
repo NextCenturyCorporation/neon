@@ -29,17 +29,18 @@ class DerbyConnectionClient implements ConnectionClient{
     private final String embeddedDriver = "org.apache.derby.jdbc.EmbeddedDriver"
     private final String clientDriver = "org.apache.derby.jdbc.ClientDriver"
 
-    public DerbyConnectionClient(ConnectionInfo info){
+    public DerbyConnectionClient(ConnectionInfo info, Boolean memoryOnly){
+        String memoryString = memoryOnly ? "memory:" : ""
         if(info.host) {
             String[] connectionUrl = info.host.split(':', 2)
             String host = connectionUrl[0]
             int port = connectionUrl.length == 2 ? Integer.parseInt(connectionUrl[1]) : 1527
 
             Class.forName(clientDriver).newInstance()
-            connection = DriverManager.getConnection("jdbc:derby://" + host + ":" + port + "/" + info.databaseName + ";create=true")
+            connection = DriverManager.getConnection("jdbc:derby://" + host + ":" + port + "/" + memoryString + info.databaseName + ";create=true")
         } else {
             Class.forName(embeddedDriver).newInstance()
-            connection = DriverManager.getConnection("jdbc:derby:" + info.databaseName + ";create=true")
+            connection = DriverManager.getConnection("jdbc:derby:" + memoryString + info.databaseName + ";create=true")
         }
     }
 

@@ -117,6 +117,11 @@ task acceptanceTest(type: GruntTask) {
     dependsOn 'assemble', 'acceptanceTestWar', 'insertMongoDataAcceptanceTest', 'transformTestWebService'
     group = TEST_GROUP
     gruntArgs "jasmine:acceptance", "--outfile-base=${jsOutputFileBase}"
+
+    // Run the acceptance tests with an in-memory Derby database so that there's no previous state
+    doFirst {
+        System.setProperty("derby.memoryOnly", "true")
+    }
 }
 
 acceptanceTest.finalizedBy afterAcceptanceTest
