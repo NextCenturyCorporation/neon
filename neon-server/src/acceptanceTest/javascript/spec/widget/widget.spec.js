@@ -56,6 +56,58 @@ describe('widgets', function() {
         });
     });
 
+    describe('with no properties', function() {
+        executeAndWait('return an empty list of keys', neon.widget.getPropertyKeys, null, function(result) {
+            expect(result).toEqual([]);
+        });
+
+        executeAndWait('return null for a key that does not exist', neon.widget.getProperty, 'not there', function(result) {
+            expect(result).toEqual({
+                key: "not there",
+                value: null
+            });
+        });
+    });
+
+    describe('check all property methods', function() {
+        var key1 = 'prop name';
+        var value1 = 'Something to remember';
+        var key2 = 'global.config';
+        var value2 = '{ "title": "Test special characters",\n "description": "JSON values should be stored and returned as \'strings\'"}';
+        executeAndWait('add a property', neon.widget.setProperty, [key1, value1], function() {
+            expect(true).toBe(true);
+        });
+        executeAndWait('add another property', neon.widget.setProperty, [key2, value2], function() {
+            expect(true).toBe(true);
+        });
+        executeAndWait('check first property', neon.widget.getProperty, key1, function(result) {
+            expect(result).toEqual({
+                key: key1,
+                value: value1
+            });
+        });
+        executeAndWait('check second property', neon.widget.getProperty, key2, function(result) {
+            expect(result).toEqual({
+                key: key2,
+                value: value2
+            });
+        });
+        executeAndWait('check all keys', neon.widget.getPropertyKeys, [], function(result) {
+            expect(result.length).toEqual(2);
+            expect(result.indexOf(key1)).not.toBe(-1);
+            expect(result.indexOf(key2)).not.toBe(-1);
+        });
+        executeAndWait('remove first property', neon.widget.removeProperty, key1, function() {
+            expect(true).toBe(true);
+        });
+        executeAndWait('check that removed property is gone', neon.widget.getProperty, key1, function(result) {
+            expect(result).toEqual({
+                key: key1,
+                value: null
+            });
+        });
+    });
+
     describe('gets a unique instance id', function() {
         // instanceId1a and 1b should be the same
         var instanceId1a;

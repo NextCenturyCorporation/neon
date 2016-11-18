@@ -16,4 +16,6 @@
     <task:executor id="asyncExecutor" pool-size="4"/>
     <task:scheduler id="scheduledScheduler"/>
 
+    <alias name="${properties.database}" alias="propertiesDatabase"/>
+
 </beans>
