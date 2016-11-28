@@ -10,6 +10,8 @@ package.json
 examples/angular-demo/app/R/NeonAngularDemo.Rcheck
 examples/angular-demo/app/R/NeonAngularDemo_*.tar.gz
 neon-server/src/main/resources/version.properties
+savedStates/
+properties/
 
 # grunt files
 node_modules

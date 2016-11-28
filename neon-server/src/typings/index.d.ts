@@ -116,7 +116,9 @@ declare namespace neon {
 
         //the objects created by neon.where (but not neon.Query.where) which are
         //opaque
-        export interface WherePredicate {}
+        export interface WherePredicate {
+            type: string;
+        }
 
         export class FieldFunction {
             constructor(operation: string, field: string, name: string);
@@ -190,7 +192,7 @@ declare namespace neon {
             filterName: string;
             databaseName: string;
             tableName: string;
-            whereClause: WhereClause;
+            whereClause: WherePredicate;
 
             static getFilterState(
                 databaseName: string,

@@ -22,6 +22,10 @@ import com.ncc.neon.query.mongo.MongoQueryExecutor
 import com.ncc.neon.query.transform.SalaryTransformer
 import com.ncc.neon.query.result.Transformer
 import com.ncc.neon.query.result.TransformerRegistry
+import com.ncc.neon.property.PropertyInterface
+import com.ncc.neon.property.DerbyProperty
+import com.ncc.neon.property.MongoProperty
+import com.ncc.neon.property.ElasticSearchProperty
 import org.springframework.beans.factory.config.CustomScopeConfigurer
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.ComponentScan
@@ -66,4 +70,25 @@ class IntegrationTestContext {
         executor.connectionManager = new ConnectionManager()
         return executor
     }
+
+    @Bean
+    PropertyInterface propertiesDatabase() {
+        return new DerbyProperty()
     }
+
+    @Bean
+    DerbyProperty derbyProperty() {
+        return new DerbyProperty()
+    }
+
+    @Bean
+    MongoProperty mongoProperty() {
+        return new MongoProperty()
+    }
+
+    @Bean
+    ElasticSearchProperty elasticSearchProperty() {
+        return new ElasticSearchProperty()
+    }
+
+}

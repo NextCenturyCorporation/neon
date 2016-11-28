@@ -1,6 +1,6 @@
 /*
  * Copyright 2016 Next Century Corporation
- * Licensed under the Apache License, Version 2.0 (the "License");
+ * Licensed under the Apache License, Version 2.0 (the "License")
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
@@ -14,13 +14,15 @@
  *
  */
 
-package com.ncc.neon.connect
+package com.ncc.neon.property
 
-class DerbyConnectionClientFactory implements ConnectionClientFactory{
+interface PropertyInterface {
+    public void setProperty(String key, String value)
 
-    @Override
-    ConnectionClient createConnectionClient(ConnectionInfo info) {
-        Boolean memoryOnly = ("true".equalsIgnoreCase(System.getProperty("derby.memoryOnly")))
-        return new DerbyConnectionClient(info, memoryOnly)
-    }
+    public Map getProperty(String key)
+
+    public void remove(String key)
+
+    public Set<String> propertyNames()
 }
+
