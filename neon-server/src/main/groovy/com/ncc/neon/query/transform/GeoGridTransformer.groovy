@@ -65,7 +65,8 @@ class GeoGridTransformer implements Transformer {
 				newData << buckets[x][y]
 			}
 		}
-		return new TabularQueryResult(newData)
+		List toReturn = [[data: queryResult.getData()], [data: newData]]
+		return new TabularQueryResult(toReturn)
 	}
 
 	@Override
