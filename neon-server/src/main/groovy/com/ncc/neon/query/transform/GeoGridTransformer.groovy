@@ -62,7 +62,9 @@ class GeoGridTransformer implements Transformer {
 		List<Map<String, Object>> newData = []
 		for(int x = 0; x < numHorizTiles; x++) {
 			for(int y = 0; y < numVertTiles; y++) {
-				newData << buckets[x][y]
+				if(buckets[x][y].data) {
+					newData << buckets[x][y] // THIS IS ONLY A STOPGAP MEASURE. MAKING FEWER BOXES WOULD BE IDEAL. TODO
+				}
 			}
 		}
 		List toReturn = [[data: queryResult.getData()], [data: newData]]
