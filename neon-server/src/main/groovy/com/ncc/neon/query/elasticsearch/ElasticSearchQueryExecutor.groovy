@@ -252,9 +252,9 @@ class ElasticSearchQueryExecutor extends AbstractQueryExecutor {
             if (fields) {
                 fields.add("_id")
                 return fields.unique()
-            } else {
-                return fields
             }
+
+            return fields
         }
         throw new ResourceNotFoundException("Table ${tableName} for Database ${databaseName} does not exist")
     }
