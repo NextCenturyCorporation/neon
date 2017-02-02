@@ -3,6 +3,7 @@ import * as log4javascript from "log4javascript";
 
 declare namespace neon {
     const NEON_SERVER: string;
+    export function setNeonServerUrl(url: string): void;
     export function ready(functionToRun: () => any): void; 
     export function serviceUrl(servicePath: string, serviceName: string, queryParamsString: string): string; 
 
