@@ -35,6 +35,8 @@ class Query {
     Filter filter
     boolean aggregateArraysByElement = false
     boolean isDistinct = false
+    boolean useInMemory = false
+    String sessionToken = ""
     List<String> fields = SelectClause.ALL_FIELDS
     List<AggregateClause> aggregates = []
     List<GroupByClause> groupByClauses = []

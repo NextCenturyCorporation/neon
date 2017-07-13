@@ -50,8 +50,20 @@ abstract class AbstractQueryExecutor implements QueryExecutor {
         if (isEmptySelection(query, options)) {
             return TabularQueryResult.EMPTY
         }
-        QueryResult result = doExecute(query, options)
+
+        // def logFile = new File('dxcvLog.txt')
+        // logFile << "*****************" + String.valueOf(query.useInMemory) + "\n" 
+
+        QueryResult result = null
+
+        if ( !query.useInMemory ) {
+            // logFile << "Running query\n"
+            result = doExecute(query, options)
+        }
+
+        // logFile << "Running transform\n"
         return transform(query.transforms, result)
+        
     }
 
     @Override
@@ -104,10 +116,13 @@ abstract class AbstractQueryExecutor implements QueryExecutor {
         transforms.each { transform ->
             String transformName = transform.transformName
             Transformer transformer = transformRegistry.getTransformer(transformName)
-
+            
             if(!transformer){
                 throw new TransformerNotFoundException("Transform ${transformName} does not exist.")
             }
+
+            //this feels like spaghetti...
+            transform.params["loadNew"] = (queryResult != null)
 
             returnResult = transformer.convert(returnResult, transform.params)
         }

@@ -22,7 +22,7 @@ import com.ncc.neon.query.result.Transformer
 
 class GeoGridTransformer implements Transformer {
 
-	    /**
+	/**
      * Expects params to be an object of the form {
      *       latField: string, giving the name of the latitude field in returned records,
      *       lonField: string, giving the name of the longitude field in returned records,
@@ -36,12 +36,13 @@ class GeoGridTransformer implements Transformer {
      *   }
      */
 	@Override
-	QueryResult convert(QueryResult queryResult, def params) {
+	QueryResult convert(QueryResult queryResult, def params) {//*
 		int numHorizTiles = Math.round(params.numTilesHorizontal)
 		int numVertTiles = Math.round(params.numTilesVertical)
 		double boxWidth = Math.abs(params.maxLon - params.minLon) / numHorizTiles
 		double boxHeight = Math.abs(params.maxLat - params.minLat) / numVertTiles
 		Map<String, Object>[][] buckets = makeBuckets(params.minLat, params.maxLat, params.minLon, params.maxLon, numHorizTiles, numVertTiles)
+
 
 		queryResult.getData().each { point ->
 			def pointAgg = getFieldValue(point, params.aggregationField)
@@ -59,6 +60,7 @@ class GeoGridTransformer implements Transformer {
 				}
 			}
 		}
+
 		List<Map<String, Object>> newData = []
 		for(int x = 0; x < numHorizTiles; x++) {
 			for(int y = 0; y < numVertTiles; y++) {

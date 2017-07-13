@@ -54,6 +54,8 @@ class QueryService {
      * @param databaseType the type of database
      * @param includeFilters If filters should be ignored and all data should be returned. Defaults to false.
      * @param selectionOnly If only data that is currently selected should be returned. Defaults to false.
+     * @param useInMemory If no query should be made to the database; Use in-memory storage inside the transformer. Default:F
+     * @param sessionToken Holds token identifying session making query; only used for accessing in-memory data. Defaults to ""
      * @param ignoredFilterIds If any specific filters should be ignored (only used if includeFilters is false)
      * @param query The query being executed
      * @return The result of the query
