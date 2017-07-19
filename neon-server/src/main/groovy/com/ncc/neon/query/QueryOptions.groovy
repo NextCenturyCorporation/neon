@@ -26,6 +26,10 @@ class QueryOptions {
     boolean ignoreFilters = false
     boolean selectionOnly = false
 
+    //Used to refine a query.
+    //Currently only used in a point_layer in the GTD's map, to limit elasticsearch's query to a visible region.
+    String refinementSpecifier = null
+
     /** ignores these particular filters only (ignoreFilters takes precedence). this is useful if a visualization wants to ignore its own filters */
     Set<String> ignoredFilterIds = [] as HashSet
 }
