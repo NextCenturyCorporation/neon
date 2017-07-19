@@ -51,17 +51,12 @@ abstract class AbstractQueryExecutor implements QueryExecutor {
             return TabularQueryResult.EMPTY
         }
 
-        // def logFile = new File('dxcvLog.txt')
-        // logFile << "*****************" + String.valueOf(query.useInMemory) + "\n" 
-
         QueryResult result = null
 
         if ( !query.useInMemory ) {
-            // logFile << "Running query\n"
             result = doExecute(query, options)
         }
 
-        // logFile << "Running transform\n"
         return transform(query.transforms, result)
         
     }
@@ -73,8 +68,15 @@ abstract class AbstractQueryExecutor implements QueryExecutor {
         for(int x = 0; x < queryGroup.queries.size(); x++) {
             query = queryGroup.queries[x]
             if(!isEmptySelection(query, options)) {
-                def result = doExecute(query, options)
+                // def result = doExecute(query, options)
+
+                QueryResult result = null
+
+                if ( !query.useInMemory ) {
+                    result = doExecute(query, options)
+                }
                 result = transform(query.transforms, result)
+                
                 queryResult.data << result.data
             }
             else {

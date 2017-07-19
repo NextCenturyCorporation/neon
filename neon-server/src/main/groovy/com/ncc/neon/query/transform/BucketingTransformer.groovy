@@ -88,9 +88,15 @@ class BucketingTransformer implements Transformer {
 			Map<String, Object> b = [
 				data : []
 			]
+
+			// double xCen = buckets[i].xCen()
+			// double yCen = buckets[i].yCen()
+			double xCen = (buckets[i].l() + buckets[i].r())/2
+			double yCen = (buckets[i].t() + buckets[i].b())/2
+
 			b.data << [count: buckets[i].count(),
 						(params.aggregationField): aggFieldValue,
-						centroid: [buckets[i].xCen(), buckets[i].yCen()]]
+						centroid: [xCen, yCen]]
 			newData << b
 		}
 
@@ -147,28 +153,28 @@ class BucketingTransformer implements Transformer {
 		return currentObject
 	}
 
-	private Set determineBoxes(def latValue, def lonValue, double maxLat, double minLon, double boxWidth, double boxHeight) {
-		if(latValue instanceof Number || latValue instanceof String) {
-			return [
-				[
-					horizBox: (((lonValue as double) - minLon) / boxWidth) as int,
-					vertBox: ((maxLat - (latValue as double)) / boxHeight) as int
-				]
-			]
-		}
-		// If latValue and lonValue aren't numbers or strings, assume they're lists of some description.
-		if(!latValue || !lonValue) {
-			return []
-		}
-		// Zip latValue and lonValue into something of the form [[lat1, lon1]. [lat2, lon2], etc], and then
-		// transform each [latX, lonX] pair into a map of the form [horizBox: ___, vertBox: ___]
-		List latLonPairs = GroovyCollections.transpose([latValue, lonValue])
-		latLonPairs = latLonPairs.collect {
-			[
-				horizBox: (((it[1] as double) - minLon) / boxWidth) as int,
-				vertBox: ((maxLat - (it[0] as double)) / boxHeight) as int
-			]
-		}
-		return latLonPairs as Set // Convert to Set to remove duplicate boxes
-	}
+	// private Set determineBoxes(def latValue, def lonValue, double maxLat, double minLon, double boxWidth, double boxHeight) {
+	// 	if(latValue instanceof Number || latValue instanceof String) {
+	// 		return [
+	// 			[
+	// 				horizBox: (((lonValue as double) - minLon) / boxWidth) as int,
+	// 				vertBox: ((maxLat - (latValue as double)) / boxHeight) as int
+	// 			]
+	// 		]
+	// 	}
+	// 	// If latValue and lonValue aren't numbers or strings, assume they're lists of some description.
+	// 	if(!latValue || !lonValue) {
+	// 		return []
+	// 	}
+	// 	// Zip latValue and lonValue into something of the form [[lat1, lon1]. [lat2, lon2], etc], and then
+	// 	// transform each [latX, lonX] pair into a map of the form [horizBox: ___, vertBox: ___]
+	// 	List latLonPairs = GroovyCollections.transpose([latValue, lonValue])
+	// 	latLonPairs = latLonPairs.collect {
+	// 		[
+	// 			horizBox: (((it[1] as double) - minLon) / boxWidth) as int,
+	// 			vertBox: ((maxLat - (it[0] as double)) / boxHeight) as int
+	// 		]
+	// 	}
+	// 	return latLonPairs as Set // Convert to Set to remove duplicate boxes
+	// }
 }
