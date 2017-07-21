@@ -50,14 +50,9 @@ public class BucketingSystem {
 	 * 		  that level. (e.g. intervalList[3] == 45 means that buckets at level 3 should be
 	 * 		  45 units wide and tall.)
 	 */
-	BucketingSystem(ArrayList<Double> inputIntervalList) {
+	BucketingSystem(ArrayList<Double> intervalList) {
 
-		ArrayList<Double> intervalList = new ArrayList<Double>();
-		for (int i = 0; i < inputIntervalList.size(); i++) {
-			if (inputIntervalList.get(i) >= 0.05) {
-				intervalList.add(inputIntervalList.get(i));
-			}
-		}
+		// ArrayList<Double> intervalList = intervalSanitizer(inputIntervalList);
 
 		MAXLEVEL = intervalList.size()-1;
 
@@ -65,18 +60,11 @@ public class BucketingSystem {
 		
 		for (int i = 0; i < intervalList.size(); i++) {
 			intervalList.set(i, (Double)(intervalList.get(i).doubleValue()));
-			// assert intervalList.get(i).doubleValue().class == Double
+
 			double xDivs = 360.0/intervalList.get(i).doubleValue();
 			double yDivs = 180.0/intervalList.get(i).doubleValue();
 			dims[i] = new TwoVar((int)xDivs, (int)yDivs);
-//			System.out.println(dims[i]);
 		}
-
-		// that's very not good. The grid view shows tons of things in every grid; my tree shows almost none.
-		// '
-		// This is in africa.
-		// Also it still is much slower than i'd expect it to be; test in straight java.
-		
 
 		int arrlen = getLevelStartIndex(MAXLEVEL+1);
 
@@ -87,6 +75,29 @@ public class BucketingSystem {
 		nodeArray[0] = new TreeNode(-180, 180, -90, 90, 0);
 		
 	}
+
+	// ArrayList<Double> intervalSanitizer(ArrayList<Double> intervals) {
+	// 	Collections.sort(intervals, Collections.reverseOrder());
+
+	// 	ArrayList<Double> sanitizedIntervals = new ArrayList<Double>();
+	// 	double prevInterval = 0;
+	// 	for (int i = 0; i < intervals.size(); i++) {
+	// 		if (intervals.get(i) < 0.05 || intervals.get(i) > 90) {
+	// 			continue;
+	// 		}
+
+	// 		double curInterval = intervals.get(i);
+	// 		if (90 % curInterval != 0) {
+	// 			//set curInterval to the next-highest value which evenly divides into 90
+	// 			curInterval = 90.0/(int)(90./curInterval);
+	// 		}
+	// 		if (curInterval != prevInterval) {
+	// 			sanitizedIntervals.add(curInterval);
+	// 			prevInterval = curInterval;
+	// 		}
+	// 	}
+	// 	return sanitizedIntervals;
+	// }
 	
 	/**
 	 * 
@@ -133,12 +144,6 @@ public class BucketingSystem {
 
 	
 	TwoVar getDivsAtLevel(int level) {
-//		int xDivs = 1;
-//		int yDivs = 1;
-//		for (int i = 0; i <= level; i++) {
-//			xDivs *= dims[i].x;
-//			yDivs *= dims[i].y;
-//		}
 		if (level == 0) {
 			return new TwoVar(1,1);
 		}
@@ -148,13 +153,11 @@ public class BucketingSystem {
 	/**
 	 * This divides the entire globe into a number of boxes associated with a particular zoom level,
 	 * and then connects them using a continuous z-order curve. 
-	 * Input is the x and y lat/lon coordinates, output is 
+	 * Input is the x and y lat/lon coordinates, output is the index along the z-order curve of the box in which that point sits,
+	 * at the current zoom level.
 	 * 
-	 * @param x
-	 * @param y
-	 * @param level 	the level  
 	 * @return 	the index along the z-order curve of the box in which that point sits,
-	 * 		   	at the current zoom level.
+	 *			at the current zoom level.
 	 */
 	int getIndexOffsetOfNodeWithPoint(double x, double y, int level) {
 
@@ -164,9 +167,6 @@ public class BucketingSystem {
 
 		int childXindex = (int)(divs.x * (x - worldBounds.w) / (worldBounds.e - worldBounds.w));
 		int childYindex = (int)(divs.y * (worldBounds.n - y) / (worldBounds.n - worldBounds.s));
-
-
-//		System.out.println("***" + level + "\t" + divs + "\t" + childXindex + "\t" + childYindex);
 
 		int base = Math.min( divs.x, divs.y);
 		if (base == 1) {

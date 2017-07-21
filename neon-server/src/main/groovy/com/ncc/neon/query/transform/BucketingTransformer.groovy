@@ -44,14 +44,11 @@ class BucketingTransformer implements Transformer {
      */
 	@Override
 	QueryResult convert(QueryResult queryResult, def params) {
-		// logFile = new File('dxcvLog.txt')
-		// logFile << "\$" + String.valueOf(params.loadNew) + '\n'
 
 		// note: despite the check below, if loadNew is false, then bucketor should not be null
 		if (params.loadNew || bucketor == null) {
 			if (queryResult != null && queryResult.getData() != null) {
 				for (int i = 0; i < params.intervals.size(); i++) {
-
 					params.intervals[i] = (double)(params.intervals[i])
 				}
 				bucketor = new BucketingSystem(params.intervals)
@@ -78,7 +75,7 @@ class BucketingTransformer implements Transformer {
 		Bucket[] buckets = bucketor.getBucketsAtLevel(zoomLevel + 1)
 
 		List<Map<String, Object>> newData = []
-
+		
 		for(int i = 0; i < buckets.length; i++) {
 			if (buckets[i] == null) {
 				break //buckets is big enough to hold every node at the given zoom level, but skips empty nodes;
@@ -89,10 +86,11 @@ class BucketingTransformer implements Transformer {
 				data : []
 			]
 
-			// double xCen = buckets[i].xCen()
-			// double yCen = buckets[i].yCen()
-			double xCen = (buckets[i].l() + buckets[i].r())/2
-			double yCen = (buckets[i].t() + buckets[i].b())/2
+			double xCen = buckets[i].xCen()
+			double yCen = buckets[i].yCen()
+			//centers each point within its bucket; used for development.
+			// double xCen = (buckets[i].l() + buckets[i].r())/2
+			// double yCen = (buckets[i].t() + buckets[i].b())/2
 
 			b.data << [count: buckets[i].count(),
 						(params.aggregationField): aggFieldValue,
