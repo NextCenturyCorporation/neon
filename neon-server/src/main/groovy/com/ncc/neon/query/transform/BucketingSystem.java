@@ -266,7 +266,6 @@ public class BucketingSystem {
 			
 			int offsetIndex = getIndexOffsetOfNodeWithPoint(x, y, l);
 			int index = baseIndex + offsetIndex;
-//			System.out.println(l + " " + baseIndex + " " + offsetIndex);
 			
 			if (nodeArray[index] == null) {
 				nodeArray[index] = new TreeNode(parentNode.getRegion(offsetIndex), l);

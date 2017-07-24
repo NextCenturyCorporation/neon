@@ -26,7 +26,7 @@ import bucketing.Bucket
 class BucketingTransformer implements Transformer {
 
 	BucketingSystem bucketor;
-	def logFile;
+	// def logFile;
 	def querySize = 0;
 	def aggFieldValue;
 	/**	
@@ -44,24 +44,49 @@ class BucketingTransformer implements Transformer {
      */
 	@Override
 	QueryResult convert(QueryResult queryResult, def params) {
-
+		// if (logFile == null) {
+		// 	logFile = new File('dxcvLog.txt')
+		// }
+		// logFile << "\$" + String.valueOf(params.loadNew) + " " + bucketor + " " + queryResult + " " + '\n'
+		// logFile << "\t" + params.latField + " " + params.lonField + " " + params.aggregationField + "\n"
+		
 		// note: despite the check below, if loadNew is false, then bucketor should not be null
 		if (params.loadNew || bucketor == null) {
+			// logFile << "\t.." + (queryResult != null && queryResult.getData() != null) + "\n"
 			if (queryResult != null && queryResult.getData() != null) {
-				for (int i = 0; i < params.intervals.size(); i++) {
+				// logFile << "\t\t1 " + "\n"
+				int i = 0
+				for (; i < params.intervals.size(); i++) {
 					params.intervals[i] = (double)(params.intervals[i])
 				}
+				// logFile << "\t\t2 " + i + "\n"
+				int sum = 0
 				bucketor = new BucketingSystem(params.intervals)
+				// logFile << "\t\t3 " + "\n"
+				def tempPoint = []
 				queryResult.getData().each { point ->
-					bucketor.insert(getFieldValue(point, params.lonField), getFieldValue(point, params.latField))
+					// bucketor.insert(getFieldValue(point, params.lonField), getFieldValue(point, params.latField))
+					// logFile << "\t\t\t4a " + sum + " " + 0 + " " + 0 + "\n"
+					// def x0 = getFieldValue(point, params.lonField)
+					// logFile << "\t\t\t4ba " + x0 + " " + x0.getClass() + "\n"
+					double x = getFieldValue(point, params.lonField).toDouble()
+					// logFile << "\t\t\t4ba " + x + " " + x.getClass() + "\n"
+					double y = getFieldValue(point, params.latField).toDouble()
+					// logFile << "\t\t\t4bb " + y + " " + y.getClass() + "\n"
+					bucketor.insert(x, y)
+					// logFile << "\t\t\t4c \n"
+					sum += 1
+					tempPoint = point
 				}
-				aggFieldValue = getFieldValue(queryResult.getData()[0], params.aggregationField)
+				// logFile << "\t\t5 " + params.intervals.size() + " " + i + " " + x + " " + y + " " + sum + "\n"
+				aggFieldValue = getFieldValue(tempPoint[0], params.aggregationField)
 			}
 			else {
 				List toReturn = [[data: []], [data: []]]
 				return new TabularQueryResult(toReturn)
 			}
 		}
+
 
 		//***********************************************************************************************//
 
@@ -75,8 +100,8 @@ class BucketingTransformer implements Transformer {
 		Bucket[] buckets = bucketor.getBucketsAtLevel(zoomLevel + 1)
 
 		List<Map<String, Object>> newData = []
-		
-		for(int i = 0; i < buckets.length; i++) {
+		int i = 0
+		for(; i < buckets.length; i++) {
 			if (buckets[i] == null) {
 				break //buckets is big enough to hold every node at the given zoom level, but skips empty nodes;
 					  // All non-null items will be in order at the front, and the remainder of the items will be null.
@@ -97,6 +122,7 @@ class BucketingTransformer implements Transformer {
 						centroid: [xCen, yCen]]
 			newData << b
 		}
+		// logFile << "\$" + buckets.length + " " + i + "\n"
 
 		//The first few lines of the updateData function handle the ouput of this
 		//Changed so as to not return the entirety of the input data in addition to the buckets, for no good reason.
@@ -140,13 +166,24 @@ class BucketingTransformer implements Transformer {
 	// }
 
 	private def getFieldValue(def point, String fieldName) {
+		// def logFile1 = new File('dxcvLog1.txt')
+		// logFile1 << "getFieldValue " + point[fieldName] + " " + fieldName + "\n"
+		// logFile1 << "getField----- " + point + "\n"
 		if(point[fieldName] != null) {
 			return point[fieldName]
 		}
 		List pieces = fieldName.split('\\.')
 		def currentObject = point
+		// int i = 0
+		// logFile1 << (pieces)
+		// logFile1 << "\n"
 		while(pieces.size() > 0 && currentObject != null) {
 			currentObject = currentObject[pieces.remove(0)]
+			// logFile1 << pieces.size() + " " + i + " " + currentObject + "\n"
+			// i++
+			// if (i > 10) {
+			// 	break
+			// }
 		}
 		return currentObject
 	}
