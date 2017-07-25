@@ -2,24 +2,6 @@ package bucketing;
 
 import java.util.ArrayList;
 
-// import java.io.BufferedWriter;
-// import java.io.FileOutputStream;
-// import java.io.OutputStreamWriter;
-// import java.io.UnsupportedEncodingException;
-// import java.io.Writer;
-// try (Writer writer = new BufferedWriter(new OutputStreamWriter(
-//			new FileOutputStream("mapTreeLog.txt"), "utf-8"))) {
-
-
-//		writer.write(zoomLevel + " " + numDivs.x + " " + numDivs.y + "\n");
-//		for (int i = 0; i < dims.length; i++) {
-//		writer.write("\t" + dims[i] + "\t" + intervalList.get(i) + "\n");
-//	}
-//	} catch (Exception e) {
-//	;
-//	}
-//	return null;
-
 
 /*
  * All children nodes are labelled going from 0 to numNodes-1, starting at upper left and going across
@@ -76,6 +58,8 @@ public class BucketingSystem {
 		
 	}
 
+	//This functionality was moved to the client-side, since the client will pass this a list of intervals, and if we change them
+	// here, then it won't match up if the client uses that list for anything besides this.
 	// ArrayList<Double> intervalSanitizer(ArrayList<Double> intervals) {
 	// 	Collections.sort(intervals, Collections.reverseOrder());
 
