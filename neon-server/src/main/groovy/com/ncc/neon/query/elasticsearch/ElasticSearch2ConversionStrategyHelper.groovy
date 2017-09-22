@@ -21,6 +21,7 @@ import com.ncc.neon.query.HeatmapBoundsQuery
 import com.ncc.neon.query.clauses.AndWhereClause
 import com.ncc.neon.query.clauses.OrWhereClause
 import com.ncc.neon.query.clauses.SingularWhereClause
+import com.ncc.neon.util.DateUtils
 import org.elasticsearch.index.query.QueryBuilder
 import org.elasticsearch.index.query.QueryBuilders
 import org.elasticsearch.search.aggregations.AggregationBuilders
@@ -68,17 +69,22 @@ class ElasticSearchConversionStrategyHelper {
 
     @SuppressWarnings("MethodSize")
     public static QueryBuilder convertSingularWhereClause(clause) {
+
+        def rhsString = getRHSString(clause.rhs)
+
         if (clause.operator in ['<', '>', '<=', '>=']) {
-            return { switch (clause.operator) {
+            return {
+                switch (clause.operator) {
                     case '<': return it.&lt
                     case '>': return it.&gt
                     case '<=': return it.&lte
                     case '>=': return it.&gte
-            }}.call(QueryBuilders.rangeQuery(clause.lhs as String))(clause.rhs as String)
+                }
+            }.call(QueryBuilders.rangeQuery(clause.lhs as String))(rhsString)
         }
 
         if (clause.operator in ['contains', 'not contains', 'notcontains']) {
-            def regexFilter = QueryBuilders.regexpQuery(clause.lhs as String, ".*${clause.rhs}.*" as String)
+            def regexFilter = QueryBuilders.regexpQuery(clause.lhs as String, ".*${rhsString}.*")
             return clause.operator == 'contains' ? regexFilter : QueryBuilders.notQuery(regexFilter)
         }
 
@@ -86,8 +92,8 @@ class ElasticSearchConversionStrategyHelper {
             def hasValue = clause.rhs || clause.rhs == '' || clause.rhs == false
 
             def filter = hasValue ?
-                QueryBuilders.termQuery(clause.lhs as String, clause.rhs as String) :
-                QueryBuilders.existsQuery(clause.lhs as String)
+                    QueryBuilders.termQuery(clause.lhs as String, rhsString) :
+                    QueryBuilders.existsQuery(clause.lhs as String)
 
             return (clause.operator == '!=') == !hasValue ? filter : QueryBuilders.notQuery(filter)
         }
@@ -100,9 +106,26 @@ class ElasticSearchConversionStrategyHelper {
         throw new NeonConnectionException("${clause.operator} is an invalid operator for a where clause")
     }
 
-    public static createHeatmapAggregation(HeatmapBoundsQuery boundingBox) {
+    /**
+     * When producing a query to ElasticSearch that has a date in it, use one of the default ES formats,
+     * which includes ISO8601.  By default, Java prints out a Date similar to 'Tue Dec 31 19:00:00 EST 2017'
+     * which ES does not understand and throws an error.
+     */
+    def static getRHSString(def rhs) {
+        switch (rhs.getClass()) {
+            case Date:
+                def d = DateUtils.dateTimeToString(rhs)
+                return d
+
+            default:
+                def d = rhs.toString()
+                return d
+        }
+    }
+
+    static createHeatmapAggregation(HeatmapBoundsQuery boundingBox) {
         def hashGrid = AggregationBuilders.geohashGrid('heatmap').field(boundingBox.locationField).precision(boundingBox.gridCount)
-        def filter  = QueryBuilders.geoBoundingBoxFilter(boundingBox.locationField).bottomLeft(boundingBox.minLat, boundingBox.minLon).topRight(boundingBox.maxLat, boundingBox.maxLon)
+        def filter = QueryBuilders.geoBoundingBoxFilter(boundingBox.locationField).bottomLeft(boundingBox.minLat, boundingBox.minLon).topRight(boundingBox.maxLat, boundingBox.maxLon)
         def bounds = AggregationBuilders.filter('bounds').filter(filter).subAggregation(hashGrid)
         return bounds
     }
