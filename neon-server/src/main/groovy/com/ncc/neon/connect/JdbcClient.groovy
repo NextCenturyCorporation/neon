@@ -28,6 +28,7 @@ import groovy.json.JsonException
 
 @SuppressWarnings("UnusedImport")
 import groovy.json.internal.Exceptions$JsonInternalException
+import groovy.json.internal.Exceptions.JsonInternalException
 
 /**
  * Wrapper for JDBC API
@@ -115,7 +116,6 @@ class JdbcClient implements Closeable {
      * are more records to iterate over. When this method returns false, assume there are no more records.
      */
     @SuppressWarnings("CatchException")
-    @SuppressWarnings("MethodSize") // there are only a couple of lines of code in here, but a large comment block explaining why we implemented this how we did
     private static boolean moveCursor(ResultSet resultSet, int offset) {
         if (offset > 0) {
             try {

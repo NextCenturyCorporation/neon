@@ -16,21 +16,22 @@
 
 package com.ncc.neon
 
-import com.ncc.neon.connect.ConnectionManager
-import com.ncc.neon.query.sparksql.SparkSQLQueryExecutor
-import com.ncc.neon.query.mongo.MongoQueryExecutor
-import com.ncc.neon.query.transform.SalaryTransformer
-import com.ncc.neon.query.result.Transformer
-import com.ncc.neon.query.result.TransformerRegistry
-import com.ncc.neon.property.PropertyInterface
-import com.ncc.neon.property.DerbyProperty
-import com.ncc.neon.property.MongoProperty
-import com.ncc.neon.property.ElasticSearchProperty
 import org.springframework.beans.factory.config.CustomScopeConfigurer
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.ComponentScan
 import org.springframework.context.annotation.Configuration
 import org.springframework.context.support.SimpleThreadScope
+
+import com.ncc.neon.connect.ConnectionManager
+import com.ncc.neon.property.DerbyProperty
+import com.ncc.neon.property.ElasticSearchProperty
+import com.ncc.neon.property.MongoProperty
+import com.ncc.neon.property.PropertyInterface
+import com.ncc.neon.query.mongo.MongoQueryExecutor
+import com.ncc.neon.query.result.Transformer
+import com.ncc.neon.query.result.TransformerRegistry
+import com.ncc.neon.query.sparksql.SparkSQLQueryExecutor
+import com.ncc.neon.transform.SalaryTransformer
 
 @Configuration
 @ComponentScan(basePackages = ['com.ncc.neon'])

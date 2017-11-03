@@ -14,16 +14,8 @@
  *
  */
 
-package com.ncc.neon.query.transform
-import com.ncc.neon.IntegrationTestContext
-import com.ncc.neon.connect.ConnectionInfo
-import com.ncc.neon.connect.DataSources
-import com.ncc.neon.query.Query
-import com.ncc.neon.query.QueryOptions
-import com.ncc.neon.query.result.Transform
-import com.ncc.neon.query.result.TransformerNotFoundException
-import com.ncc.neon.query.filter.Filter
-import com.ncc.neon.query.mongo.MongoQueryExecutor
+package com.ncc.neon.transform
+
 import org.junit.Assume
 import org.junit.Before
 import org.junit.Test
@@ -31,6 +23,16 @@ import org.junit.runner.RunWith
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.test.context.ContextConfiguration
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner
+
+import com.ncc.neon.IntegrationTestContext
+import com.ncc.neon.connect.ConnectionInfo
+import com.ncc.neon.connect.DataSources
+import com.ncc.neon.query.Query
+import com.ncc.neon.query.QueryOptions
+import com.ncc.neon.query.filter.Filter
+import com.ncc.neon.query.mongo.MongoQueryExecutor
+import com.ncc.neon.query.result.Transform
+import com.ncc.neon.query.result.TransformerNotFoundException
 
 @RunWith(SpringJUnit4ClassRunner)
 @ContextConfiguration(classes = IntegrationTestContext)

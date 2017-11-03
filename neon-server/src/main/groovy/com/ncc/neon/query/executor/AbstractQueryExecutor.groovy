@@ -56,9 +56,7 @@ abstract class AbstractQueryExecutor implements QueryExecutor {
         if ( !query.useInMemory ) {
             result = doExecute(query, options)
         }
-
         return transform(query.transforms, result)
-        
     }
 
     @Override
@@ -76,7 +74,6 @@ abstract class AbstractQueryExecutor implements QueryExecutor {
                     result = doExecute(query, options)
                 }
                 result = transform(query.transforms, result)
-                
                 queryResult.data << result.data
             }
             else {
@@ -118,7 +115,6 @@ abstract class AbstractQueryExecutor implements QueryExecutor {
         transforms.each { transform ->
             String transformName = transform.transformName
             Transformer transformer = transformRegistry.getTransformer(transformName)
-            
             if(!transformer){
                 throw new TransformerNotFoundException("Transform ${transformName} does not exist.")
             }

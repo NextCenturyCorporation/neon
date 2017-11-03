@@ -16,20 +16,19 @@
 
 package com.ncc.neon
 
+import org.json.JSONArray
+import org.junit.After
+import org.junit.Test
+
 import com.ncc.neon.query.Query
-import com.ncc.neon.query.executor.QueryExecutor
 import com.ncc.neon.query.QueryGroup
 import com.ncc.neon.query.QueryOptions
 import com.ncc.neon.query.clauses.*
+import com.ncc.neon.query.executor.QueryExecutor
 import com.ncc.neon.query.filter.Filter
 import com.ncc.neon.query.filter.FilterKey
 import com.ncc.neon.util.AssertUtils
 import com.ncc.neon.util.DateUtils
-
-import org.json.JSONArray
-
-import org.junit.After
-import org.junit.Test
 
 /**
  * Integration test that verifies the neon server properly translates database specific queries.
@@ -648,7 +647,6 @@ abstract class AbstractQueryExecutorIntegrationTest {
 
     @Test
     @SuppressWarnings('CoupledTestCase') // this method incorrectly throws this codenarc error
-    @SuppressWarnings('MethodSize') // there is a lot of setup in this method but it is pretty straightforward and would be harder to read if extracted
     void "query group aggregates results"() {
         def whereClause1 = new SingularWhereClause(lhs: 'state', operator: '=', rhs: 'VA')
         def query1 = createQueryWithWhereClause(whereClause1)

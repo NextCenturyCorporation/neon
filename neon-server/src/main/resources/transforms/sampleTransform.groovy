@@ -14,7 +14,8 @@
  *
  */
 
-package com.ncc.neon.query.transform
+package transforms
+
 import com.ncc.neon.query.result.QueryResult
 import com.ncc.neon.query.result.TabularQueryResult
 import com.ncc.neon.query.result.Transformer
