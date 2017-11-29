@@ -16,20 +16,20 @@
 
 package com.ncc.neon.query.elasticsearch
 
-import com.ncc.neon.connect.NeonConnectionException
-import com.ncc.neon.query.HeatmapBoundsQuery
-import com.ncc.neon.query.clauses.AndWhereClause
-import com.ncc.neon.query.clauses.OrWhereClause
-import com.ncc.neon.query.clauses.SingularWhereClause
 import org.elasticsearch.index.query.QueryBuilder
 import org.elasticsearch.index.query.QueryBuilders
 import org.elasticsearch.search.aggregations.AggregationBuilders
 import org.elasticsearch.search.aggregations.bucket.histogram.DateHistogramInterval
 
+import com.ncc.neon.connect.NeonConnectionException
+import com.ncc.neon.query.HeatmapBoundsQuery
+import com.ncc.neon.query.clauses.AndWhereClause
+import com.ncc.neon.query.clauses.OrWhereClause
+import com.ncc.neon.query.clauses.SingularWhereClause
+
 /**
  * Helper methods that are specific to Elasticsearch 2.x
  */
-SuppressWarnings("ClassNameSameAsFilename")
 class ElasticSearchConversionStrategyHelper {
     // Elasticsearch v2.x only supports getting the first 10000 records
     public static final RESULT_LIMIT = 10000
