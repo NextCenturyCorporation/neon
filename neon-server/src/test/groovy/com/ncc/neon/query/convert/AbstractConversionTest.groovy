@@ -16,6 +16,9 @@
 
 package com.ncc.neon.query.convert
 
+import org.junit.Before
+import org.junit.Test
+
 import com.ncc.neon.query.Query
 import com.ncc.neon.query.QueryOptions
 import com.ncc.neon.query.clauses.*
@@ -23,8 +26,6 @@ import com.ncc.neon.query.filter.Filter
 import com.ncc.neon.query.filter.FilterKey
 import com.ncc.neon.query.filter.FilterState
 import com.ncc.neon.query.filter.SelectionState
-import org.junit.Before
-import org.junit.Test
 
 /**
  * Sets up unit tests to be run against both spark SQL and mongo conversion strategies
@@ -53,40 +54,40 @@ abstract class AbstractConversionTest {
     }
 
     @Test(expected = NullPointerException)
-    void "test converting a query requires a filter"() {
+    void "testConvertingAQueryRequiresAFilter"() {
         Query query = new Query()
         convertQuery(query)
     }
 
     @Test
-    void "test converting a query with just a dataset populated"() {
+    void "testConvertingAQueryWithJustADatasetPopulated"() {
         def query = convertQuery(simpleQuery)
         assertSimplestConvertQuery(query)
     }
 
     @Test
-    void "test converting a query with a filter in the FilterState"() {
+    void "testConvertingAQueryWithAFilterInTheFilterstate"() {
         givenFilterStateHasOneFilter()
         def query = convertQuery(simpleQuery)
         assertQueryWithWhereClause(query)
     }
 
     @Test
-    void "test converting a query with a filter in the FilterState but ignore filters"() {
+    void "testConvertingAQueryWithAFilterInTheFilterstateButIgnoreFilters"() {
         givenFilterStateHasOneFilter()
         def query = convertQuery(simpleQuery, new QueryOptions(ignoreFilters: true, selectionOnly: false))
         assertSimplestConvertQuery(query)
     }
 
     @Test
-    void "test converting a query with a selection"() {
+    void "testConvertingAQueryWithASelection"() {
         givenSelectionStateHasOneFilter()
         def query = convertQuery(simpleQuery, new QueryOptions(ignoreFilters: false, selectionOnly: true))
         assertQueryWithWhereClause(query)
     }
 
     @Test
-    void "test converting a compound query with a selection"() {
+    void "testConvertingACompoundQueryWithASelection"() {
         givenSelectionStateHasOneFilter()
         givenQueryHasOrWhereClause()
         def query = convertQuery(simpleQuery, new QueryOptions(ignoreFilters: false, selectionOnly: true))
@@ -94,7 +95,7 @@ abstract class AbstractConversionTest {
     }
 
     @Test
-    void "test selection not used"() {
+    void "testSelectionNotUsed"(){
         givenSelectionStateHasOneFilter()
         givenQueryHasSimpleWhereClause()
         def query = convertQuery(simpleQuery, new QueryOptions(ignoreFilters: false, selectionOnly: false))
@@ -102,7 +103,7 @@ abstract class AbstractConversionTest {
     }
 
     @Test
-    void "test converting a compound query with a filter in the FilterState"() {
+    void "testConvertingACompoundQueryWithAFilterInTheFilterstate"() {
         givenFilterStateHasOneFilter()
         givenQueryHasOrWhereClause()
         def query = convertQuery(simpleQuery)
@@ -110,28 +111,28 @@ abstract class AbstractConversionTest {
     }
 
     @Test
-    void "test select clause populated"() {
+    void "testSelectClausePopulated"() {
         givenQueryHasFields()
         def query = convertQuery(simpleQuery)
         assertSelectClausePopulated(query)
     }
 
     @Test
-    void "test sort clause populated"() {
+    void "testSortClausePopulated"() {
         givenQueryHasSortClause()
         def query = convertQuery(simpleQuery)
         assertQueryWithSortClause(query)
     }
 
     @Test
-    void "test limit clause populated"() {
+    void "testLimitClausePopulated"() {
         givenQueryHasLimitClause()
         def query = convertQuery(simpleQuery)
         assertQueryWithLimitClause(query)
     }
 
     @Test
-    void "test offset clause populated"() {
+    void "testOffsetClausePopulated"() {
         givenQueryHasSkipClause()
         def query = convertQuery(simpleQuery)
         assertQueryWithOffsetClause(query)
@@ -139,42 +140,42 @@ abstract class AbstractConversionTest {
 
 
     @Test
-    void "test distinct clause populated"() {
+    void "testDistinctClausePopulated"() {
         givenQueryHasDistinctClause()
         def query = convertQuery(simpleQuery)
         assertQueryWithDistinctClause(query)
     }
 
     @Test
-    void "test aggregate clause populated"() {
+    void "testAggregateClausePopulated"() {
         givenQueryHasAggregateClause()
         def query = convertQuery(simpleQuery)
         assertQueryWithAggregateClause(query)
     }
 
     @Test
-    void "test group by clause populated"() {
+    void "testGroupByClausePopulated"() {
         givenQueryHasGroupByPopulated()
         def query = convertQuery(simpleQuery)
         assertQueryWithGroupByClauses(query)
     }
 
     @Test
-    void "test a filter with no where clause"() {
+    void "testAFilterWithNoWhereClause"() {
         givenFilterStateHasAnEmptyFilter()
         def query = convertQuery(simpleQuery)
         assertQueryWithEmptyFilter(query)
     }
 
     @Test
-    void "test query where null"() {
+    void "testQueryWhereNull"() {
         givenQueryHasWhereNullClause()
         def query = convertQuery(simpleQuery)
         assertQueryWithWhereNullClause(query)
     }
 
     @Test
-    void "test query where not null"() {
+    void "testQueryWhereNotNull"() {
         givenQueryHasWhereNotNullClause()
         def query = convertQuery(simpleQuery)
         assertQueryWithWhereNotNullClause(query)
@@ -182,7 +183,7 @@ abstract class AbstractConversionTest {
 
     @Test
     @SuppressWarnings('UnusedVariable')
-    void "test query where contains"() {
+    void "testQueryWhereContains"() {
         givenQueryHasWhereContainsFooClause()
         def query = convertQuery(simpleQuery)
         assertQueryWithWhereContainsFooClause(query)
@@ -190,18 +191,17 @@ abstract class AbstractConversionTest {
 
     @Test
     @SuppressWarnings('UnusedVariable')
-    void "test query where not contains"() {
+    void "testQueryWhereNotContains"() {
         givenQueryHasWhereNotContainsFooClause()
         def query = convertQuery(simpleQuery)
         assertQueryWithWhereNotContainsFooClause(query)
     }
 
     @Test
-    void "test ignoring specific filter"() {
+    void "testIgnoringSpecificFilter"() {
         givenFilterStateHasOneFilter()
         def query = convertQuery(simpleQuery, new QueryOptions(ignoredFilterIds: ["filterA"] as HashSet))
         assertSimplestConvertQuery(query)
-
     }
 
     private def convertQuery(query, queryOptions = QueryOptions.DEFAULT_OPTIONS) {
@@ -293,7 +293,9 @@ abstract class AbstractConversionTest {
     }
 
     private void givenQueryHasSortClause() {
-        simpleQuery.sortClauses = [new SortClause(fieldName: FIELD_NAME, sortOrder: SortOrder.ASCENDING)]
+        simpleQuery.sortClauses = [
+            new SortClause(fieldName: FIELD_NAME, sortOrder: SortOrder.ASCENDING)
+        ]
     }
 
     private void givenQueryHasLimitClause() {
@@ -309,12 +311,15 @@ abstract class AbstractConversionTest {
     }
 
     private void givenQueryHasAggregateClause() {
-        simpleQuery.aggregates = [new AggregateClause(name: "${FIELD_NAME}_sum", operation: "sum", field: FIELD_NAME)]
+        simpleQuery.aggregates = [
+            new AggregateClause(name: "${FIELD_NAME}_sum", operation: "sum", field: FIELD_NAME)
+        ]
     }
 
     private void givenQueryHasGroupByPopulated() {
-        simpleQuery.groupByClauses = [new GroupByFieldClause(field: "${FIELD_NAME_2}"),
-                new GroupByFunctionClause(name: "${FIELD_NAME}_dayOfWeek", operation: "dayOfWeek", field: FIELD_NAME)]
+        simpleQuery.groupByClauses = [
+            new GroupByFieldClause(field: "${FIELD_NAME_2}"),
+            new GroupByFunctionClause(name: "${FIELD_NAME}_dayOfWeek", operation: "dayOfWeek", field: FIELD_NAME)
+        ]
     }
-
 }
