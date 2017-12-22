@@ -51,7 +51,7 @@ class MongoImportHelperProcessorTest {
     private static final String HOST = System.getProperty("mongo.host")
     private static final String USERNAME = "testUsername"
     private static final String PRETTY_NAME = "testPrettyName"
-    private static final String UUID = 1234
+    private static final String UUID = '1234'
     private static final Map FT_PAIRS_MAP1 = ["name": FieldType.STRING as String, "age": FieldType.INTEGER as String, "address": [FieldType.OBJECT as String, ["city": FieldType.STRING as String]]]
     private static final Map FT_PAIRS_MAP2 = ["age": [FieldType.OBJECT as String, [:]], "address": [FieldType.OBJECT as String, ["zip": FieldType.DATE as String]]]
     private static final Map FT_PAIRS_MAP3 = ["name": [FieldType.OBJECT as String, [:]], "age": FieldType.DATE as String]

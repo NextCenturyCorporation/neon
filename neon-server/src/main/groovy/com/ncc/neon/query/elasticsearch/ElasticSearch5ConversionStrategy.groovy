@@ -23,9 +23,9 @@ import org.elasticsearch.index.query.QueryBuilders
 import org.elasticsearch.search.aggregations.AbstractAggregationBuilder
 import org.elasticsearch.search.aggregations.AggregationBuilder
 import org.elasticsearch.search.aggregations.AggregationBuilders
-import org.elasticsearch.search.aggregations.bucket.histogram.DateHistogramAggregationBuilder
+//import org.elasticsearch.search.aggregations.bucket.histogram.DateHistogramAggregationBuilder
 import org.elasticsearch.search.aggregations.bucket.terms.Terms
-import org.elasticsearch.search.aggregations.bucket.terms.TermsAggregationBuilder
+//import org.elasticsearch.search.aggregations.bucket.terms.TermsAggregationBuilder
 import org.elasticsearch.search.builder.SearchSourceBuilder
 import org.elasticsearch.search.sort.SortBuilder
 import org.elasticsearch.search.sort.SortBuilders
@@ -54,7 +54,15 @@ import groovy.transform.Immutable
 class ElasticSearch5ConversionStrategy {
     static final String TERM_PREFIX = "_term"
     static final String STATS_AGG_PREFIX = "_statsFor_"
-    static final String[] DATE_OPERATIONS = ['year', 'month', 'dayOfMonth', 'dayOfWeek', 'hour', 'minute', 'second']
+    static final String[] DATE_OPERATIONS = [
+        'year',
+        'month',
+        'dayOfMonth',
+        'dayOfWeek',
+        'hour',
+        'minute',
+        'second'
+    ]
 
     private final FilterState filterState
     private final SelectionState selectionState
@@ -92,14 +100,14 @@ class ElasticSearch5ConversionStrategy {
      * possibly need. Also, don't process the count all clauses here, since
      * that will be available either through the hit count in the results, or as
      * doc_count in the buckets
-    */
+     */
     private static convertAggregations(Query query, SearchSourceBuilder source) {
         if(query.isDistinct) {
             if(!query.fields || query.fields.size() > 1) {
                 throw new NeonConnectionException("Distinct call requires one field")
             }
 
-            def termsAggregations = AggregationBuilders.terms('distinct').field(query.fields[0]).size(ElasticSearchConversionStrategyHelper.RESULT_LIMIT)
+            def termsAggregations = AggregationBuilders.terms('distinct').field(query.fields[0]).size(ElasticSearch5ConversionStrategyHelper.RESULT_LIMIT)
             source.aggregation(termsAggregations)
         } else {
             convertMetricAggregations(query, source)
@@ -121,7 +129,7 @@ class ElasticSearch5ConversionStrategy {
         def metricAggregations = getMetricAggregations(query)
 
         if (query.groupByClauses) {
-            def bucketAggregations = query.groupByClauses.collect(ElasticSearchConversionStrategy.&convertGroupByClause.curry(query))
+            def bucketAggregations = query.groupByClauses.collect(ElasticSearch5ConversionStrategy.&convertGroupByClause.curry(query))
 
             //apply metricAggregations and any associated sorting to the terminal group by clause
             metricAggregations.each(bucketAggregations.last().&subAggregation)
@@ -153,7 +161,7 @@ class ElasticSearch5ConversionStrategy {
         } else {
             //if there are no groupByClauses, apply sort and metricAggregations directly to source
             metricAggregations.each(source.&aggregation)
-            query.sortClauses.collect(ElasticSearchConversionStrategy.&convertSortClause).each(source.&sort)
+            query.sortClauses.collect(ElasticSearch5ConversionStrategy.&convertSortClause).each(source.&sort)
         }
     }
 
@@ -175,7 +183,7 @@ class ElasticSearch5ConversionStrategy {
     }
 
     private collectWhereClauses(DataSet dataSet, Query query, QueryOptions options, WhereClause whereClause) {
-        def whereClauses = whereClause ? [whereClause] : []
+        def whereClauses = whereClause ? [whereClause]: []
         if (query.filter?.whereClause) {
             whereClauses << query.filter.whereClause
         }
@@ -203,9 +211,9 @@ class ElasticSearch5ConversionStrategy {
 
     public static SearchSourceBuilder createSearchSourceBuilder(Query params) {
         new SearchSourceBuilder()
-            .explain(false)
-            .from(getOffset(params))
-            .size(getTotalLimit(params))
+                .explain(false)
+                .from(getOffset(params))
+                .size(getTotalLimit(params))
     }
 
     public static int getOffset(Query query) {
@@ -229,15 +237,15 @@ class ElasticSearch5ConversionStrategy {
             return 0
         }
 
-        return Math.max(ElasticSearchConversionStrategyHelper.RESULT_LIMIT - getOffset(query), 0)
+        return Math.max(ElasticSearch5ConversionStrategyHelper.RESULT_LIMIT - getOffset(query), 0)
     }
 
     public static SearchRequest createSearchRequest(SearchSourceBuilder source, Query params) {
         SearchRequest req = new SearchRequest()
         req.searchType((params?.aggregates) ? SearchType.QUERY_THEN_FETCH : SearchType.DFS_QUERY_THEN_FETCH)
-            .source(source)
-            .indices(params?.filter?.databaseName ?: '_all')
-            .types(params?.filter?.tableName ?: '_all')
+                .source(source)
+                .indices(params?.filter?.databaseName ?: '_all')
+                .types(params?.filter?.tableName ?: '_all')
         if (req.searchType == SearchType.DFS_QUERY_THEN_FETCH && params.limitClause && params.limitClause.limit > 10000) {
             req = req.scroll(TimeValue.timeValueMinutes(1))
         }
@@ -254,8 +262,8 @@ class ElasticSearch5ConversionStrategy {
 
     private static createWhereClausesForFilters(DataSet dataSet, filterCache, ignoredFilterIds = []) {
         filterCache.getFilterKeysForDataset(dataSet)
-            .findAll { !(it.id in ignoredFilterIds) && it.filter.whereClause }
-            .collect { it.filter.whereClause }
+                .findAll { !(it.id in ignoredFilterIds) && it.filter.whereClause }
+                .collect { it.filter.whereClause }
     }
 
     private static SortBuilder convertSortClause(clause) {
@@ -278,7 +286,7 @@ class ElasticSearch5ConversionStrategy {
 
         if (clause instanceof GroupByFieldClause) {
             return applySort(AggregationBuilders.terms(clause.field as String).field(clause.field as String).size(
-                ElasticSearchConversionStrategyHelper.RESULT_LIMIT))
+                    ElasticSearch5ConversionStrategyHelper.RESULT_LIMIT))
         }
 
         if (clause instanceof GroupByFunctionClause) {
@@ -286,24 +294,24 @@ class ElasticSearch5ConversionStrategy {
 
                 def template = {
                     def groupByClause = AggregationBuilders
-                        .dateHistogram(clause.name as String)
-                        .field(clause.field as String)
-                        .interval(it.interval)
-                        .format(it.format)
-                                        if (clause.operation == 'dayOfWeek') {
-                                                groupByClause.offset("1d")
-                                        }
-                                        return groupByClause
+                            .dateHistogram(clause.name as String)
+                            .field(clause.field as String)
+                            .interval(it.interval)
+                            .format(it.format)
+                    if (clause.operation == 'dayOfWeek') {
+                        groupByClause.offset("1d")
+                    }
+                    return groupByClause
                 }
 
                 switch (clause.operation) {
-                    case 'year': return template(interval:ElasticSearchConversionStrategyHelper.YEAR, format:'yyyy')
-                    case 'month': return template(interval:ElasticSearchConversionStrategyHelper.MONTH, format:'M')
-                    case 'dayOfMonth': return template(interval:ElasticSearchConversionStrategyHelper.DAY, format:'d')
-                    case 'dayOfWeek': return template(interval:ElasticSearchConversionStrategyHelper.DAY, format:'e')
-                    case 'hour': return template(interval:ElasticSearchConversionStrategyHelper.HOUR, format:'H')
-                    case 'minute': return template(interval:ElasticSearchConversionStrategyHelper.MINUTE, format:'m')
-                    case 'second': return template(interval:ElasticSearchConversionStrategyHelper.SECOND, format:'s')
+                    case 'year': return template(interval:ElasticSearch5ConversionStrategyHelper.YEAR, format:'yyyy')
+                    case 'month': return template(interval:ElasticSearch5ConversionStrategyHelper.MONTH, format:'M')
+                    case 'dayOfMonth': return template(interval:ElasticSearch5ConversionStrategyHelper.DAY, format:'d')
+                    case 'dayOfWeek': return template(interval:ElasticSearch5ConversionStrategyHelper.DAY, format:'e')
+                    case 'hour': return template(interval:ElasticSearch5ConversionStrategyHelper.HOUR, format:'H')
+                    case 'minute': return template(interval:ElasticSearch5ConversionStrategyHelper.MINUTE, format:'m')
+                    case 'second': return template(interval:ElasticSearch5ConversionStrategyHelper.SECOND, format:'s')
                 }
             }
         }
