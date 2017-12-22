@@ -103,7 +103,7 @@ class ElasticSearchRestQueryExecutor extends AbstractQueryExecutor {
         checkDatabaseAndTableExists(query.databaseName, query.tableName)
         long d1 = new Date().getTime()
 
-        ElasticSearchConversionStrategy conversionStrategy = new ElasticSearchConversionStrategy(filterState: filterState, selectionState: selectionState)
+        ElasticSearch5ConversionStrategy conversionStrategy = new ElasticSearch5ConversionStrategy(filterState: filterState, selectionState: selectionState)
         SearchRequest request = conversionStrategy.convertQuery(query, options)
 
         def aggregates = query.aggregates
@@ -410,7 +410,7 @@ class ElasticSearchRestQueryExecutor extends AbstractQueryExecutor {
                     // returned by the function (e.g., the month).
                     key = value.getKeyAsString()
                 }
-                def isDateClause = (currentClause.operation in ElasticSearchConversionStrategy.DATE_OPERATIONS
+                def isDateClause = (currentClause.operation in ElasticSearch5ConversionStrategy.DATE_OPERATIONS
                         && key.isNumber())
 
                 accumulator.put(groupByClauses.head().name, isDateClause ? key.toFloat() : key)
