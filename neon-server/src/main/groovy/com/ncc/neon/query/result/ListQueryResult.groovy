@@ -15,19 +15,23 @@
  */
 
 package com.ncc.neon.query.result
+
+import groovy.transform.ToString
+
 /**
  * Query results of a tabular data store.
  * This is represented as a list of rows, where a row is a map of column names to values.
  */
+@ToString
 class ListQueryResult<T> implements QueryResult{
 
     final List<T> data
 
-    public ListQueryResult() {
+    ListQueryResult() {
         this([])
     }
 
-    public ListQueryResult(List<T> list){
+    ListQueryResult(List<T> list){
         this.data = list
     }
 }
