@@ -46,7 +46,7 @@ class ElasticSearchPropertyIntegrationTest {
     @Before
     void before() {
         // Establish the connection, or skip the tests if no host was specified
-        Assume.assumeTrue(HOST_STRING != null && HOST_STRING != "")
+        Assume.assumeTrue(" System property HOST_STRING is null or empty", HOST_STRING != null && HOST_STRING != "")
         elasticSearchProperty.propertiesDatabaseName = "properties"
         elasticSearchProperty.elasticSearchHost = HOST_STRING.split(":")[0]
         elasticSearchProperty.elasticSearchPort = HOST_STRING.split(":").length > 1 ?

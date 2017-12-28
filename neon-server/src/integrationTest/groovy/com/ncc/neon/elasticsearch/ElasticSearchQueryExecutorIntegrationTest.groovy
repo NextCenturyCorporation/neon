@@ -44,7 +44,8 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner
  */
 @RunWith(SpringJUnit4ClassRunner)
 @ContextConfiguration(classes = IntegrationTestContext)
-class ElasticSearchQueryExecutorIntegrationTest extends AbstractQueryExecutorIntegrationTest{
+class ElasticSearchQueryExecutorIntegrationTest extends AbstractQueryExecutorIntegrationTest {
+
     private static final String HOST_STRING = System.getProperty("elasticsearch.host")
     private static final int NUMBER_OF_SCROLL_RECORDS = 20000
 
@@ -63,7 +64,8 @@ class ElasticSearchQueryExecutorIntegrationTest extends AbstractQueryExecutorInt
     @Before
     void before() {
         // Establish the connection, or skip the tests if no host was specified
-        Assume.assumeTrue(HOST_STRING != null && HOST_STRING != "")
+        Assume.assumeTrue(" System property HOST_STRING is null or empty",
+                (HOST_STRING != null && HOST_STRING != ""))
         this.elasticSearchQueryExecutor.connectionManager.currentRequest = new ConnectionInfo(host: HOST_STRING, dataSource: DataSources.elasticsearch)
     }
 

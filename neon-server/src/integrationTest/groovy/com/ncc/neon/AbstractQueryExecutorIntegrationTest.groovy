@@ -839,7 +839,6 @@ abstract class AbstractQueryExecutorIntegrationTest {
 
     protected def assertQueryResult(expected, actual, ordered, stripId = false) {
         def data = actual.data
-        assert expected.size() == data.size()
 
         // compare row by row for better error messages on failure
         data.eachWithIndex { map, index ->
