@@ -20,7 +20,6 @@ import com.ncc.neon.query.elasticsearch.ElasticSearchConversionStrategy
 import org.elasticsearch.common.xcontent.XContentHelper
 import org.elasticsearch.common.xcontent.XContentParser
 import org.junit.After
-import org.junit.Assert
 import org.junit.Before
 
 /*
