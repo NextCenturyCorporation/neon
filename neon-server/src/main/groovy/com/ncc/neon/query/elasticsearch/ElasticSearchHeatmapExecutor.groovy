@@ -28,7 +28,7 @@ import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
 
 @Component("elasticSearchHeatmapExecutor")
-class ElasticSearchHeatmapExecutor extends ElasticSearchQueryExecutor{
+class ElasticSearchHeatmapExecutor extends ElasticSearchRestQueryExecutor{
     private static final Logger LOGGER = LoggerFactory.getLogger(ElasticSearchHeatmapExecutor)
 
     QueryResult execute(Query query, QueryOptions options, HeatmapBoundsQuery boundingBox) {

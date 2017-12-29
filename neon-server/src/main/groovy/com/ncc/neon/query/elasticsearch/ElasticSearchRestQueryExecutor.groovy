@@ -104,7 +104,10 @@ class ElasticSearchRestQueryExecutor extends AbstractQueryExecutor {
 		return returnVal
 	}
 
-
+    /**
+     * Show the databases in elastic search means all the indexes.
+     * @return list of index names
+     */
 	@Override
 	List<String> showDatabases() {
 		LOGGER.debug("Executing showDatabases to retrieve indices")

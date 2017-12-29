@@ -76,10 +76,10 @@ class ElasticSearchHeatmapConversionStrategy {
      * inject heatmap aggregation and bounding box
      */
     private static injectHeatmapAggregation(SearchSourceBuilder source, HeatmapBoundsQuery boundingBox) {
-        def bounds = ElasticSearchConversionStrategyHelper.createHeatmapAggregation(boundingBox)
-        if(bounds) {
-            source.aggregation(bounds)
-        }
+       // def bounds = ElasticSearchConversionStrategyHelper.createHeatmapAggregation(boundingBox)
+       // if(bounds) {
+       //     source.aggregation(bounds)
+       // }
     }
 
     private static SearchRequest buildRequest(Query query, SearchSourceBuilder source) {
