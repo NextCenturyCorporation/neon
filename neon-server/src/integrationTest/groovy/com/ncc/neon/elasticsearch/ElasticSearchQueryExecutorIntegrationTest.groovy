@@ -64,7 +64,8 @@ class ElasticSearchQueryExecutorIntegrationTest extends AbstractQueryExecutorInt
     @Before
     void before() {
         // Establish the connection, or skip the tests if no host was specified
-        Assume.assumeTrue(HOST_STRING != null && HOST_STRING != "")
+        Assume.assumeTrue(" System property HOST_STRING is null or empty",
+                (HOST_STRING != null && HOST_STRING != ""))
         this.elasticSearchQueryExecutor.connectionManager.currentRequest = new ConnectionInfo(host: HOST_STRING, dataSource: DataSources.elasticsearch)
     }
 
