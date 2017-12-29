@@ -45,7 +45,7 @@ import com.ncc.neon.util.AssertUtils
  */
 @RunWith(SpringJUnit4ClassRunner)
 @ContextConfiguration(classes = IntegrationTestContext)
-class ElasticSearchQueryExecutorIntegrationTest extends AbstractQueryExecutorIntegrationTest{
+class ElasticSearchQueryExecutorIntegrationTest extends AbstractQueryExecutorIntegrationTest {
 	private static final String HOST_STRING = System.getProperty("elasticsearch.host")
 	private static final int NUMBER_OF_SCROLL_RECORDS = 20000
 

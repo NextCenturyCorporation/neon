@@ -43,17 +43,27 @@ dependencies {
 
 task integrationTest(type: Test) {
     description = "Runs the neon integration tests"
+
     group = TEST_GROUP
     dependsOn 'integrationTestClasses'
 
     if (isMongoEnabled()) {
         dependsOn 'insertMongoDataIntegrationTest'
     }
+    else {
+         println "    Mongo host not defined, so mongo integration tests cannot be run"
+    }
     if (isSparkSQLEnabled()) {
         dependsOn 'insertSparkSQLDataIntegrationTest'
     }
+    else {
+         println "    SparkSQL host not defined, so sparksql integration tests cannot be run"
+    }
     if(isElasticSearchEnabled()) {
         dependsOn 'insertElasticSearchDataIntegrationTest'
+    }
+    else {
+         println "    ElasticSearch host not defined, so elasticsearch integration tests cannot be run"
     }
 
     testClassesDir = sourceSets.integrationTest.output.classesDir
@@ -99,6 +109,7 @@ task deleteSparkSQLDataIntegrationTestBeforeInsert(type: com.ncc.neon.data.Spark
     host = getSparkSQLHost()
     databaseName = 'neonintegrationtest'
 }
+
 
 task insertElasticSearchDataIntegrationTest(type: com.ncc.neon.data.ElasticSearchDataInserter) {
     description = "Inserts test data used for elasticsearch integration tests"

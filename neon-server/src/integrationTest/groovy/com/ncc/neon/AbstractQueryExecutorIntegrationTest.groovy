@@ -16,6 +16,7 @@
 
 package com.ncc.neon
 
+import com.ncc.neon.query.result.TabularQueryResult
 import org.json.JSONArray
 import org.junit.After
 import org.junit.Test
@@ -664,7 +665,7 @@ abstract class AbstractQueryExecutorIntegrationTest {
 
         def expected = readJson('queryGroup.json')
         def queryGroupResult = queryExecutor.execute(queryGroup, QueryOptions.DEFAULT_OPTIONS)
-        assertUnorderedQueryResult(expected, queryGroupResult)
+        assertGroupUnorderedQueryResult(expected, queryGroupResult)
     }
 
     @Test
@@ -821,6 +822,18 @@ abstract class AbstractQueryExecutorIntegrationTest {
     }
     */
 
+    protected def assertGroupUnorderedQueryResult(expected, actual)
+    {
+        // Group results consist of a list of TabularQueryResults
+        //     List<List<Map<String, Object>>> data
+        // Make a single data object that has all of them
+        TabularQueryResult tqr = new TabularQueryResult()
+        actual.data.each { list ->
+            tqr.data.addAll(list)
+        }
+        assertUnorderedQueryResult(expected, tqr)
+    }
+
     protected def assertOrderedQueryResult(expected, actual) {
         assertQueryResult(expected, actual, true)
     }
@@ -839,7 +852,6 @@ abstract class AbstractQueryExecutorIntegrationTest {
 
     protected def assertQueryResult(expected, actual, ordered, stripId = false) {
         def data = actual.data
-        assert expected.size() == data.size()
 
         // compare row by row for better error messages on failure
         data.eachWithIndex { map, index ->

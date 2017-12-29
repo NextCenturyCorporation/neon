@@ -16,20 +16,22 @@
 
 package com.ncc.neon.query.result
 
+import groovy.transform.ToString
+
 /**
  * Query results of calls to multiple tabular data stores.
  * This is represented as a map, from string IDs to lists of rows, where a row is a map of column names to values.
  */
-
+@ToString
 class GroupQueryResult implements QueryResult {
 
 	final List<List<Map<String, Object>>> data
 
-	public GroupQueryResult() {
+	GroupQueryResult() {
 		this([])
 	}
 
-	public GroupQueryResult(List<List<Map<String, Object>>> table) {
+	GroupQueryResult(List<List<Map<String, Object>>> table) {
 		this.data = table
 	}
 }

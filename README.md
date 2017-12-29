@@ -57,6 +57,54 @@ to point to the appropriate port.
 3. Check out the [Neon-GTD][neon-gtd] project, a sample analysis dashboard built on Neon.  You can see a sample dashboard with earthquake data [here][neon-gtd-demo].
 4. Visit [http://neonframework.org][5] for the latest Neon news, downloads and API documents.
 
+## Testing
+
+### Unit Testing
+
+Unit tests are run as part of the normal build cycle.  For example, the build, war, and 
+jettyRun tasks run the unit tests.  To run them separately, do: 
+
+     ./gradlew test
+or 
+
+     ./gradlew :neon:test
+     
+### Integration Test
+
+Integration tests are _not_ run as a result of other standard tasks.  The integration
+tests create database entries, run java / groovy queries against them, verify the results, 
+and then remove the database entries.
+
+To run the integration tests, you have to specify what database(s) to use:
+
+1.  Copy gradle.properties.sample to gradle.properties
+2.  Uncomment the mongo.host, sparksql.host, and/or elasticsearch.host properties and point to the 
+appropriate host machine.  
+3.  ./gradlew :neon:integrationTest 
+
+If you want to do internal development in Neon and want to run individual integration tests; for 
+example in an IDE, then you will need to set up the database.  Do #1 and #2 above,
+then do:  ./gradlew  :neon:insertElasticSearchDataIntegrationTest .  This is part of the normal process 
+for the integration test; running it by itself will leave the data in the database.  Then, in your 
+IDE, you need to set the database host as a system property, which is used by the integration 
+test classes.  For example, in ElasticSearchQueryExecutorIntegrationTest, it gets the host:
+
+      private static final String HOST_STRING = System.getProperty("elasticsearch.host") 
+      
+To set this in the IDE, set the run configuration to pass the VM argument:
+
+      -Delasticsearch.host=localhost
+      
+Replace localhost with a remote machine as needed for your set up.  
+
+### Acceptance Test
+
+Like the integration tests, the acceptance tests are not run as a result of other tasks.  The 
+acceptance tests create a war file, start up a server, and then make javascript queries of the 
+server, and verify the results.
+
+Note:  the acceptance tests require mongodb.
+
 ## Apache 2 Open Source License
 
 Neon and Neon-GTD are made available by [Next Century][10] under the [Apache 2 Open Source License][8]. You may freely download, use, and modify, in whole or in part, the source code or release packages. Any restrictions or attribution requirements are spelled out in the license file. Neon and Neon-GTD attribution information can be found in the LICENSE.TXT file and licenses folder in each of the [Neon Git Repository][neon] and [Neon-GTD Git Repository][neon-gtd]. For more information about the Apache license, please visit the [The Apache Software Foundation’s License FAQ][9].
