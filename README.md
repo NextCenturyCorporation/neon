@@ -103,6 +103,8 @@ Like the integration tests, the acceptance tests are not run as a result of othe
 acceptance tests create a war file, start up a server, and then make javascript queries of the 
 server, and verify the results.
 
+Note:  the acceptance tests require mongodb.
+
 ## Apache 2 Open Source License
 
 Neon and Neon-GTD are made available by [Next Century][10] under the [Apache 2 Open Source License][8]. You may freely download, use, and modify, in whole or in part, the source code or release packages. Any restrictions or attribution requirements are spelled out in the license file. Neon and Neon-GTD attribution information can be found in the LICENSE.TXT file and licenses folder in each of the [Neon Git Repository][neon] and [Neon-GTD Git Repository][neon-gtd]. For more information about the Apache license, please visit the [The Apache Software Foundation’s License FAQ][9].
