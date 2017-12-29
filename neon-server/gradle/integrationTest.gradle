@@ -51,19 +51,19 @@ task integrationTest(type: Test) {
         dependsOn 'insertMongoDataIntegrationTest'
     }
     else {
-         println "Mongo not enabled"
+         println "    Mongo host not defined, so mongo integration tests cannot be run"
     }
     if (isSparkSQLEnabled()) {
         dependsOn 'insertSparkSQLDataIntegrationTest'
     }
     else {
-         println "SparlSQL not enabled"
+         println "    SparkSQL host not defined, so sparksql integration tests cannot be run"
     }
     if(isElasticSearchEnabled()) {
         dependsOn 'insertElasticSearchDataIntegrationTest'
     }
     else {
-         println "ElasticSearch not enabled"
+         println "    ElasticSearch host not defined, so elasticsearch integration tests cannot be run"
     }
 
     testClassesDir = sourceSets.integrationTest.output.classesDir
