@@ -46,111 +46,111 @@ import com.ncc.neon.util.AssertUtils
 @RunWith(SpringJUnit4ClassRunner)
 @ContextConfiguration(classes = IntegrationTestContext)
 class ElasticSearchQueryExecutorIntegrationTest extends AbstractQueryExecutorIntegrationTest {
-	private static final String HOST_STRING = System.getProperty("elasticsearch.host")
-	private static final int NUMBER_OF_SCROLL_RECORDS = 20000
+    private static final String HOST_STRING = System.getProperty("elasticsearch.host")
+    private static final int NUMBER_OF_SCROLL_RECORDS = 20000
 
-	private ElasticSearchRestQueryExecutor elasticSearchQueryExecutor
+    private ElasticSearchRestQueryExecutor elasticSearchQueryExecutor
 
-	protected String getResultsJsonFolder() {
-		return "elasticsearch-json/"
-	}
+    protected String getResultsJsonFolder() {
+        return "elasticsearch-json/"
+    }
 
-	@SuppressWarnings('JUnitPublicNonTestMethod')
-	@Autowired
-	public void setElasticSearchQueryExecutor(ElasticSearchRestQueryExecutor elasticSearchQueryExecutor) {
-		this.elasticSearchQueryExecutor = elasticSearchQueryExecutor
-	}
+    @SuppressWarnings('JUnitPublicNonTestMethod')
+    @Autowired
+    public void setElasticSearchQueryExecutor(ElasticSearchRestQueryExecutor elasticSearchQueryExecutor) {
+        this.elasticSearchQueryExecutor = elasticSearchQueryExecutor
+    }
 
-	@Before
-	void before() {
-		// Establish the connection, or skip the tests if no host was specified
-		Assume.assumeTrue(HOST_STRING != null && HOST_STRING != "")
-		this.elasticSearchQueryExecutor.connectionManager.currentRequest = new ConnectionInfo(host: HOST_STRING, dataSource: DataSources.elasticsearch)
-	}
+    @Before
+    void before() {
+        // Establish the connection, or skip the tests if no host was specified
+        Assume.assumeTrue(HOST_STRING != null && HOST_STRING != "")
+        this.elasticSearchQueryExecutor.connectionManager.currentRequest = new ConnectionInfo(host: HOST_STRING, dataSource: DataSources.elasticsearch)
+    }
 
-	protected ElasticSearchRestQueryExecutor getQueryExecutor(){
-		return elasticSearchQueryExecutor
-	}
+    protected ElasticSearchRestQueryExecutor getQueryExecutor() {
+        return elasticSearchQueryExecutor
+    }
 
-	@Override
-	protected def convertRowValueToBasicJavaType(def val) {
-		return super.convertRowValueToBasicJavaType(val)
-	}
+    @Override
+    protected def convertRowValueToBasicJavaType(def val) {
+        return super.convertRowValueToBasicJavaType(val)
+    }
 
-	@Override
-	protected def jsonObjectToMap(def jsonObject, def parseDates) {
-		def map = [:]
-		jsonObject.keys().each { key ->
-			def value = jsonObject.get(key)
-			if (parseDates && key =~ AbstractQueryExecutorIntegrationTest.DATE_FIELD_REGEX) {
-				DateTimeFormatter formatIn = DateTimeFormat.forPattern("yyyy-MM-dd'T'HH:mm:ss'Z'")
-				map[key] = formatIn.withZoneUTC().parseDateTime(value).toString()
-			} else if (value instanceof JSONArray) {
-				map[key] = jsonArrayToList(value)
-			} else if (value instanceof JSONObject) {
-				map[key] = jsonObjectToMap(value, parseDates)
-			} else {
-				map[key] = value
-			}
-		}
-		return map
-	}
+    @Override
+    protected def jsonObjectToMap(def jsonObject, def parseDates) {
+        def map = [:]
+        jsonObject.keys().each { key ->
+            def value = jsonObject.get(key)
+            if (parseDates && key =~ AbstractQueryExecutorIntegrationTest.DATE_FIELD_REGEX) {
+                DateTimeFormatter formatIn = DateTimeFormat.forPattern("yyyy-MM-dd'T'HH:mm:ss'Z'")
+                map[key] = formatIn.withZoneUTC().parseDateTime(value).toString()
+            } else if (value instanceof JSONArray) {
+                map[key] = jsonArrayToList(value)
+            } else if (value instanceof JSONObject) {
+                map[key] = jsonObjectToMap(value, parseDates)
+            } else {
+                map[key] = value
+            }
+        }
+        return map
+    }
 
-	@Test
-	void "query with index wildcards"() {
-		def wildcardFilter = new Filter(databaseName: DATABASE_NAME.substring(0, DATABASE_NAME.length() - 2) + '*',
-		tableName: TABLE_NAME)
-		def query = new Query(filter: wildcardFilter)
-		def result = queryExecutor.execute(query, QueryOptions.DEFAULT_OPTIONS)
-		assertUnorderedQueryResult(getAllData(), result)
-	}
+    @Test
+    void "query with index wildcards"() {
+        def wildcardFilter = new Filter(databaseName: DATABASE_NAME.substring(0, DATABASE_NAME.length() - 2) + '*',
+                tableName: TABLE_NAME)
+        def query = new Query(filter: wildcardFilter)
+        def result = queryExecutor.execute(query, QueryOptions.DEFAULT_OPTIONS)
+        assertUnorderedQueryResult(getAllData(), result)
+    }
 
-	@Test
-	void "field names with wildcards"() {
-		def fieldNames = queryExecutor.getFieldNames(DATABASE_NAME.substring(0, DATABASE_NAME.length() - 2) + '*',
-				TABLE_NAME.substring(0, TABLE_NAME.length() - 2) + '*')
-		def expected = getNestedObjects(getAllData()[0], null)
-		AssertUtils.assertEqualCollections(expected, fieldNames)
-	}
+    @Test
+    void "field names with wildcards"() {
+        def fieldNames = queryExecutor.getFieldNames(DATABASE_NAME.substring(0, DATABASE_NAME.length() - 2) + '*',
+                TABLE_NAME.substring(0, TABLE_NAME.length() - 2) + '*')
+        def expected = getNestedObjects(getAllData()[0], null)
+        AssertUtils.assertEqualCollections(expected, fieldNames)
+    }
 
-	@Test
-	void "show tables with wildcard"(){
-		def tables = queryExecutor.showTables(DATABASE_NAME.substring(0, DATABASE_NAME.length() - 2) + '*')
-		assert tables.contains(TABLE_NAME)
-	}
+    @Test
+    void "show tables with wildcard"() {
+        def tables = queryExecutor.showTables(DATABASE_NAME.substring(0, DATABASE_NAME.length() - 2) + '*')
+        assert tables.contains(TABLE_NAME)
+    }
 
-	@Test
-	void "field types with wildcards"() {
-		def fieldTypes = queryExecutor.getFieldTypes(DATABASE_NAME.substring(0, DATABASE_NAME.length() - 2) + '*',
-				TABLE_NAME.substring(0, TABLE_NAME.length() - 2) + '*')
-		def expected = getAllTypes()
+    @Test
+    void "field types with wildcards"() {
+        def fieldTypes = queryExecutor.getFieldTypes(DATABASE_NAME.substring(0, DATABASE_NAME.length() - 2) + '*',
+                TABLE_NAME.substring(0, TABLE_NAME.length() - 2) + '*')
+        def expected = getAllTypes()
 
-		//AssertUtils.assertEqualCollections(expected, fieldTypes)
-		compareRowUnordered(expected, fieldTypes, "Returned values, ${fieldTypes}, did not match expected values, ${expected}")
-	}
+        //AssertUtils.assertEqualCollections(expected, fieldTypes)
+        compareRowUnordered(expected, fieldTypes, "Returned values, ${fieldTypes}, did not match expected values, ${expected}")
+    }
 
-	@Test
-	void "query uses scroll to get all the data"() {
-		def result = queryExecutor.execute(
-				new Query(
-				filter: new Filter(databaseName: DATABASE_NAME, tableName: "many-records"),
-				// Ask for more records than are there
-				limitClause: new LimitClause(limit: NUMBER_OF_SCROLL_RECORDS + 10000)
-				),
-				QueryOptions.DEFAULT_OPTIONS)
-		assert result.data.size() == NUMBER_OF_SCROLL_RECORDS
-	}
+    @Test
+    void "query uses scroll to get all the data"() {
+        def result = queryExecutor.execute(
+                new Query(
+                        filter: new Filter(databaseName: DATABASE_NAME, tableName: "many-records"),
+                        // Ask for more records than are there
+                        limitClause: new LimitClause(limit: NUMBER_OF_SCROLL_RECORDS + 10000)
+                ),
+                QueryOptions.DEFAULT_OPTIONS)
+        assert result.data.size() == NUMBER_OF_SCROLL_RECORDS
+    }
 
-	@Test
-	void "query uses scroll to get less than all the data"() {
-		final int MANY_RECORDS = 15000
-		def result = queryExecutor.execute(
-				new Query(
-				filter: new Filter(databaseName: DATABASE_NAME, tableName: "many-records"),
-				// Ask for more records than are there
-				limitClause: new LimitClause(limit: MANY_RECORDS)
-				),
-				QueryOptions.DEFAULT_OPTIONS)
-		assert result.data.size() == MANY_RECORDS
-	}
+    @Test
+    void "query uses scroll to get less than all the data"() {
+        final int MANY_RECORDS = 15000
+        def result = queryExecutor.execute(
+                new Query(
+                        filter: new Filter(databaseName: DATABASE_NAME, tableName: "many-records"),
+                        // Ask for more records than are there
+                        limitClause: new LimitClause(limit: MANY_RECORDS)
+                ),
+                QueryOptions.DEFAULT_OPTIONS)
+        assert result.data.size() == MANY_RECORDS
+    }
 }
