@@ -16,6 +16,7 @@
 
 package com.ncc.neon.query.elasticsearch
 
+
 import org.elasticsearch.action.admin.cluster.state.ClusterStateRequest
 import org.elasticsearch.action.admin.indices.exists.indices.IndicesExistsRequest
 import org.elasticsearch.action.admin.indices.mapping.get.GetMappingsRequest
@@ -23,6 +24,7 @@ import org.elasticsearch.action.search.SearchRequest
 import org.elasticsearch.action.search.SearchResponse
 import org.elasticsearch.action.search.SearchScrollRequest
 import org.elasticsearch.client.Client
+import org.elasticsearch.client.RestClient
 import org.elasticsearch.common.collect.ImmutableOpenMap
 import org.elasticsearch.search.aggregations.bucket.MultiBucketsAggregation
 import org.elasticsearch.search.aggregations.metrics.stats.InternalStats
@@ -190,7 +192,7 @@ class ElasticSearchRestQueryExecutor extends AbstractQueryExecutor {
 		return fieldTypes
 	}
 
-	protected Client getClient() {
+	protected RestClient getClient() {
 		return connectionManager.connection.client
 	}
 

@@ -24,8 +24,7 @@ import org.elasticsearch.common.transport.InetSocketTransportAddress
 This class handles the version-specific parts of connecting to an Elasticsearch connector. This is
 the Elasticsearch 2.x version of the class.
 */
-SuppressWarnings("ClassNameSameAsFilename")
-class ElasticSearchTransportConnector{
+class ElasticSearch2TransportConnector{
     public static TransportClient connectViaTransport(String host, int port) {
         Settings settings = Settings.settingsBuilder().put("client.transport.ignore_cluster_name", true).put("client.transport.sniff", true).build()
         return TransportClient.builder().settings(settings).build().addTransportAddress(new InetSocketTransportAddress(new InetSocketAddress(host, port)))
