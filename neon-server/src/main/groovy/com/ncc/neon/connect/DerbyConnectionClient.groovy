@@ -16,7 +16,8 @@
 
 package com.ncc.neon.connect
 
-import java.sql.*
+import java.sql.Connection
+import java.sql.DriverManager
 
 /**
  * Holds a connection to derby

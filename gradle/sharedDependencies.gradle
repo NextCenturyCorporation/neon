@@ -33,7 +33,13 @@ dependencies {
     compile ("org.elasticsearch:elasticsearch:5.5.3") {
         exclude module: 'asm'
     }
+
+    // NOTE:  REST is used for connections for clients (the javascript client)
     compile ("org.elasticsearch.client:rest:5.5.3")
+
+    // Transport is used for buildSrc, testing, etc.
+    // TODO:  Replace with the REST client
+    compile ("org.elasticsearch.client:transport:5.5.3")
     compile 'com.opencsv:opencsv:3.5'
 }
 
