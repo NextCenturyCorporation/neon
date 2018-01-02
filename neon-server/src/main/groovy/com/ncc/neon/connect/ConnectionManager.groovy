@@ -34,6 +34,7 @@ class ConnectionManager {
     ConnectionClientFactory mongoConnectionFactory = new MongoConnectionClientFactory()
     ConnectionClientFactory sparkSQLConnectionFactory = new JdbcConnectionClientFactory("org.apache.hive.jdbc.HiveDriver", "hive2")
     ConnectionClientFactory elasticSearchConnectionFactory = new ElasticSearchConnectionClientFactory()
+    ConnectionClientFactory elasticSearchRestConnectionFactory = new ElasticSearchRestConnectionClientFactory()
     DerbyConnectionClientFactory derbyConnectionFactory = new DerbyConnectionClientFactory()
 
 
@@ -82,6 +83,9 @@ class ConnectionManager {
         }
         if(connectionInfo.dataSource == DataSources.elasticsearch) {
             return elasticSearchConnectionFactory
+        }
+        if(connectionInfo.dataSource == DataSources.elasticsearchrest) {
+            return elasticSearchRestConnectionFactory
         }
         if(connectionInfo.dataSource == DataSources.derby) {
             return derbyConnectionFactory

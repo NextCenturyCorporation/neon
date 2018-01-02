@@ -45,11 +45,11 @@ import com.ncc.neon.util.AssertUtils
  */
 @RunWith(SpringJUnit4ClassRunner)
 @ContextConfiguration(classes = IntegrationTestContext)
-class ElasticSearchQueryExecutorIntegrationTest extends AbstractQueryExecutorIntegrationTest {
+class ElasticSearchRestQueryExecutorIntegrationTest extends AbstractQueryExecutorIntegrationTest {
     private static final String HOST_STRING = System.getProperty("elasticsearch.host")
     private static final int NUMBER_OF_SCROLL_RECORDS = 20000
 
-    private ElasticSearchRestQueryExecutor elasticSearchQueryExecutor
+    private ElasticSearchRestQueryExecutor elasticSearchRestQueryExecutor
 
     protected String getResultsJsonFolder() {
         return "elasticsearch-json/"
@@ -57,8 +57,8 @@ class ElasticSearchQueryExecutorIntegrationTest extends AbstractQueryExecutorInt
 
     @SuppressWarnings('JUnitPublicNonTestMethod')
     @Autowired
-    public void setElasticSearchQueryExecutor(ElasticSearchRestQueryExecutor elasticSearchQueryExecutor) {
-        this.elasticSearchQueryExecutor = elasticSearchQueryExecutor
+    public void setElasticSearchRestQueryExecutor(ElasticSearchRestQueryExecutor elasticSearchRestQueryExecutor) {
+        this.elasticSearchRestQueryExecutor = elasticSearchRestQueryExecutor
     }
 
     @Before
@@ -66,11 +66,20 @@ class ElasticSearchQueryExecutorIntegrationTest extends AbstractQueryExecutorInt
         // Establish the connection, or skip the tests if no host was specified
         Assume.assumeTrue(" System property HOST_STRING is null or empty",
                 (HOST_STRING != null && HOST_STRING != ""))
-        this.elasticSearchQueryExecutor.connectionManager.currentRequest = new ConnectionInfo(host: HOST_STRING, dataSource: DataSources.elasticsearch)
+        this.elasticSearchRestQueryExecutor.connectionManager.currentRequest =
+                new ConnectionInfo(host: HOST_STRING, dataSource: DataSources.elasticsearchrest)
     }
 
     protected ElasticSearchRestQueryExecutor getQueryExecutor() {
-        return elasticSearchQueryExecutor
+        return elasticSearchRestQueryExecutor
+    }
+
+
+    @Test
+    void "show databases"(){
+        def dbs = queryExecutor.showDatabases()
+
+        assert dbs.contains(DATABASE_NAME)
     }
 
     @Override

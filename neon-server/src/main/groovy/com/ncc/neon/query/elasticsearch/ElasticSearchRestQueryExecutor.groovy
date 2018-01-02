@@ -16,7 +16,8 @@
 
 package com.ncc.neon.query.elasticsearch
 
-
+import org.apache.http.HttpEntity
+import org.apache.http.util.EntityUtils
 import org.elasticsearch.action.admin.cluster.state.ClusterStateRequest
 import org.elasticsearch.action.admin.indices.exists.indices.IndicesExistsRequest
 import org.elasticsearch.action.admin.indices.mapping.get.GetMappingsRequest
@@ -24,6 +25,7 @@ import org.elasticsearch.action.search.SearchRequest
 import org.elasticsearch.action.search.SearchResponse
 import org.elasticsearch.action.search.SearchScrollRequest
 import org.elasticsearch.client.Client
+import org.elasticsearch.client.Response
 import org.elasticsearch.client.RestClient
 import org.elasticsearch.common.collect.ImmutableOpenMap
 import org.elasticsearch.search.aggregations.bucket.MultiBucketsAggregation
@@ -52,148 +54,168 @@ import com.ncc.neon.util.ResourceNotFoundException
 @Component("elasticSearchRestQueryExecutor")
 class ElasticSearchRestQueryExecutor extends AbstractQueryExecutor {
 
-	static final String STATS_AGG_PREFIX = "_statsFor_"
+    static final String STATS_AGG_PREFIX = "_statsFor_"
 
-	private static final Logger LOGGER = LoggerFactory.getLogger(ElasticSearchRestQueryExecutor)
+    private static final Logger LOGGER = LoggerFactory.getLogger(ElasticSearchRestQueryExecutor)
 
-	/*
-	 * A small class to hold the important information about an aggregation bucket between when the
-	 * buckets are taken out of ElasticSearch's hierarchical arrangement and when everything can be
-	 * extracted into the format that the Neon API uses.
-	 */
-	private static class AggregationBucket {
-		def getGroupByKeys() {
-			return groupByKeys
-		}
+    /*
+     * A small class to hold the important information about an aggregation bucket between when the
+     * buckets are taken out of ElasticSearch's hierarchical arrangement and when everything can be
+     * extracted into the format that the Neon API uses.
+     */
 
-		def setGroupByKeys(newGroupByKeys) {
-			groupByKeys = newGroupByKeys
-		}
+    private static class AggregationBucket {
+        def getGroupByKeys() {
+            return groupByKeys
+        }
 
-		def getAggregatedValues() {
-			return aggregatedValues
-		}
+        def setGroupByKeys(newGroupByKeys) {
+            groupByKeys = newGroupByKeys
+        }
 
-		def setAggregatedValues(newValues) {
-			aggregatedValues = newValues
-		}
+        def getAggregatedValues() {
+            return aggregatedValues
+        }
 
-		def getDocCount() {
-			return docCount
-		}
+        def setAggregatedValues(newValues) {
+            aggregatedValues = newValues
+        }
 
-		def setDocCount(newCount) {
-			docCount = newCount
-		}
+        def getDocCount() {
+            return docCount
+        }
 
-		private Map groupByKeys
-		private Map aggregatedValues = [:]
-		private def docCount
-	}
+        def setDocCount(newCount) {
+            docCount = newCount
+        }
 
-	@Autowired
-	protected FilterState filterState
+        private Map groupByKeys
+        private Map aggregatedValues = [:]
+        private def docCount
+    }
 
-	@Autowired
-	protected SelectionState selectionState
+    @Autowired
+    protected FilterState filterState
 
-	@Autowired
-	protected ConnectionManager connectionManager
+    @Autowired
+    protected SelectionState selectionState
 
-	@Override
-	QueryResult doExecute(Query query, QueryOptions options) {
-		returnVal = new TabularQueryResult()
-		return returnVal
-	}
+    @Autowired
+    protected ConnectionManager connectionManager
+
+    @Override
+    QueryResult doExecute(Query query, QueryOptions options) {
+        returnVal = new TabularQueryResult()
+        return returnVal
+    }
 
     /**
-     * Show the databases in elastic search means all the indexes.
+     * Show the databases in elastic search means all the indexes.  Data looks like following.  We want field 2:
+     *
+     * health status index               uuid           pri rep docs.count docs.deleted store.size pri.store.size
+     * -----  -----  -------             ------          --  --       ----         ----      -----           ----
+     * yellow open   neonintegrationtest JAjqGHdyRIOB     5   1      20008            0    900.8kb        900.8kb
+     * yellow open   properties          vAC8vckjS1CP     5   1          2            0      3.5kb          3.5kb
+     *
      * @return list of index names
      */
-	@Override
-	List<String> showDatabases() {
-		LOGGER.debug("Executing showDatabases to retrieve indices")
-		getClient().admin().cluster().state(new ClusterStateRequest()).actionGet().state.metaData.indices.collect { it.key }
-	}
+    @Override
+    List<String> showDatabases() {
+        LOGGER.debug("Executing showDatabases to retrieve indices")
 
-	@Override
-	List<String> showTables(String dbName) {
-		LOGGER.debug("Executing showTables for index " + dbName + " to get type mappings")
-		// Elastic search allows wildcards in index names.  If dbName contains a wildcard, find all matches.
-		if (dbName?.contains('*')) {
-			def match = dbName.replaceAll(/\*/, '.*')
-			List<String> tables = []
-			def mappings = getMappings()
-			mappings.keysIt().each {
-				if (it.matches(match)) {
-					tables.addAll(mappings.get(it).collect{ table -> table.key })
-				}
-			}
-			return tables.unique()
-		}
+        def dbList = []
+        Response response = getClient().performRequest("GET", "/_cat/indices")
+        int statusCode = response.statusLine.statusCode
+        if (statusCode != 200) {
+            LOGGER.warn("Unable to get databases.  Status code " + statusCode)
+            return dbList
+        }
+        BufferedReader bis = new BufferedReader(new InputStreamReader(response.entity.content))
+        bis.eachLine { String line ->
+            dbList.add( (line.split() as List)[2])
+        }
+        LOGGER.debug("   List: " + dbList)
+        return dbList
+    }
 
-		def dbExists = getClient().admin().indices().exists(new IndicesExistsRequest(dbName)).actionGet().isExists()
-		if(!dbExists) {
-			throw new ResourceNotFoundException("Database ${dbName} does not exist")
-		}
+    @Override
+    List<String> showTables(String dbName) {
+        LOGGER.debug("Executing showTables for index " + dbName + " to get type mappings")
+//        // Elastic search allows wildcards in index names.  If dbName contains a wildcard, find all matches.
+//        if (dbName?.contains('*')) {
+//            def match = dbName.replaceAll(/\*/, '.*')
+//            List<String> tables = []
+//            def mappings = getMappings()
+//            mappings.keysIt().each {
+//                if (it.matches(match)) {
+//                    tables.addAll(mappings.get(it).collect { table -> table.key })
+//                }
+//            }
+//            return tables.unique()
+//        }
 
-		// Fall through case is to return the exact match.
-		getMappings().get(dbName).collect { it.key }
-	}
+        def dbExists = getClient().admin().indices().exists(new IndicesExistsRequest(dbName)).actionGet().isExists()
+        if (!dbExists) {
+            throw new ResourceNotFoundException("Database ${dbName} does not exist")
+        }
 
-	@Override
-	List<String> getFieldNames(String databaseName, String tableName) {
-		if(databaseName && tableName) {
-			def dbMatch = databaseName.replaceAll(/\*/, '.*')
-			def tableMatch = tableName.replaceAll(/\*/, '.*')
+        // Fall through case is to return the exact match.
+        getMappings().get(dbName).collect { it.key }
+    }
 
-			def fields = []
-			def mappings = getMappings()
-			mappings.keysIt().each { dbKey ->
-				if (dbKey.matches(dbMatch)) {
-					def dbMappings = mappings.get(dbKey)
-					dbMappings.keysIt().each { tableKey ->
-						if (tableKey.matches(tableMatch)) {
-							def tableMappings = dbMappings.get(tableKey)
-							fields.addAll(getFieldsInObject(tableMappings.getSourceAsMap(), null))
-						}
-					}
-				}
-			}
+    @Override
+    List<String> getFieldNames(String databaseName, String tableName) {
+        if (databaseName && tableName) {
+            def dbMatch = databaseName.replaceAll(/\*/, '.*')
+            def tableMatch = tableName.replaceAll(/\*/, '.*')
 
-			if (fields) {
-				fields.add("_id")
-				return fields.unique()
-			}
-		}
-		throw new ResourceNotFoundException("Fields for Database ${databaseName} and Table ${tableName} do not exist")
-	}
+            def fields = []
+            def mappings = getMappings()
+            mappings.keysIt().each { dbKey ->
+                if (dbKey.matches(dbMatch)) {
+                    def dbMappings = mappings.get(dbKey)
+                    dbMappings.keysIt().each { tableKey ->
+                        if (tableKey.matches(tableMatch)) {
+                            def tableMappings = dbMappings.get(tableKey)
+                            fields.addAll(getFieldsInObject(tableMappings.getSourceAsMap(), null))
+                        }
+                    }
+                }
+            }
 
-	@Override
-	Map getFieldTypes(String databaseName, String tableName) {
-		def fieldTypes = [:]
-		if(databaseName && tableName) {
-			def dbMatch = databaseName.replaceAll(/\*/, '.*')
-			def tableMatch = tableName.replaceAll(/\*/, '.*')
-			def mappings = getMappings()
-			mappings.keysIt().each { dbKey ->
-				if (dbKey.matches(dbMatch)) {
-					def dbMappings = mappings.get(dbKey)
-					dbMappings.keysIt().each { tableKey ->
-						if (tableKey.matches(tableMatch)) {
-							def tableMappings = dbMappings.get(tableKey)
-							fieldTypes.putAll(getFieldTypesInObject(tableMappings.getSourceAsMap(), null))
-						}
-					}
-				}
-			}
-		}
+            if (fields) {
+                fields.add("_id")
+                return fields.unique()
+            }
+        }
+        throw new ResourceNotFoundException("Fields for Database ${databaseName} and Table ${tableName} do not exist")
+    }
 
-		return fieldTypes
-	}
+    @Override
+    Map getFieldTypes(String databaseName, String tableName) {
+        def fieldTypes = [:]
+        if (databaseName && tableName) {
+            def dbMatch = databaseName.replaceAll(/\*/, '.*')
+            def tableMatch = tableName.replaceAll(/\*/, '.*')
+            def mappings = getMappings()
+            mappings.keysIt().each { dbKey ->
+                if (dbKey.matches(dbMatch)) {
+                    def dbMappings = mappings.get(dbKey)
+                    dbMappings.keysIt().each { tableKey ->
+                        if (tableKey.matches(tableMatch)) {
+                            def tableMappings = dbMappings.get(tableKey)
+                            fieldTypes.putAll(getFieldTypesInObject(tableMappings.getSourceAsMap(), null))
+                        }
+                    }
+                }
+            }
+        }
 
-	protected RestClient getClient() {
-		return connectionManager.connection.client
-	}
+        return fieldTypes
+    }
+
+    protected RestClient getClient() {
+        return connectionManager.connection.client
+    }
 
 }
