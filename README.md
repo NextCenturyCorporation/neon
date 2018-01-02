@@ -84,10 +84,15 @@ appropriate host machine.
 
 If you want to do internal development in Neon and want to run individual integration tests; for 
 example in an IDE, then you will need to set up the database.  Do #1 and #2 above,
-then do:  ./gradlew  :neon:insertElasticSearchDataIntegrationTest .  This is part of the normal process 
-for the integration test; running it by itself will leave the data in the database.  Then, in your 
-IDE, you need to set the database host as a system property, which is used by the integration 
-test classes.  For example, in ElasticSearchQueryExecutorIntegrationTest, it gets the host:
+then do:
+
+     ./gradlew  :neon:insertElasticSearchDataIntegrationTest
+
+This is part of the normal process for the integration test; running it by
+itself will leave the data in the database.  Then, in your IDE, you need to set
+the database host as a system property, which is used by the integration test
+classes.  For example, in ElasticSearchQueryExecutorIntegrationTest, it gets the
+host:
 
       private static final String HOST_STRING = System.getProperty("elasticsearch.host") 
       
