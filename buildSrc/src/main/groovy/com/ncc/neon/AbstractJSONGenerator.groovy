@@ -56,7 +56,7 @@ abstract class AbstractJSONGenerator {
 
     protected abstract void modifyJson(jsonArray)
 
-    protected static writeOutputFile(json, outDir, fileName) {
+    protected static writeOutputFile(json, File outDir, fileName) {
         outDir.mkdirs()
         def outfile = new File(outDir, fileName)
         outfile.withWriter { w ->
