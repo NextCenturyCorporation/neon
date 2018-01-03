@@ -16,6 +16,8 @@
 
 package com.ncc.neon.query.elasticsearch
 
+import com.mongodb.util.JSON
+import groovy.json.JsonSlurper
 import org.apache.http.HttpEntity
 import org.apache.http.util.EntityUtils
 import org.elasticsearch.action.admin.cluster.state.ClusterStateRequest
@@ -49,6 +51,9 @@ import com.ncc.neon.query.filter.SelectionState
 import com.ncc.neon.query.result.QueryResult
 import com.ncc.neon.query.result.TabularQueryResult
 import com.ncc.neon.util.ResourceNotFoundException
+
+import java.util.regex.Matcher
+import java.util.regex.Pattern
 
 @Primary
 @Component("elasticSearchRestQueryExecutor")
@@ -110,57 +115,29 @@ class ElasticSearchRestQueryExecutor extends AbstractQueryExecutor {
     }
 
     /**
-     * Show the databases in elastic search means all the indexes.  Data looks like following.  We want field 2:
-     *
-     * health status index               uuid           pri rep docs.count docs.deleted store.size pri.store.size
-     * -----  -----  -------             ------          --  --       ----         ----      -----           ----
-     * yellow open   neonintegrationtest JAjqGHdyRIOB     5   1      20008            0    900.8kb        900.8kb
-     * yellow open   properties          vAC8vckjS1CP     5   1          2            0      3.5kb          3.5kb
-     *
+     * Show the databases in elastic search
      * @return list of index names
      */
     @Override
     List<String> showDatabases() {
         LOGGER.debug("Executing showDatabases to retrieve indices")
-
-        def dbList = []
-        Response response = getClient().performRequest("GET", "/_cat/indices")
-        int statusCode = response.statusLine.statusCode
-        if (statusCode != 200) {
-            LOGGER.warn("Unable to get databases.  Status code " + statusCode)
-            return dbList
-        }
-        BufferedReader bis = new BufferedReader(new InputStreamReader(response.entity.content))
-        bis.eachLine { String line ->
-            dbList.add( (line.split() as List)[2])
-        }
-        LOGGER.debug("   List: " + dbList)
-        return dbList
+        def mappingData = getMappings()
+        return mappingData.keySet() as List
     }
 
     @Override
     List<String> showTables(String dbName) {
         LOGGER.debug("Executing showTables for index " + dbName + " to get type mappings")
-//        // Elastic search allows wildcards in index names.  If dbName contains a wildcard, find all matches.
-//        if (dbName?.contains('*')) {
-//            def match = dbName.replaceAll(/\*/, '.*')
-//            List<String> tables = []
-//            def mappings = getMappings()
-//            mappings.keysIt().each {
-//                if (it.matches(match)) {
-//                    tables.addAll(mappings.get(it).collect { table -> table.key })
-//                }
-//            }
-//            return tables.unique()
-//        }
-
-        def dbExists = getClient().admin().indices().exists(new IndicesExistsRequest(dbName)).actionGet().isExists()
-        if (!dbExists) {
-            throw new ResourceNotFoundException("Database ${dbName} does not exist")
+        def dbMatch = dbName.replaceAll(/\*/, '.*')
+        def tableList = []
+        def mappingData = getMappings()
+        mappingData.each { k, v ->
+            if (k.matches(dbMatch)) {
+                def tablenames = v['mappings'].keySet()
+                tableList.addAll(tablenames)
+            }
         }
-
-        // Fall through case is to return the exact match.
-        getMappings().get(dbName).collect { it.key }
+        return tableList
     }
 
     @Override
@@ -170,14 +147,14 @@ class ElasticSearchRestQueryExecutor extends AbstractQueryExecutor {
             def tableMatch = tableName.replaceAll(/\*/, '.*')
 
             def fields = []
-            def mappings = getMappings()
-            mappings.keysIt().each { dbKey ->
-                if (dbKey.matches(dbMatch)) {
-                    def dbMappings = mappings.get(dbKey)
-                    dbMappings.keysIt().each { tableKey ->
-                        if (tableKey.matches(tableMatch)) {
-                            def tableMappings = dbMappings.get(tableKey)
-                            fields.addAll(getFieldsInObject(tableMappings.getSourceAsMap(), null))
+            def mappingData = getMappings()
+            mappingData.each { dbkey, dbvalues ->
+                if (dbkey.matches(dbMatch)) {
+                    def mappings = dbvalues['mappings']
+                    mappings.each { tablekey, tablevalues ->
+                        if (tablekey.matches(tableMatch)) {
+                            def fieldValues = tablevalues['properties'].keySet()
+                            fields.addAll(fieldValues)
                         }
                     }
                 }
@@ -197,21 +174,49 @@ class ElasticSearchRestQueryExecutor extends AbstractQueryExecutor {
         if (databaseName && tableName) {
             def dbMatch = databaseName.replaceAll(/\*/, '.*')
             def tableMatch = tableName.replaceAll(/\*/, '.*')
-            def mappings = getMappings()
-            mappings.keysIt().each { dbKey ->
-                if (dbKey.matches(dbMatch)) {
-                    def dbMappings = mappings.get(dbKey)
-                    dbMappings.keysIt().each { tableKey ->
-                        if (tableKey.matches(tableMatch)) {
-                            def tableMappings = dbMappings.get(tableKey)
-                            fieldTypes.putAll(getFieldTypesInObject(tableMappings.getSourceAsMap(), null))
+            def mappingData = getMappings()
+
+            mappingData.each { dbkey, dbvalues ->
+                if (dbkey.matches(dbMatch)) {
+                    def mappings = dbvalues['mappings']
+                    mappings.each { tablekey, tablevalues ->
+                        if (tablekey.matches(tableMatch)) {
+                            def fieldValues = tablevalues['properties']
+                            fieldValues.each { fieldkey, fieldvalues ->
+                                def fieldType = fieldvalues['type']
+                                fieldTypes.put(fieldkey, fieldType)
+                            }
                         }
                     }
                 }
             }
         }
-
         return fieldTypes
+    }
+
+    /** Get the _mappings from the DB.  This looks like:
+     * <pre>
+     * { "neonintegrationtest":
+     *     {"mappings":
+     *         {"records":
+     *              {"properties":
+     *                     {"city": {"type":"keyword"},
+     *                      "firstname":{"type":"keyword"}
+     *  ....
+     * </pre>
+     * which is a map of maps.
+     * @return map of maps object, groovy.json.internal.lazyMap
+     */
+    protected Object getMappings() {
+        LOGGER.debug("Executing get mappings")
+        Response response = getClient().performRequest("GET", "/_mappings")
+        int statusCode = response.statusLine.statusCode
+        if (statusCode != 200) {
+            LOGGER.warn("Unable to get mappings.  Status code " + statusCode)
+            return new Object()
+        }
+        def json = new JsonSlurper().parse(response.entity.content)
+        return json
     }
 
     protected RestClient getClient() {

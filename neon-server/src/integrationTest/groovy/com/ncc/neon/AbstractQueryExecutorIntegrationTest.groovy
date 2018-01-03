@@ -19,6 +19,7 @@ package com.ncc.neon
 import com.ncc.neon.query.result.TabularQueryResult
 import org.json.JSONArray
 import org.junit.After
+import org.junit.FixMethodOrder
 import org.junit.Test
 
 import com.ncc.neon.query.Query
@@ -37,7 +38,6 @@ import com.ncc.neon.util.DateUtils
  *
  * Subclasses implement database specific translations
  */
-
 abstract class AbstractQueryExecutorIntegrationTest {
 
     static final DATE_FIELD_REGEX = ~/.*date.*/

@@ -22,6 +22,7 @@ import org.json.JSONArray
 import org.json.JSONObject
 import org.junit.Assume
 import org.junit.Before
+import org.junit.FixMethodOrder
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.springframework.beans.factory.annotation.Autowired
@@ -74,14 +75,6 @@ class ElasticSearchRestQueryExecutorIntegrationTest extends AbstractQueryExecuto
         return elasticSearchRestQueryExecutor
     }
 
-
-    @Test
-    void "show databases"(){
-        def dbs = queryExecutor.showDatabases()
-
-        assert dbs.contains(DATABASE_NAME)
-    }
-
     @Override
     protected def convertRowValueToBasicJavaType(def val) {
         return super.convertRowValueToBasicJavaType(val)
@@ -104,6 +97,34 @@ class ElasticSearchRestQueryExecutorIntegrationTest extends AbstractQueryExecuto
             }
         }
         return map
+    }
+
+    @Test
+    void "get mappings"() {
+        // Mappings is a groovy.json.internal.lazyMap
+        Object mappings = queryExecutor.getMappings()
+        assert mappings.containsKey(DATABASE_NAME)
+    }
+
+    @Test
+    void "show databases"() {
+        def dbs = queryExecutor.showDatabases()
+        println dbs
+        assert dbs.contains(DATABASE_NAME)
+    }
+
+    @Test
+    void "show tables"() {
+        def tables = queryExecutor.showTables(DATABASE_NAME)
+        println tables
+        assert tables.contains(TABLE_NAME)
+    }
+
+    @Test
+    void "field types"() {
+        def fieldTypes = queryExecutor.getFieldTypes(DATABASE_NAME, TABLE_NAME)
+        def expected = getAllTypes()
+        compareRowUnordered(expected, fieldTypes, "Returned values, ${fieldTypes}, did not match expected values, ${expected}")
     }
 
     @Test
