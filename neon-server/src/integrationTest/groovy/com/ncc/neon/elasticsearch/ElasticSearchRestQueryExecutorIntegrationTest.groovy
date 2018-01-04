@@ -20,6 +20,7 @@ import org.joda.time.format.DateTimeFormat
 import org.joda.time.format.DateTimeFormatter
 import org.json.JSONArray
 import org.json.JSONObject
+import org.junit.Assert
 import org.junit.Assume
 import org.junit.Before
 import org.junit.Test
@@ -99,30 +100,55 @@ class ElasticSearchRestQueryExecutorIntegrationTest extends AbstractQueryExecuto
     }
 
     @Test
-    void "get mappings"() {
-        // Mappings is a groovy.json.internal.lazyMap
-        Object mappings = queryExecutor.getMappings()
-        assert mappings.containsKey(DATABASE_NAME)
+    void "make sure database and table exist"() {
+        try {
+            queryExecutor.checkDatabaseAndTableExists(DATABASE_NAME, TABLE_NAME)
+        }
+        catch (all)
+        {
+            Assert.fail("Database $DATABASE_NAME did not exist")
+        }
     }
 
-    @Test
-    void "show databases"() {
-        def dbs = queryExecutor.showDatabases()
-        assert dbs.contains(DATABASE_NAME)
-    }
 
     @Test
-    void "show tables"() {
-        def tables = queryExecutor.showTables(DATABASE_NAME)
-        assert tables.contains(TABLE_NAME)
+    void "make sure fake database and table do not exist"() {
+        def fakeDB = "lasdf"
+        try {
+            queryExecutor.checkDatabaseAndTableExists(fakeDB, TABLE_NAME)
+            Assert.fail("Should not get here $fakeDB")
+        }
+        catch (all)
+        {
+            // this is expected.
+        }
     }
-
-    @Test
-    void "field types"() {
-        def fieldTypes = queryExecutor.getFieldTypes(DATABASE_NAME, TABLE_NAME)
-        def expected = getAllTypes()
-        compareRowUnordered(expected, fieldTypes, "Returned values, ${fieldTypes}, did not match expected values, ${expected}")
-    }
+//
+//    @Test
+//    void "get mappings"() {
+//        // Mappings is a groovy.json.internal.lazyMap
+//        Object mappings = queryExecutor.getMappings()
+//        assert mappings.containsKey(DATABASE_NAME)
+//    }
+//
+//    @Test
+//    void "show databases"() {
+//        def dbs = queryExecutor.showDatabases()
+//        assert dbs.contains(DATABASE_NAME)
+//    }
+//
+//    @Test
+//    void "show tables"() {
+//        def tables = queryExecutor.showTables(DATABASE_NAME)
+//        assert tables.contains(TABLE_NAME)
+//    }
+//
+//    @Test
+//    void "field types"() {
+//        def fieldTypes = queryExecutor.getFieldTypes(DATABASE_NAME, TABLE_NAME)
+//        def expected = getAllTypes()
+//        compareRowUnordered(expected, fieldTypes, "Returned values, ${fieldTypes}, did not match expected values, ${expected}")
+//    }
 
     @Test
     void "query with index wildcards"() {

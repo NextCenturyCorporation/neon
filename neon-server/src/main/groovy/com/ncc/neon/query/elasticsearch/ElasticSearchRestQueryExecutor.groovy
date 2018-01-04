@@ -26,6 +26,8 @@ import com.ncc.neon.query.result.QueryResult
 import com.ncc.neon.query.result.TabularQueryResult
 import com.ncc.neon.util.ResourceNotFoundException
 import groovy.json.JsonSlurper
+import org.elasticsearch.action.search.SearchRequest
+import org.elasticsearch.action.search.SearchResponse
 import org.elasticsearch.client.Response
 import org.elasticsearch.client.RestClient
 import org.slf4j.Logger
@@ -89,8 +91,81 @@ class ElasticSearchRestQueryExecutor extends AbstractQueryExecutor {
 
     @Override
     QueryResult doExecute(Query query, QueryOptions options) {
-        returnVal = new TabularQueryResult()
+
+        def aggregates = query.aggregates
+        def groupByClauses = query.groupByClauses
+
+        checkDatabaseAndTableExists(query.databaseName, query.tableName)
+        long d1 = new Date().getTime()
+
+        ElasticSearchRestConversionStrategy conversionStrategy = new ElasticSearchRestConversionStrategy(
+                filterState: filterState, selectionState: selectionState)
+        String request = conversionStrategy.convertQuery(query, options)
+        Response response = getClient().performRequest("GET", request)
+
+        // SearchResponse results = getClient().search(request).actionGet()
+        // def aggResults = results.aggregations
+        def returnVal = new TabularQueryResult()
+
+        if (aggregates && !groupByClauses) {
+//            returnVal = new TabularQueryResult([
+//                    extractMetrics(aggregates, aggResults ? aggResults.asMap() : null, results.hits.totalHits)
+//            ])
+        } else if (groupByClauses) {
+//            def buckets = extractBuckets(groupByClauses, aggResults.asList()[0])
+//            buckets = combineDuplicateBuckets(buckets)
+//            buckets = extractMetricsFromBuckets(aggregates, buckets)
+//            buckets = sortBuckets(query.sortClauses, buckets)
+//            buckets = limitBuckets(buckets, query)
+//            returnVal = new TabularQueryResult(buckets)
+        } else if (query.isDistinct) {
+//            returnVal = new TabularQueryResult(extractDistinct(query, aggResults.asList()[0]))
+//        } else if (results.getScrollId()) {
+//            returnVal = collectScrolledResults(query, results)
+        } else {
+            returnVal = new TabularQueryResult(extractResults(response))
+        }
+
+        long diffTime = new Date().getTime() - d1
+        LOGGER.debug(" Query took: " + diffTime + " ms ")
+
         return returnVal
+    }
+
+    private List<Map<String, Object>> extractResults(response) {
+        return hits.collect {
+            def record = it.getSource()
+            // Add the ElasticSearch id, since it isn't included in the "source" document
+            record["_id"] =  it.getId()
+            return record
+        }
+    }
+
+    /**
+     *  Note: This method is not an appropriate check for queries against index mappings as they
+     *  allow both the databaseName and tableName to be wildcarded.  This method allows only
+     *  the databaseName to be wildcarded to match the behavior of index searches.
+     */
+    protected void checkDatabaseAndTableExists(String databaseName, String tableName) {
+        def dbMatch = databaseName.replaceAll(/\*/, '.*')
+        def tableMatch = tableName
+        def mappingData = getMappings()
+        boolean found = false
+
+        mappingData.each { dbkey, v ->
+            if (dbkey.matches(dbMatch)) {
+                def tablenames = v['mappings'].keySet() as List
+                tablenames.each { String it ->
+                    if (it.matches(tableMatch)) {
+                        println("found it ")
+                        found = true
+                    }
+                }
+            }
+        }
+        if (!found) {
+            throw new ResourceNotFoundException("Table ${tableName} does not exist")
+        }
     }
 
     /**
@@ -176,13 +251,12 @@ class ElasticSearchRestQueryExecutor extends AbstractQueryExecutor {
 
     /** Get the _mappings from the DB.  This looks like:
      * <pre>
-     * { "neonintegrationtest":
-     *     {"mappings":
-     *         {"records":
-     *              {"properties":
-     *                     {"city": {"type":"keyword"},
-     *                      "firstname":{"type":"keyword"}
-     *  ....
+     *{ "neonintegrationtest":
+     *{"mappings":
+     *{"records":
+     *{"properties":
+     *{"city": {"type":"keyword"},
+     *                      "firstname":{"type":"keyword"}*  ....
      * </pre>
      * which is a map of maps.
      * @return map of maps object, groovy.json.internal.lazyMap
