@@ -32,12 +32,15 @@ import org.elasticsearch.index.query.QueryBuilders
 import org.elasticsearch.search.builder.SearchSourceBuilder
 
 import groovy.transform.Immutable
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
 
 /**
  * Converts a Query object into a BasicDbObject
  */
 @Immutable
 class ElasticSearchHeatmapConversionStrategy {
+    private static final Logger LOGGER = LoggerFactory.getLogger(ElasticSearchHeatmapConversionStrategy)
     static final String TERM_PREFIX = "_term"
     static final String STATS_AGG_PREFIX = "_statsFor_"
     static final String[] DATE_OPERATIONS = ['year', 'month', 'dayOfMonth', 'dayOfWeek', 'hour', 'minute', 'second']
@@ -63,6 +66,7 @@ class ElasticSearchHeatmapConversionStrategy {
      * filter and selection state associated with this ConverstionStrategy to it and
      * returns a sourcebuilder seeded with the resultant query param.
      */
+
     public SearchSourceBuilder createSourceBuilderWithState(Query query, QueryOptions options, WhereClause whereClause = null) {
         def dataSet = new DataSet(databaseName: query.databaseName, tableName: query.tableName)
         def whereClauses = collectWhereClauses(dataSet, query, options, whereClause)
@@ -75,11 +79,14 @@ class ElasticSearchHeatmapConversionStrategy {
     /*
      * inject heatmap aggregation and bounding box
      */
+
     private static injectHeatmapAggregation(SearchSourceBuilder source, HeatmapBoundsQuery boundingBox) {
-       // def bounds = ElasticSearchConversionStrategyHelper.createHeatmapAggregation(boundingBox)
-       // if(bounds) {
-       //     source.aggregation(bounds)
-       // }
+        // handle code narc
+        LOGGER.debug("In injectHeatmapAggregation " + source + " " + boundingBox)
+        // def bounds = ElasticSearchConversionStrategyHelper.createHeatmapAggregation(boundingBox)
+        // if(bounds) {
+        //     source.aggregation(bounds)
+        // }
     }
 
     private static SearchRequest buildRequest(Query query, SearchSourceBuilder source) {
@@ -111,7 +118,7 @@ class ElasticSearchHeatmapConversionStrategy {
     private getCountFieldClauses(query) {
         def clauses = []
         query.aggregates.each {
-            if(isCountFieldAggregation(it)) {
+            if (isCountFieldAggregation(it)) {
                 clauses.push(new SingularWhereClause(lhs: it.field, operator: '!=', rhs: null))
             }
         }
@@ -130,7 +137,7 @@ class ElasticSearchHeatmapConversionStrategy {
     }
 
     public static int getTotalLimit(Query query) {
-        if(query.groupByClauses || query.aggregates) {
+        if (query.groupByClauses || query.aggregates) {
             return 0
         }
 
@@ -138,11 +145,11 @@ class ElasticSearchHeatmapConversionStrategy {
     }
 
     public static int getLimit(Query query, Boolean supportsUnlimited = false) {
-        if(query?.limitClause) {
+        if (query?.limitClause) {
             return query.limitClause.limit as int
         }
 
-        if(supportsUnlimited) {
+        if (supportsUnlimited) {
             return 0
         }
 

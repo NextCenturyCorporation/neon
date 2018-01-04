@@ -19,7 +19,6 @@ package com.ncc.neon
 import com.ncc.neon.query.result.TabularQueryResult
 import org.json.JSONArray
 import org.junit.After
-import org.junit.FixMethodOrder
 import org.junit.Test
 
 import com.ncc.neon.query.Query

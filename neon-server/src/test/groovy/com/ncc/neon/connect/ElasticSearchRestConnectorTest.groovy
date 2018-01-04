@@ -11,6 +11,7 @@ public class ElasticSearchRestConnectorTest {
     public void connectViaRest() {
         RestClient rc = ElasticSearchRestConnector.connectViaRest("localhost", 9200)
         Response response = rc.performRequest("GET", "/haiti_5/_search")
-        System.out.println(EntityUtils.toString(response.getEntity()))
+        assert response.getStatusLine().statusCode == 200
+        // System.out.println(EntityUtils.toString(response.getEntity()))
     }
 }

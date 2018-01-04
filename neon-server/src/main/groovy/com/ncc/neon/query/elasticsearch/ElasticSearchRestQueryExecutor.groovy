@@ -16,44 +16,23 @@
 
 package com.ncc.neon.query.elasticsearch
 
-import com.mongodb.util.JSON
-import groovy.json.JsonSlurper
-import org.apache.http.HttpEntity
-import org.apache.http.util.EntityUtils
-import org.elasticsearch.action.admin.cluster.state.ClusterStateRequest
-import org.elasticsearch.action.admin.indices.exists.indices.IndicesExistsRequest
-import org.elasticsearch.action.admin.indices.mapping.get.GetMappingsRequest
-import org.elasticsearch.action.search.SearchRequest
-import org.elasticsearch.action.search.SearchResponse
-import org.elasticsearch.action.search.SearchScrollRequest
-import org.elasticsearch.client.Client
-import org.elasticsearch.client.Response
-import org.elasticsearch.client.RestClient
-import org.elasticsearch.common.collect.ImmutableOpenMap
-import org.elasticsearch.search.aggregations.bucket.MultiBucketsAggregation
-import org.elasticsearch.search.aggregations.metrics.stats.InternalStats
-import org.slf4j.Logger
-import org.slf4j.LoggerFactory
-import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.context.annotation.Primary
-import org.springframework.stereotype.Component
-
 import com.ncc.neon.connect.ConnectionManager
-import com.ncc.neon.connect.NeonConnectionException
 import com.ncc.neon.query.Query
 import com.ncc.neon.query.QueryOptions
-import com.ncc.neon.query.clauses.GroupByFieldClause
-import com.ncc.neon.query.clauses.GroupByFunctionClause
-import com.ncc.neon.query.clauses.SortClause
 import com.ncc.neon.query.executor.AbstractQueryExecutor
 import com.ncc.neon.query.filter.FilterState
 import com.ncc.neon.query.filter.SelectionState
 import com.ncc.neon.query.result.QueryResult
 import com.ncc.neon.query.result.TabularQueryResult
 import com.ncc.neon.util.ResourceNotFoundException
-
-import java.util.regex.Matcher
-import java.util.regex.Pattern
+import groovy.json.JsonSlurper
+import org.elasticsearch.client.Response
+import org.elasticsearch.client.RestClient
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
+import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.context.annotation.Primary
+import org.springframework.stereotype.Component
 
 @Primary
 @Component("elasticSearchRestQueryExecutor")
@@ -123,6 +102,7 @@ class ElasticSearchRestQueryExecutor extends AbstractQueryExecutor {
         LOGGER.debug("Executing showDatabases to retrieve indices")
         def mappingData = getMappings()
         return mappingData.keySet() as List
+
     }
 
     @Override

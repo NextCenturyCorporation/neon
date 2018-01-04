@@ -22,7 +22,6 @@ import org.json.JSONArray
 import org.json.JSONObject
 import org.junit.Assume
 import org.junit.Before
-import org.junit.FixMethodOrder
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.springframework.beans.factory.annotation.Autowired
@@ -109,14 +108,12 @@ class ElasticSearchRestQueryExecutorIntegrationTest extends AbstractQueryExecuto
     @Test
     void "show databases"() {
         def dbs = queryExecutor.showDatabases()
-        println dbs
         assert dbs.contains(DATABASE_NAME)
     }
 
     @Test
     void "show tables"() {
         def tables = queryExecutor.showTables(DATABASE_NAME)
-        println tables
         assert tables.contains(TABLE_NAME)
     }
 

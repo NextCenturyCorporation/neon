@@ -10,6 +10,7 @@ configurations {
 
 configurations.all {
     exclude group: 'org.jboss.netty', module: 'netty'
+    exclude group: 'org.slf4j', module: 'slf4j-log4j12'
 }
 
 // dependencies required for the spark sql libraries
