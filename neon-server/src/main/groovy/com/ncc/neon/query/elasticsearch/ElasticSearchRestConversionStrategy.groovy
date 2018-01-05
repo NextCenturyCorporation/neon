@@ -20,10 +20,16 @@ package com.ncc.neon.query.elasticsearch
 import com.ncc.neon.query.Query
 import com.ncc.neon.query.QueryOptions
 import com.ncc.neon.query.clauses.SelectClause
+import com.ncc.neon.query.clauses.WhereClause
+import com.ncc.neon.query.filter.DataSet
 import com.ncc.neon.query.filter.FilterState
 import com.ncc.neon.query.filter.SelectionState
 import groovy.transform.Immutable
 import org.elasticsearch.action.search.SearchRequest
+import org.elasticsearch.index.query.QueryBuilders
+import org.elasticsearch.search.builder.SearchSourceBuilder
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
 
 /**
  * Converts a Query object into a BasicDbObject
@@ -34,35 +40,42 @@ class ElasticSearchRestConversionStrategy {
     static final String STATS_AGG_PREFIX = "_statsFor_"
     static final String[] DATE_OPERATIONS = ['year', 'month', 'dayOfMonth', 'dayOfWeek', 'hour', 'minute', 'second']
 
-    private final FilterState filterState
-    private final SelectionState selectionState
+    private static final Logger LOGGER = LoggerFactory.getLogger(ElasticSearchRestConversionStrategy)
+
+//    private final FilterState filterState
+//    private final SelectionState selectionState
 
     public SearchRequest convertQuery(Query query, QueryOptions options) {
-        def source = createSourceBuilderWithState(query, options)
-
-        if (query.fields && query.fields != SelectClause.ALL_FIELDS) {
-            source.fetchSource(query.fields as String[])
-        }
-
-        convertAggregations(query, source)
-
-        return buildRequest(query, source)
+        LOGGER.debug("Query is " + query)
+        LOGGER.debug("QueryOptions is " + options)
+        SearchRequest sr = new SearchRequest()
+        return sr
+//
+//        def source = createSourceBuilderWithState(query, options)
+//
+//        if (query.fields && query.fields != SelectClause.ALL_FIELDS) {
+//            source.fetchSource(query.fields as String[])
+//        }
+//
+//        convertAggregations(query, source)
+//
+//        return buildRequest(query, source)
     }
 
-//    /*
-//     * Create and return an elastic search SourceBuilder that takes into account the current
-//     * filter state and selection state.  It takes an input query, applies the current
-//     * filter and selection state associated with this ConverstionStrategy to it and
-//     * returns a sourcebuilder seeded with the resultant query param.
-//     */
-//    public SearchSourceBuilder createSourceBuilderWithState(Query query, QueryOptions options, WhereClause whereClause = null) {
-//        def dataSet = new DataSet(databaseName: query.databaseName, tableName: query.tableName)
-//        def whereClauses = collectWhereClauses(dataSet, query, options, whereClause)
-//
-//        def whereFilter = ElasticSearchConversionStrategyHelper.convertWhereClauses(whereClauses)
-//
-//        return createSearchSourceBuilder(query).query(QueryBuilders.filteredQuery(null, whereFilter))
-//    }
+    /*
+     * Create and return an elastic search SourceBuilder that takes into account the current
+     * filter state and selection state.  It takes an input query, applies the current
+     * filter and selection state associated with this ConverstionStrategy to it and
+     * returns a sourcebuilder seeded with the resultant query param.
+     */
+    public SearchSourceBuilder createSourceBuilderWithState(Query query, QueryOptions options, WhereClause whereClause = null) {
+        def dataSet = new DataSet(databaseName: query.databaseName, tableName: query.tableName)
+        def whereClauses = collectWhereClauses(dataSet, query, options, whereClause)
+
+        def whereFilter = ElasticSearchConversionStrategyHelper.convertWhereClauses(whereClauses)
+
+        return createSearchSourceBuilder(query).query(QueryBuilders.filteredQuery(null, whereFilter))
+    }
 //
 //    /*
 //     * create the metric aggregations by doing a stats aggregation for any field where

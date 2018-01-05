@@ -121,34 +121,42 @@ class ElasticSearchRestQueryExecutorIntegrationTest extends AbstractQueryExecuto
         catch (all)
         {
             // this is expected.
+            assert fakeDB.contains(fakeDB)
         }
     }
-//
-//    @Test
-//    void "get mappings"() {
-//        // Mappings is a groovy.json.internal.lazyMap
-//        Object mappings = queryExecutor.getMappings()
-//        assert mappings.containsKey(DATABASE_NAME)
-//    }
-//
-//    @Test
-//    void "show databases"() {
-//        def dbs = queryExecutor.showDatabases()
-//        assert dbs.contains(DATABASE_NAME)
-//    }
-//
-//    @Test
-//    void "show tables"() {
-//        def tables = queryExecutor.showTables(DATABASE_NAME)
-//        assert tables.contains(TABLE_NAME)
-//    }
-//
-//    @Test
-//    void "field types"() {
-//        def fieldTypes = queryExecutor.getFieldTypes(DATABASE_NAME, TABLE_NAME)
-//        def expected = getAllTypes()
-//        compareRowUnordered(expected, fieldTypes, "Returned values, ${fieldTypes}, did not match expected values, ${expected}")
-//    }
+
+
+    @Test
+    void "query all"() {
+        def result = queryExecutor.execute(ALL_DATA_QUERY, QueryOptions.DEFAULT_OPTIONS)
+        assertUnorderedQueryResult(getAllData(), result)
+    }
+
+    @Test
+    void "get mappings"() {
+        // Mappings is a groovy.json.internal.lazyMap
+        Object mappings = queryExecutor.getMappings()
+        assert mappings.containsKey(DATABASE_NAME)
+    }
+
+    @Test
+    void "show databases"() {
+        def dbs = queryExecutor.showDatabases()
+        assert dbs.contains(DATABASE_NAME)
+    }
+
+    @Test
+    void "show tables"() {
+        def tables = queryExecutor.showTables(DATABASE_NAME)
+        assert tables.contains(TABLE_NAME)
+    }
+
+    @Test
+    void "field types"() {
+        def fieldTypes = queryExecutor.getFieldTypes(DATABASE_NAME, TABLE_NAME)
+        def expected = getAllTypes()
+        compareRowUnordered(expected, fieldTypes, "Returned values, ${fieldTypes}, did not match expected values, ${expected}")
+    }
 
     @Test
     void "query with index wildcards"() {

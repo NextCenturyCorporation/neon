@@ -26,8 +26,6 @@ import com.ncc.neon.query.result.QueryResult
 import com.ncc.neon.query.result.TabularQueryResult
 import com.ncc.neon.util.ResourceNotFoundException
 import groovy.json.JsonSlurper
-import org.elasticsearch.action.search.SearchRequest
-import org.elasticsearch.action.search.SearchResponse
 import org.elasticsearch.client.Response
 import org.elasticsearch.client.RestClient
 import org.slf4j.Logger
@@ -89,6 +87,7 @@ class ElasticSearchRestQueryExecutor extends AbstractQueryExecutor {
     @Autowired
     protected ConnectionManager connectionManager
 
+    @SuppressWarnings('MethodSize')
     @Override
     QueryResult doExecute(Query query, QueryOptions options) {
 
@@ -108,10 +107,12 @@ class ElasticSearchRestQueryExecutor extends AbstractQueryExecutor {
         def returnVal = new TabularQueryResult()
 
         if (aggregates && !groupByClauses) {
+            LOGGER.debug("aggs and no group by ")
 //            returnVal = new TabularQueryResult([
 //                    extractMetrics(aggregates, aggResults ? aggResults.asMap() : null, results.hits.totalHits)
 //            ])
         } else if (groupByClauses) {
+            LOGGER.debug("group by ")
 //            def buckets = extractBuckets(groupByClauses, aggResults.asList()[0])
 //            buckets = combineDuplicateBuckets(buckets)
 //            buckets = extractMetricsFromBuckets(aggregates, buckets)
@@ -119,10 +120,12 @@ class ElasticSearchRestQueryExecutor extends AbstractQueryExecutor {
 //            buckets = limitBuckets(buckets, query)
 //            returnVal = new TabularQueryResult(buckets)
         } else if (query.isDistinct) {
+            LOGGER.debug("distinct")
 //            returnVal = new TabularQueryResult(extractDistinct(query, aggResults.asList()[0]))
 //        } else if (results.getScrollId()) {
 //            returnVal = collectScrolledResults(query, results)
         } else {
+            LOGGER.debug("none of the above")
             returnVal = new TabularQueryResult(extractResults(response))
         }
 
@@ -133,7 +136,7 @@ class ElasticSearchRestQueryExecutor extends AbstractQueryExecutor {
     }
 
     private List<Map<String, Object>> extractResults(response) {
-        return hits.collect {
+        return response.collect {
             def record = it.getSource()
             // Add the ElasticSearch id, since it isn't included in the "source" document
             record["_id"] =  it.getId()
@@ -157,7 +160,6 @@ class ElasticSearchRestQueryExecutor extends AbstractQueryExecutor {
                 def tablenames = v['mappings'].keySet() as List
                 tablenames.each { String it ->
                     if (it.matches(tableMatch)) {
-                        println("found it ")
                         found = true
                     }
                 }

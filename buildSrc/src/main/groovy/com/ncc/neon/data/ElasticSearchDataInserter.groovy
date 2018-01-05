@@ -18,20 +18,15 @@ package com.ncc.neon.data
 
 import com.opencsv.CSVIterator
 import com.opencsv.CSVReader
-import groovy.json.JsonOutput
 import org.elasticsearch.action.admin.indices.create.CreateIndexRequest
 import org.elasticsearch.action.admin.indices.create.CreateIndexResponse
 import org.elasticsearch.action.admin.indices.exists.indices.IndicesExistsRequest
 import org.elasticsearch.action.admin.indices.exists.indices.IndicesExistsResponse
-import org.elasticsearch.action.admin.indices.mapping.put.PutMappingResponse
 import org.elasticsearch.action.bulk.BulkRequestBuilder
 import org.elasticsearch.action.bulk.BulkResponse
 import org.elasticsearch.action.index.IndexRequestBuilder
 import org.elasticsearch.client.IndicesAdminClient
 import org.elasticsearch.client.transport.TransportClient
-import org.elasticsearch.common.settings.Settings
-import org.elasticsearch.common.settings.Settings
-import org.elasticsearch.common.transport.InetSocketTransportAddress
 import org.elasticsearch.common.xcontent.XContentBuilder
 import org.elasticsearch.common.xcontent.XContentFactory
 import org.gradle.api.DefaultTask
@@ -39,6 +34,12 @@ import org.gradle.api.tasks.TaskAction
 import org.joda.time.format.DateTimeFormat
 import org.joda.time.format.DateTimeFormatter
 
+/**
+ * Insert data into ElasticSearch.  Unfortunately, this still uses the TransportClient because
+ * the RestHighLevelClient cannot do this yet.
+ *
+ * TODO:  Replace TransportClient when RestHighLevelClient implements admin tasks, like mappings.
+ */
 class ElasticSearchDataInserter extends DefaultTask{
     // default values. build will override these
     String host = "elastic:10000"
