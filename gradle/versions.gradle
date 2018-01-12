@@ -36,7 +36,7 @@ project.ext {
     jsonVersion = "20090211"
     junitVersion = "4.11"
     logbackVersion = "1.0.13"
-    mongoDriverVersion = "3.0.4"
+    mongoDriverVersion = "3.6.1"
     mongodbVersion="3.0.2"
     ooxmlSchemasVersion="1.0"
     openCsvVersion="2.3"
