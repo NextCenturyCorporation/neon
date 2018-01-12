@@ -59,6 +59,7 @@ examples/app
 neon-server/dist
 neon-server/typings
 neon-server/typings.json
+package-lock.json
 
 # neon-gtd links - For quick development, you can link your neon-gtd folder to you neon folder and test both
 # via jetty.
