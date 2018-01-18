@@ -26,6 +26,7 @@ import com.ncc.neon.query.result.QueryResult
 import com.ncc.neon.query.result.TabularQueryResult
 import com.ncc.neon.util.ResourceNotFoundException
 import groovy.json.JsonSlurper
+import org.elasticsearch.action.search.SearchResponse
 import org.elasticsearch.client.Response
 import org.elasticsearch.client.RestClient
 import org.slf4j.Logger
@@ -102,28 +103,28 @@ class ElasticSearchRestQueryExecutor extends AbstractQueryExecutor {
         String request = conversionStrategy.convertQuery(query, options)
         Response response = getClient().performRequest("GET", request)
 
-        // SearchResponse results = getClient().search(request).actionGet()
-        // def aggResults = results.aggregations
+        SearchResponse results = getClient().search(request).actionGet()
+        def aggResults = results.aggregations
         def returnVal = new TabularQueryResult()
 
         if (aggregates && !groupByClauses) {
             LOGGER.debug("aggs and no group by ")
-//            returnVal = new TabularQueryResult([
-//                    extractMetrics(aggregates, aggResults ? aggResults.asMap() : null, results.hits.totalHits)
-//            ])
+            returnVal = new TabularQueryResult([
+                    extractMetrics(aggregates, aggResults ? aggResults.asMap() : null, results.hits.totalHits)
+            ])
         } else if (groupByClauses) {
             LOGGER.debug("group by ")
-//            def buckets = extractBuckets(groupByClauses, aggResults.asList()[0])
-//            buckets = combineDuplicateBuckets(buckets)
-//            buckets = extractMetricsFromBuckets(aggregates, buckets)
-//            buckets = sortBuckets(query.sortClauses, buckets)
-//            buckets = limitBuckets(buckets, query)
-//            returnVal = new TabularQueryResult(buckets)
+            def buckets = extractBuckets(groupByClauses, aggResults.asList()[0])
+            buckets = combineDuplicateBuckets(buckets)
+            buckets = extractMetricsFromBuckets(aggregates, buckets)
+            buckets = sortBuckets(query.sortClauses, buckets)
+            buckets = limitBuckets(buckets, query)
+            returnVal = new TabularQueryResult(buckets)
         } else if (query.isDistinct) {
             LOGGER.debug("distinct")
-//            returnVal = new TabularQueryResult(extractDistinct(query, aggResults.asList()[0]))
-//        } else if (results.getScrollId()) {
-//            returnVal = collectScrolledResults(query, results)
+            returnVal = new TabularQueryResult(extractDistinct(query, aggResults.asList()[0]))
+        } else if (results.getScrollId()) {
+            returnVal = collectScrolledResults(query, results)
         } else {
             LOGGER.debug("none of the above")
             returnVal = new TabularQueryResult(extractResults(response))
