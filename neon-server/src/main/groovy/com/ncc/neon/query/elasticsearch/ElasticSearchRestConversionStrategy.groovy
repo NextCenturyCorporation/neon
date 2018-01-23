@@ -435,7 +435,7 @@ class ElasticSearchRestConversionStrategy {
                     def groupByClause = AggregationBuilders
                             .dateHistogram(clause.name as String)
                             .field(clause.field as String)
-                            .interval(it.interval)
+                            .dateHistogramInterval(it.interval)
                             .format(it.format)
                     if (clause.operation == 'dayOfWeek') {
                         groupByClause.offset("1d")

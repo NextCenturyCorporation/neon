@@ -17,8 +17,12 @@
 package com.ncc.neon.query.elasticsearch
 
 import com.ncc.neon.connect.ConnectionManager
+import com.ncc.neon.connect.NeonConnectionException
 import com.ncc.neon.query.Query
 import com.ncc.neon.query.QueryOptions
+import com.ncc.neon.query.clauses.GroupByFieldClause
+import com.ncc.neon.query.clauses.GroupByFunctionClause
+import com.ncc.neon.query.clauses.SortClause
 import com.ncc.neon.query.executor.AbstractQueryExecutor
 import com.ncc.neon.query.filter.FilterState
 import com.ncc.neon.query.filter.SelectionState
@@ -31,6 +35,9 @@ import org.elasticsearch.action.search.SearchResponse
 import org.elasticsearch.client.Response
 import org.elasticsearch.client.RestClient
 import org.elasticsearch.client.RestHighLevelClient
+import org.elasticsearch.search.DocValueFormat
+import org.elasticsearch.search.aggregations.bucket.MultiBucketsAggregation
+import org.elasticsearch.search.aggregations.metrics.stats.InternalStats
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
@@ -105,7 +112,7 @@ class ElasticSearchRestQueryExecutor extends AbstractQueryExecutor {
         SearchRequest request = conversionStrategy.convertQuery(query, options)
         RestHighLevelClient highLevelClient = new RestHighLevelClient(getClient())
         SearchResponse response = highLevelClient.search(request)
-        System.out.println("Response: " + response)
+        println "Response " + groovy.json.JsonOutput.prettyPrint(response.toString())
 
         def aggResults = response.aggregations
         def returnVal
@@ -127,7 +134,7 @@ class ElasticSearchRestQueryExecutor extends AbstractQueryExecutor {
             LOGGER.debug("distinct")
             returnVal = new TabularQueryResult(extractDistinct(query, aggResults.asList()[0]))
         } else if (response.getScrollId()) {
-            returnVal = collectScrolledResults(query, results)
+            returnVal = collectScrolledResults(query, response)
         } else {
             LOGGER.debug("none of the above")
             returnVal = new TabularQueryResult(extractResults(response))
@@ -143,11 +150,10 @@ class ElasticSearchRestQueryExecutor extends AbstractQueryExecutor {
         return response.getHits().getHits().collect {
             def record = it.getSource()
             // Add the ElasticSearch id, since it isn't included in the "source" document
-            record["_id"] =  it.getId()
+            record["_id"] = it.getId()
             return record
         }
     }
-
 
     List<Map<String, Object>> extractDistinct(Query query, aggResult) {
         String field = query.fields[0]
@@ -164,7 +170,7 @@ class ElasticSearchRestQueryExecutor extends AbstractQueryExecutor {
         int offset = ElasticSearchRestConversionStrategy.getOffset(query)
         int limit = ElasticSearchRestConversionStrategy.getLimit(query, true)
 
-        if(limit == 0) {
+        if (limit == 0) {
             limit = distinctValues.size()
         }
 
@@ -176,7 +182,7 @@ class ElasticSearchRestQueryExecutor extends AbstractQueryExecutor {
     }
 
     private List<Map<String, Object>> sortDistinct(Query query, values) {
-        if(query.sortClauses) {
+        if (query.sortClauses) {
             return values.sort { a, b ->
                 a[query.fields[0]] <=> b[query.fields[0]]
             }
@@ -185,6 +191,164 @@ class ElasticSearchRestQueryExecutor extends AbstractQueryExecutor {
         return values
     }
 
+    private static Map<String, Object> extractMetrics(clauses, results, totalCount) {
+        def (countAllClause, metricClauses) = clauses.split {
+            ElasticSearchRestConversionStrategy.isCountAllAggregation(it) || ElasticSearchRestConversionStrategy.isCountFieldAggregation(it)
+        }
+
+        def metrics = metricClauses.inject([:]) { acc, clause ->
+            def result = results.get("${STATS_AGG_PREFIX}${clause.field}" as String)
+            acc.put(clause.name, result[clause.operation])
+            acc
+        }
+
+        if (countAllClause) {
+            metrics.put(countAllClause[0].name, totalCount)
+        }
+        metrics
+    }
+
+    /**
+     * The aggregation results from ES will be a tree of aggregation -> buckets -> aggregation -> buckets -> etc
+     * we want to flatten it into a list of buckets where we have one item in the list for each leaf in the tree.
+     * Each item is an accumulation of all the buckets along the path to the leaf.
+     *
+     * We process an aggregation by getting the list of buckets and calling extract again for each of them.
+     * For each bucket we copy the current accumulator, since we're branching into more paths in the tree.
+     *
+     * We process a bucket by getting the current groupByClause and using it to get the value we're interested in
+     * from the bucket. Then if there are more groupByClauses, we recurse into extract using the rest of the clauses
+     * and the nested aggregation. If there are no more clauses to process, then we've reached the bottom of the tree
+     * we add any metric aggregations to the bucket and push it onto the result list.
+     */
+    private
+    static List<AggregationBucket> extractBuckets(groupByClauses, value, Map accumulator = [:], List<AggregationBucket> results = []) {
+        value.buckets.each {
+            def newAccumulator = [:]
+            newAccumulator.putAll(accumulator)
+            extractBucket(groupByClauses, it, newAccumulator, results)
+        }
+
+        return results
+    }
+
+    private static void extractBucket(groupByClauses, value, Map accumulator, List<Map<String, Object>> results) {
+        def currentClause = groupByClauses.head()
+        switch (currentClause.getClass()) {
+            case GroupByFieldClause:
+                accumulator.put(currentClause.field, value.key)
+                break
+            case GroupByFunctionClause:
+                // If the group by field is a function of a date (e.g., group by month), then the
+                // key field will still be just a date, but getKeyAsString() will return the value
+                // returned by the function (e.g., the month).
+                def key = value.getKeyAsString()
+                def isDateClause = (currentClause.operation in ElasticSearchRestConversionStrategy.DATE_OPERATIONS
+                        && key.isNumber())
+
+                accumulator.put(groupByClauses.head().name, isDateClause ? key.toFloat() : key)
+                break
+            default:
+                throw new NeonConnectionException("Bad implementation - ${currentClause.getClass()} is not a valid groupByClause")
+        }
+
+        if (groupByClauses.tail()) {
+            extractBuckets(groupByClauses.tail(), (MultiBucketsAggregation) value.getAggregations().asList().head(), accumulator, results)
+        } else {
+            def bucket = new AggregationBucket()
+            bucket.setGroupByKeys(accumulator)
+            bucket.setDocCount(value.getDocCount())
+
+            def terminalAggs = value.getAggregations()
+            if (terminalAggs) {
+                bucket.getAggregatedValues().putAll(terminalAggs.asMap())
+            }
+            results.push(bucket)
+        }
+    }
+
+    private static List<AggregationBucket> combineDuplicateBuckets(List<AggregationBucket> buckets) {
+        Map mappedBuckets = [:]
+        // Iterate over all of the buckets, looking for any that have the same groupByKeys
+        buckets.each {
+            // Only process a bucket if there are documents in it, since we're using a histogram to
+            // replicate group-by functionality.
+            if (it.getDocCount() > 0) {
+                def existingBucket = mappedBuckets.get(it.getGroupByKeys())
+                if (existingBucket) {
+                    // If we've already found a bucket with these groupByKeys, then combine them
+                    it.getAggregatedValues().each { key, value ->
+                        def existingAgg = existingBucket.getAggregatedValues().get(key)
+                        if (existingAgg) {
+                            def newAgg = createInternalStats(
+                                    existingAgg.getName(),
+                                    existingAgg.getCount() + value.getCount(),
+                                    existingAgg.getSum() + value.getSum(),
+                                    Math.min(existingAgg.getMin(), value.getMin()),
+                                    Math.max(existingAgg.getMax(), value.getMax()),
+                                    DocValueFormat.RAW
+                            )
+                            existingBucket.getAggregatedValues().put(key, newAgg)
+                        } else {
+                            existingBucket.put(key, value)
+                        }
+                    }
+                    existingBucket.setDocCount(existingBucket.getDocCount() + it.getDocCount())
+                } else {
+                    // If there isn't already a bucket with these groupByKeys, then add it to the map
+                    mappedBuckets.put(it.getGroupByKeys(), it)
+                }
+            }
+        }
+        return mappedBuckets.values().asList()
+    }
+
+
+    private static createInternalStats(name, count, sum, min, max, formatter) {
+        return new InternalStats(name, count, sum, min, max, formatter, [], [:])
+    }
+
+    private static List<Map<String, Object>> extractMetricsFromBuckets(clauses, buckets) {
+        return buckets.collect {
+            def result = it.getGroupByKeys()
+            result.putAll(extractMetrics(clauses, it.getAggregatedValues(), it.getDocCount()))
+            result
+        }
+    }
+
+    private static List<Map<String, Object>> sortBuckets(List<SortClause> sortClauses,
+                                                         List<Map<String, Object>> buckets) {
+        if (sortClauses) {
+            buckets.sort { a, b ->
+                for (def sortClause : sortClauses) {
+                    def aField = a[sortClause.fieldName]
+                    def bField = b[sortClause.fieldName]
+                    def order = sortClause.getSortDirection() * (aField <=> bField)
+                    if (order != 0) {
+                        return order
+                    }
+                }
+                return 0
+            }
+        }
+        return buckets
+    }
+
+    private List<Map<String, Object>> limitBuckets(def buckets, Query query) {
+        int offset = ElasticSearchRestConversionStrategy.getOffset(query)
+        int limit = ElasticSearchRestConversionStrategy.getLimit(query, true)
+
+        if (limit == 0) {
+            limit = buckets.size()
+        }
+
+        int endIndex = ((limit - 1) + offset) < (buckets.size() - 1) ? ((limit - 1) + offset) : (buckets.size() - 1)
+        endIndex = (endIndex > offset ? endIndex : offset)
+
+        def result = (offset >= buckets.size()) ? [] : buckets[offset..endIndex]
+
+        return result
+    }
 
     /**
      *  Note: This method is not an appropriate check for queries against index mappings as they
