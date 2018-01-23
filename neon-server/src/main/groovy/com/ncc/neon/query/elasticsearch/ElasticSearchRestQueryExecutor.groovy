@@ -113,7 +113,7 @@ class ElasticSearchRestQueryExecutor extends AbstractQueryExecutor {
         if (aggregates && !groupByClauses) {
             LOGGER.debug("aggs and no group by ")
             returnVal = new TabularQueryResult([
-                    extractMetrics(aggregates, aggResults ? aggResults.asMap() : null, results.hits.totalHits)
+                    extractMetrics(aggregates, aggResults ? aggResults.asMap() : null, response.hits.totalHits)
             ])
         } else if (groupByClauses) {
             LOGGER.debug("group by ")
@@ -147,6 +147,44 @@ class ElasticSearchRestQueryExecutor extends AbstractQueryExecutor {
             return record
         }
     }
+
+
+    List<Map<String, Object>> extractDistinct(Query query, aggResult) {
+        String field = query.fields[0]
+
+        def distinctValues = []
+        aggResult.buckets.each {
+            def accumulator = [:]
+            accumulator[field] = it.key
+            distinctValues.push(accumulator)
+        }
+
+        distinctValues = sortDistinct(query, distinctValues)
+
+        int offset = ElasticSearchRestConversionStrategy.getOffset(query)
+        int limit = ElasticSearchRestConversionStrategy.getLimit(query, true)
+
+        if(limit == 0) {
+            limit = distinctValues.size()
+        }
+
+        int endIndex = ((limit - 1) + offset) < (distinctValues.size() - 1) ? ((limit - 1) + offset) : (distinctValues.size() - 1)
+        endIndex = (endIndex > offset ? endIndex : offset)
+        distinctValues = (offset >= distinctValues.size()) ? [] : distinctValues[offset..endIndex]
+
+        return distinctValues
+    }
+
+    private List<Map<String, Object>> sortDistinct(Query query, values) {
+        if(query.sortClauses) {
+            return values.sort { a, b ->
+                a[query.fields[0]] <=> b[query.fields[0]]
+            }
+        }
+
+        return values
+    }
+
 
     /**
      *  Note: This method is not an appropriate check for queries against index mappings as they
