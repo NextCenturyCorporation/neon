@@ -62,6 +62,7 @@ class ElasticSearchRestConversionStrategy {
     static final String[] DATE_OPERATIONS = ['year', 'month', 'dayOfMonth', 'dayOfWeek', 'hour', 'minute', 'second']
 
     public static final RESULT_LIMIT = 10000
+    private static final int TERM_AGGREGATION_SIZE = 100
 
     public static final YEAR = DateHistogramInterval.YEAR
     public static final MONTH = DateHistogramInterval.MONTH
@@ -234,21 +235,25 @@ class ElasticSearchRestConversionStrategy {
         return bounds
     }
 
-    /*
+    /**
      * create the metric aggregations by doing a stats aggregation for any field where
      * a calculation is requested - this gives us all of the metrics we could
      * possibly need. Also, don't process the count all clauses here, since
      * that will be available either through the hit count in the results, or as
      * doc_count in the buckets
     */
-
     private static convertAggregations(Query query, SearchSourceBuilder source) {
         if (query.isDistinct) {
             if (!query.fields || query.fields.size() > 1) {
                 throw new NeonConnectionException("Distinct call requires one field")
             }
 
-            def termsAggregations = AggregationBuilders.terms('distinct').field(query.fields[0]).size(0)
+            // This used to be set to size 0.  However, in ES5, this is not allowed:
+            // https://www.elastic.co/guide/en/elasticsearch/reference/5.0/breaking_50_aggregations_changes.html
+            // Here is why:
+            // https://www.elastic.co/guide/en/elasticsearch/guide/current/_preventing_combinatorial_explosions.html
+            // We are supposed to set it to something reasonable (????).  I have no idea, so using 100
+            def termsAggregations = AggregationBuilders.terms('distinct').field(query.fields[0]).size(TERM_AGGREGATION_SIZE)
             source.aggregation(termsAggregations)
         } else {
             convertMetricAggregations(query, source)
