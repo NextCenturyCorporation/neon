@@ -88,7 +88,6 @@ class ElasticSearchRestConversionStrategy {
         convertAggregations(query, source)
 
         SearchRequest request = buildRequest(query, source)
-        LOGGER.info("request " + request)
         return request
     }
 
@@ -339,11 +338,12 @@ class ElasticSearchRestConversionStrategy {
         return clauses
     }
 
-    static SearchSourceBuilder createSearchSourceBuilder(Query params) {
-        new SearchSourceBuilder()
-                .explain(false)
-                .from(getOffset(params))
-                .size(getTotalLimit(params))
+    static SearchSourceBuilder createSearchSourceBuilder(Query query) {
+        def offset = getOffset(query)
+        def size = getTotalLimit(query)
+        SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder()
+                .explain(false).from(offset).size(size)
+        return searchSourceBuilder
     }
 
     static int getOffset(Query query) {
@@ -354,19 +354,29 @@ class ElasticSearchRestConversionStrategy {
         if (query.groupByClauses || query.aggregates) {
             return 0
         }
-
         return getLimit(query)
     }
 
     static int getLimit(Query query, Boolean supportsUnlimited = false) {
         if (query?.limitClause) {
-            return query.limitClause.limit as int
+            def limitClauselimit = query.limitClause.limit
+            if (supportsUnlimited) {
+                return limitClauselimit as int
+            }
+            if (limitClauselimit < RESULT_LIMIT)
+            {
+                return limitClauselimit as int
+            }
+            return RESULT_LIMIT
         }
 
         if (supportsUnlimited) {
             return 0
         }
 
+        // Set the limit to the max (10,000) minus the offset. This is so the 'window' of returned results
+        // is less than the max.  See:
+        // https://www.elastic.co/guide/en/elasticsearch/reference/current/search-request-from-size.html
         return Math.max(RESULT_LIMIT - getOffset(query), 0)
     }
 

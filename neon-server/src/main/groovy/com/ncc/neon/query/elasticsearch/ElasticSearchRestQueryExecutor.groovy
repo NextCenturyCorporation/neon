@@ -32,6 +32,7 @@ import com.ncc.neon.util.ResourceNotFoundException
 import groovy.json.JsonSlurper
 import org.elasticsearch.action.search.SearchRequest
 import org.elasticsearch.action.search.SearchResponse
+import org.elasticsearch.action.search.SearchScrollRequest
 import org.elasticsearch.client.Response
 import org.elasticsearch.client.RestClient
 import org.elasticsearch.client.RestHighLevelClient
@@ -97,6 +98,8 @@ class ElasticSearchRestQueryExecutor extends AbstractQueryExecutor {
     @Autowired
     protected ConnectionManager connectionManager
 
+    private RestHighLevelClient highLevelClient
+
     @SuppressWarnings('MethodSize')
     @Override
     QueryResult doExecute(Query query, QueryOptions options) {
@@ -110,9 +113,8 @@ class ElasticSearchRestQueryExecutor extends AbstractQueryExecutor {
         ElasticSearchRestConversionStrategy conversionStrategy = new ElasticSearchRestConversionStrategy(
                 filterState: filterState, selectionState: selectionState)
         SearchRequest request = conversionStrategy.convertQuery(query, options)
-        RestHighLevelClient highLevelClient = new RestHighLevelClient(getClient())
+        highLevelClient = new RestHighLevelClient(getClient())
         SearchResponse response = highLevelClient.search(request)
-        println "Response " + groovy.json.JsonOutput.prettyPrint(response.toString())
 
         def aggResults = response.aggregations
         def returnVal
@@ -137,7 +139,7 @@ class ElasticSearchRestQueryExecutor extends AbstractQueryExecutor {
             returnVal = collectScrolledResults(query, response)
         } else {
             LOGGER.debug("none of the above")
-            returnVal = new TabularQueryResult(extractResults(response))
+            returnVal = new TabularQueryResult(extractHitsFromResults(response))
         }
 
         long diffTime = new Date().getTime() - d1
@@ -146,7 +148,35 @@ class ElasticSearchRestQueryExecutor extends AbstractQueryExecutor {
         return returnVal
     }
 
-    private List<Map<String, Object>> extractResults(SearchResponse response) {
+    /**
+     * Use scroll interface to get many results.  See:
+     *
+     * https://www.elastic.co/guide/en/elasticsearch/client/java-rest/5.6/java-rest-high-search-scroll.html
+     */
+    private QueryResult collectScrolledResults(Query query, SearchResponse firstResponse) {
+        def accumulatedHits = []
+        def response = firstResponse
+        accumulatedHits.addAll(extractHitsFromResults(response))
+        String scrollId = response.getScrollId()
+
+        // Keep scrolling until we either get all of the results or we reach the requested limit
+        while (response.hits.hits.size() > 0 &&
+                accumulatedHits.size() < response.hits.getTotalHits() &&
+                accumulatedHits.size() < query.limitClause.limit) {
+            SearchScrollRequest scrollRequest = new SearchScrollRequest(scrollId)
+            scrollRequest.scroll()
+            response = highLevelClient.searchScroll(scrollRequest)
+            scrollId = response.scrollId()
+            accumulatedHits.addAll(extractHitsFromResults(response))
+        }
+        // Limit the list to only the desired limit.  This is because we added all the results above so
+        // the size of  the accumulated hits could be more than the limit desired.
+        accumulatedHits = accumulatedHits.subList(0, Math.min(accumulatedHits.size(), query.limitClause.limit))
+        return new TabularQueryResult(accumulatedHits)
+    }
+
+
+    private List<Map<String, Object>> extractHitsFromResults(SearchResponse response) {
         return response.getHits().getHits().collect {
             def record = it.getSource()
             // Add the ElasticSearch id, since it isn't included in the "source" document
@@ -470,7 +500,6 @@ class ElasticSearchRestQueryExecutor extends AbstractQueryExecutor {
      * @return map of maps object, groovy.json.internal.lazyMap
      */
     protected Object getMappings() {
-        LOGGER.debug("Executing get mappings")
         Response response = getClient().performRequest("GET", "/_mappings")
         int statusCode = response.statusLine.statusCode
         if (statusCode != 200) {
