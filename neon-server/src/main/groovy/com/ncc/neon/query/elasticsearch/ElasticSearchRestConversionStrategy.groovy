@@ -425,7 +425,7 @@ class ElasticSearchRestConversionStrategy {
         }
 
         if (clause instanceof GroupByFieldClause) {
-            return applySort(AggregationBuilders.terms(clause.field as String).field(clause.field as String).size(0))
+            return applySort(AggregationBuilders.terms(clause.field as String).field(clause.field as String).size(TERM_AGGREGATION_SIZE))
         }
 
         if (clause instanceof GroupByFunctionClause) {
