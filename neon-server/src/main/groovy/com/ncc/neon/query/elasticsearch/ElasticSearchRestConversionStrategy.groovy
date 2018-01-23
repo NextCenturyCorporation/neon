@@ -149,7 +149,7 @@ class ElasticSearchRestConversionStrategy {
      */
     protected static QueryBuilder convertWhereClauses(whereClauses) {
 
-        BoolQueryBuilder queryBuilder = new BoolQueryBuilder()
+        BoolQueryBuilder queryBuilder = QueryBuilders.boolQuery()
 
         //Build the elasticsearch filters for the where clauses
         def inners = []
@@ -173,7 +173,7 @@ class ElasticSearchRestConversionStrategy {
     }
 
     private static QueryBuilder convertCompoundWhereClause(clause) {
-        BoolQueryBuilder qb = new BoolQueryBuilder()
+        BoolQueryBuilder qb = QueryBuilders.boolQuery()
         def inners = clause.whereClauses.collect(this.&convertWhereClause)
 
         switch (clause.getClass()) {
@@ -206,7 +206,7 @@ class ElasticSearchRestConversionStrategy {
 
         if (clause.operator in ['contains', 'not contains', 'notcontains']) {
             def regexFilter = QueryBuilders.regexpQuery(clause.lhs as String, ".*${clause.rhs}.*" as String)
-            return clause.operator == 'contains' ? regexFilter : QueryBuilders.notQuery(regexFilter)
+            return clause.operator == 'contains' ? regexFilter : QueryBuilders.boolQuery().mustNot(regexFilter)
         }
 
         if (clause.operator in ['=', '!=']) {
@@ -216,12 +216,12 @@ class ElasticSearchRestConversionStrategy {
                     QueryBuilders.termQuery(clause.lhs as String, clause.rhs as String) :
                     QueryBuilders.existsQuery(clause.lhs as String)
 
-            return (clause.operator == '!=') == !hasValue ? filter : QueryBuilders.notQuery(filter)
+            return (clause.operator == '!=') == !hasValue ? filter : QueryBuilders.boolQuery().mustNot(filter)
         }
 
         if (clause.operator in ["in", "notin"]) {
             def filter = QueryBuilders.termsQuery(clause.lhs as String, clause.rhs as String[])
-            return (clause.operator == "in") ? filter : QueryBuilders.notQuery(filter)
+            return (clause.operator == "in") ? filter : QueryBuilders.boolQuery().mustNot(filter)
         }
 
         throw new NeonConnectionException("${clause.operator} is an invalid operator for a where clause")
