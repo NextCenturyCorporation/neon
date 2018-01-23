@@ -26,9 +26,11 @@ import com.ncc.neon.query.result.QueryResult
 import com.ncc.neon.query.result.TabularQueryResult
 import com.ncc.neon.util.ResourceNotFoundException
 import groovy.json.JsonSlurper
+import org.elasticsearch.action.search.SearchRequest
 import org.elasticsearch.action.search.SearchResponse
 import org.elasticsearch.client.Response
 import org.elasticsearch.client.RestClient
+import org.elasticsearch.client.RestHighLevelClient
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
@@ -100,12 +102,13 @@ class ElasticSearchRestQueryExecutor extends AbstractQueryExecutor {
 
         ElasticSearchRestConversionStrategy conversionStrategy = new ElasticSearchRestConversionStrategy(
                 filterState: filterState, selectionState: selectionState)
-        String request = conversionStrategy.convertQuery(query, options)
-        Response response = getClient().performRequest("GET", request)
+        SearchRequest request = conversionStrategy.convertQuery(query, options)
+        RestHighLevelClient highLevelClient = new RestHighLevelClient(getClient())
+        SearchResponse response = highLevelClient.search(request)
+        System.out.println("Response: " + response)
 
-        SearchResponse results = getClient().search(request).actionGet()
-        def aggResults = results.aggregations
-        def returnVal = new TabularQueryResult()
+        def aggResults = response.aggregations
+        def returnVal
 
         if (aggregates && !groupByClauses) {
             LOGGER.debug("aggs and no group by ")
@@ -123,7 +126,7 @@ class ElasticSearchRestQueryExecutor extends AbstractQueryExecutor {
         } else if (query.isDistinct) {
             LOGGER.debug("distinct")
             returnVal = new TabularQueryResult(extractDistinct(query, aggResults.asList()[0]))
-        } else if (results.getScrollId()) {
+        } else if (response.getScrollId()) {
             returnVal = collectScrolledResults(query, results)
         } else {
             LOGGER.debug("none of the above")
@@ -136,8 +139,8 @@ class ElasticSearchRestQueryExecutor extends AbstractQueryExecutor {
         return returnVal
     }
 
-    private List<Map<String, Object>> extractResults(response) {
-        return response.collect {
+    private List<Map<String, Object>> extractResults(SearchResponse response) {
+        return response.getHits().getHits().collect {
             def record = it.getSource()
             // Add the ElasticSearch id, since it isn't included in the "source" document
             record["_id"] =  it.getId()

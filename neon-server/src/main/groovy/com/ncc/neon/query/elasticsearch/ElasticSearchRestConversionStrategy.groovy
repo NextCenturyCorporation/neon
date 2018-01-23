@@ -75,9 +75,8 @@ class ElasticSearchRestConversionStrategy {
     private final FilterState filterState
     private final SelectionState selectionState
 
-    public SearchRequest convertQuery(Query query, QueryOptions options) {
-        LOGGER.debug("Query is " + query)
-        LOGGER.debug("QueryOptions is " + options)
+    SearchRequest convertQuery(Query query, QueryOptions options) {
+        LOGGER.debug("Query is " + query + " QueryOptions is " + options)
 
         def source = createSourceBuilderWithState(query, options)
 
@@ -87,47 +86,122 @@ class ElasticSearchRestConversionStrategy {
 
         convertAggregations(query, source)
 
-        return buildRequest(query, source)
+        SearchRequest request = buildRequest(query, source)
+        LOGGER.info("request " + request)
+        return request
     }
 
+    /*
+     * Create and return an elastic search SourceBuilder that takes into account the current
+     * filter state and selection state.  It takes an input query, applies the current
+     * filter and selection state associated with this ConversionStrategy to it and
+     * returns a SourceBuilder seeded with the resultant query param.
+     */
 
-    public static QueryBuilder convertWhereClauses(whereClauses) {
+    protected SearchSourceBuilder createSourceBuilderWithState(Query query, QueryOptions options,
+                                                               WhereClause extraWhereClause = null) {
+        def dataSet = new DataSet(databaseName: query.databaseName, tableName: query.tableName)
+
+        // Get all the (top level) WhereClauses, from the Filter and query
+        def whereClauses = collectWhereClauses(dataSet, query, options, extraWhereClause)
+
+        // Convert the WhereClauses into a single ElasticSearch QueryBuilder object
+        def whereFilter = convertWhereClauses(whereClauses)
+
+        SearchSourceBuilder ssb = createSearchSourceBuilder(query).query(whereFilter)
+        return ssb
+
+        // Was:
+        // return createSearchSourceBuilder(query).query(QueryBuilders.filteredQuery(null, whereFilter))
+    }
+
+    /**
+     * Returns a list of Neon WhereClause objects, some of which might have embedded WhereClauses
+     */
+    private List<WhereClause> collectWhereClauses(DataSet dataSet, Query query, QueryOptions options,
+                                                  WhereClause extraWhereClause) {
+        // Start the list as empty unless an extra WhereClause is passed
+        List<WhereClause> whereClauses = extraWhereClause ? [extraWhereClause] : []
+
+        // If the Query has a WhereClaus, add it.
+        if (query.filter?.whereClause) {
+            whereClauses << query.filter.whereClause
+        }
+
+        // Add the rest of the filters unless told not to.
+        if (!options.ignoreFilters) {
+            whereClauses.addAll(createWhereClausesForFilters(dataSet, filterState, options.ignoredFilterIds))
+        }
+
+        // If selectionOnly, then
+        if (options.selectionOnly) {
+            whereClauses.addAll(createWhereClausesForFilters(dataSet, selectionState))
+        }
+
+        whereClauses.addAll(getCountFieldClauses(query))
+
+        return whereClauses
+    }
+
+    /**
+     * Given a list of WhereClause objects, convert them into a QueryBuilder.  In this case, a BoolQueryBuilder
+     * that combines all the subsidiary QueryBuilder objects
+     */
+    protected static QueryBuilder convertWhereClauses(whereClauses) {
+
+        BoolQueryBuilder queryBuilder = new BoolQueryBuilder()
+
         //Build the elasticsearch filters for the where clauses
-        QueryBuilder[] inners = whereClauses.collect(this.&convertWhereClause) as QueryBuilder[]
-        // Old, when andqQuery existed
-        // def whereFilter = QueryBuilders.boolQuery().must(QueryBuilders.andQuery(inners))
-        // New, where andQuery has been replaced by boolQuery
-        def whereFilter = QueryBuilders.boolQuery().must(inners)
-        return whereFilter
+        def inners = []
+        whereClauses.each { inners.add(convertWhereClause(it)) }
+        inners.each { queryBuilder.must(it) }
+        return queryBuilder
     }
 
-    private static QueryBuilder convertWhereClause(clause) {
+    private static QueryBuilder convertWhereClause(WhereClause clause) {
         switch (clause.getClass()) {
-            case AndWhereClause:
-                return convertBooleanWhereClause(clause, BoolQueryBuilder.&must)
-            case OrWhereClause:
-                return convertBooleanWhereClause(clause, BoolQueryBuilder.&should)
             case SingularWhereClause:
                 return convertSingularWhereClause(clause)
+
+            case AndWhereClause:
+            case OrWhereClause:
+                return convertCompoundWhereClause(clause)
+
             default:
                 throw new NeonConnectionException("Unknown where clause: ${clause.getClass()}")
         }
     }
 
-    private static QueryBuilder convertBooleanWhereClause(clause, Closure<QueryBuilder> combiner) {
+    private static QueryBuilder convertCompoundWhereClause(clause) {
+        BoolQueryBuilder qb = new BoolQueryBuilder()
         def inners = clause.whereClauses.collect(this.&convertWhereClause)
-        QueryBuilders.boolQuery().must(combiner(inners as QueryBuilder[]))
+
+        switch (clause.getClass()) {
+            case AndWhereClause:
+                inners.each { qb.must(it) }
+                break
+
+            case OrWhereClause:
+                inners.each { qb.should(it) }
+                break
+
+            default:
+                throw new NeonConnectionException("Unknown where clause: ${clause.getClass()}")
+        }
+        return qb
     }
 
     @SuppressWarnings("MethodSize")
-    public static QueryBuilder convertSingularWhereClause(clause) {
+    static QueryBuilder convertSingularWhereClause(clause) {
         if (clause.operator in ['<', '>', '<=', '>=']) {
-            return { switch (clause.operator) {
-                case '<': return it.&lt
-                case '>': return it.&gt
-                case '<=': return it.&lte
-                case '>=': return it.&gte
-            }}.call(QueryBuilders.rangeQuery(clause.lhs as String))(clause.rhs as String)
+            return {
+                switch (clause.operator) {
+                    case '<': return it.&lt
+                    case '>': return it.&gt
+                    case '<=': return it.&lte
+                    case '>=': return it.&gte
+                }
+            }.call(QueryBuilders.rangeQuery(clause.lhs as String))(clause.rhs as String)
         }
 
         if (clause.operator in ['contains', 'not contains', 'notcontains']) {
@@ -153,27 +227,11 @@ class ElasticSearchRestConversionStrategy {
         throw new NeonConnectionException("${clause.operator} is an invalid operator for a where clause")
     }
 
-    public static createHeatmapAggregation(HeatmapBoundsQuery boundingBox) {
+    static createHeatmapAggregation(HeatmapBoundsQuery boundingBox) {
         def hashGrid = AggregationBuilders.geohashGrid('heatmap').field(boundingBox.locationField).precision(boundingBox.gridCount)
-        def filter  = QueryBuilders.geoBoundingBoxFilter(boundingBox.locationField).bottomLeft(boundingBox.minLat, boundingBox.minLon).topRight(boundingBox.maxLat, boundingBox.maxLon)
+        def filter = QueryBuilders.geoBoundingBoxFilter(boundingBox.locationField).bottomLeft(boundingBox.minLat, boundingBox.minLon).topRight(boundingBox.maxLat, boundingBox.maxLon)
         def bounds = AggregationBuilders.filter('bounds').filter(filter).subAggregation(hashGrid)
         return bounds
-    }
-
-
-    /*
-     * Create and return an elastic search SourceBuilder that takes into account the current
-     * filter state and selection state.  It takes an input query, applies the current
-     * filter and selection state associated with this ConverstionStrategy to it and
-     * returns a sourcebuilder seeded with the resultant query param.
-     */
-    protected SearchSourceBuilder createSourceBuilderWithState(Query query, QueryOptions options, WhereClause whereClause = null) {
-        def dataSet = new DataSet(databaseName: query.databaseName, tableName: query.tableName)
-        def whereClauses = collectWhereClauses(dataSet, query, options, whereClause)
-
-        def whereFilter = convertWhereClauses(whereClauses)
-
-        return createSearchSourceBuilder(query).query(QueryBuilders.filteredQuery(null, whereFilter))
     }
 
     /*
@@ -183,9 +241,10 @@ class ElasticSearchRestConversionStrategy {
      * that will be available either through the hit count in the results, or as
      * doc_count in the buckets
     */
+
     private static convertAggregations(Query query, SearchSourceBuilder source) {
-        if(query.isDistinct) {
-            if(!query.fields || query.fields.size() > 1) {
+        if (query.isDistinct) {
+            if (!query.fields || query.fields.size() > 1) {
                 throw new NeonConnectionException("Distinct call requires one field")
             }
 
@@ -264,65 +323,49 @@ class ElasticSearchRestConversionStrategy {
         request
     }
 
-    private collectWhereClauses(DataSet dataSet, Query query, QueryOptions options, WhereClause whereClause) {
-        def whereClauses = whereClause ? [whereClause] : []
-        if (query.filter?.whereClause) {
-            whereClauses << query.filter.whereClause
-        }
-        if (!options.ignoreFilters) {
-            whereClauses.addAll(createWhereClausesForFilters(dataSet, filterState, options.ignoredFilterIds))
-        }
-        if (options.selectionOnly) {
-            whereClauses.addAll(createWhereClausesForFilters(dataSet, selectionState))
-        }
 
-        whereClauses.addAll(getCountFieldClauses(query))
-
-        return whereClauses
-    }
-
-    private static getCountFieldClauses(Query query) {
+    private static List<SingularWhereClause> getCountFieldClauses(Query query) {
         def clauses = []
         query.aggregates.each { AggregateClause it ->
-            if(isCountFieldAggregation(it)) {
+            if (isCountFieldAggregation(it)) {
                 clauses.push(new SingularWhereClause(lhs: it.field, operator: '!=', rhs: null))
             }
         }
         return clauses
     }
 
-    public static SearchSourceBuilder createSearchSourceBuilder(Query params) {
+    static SearchSourceBuilder createSearchSourceBuilder(Query params) {
         new SearchSourceBuilder()
-            .explain(false)
-            .from(getOffset(params))
-            .size(getTotalLimit(params))
+                .explain(false)
+                .from(getOffset(params))
+                .size(getTotalLimit(params))
     }
 
-    public static int getOffset(Query query) {
+    static int getOffset(Query query) {
         return (query?.offsetClause ? query.offsetClause.offset : 0) as int
     }
 
-    public static int getTotalLimit(Query query) {
-        if(query.groupByClauses || query.aggregates) {
+    static int getTotalLimit(Query query) {
+        if (query.groupByClauses || query.aggregates) {
             return 0
         }
 
         return getLimit(query)
     }
 
-    public static int getLimit(Query query, Boolean supportsUnlimited = false) {
-        if(query?.limitClause) {
+    static int getLimit(Query query, Boolean supportsUnlimited = false) {
+        if (query?.limitClause) {
             return query.limitClause.limit as int
         }
 
-        if(supportsUnlimited) {
+        if (supportsUnlimited) {
             return 0
         }
 
         return Math.max(RESULT_LIMIT - getOffset(query), 0)
     }
 
-    public static SearchRequest createSearchRequest(SearchSourceBuilder source, Query params) {
+    static SearchRequest createSearchRequest(SearchSourceBuilder source, Query params) {
         SearchRequest req = new SearchRequest()
 
         // NOTE:  IN version 5, count was replaced by Query_Then_Fetch with a size=0
@@ -331,27 +374,31 @@ class ElasticSearchRestConversionStrategy {
         //
         // TODO:  Set size=0 (i.e. limit clause) when type is counts
         req.searchType(SearchType.DFS_QUERY_THEN_FETCH)
-            .source(source)
-            .indices(params?.filter?.databaseName ?: '_all')
-            .types(params?.filter?.tableName ?: '_all')
+                .source(source)
+                .indices(params?.filter?.databaseName ?: '_all')
+                .types(params?.filter?.tableName ?: '_all')
         if (req.searchType == SearchType.DFS_QUERY_THEN_FETCH && params.limitClause && params.limitClause.limit > 10000) {
             req = req.scroll(TimeValue.timeValueMinutes(1))
         }
         return req
     }
 
-    public static boolean isCountAllAggregation(clause) {
+    static boolean isCountAllAggregation(clause) {
         clause && clause.operation == 'count' && clause.field == '*'
     }
 
-    public static boolean isCountFieldAggregation(clause) {
+    static boolean isCountFieldAggregation(clause) {
         clause && clause.operation == 'count' && clause.field != '*'
     }
 
-    private static createWhereClausesForFilters(DataSet dataSet, filterCache, ignoredFilterIds = []) {
-        filterCache.getFilterKeysForDataset(dataSet)
-            .findAll { !(it.id in ignoredFilterIds) && it.filter.whereClause }
-            .collect { it.filter.whereClause }
+
+    private static List<WhereClause> createWhereClausesForFilters(DataSet dataSet,
+                                                                  filterCache,
+                                                                  ignoredFilterIds = []) {
+        List<WhereClause> filterWhereClauses = filterCache.getFilterKeysForDataset(dataSet)
+                .findAll { !(it.id in ignoredFilterIds) && it.filter.whereClause }
+                .collect { it.filter.whereClause }
+        return filterWhereClauses
     }
 
     private static SortBuilder convertSortClause(clause) {
@@ -381,24 +428,24 @@ class ElasticSearchRestConversionStrategy {
 
                 def template = {
                     def groupByClause = AggregationBuilders
-                        .dateHistogram(clause.name as String)
-                        .field(clause.field as String)
-                        .interval(it.interval)
-                        .format(it.format)
-                                        if (clause.operation == 'dayOfWeek') {
-                                                groupByClause.offset("1d")
-                                        }
-                                        return groupByClause
+                            .dateHistogram(clause.name as String)
+                            .field(clause.field as String)
+                            .interval(it.interval)
+                            .format(it.format)
+                    if (clause.operation == 'dayOfWeek') {
+                        groupByClause.offset("1d")
+                    }
+                    return groupByClause
                 }
 
                 switch (clause.operation) {
-                    case 'year': return template(interval:YEAR, format:'yyyy')
-                    case 'month': return template(interval:MONTH, format:'M')
-                    case 'dayOfMonth': return template(interval:DAY, format:'d')
-                    case 'dayOfWeek': return template(interval:DAY, format:'e')
-                    case 'hour': return template(interval:HOUR, format:'H')
-                    case 'minute': return template(interval:MINUTE, format:'m')
-                    case 'second': return template(interval:SECOND, format:'s')
+                    case 'year': return template(interval: YEAR, format: 'yyyy')
+                    case 'month': return template(interval: MONTH, format: 'M')
+                    case 'dayOfMonth': return template(interval: DAY, format: 'd')
+                    case 'dayOfWeek': return template(interval: DAY, format: 'e')
+                    case 'hour': return template(interval: HOUR, format: 'H')
+                    case 'minute': return template(interval: MINUTE, format: 'm')
+                    case 'second': return template(interval: SECOND, format: 's')
                 }
             }
         }

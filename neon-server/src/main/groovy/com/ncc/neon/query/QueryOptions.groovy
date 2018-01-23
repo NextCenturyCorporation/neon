@@ -24,6 +24,8 @@ class QueryOptions {
     public static final QueryOptions DEFAULT_OPTIONS = new QueryOptions()
 
     boolean ignoreFilters = false
+
+    // TODO:  Figure out what this means?  does it mean that we are not doing aggregations????
     boolean selectionOnly = false
 
     //Used to refine a query.
