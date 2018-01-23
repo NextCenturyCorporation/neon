@@ -619,9 +619,9 @@ abstract class AbstractQueryExecutorIntegrationTest {
         def offsetClause = new OffsetClause(offset: 4)
         // sort so the order is known
         def sortBySalaryClause = new SortClause(fieldName: 'salary', sortOrder: SortOrder.ASCENDING)
-        def result = queryExecutor.execute(new Query(filter: ALL_DATA_FILTER,
-                sortClauses: [sortBySalaryClause],
-                offsetClause: offsetClause), QueryOptions.DEFAULT_OPTIONS)
+        Query query = new Query(filter: ALL_DATA_FILTER, sortClauses: [sortBySalaryClause], offsetClause: offsetClause)
+        QueryOptions options = QueryOptions.DEFAULT_OPTIONS
+        def result = queryExecutor.execute(query, options)
         assertOrderedQueryResult(expected, result)
     }
 

@@ -49,6 +49,7 @@ import com.ncc.neon.util.AssertUtils
 class ElasticSearchRestQueryExecutorIntegrationTest extends AbstractQueryExecutorIntegrationTest {
     private static final String HOST_STRING = System.getProperty("elasticsearch.host")
     private static final int NUMBER_OF_SCROLL_RECORDS = 20000
+    private static final int RECORDS_LIMIT_LESS_THAN_ALL = 15000
 
     private ElasticSearchRestQueryExecutor elasticSearchRestQueryExecutor
 
@@ -205,14 +206,11 @@ class ElasticSearchRestQueryExecutorIntegrationTest extends AbstractQueryExecuto
 
     @Test
     void "query uses scroll to get less than all the data"() {
-        final int MANY_RECORDS = 15000
-        def result = queryExecutor.execute(
-                new Query(
-                        filter: new Filter(databaseName: DATABASE_NAME, tableName: "many-records"),
-                        // Ask for more records than are there
-                        limitClause: new LimitClause(limit: MANY_RECORDS)
-                ),
-                QueryOptions.DEFAULT_OPTIONS)
-        assert result.data.size() == MANY_RECORDS
+        Query query =  new Query(
+                filter: new Filter(databaseName: DATABASE_NAME, tableName: "many-records"),
+                limitClause: new LimitClause(limit: RECORDS_LIMIT_LESS_THAN_ALL)
+        )
+        def result = queryExecutor.execute(query, QueryOptions.DEFAULT_OPTIONS)
+        assert result.data.size() == RECORDS_LIMIT_LESS_THAN_ALL
     }
 }
