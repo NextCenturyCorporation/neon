@@ -94,8 +94,11 @@ declare namespace neon {
             events(callbacks: {[key:string]: (resp: any) => void});
             removeEvents();
             addFilter(id: string, filter: neon.query.Filter, successCallback: (resp: any) => any, errorCallback: (resp: any) => any): neon.util.AjaxRequest;
+            addFilters(idAndFilterList: any[], successCallback: (resp: any) => any, errorCallback: (resp: any) => any): void;
             removeFilter(id: string, successCallback: (resp: any) => any, errorCallback: (resp: any) => any): neon.util.AjaxRequest;
+            removeFilters(idList: string[], successCallback: (resp: any) => any, errorCallback: (resp: any) => any): void;
             replaceFilter(id: string, filter: neon.query.Filter, successCallback: (resp: any) => any, errorCallback: (resp: any) => any): neon.util.AjaxRequest;
+            replaceFilters(idAndFilterList: any[], successCallback: (resp: any) => any, errorCallback: (resp: any) => any): void;
             clearFilters(successCallback?: (resp: any) => any, errorCallback?: (resp: any) => any): neon.util.AjaxRequest;
             clearFiltersSilently(successCallback?: (resp: any) => any, errorCallback?: (resp: any) => any): neon.util.AjaxRequest;
             addSelection(id: string, filter: neon.query.Filter, successCallback: (resp: any) => any, errorCallback: (resp: any) => any): neon.util.AjaxRequest;
