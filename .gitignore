@@ -43,6 +43,9 @@ classes/
 target/
 neon-server/bin
 
+# VSCode files
+.vscode
+
 *.*~
 *.swp
 *.log
