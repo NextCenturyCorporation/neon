@@ -17,7 +17,7 @@
 defaultTasks 'clean', 'build'
 
 allprojects {
-    version = "1.3.4"
+    version = "1.4.0-SNAPSHOT"
 }
 
 // Versions are shared across all builds

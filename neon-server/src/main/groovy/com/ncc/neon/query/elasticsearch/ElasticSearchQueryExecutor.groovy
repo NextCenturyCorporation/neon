@@ -253,8 +253,10 @@ class ElasticSearchQueryExecutor extends AbstractQueryExecutor {
                 fields.add("_id")
                 return fields.unique()
             }
+
+            return fields
         }
-        throw new ResourceNotFoundException("Fields for Database ${databaseName} and Table ${tableName} do not exist")
+        throw new ResourceNotFoundException("Table ${tableName} for Database ${databaseName} does not exist")
     }
 
     @Override

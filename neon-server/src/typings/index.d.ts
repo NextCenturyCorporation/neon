@@ -484,6 +484,10 @@ declare namespace neon {
             successCallback: (resp: any) => any,
             errorCallback: (resp: any) => any
         ): neon.util.AjaxRequest;
+        export function getPropertyKeys(successCallback: (resp: any) => any, errorCallback: (resp: any) => any): neon.util.AjaxRequest;
+        export function getProperty(key: string, successCallback: (resp: any) => any, errorCallback: (resp: any) => any): neon.util.AjaxRequest;
+        export function removeProperty(key: string, successCallback: (resp: any) => any, errorCallback: (resp: any) => any): neon.util.AjaxRequest;
+        export function setProperty(key: string, value: string, successCallback: (resp: any) => any, errorCallback: (resp: any) => any): neon.util.AjaxRequest;
     }
 }
 export = neon;

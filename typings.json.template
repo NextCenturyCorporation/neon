@@ -1,6 +1,6 @@
 {
     "name": "neon-framework",
-    "version": "1.3.2",
+    "version": "1.4.0-SNAPSHOT",
     "main": "index.d.ts",
     "dependencies": {},
     "globalDependencies": {
