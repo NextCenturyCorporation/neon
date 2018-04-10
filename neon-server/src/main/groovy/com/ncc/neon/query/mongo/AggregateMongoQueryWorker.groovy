@@ -161,7 +161,7 @@ class AggregateMongoQueryWorker extends AbstractMongoQueryWorker {
         }
 
         if(!groupByMappings) {
-            return results.asList() as BasicDBList
+            return results
         }
 
         def convertedResults = [] as List<BasicDBObject>
