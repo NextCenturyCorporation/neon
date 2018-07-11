@@ -34,3 +34,7 @@ neon.serviceUrl = function(servicePath, serviceName, queryParamsString) {
 
     return neon.SERVER_URL + '/services/' + servicePath + '/' + serviceName + queryString;
 };
+
+neon.setNeonServerUrl = function(serverUrl) {
+    neon.SERVER_URL = serverUrl;
+};

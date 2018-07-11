@@ -3,6 +3,7 @@ import * as log4javascript from "log4javascript";
 
 declare namespace neon {
     const NEON_SERVER: string;
+    export function setNeonServerUrl(url: string): void;
     export function ready(functionToRun: () => any): void; 
     export function serviceUrl(servicePath: string, serviceName: string, queryParamsString: string): string; 
 
@@ -94,8 +95,11 @@ declare namespace neon {
             events(callbacks: {[key:string]: (resp: any) => void});
             removeEvents();
             addFilter(id: string, filter: neon.query.Filter, successCallback: (resp: any) => any, errorCallback: (resp: any) => any): neon.util.AjaxRequest;
+            addFilters(idAndFilterList: any[], successCallback: (resp: any) => any, errorCallback: (resp: any) => any): void;
             removeFilter(id: string, successCallback: (resp: any) => any, errorCallback: (resp: any) => any): neon.util.AjaxRequest;
+            removeFilters(idList: string[], successCallback: (resp: any) => any, errorCallback: (resp: any) => any): void;
             replaceFilter(id: string, filter: neon.query.Filter, successCallback: (resp: any) => any, errorCallback: (resp: any) => any): neon.util.AjaxRequest;
+            replaceFilters(idAndFilterList: any[], successCallback: (resp: any) => any, errorCallback: (resp: any) => any): void;
             clearFilters(successCallback?: (resp: any) => any, errorCallback?: (resp: any) => any): neon.util.AjaxRequest;
             clearFiltersSilently(successCallback?: (resp: any) => any, errorCallback?: (resp: any) => any): neon.util.AjaxRequest;
             addSelection(id: string, filter: neon.query.Filter, successCallback: (resp: any) => any, errorCallback: (resp: any) => any): neon.util.AjaxRequest;
@@ -480,6 +484,10 @@ declare namespace neon {
             successCallback: (resp: any) => any,
             errorCallback: (resp: any) => any
         ): neon.util.AjaxRequest;
+        export function getPropertyKeys(successCallback: (resp: any) => any, errorCallback: (resp: any) => any): neon.util.AjaxRequest;
+        export function getProperty(key: string, successCallback: (resp: any) => any, errorCallback: (resp: any) => any): neon.util.AjaxRequest;
+        export function removeProperty(key: string, successCallback: (resp: any) => any, errorCallback: (resp: any) => any): neon.util.AjaxRequest;
+        export function setProperty(key: string, value: string, successCallback: (resp: any) => any, errorCallback: (resp: any) => any): neon.util.AjaxRequest;
     }
 }
 export = neon;

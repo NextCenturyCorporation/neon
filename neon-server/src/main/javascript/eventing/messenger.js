@@ -181,6 +181,37 @@ neon.eventing.Messenger.prototype.addFilter = function(id, filter, successCallba
     );
 };
 
+neon.eventing.Messenger.prototype.addFilters = function(idAndFilterList, successCallback, errorCallback) {
+    var me = this;
+    var successes = [];
+    var completedQueries = 0;
+    var successCB = function(returnedData) {
+        successes.push(returnedData.addedFilter);
+        checkIfComplete();
+    };
+    var checkIfComplete = function() {
+        if (++completedQueries === idAndFilterList.length) {
+            if (successes.length > 0) {
+                var channelCallback = me.createChannelCallback_(neon.eventing.channels.FILTERS_CHANGED, successCallback);
+                channelCallback(successes);
+            } else {
+                errorCallback();
+            }
+        }
+    };
+    idAndFilterList.forEach(function(idAndFilterPair) {
+        var filterKey = me.createFilterKey_(idAndFilterPair[0], idAndFilterPair[1]);
+        neon.util.ajaxUtils.doPostJSON(
+            filterKey,
+            neon.serviceUrl('filterservice', 'addfilter'),
+            {
+                success: successCB,
+                error: checkIfComplete
+            }
+        );
+    });
+};
+
 /**
  * Removes a previously added filter. This will fire a filter changed event to notify other widgets that the filters
  * have changed.
@@ -202,6 +233,38 @@ neon.eventing.Messenger.prototype.removeFilter = function(id, successCallback, e
     );
 };
 
+neon.eventing.Messenger.prototype.removeFilters = function(idList, successCallback, errorCallback) {
+    var me = this;
+    var successes = [];
+    var completedQueries = 0;
+    var successCB = function(returnedData) {
+        successes.push(returnedData.removedFilter);
+        checkIfComplete();
+    };
+    var checkIfComplete = function() {
+        if (++completedQueries === idList.length) {
+            if (successes.length > 0) {
+                var channelCallback = me.createChannelCallback_(neon.eventing.channels.FILTERS_CHANGED, successCallback);
+                channelCallback(successes);
+            } else {
+                errorCallback();
+            }
+        }
+    };
+    idList.forEach(function(id) {
+        neon.util.ajaxUtils.doPost(
+            neon.serviceUrl('filterservice', 'removefilter'),
+            {
+                success: successCB,
+                error: checkIfComplete,
+                data: id,
+                contentType: 'text/plain',
+                responseType: 'json'
+            }
+        );
+    });
+};
+
 /**
  * Replaces a previously added filter. This is a similar to calling remove and then add, but does so with one
  * notification event.
@@ -221,6 +284,40 @@ neon.eventing.Messenger.prototype.replaceFilter = function(id, filter, successCa
             error: errorCallback
         }
     );
+};
+
+neon.eventing.Messenger.prototype.replaceFilters = function(idAndFilterList, successCallback, errorCallback) {
+    var me = this;
+    var successes = [];
+    var completedQueries = 0;
+    var successCB = function(returnedData) {
+        successes.push({
+            added: returnedData.addedFilter,
+            removed: returnedData.removedFilter
+        });
+        checkIfComplete();
+    };
+    var checkIfComplete = function() {
+        if (++completedQueries === idAndFilterList.length) {
+            if (successes.length > 0) {
+                var channelCallback = me.createChannelCallback_(neon.eventing.channels.FILTERS_CHANGED, successCallback);
+                channelCallback(successes);
+            } else {
+                errorCallback();
+            }
+        }
+    };
+    idAndFilterList.forEach(function(idAndFilterPair) {
+        var filterKey = me.createFilterKey_(idAndFilterPair[0], idAndFilterPair[1]);
+        neon.util.ajaxUtils.doPostJSON(
+            filterKey,
+            neon.serviceUrl('filterservice', 'replacefilter'),
+            {
+                success: successCB,
+                error: checkIfComplete
+            }
+        );
+    });
 };
 
 /**

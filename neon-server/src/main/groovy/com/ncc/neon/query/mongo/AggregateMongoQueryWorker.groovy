@@ -17,7 +17,6 @@
 package com.ncc.neon.query.mongo
 
 import com.mongodb.BasicDBObject
-import com.mongodb.BasicDBList
 import com.mongodb.DBObject
 import com.mongodb.MongoClient
 
@@ -153,7 +152,7 @@ class AggregateMongoQueryWorker extends AbstractMongoQueryWorker {
      * Query results with group-by fields in nested objects need to have their pretty field name (e.g. "object->field")
      * changed to their normal field name (e.g. "object.field").
      */
-    private BasicDBList renameNestedGroupByFields(results, groupByClauses) {
+    private List<BasicDBObject> renameNestedGroupByFields(results, groupByClauses) {
         def groupByMappings = [:]
         groupByClauses.each { groupByClause ->
             if (groupByClause instanceof GroupByFieldClause && groupByClause.prettyField != groupByClause.field) {
@@ -162,10 +161,10 @@ class AggregateMongoQueryWorker extends AbstractMongoQueryWorker {
         }
 
         if(!groupByMappings) {
-            return results.asList() as BasicDBList
+            return results
         }
 
-        def convertedResults = [] as BasicDBList
+        def convertedResults = [] as List<BasicDBObject>
         def index = 0
 
         // TODO How does this loop affect performance?

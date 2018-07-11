@@ -38,7 +38,7 @@ class MongoDataInserter extends DefaultTask{
         def collection = db.getCollection(tableName)
         def dbList = parseJSON("/mongo-json/${dataFileName}")
         collection.insert(dbList)
-        collection.ensureIndex(new BasicDBObject("location", "2dsphere"))
+        collection.createIndex(new BasicDBObject("location", "2dsphere"))
     }
 
     private def parseJSON(resourcePath) {

@@ -176,6 +176,14 @@ class ElasticSearchRestQueryExecutorIntegrationTest extends AbstractQueryExecuto
         AssertUtils.assertEqualCollections(expected, fieldNames)
     }
 
+    @Override
+    @Test
+    // ElasticSearch doesn't throw an error because you can define a type without having any fields
+    void "field names without a table throws an exception"() {
+        def fieldNames = queryExecutor.getFieldNames(DATABASE_NAME, "zsz")
+        AssertUtils.assertEqualCollections([], fieldNames)
+    }
+
     @Test
     void "show tables with wildcard"() {
         def tables = queryExecutor.showTables(DATABASE_NAME.substring(0, DATABASE_NAME.length() - 2) + '*')
