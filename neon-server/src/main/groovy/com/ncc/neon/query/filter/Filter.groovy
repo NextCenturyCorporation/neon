@@ -30,10 +30,7 @@ class Filter implements Serializable {
     String databaseName
     String tableName
 
-    // Commented by Clark.  According to Intellij, this is never used, so I have commented it out.
-    // However, groovy being the way it is, it's hard to tell if it is used indirectly, so I've kept
-    // it here as an indication that it might be the solution if a problem crops up.  This is why groovy sucks.
-    // String filterName
+    String filterName
 
     WhereClause whereClause
 
