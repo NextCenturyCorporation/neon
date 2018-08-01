@@ -204,6 +204,10 @@ class ElasticSearchRestConversionStrategy {
             }.call(QueryBuilders.rangeQuery(clause.lhs as String))(clause.rhs as String)
         }
 
+        if (clause.operator == 'string' && clause.rhs.trim() != '') {
+            return QueryBuilders.queryStringQuery(clause.rhs)
+        }
+
         if (clause.operator in ['contains', 'not contains', 'notcontains']) {
             def regexFilter = QueryBuilders.regexpQuery(clause.lhs as String, ".*${clause.rhs}.*" as String)
             return clause.operator == 'contains' ? regexFilter : QueryBuilders.boolQuery().mustNot(regexFilter)
