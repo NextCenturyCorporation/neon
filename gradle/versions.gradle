@@ -24,7 +24,7 @@ project.ext {
     commonsIoVersion = "2.4"
     commonsDaemonVersion = "1.0.5"
     derbyVersion="10.12.1.1"
-    groovyVersion = "2.4.12"
+    groovyVersion = "2.4.4"
     guavaVersion = "14.0.1"
     hadoopVersion = "2.3.0"
     hiveVersion = "0.12.0"
