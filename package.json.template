@@ -22,12 +22,12 @@
     "node-uuid": "1.4.7"
   },
   "devDependencies": {
-    "grunt": ">0.4.0",
+    "grunt": "1.0.3",
     "grunt-cli": "0.1.13",
-    "grunt-contrib-jshint": "1.0.0",
+    "grunt-contrib-jshint": "1.1.0",
     "grunt-contrib-concat": "1.0.1",
-    "grunt-contrib-jasmine": "1.0.3",
-    "grunt-contrib-watch": "1.0.0",
+    "grunt-contrib-jasmine": "2.0.1",
+    "grunt-contrib-watch": "1.1.0",
     "grunt-contrib-uglify": "1.0.1",
     "grunt-jscs": "2.8.0",
     "grunt-umd": "2.3.6",

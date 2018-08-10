@@ -28,6 +28,10 @@ describe('messaging using the OWF event bus', function() {
     });
 
     it('supports multiple subscribers', function() {
+        OWF.getInstanceId = function() {
+            return uuid.v4();
+        };
+
         //Previously:
         // as mentioned in the owfEventBus publish/subscribe docs, OWF only supports a single
         // subscriber per channel
