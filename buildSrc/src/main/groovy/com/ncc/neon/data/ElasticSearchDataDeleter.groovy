@@ -19,7 +19,6 @@ package com.ncc.neon.data
 import org.elasticsearch.action.admin.indices.delete.DeleteIndexRequest
 import org.elasticsearch.action.admin.indices.delete.DeleteIndexResponse
 import org.elasticsearch.client.transport.TransportClient
-import org.elasticsearch.common.transport.InetSocketTransportAddress
 import org.elasticsearch.ElasticsearchException
 import org.gradle.api.DefaultTask
 import org.gradle.api.tasks.TaskAction

@@ -18,7 +18,7 @@ package com.ncc.neon.connect
 
 import org.elasticsearch.client.transport.TransportClient
 import org.elasticsearch.common.settings.Settings
-import org.elasticsearch.common.transport.InetSocketTransportAddress
+import org.elasticsearch.common.transport.TransportAddress
 import org.elasticsearch.transport.client.PreBuiltTransportClient
 
 /*
@@ -32,7 +32,7 @@ class ElasticSearchTransportConnector {
         Settings settings = Settings.builder().put("client.transport.ignore_cluster_name", true).
                 put("client.transport.sniff", true).build()
         TransportClient client = new PreBuiltTransportClient(settings)
-                .addTransportAddress(new InetSocketTransportAddress(new InetSocketAddress(host, port)))
+                .addTransportAddress(new TransportAddress(InetAddress.getByName(host), port))
         return client
     }
 }

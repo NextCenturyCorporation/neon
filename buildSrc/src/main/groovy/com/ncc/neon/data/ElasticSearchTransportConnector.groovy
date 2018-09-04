@@ -19,7 +19,7 @@ package com.ncc.neon.data
 import org.elasticsearch.transport.client.PreBuiltTransportClient
 import org.elasticsearch.client.transport.TransportClient
 import org.elasticsearch.common.settings.Settings
-import org.elasticsearch.common.transport.InetSocketTransportAddress
+import org.elasticsearch.common.transport.TransportAddress
 
 /*
 This class handles the version-specific parts of connecting to an Elasticsearch connector. This is
@@ -31,7 +31,7 @@ class ElasticSearchTransportConnector {
         Settings settings = Settings.builder().put("client.transport.ignore_cluster_name", true).
                 put("client.transport.sniff", true).build()
         TransportClient client = new PreBuiltTransportClient(settings)
-                .addTransportAddress(new InetSocketTransportAddress(new InetSocketAddress(host, port)))
+                .addTransportAddress(new TransportAddress(InetAddress.getByName(host), port))
         return client
     }
 }

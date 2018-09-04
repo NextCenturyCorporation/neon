@@ -30,16 +30,16 @@ dependencies {
     compile "com.mchange:c3p0:$c3p0Version"
     compile "org.codehaus.jackson:jackson-core-asl:$jacksonVersion"
 
-    compile ("org.elasticsearch:elasticsearch:5.6.3") {
+    compile ("org.elasticsearch:elasticsearch:6.4.0") {
         exclude module: 'asm'
     }
 
     // NOTE:  REST is used for connections for clients (the javascript client)
-    compile ("org.elasticsearch.client:elasticsearch-rest-high-level-client:5.6.3")
+    compile ("org.elasticsearch.client:elasticsearch-rest-high-level-client:6.4.0")
 
     // Transport is used for buildSrc, testing, etc.
     // TODO:  Replace with the REST client
-    compile ("org.elasticsearch.client:transport:5.6.3")
+    compile ("org.elasticsearch.client:transport:6.4.0")
 
 
     compile 'com.opencsv:opencsv:3.5'
