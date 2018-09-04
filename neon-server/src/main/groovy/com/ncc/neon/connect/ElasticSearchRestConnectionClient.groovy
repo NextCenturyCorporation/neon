@@ -16,13 +16,13 @@
 
 package com.ncc.neon.connect
 
-import org.elasticsearch.client.RestClient
+import org.elasticsearch.client.RestHighLevelClient
 
 /**
  * Holds a rest connection to elasticsearch
  */
 class ElasticSearchRestConnectionClient implements ConnectionClient {
-    RestClient client
+    RestHighLevelClient client
 
     public ElasticSearchRestConnectionClient(ConnectionInfo info) {
         String[] connectionUrl = info.host.split(':', 2)

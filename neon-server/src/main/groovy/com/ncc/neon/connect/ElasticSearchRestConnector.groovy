@@ -18,19 +18,20 @@ package com.ncc.neon.connect
 
 import org.apache.http.HttpHost
 import org.elasticsearch.client.RestClient
+import org.elasticsearch.client.RestHighLevelClient
 
 /**
  * Create a Rest Client connection to ElasticSearch 5+
 */
 class ElasticSearchRestConnector {
-    public static RestClient connectViaRest(String host, int port) {
+    public static RestHighLevelClient connectViaRest(String host, int port) {
 
         // TODO:  Determine what settings would be best for the Rest Client.  These are from the Transport
         // Settings settings = Settings.settingsBuilder().
         //     put("client.transport.ignore_cluster_name", true).
         //     put("client.transport.sniff", true).build()
 
-        return RestClient.builder(new HttpHost(host, port)).build()
+        return new RestHighLevelClient(RestClient.builder(new HttpHost(host, port)))
     }
 }
 

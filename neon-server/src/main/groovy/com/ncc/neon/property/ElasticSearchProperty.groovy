@@ -63,7 +63,7 @@ class ElasticSearchProperty implements PropertyInterface {
             GetResponse resp = client.prepareGet(propertiesDatabaseName, propertiesTypeName, key).get()
 
             if (resp.isExists()) {
-                String value = resp.getSource().get("value")
+                String value = resp.getSourceAsMap().get("value")
                 toReturn.put("value", value)
             }
         }

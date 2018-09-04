@@ -34,7 +34,6 @@ import org.elasticsearch.action.search.SearchRequest
 import org.elasticsearch.action.search.SearchResponse
 import org.elasticsearch.action.search.SearchScrollRequest
 import org.elasticsearch.client.Response
-import org.elasticsearch.client.RestClient
 import org.elasticsearch.client.RestHighLevelClient
 import org.elasticsearch.search.DocValueFormat
 import org.elasticsearch.search.aggregations.bucket.MultiBucketsAggregation
@@ -113,7 +112,7 @@ class ElasticSearchRestQueryExecutor extends AbstractQueryExecutor {
         ElasticSearchRestConversionStrategy conversionStrategy = new ElasticSearchRestConversionStrategy(
                 filterState: filterState, selectionState: selectionState)
         SearchRequest request = conversionStrategy.convertQuery(query, options)
-        highLevelClient = new RestHighLevelClient(getClient())
+        highLevelClient = getClient()
         SearchResponse response = highLevelClient.search(request)
 
         def aggResults = response.aggregations
@@ -178,7 +177,7 @@ class ElasticSearchRestQueryExecutor extends AbstractQueryExecutor {
 
     private List<Map<String, Object>> extractHitsFromResults(SearchResponse response) {
         return response.getHits().getHits().collect {
-            def record = it.getSource()
+            def record = it.getSourceAsMap()
             // Add the ElasticSearch id, since it isn't included in the "source" document
             record["_id"] = it.getId()
             return record
@@ -500,7 +499,7 @@ class ElasticSearchRestQueryExecutor extends AbstractQueryExecutor {
      * @return map of maps object, groovy.json.internal.lazyMap
      */
     protected Object getMappings() {
-        Response response = getClient().performRequest("GET", "/_mappings")
+        Response response = getClient().getLowLevelClient().performRequest("GET", "/_mappings")
         int statusCode = response.statusLine.statusCode
         if (statusCode != 200) {
             LOGGER.warn("Unable to get mappings.  Status code " + statusCode)
@@ -510,7 +509,7 @@ class ElasticSearchRestQueryExecutor extends AbstractQueryExecutor {
         return json
     }
 
-    protected RestClient getClient() {
+    protected RestHighLevelClient getClient() {
         return connectionManager.connection.client
     }
 

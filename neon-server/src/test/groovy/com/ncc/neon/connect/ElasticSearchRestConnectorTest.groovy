@@ -8,7 +8,7 @@ public class ElasticSearchRestConnectorTest {
 
     @Test
     public void connectViaRest() {
-        RestClient rc = ElasticSearchRestConnector.connectViaRest("localhost", 9200)
+        RestClient rc = ElasticSearchRestConnector.connectViaRest("localhost", 9200).getLowLevelClient()
         Response response = rc.performRequest("GET", "/_cat/indices")
         assert response.getStatusLine().statusCode == 200
     }
