@@ -385,15 +385,14 @@ class ElasticSearchRestQueryExecutor extends AbstractQueryExecutor {
      *  the databaseName to be wildcarded to match the behavior of index searches.
      */
     protected void checkDatabaseAndTableExists(String databaseName, String tableName) {
-        def dbMatch = databaseName.replaceAll(/\*/, '.*')
+        def databaseMatch = databaseName.replaceAll(/\*/, '.*')
         def tableMatch = tableName
         def mappingData = getMappings()
         boolean found = false
-
-        mappingData.each { dbkey, v ->
-            if (dbkey.matches(dbMatch)) {
-                def tablenames = v['mappings'].keySet() as List
-                tablenames.each { String it ->
+        mappingData.each { databaseKey, databaseValues ->
+            if (databaseKey.matches(databaseMatch)) {
+                def tableNames = databaseValues['mappings'].keySet() as List
+                tableNames.each { String it ->
                     if (it.matches(tableMatch)) {
                         found = true
                     }
@@ -418,15 +417,15 @@ class ElasticSearchRestQueryExecutor extends AbstractQueryExecutor {
     }
 
     @Override
-    List<String> showTables(String dbName) {
-        LOGGER.debug("Executing showTables for index " + dbName + " to get type mappings")
-        def dbMatch = dbName.replaceAll(/\*/, '.*')
+    List<String> showTables(String databaseName) {
+        LOGGER.debug("Executing showTables for index " + databaseName + " to get type mappings")
+        def databaseMatch = databaseName.replaceAll(/\*/, '.*')
         def tableList = []
         def mappingData = getMappings()
-        mappingData.each { k, v ->
-            if (k.matches(dbMatch)) {
-                def tablenames = v['mappings'].keySet()
-                tableList.addAll(tablenames)
+        mappingData.each { databaseKey, databaseValues ->
+            if (databaseKey.matches(databaseMatch)) {
+                def tableNames = databaseValues['mappings'].keySet()
+                tableList.addAll(tableNames)
             }
         }
         return tableList
@@ -435,18 +434,16 @@ class ElasticSearchRestQueryExecutor extends AbstractQueryExecutor {
     @Override
     List<String> getFieldNames(String databaseName, String tableName) {
         if (databaseName && tableName) {
-            def dbMatch = databaseName.replaceAll(/\*/, '.*')
+            def databaseMatch = databaseName.replaceAll(/\*/, '.*')
             def tableMatch = tableName.replaceAll(/\*/, '.*')
-
             def fields = []
             def mappingData = getMappings()
-            mappingData.each { dbkey, dbvalues ->
-                if (dbkey.matches(dbMatch)) {
-                    def mappings = dbvalues['mappings']
-                    mappings.each { tablekey, tablevalues ->
-                        if (tablekey.matches(tableMatch)) {
-                            def fieldValues = tablevalues['properties'].keySet()
-                            fields.addAll(fieldValues)
+            mappingData.each { databaseKey, databaseValues ->
+                if (databaseKey.matches(databaseMatch)) {
+                    def tableMappings = databaseValues['mappings']
+                    tableMappings.each { tableKey, tableValues ->
+                        if (tableKey.matches(tableMatch)) {
+                            fields.addAll(getFieldsInObject(tableValues['properties'], ""))
                         }
                     }
                 }
@@ -460,23 +457,38 @@ class ElasticSearchRestQueryExecutor extends AbstractQueryExecutor {
         throw new ResourceNotFoundException("Fields for Database ${databaseName} and Table ${tableName} do not exist")
     }
 
+    private List<String> getFieldsInObject(Map fields, String parentFieldName) {
+        def fieldNames = []
+        fields.each { field ->
+            def type = field.getValue().containsKey('type') ? field.getValue().get('type') : 'object'
+            String fieldName = field.getKey()
+            if(parentFieldName) {
+                fieldName = parentFieldName + "." + field.getKey()
+            }
+            fieldNames.add(fieldName)
+            if(type == 'object') {
+                fieldNames.addAll(getFieldsInObject(field.getValue().get('properties'), fieldName))
+            }
+        }
+        return fieldNames
+    }
+
     @Override
     Map getFieldTypes(String databaseName, String tableName) {
         def fieldTypes = [:]
         if (databaseName && tableName) {
-            def dbMatch = databaseName.replaceAll(/\*/, '.*')
+            def databaseMatch = databaseName.replaceAll(/\*/, '.*')
             def tableMatch = tableName.replaceAll(/\*/, '.*')
             def mappingData = getMappings()
-
-            mappingData.each { dbkey, dbvalues ->
-                if (dbkey.matches(dbMatch)) {
-                    def mappings = dbvalues['mappings']
-                    mappings.each { tablekey, tablevalues ->
-                        if (tablekey.matches(tableMatch)) {
-                            def fieldValues = tablevalues['properties']
-                            fieldValues.each { fieldkey, fieldvalues ->
-                                def fieldType = fieldvalues['type']
-                                fieldTypes.put(fieldkey, fieldType)
+            mappingData.each { databaseKey, databaseValues ->
+                if (databaseKey.matches(databaseMatch)) {
+                    def tableMappings = databaseValues['mappings']
+                    tableMappings.each { tableKey, tableValues ->
+                        if (tableKey.matches(tableMatch)) {
+                            def fieldProperties = tableValues['properties']
+                            fieldProperties.each { fieldKey, fieldValues ->
+                                def fieldType = fieldValues['type']
+                                fieldTypes.put(fieldKey, fieldType)
                             }
                         }
                     }
