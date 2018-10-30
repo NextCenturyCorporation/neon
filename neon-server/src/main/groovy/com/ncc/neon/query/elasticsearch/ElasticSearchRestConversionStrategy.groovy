@@ -43,6 +43,7 @@ import org.elasticsearch.index.query.QueryBuilders
 import org.elasticsearch.search.aggregations.AbstractAggregationBuilder
 import org.elasticsearch.search.aggregations.AggregationBuilder
 import org.elasticsearch.search.aggregations.AggregationBuilders
+import org.elasticsearch.search.aggregations.BucketOrder
 import org.elasticsearch.search.aggregations.bucket.histogram.DateHistogramInterval
 import org.elasticsearch.search.aggregations.bucket.terms.Terms
 import org.elasticsearch.search.builder.SearchSourceBuilder
@@ -429,7 +430,7 @@ class ElasticSearchRestConversionStrategy {
             def sc = findMatchingSortClause(query, clause)
             if (sc) {
                 def sortOrder = sc.sortOrder == com.ncc.neon.query.clauses.SortOrder.ASCENDING
-                tb.order(Terms.Order.term(sortOrder))
+                tb.order(BucketOrder.key(sortOrder))
             }
             return tb
         }
