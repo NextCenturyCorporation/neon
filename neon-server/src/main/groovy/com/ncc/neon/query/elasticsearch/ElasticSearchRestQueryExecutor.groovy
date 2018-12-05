@@ -485,17 +485,29 @@ class ElasticSearchRestQueryExecutor extends AbstractQueryExecutor {
                     def tableMappings = databaseValues['mappings']
                     tableMappings.each { tableKey, tableValues ->
                         if (tableKey.matches(tableMatch)) {
-                            def fieldProperties = tableValues['properties']
-                            fieldProperties.each { fieldKey, fieldValues ->
-                                def fieldType = fieldValues['type']
-                                fieldTypes.put(fieldKey, fieldType)
-                            }
+                            fieldTypes.putAll(getFieldTypesInObject(tableValues['properties'], null))
                         }
                     }
                 }
             }
         }
         return fieldTypes
+    }
+
+    private Map getFieldTypesInObject(Map fields, String parentFieldName) {
+        def fieldsToTypes = [:]
+        fields.each { field ->
+            String fieldName = field.getKey()
+            if(parentFieldName) {
+                fieldName = parentFieldName + "." + field.getKey()
+            }
+            if(field.getValue().containsKey('type')) {
+                fieldsToTypes.put(fieldName, field.getValue().get('type'))
+            } else {
+                fieldsToTypes.putAll(getFieldTypesInObject(field.getValue().get('properties'), fieldName))
+            }
+        }
+        return fieldsToTypes
     }
 
     /** Get the _mappings from the DB.  This looks like:
