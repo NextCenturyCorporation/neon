@@ -63,7 +63,6 @@ class ElasticSearchRestConversionStrategy {
     static final String[] DATE_OPERATIONS = ['year', 'month', 'dayOfMonth', 'dayOfWeek', 'hour', 'minute', 'second']
 
     public static final RESULT_LIMIT = 10000
-    private static final int TERM_AGGREGATION_SIZE = 100
 
     public static final YEAR = DateHistogramInterval.YEAR
     public static final MONTH = DateHistogramInterval.MONTH
@@ -211,7 +210,7 @@ class ElasticSearchRestConversionStrategy {
         }
 
         if (clause.operator in ['=', '!=']) {
-            def hasValue = clause.rhs || clause.rhs == '' || clause.rhs == false
+            def hasValue = clause.rhs || clause.rhs == 0 || clause.rhs == '' || clause.rhs == false
 
             def filter = hasValue ?
                     QueryBuilders.termQuery(clause.lhs as String, clause.rhs as String) :
@@ -248,12 +247,7 @@ class ElasticSearchRestConversionStrategy {
                 throw new NeonConnectionException("Distinct call requires one field")
             }
 
-            // This used to be set to size 0.  However, in ES5, this is not allowed:
-            // https://www.elastic.co/guide/en/elasticsearch/reference/5.0/breaking_50_aggregations_changes.html
-            // Here is why:
-            // https://www.elastic.co/guide/en/elasticsearch/guide/current/_preventing_combinatorial_explosions.html
-            // We are supposed to set it to something reasonable (????).  I have no idea, so using 100
-            def termsAggregations = AggregationBuilders.terms('distinct').field(query.fields[0]).size(TERM_AGGREGATION_SIZE)
+            def termsAggregations = AggregationBuilders.terms('distinct').field(query.fields[0]).size(getLimit(query))
             source.aggregation(termsAggregations)
         } else {
             convertMetricAggregations(query, source)
@@ -341,7 +335,7 @@ class ElasticSearchRestConversionStrategy {
 
     static SearchSourceBuilder createSearchSourceBuilder(Query query) {
         def offset = getOffset(query)
-        def size = getTotalLimit(query)
+        def size = getLimit(query)
         SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder()
                 .explain(false).from(offset).size(size)
         return searchSourceBuilder
@@ -349,13 +343,6 @@ class ElasticSearchRestConversionStrategy {
 
     static int getOffset(Query query) {
         return (query?.offsetClause ? query.offsetClause.offset : 0) as int
-    }
-
-    static int getTotalLimit(Query query) {
-        if (query.groupByClauses || query.aggregates) {
-            return 0
-        }
-        return getLimit(query)
     }
 
     static int getLimit(Query query, Boolean supportsUnlimited = false) {
@@ -436,7 +423,7 @@ class ElasticSearchRestConversionStrategy {
         }
 
         if (clause instanceof GroupByFieldClause) {
-            return applySort(AggregationBuilders.terms(clause.field as String).field(clause.field as String).size(TERM_AGGREGATION_SIZE))
+            return applySort(AggregationBuilders.terms(clause.field as String).field(clause.field as String).size(getLimit(query)))
         }
 
         if (clause instanceof GroupByFunctionClause) {
