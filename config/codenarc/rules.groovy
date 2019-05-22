@@ -153,7 +153,7 @@ ruleset {
         regex = '[a-z].*'
     }
     MethodSize {
-        maxLines = 40
+        maxLines = 50
     }
     MissingNewInThrowStatement
     MultipleLoggers

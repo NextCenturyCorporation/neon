@@ -57,6 +57,11 @@ class ElasticSearchQueryExecutor extends AbstractQueryExecutor {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ElasticSearchQueryExecutor)
 
+    private static class AggregationData {
+        private long count
+            private Object value
+    }
+
     /*
     * A small class to hold the important information about an aggregation bucket between when the
     * buckets are taken out of ElasticSearch's hierarchical arrangement and when everything can be
@@ -118,12 +123,12 @@ class ElasticSearchQueryExecutor extends AbstractQueryExecutor {
 
         if(aggregates && !groupByClauses) {
             returnVal = new TabularQueryResult([
-                extractMetrics(aggregates, aggResults ? aggResults.asMap() : null, results.hits.totalHits)
+                extractMetrics(aggregates, aggResults ? aggResults.asMap() : [:], [:], results.hits.totalHits)
             ])
         } else if(groupByClauses) {
             def buckets = extractBuckets(groupByClauses, aggResults.asList()[0])
             buckets = combineDuplicateBuckets(buckets)
-            buckets = extractMetricsFromBuckets(aggregates, buckets)
+            buckets = extractMetricsFromBuckets(aggregates, buckets, results.hits.totalHits)
             buckets = sortBuckets(query.sortClauses, buckets)
             buckets = limitBuckets(buckets, query)
             returnVal = new TabularQueryResult(buckets)
@@ -334,28 +339,38 @@ class ElasticSearchQueryExecutor extends AbstractQueryExecutor {
         }
     }
 
-    private static List<Map<String, Object>> extractMetricsFromBuckets(clauses, buckets) {
+    private static List<Map<String, Object>> extractMetricsFromBuckets(clauses, buckets, totalCount) {
         return buckets.collect {
-            def result = it.getGroupByKeys()
-            result.putAll(extractMetrics(clauses, it.getAggregatedValues(), it.getDocCount()))
+            Map<String, AggregationData> groupResults = it.getGroupByKeys()
+            Map<String, Object> result = groupResults.keySet().inject([:]) { Map<String, Object> map, String key ->
+                map.put(key, groupResults[key].value)
+                    return map
+            }
+            result.putAll(extractMetrics(clauses, it.getAggregatedValues(), groupResults, totalCount))
             result
         }
     }
 
-    private static Map<String, Object> extractMetrics(clauses, results, totalCount) {
-        def (countAllClause, metricClauses) = clauses.split {
-            ElasticSearchConversionStrategy.isCountAllAggregation(it) || ElasticSearchConversionStrategy.isCountFieldAggregation(it)
-        }
+    private static Map<String, Object> extractMetrics(clauses, results, groupResults, totalCount) {
+        def metricsClauses = clauses.findAll { it -> !ElasticSearchConversionStrategy.isCountAllAggregation(it) &&
+            !ElasticSearchConversionStrategy.isCountFieldAggregation(it) }
 
-        def metrics = metricClauses.inject([:]) { acc, clause ->
+        def countFieldClauses = clauses.findAll { it -> ElasticSearchConversionStrategy.isCountFieldAggregation(it) }
+
+        def totalCountClauses = clauses.findAll { it -> ElasticSearchConversionStrategy.isCountAllAggregation(it) }
+
+        def metrics = metricsClauses.inject([:]) { acc, clause ->
             def result = results.get("${STATS_AGG_PREFIX}${clause.field}" as String)
             acc.put(clause.name, result[clause.operation])
             acc
         }
 
-        if (countAllClause) {
-            metrics.put(countAllClause[0].name, totalCount)
+        if (totalCountClauses) {
+            totalCountClauses.collect { it -> metrics[it.name] = totalCount }
         }
+
+        countFieldClauses.collect { it -> metrics[it.name] = (groupResults[it.field] ? groupResults[it.field].count : 0) }
+
         metrics
     }
 
@@ -403,7 +418,10 @@ class ElasticSearchQueryExecutor extends AbstractQueryExecutor {
         def currentClause = groupByClauses.head()
         switch (currentClause.getClass()) {
             case GroupByFieldClause:
-                accumulator.put(currentClause.field, value.key)
+                def data = new AggregationData()
+                data.count = value.getDocCount()
+                data.value = value.key
+                accumulator.put(currentClause.field, data)
                 break
             case GroupByFunctionClause:
                 def key
@@ -418,7 +436,10 @@ class ElasticSearchQueryExecutor extends AbstractQueryExecutor {
                 def isDateClause = (currentClause.operation in ElasticSearchConversionStrategy.DATE_OPERATIONS
                         && key.isNumber())
 
-                accumulator.put(groupByClauses.head().name, isDateClause ? key.toFloat() : key)
+                def data = new AggregationData()
+                data.count = value.getDocCount()
+                data.value = isDateClause ? key.toFloat() : key
+                accumulator.put(groupByClauses.head().name, data)
                 break
             default:
                 throw new NeonConnectionException("Bad implementation - ${currentClause.getClass()} is not a valid groupByClause")

@@ -18,6 +18,7 @@ package com.ncc.neon.query.elasticsearch
 
 import com.ncc.neon.connect.NeonConnectionException
 import com.ncc.neon.query.clauses.FieldFunction
+import com.ncc.neon.query.clauses.GroupByClause
 import com.ncc.neon.query.clauses.GroupByFieldClause
 import com.ncc.neon.query.clauses.GroupByFunctionClause
 import com.ncc.neon.query.clauses.SelectClause
@@ -192,8 +193,15 @@ class ElasticSearchConversionStrategy {
 
     private getCountFieldClauses(query) {
         def clauses = []
+
+        Map<String, Boolean> groupNames = query.groupByClauses.findAll { GroupByClause it -> it instanceof GroupByFunctionClause }
+            .inject([:]) { Map<String, Boolean> map, GroupByClause group ->
+                map.put(group.name, true)
+                    return map
+            }
+
         query.aggregates.each {
-            if(isCountFieldAggregation(it)) {
+            if(isCountFieldAggregation(it) && !groupNames.containsKey(it.field)) {
                 clauses.push(new SingularWhereClause(lhs: it.field, operator: '!=', rhs: null))
             }
         }
